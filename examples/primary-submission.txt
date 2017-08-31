@@ -1,0 +1,125 @@
+# Discover the collection managing submission envelopes, along with all other types of objects
+curl -X GET http://localhost:8080/
+# returns _links.submissionEnvelopes.href -> /submissionEnvelopes
+
+# Request a new submissionEnvelope
+curl -X POST -H "Content-Type: application/json" http://localhost:8080/submissionEnvelopes -d {}
+# returns $sub_url
+
+# Discover how to associate projects and other objects to the submission envelope
+curl -X GET $sub_url
+# returns _links.projects.href -> /submissionEnvelopes/{$sub_id}/projects etc., this is $assoc_url
+
+# Request a new project
+curl -X POST -H "Content-Type: application/json" http://localhost:8080/projects -d @project.json
+# returns $project_url
+
+# Associate project to submission envelope
+curl -X PUT -H "Content-Type: text/uri-list" $assoc_url -d $project_url
+
+
+
+
+Worked example:
+
+ >: curl -X POST -H "Content-Type: application/json" http://localhost:8080/submissionEnvelopes -d {}
+{
+  "uuid" : null,
+  "submissionDate" : {
+    "date" : "2017-08-31T16:52:00.847+0000"
+  },
+  "updateDate" : {
+    "date" : "2017-08-31T16:52:00.847+0000"
+  },
+  "_links" : {
+    "self" : {
+      "href" : "http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966"
+    },
+    "submissionEnvelope" : {
+      "href" : "http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966",
+      "title" : "A single submission envelope"
+    },
+    "projects" : {
+      "href" : "http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966/projects"
+    },
+    "samples" : {
+      "href" : "http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966/samples"
+    },
+    "assays" : {
+      "href" : "http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966/assays"
+    },
+    "analyses" : {
+      "href" : "http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966/analyses"
+    },
+    "protocols" : {
+      "href" : "http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966/protocols"
+    }
+  }
+}
+
+
+>: curl -X GET http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966
+{
+  "uuid" : null,
+  "submissionDate" : {
+    "date" : "2017-08-31T16:52:00.847+0000"
+  },
+  "updateDate" : {
+    "date" : "2017-08-31T16:52:00.847+0000"
+  },
+  "_links" : {
+    "self" : {
+      "href" : "http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966"
+    },
+    "submissionEnvelope" : {
+      "href" : "http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966",
+      "title" : "A single submission envelope"
+    },
+    "projects" : {
+      "href" : "http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966/projects"
+    },
+    "samples" : {
+      "href" : "http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966/samples"
+    },
+    "assays" : {
+      "href" : "http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966/assays"
+    },
+    "analyses" : {
+      "href" : "http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966/analyses"
+    },
+    "protocols" : {
+      "href" : "http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966/protocols"
+    }
+  }
+}
+
+
+>: curl -X POST -H "Content-Type: application/json" http://localhost:8080/projects -d @project.json
+{
+  "uuid" : null,
+  "submissionDate" : {
+    "date" : "2017-08-31T16:56:03.679+0000"
+  },
+  "updateDate" : {
+    "date" : "2017-08-31T16:56:03.679+0000"
+  },
+  "accession" : null,
+  "content" : null,
+  "_links" : {
+    "self" : {
+      "href" : "http://localhost:8080/projects/59a83fa339117d3692b74967"
+    },
+    "project" : {
+      "href" : "http://localhost:8080/projects/59a83fa339117d3692b74967"
+    }
+  }
+}
+
+>: curl -X PUT -H "Content-Type: text/uri-list" http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966/projects -d http://localhost:8080/projects/59a83fa339117d3692b74967
+
+
+
+
+
+
+

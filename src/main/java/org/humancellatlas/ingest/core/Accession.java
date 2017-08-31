@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @Data
 public class Accession {
-    private final String number;
+    private String number;
 
     protected Accession() {
         this.number = null;

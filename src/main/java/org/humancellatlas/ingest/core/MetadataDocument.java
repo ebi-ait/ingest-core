@@ -1,7 +1,7 @@
 package org.humancellatlas.ingest.core;
 
 import lombok.Getter;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import lombok.Setter;
 
 /**
  * Javadocs go here!

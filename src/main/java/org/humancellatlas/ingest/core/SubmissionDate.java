@@ -12,7 +12,7 @@ import java.util.Date;
  */
 @Data
 public class SubmissionDate {
-    private final Date date;
+    private Date date;
 
     protected SubmissionDate() {
         this.date = null;

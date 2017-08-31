@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.core;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Data;
 
 import java.util.UUID;
@@ -12,9 +13,10 @@ import java.util.UUID;
  */
 @Data
 public class Uuid {
-    private final UUID uuid;
+    private UUID uuid;
 
-    protected Uuid(String name) {
+    @JsonCreator
+    public Uuid(String name) {
         // throws IllegalArgumentException if not valid
         this.uuid = UUID.fromString(name);
     }
