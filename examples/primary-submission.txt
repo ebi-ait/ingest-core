@@ -9,6 +9,7 @@ curl -X POST -H "Content-Type: application/json" http://localhost:8080/submissio
 # Discover how to associate projects and other objects to the submission envelope
 curl -X GET $sub_url
 # returns _links.projects.href -> /submissionEnvelopes/{$sub_id}/projects etc., this is $assoc_url
+# also returns _links.submit -> /submissionEnvelopes/submit, this describes how to submit the envelope, this is $submit_url
 
 # Request a new project
 curl -X POST -H "Content-Type: application/json" http://localhost:8080/projects -d @project.json
@@ -30,6 +31,9 @@ curl -X POST -H "Content-Type: application/json" http://localhost:8080/assays -d
 
 # Associate assay to submission envelope
 curl -X PUT -H "Content-Type: text/uri-list" $assoc_url -d $assay_url
+
+# Finally, submit the submission envelope
+curl -X PUT -H curl -X PUT $submit_url
 
 
 ---------------------
@@ -131,7 +135,8 @@ Worked example:
 
 >: curl -X PUT -H "Content-Type: text/uri-list" http://localhost:8080/submissionEnvelopes/59a83eb039117d3692b74966/projects -d http://localhost:8080/projects/59a83fa339117d3692b74967
 
-
+>: curl -X PUT http://localhost:8080/submissionEnvelopes/59a84a4a39117d467894763b/submit
+{"receiptNumber":"YOUR RECEIPT"}
 
 
 
