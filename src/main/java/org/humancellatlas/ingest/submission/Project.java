@@ -19,14 +19,6 @@ import java.util.Date;
  */
 @Getter
 public class Project extends MetadataDocument {
-    public Project(Uuid uuid,
-                   SubmissionDate submissionDate,
-                   UpdateDate updateDate,
-                   Accession accession,
-                   Object content) {
-        super(EntityType.PROJECT, uuid, submissionDate, updateDate, accession, content);
-    }
-
     protected Project() {
         super(EntityType.PROJECT, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null);
     }
