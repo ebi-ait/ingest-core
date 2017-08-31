@@ -11,5 +11,5 @@ import java.util.UUID;
  * @date 31/08/17
  */
 public interface SampleRepository extends MongoRepository<Sample, String> {
-    public Sample findByUUID(UUID uuid);
+    public Sample findByUuid(UUID uuid);
 }

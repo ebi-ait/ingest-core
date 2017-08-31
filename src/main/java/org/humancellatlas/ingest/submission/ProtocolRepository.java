@@ -11,5 +11,5 @@ import java.util.UUID;
  * @date 31/08/17
  */
 public interface ProtocolRepository extends MongoRepository<Protocol, String> {
-    public Protocol findByUUID(UUID uuid);
+    public Protocol findByUuid(UUID uuid);
 }

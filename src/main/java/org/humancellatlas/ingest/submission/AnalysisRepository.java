@@ -11,5 +11,5 @@ import java.util.UUID;
  * @date 31/08/17
  */
 public interface AnalysisRepository extends MongoRepository<Analysis, String> {
-    public Analysis findByUUID(UUID uuid);
+    public Analysis findByUuid(UUID uuid);
 }
