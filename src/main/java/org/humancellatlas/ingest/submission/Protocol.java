@@ -1,7 +1,7 @@
 package org.humancellatlas.ingest.submission;
 
 import lombok.Getter;
-import org.humancellatlas.ingest.core.AbstractMetadataDocument;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Accession;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.SubmissionDate;
@@ -15,7 +15,7 @@ import org.humancellatlas.ingest.core.Uuid;
  * @date 30/08/17
  */
 @Getter
-public class Protocol extends AbstractMetadataDocument {
+public class Protocol extends MetadataDocument {
     protected Protocol(Uuid uuid,
                        SubmissionDate submissionDate,
                        UpdateDate updateDate,
