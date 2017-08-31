@@ -5,8 +5,7 @@ import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.SubmissionDate;
 import org.humancellatlas.ingest.core.UpdateDate;
-
-import java.util.UUID;
+import org.humancellatlas.ingest.core.Uuid;
 
 /**
  * Javadocs go here!
@@ -16,7 +15,11 @@ import java.util.UUID;
  */
 @Getter
 public class SubmissionEnvelope extends AbstractEntity {
-    protected SubmissionEnvelope(UUID uuid, SubmissionDate submissionDate, UpdateDate updateDate) {
+    public SubmissionEnvelope(Uuid uuid, SubmissionDate submissionDate, UpdateDate updateDate) {
         super(EntityType.SUBMISSION, uuid, submissionDate, updateDate);
+    }
+
+    public SubmissionEnvelope() {
+        this(null, null, null);
     }
 }

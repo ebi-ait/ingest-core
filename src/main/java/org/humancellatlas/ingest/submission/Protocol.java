@@ -6,8 +6,7 @@ import org.humancellatlas.ingest.core.Accession;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.SubmissionDate;
 import org.humancellatlas.ingest.core.UpdateDate;
-
-import java.util.UUID;
+import org.humancellatlas.ingest.core.Uuid;
 
 /**
  * Javadocs go here!
@@ -17,7 +16,7 @@ import java.util.UUID;
  */
 @Getter
 public class Protocol extends AbstractMetadataDocument {
-    protected Protocol(UUID uuid,
+    protected Protocol(Uuid uuid,
                        SubmissionDate submissionDate,
                        UpdateDate updateDate,
                        Accession accession,
