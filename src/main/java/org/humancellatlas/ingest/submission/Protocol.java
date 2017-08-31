@@ -23,5 +23,4 @@ public class Protocol extends MetadataDocument {
                        Object content) {
         super(EntityType.PROTOCOL, uuid, submissionDate, updateDate, accession, content);
     }
-
 }

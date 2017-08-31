@@ -23,5 +23,4 @@ public class Assay extends MetadataDocument {
                     Object content) {
         super(EntityType.ASSAY, uuid, submissionDate, updateDate, accession, content);
     }
-
 }
