@@ -1,5 +1,6 @@
-package org.humancellatlas.ingest.submission;
+package org.humancellatlas.ingest.envelope;
 
+import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.UUID;
@@ -10,6 +11,6 @@ import java.util.UUID;
  * @author Tony Burdett
  * @date 31/08/17
  */
-public interface SubmissionRepository extends MongoRepository<SubmissionEnvelope, String> {
+public interface SubmissionEnvelopeRepository extends MongoRepository<SubmissionEnvelope, String> {
     public SubmissionEnvelope findByUuid(UUID uuid);
 }

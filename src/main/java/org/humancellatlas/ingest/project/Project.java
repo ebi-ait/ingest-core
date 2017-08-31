@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.submission;
+package org.humancellatlas.ingest.project;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;

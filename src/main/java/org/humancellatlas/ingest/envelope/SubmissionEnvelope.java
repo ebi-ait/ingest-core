@@ -1,11 +1,16 @@
-package org.humancellatlas.ingest.submission;
+package org.humancellatlas.ingest.envelope;
 
 import lombok.Getter;
+import org.humancellatlas.ingest.analysis.Analysis;
 import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.SubmissionDate;
 import org.humancellatlas.ingest.core.UpdateDate;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.assay.Assay;
+import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.protocol.Protocol;
+import org.humancellatlas.ingest.sample.Sample;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.util.ArrayList;

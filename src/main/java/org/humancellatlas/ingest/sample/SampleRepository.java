@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.submission;
+package org.humancellatlas.ingest.sample;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
@@ -10,6 +10,6 @@ import java.util.UUID;
  * @author Tony Burdett
  * @date 31/08/17
  */
-public interface ProjectRepository extends MongoRepository<Project, String> {
-//    public Project findByUuid(UUID uuid);
+public interface SampleRepository extends MongoRepository<Sample, String> {
+    public Sample findByUuid(UUID uuid);
 }

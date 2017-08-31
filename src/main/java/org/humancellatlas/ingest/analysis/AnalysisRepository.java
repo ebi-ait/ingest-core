@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.submission;
+package org.humancellatlas.ingest.analysis;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
@@ -10,6 +10,6 @@ import java.util.UUID;
  * @author Tony Burdett
  * @date 31/08/17
  */
-public interface AssayRepository extends MongoRepository<Assay, String> {
-    public Assay findByUuid(UUID uuid);
+public interface AnalysisRepository extends MongoRepository<Analysis, String> {
+    public Analysis findByUuid(UUID uuid);
 }

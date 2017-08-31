@@ -1,5 +1,6 @@
-package org.humancellatlas.ingest.submission;
+package org.humancellatlas.ingest.protocol;
 
+import org.humancellatlas.ingest.protocol.Protocol;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.UUID;
