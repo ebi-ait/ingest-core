@@ -26,6 +26,6 @@ public class SubmissionDate {
     }
 
     public static boolean isValid(Date date) {
-        return date.before(new Date());
+        return !date.after(new Date());
     }
 }
