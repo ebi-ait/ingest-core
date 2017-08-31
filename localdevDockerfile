@@ -1,0 +1,10 @@
+FROM anapsix/alpine-java:8_jdk
+
+WORKDIR /opt
+
+ENV LC_ALL=C
+ENV MONGO_URI=mongodb://localhost:27017/admin
+
+ADD build/libs/*.jar .
+
+CMD java -jar *.jar --spring.data.mongodb.uri=$MONGO_URI 
