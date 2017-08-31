@@ -1,5 +1,7 @@
 package org.humancellatlas.ingest.core;
 
+import lombok.Data;
+
 import java.util.Date;
 
 /**
@@ -8,6 +10,7 @@ import java.util.Date;
  * @author Tony Burdett
  * @date 30/08/17
  */
+@Data
 public class UpdateDate {
     private final Date date;
 
