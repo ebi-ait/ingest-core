@@ -24,14 +24,15 @@ public abstract class AbstractEntity implements Identifiable<String> {
     private final EntityType type;
 
     private final UUID uuid;
-    private final Accession accession;
     private final SubmissionDate submissionDate;
     private final UpdateDate updateDate;
 
-    protected AbstractEntity(EntityType type, UUID uuid, Accession accession, SubmissionDate submissionDate, UpdateDate updateDate) {
+    protected AbstractEntity(EntityType type,
+                             UUID uuid,
+                             SubmissionDate submissionDate,
+                             UpdateDate updateDate) {
         this.type = type;
         this.uuid = uuid;
-        this.accession = accession;
         this.submissionDate = submissionDate;
         this.updateDate = updateDate;
     }

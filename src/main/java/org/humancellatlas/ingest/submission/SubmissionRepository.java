@@ -10,6 +10,6 @@ import java.util.UUID;
  * @author Tony Burdett
  * @date 31/08/17
  */
-public interface SubmissionRepository extends MongoRepository<Submission, String> {
-    public Submission findByUuid(UUID uuid);
+public interface SubmissionRepository extends MongoRepository<SubmissionEnvelope, String> {
+    public SubmissionEnvelope findByUuid(UUID uuid);
 }

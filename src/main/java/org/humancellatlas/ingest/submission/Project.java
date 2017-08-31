@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.submission;
 
 import lombok.Getter;
 import org.humancellatlas.ingest.core.AbstractEntity;
+import org.humancellatlas.ingest.core.AbstractMetadataDocument;
 import org.humancellatlas.ingest.core.Accession;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.SubmissionDate;
@@ -16,8 +17,8 @@ import java.util.UUID;
  * @date 30/08/17
  */
 @Getter
-public class Project extends AbstractEntity {
-    protected Project(UUID uuid, Accession accession, SubmissionDate submissionDate, UpdateDate updateDate) {
-        super(EntityType.PROJECT, uuid, accession, submissionDate, updateDate);
+public class Project extends AbstractMetadataDocument {
+    protected Project(UUID uuid, SubmissionDate submissionDate, UpdateDate updateDate, Accession accession, Object content) {
+        super(EntityType.PROJECT, uuid, submissionDate, updateDate, accession, content);
     }
 }
