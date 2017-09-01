@@ -16,21 +16,21 @@ curl -X POST -H "Content-Type: application/json" http://localhost:8080/projects 
 # returns $project_url
 
 # Associate project to submission envelope
-curl -X PUT -H "Content-Type: text/uri-list" $assoc_url -d $project_url
+curl -X POST -H "Content-Type: text/uri-list" $assoc_url -d $project_url
 
 # Request a new sample
 curl -X POST -H "Content-Type: application/json" http://localhost:8080/samples -d @sample.json
 # returns $sample_url
 
 # Associate sample to submission envelope
-curl -X PUT -H "Content-Type: text/uri-list" $assoc_url -d $sample_url
+curl -X POST -H "Content-Type: text/uri-list" $assoc_url -d $sample_url
 
 # Request a new assay
 curl -X POST -H "Content-Type: application/json" http://localhost:8080/assays -d @assay.json
 # returns $sample_url
 
 # Associate assay to submission envelope
-curl -X PUT -H "Content-Type: text/uri-list" $assoc_url -d $assay_url
+curl -X POST -H "Content-Type: text/uri-list" $assoc_url -d $assay_url
 
 # Finally, submit the submission envelope
 curl -X PUT -H curl -X PUT $submit_url
