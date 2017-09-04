@@ -38,7 +38,7 @@ public class SubmissionService {
         submissionEnvelopeRepository.save(updatedEnvelope);
 
         // post event to queue
-        messagingTemplate.convertAndSend(Constants.Exchanges.SUBMISSION_FANOUT,"", submissionEnvelope);
+        messagingTemplate.convertAndSend(Constants.Exchanges.ENVELOPE_FANOUT,"", submissionEnvelope);
 
         return new SubmissionReceipt();
     }

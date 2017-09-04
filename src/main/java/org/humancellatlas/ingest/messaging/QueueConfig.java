@@ -30,8 +30,10 @@ public class QueueConfig {
 
     @Bean Queue queueFileUpdate() { return new Queue(Constants.Queues.FILE_UPDATE, false); }
     @Bean FanoutExchange fileExchange() { return new FanoutExchange(Constants.Exchanges.FILE_FANOUT); }
-    @Bean Queue queueSubmissionUpdate() { return new Queue(Constants.Queues.SUBMISSION_UPDATE, false); }
-    @Bean FanoutExchange submissionExchange() { return new FanoutExchange(Constants.Exchanges.SUBMISSION_FANOUT); }
+
+    @Bean Queue queueEnvelopeSubmitted() { return new Queue(Constants.Queues.ENVELOPE_SUBMITTED, false); }
+    @Bean FanoutExchange envelopeExchange() { return new FanoutExchange(Constants.Exchanges.ENVELOPE_FANOUT); }
+
     @Bean Binding bindingFile(Queue queueFileUpdate, FanoutExchange fileExchange) { return BindingBuilder.bind(queueFileUpdate).to(fileExchange); }
-    @Bean Binding bindingSubmission(Queue queueSubmissionUpdate, FanoutExchange submissionExchange) { return BindingBuilder.bind(queueSubmissionUpdate).to(submissionExchange); }
+    @Bean Binding bindingSubmission(Queue queueEnvelopeSubmitted, FanoutExchange envelopeExchange) { return BindingBuilder.bind(queueEnvelopeSubmitted).to(envelopeExchange); }
 }

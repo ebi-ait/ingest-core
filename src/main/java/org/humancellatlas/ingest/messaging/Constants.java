@@ -8,11 +8,11 @@ package org.humancellatlas.ingest.messaging;
 public class Constants {
     public class Queues {
         public static final String FILE_UPDATE = "ingest.file.update.queue";
-        public static final String SUBMISSION_UPDATE = "ingest.submission.update.queue";
+        public static final String ENVELOPE_SUBMITTED = "ingest.envelope.submitted.queue";
     }
 
     public class Exchanges {
         public static final String FILE_FANOUT = "ingest.file.update.exchange";
-        public static final String SUBMISSION_FANOUT = "ingest.submission.update.exchange";
+        public static final String ENVELOPE_FANOUT = "ingest.envelope.submitted.exchange";
     }
 }
