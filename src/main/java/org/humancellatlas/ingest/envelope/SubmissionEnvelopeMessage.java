@@ -15,7 +15,9 @@ public class SubmissionEnvelopeMessage {
 
     public SubmissionEnvelopeMessage(SubmissionEnvelope submissionEnvelope) {
         this.id = submissionEnvelope.getId();
-        this.uuid = submissionEnvelope.getUuid().toString();
+        if (submissionEnvelope.getUuid() != null) {
+            this.uuid = submissionEnvelope.getUuid().toString();
+        }
     }
 
 }

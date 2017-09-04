@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.submission;
 
 import org.humancellatlas.ingest.core.SubmissionStatus;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
+import org.humancellatlas.ingest.envelope.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.messaging.Constants;
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ public class SubmissionService {
         submissionEnvelopeRepository.save(updatedEnvelope);
 
         // post event to queue
-        messagingTemplate.convertAndSend(Constants.Exchanges.ENVELOPE_FANOUT,"", submissionEnvelope);
+        messagingTemplate.convertAndSend(Constants.Exchanges.ENVELOPE_FANOUT,"", new SubmissionEnvelopeMessage(submissionEnvelope));
 
         return new SubmissionReceipt();
     }
