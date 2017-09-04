@@ -29,16 +29,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class SubmissionController {
     private final @NonNull SubmissionService submissionService;
 
-    @Autowired
-    private AmqpTemplate messagingTemplate;
-
     @RequestMapping(path = "/submit", method = RequestMethod.PUT)
     HttpEntity<?> submitEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
         SubmissionReceipt receipt = submissionService.submitEnvelope(submissionEnvelope);
-
-        // post event to queue
-        messagingTemplate.convertAndSend(Constants.Exchanges.SUBMISSION_FANOUT,"", submissionEnvelope);
-
         return ResponseEntity.accepted().body(receipt);
     }
 }
