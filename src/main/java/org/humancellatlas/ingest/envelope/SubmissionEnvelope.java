@@ -63,4 +63,10 @@ public class SubmissionEnvelope extends AbstractEntity {
              new ArrayList<>(),
              new ArrayList<>());
     }
+
+    public SubmissionEnvelope addSample(Sample sample) {
+        this.samples.add(sample);
+
+        return this;
+    }
 }
