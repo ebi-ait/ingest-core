@@ -21,8 +21,8 @@ public class SampleService {
     private final @NonNull SampleRepository sampleRepository;
 
     public Sample addSampleToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Sample sample) {
-        Sample response = getSampleRepository().save(sample);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope.addSample(response));
-        return response;
+        Sample result = getSampleRepository().save(sample);
+        getSubmissionEnvelopeRepository().save(submissionEnvelope.addSample(result));
+        return result;
     }
 }
