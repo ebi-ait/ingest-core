@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Getter
-public class SampleService {
+public class OtherSampleService {
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull SampleRepository sampleRepository;
 

@@ -5,7 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.humancellatlas.ingest.sample.Sample;
-import org.humancellatlas.ingest.sample.SampleService;
+import org.humancellatlas.ingest.sample.OtherSampleService;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpEntity;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequiredArgsConstructor
 @Getter
 public class SampleController {
-    private final @NonNull SampleService sampleService;
+    private final @NonNull OtherSampleService sampleService;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/samples", method = RequestMethod.POST)
     HttpEntity<Sample> addSampleToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
