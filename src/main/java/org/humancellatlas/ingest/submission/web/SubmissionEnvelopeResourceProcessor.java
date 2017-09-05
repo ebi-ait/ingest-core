@@ -21,8 +21,10 @@ import javax.validation.constraints.NotNull;
 public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Resource<SubmissionEnvelope>> {
     private final @NotNull EntityLinks entityLinks;
 
-    Link getSubmitLink(SubmissionEnvelope submissionEnvelope) {
-        return entityLinks.linkForSingleResource(submissionEnvelope).slash("/submit").withRel("submit");
+    private Link getSubmitLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                .slash("/confirmation")
+                .withRel(SubmissionLinks.SUBMIT_REL);
     }
 
     public Resource<SubmissionEnvelope> process(Resource<SubmissionEnvelope> envelopeResource) {

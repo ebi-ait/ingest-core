@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class SubmissionController {
     private final @NonNull SubmissionService submissionService;
 
-    @RequestMapping(path = "/submit", method = RequestMethod.PUT)
+    @RequestMapping(path = "/confirmation", method = RequestMethod.PUT)
     HttpEntity<?> submitEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
         SubmissionReceipt receipt = submissionService.submitEnvelope(submissionEnvelope);
         return ResponseEntity.accepted().body(receipt);
