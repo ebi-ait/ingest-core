@@ -64,6 +64,30 @@ public class SubmissionEnvelope extends AbstractEntity {
              new ArrayList<>());
     }
 
+    public SubmissionEnvelope addAnalysis(Analysis analysis) {
+        this.analyses.add(analysis);
+
+        return this;
+    }
+
+    public SubmissionEnvelope addAssay(Assay assay) {
+        this.assays.add(assay);
+
+        return this;
+    }
+
+    public SubmissionEnvelope addProject(Project project) {
+        this.projects.add(project);
+
+        return this;
+    }
+
+    public SubmissionEnvelope addProtocol(Protocol protocol) {
+        this.protocols.add(protocol);
+
+        return this;
+    }
+
     public SubmissionEnvelope addSample(Sample sample) {
         this.samples.add(sample);
 
