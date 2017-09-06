@@ -1,7 +1,5 @@
 package org.humancellatlas.ingest.sample.web;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.sample.Sample;
 import org.springframework.hateoas.ResourceSupport;
 
@@ -11,8 +9,6 @@ import org.springframework.hateoas.ResourceSupport;
  * @author Tony Burdett
  * @date 05/09/17
  */
-@RequiredArgsConstructor
-@Getter
-public class SampleResource extends ResourceSupport {
-    private final Sample sample;
+class SampleResource extends ResourceSupport {
+    Sample sample;
 }
