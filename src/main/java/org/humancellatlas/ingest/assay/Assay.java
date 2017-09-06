@@ -69,4 +69,10 @@ public class Assay extends MetadataDocument {
              new ArrayList<>(),
              content);
     }
+
+    public Assay addFile(File file) {
+        this.files.add(file);
+
+        return this;
+    }
 }

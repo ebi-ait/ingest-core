@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.submission.web;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
@@ -8,8 +9,6 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.stereotype.Component;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * Javadocs go here!
@@ -20,7 +19,7 @@ import javax.validation.constraints.NotNull;
 @Component
 @RequiredArgsConstructor
 public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Resource<SubmissionEnvelope>> {
-    private final @NotNull EntityLinks entityLinks;
+    private final @NonNull EntityLinks entityLinks;
 
     private Link getSubmitLink(SubmissionEnvelope submissionEnvelope) {
         return entityLinks.linkForSingleResource(submissionEnvelope).slash(Links.SUBMIT_URL).withRel(Links.SUBMIT_REL);

@@ -69,4 +69,10 @@ public class Analysis extends MetadataDocument {
              new ArrayList<>(),
              content);
     }
+
+    public Analysis addFile(File file) {
+        this.files.add(file);
+
+        return this;
+    }
 }
