@@ -42,8 +42,6 @@ public class File extends MetadataDocument {
 
     @JsonCreator
     protected File(String fileName,
-                   String cloudUrl,
-                   Checksums checksums,
                    Object content) {
         this(EntityType.FILE,
              null,
@@ -51,8 +49,8 @@ public class File extends MetadataDocument {
              new UpdateDate(new Date()),
              null,
              fileName,
-             cloudUrl,
-             checksums,
+             null,
+             null,
              content);
     }
 }
