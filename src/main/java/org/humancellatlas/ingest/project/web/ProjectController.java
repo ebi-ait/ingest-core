@@ -6,9 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
+import org.springframework.data.rest.webmvc.PersistentEntityResource;
+import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.http.HttpEntity;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,9 +31,11 @@ public class ProjectController {
     private final @NonNull ProjectService projectService;
 
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects", method = RequestMethod.POST)
-    HttpEntity<Project> addProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                             @RequestBody Project project) {
+    ResponseEntity<Resource<?>> addProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                     @RequestBody Project project,
+                                                     PersistentEntityResourceAssembler assembler) {
         Project entity = getProjectService().addProjectToSubmissionEnvelope(submissionEnvelope, project);
-        return ResponseEntity.accepted().body(entity);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
     }
 }

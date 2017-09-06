@@ -6,8 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.analysis.Analysis;
 import org.humancellatlas.ingest.analysis.AnalysisService;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
+import org.springframework.data.rest.webmvc.PersistentEntityResource;
+import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,10 +32,11 @@ public class AnalysisController {
     private final @NonNull AnalysisService analysisService;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/analyses", method = RequestMethod.POST)
-    HttpEntity<Analysis> addAnalysisToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                               @RequestBody Analysis analysis) {
+    ResponseEntity<Resource<?>> addAnalysisToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                      @RequestBody Analysis analysis,
+                                                      final PersistentEntityResourceAssembler assembler) {
         Analysis entity = getAnalysisService().addAnalysisToSubmissionEnvelope(submissionEnvelope, analysis);
-        return ResponseEntity.accepted().body(entity);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
     }
-
 }

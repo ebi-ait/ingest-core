@@ -6,9 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolService;
+import org.springframework.data.rest.webmvc.PersistentEntityResource;
+import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.http.HttpEntity;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,9 +31,11 @@ public class ProtocolController {
     private final @NonNull ProtocolService protocolService;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols", method = RequestMethod.POST)
-    HttpEntity<Protocol> addProtocolToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                               @RequestBody Protocol protocol) {
+    ResponseEntity<Resource<?>> addProtocolToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                      @RequestBody Protocol protocol,
+                                                      PersistentEntityResourceAssembler assembler) {
         Protocol entity = getProtocolService().addProtocolToSubmissionEnvelope(submissionEnvelope, protocol);
-        return ResponseEntity.accepted().body(entity);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
     }
 }

@@ -6,9 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.assay.AssayService;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
+import org.springframework.data.rest.webmvc.PersistentEntityResource;
+import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.http.HttpEntity;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,10 +31,11 @@ public class AssayController {
     private final @NonNull AssayService assayService;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays", method = RequestMethod.POST)
-    HttpEntity<Assay> addSampleToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                          @RequestBody Assay assay) {
+    ResponseEntity<Resource<?>> addSampleToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                    @RequestBody Assay assay,
+                                                    PersistentEntityResourceAssembler assembler) {
         Assay entity = getAssayService().addAssayToSubmissionEnvelope(submissionEnvelope, assay);
-        return ResponseEntity.accepted().body(entity);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
     }
-
 }
