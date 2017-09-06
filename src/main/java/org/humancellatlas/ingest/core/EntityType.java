@@ -12,5 +12,6 @@ public enum EntityType {
     SAMPLE,
     ASSAY,
     ANALYSIS,
-    PROTOCOL
+    PROTOCOL,
+    FILE
 }
