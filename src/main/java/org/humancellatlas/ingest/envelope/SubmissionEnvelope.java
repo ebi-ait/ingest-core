@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.envelope;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.humancellatlas.ingest.analysis.Analysis;
 import org.humancellatlas.ingest.core.*;
@@ -22,41 +23,38 @@ import java.util.List;
  */
 @Getter
 public class SubmissionEnvelope extends AbstractEntity {
-    @DBRef(lazy = true)
-    private List<Project> projects;
-    @DBRef(lazy = true)
-    private List<Sample> samples;
-    @DBRef(lazy = true)
-    private List<Assay> assays;
-    @DBRef(lazy = true)
-    private List<Analysis> analyses;
-    @DBRef(lazy = true)
-    private List<Protocol> protocols;
+    private final @DBRef List<Project> projects;
+    private final @DBRef List<Sample> samples;
+    private final @DBRef List<Assay> assays;
+    private final @DBRef List<Analysis> analyses;
+    private final @DBRef List<Protocol> protocols;
 
-    @Setter
-    private SubmissionStatus submissionStatus;
+    private @Setter SubmissionStatus submissionStatus;
+
 
     public SubmissionEnvelope(Uuid uuid,
                               SubmissionDate submissionDate,
                               UpdateDate updateDate,
+                              SubmissionStatus submissionStatus,
                               List<Project> projects,
                               List<Sample> samples,
                               List<Assay> assays,
                               List<Analysis> analyses,
                               List<Protocol> protocols) {
         super(EntityType.SUBMISSION, uuid, submissionDate, updateDate);
+        this.submissionStatus = submissionStatus;
         this.projects = projects;
         this.samples = samples;
         this.assays = assays;
         this.analyses = analyses;
         this.protocols = protocols;
-        this.submissionStatus = SubmissionStatus.DRAFT;
     }
 
     public SubmissionEnvelope() {
         this(null,
              new SubmissionDate(new Date()),
              new UpdateDate(new Date()),
+             SubmissionStatus.DRAFT,
              new ArrayList<>(),
              new ArrayList<>(),
              new ArrayList<>(),

@@ -19,7 +19,7 @@ import org.springframework.hateoas.Identifiable;
 public abstract class AbstractEntity implements Identifiable<String> {
     private @Id @JsonIgnore String id;
 
-    private @JsonIgnore final EntityType type;
+    private final @JsonIgnore EntityType type;
 
     private final Uuid uuid;
     private final SubmissionDate submissionDate;

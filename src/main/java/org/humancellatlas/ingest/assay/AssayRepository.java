@@ -1,8 +1,7 @@
 package org.humancellatlas.ingest.assay;
 
+import org.humancellatlas.ingest.core.Uuid;
 import org.springframework.data.mongodb.repository.MongoRepository;
-
-import java.util.UUID;
 
 /**
  * Javadocs go here!
@@ -11,5 +10,5 @@ import java.util.UUID;
  * @date 31/08/17
  */
 public interface AssayRepository extends MongoRepository<Assay, String> {
-    public Assay findByUuid(UUID uuid);
+    public Assay findByUuid(Uuid uuid);
 }

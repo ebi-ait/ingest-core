@@ -1,6 +1,6 @@
 package org.humancellatlas.ingest.project;
 
-import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.core.Uuid;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
@@ -10,5 +10,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  * @date 31/08/17
  */
 public interface ProjectRepository extends MongoRepository<Project, String> {
-//    public Project findByUuid(UUID uuid);
+    public Project findByUuid(Uuid uuid);
 }

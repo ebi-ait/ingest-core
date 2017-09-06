@@ -14,13 +14,11 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Simon Jupp
- * @date 04/09/2017
- * Samples, Phenotypes and Ontologies Team, EMBL-EBI
+ * @date 04/09/2017 Samples, Phenotypes and Ontologies Team, EMBL-EBI
  */
 @Configuration
 public class QueueConfig {
-    @Bean
-    MessageConverter messageConverter() {
+    @Bean MessageConverter messageConverter() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
@@ -29,11 +27,20 @@ public class QueueConfig {
     }
 
     @Bean Queue queueFileUpdate() { return new Queue(Constants.Queues.FILE_UPDATE, false); }
+
     @Bean FanoutExchange fileExchange() { return new FanoutExchange(Constants.Exchanges.FILE_FANOUT); }
 
     @Bean Queue queueEnvelopeSubmitted() { return new Queue(Constants.Queues.ENVELOPE_SUBMITTED, false); }
+
     @Bean FanoutExchange envelopeExchange() { return new FanoutExchange(Constants.Exchanges.ENVELOPE_FANOUT); }
 
-    @Bean Binding bindingFile(Queue queueFileUpdate, FanoutExchange fileExchange) { return BindingBuilder.bind(queueFileUpdate).to(fileExchange); }
-    @Bean Binding bindingSubmission(Queue queueEnvelopeSubmitted, FanoutExchange envelopeExchange) { return BindingBuilder.bind(queueEnvelopeSubmitted).to(envelopeExchange); }
+    @Bean Binding bindingFile(Queue queueFileUpdate, FanoutExchange fileExchange) {
+        return BindingBuilder.bind(queueFileUpdate).to(fileExchange);
+    }
+
+    @Bean Binding bindingSubmission(Queue queueEnvelopeSubmitted,
+                                    FanoutExchange envelopeExchange) {
+        return BindingBuilder.bind(queueEnvelopeSubmitted)
+                .to(envelopeExchange);
+    }
 }
