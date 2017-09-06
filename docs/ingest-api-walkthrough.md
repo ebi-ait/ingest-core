@@ -39,12 +39,21 @@ Evaluate the expression `_links.analyses.href` from the response to the previous
 >: curl -X POST -H "Content-Type: application/json" http://api.ingest.dev.data.humancellatlas.org/submissionEnvelopes/{sub_id}/analyses -d @analysis.json
 ```
 
+## 4. Add a Bundle Reference to this Analysis
+
+From the previous expression, use `_links.add-input-bundles.href`. This should give you a URL like the one shown in the example below. Submit a JSON snippet that contains the URLs of the bundles used in this analysis.
+
+```bash
+# point to the bundle UUID - for now, it doesn't matter if this doesn't exist (in future this will fail)
+>: curl -X PUT -H "Content-Type: application/json" http://api.ingest.dev.data.humancellatlas.org/analyses/{analysis_id}/bundleReferences -d '{"bundleUuids": ["b7136c7e-a8eb-4499-94ab-70df1e91367e"]}'
+```
+
 ## 4. Add a File Reference to this Analysis
 
 From the previous expression, use `_links.add-file-reference.href`. This should give you a URL like the one shown in the example below. Submit JSON that describes the file you want to reference.
 
 ```bash
->: curl -X PUT -H "Content-Type: application/json" http://api.ingest.dev.data.humancellatlas.org/analyses/{analysis_id}/analyses/fileReference -d '{"fileName": "ERR1630013.fastq.gz", "content": {"lane": 1, "type": "reads", "name": "ERR1630013.fastq.gz", "format": ".fastq.gz"}}'
+>: curl -X PUT -H "Content-Type: application/json" http://api.ingest.dev.data.humancellatlas.org/analyses/{analysis_id}/fileReference -d '{"fileName": "ERR1630013.fastq.gz", "content": {"lane": 1, "type": "reads", "name": "ERR1630013.fastq.gz", "format": ".fastq.gz"}}'
 ```
 
 Repeat this step for all the files referenced by the Analysis
