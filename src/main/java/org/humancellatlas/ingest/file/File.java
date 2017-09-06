@@ -7,7 +7,7 @@ import org.humancellatlas.ingest.core.*;
 import java.util.Date;
 
 @Getter
-public class File extends MetadataDocument{
+public class File extends MetadataDocument {
     private String fileName;
     private String cloudUrl;
     private Checksums checksums;
