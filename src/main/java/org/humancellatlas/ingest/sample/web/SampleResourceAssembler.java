@@ -18,6 +18,6 @@ public class SampleResourceAssembler extends ResourceAssemblerSupport<Sample, Sa
 
     @Override public SampleResource toResource(Sample sample) {
         SampleResource resource = createResourceWithId(sample.getId(), sample);
-
+        return resource;
     }
 }
