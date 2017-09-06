@@ -48,7 +48,7 @@ From the previous expression, use `_links.add-input-bundles.href`. This should g
 >: curl -X PUT -H "Content-Type: application/json" http://api.ingest.dev.data.humancellatlas.org/analyses/{analysis_id}/bundleReferences -d '{"bundleUuids": ["b7136c7e-a8eb-4499-94ab-70df1e91367e"]}'
 ```
 
-## 4. Add a File Reference to this Analysis
+## 5. Add a File Reference to this Analysis
 
 From the previous expression, use `_links.add-file-reference.href`. This should give you a URL like the one shown in the example below. Submit JSON that describes the file you want to reference.
 
@@ -58,15 +58,15 @@ From the previous expression, use `_links.add-file-reference.href`. This should 
 
 Repeat this step for all the files referenced by the Analysis
 
-## 5. Repeat for Additional analyses
+## 6. Repeat for Additional analyses
 
 Repeat steps 3. and 4. if required. It's possible to upload multiple analysis results in a single submission. The ingest API will figure out how to map them into bundles in the datastore.
 
-## 6. Upload Files to the Staging Area
+## 7. Upload Files to the Staging Area
 
 This functionality is not yet complete. It's fine to progress without this for now.
 
-## 7. Confirm your submission
+## 8. Confirm your submission
 
 In step 2. you will have received a 'submit' link (it's `_links.submit.href`). You can now use this to confirm your submission. It's also possible to reevaluate the submit link using a call to check on the submission envelope
 
