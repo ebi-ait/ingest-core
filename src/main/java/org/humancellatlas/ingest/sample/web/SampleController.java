@@ -8,6 +8,8 @@ import org.humancellatlas.ingest.sample.Sample;
 import org.humancellatlas.ingest.sample.SampleService;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,10 +30,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class SampleController {
     private final @NonNull SampleService sampleService;
 
+    private final @NonNull ResourceAssembler<Sample, Resource<Sample>> sampleResourceAssembler;
+
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/samples", method = RequestMethod.POST)
-    HttpEntity<Sample> addSampleToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                           @RequestBody Sample sample) {
+    HttpEntity<Resource<Sample>> addSampleToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                     @RequestBody Sample sample) {
         Sample entity = getSampleService().addSampleToSubmissionEnvelope(submissionEnvelope, sample);
-        return ResponseEntity.accepted().body(entity);
+        Resource<Sample> resource = sampleResourceAssembler.toResource(entity);
+        return ResponseEntity.accepted().body(resource);
     }
 }
