@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.file;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import org.humancellatlas.ingest.core.Accession;
 import org.humancellatlas.ingest.core.Checksums;
@@ -41,8 +42,8 @@ public class File extends MetadataDocument {
     }
 
     @JsonCreator
-    protected File(String fileName,
-                   Object content) {
+    protected File(@JsonProperty("name") String fileName,
+                   @JsonProperty("content") Object content) {
         this(EntityType.FILE,
              null,
              new SubmissionDate(new Date()),
