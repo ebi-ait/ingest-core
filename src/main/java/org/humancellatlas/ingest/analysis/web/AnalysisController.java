@@ -5,13 +5,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.analysis.Analysis;
 import org.humancellatlas.ingest.analysis.AnalysisService;
+import org.humancellatlas.ingest.analysis.BundleReference;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,6 +36,17 @@ public class AnalysisController {
                                                       @RequestBody Analysis analysis,
                                                       final PersistentEntityResourceAssembler assembler) {
         Analysis entity = getAnalysisService().addAnalysisToSubmissionEnvelope(submissionEnvelope, analysis);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/analyses/{analysis_id}/bundleReferences",
+                    method = RequestMethod.PUT)
+    ResponseEntity<Resource<?>> addBundleReference(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                   @PathVariable("analysis_id") Analysis analysis,
+                                                   @RequestBody BundleReference bundleReference,
+                                                   final PersistentEntityResourceAssembler assembler) {
+        Analysis entity = getAnalysisService().resolveBundleReferencesForAnalysis(analysis, bundleReference);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }

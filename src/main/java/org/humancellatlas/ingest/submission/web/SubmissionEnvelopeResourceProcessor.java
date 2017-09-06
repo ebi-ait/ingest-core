@@ -23,9 +23,7 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
     private final @NotNull EntityLinks entityLinks;
 
     private Link getSubmitLink(SubmissionEnvelope submissionEnvelope) {
-        return entityLinks.linkForSingleResource(submissionEnvelope)
-                .slash("/confirmation")
-                .withRel(Links.SUBMIT_REL);
+        return entityLinks.linkForSingleResource(submissionEnvelope).slash(Links.SUBMIT_URL).withRel(Links.SUBMIT_REL);
     }
 
     public Resource<SubmissionEnvelope> process(Resource<SubmissionEnvelope> resource) {
