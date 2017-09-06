@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.humancellatlas.ingest.core.*;
-import org.humancellatlas.ingest.file.File;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.hateoas.Identifiable;
 
 import java.util.Collection;
