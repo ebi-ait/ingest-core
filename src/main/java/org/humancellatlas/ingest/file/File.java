@@ -42,7 +42,7 @@ public class File extends MetadataDocument {
     }
 
     @JsonCreator
-    protected File(@JsonProperty("name") String fileName,
+    protected File(@JsonProperty("fileName") String fileName,
                    @JsonProperty("content") Object content) {
         this(EntityType.FILE,
              null,
