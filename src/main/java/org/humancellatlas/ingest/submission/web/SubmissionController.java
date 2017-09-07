@@ -61,7 +61,7 @@ public class SubmissionController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(analyses, resourceAssembler));
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assay", method = RequestMethod.GET)
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays", method = RequestMethod.GET)
     ResponseEntity<?> getAssays(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                 Pageable pageable,
                                 final PersistentEntityResourceAssembler resourceAssembler) {
