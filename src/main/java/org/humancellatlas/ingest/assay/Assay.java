@@ -32,7 +32,7 @@ public class Assay extends MetadataDocument {
     private final @DBRef List<Protocol> protocols;
     private final @DBRef List<File> files;
 
-    private SubmissionEnvelope submissionEnvelope;
+    private @DBRef SubmissionEnvelope submissionEnvelope;
 
     protected Assay() {
         super(EntityType.ASSAY, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null);
