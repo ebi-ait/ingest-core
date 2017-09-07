@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.core;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.hateoas.Identifiable;
@@ -21,7 +22,7 @@ public abstract class AbstractEntity implements Identifiable<String> {
 
     private final @JsonIgnore EntityType type;
 
-    private final Uuid uuid;
+    private Uuid uuid;
     private final SubmissionDate submissionDate;
     private final UpdateDate updateDate;
 
@@ -33,5 +34,9 @@ public abstract class AbstractEntity implements Identifiable<String> {
         this.uuid = uuid;
         this.submissionDate = submissionDate;
         this.updateDate = updateDate;
+    }
+
+    public void setUuid(Uuid uuid) {
+        this.uuid = uuid;
     }
 }
