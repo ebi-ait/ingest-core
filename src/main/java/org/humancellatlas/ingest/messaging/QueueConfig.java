@@ -34,6 +34,11 @@ public class QueueConfig {
 
     @Bean FanoutExchange envelopeExchange() { return new FanoutExchange(Constants.Exchanges.ENVELOPE_FANOUT); }
 
+    @Bean Queue queueValidationRequired() { return new Queue(Constants.Queues.VALIDATION_REQUIRED, false); }
+
+    @Bean FanoutExchange validationExchange() { return new FanoutExchange(Constants.Exchanges.VALIDATION_FANOUT); }
+
+
     @Bean Binding bindingFile(Queue queueFileUpdate, FanoutExchange fileExchange) {
         return BindingBuilder.bind(queueFileUpdate).to(fileExchange);
     }
@@ -43,4 +48,9 @@ public class QueueConfig {
         return BindingBuilder.bind(queueEnvelopeSubmitted)
                 .to(envelopeExchange);
     }
+
+    @Bean Binding bindingValidation(Queue queueValidationRequired, FanoutExchange validationExchange) {
+        return BindingBuilder.bind(queueValidationRequired).to(validationExchange);
+    }
+
 }

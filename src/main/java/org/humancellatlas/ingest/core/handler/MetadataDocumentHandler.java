@@ -3,8 +3,10 @@ package org.humancellatlas.ingest.core.handler;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.AbstractEntity;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.ValidateMetadataService;
+import org.springframework.data.rest.core.annotation.HandleAfterCreate;
 import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
@@ -23,5 +25,10 @@ public class MetadataDocumentHandler {
     @HandleBeforeCreate
     public void assignUuid(AbstractEntity entity) {
         entity.setUuid(new Uuid(UUID.randomUUID().toString()));
+    }
+
+    @HandleAfterCreate
+    public void validateDocument(MetadataDocument document){
+        validateMetadataService.validateMetadata(document);
     }
 }

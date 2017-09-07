@@ -9,6 +9,7 @@ public class Constants {
     public class Queues {
         public static final String FILE_UPDATE = "ingest.file.update.queue";
         public static final String ENVELOPE_SUBMITTED = "ingest.envelope.submitted.queue";
+        public static final String VALIDATION_REQUIRED = "ingest.validation.queue";
     }
 
     public class Exchanges {
