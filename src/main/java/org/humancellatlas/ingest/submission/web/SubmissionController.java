@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.submission.web;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.humancellatlas.ingest.messaging.Constants;
 import org.humancellatlas.ingest.submission.SubmissionReceipt;
@@ -29,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class SubmissionController {
     private final @NonNull SubmissionService submissionService;
 
-    @RequestMapping(path = "/confirmation", method = RequestMethod.PUT)
+    @RequestMapping(path = Links.SUBMIT_URL, method = RequestMethod.PUT)
     HttpEntity<?> submitEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
         SubmissionReceipt receipt = submissionService.submitEnvelope(submissionEnvelope);
         return ResponseEntity.accepted().body(receipt);

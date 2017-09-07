@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.SubmissionDate;
 import org.humancellatlas.ingest.core.UpdateDate;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.sample.Sample;
@@ -28,12 +29,14 @@ public class Assay extends MetadataDocument {
     private final @DBRef List<Sample> samples;
     private final @DBRef List<Project> projects;
     private final @DBRef List<Protocol> protocols;
+    private final @DBRef List<File> files;
 
     protected Assay() {
         super(EntityType.ASSAY, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null);
         this.samples = new ArrayList<>();
         this.projects = new ArrayList<>();
         this.protocols = new ArrayList<>();
+        this.files = new ArrayList<>();
     }
 
     public Assay(EntityType type,
@@ -44,11 +47,13 @@ public class Assay extends MetadataDocument {
                  List<Sample> samples,
                  List<Project> projects,
                  List<Protocol> protocols,
+                 List<File> files,
                  Object content) {
         super(type, uuid, submissionDate, updateDate, accession, content);
         this.samples = samples;
         this.projects = projects;
         this.protocols = protocols;
+        this.files = files;
     }
 
     @JsonCreator
@@ -61,6 +66,13 @@ public class Assay extends MetadataDocument {
              new ArrayList<>(),
              new ArrayList<>(),
              new ArrayList<>(),
+             new ArrayList<>(),
              content);
+    }
+
+    public Assay addFile(File file) {
+        this.files.add(file);
+
+        return this;
     }
 }

@@ -5,7 +5,10 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.assay.AssayService;
+import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
+import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.file.FileRepository;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -29,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Getter
 public class AssayController {
     private final @NonNull AssayService assayService;
+    private final @NonNull FileRepository fileRepository;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addSampleToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -38,4 +42,16 @@ public class AssayController {
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }
+
+    @RequestMapping(path = "/assays/{assay_id}/" + Links.FILE_REF_URL,
+                    method = RequestMethod.PUT)
+    ResponseEntity<Resource<?>> addFileReference(@PathVariable("analysis_id") Assay assay,
+                                                 @RequestBody File file,
+                                                 final PersistentEntityResourceAssembler assembler) {
+        File entity = getFileRepository().save(file);
+        Assay result = getAssayService().getAssayRepository().save(assay.addFile(entity));
+        PersistentEntityResource resource = assembler.toFullResource(result);
+        return ResponseEntity.accepted().body(resource);
+    }
+
 }

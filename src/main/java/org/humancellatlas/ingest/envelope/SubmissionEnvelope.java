@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.humancellatlas.ingest.analysis.Analysis;
 import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.assay.Assay;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.sample.Sample;
@@ -28,6 +29,7 @@ public class SubmissionEnvelope extends AbstractEntity {
     private final @DBRef List<Assay> assays;
     private final @DBRef List<Analysis> analyses;
     private final @DBRef List<Protocol> protocols;
+    private final @DBRef List<File> files;
 
     private @Setter SubmissionStatus submissionStatus;
 
@@ -40,7 +42,8 @@ public class SubmissionEnvelope extends AbstractEntity {
                               List<Sample> samples,
                               List<Assay> assays,
                               List<Analysis> analyses,
-                              List<Protocol> protocols) {
+                              List<Protocol> protocols,
+                              List<File> files) {
         super(EntityType.SUBMISSION, uuid, submissionDate, updateDate);
         this.submissionStatus = submissionStatus;
         this.projects = projects;
@@ -48,6 +51,7 @@ public class SubmissionEnvelope extends AbstractEntity {
         this.assays = assays;
         this.analyses = analyses;
         this.protocols = protocols;
+        this.files = files;
     }
 
     public SubmissionEnvelope() {
@@ -55,6 +59,7 @@ public class SubmissionEnvelope extends AbstractEntity {
              new SubmissionDate(new Date()),
              new UpdateDate(new Date()),
              SubmissionStatus.DRAFT,
+             new ArrayList<>(),
              new ArrayList<>(),
              new ArrayList<>(),
              new ArrayList<>(),
@@ -88,6 +93,12 @@ public class SubmissionEnvelope extends AbstractEntity {
 
     public SubmissionEnvelope addSample(Sample sample) {
         this.samples.add(sample);
+
+        return this;
+    }
+
+    public SubmissionEnvelope addFile(File file) {
+        this.files.add(file);
 
         return this;
     }

@@ -27,7 +27,7 @@ curl -X POST -H "Content-Type: application/json" http://localhost:8080/submissio
 # returns $sample_url
 
 # Finally, submit the submission envelope
-curl -X PUT -H curl -X PUT $submit_url
+curl -X PUT -H "Content-Type: application/json" $submit_url
 
 SECONDARY SUBMISSION
 
@@ -53,7 +53,7 @@ curl -X POST -H "Content-Type: application/json" http://localhost:8080/submissio
 curl -X PUT -H "Content-Type: text/uri-list" $assoc_url -d $assay_url
 
 # Finally, submit the submission envelope
-curl -X PUT -H curl -X PUT $submit_url
+curl -X PUT -H "Content-Type: application/json" $submit_url
 
 ---------------------
 
