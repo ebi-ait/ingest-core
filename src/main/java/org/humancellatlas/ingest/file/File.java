@@ -11,18 +11,22 @@ import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.SubmissionDate;
 import org.humancellatlas.ingest.core.UpdateDate;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 
 import java.util.Date;
 
 @Getter
 @Setter
 public class File extends MetadataDocument {
+    private SubmissionEnvelope submissionEnvelope;
+
     private String fileName;
     private String cloudUrl;
     private Checksums checksums;
 
     protected File() {
         super(EntityType.FILE, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null);
+        this.submissionEnvelope = null;
         this.cloudUrl = "";
         this.fileName = "";
         this.checksums = null;
@@ -33,11 +37,13 @@ public class File extends MetadataDocument {
                    SubmissionDate submissionDate,
                    UpdateDate updateDate,
                    Accession accession,
+                   SubmissionEnvelope submissionEnvelope,
                    String fileName,
                    String cloudUrl,
                    Checksums checksums,
                    Object content) {
         super(type, uuid, submissionDate, updateDate, accession, content);
+        this.submissionEnvelope = submissionEnvelope;
         this.fileName = fileName;
         this.cloudUrl = cloudUrl;
         this.checksums = checksums;
@@ -51,9 +57,24 @@ public class File extends MetadataDocument {
              new SubmissionDate(new Date()),
              new UpdateDate(new Date()),
              null,
+             null,
              fileName,
              null,
              null,
              content);
+    }
+
+    public File addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        this.submissionEnvelope = submissionEnvelope;
+
+        return this;
+    }
+
+    public boolean isInEnvelope(SubmissionEnvelope submissionEnvelope) {
+        return this.submissionEnvelope.equals(submissionEnvelope);
+    }
+
+    public boolean isInEnvelopeWithUuid(Uuid uuid) {
+        return this.submissionEnvelope.getUuid().equals(uuid);
     }
 }

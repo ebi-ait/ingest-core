@@ -21,8 +21,7 @@ public class AssayService {
     private final @NonNull AssayRepository assayRepository;
 
     public Assay addAssayToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Assay assay) {
-        Assay result = getAssayRepository().save(assay);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope.addAssay(result));
-        return result;
+        assay.addToSubmissionEnvelope(submissionEnvelope);
+        return getAssayRepository().save(assay);
     }
 }

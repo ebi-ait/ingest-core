@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.SubmissionDate;
 import org.humancellatlas.ingest.core.UpdateDate;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.protocol.Protocol;
@@ -31,12 +32,15 @@ public class Assay extends MetadataDocument {
     private final @DBRef List<Protocol> protocols;
     private final @DBRef List<File> files;
 
+    private SubmissionEnvelope submissionEnvelope;
+
     protected Assay() {
         super(EntityType.ASSAY, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null);
         this.samples = new ArrayList<>();
         this.projects = new ArrayList<>();
         this.protocols = new ArrayList<>();
         this.files = new ArrayList<>();
+        this.submissionEnvelope = null;
     }
 
     public Assay(EntityType type,
@@ -48,12 +52,14 @@ public class Assay extends MetadataDocument {
                  List<Project> projects,
                  List<Protocol> protocols,
                  List<File> files,
+                 SubmissionEnvelope submissionEnvelope,
                  Object content) {
         super(type, uuid, submissionDate, updateDate, accession, content);
         this.samples = samples;
         this.projects = projects;
         this.protocols = protocols;
         this.files = files;
+        this.submissionEnvelope = submissionEnvelope;
     }
 
     @JsonCreator
@@ -67,7 +73,14 @@ public class Assay extends MetadataDocument {
              new ArrayList<>(),
              new ArrayList<>(),
              new ArrayList<>(),
+             null,
              content);
+    }
+
+    public Assay addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        this.submissionEnvelope = submissionEnvelope;
+
+        return this;
     }
 
     public Assay addFile(File file) {
