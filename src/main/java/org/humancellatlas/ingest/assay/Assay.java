@@ -2,12 +2,7 @@ package org.humancellatlas.ingest.assay;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
-import org.humancellatlas.ingest.core.Accession;
-import org.humancellatlas.ingest.core.EntityType;
-import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.SubmissionDate;
-import org.humancellatlas.ingest.core.UpdateDate;
-import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.protocol.Protocol;
@@ -25,14 +20,14 @@ import java.util.List;
  * @date 30/08/17
  */
 @Getter
-public class Assay extends MetadataDocument {
+public class Assay extends BioMetadataDocument {
     private final @DBRef List<Sample> samples;
     private final @DBRef List<Project> projects;
     private final @DBRef List<Protocol> protocols;
     private final @DBRef List<File> files;
 
     protected Assay() {
-        super(EntityType.ASSAY, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null);
+        super(EntityType.ASSAY, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING);
         this.samples = new ArrayList<>();
         this.projects = new ArrayList<>();
         this.protocols = new ArrayList<>();
@@ -48,8 +43,9 @@ public class Assay extends MetadataDocument {
                  List<Project> projects,
                  List<Protocol> protocols,
                  List<File> files,
-                 Object content) {
-        super(type, uuid, submissionDate, updateDate, accession, content);
+                 Object content,
+                 ValidationStatus validationStatus) {
+        super(type, uuid, submissionDate, updateDate, accession, content, validationStatus);
         this.samples = samples;
         this.projects = projects;
         this.protocols = protocols;
@@ -67,7 +63,8 @@ public class Assay extends MetadataDocument {
              new ArrayList<>(),
              new ArrayList<>(),
              new ArrayList<>(),
-             content);
+             content,
+             ValidationStatus.PENDING);
     }
 
     public Assay addFile(File file) {

@@ -2,14 +2,15 @@ package org.humancellatlas.ingest.core.handler;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import org.humancellatlas.ingest.core.AbstractEntity;
-import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.*;
+import org.humancellatlas.ingest.core.service.AccessionMetadataService;
 import org.humancellatlas.ingest.core.service.ValidateMetadataService;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
+import org.springframework.data.rest.core.annotation.HandleAfterSave;
 import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.UUID;
 
@@ -21,6 +22,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class MetadataDocumentHandler {
     private final @NonNull ValidateMetadataService validateMetadataService;
+    private final @NonNull AccessionMetadataService accessionMetadataService;
 
     @HandleBeforeCreate
     public void assignUuid(AbstractEntity entity) {
@@ -28,7 +30,15 @@ public class MetadataDocumentHandler {
     }
 
     @HandleAfterCreate
-    public void validateDocument(MetadataDocument document){
+    public void validateDocument(BioMetadataDocument document){
         validateMetadataService.validateMetadata(document);
+        document.setValidationStatus(ValidationStatus.VALIDATING);
+    }
+
+    @HandleAfterSave
+    public void accessionMetadata(BioMetadataDocument document) {
+        if(StringUtils.isEmpty(document.getAccession().getNumber()) && document.getValidationStatus().equals(ValidationStatus.VALID)) {
+            accessionMetadataService.accessionMetadata(document);
+        }
     }
 }

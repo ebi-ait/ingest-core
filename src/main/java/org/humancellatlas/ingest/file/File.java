@@ -4,13 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.humancellatlas.ingest.core.Accession;
-import org.humancellatlas.ingest.core.Checksums;
-import org.humancellatlas.ingest.core.EntityType;
-import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.SubmissionDate;
-import org.humancellatlas.ingest.core.UpdateDate;
-import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.*;
 
 import java.util.Date;
 
@@ -22,7 +16,7 @@ public class File extends MetadataDocument {
     private Checksums checksums;
 
     protected File() {
-        super(EntityType.FILE, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null);
+        super(EntityType.FILE, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null);
         this.cloudUrl = "";
         this.fileName = "";
         this.checksums = null;
@@ -32,12 +26,11 @@ public class File extends MetadataDocument {
                    Uuid uuid,
                    SubmissionDate submissionDate,
                    UpdateDate updateDate,
-                   Accession accession,
                    String fileName,
                    String cloudUrl,
                    Checksums checksums,
                    Object content) {
-        super(type, uuid, submissionDate, updateDate, accession, content);
+        super(type, uuid, submissionDate, updateDate, content);
         this.fileName = fileName;
         this.cloudUrl = cloudUrl;
         this.checksums = checksums;
@@ -50,9 +43,8 @@ public class File extends MetadataDocument {
              null,
              new SubmissionDate(new Date()),
              new UpdateDate(new Date()),
-             null,
              fileName,
-             null,
+             "",
              null,
              content);
     }

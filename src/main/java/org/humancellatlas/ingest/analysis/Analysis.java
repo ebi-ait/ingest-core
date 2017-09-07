@@ -4,12 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.bundle.BundleManifest;
-import org.humancellatlas.ingest.core.Accession;
-import org.humancellatlas.ingest.core.EntityType;
-import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.SubmissionDate;
-import org.humancellatlas.ingest.core.UpdateDate;
-import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.project.Project;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -25,14 +20,14 @@ import java.util.List;
  * @date 30/08/17
  */
 @Getter
-public class Analysis extends MetadataDocument {
+public class Analysis extends BioMetadataDocument {
     private final @DBRef List<Project> projects;
     private final @DBRef List<Assay> assays;
     private final @DBRef List<File> files;
     private final @DBRef List<BundleManifest> inputBundleManifests;
 
     protected Analysis() {
-        super(EntityType.ANALYSIS, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null);
+        super(EntityType.ANALYSIS, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING);
         this.projects = new ArrayList<>();
         this.assays = new ArrayList<>();
         this.files = new ArrayList<>();
@@ -48,8 +43,9 @@ public class Analysis extends MetadataDocument {
                     List<Assay> assays,
                     List<File> files,
                     List<BundleManifest> inputBundleManifests,
-                    Object content) {
-        super(type, uuid, submissionDate, updateDate, accession, content);
+                    Object content,
+                    ValidationStatus validationStatus) {
+        super(type, uuid, submissionDate, updateDate, accession, content, validationStatus);
         this.projects = projects;
         this.assays = assays;
         this.files = files;
@@ -67,7 +63,8 @@ public class Analysis extends MetadataDocument {
              new ArrayList<>(),
              new ArrayList<>(),
              new ArrayList<>(),
-             content);
+             content,
+             ValidationStatus.PENDING);
     }
 
     public Analysis addFile(File file) {

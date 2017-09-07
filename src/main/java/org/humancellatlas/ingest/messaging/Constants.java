@@ -10,7 +10,8 @@ public class Constants {
         public static final String FILE_STAGED = "ingest.file.create.staged";
         public static final String FILE_UPDATE = "ingest.file.update.queue";
         public static final String ENVELOPE_SUBMITTED = "ingest.envelope.submitted.queue";
-        public static final String VALIDATION_REQUIRED = "ingest.validation.queue";
+        public static final String VALIDATION_REQUIRED = "ingest.metadata.validation.queue";
+        public static final String ACCESSION_REQUIRED = "ingest.metadata.accession.queue";
     }
 
     public class Exchanges {
@@ -18,5 +19,6 @@ public class Constants {
         public static final String FILE_FANOUT = "ingest.file.update.exchange";
         public static final String FILE_STAGED_FANOUT = "ingest.file.staged.exchange";
         public static final String ENVELOPE_FANOUT = "ingest.envelope.submitted.exchange";
+        public static final String ACCESSION_FANOUT = "ingest.metadata.accession.exchange";
     }
 }

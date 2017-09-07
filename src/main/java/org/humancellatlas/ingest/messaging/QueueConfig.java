@@ -42,6 +42,10 @@ public class QueueConfig {
 
     @Bean FanoutExchange validationExchange() { return new FanoutExchange(Constants.Exchanges.VALIDATION_FANOUT); }
 
+    @Bean Queue queueAccessionRequired() { return new Queue(Constants.Queues.ACCESSION_REQUIRED, false); }
+
+    @Bean FanoutExchange accessionExchange() { return new FanoutExchange(Constants.Exchanges.ACCESSION_FANOUT); }
+
     /* bindings */
 
     @Bean Binding bindingFileStaged(Queue queueFileStaged, FanoutExchange fileStagedExchange) {
@@ -60,6 +64,10 @@ public class QueueConfig {
 
     @Bean Binding bindingValidation(Queue queueValidationRequired, FanoutExchange validationExchange) {
         return BindingBuilder.bind(queueValidationRequired).to(validationExchange);
+    }
+
+    @Bean Binding bindingAccession(Queue queueAccessionRequired, FanoutExchange accessionExchange) {
+        return BindingBuilder.bind(queueAccessionRequired).to(accessionExchange);
     }
 
 }
