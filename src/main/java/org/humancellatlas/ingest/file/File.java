@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.file;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.Setter;
 import org.humancellatlas.ingest.core.Accession;
 import org.humancellatlas.ingest.core.Checksums;
 import org.humancellatlas.ingest.core.EntityType;
@@ -14,6 +15,7 @@ import org.humancellatlas.ingest.core.Uuid;
 import java.util.Date;
 
 @Getter
+@Setter
 public class File extends MetadataDocument {
     private String fileName;
     private String cloudUrl;
