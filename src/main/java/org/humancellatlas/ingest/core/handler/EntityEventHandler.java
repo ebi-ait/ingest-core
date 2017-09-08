@@ -20,7 +20,7 @@ import java.util.UUID;
  * Created by rolando on 06/09/2017.
  */
 @Component
-public class EntityCreatedListener extends AbstractMongoEventListener<AbstractEntity> {
+public class EntityEventHandler extends AbstractMongoEventListener<AbstractEntity> {
 
     @Override
     public void onBeforeSave(BeforeSaveEvent<AbstractEntity> entityBeforeSaveEvent) {

@@ -2,12 +2,8 @@ package org.humancellatlas.ingest.assay;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
-import org.humancellatlas.ingest.core.Accession;
-import org.humancellatlas.ingest.core.EntityType;
-import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.SubmissionDate;
-import org.humancellatlas.ingest.core.UpdateDate;
-import org.humancellatlas.ingest.core.Uuid;
+
+import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.project.Project;
@@ -26,7 +22,7 @@ import java.util.List;
  * @date 30/08/17
  */
 @Getter
-public class Assay extends MetadataDocument {
+public class Assay extends BioMetadataDocument {
     private final @DBRef List<Sample> samples;
     private final @DBRef List<Project> projects;
     private final @DBRef List<Protocol> protocols;
@@ -35,7 +31,7 @@ public class Assay extends MetadataDocument {
     private @DBRef SubmissionEnvelope submissionEnvelope;
 
     protected Assay() {
-        super(EntityType.ASSAY, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null);
+        super(EntityType.ASSAY, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING);
         this.samples = new ArrayList<>();
         this.projects = new ArrayList<>();
         this.protocols = new ArrayList<>();
@@ -53,8 +49,9 @@ public class Assay extends MetadataDocument {
                  List<Protocol> protocols,
                  List<File> files,
                  SubmissionEnvelope submissionEnvelope,
-                 Object content) {
-        super(type, uuid, submissionDate, updateDate, accession, content);
+                 Object content,
+                 ValidationStatus validationStatus) {
+        super(type, uuid, submissionDate, updateDate, accession, content, validationStatus);
         this.samples = samples;
         this.projects = projects;
         this.protocols = protocols;
@@ -74,7 +71,8 @@ public class Assay extends MetadataDocument {
              new ArrayList<>(),
              new ArrayList<>(),
              null,
-             content);
+             content,
+             ValidationStatus.PENDING);
     }
 
     public Assay addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {

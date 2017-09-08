@@ -26,7 +26,7 @@ public class File extends MetadataDocument {
     private Checksums checksums;
 
     protected File() {
-        super(EntityType.FILE, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null);
+        super(EntityType.FILE, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null);
         this.submissionEnvelope = null;
         this.cloudUrl = "";
         this.fileName = "";
@@ -37,13 +37,12 @@ public class File extends MetadataDocument {
                    Uuid uuid,
                    SubmissionDate submissionDate,
                    UpdateDate updateDate,
-                   Accession accession,
                    SubmissionEnvelope submissionEnvelope,
                    String fileName,
                    String cloudUrl,
                    Checksums checksums,
                    Object content) {
-        super(type, uuid, submissionDate, updateDate, accession, content);
+        super(type, uuid, submissionDate, updateDate, content);
         this.submissionEnvelope = submissionEnvelope;
         this.fileName = fileName;
         this.cloudUrl = cloudUrl;
@@ -58,9 +57,8 @@ public class File extends MetadataDocument {
              new SubmissionDate(new Date()),
              new UpdateDate(new Date()),
              null,
-             null,
              fileName,
-             null,
+             "",
              null,
              content);
     }
