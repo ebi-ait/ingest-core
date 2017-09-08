@@ -8,6 +8,8 @@ import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.hateoas.Identifiable;
 
+import java.util.UUID;
+
 /**
  * Javadocs go here!
  *
@@ -31,7 +33,7 @@ public abstract class AbstractEntity implements Identifiable<String> {
                              SubmissionDate submissionDate,
                              UpdateDate updateDate) {
         this.type = type;
-        this.uuid = uuid;
+        this.uuid = new Uuid(UUID.randomUUID().toString());
         this.submissionDate = submissionDate;
         this.updateDate = updateDate;
     }

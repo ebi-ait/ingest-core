@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.core.handler;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
@@ -20,12 +21,13 @@ import java.util.UUID;
  * Created by rolando on 06/09/2017.
  */
 @Component
-public class EntityEventHandler extends AbstractMongoEventListener<AbstractEntity> {
+public class EntityEventHandler extends AbstractRepositoryEventListener<AbstractEntity> {
 
     @Override
-    public void onBeforeSave(BeforeSaveEvent<AbstractEntity> entityBeforeSaveEvent) {
-        entityBeforeSaveEvent.getSource().setUuid(new Uuid(UUID.randomUUID().toString()));
+    public void onBeforeCreate(AbstractEntity entity) {
+        entity.setUuid(new Uuid(UUID.randomUUID().toString()));
     }
+
 }
 
 
