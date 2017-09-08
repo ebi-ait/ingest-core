@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.messaging.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class SubmissionService {
     private SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
     @Autowired
-    private AmqpTemplate messagingTemplate;
+    private RabbitMessagingTemplate messagingTemplate;
 
     public SubmissionReceipt submitEnvelope(SubmissionEnvelope submissionEnvelope) {
         log.info(String.format("Congratulations! You have submitted your envelope '%s'", submissionEnvelope.getId()));
