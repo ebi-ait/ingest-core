@@ -33,9 +33,8 @@ public class AnalysisService {
     }
 
     public Analysis addAnalysisToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Analysis analysis) {
-        Analysis result = getAnalysisRepository().save(analysis);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope.addAnalysis(result));
-        return result;
+        analysis.addToEnvelope(submissionEnvelope);
+        return getAnalysisRepository().save(analysis);
     }
 
     public Analysis resolveBundleReferencesForAnalysis(Analysis analysis, BundleReference bundleReference) {

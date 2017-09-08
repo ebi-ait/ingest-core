@@ -25,8 +25,55 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         return entityLinks.linkForSingleResource(submissionEnvelope).slash(Links.SUBMIT_URL).withRel(Links.SUBMIT_REL);
     }
 
+    private Link getAnalysesLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                .slash(Links.ANALYSES_URL)
+                .withRel(Links.ANALYSES_REL);
+    }
+
+    private Link getAssaysLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                .slash(Links.ASSAYS_URL)
+                .withRel(Links.ASSAYS_REL);
+    }
+
+    private Link getFilesLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                .slash(Links.FILES_URL)
+                .withRel(Links.FILES_REL);
+    }
+
+    private Link getProjectsLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                .slash(Links.PROJECTS_URL)
+                .withRel(Links.PROJECTS_REL);
+    }
+
+    private Link getProtocolsLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                .slash(Links.PROTOCOLS_URL)
+                .withRel(Links.PROTOCOLS_REL);
+    }
+
+    private Link getSamplesLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                .slash(Links.SAMPLES_URL)
+                .withRel(Links.SAMPLES_REL);
+    }
+
     public Resource<SubmissionEnvelope> process(Resource<SubmissionEnvelope> resource) {
-        resource.add(getSubmitLink(resource.getContent()));
+        SubmissionEnvelope submissionEnvelope = resource.getContent();
+
+        resource.add(getAnalysesLink(submissionEnvelope));
+        resource.add(getAssaysLink(submissionEnvelope));
+        resource.add(getFilesLink(submissionEnvelope));
+        resource.add(getProjectsLink(submissionEnvelope));
+        resource.add(getProtocolsLink(submissionEnvelope));
+        resource.add(getSamplesLink(submissionEnvelope));
+
+        // should be dependent on validation state
+        resource.add(getSubmitLink(submissionEnvelope));
+
         return resource;
     }
 }

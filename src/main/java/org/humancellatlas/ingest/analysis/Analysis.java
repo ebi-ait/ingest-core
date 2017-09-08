@@ -10,6 +10,7 @@ import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.SubmissionDate;
 import org.humancellatlas.ingest.core.UpdateDate;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.project.Project;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -31,12 +32,15 @@ public class Analysis extends MetadataDocument {
     private final @DBRef List<File> files;
     private final @DBRef List<BundleManifest> inputBundleManifests;
 
+    private @DBRef SubmissionEnvelope submissionEnvelope;
+
     protected Analysis() {
         super(EntityType.ANALYSIS, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null);
         this.projects = new ArrayList<>();
         this.assays = new ArrayList<>();
         this.files = new ArrayList<>();
         this.inputBundleManifests = new ArrayList<>();
+        this.submissionEnvelope = null;
     }
 
     public Analysis(EntityType type,
@@ -48,12 +52,14 @@ public class Analysis extends MetadataDocument {
                     List<Assay> assays,
                     List<File> files,
                     List<BundleManifest> inputBundleManifests,
+                    SubmissionEnvelope submissionEnvelope,
                     Object content) {
         super(type, uuid, submissionDate, updateDate, accession, content);
         this.projects = projects;
         this.assays = assays;
         this.files = files;
         this.inputBundleManifests = inputBundleManifests;
+        this.submissionEnvelope = submissionEnvelope;
     }
 
     @JsonCreator
@@ -67,7 +73,14 @@ public class Analysis extends MetadataDocument {
              new ArrayList<>(),
              new ArrayList<>(),
              new ArrayList<>(),
+             null,
              content);
+    }
+
+    public Analysis addToEnvelope(SubmissionEnvelope submissionEnvelope) {
+        this.submissionEnvelope = submissionEnvelope;
+
+        return this;
     }
 
     public Analysis addFile(File file) {

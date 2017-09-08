@@ -2,12 +2,14 @@ package org.humancellatlas.ingest.protocol;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
-import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Accession;
 import org.humancellatlas.ingest.core.EntityType;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.SubmissionDate;
 import org.humancellatlas.ingest.core.UpdateDate;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.util.Date;
 
@@ -19,12 +21,38 @@ import java.util.Date;
  */
 @Getter
 public class Protocol extends MetadataDocument {
+    private @DBRef SubmissionEnvelope submissionEnvelope;
+
     protected Protocol() {
         super(EntityType.PROTOCOL, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null);
+        this.submissionEnvelope = null;
+    }
+
+    public Protocol(EntityType type,
+                    Uuid uuid,
+                    SubmissionDate submissionDate,
+                    UpdateDate updateDate,
+                    Accession accession,
+                    SubmissionEnvelope submissionEnvelope,
+                    Object content) {
+        super(type, uuid, submissionDate, updateDate, accession, content);
+        this.submissionEnvelope = submissionEnvelope;
     }
 
     @JsonCreator
     public Protocol(Object content) {
-        super(EntityType.PROTOCOL, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, content);
+        this(EntityType.PROTOCOL,
+             null,
+             new SubmissionDate(new Date()),
+             new UpdateDate(new Date()),
+             null,
+             null,
+             content);
+    }
+
+    public Protocol addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        this.submissionEnvelope = submissionEnvelope;
+
+        return this;
     }
 }

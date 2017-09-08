@@ -21,8 +21,7 @@ public class ProjectService {
     private final @NonNull ProjectRepository projectRepository;
 
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
-        Project result = getProjectRepository().save(project);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope.addProject(result));
-        return result;
+        project.addToSubmissionEnvelope(submissionEnvelope);
+        return getProjectRepository().save(project);
     }
 }
