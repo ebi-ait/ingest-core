@@ -13,6 +13,19 @@ public class Links {
     public static final String SUBMIT_URL = "/confirmation";
     public static final String SUBMIT_REL = "submit";
 
+    public static final String ANALYSES_URL = "/analyses";
+    public static final String ANALYSES_REL = "analyses";
+    public static final String ASSAYS_URL = "/assays";
+    public static final String ASSAYS_REL = "assays";
+    public static final String FILES_URL = "/files";
+    public static final String FILES_REL = "files";
+    public static final String PROJECTS_URL = "/projects";
+    public static final String PROJECTS_REL = "projects";
+    public static final String PROTOCOLS_URL = "/protocols";
+    public static final String PROTOCOLS_REL = "protocols";
+    public static final String SAMPLES_URL = "/samples";
+    public static final String SAMPLES_REL = "samples";
+
     // Links for analyses
     public static final String BUNDLE_REF_URL = "/bundleReferences";
     public static final String BUNDLE_REF_REL = "add-input-bundles";

@@ -2,7 +2,9 @@ package org.humancellatlas.ingest.assay;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
+
 import org.humancellatlas.ingest.core.*;
+import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.protocol.Protocol;
@@ -26,12 +28,15 @@ public class Assay extends BioMetadataDocument {
     private final @DBRef List<Protocol> protocols;
     private final @DBRef List<File> files;
 
+    private @DBRef SubmissionEnvelope submissionEnvelope;
+
     protected Assay() {
         super(EntityType.ASSAY, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING);
         this.samples = new ArrayList<>();
         this.projects = new ArrayList<>();
         this.protocols = new ArrayList<>();
         this.files = new ArrayList<>();
+        this.submissionEnvelope = null;
     }
 
     public Assay(EntityType type,
@@ -43,6 +48,7 @@ public class Assay extends BioMetadataDocument {
                  List<Project> projects,
                  List<Protocol> protocols,
                  List<File> files,
+                 SubmissionEnvelope submissionEnvelope,
                  Object content,
                  ValidationStatus validationStatus) {
         super(type, uuid, submissionDate, updateDate, accession, content, validationStatus);
@@ -50,6 +56,7 @@ public class Assay extends BioMetadataDocument {
         this.projects = projects;
         this.protocols = protocols;
         this.files = files;
+        this.submissionEnvelope = submissionEnvelope;
     }
 
     @JsonCreator
@@ -63,8 +70,15 @@ public class Assay extends BioMetadataDocument {
              new ArrayList<>(),
              new ArrayList<>(),
              new ArrayList<>(),
+             null,
              content,
              ValidationStatus.PENDING);
+    }
+
+    public Assay addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        this.submissionEnvelope = submissionEnvelope;
+
+        return this;
     }
 
     public Assay addFile(File file) {

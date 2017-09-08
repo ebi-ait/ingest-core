@@ -21,8 +21,7 @@ public class ProtocolService {
     private final @NonNull ProtocolRepository protocolRepository;
 
     public Protocol addProtocolToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Protocol protocol) {
-        Protocol result = getProtocolRepository().save(protocol);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope.addProtocol(protocol));
-        return result;
+        protocol.addToSubmissionEnvelope(submissionEnvelope);
+        return getProtocolRepository().save(protocol);
     }
 }

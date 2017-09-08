@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.file;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.exception.CoreEntityNotFoundException;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelopeRepository;
@@ -27,16 +28,15 @@ public class FileService {
     private final @NonNull FileRepository fileRepository;
 
     public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
-        File result = getFileRepository().save(file);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope.addFile(result));
-        return result;
+        file.addToSubmissionEnvelope(submissionEnvelope);
+        return getFileRepository().save(file);
     }
 
-    public File updateStagedFileUrl(UUID envelopeUuid, String fileName, String newFileUrl) throws CoreEntityNotFoundException {
+    public File updateStagedFileUrl(Uuid envelopeUuid, String fileName, String newFileUrl) throws CoreEntityNotFoundException {
         Optional<SubmissionEnvelope> envelope = Optional.ofNullable(submissionEnvelopeRepository.findByUuid(envelopeUuid));
 
         if(envelope.isPresent()) {
-            List<File> filesInEnvelope = submissionEnvelopeRepository.findByUuid(envelopeUuid).getFiles();
+            List<File> filesInEnvelope = fileRepository.findBySubmissionEnvelopeUuid(envelopeUuid);
 
             Optional<File> fileToUpdate = filesInEnvelope.stream()
                     .filter(file -> file.getFileName().equals(fileName))

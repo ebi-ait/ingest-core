@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.*;
+import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.project.Project;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -26,12 +27,15 @@ public class Analysis extends BioMetadataDocument {
     private final @DBRef List<File> files;
     private final @DBRef List<BundleManifest> inputBundleManifests;
 
+    private @DBRef SubmissionEnvelope submissionEnvelope;
+
     protected Analysis() {
         super(EntityType.ANALYSIS, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING);
         this.projects = new ArrayList<>();
         this.assays = new ArrayList<>();
         this.files = new ArrayList<>();
         this.inputBundleManifests = new ArrayList<>();
+        this.submissionEnvelope = null;
     }
 
     public Analysis(EntityType type,
@@ -43,6 +47,7 @@ public class Analysis extends BioMetadataDocument {
                     List<Assay> assays,
                     List<File> files,
                     List<BundleManifest> inputBundleManifests,
+                    SubmissionEnvelope submissionEnvelope,
                     Object content,
                     ValidationStatus validationStatus) {
         super(type, uuid, submissionDate, updateDate, accession, content, validationStatus);
@@ -50,6 +55,7 @@ public class Analysis extends BioMetadataDocument {
         this.assays = assays;
         this.files = files;
         this.inputBundleManifests = inputBundleManifests;
+        this.submissionEnvelope = submissionEnvelope;
     }
 
     @JsonCreator
@@ -63,8 +69,15 @@ public class Analysis extends BioMetadataDocument {
              new ArrayList<>(),
              new ArrayList<>(),
              new ArrayList<>(),
+             null,
              content,
              ValidationStatus.PENDING);
+    }
+
+    public Analysis addToEnvelope(SubmissionEnvelope submissionEnvelope) {
+        this.submissionEnvelope = submissionEnvelope;
+
+        return this;
     }
 
     public Analysis addFile(File file) {
