@@ -12,13 +12,14 @@ import org.humancellatlas.ingest.core.SubmissionDate;
 import org.humancellatlas.ingest.core.UpdateDate;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.util.Date;
 
 @Getter
 @Setter
 public class File extends MetadataDocument {
-    private SubmissionEnvelope submissionEnvelope;
+    private @DBRef SubmissionEnvelope submissionEnvelope;
 
     private String fileName;
     private String cloudUrl;
