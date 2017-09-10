@@ -14,6 +14,7 @@ import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -47,6 +48,11 @@ public class SubmissionEnvelopeStateEngine {
         this.rabbitMessagingTemplate = rabbitMessagingTemplate;
 
         this.executorService = Executors.newCachedThreadPool();
+    }
+
+    @PreDestroy
+    void shutdownExecutor() {
+        this.executorService.shutdown();
     }
 
     public Event progressState(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
