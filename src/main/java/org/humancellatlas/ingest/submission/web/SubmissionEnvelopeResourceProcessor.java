@@ -69,7 +69,7 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
 
     private Link getStateTransitionLink(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
         String transitionResourceName = SubmissionEnvelopeStateEngine.getSubresourceNameForSubmissionState(targetState);
-        String rel = SubmissionEnvelopeStateEngine.getSubresourceNameForSubmissionState(targetState);
+        String rel = SubmissionEnvelopeStateEngine.getRelNameForSubmissionState(targetState);
         return entityLinks.linkForSingleResource(submissionEnvelope)
                 .slash(transitionResourceName)
                 .withRel(rel);
