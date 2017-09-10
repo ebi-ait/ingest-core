@@ -5,17 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionState;
-import org.humancellatlas.ingest.submission.state.InvalidSubmissionStateException;
-import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 /**
  * Javadocs go here!
@@ -64,59 +60,52 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 .withRel(Links.SAMPLES_REL);
     }
 
-    private Link getStateTransitionLink(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
-        String transitionResourceName = getSubresourceNameForSubmissionState(targetState);
-        String rel = getRelNameForSubmissionState(targetState);
-        return entityLinks.linkForSingleResource(submissionEnvelope)
-                .slash(transitionResourceName)
-                .withRel(rel);
-    }
-
-    private String getRelNameForSubmissionState(SubmissionState submissionState) {
-        switch (submissionState) {
-            case DRAFT:
-                return Links.DRAFT_REL;
-            case VALIDATING:
-                return Links.VALIDATING_REL;
-            case VALID:
-                return Links.VALID_REL;
-            case INVALID:
-                return Links.INVALID_REL;
-            case SUBMITTED:
-                return Links.SUBMIT_REL;
-            case PROCESSING:
-                return Links.PROCESSING_REL;
-            case CLEANUP:
-                return "mark-cleaning";
-            case COMPLETE:
-                return "mark-complete";
-            default:
-                throw new InvalidSubmissionStateException(String.format("The submission state '%s' is not recognised " +
-                        "as a submission envelope state that can be set", submissionState.name()));
+    private Optional<Link> getStateTransitionLink(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
+        Optional<String> transitionResourceName = getSubresourceNameForSubmissionState(targetState);
+        if (transitionResourceName.isPresent()) {
+            Optional<String> rel = getRelNameForSubmissionState(targetState);
+            if (rel.isPresent()) {
+                return Optional.of(entityLinks.linkForSingleResource(submissionEnvelope)
+                        .slash(transitionResourceName.get())
+                        .withRel(rel.get()));
+            } else {
+                throw new RuntimeException(String.format("Unexpected link/rel mismatch exception (link = '%s', rel = " +
+                        "'%s')", transitionResourceName.toString(), rel.toString()));
+            }
+        } else {
+            return Optional.empty();
         }
     }
 
-    private String getSubresourceNameForSubmissionState(SubmissionState submissionState) {
+    private Optional<String> getRelNameForSubmissionState(SubmissionState submissionState) {
         switch (submissionState) {
-            case DRAFT:
-                return "/draftState";
-            case VALIDATING:
-                return "/validatingState";
-            case VALID:
-                return "/validState";
-            case INVALID:
-                return "/invalidState";
             case SUBMITTED:
-                return "/submittedState";
+                return Optional.of(Links.SUBMIT_REL);
             case PROCESSING:
-                return "/processingState";
+                return Optional.of(Links.PROCESSING_REL);
             case CLEANUP:
-                return "/cleanupState";
+                return Optional.of(Links.CLEANUP_REL);
             case COMPLETE:
-                return "/completeState";
+                return Optional.of(Links.COMPLETE_REL);
             default:
-                throw new InvalidSubmissionStateException(String.format("The submission state '%s' is not recognised " +
-                        "as a submission envelope state that can be set", submissionState.name()));
+                // default returns no links (not expecting external user interaction)
+                return Optional.empty();
+        }
+    }
+
+    private Optional<String> getSubresourceNameForSubmissionState(SubmissionState submissionState) {
+        switch (submissionState) {
+            case SUBMITTED:
+                return Optional.of("/submittedState");
+            case PROCESSING:
+                return Optional.of("/processingState");
+            case CLEANUP:
+                return Optional.of("/cleanupState");
+            case COMPLETE:
+                return Optional.of("/completeState");
+            default:
+                // default returns no subresource name (not expecting external user interaction)
+                return Optional.empty();
         }
     }
 
@@ -134,6 +123,8 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         // add subresource links for events that occur in response to state transitions
         submissionEnvelope.allowedStateTransitions().stream()
                 .map(submissionState -> getStateTransitionLink(submissionEnvelope, submissionState))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .forEach(resource::add);
 
         return resource;
