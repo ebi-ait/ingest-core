@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionState;
+import org.humancellatlas.ingest.submission.state.InvalidSubmissionStateException;
 import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Link;
@@ -26,10 +27,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Resource<SubmissionEnvelope>> {
     private final @NonNull EntityLinks entityLinks;
-
-    private Link getSubmitLink(SubmissionEnvelope submissionEnvelope) {
-        return entityLinks.linkForSingleResource(submissionEnvelope).slash(Links.SUBMIT_URL).withRel(Links.SUBMIT_REL);
-    }
 
     private Link getAnalysesLink(SubmissionEnvelope submissionEnvelope) {
         return entityLinks.linkForSingleResource(submissionEnvelope)
@@ -68,11 +65,59 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
     }
 
     private Link getStateTransitionLink(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
-        String transitionResourceName = SubmissionEnvelopeStateEngine.getSubresourceNameForSubmissionState(targetState);
-        String rel = SubmissionEnvelopeStateEngine.getRelNameForSubmissionState(targetState);
+        String transitionResourceName = getSubresourceNameForSubmissionState(targetState);
+        String rel = getRelNameForSubmissionState(targetState);
         return entityLinks.linkForSingleResource(submissionEnvelope)
                 .slash(transitionResourceName)
                 .withRel(rel);
+    }
+
+    private String getRelNameForSubmissionState(SubmissionState submissionState) {
+        switch (submissionState) {
+            case DRAFT:
+                return Links.DRAFT_REL;
+            case VALIDATING:
+                return Links.VALIDATING_REL;
+            case VALID:
+                return Links.VALID_REL;
+            case INVALID:
+                return Links.INVALID_REL;
+            case SUBMITTED:
+                return Links.SUBMIT_REL;
+            case PROCESSING:
+                return Links.PROCESSING_REL;
+            case CLEANUP:
+                return "mark-cleaning";
+            case COMPLETE:
+                return "mark-complete";
+            default:
+                throw new InvalidSubmissionStateException(String.format("The submission state '%s' is not recognised " +
+                        "as a submission envelope state that can be set", submissionState.name()));
+        }
+    }
+
+    private String getSubresourceNameForSubmissionState(SubmissionState submissionState) {
+        switch (submissionState) {
+            case DRAFT:
+                return "/draftState";
+            case VALIDATING:
+                return "/validatingState";
+            case VALID:
+                return "/validState";
+            case INVALID:
+                return "/invalidState";
+            case SUBMITTED:
+                return "/submittedState";
+            case PROCESSING:
+                return "/processingState";
+            case CLEANUP:
+                return "/cleanupState";
+            case COMPLETE:
+                return "/completeState";
+            default:
+                throw new InvalidSubmissionStateException(String.format("The submission state '%s' is not recognised " +
+                        "as a submission envelope state that can be set", submissionState.name()));
+        }
     }
 
     public Resource<SubmissionEnvelope> process(Resource<SubmissionEnvelope> resource) {

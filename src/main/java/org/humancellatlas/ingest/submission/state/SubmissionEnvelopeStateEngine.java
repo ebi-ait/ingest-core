@@ -1,7 +1,21 @@
 package org.humancellatlas.ingest.submission.state;
 
-import org.humancellatlas.ingest.core.web.Links;
+import lombok.Getter;
+import lombok.NonNull;
+import org.humancellatlas.ingest.core.Event;
+import org.humancellatlas.ingest.messaging.Constants;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessage;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Javadocs go here!
@@ -9,52 +23,56 @@ import org.humancellatlas.ingest.submission.SubmissionState;
  * @author Tony Burdett
  * @date 10/09/17
  */
+@Service
+@Getter
 public class SubmissionEnvelopeStateEngine {
-    public static String getRelNameForSubmissionState(SubmissionState submissionState) {
-        switch (submissionState) {
-            case DRAFT:
-                return Links.DRAFT_REL;
-            case VALIDATING:
-                return Links.VALIDATING_REL;
-            case VALID:
-                return Links.VALID_REL;
-            case INVALID:
-                return Links.INVALID_REL;
-            case SUBMITTED:
-                return Links.SUBMIT_REL;
-            case PROCESSING:
-                return Links.PROCESSING_REL;
-            case CLEANUP:
-                return "mark-cleaning";
-            case COMPLETE:
-                return "mark-complete";
-            default:
-                throw new InvalidSubmissionStateException(String.format("The submission state '%s' is not recognised " +
-                        "as a submission envelope state that can be set", submissionState.name()));
-        }
+    private final @NonNull
+    SubmissionEnvelopeRepository submissionEnvelopeRepository;
+    private final @NonNull
+    RabbitMessagingTemplate rabbitMessagingTemplate;
+
+    private final @NonNull
+    ExecutorService executorService;
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
+    protected Logger getLog() {
+        return log;
     }
 
-    public static String getSubresourceNameForSubmissionState(SubmissionState submissionState) {
-        switch (submissionState) {
-            case DRAFT:
-                return "/draftState";
-            case VALIDATING:
-                return "/validatingState";
-            case VALID:
-                return "/validState";
-            case INVALID:
-                return "/invalidState";
+    @Autowired
+    SubmissionEnvelopeStateEngine(SubmissionEnvelopeRepository submissionEnvelopeRepository, RabbitMessagingTemplate
+            rabbitMessagingTemplate) {
+        this.submissionEnvelopeRepository = submissionEnvelopeRepository;
+        this.rabbitMessagingTemplate = rabbitMessagingTemplate;
+
+        this.executorService = Executors.newCachedThreadPool();
+    }
+
+    public Event progressState(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
+        final Event event = new Event(submissionEnvelope.getSubmissionState(), targetState);
+        executorService.submit(() -> {
+            submissionEnvelope.addEvent(event).enactStateTransition(targetState);
+
+            // is this an event that needs to be posted to a queue?
+            postMessageIfRequired(submissionEnvelope, targetState);
+        });
+        return event;
+    }
+
+    private void postMessageIfRequired(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
+        switch (targetState) {
             case SUBMITTED:
-                return "/submittedState";
-            case PROCESSING:
-                return "/processingState";
-            case CLEANUP:
-                return "/cleanupState";
-            case COMPLETE:
-                return "/completeState";
+                log.info(String.format("Congratulations! You have submitted your envelope '%s'", submissionEnvelope.getId()));
+                getRabbitMessagingTemplate().convertAndSend(
+                        Constants.Exchanges.ENVELOPE_FANOUT,
+                        "",
+                        new SubmissionEnvelopeMessage(submissionEnvelope));
+                break;
             default:
-                throw new InvalidSubmissionStateException(String.format("The submission state '%s' is not recognised " +
-                        "as a submission envelope state that can be set", submissionState.name()));
+                getLog().debug(
+                        String.format("No notification required for state transition to '%s'",
+                        targetState.name()));
         }
     }
 }

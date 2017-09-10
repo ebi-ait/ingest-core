@@ -1,7 +1,6 @@
 package org.humancellatlas.ingest.submission;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.submission.state.InvalidSubmissionStateException;
 import org.slf4j.Logger;
@@ -19,8 +18,9 @@ import java.util.List;
  */
 @Getter
 public class SubmissionEnvelope extends AbstractEntity {
-    private @Setter
-    SubmissionState submissionState;
+    private final List<Event> events;
+
+    private SubmissionState submissionState;
 
     private static final Logger log = LoggerFactory.getLogger(SubmissionEnvelope.class);
 
@@ -33,6 +33,7 @@ public class SubmissionEnvelope extends AbstractEntity {
                               UpdateDate updateDate,
                               SubmissionState submissionState) {
         super(EntityType.SUBMISSION, uuid, submissionDate, updateDate);
+        this.events = new ArrayList<>();
         this.submissionState = submissionState;
     }
 
@@ -84,12 +85,18 @@ public class SubmissionEnvelope extends AbstractEntity {
         return allowedStateTransitions(getSubmissionState());
     }
 
+    public SubmissionEnvelope addEvent(Event event) {
+        this.events.add(event);
+
+        return this;
+    }
+
     public SubmissionEnvelope enactStateTransition(SubmissionState targetState) {
         if (!allowedStateTransitions().contains(targetState)) {
             throw new InvalidSubmissionStateException(String.format("The submission state '%s' is not recognised " +
                     "as a submission envelope state that can be set", submissionState.name()));
         }
-        setSubmissionState(targetState);
+        this.submissionState = targetState;
 
         return this;
     }

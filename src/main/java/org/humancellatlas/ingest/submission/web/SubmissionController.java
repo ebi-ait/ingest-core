@@ -7,6 +7,7 @@ import org.humancellatlas.ingest.analysis.Analysis;
 import org.humancellatlas.ingest.analysis.AnalysisRepository;
 import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.assay.AssayRepository;
+import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
@@ -18,7 +19,8 @@ import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.sample.Sample;
 import org.humancellatlas.ingest.sample.SampleRepository;
 import org.humancellatlas.ingest.submission.SubmissionReceipt;
-import org.humancellatlas.ingest.submission.SubmissionService;
+import org.humancellatlas.ingest.submission.SubmissionState;
+import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -42,7 +44,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequiredArgsConstructor
 @Getter
 public class SubmissionController {
-    private final @NonNull SubmissionService submissionService;
+    private final @NonNull SubmissionEnvelopeStateEngine stateEngine;
 
     private final @NonNull AnalysisRepository analysisRepository;
     private final @NonNull AssayRepository assayRepository;
@@ -103,7 +105,7 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMIT_URL, method = RequestMethod.PUT)
     HttpEntity<?> submitEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
-        SubmissionReceipt receipt = submissionService.submitEnvelope(submissionEnvelope);
-        return ResponseEntity.accepted().body(receipt);
+        Event event = getStateEngine().progressState(submissionEnvelope, SubmissionState.SUBMITTED);
+        return ResponseEntity.accepted().body(event);
     }
 }
