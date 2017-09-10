@@ -1,12 +1,11 @@
-package org.humancellatlas.ingest.core;
+package org.humancellatlas.ingest.submission;
 
 /**
  * @author Simon Jupp
  * @date 04/09/2017
  * Samples, Phenotypes and Ontologies Team, EMBL-EBI
  */
-public enum SubmissionStatus {
-
+public enum SubmissionState {
     PENDING,
     DRAFT,
     VALIDATING,

@@ -7,7 +7,7 @@ import org.humancellatlas.ingest.analysis.Analysis;
 import org.humancellatlas.ingest.analysis.AnalysisService;
 import org.humancellatlas.ingest.analysis.BundleReference;
 import org.humancellatlas.ingest.core.web.Links;
-import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.assay.AssayService;
 import org.humancellatlas.ingest.core.web.Links;
-import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;

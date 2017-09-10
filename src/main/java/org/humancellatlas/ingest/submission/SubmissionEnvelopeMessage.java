@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.envelope;
+package org.humancellatlas.ingest.submission;
 
 import lombok.Getter;
 import org.springframework.util.Assert;

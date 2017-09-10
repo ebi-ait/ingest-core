@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.envelope;
+package org.humancellatlas.ingest.submission;
 
 import org.humancellatlas.ingest.core.Uuid;
 import org.springframework.data.mongodb.repository.MongoRepository;

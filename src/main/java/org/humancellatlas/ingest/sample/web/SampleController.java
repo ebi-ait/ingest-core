@@ -3,7 +3,7 @@ package org.humancellatlas.ingest.sample.web;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.sample.Sample;
 import org.humancellatlas.ingest.sample.SampleService;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;

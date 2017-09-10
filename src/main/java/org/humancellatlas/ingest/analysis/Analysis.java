@@ -5,7 +5,7 @@ import lombok.Getter;
 import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.*;
-import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.project.Project;
 import org.springframework.data.mongodb.core.mapping.DBRef;

@@ -8,7 +8,7 @@ import org.humancellatlas.ingest.analysis.AnalysisRepository;
 import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.assay.AssayRepository;
 import org.humancellatlas.ingest.core.web.Links;
-import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.project.Project;
@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- * Spring controller that will handle submission events on a {@link org.humancellatlas.ingest.envelope.SubmissionEnvelope}
+ * Spring controller that will handle submission events on a {@link SubmissionEnvelope}
  *
  * @author Tony Burdett
  * @date 31/08/17

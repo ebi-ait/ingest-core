@@ -5,17 +5,12 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.exception.CoreEntityNotFoundException;
-import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
-import org.humancellatlas.ingest.envelope.SubmissionEnvelopeRepository;
-import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.rest.core.event.BeforeSaveEvent;
-import org.springframework.data.rest.core.event.RepositoryEvent;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Javadocs go here!
@@ -30,11 +25,8 @@ public class FileService {
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull FileRepository fileRepository;
 
-    private final @NonNull ApplicationEventPublisher applicationEventPublisher;
-
     public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
         file.addToSubmissionEnvelope(submissionEnvelope);
-        applicationEventPublisher.publishEvent(new BeforeSaveEvent(file));
         return getFileRepository().save(file);
     }
 

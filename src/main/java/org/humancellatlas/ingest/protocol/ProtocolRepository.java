@@ -1,7 +1,7 @@
 package org.humancellatlas.ingest.protocol;
 
 import org.humancellatlas.ingest.core.Uuid;
-import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
