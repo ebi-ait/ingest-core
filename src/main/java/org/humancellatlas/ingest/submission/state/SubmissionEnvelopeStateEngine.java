@@ -52,7 +52,9 @@ public class SubmissionEnvelopeStateEngine {
 
     @PreDestroy
     void shutdownExecutor() {
+        getLog().info("Shutting down state engine...");
         this.executorService.shutdown();
+        getLog().info("State engine shutdown successfully");
     }
 
     public Event progressState(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
