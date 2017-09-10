@@ -4,11 +4,17 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionState;
+import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Javadocs go here!
@@ -61,9 +67,18 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 .withRel(Links.SAMPLES_REL);
     }
 
+    private Link getStateTransitionLink(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
+        String transitionResourceName = SubmissionEnvelopeStateEngine.getSubresourceNameForSubmissionState(targetState);
+        String rel = SubmissionEnvelopeStateEngine.getSubresourceNameForSubmissionState(targetState);
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                .slash(transitionResourceName)
+                .withRel(rel);
+    }
+
     public Resource<SubmissionEnvelope> process(Resource<SubmissionEnvelope> resource) {
         SubmissionEnvelope submissionEnvelope = resource.getContent();
 
+        // add subresource links for each type of metadata document in a submission envelope
         resource.add(getAnalysesLink(submissionEnvelope));
         resource.add(getAssaysLink(submissionEnvelope));
         resource.add(getFilesLink(submissionEnvelope));
@@ -71,8 +86,10 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         resource.add(getProtocolsLink(submissionEnvelope));
         resource.add(getSamplesLink(submissionEnvelope));
 
-        // should be dependent on validation state
-        resource.add(getSubmitLink(submissionEnvelope));
+        // add subresource links for events that occur in response to state transitions
+        submissionEnvelope.allowedStateTransitions().stream()
+                .map(submissionState -> getStateTransitionLink(submissionEnvelope, submissionState))
+                .forEach(resource::add);
 
         return resource;
     }

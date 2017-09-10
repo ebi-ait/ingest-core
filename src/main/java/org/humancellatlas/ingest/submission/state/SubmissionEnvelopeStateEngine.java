@@ -10,7 +10,7 @@ import org.humancellatlas.ingest.submission.SubmissionState;
  * @date 10/09/17
  */
 public class SubmissionEnvelopeStateEngine {
-    public static String getRelNameForSubmissionStatus(SubmissionState submissionState) {
+    public static String getRelNameForSubmissionState(SubmissionState submissionState) {
         switch (submissionState) {
             case DRAFT:
                 return Links.DRAFT_REL;
@@ -34,7 +34,7 @@ public class SubmissionEnvelopeStateEngine {
         }
     }
 
-    public static String getUrlPartForSubmissionStatus(SubmissionState submissionState) {
+    public static String getSubresourceNameForSubmissionState(SubmissionState submissionState) {
         switch (submissionState) {
             case DRAFT:
                 return "/draftState";
