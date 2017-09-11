@@ -5,6 +5,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelopeRepository;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.rest.core.event.BeforeSaveEvent;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,9 +21,11 @@ import org.springframework.stereotype.Service;
 public class ProtocolService {
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull ProtocolRepository protocolRepository;
+    private final @NonNull ApplicationEventPublisher applicationEventPublisher;
 
     public Protocol addProtocolToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Protocol protocol) {
         protocol.addToSubmissionEnvelope(submissionEnvelope);
+        applicationEventPublisher.publishEvent(new BeforeSaveEvent(protocol));
         return getProtocolRepository().save(protocol);
     }
 }

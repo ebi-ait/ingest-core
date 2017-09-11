@@ -22,6 +22,6 @@ public class Uuid {
     }
 
     public Uuid() {
-        this.uuid = UUID.randomUUID().toString();
+        this.uuid = "";
     }
 }

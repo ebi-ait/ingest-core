@@ -7,10 +7,7 @@ import org.humancellatlas.ingest.core.service.AccessionMetadataService;
 import org.humancellatlas.ingest.core.service.ValidateMetadataService;
 import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;
 import org.springframework.data.mongodb.core.mapping.event.AfterSaveEvent;
-import org.springframework.data.rest.core.annotation.HandleAfterCreate;
-import org.springframework.data.rest.core.annotation.HandleAfterSave;
-import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
-import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
+import org.springframework.data.rest.core.annotation.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -21,14 +18,13 @@ import java.util.UUID;
  */
 @Component
 @AllArgsConstructor
-public class MetadataDocumentEventHandler extends AbstractMongoEventListener<BioMetadataDocument> {
+@RepositoryEventHandler
+public class MetadataDocumentEventHandler{
     private final @NonNull ValidateMetadataService validateMetadataService;
     private final @NonNull AccessionMetadataService accessionMetadataService;
 
-    @Override
-    public void onAfterSave(AfterSaveEvent<BioMetadataDocument> documentAfterSaveEvent){
-        BioMetadataDocument document = documentAfterSaveEvent.getSource();
-
+    @HandleAfterSave
+    public void onAfterSave(BioMetadataDocument document){
         doValidation(document);
         doAccession(document);
     }

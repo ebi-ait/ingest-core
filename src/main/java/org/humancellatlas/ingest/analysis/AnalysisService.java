@@ -10,6 +10,8 @@ import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.rest.core.event.BeforeSaveEvent;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,6 +27,8 @@ public class AnalysisService {
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull AnalysisRepository analysisRepository;
     private final @NonNull BundleManifestRepository bundleManifestRepository;
+    private final @NonNull ApplicationEventPublisher applicationEventPublisher;
+
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -34,6 +38,7 @@ public class AnalysisService {
 
     public Analysis addAnalysisToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Analysis analysis) {
         analysis.addToEnvelope(submissionEnvelope);
+        applicationEventPublisher.publishEvent(new BeforeSaveEvent(analysis));
         return getAnalysisRepository().save(analysis);
     }
 
@@ -50,6 +55,7 @@ public class AnalysisService {
                         uuid.getUuid()));
             }
         }
+        applicationEventPublisher.publishEvent(new BeforeSaveEvent(analysis));
         return analysisRepository.save(analysis);
     }
 }

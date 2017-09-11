@@ -33,7 +33,7 @@ public abstract class AbstractEntity implements Identifiable<String> {
                              SubmissionDate submissionDate,
                              UpdateDate updateDate) {
         this.type = type;
-        this.uuid = new Uuid(UUID.randomUUID().toString());
+        this.uuid = uuid;
         this.submissionDate = submissionDate;
         this.updateDate = updateDate;
     }
