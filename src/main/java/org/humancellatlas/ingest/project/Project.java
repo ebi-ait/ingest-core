@@ -49,6 +49,9 @@ public class Project extends BioMetadataDocument {
     public Project addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
         this.submissionEnvelope = submissionEnvelope;
 
+        // mark this submission envelope as having received new metadata
+        this.submissionEnvelope.markDraft();
+
         return this;
     }
 }
