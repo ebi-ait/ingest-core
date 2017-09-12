@@ -11,21 +11,22 @@ import lombok.Setter;
  */
 @Getter
 public abstract class MetadataDocument extends AbstractEntity {
+    private final Accession accession;
     private final Object content;
-    private @Setter ValidationStatus validationStatus;
-    private @Setter ValidationChecksum validationChecksum;
+
+    private @Setter ValidationState validationState;
 
     protected MetadataDocument(EntityType type,
                                Uuid uuid,
                                SubmissionDate submissionDate,
                                UpdateDate updateDate,
-                               Object content,
-                               ValidationStatus validationStatus,
-                               ValidationChecksum validationChecksum) {
+                               Accession accession,
+                               ValidationState validationState,
+                               Object content) {
         super(type, uuid, submissionDate, updateDate);
 
+        this.accession = accession;
+        this.validationState = validationState;
         this.content = content;
-        this.validationStatus = validationStatus;
-        this.validationChecksum = validationChecksum;
     }
 }

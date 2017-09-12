@@ -33,7 +33,7 @@ public class AnalysisService {
     }
 
     public Analysis addAnalysisToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Analysis analysis) {
-        analysis.addToEnvelope(submissionEnvelope);
+        analysis.addToSubmissionEnvelope(submissionEnvelope);
         return getAnalysisRepository().save(analysis);
     }
 
