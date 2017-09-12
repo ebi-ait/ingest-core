@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.submission.state;
 import lombok.Getter;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.Event;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.messaging.Constants;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessage;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -39,8 +41,7 @@ public class SubmissionEnvelopeStateEngine {
     }
 
     @Autowired SubmissionEnvelopeStateEngine(SubmissionEnvelopeRepository submissionEnvelopeRepository,
-                                             RabbitMessagingTemplate
-                                                     rabbitMessagingTemplate) {
+                                             RabbitMessagingTemplate rabbitMessagingTemplate) {
         this.submissionEnvelopeRepository = submissionEnvelopeRepository;
         this.rabbitMessagingTemplate = rabbitMessagingTemplate;
 
@@ -54,7 +55,7 @@ public class SubmissionEnvelopeStateEngine {
         getLog().info("State engine shutdown successfully");
     }
 
-    public Event progressState(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
+    public Event advanceStateOfEnvelope(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
         final Event event = new Event(submissionEnvelope.getSubmissionState(), targetState);
         executorService.submit(() -> {
             submissionEnvelope.addEvent(event).enactStateTransition(targetState);
@@ -63,6 +64,22 @@ public class SubmissionEnvelopeStateEngine {
             postMessageIfRequired(submissionEnvelope, targetState);
         });
         return event;
+    }
+
+    public Optional<Event> analyseStateOfEnvelope(SubmissionEnvelope submissionEnvelope) {
+        SubmissionState determinedState = submissionEnvelope.determineEnvelopeState();
+        if (submissionEnvelope.getSubmissionState().equals(determinedState)) {
+            return Optional.empty();
+        }
+        else {
+            return Optional.of(advanceStateOfEnvelope(submissionEnvelope, determinedState));
+        }
+    }
+
+    public void notifySubmissionEnvelopeOfMetadataDocumentChange(SubmissionEnvelope submissionEnvelope,
+                                                                 MetadataDocument metadataDocument) {
+        submissionEnvelope.notifyOfMetadataDocumentState(metadataDocument);
+        getSubmissionEnvelopeRepository().save(submissionEnvelope);
     }
 
     private void postMessageIfRequired(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {

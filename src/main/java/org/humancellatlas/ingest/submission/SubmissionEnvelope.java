@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -117,10 +118,10 @@ public class SubmissionEnvelope extends AbstractEntity {
     }
 
     public SubmissionEnvelope notifyOfMetadataDocumentState(MetadataDocument metadataDocument) {
-        if (!isMetadataDocumentBeingTracked(metadataDocument)) {
-            // if it's pending it's a new document or has new content, so it's ok to add to state tracker
+        if (!isTrackingMetadata(metadataDocument)) {
+            // if this doc is pending, it's either a new document or has new content, so it's ok to add to state tracker
+            // but if not, we need to throw an exception here
             if (!metadataDocument.getValidationState().equals(ValidationState.PENDING)) {
-                this.validationStateMap.put(metadataDocument.getId(), metadataDocument.getValidationState());
                 throw new MetadataDocumentStateException(String.format(
                         "Metadata document '%s' was not being tracked by containing envelope '%s' and does not have new content",
                         metadataDocument,
@@ -132,8 +133,66 @@ public class SubmissionEnvelope extends AbstractEntity {
         return this;
     }
 
+    public SubmissionState determineEnvelopeState() {
+        final Iterator<Map.Entry<String, ValidationState>> validationStateMapIterator =
+                validationStateMap.entrySet().iterator();
 
-    public boolean isMetadataDocumentBeingTracked(MetadataDocument metadataDocument) {
+        boolean isSomethingValidating = false;
+        boolean isSomethingInvalid = false;
+
+        while (validationStateMapIterator.hasNext()) {
+            Map.Entry<String, ValidationState> entry = validationStateMapIterator.next();
+            ValidationState nextTrackedDocumentState = entry.getValue();
+
+            switch (nextTrackedDocumentState) {
+                case VALIDATING:
+                    // this document is validating, so we can set the envelope state to validating (as long as nothing is invalid)
+                    isSomethingValidating = true;
+                    break;
+                case VALID:
+                    // this document has finished validating, we can remove it from the map
+                    validationStateMapIterator.remove();
+                    break;
+                case INVALID:
+                    // if the envelope is already invalid, we can continue cleaning up...
+                    isSomethingInvalid = true;
+                    // but if the envelope is not invalid, we need to flag the state change
+                    if (!getSubmissionState().equals(SubmissionState.INVALID)) {
+                        // need to mark as invalid immediately
+                        return SubmissionState.INVALID;
+                    }
+            }
+        }
+
+        // decision time!
+        // according to spec...
+        //     - if >=1 metadata documents are invalid, the envelope is invalid
+        //     - otherwise, if >=1 metadata documents are validating, then the envelope is validating
+        //     - if everything is now valid (state > PENDING and nothing in the validationStateMap) the envelope is valid
+        //     - otherwise, nothing changes
+
+        if (isSomethingInvalid) {
+            return SubmissionState.INVALID;
+        }
+        if (isSomethingValidating) {
+            return SubmissionState.VALIDATING;
+        }
+        if (hasReceivedDocuments() && !isTrackingMetadata()) {
+            return SubmissionState.VALID;
+        }
+
+        return getSubmissionState();
+    }
+
+    public boolean hasReceivedDocuments() {
+        return getSubmissionState().compareTo(SubmissionState.PENDING) > 0;
+    }
+
+    public boolean isTrackingMetadata() {
+        return validationStateMap.size() > 0;
+    }
+
+    public boolean isTrackingMetadata(MetadataDocument metadataDocument) {
         return validationStateMap.containsKey(metadataDocument.getId());
     }
 }

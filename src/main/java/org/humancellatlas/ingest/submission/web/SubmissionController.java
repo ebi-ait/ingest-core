@@ -18,7 +18,6 @@ import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.sample.Sample;
 import org.humancellatlas.ingest.sample.SampleRepository;
-import org.humancellatlas.ingest.submission.SubmissionReceipt;
 import org.humancellatlas.ingest.submission.SubmissionState;
 import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
 import org.springframework.data.domain.Page;
@@ -105,7 +104,7 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMIT_URL, method = RequestMethod.PUT)
     HttpEntity<?> submitEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
-        Event event = getStateEngine().progressState(submissionEnvelope, SubmissionState.SUBMITTED);
+        Event event = getStateEngine().advanceStateOfEnvelope(submissionEnvelope, SubmissionState.SUBMITTED);
         return ResponseEntity.accepted().body(event);
     }
 }
