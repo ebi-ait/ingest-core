@@ -96,13 +96,13 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
     private Optional<String> getSubresourceNameForSubmissionState(SubmissionState submissionState) {
         switch (submissionState) {
             case SUBMITTED:
-                return Optional.of("/submittedState");
+                return Optional.of(Links.SUBMIT_URL);
             case PROCESSING:
-                return Optional.of("/processingState");
+                return Optional.of(Links.PROCESSING_URL);
             case CLEANUP:
-                return Optional.of("/cleanupState");
+                return Optional.of(Links.CLEANUP_URL);
             case COMPLETE:
-                return Optional.of("/completeState");
+                return Optional.of(Links.COMPLETE_URL);
             default:
                 // default returns no subresource name (not expecting external user interaction)
                 return Optional.empty();

@@ -8,8 +8,8 @@ import org.humancellatlas.ingest.analysis.AnalysisRepository;
 import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.assay.AssayRepository;
 import org.humancellatlas.ingest.core.Event;
+import org.humancellatlas.ingest.core.SubmissionState;
 import org.humancellatlas.ingest.core.web.Links;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.project.Project;
@@ -18,7 +18,7 @@ import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.sample.Sample;
 import org.humancellatlas.ingest.sample.SampleRepository;
-import org.humancellatlas.ingest.core.SubmissionState;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -56,8 +56,8 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/analyses", method = RequestMethod.GET)
     ResponseEntity<?> getAnalyses(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                             Pageable pageable,
-                                             final PersistentEntityResourceAssembler resourceAssembler) {
+                                  Pageable pageable,
+                                  final PersistentEntityResourceAssembler resourceAssembler) {
         Page<Analysis> analyses = getAnalysisRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(analyses, resourceAssembler));
     }
@@ -105,6 +105,24 @@ public class SubmissionController {
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMIT_URL, method = RequestMethod.PUT)
     HttpEntity<?> submitEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
         Event event = getStateEngine().advanceStateOfEnvelope(submissionEnvelope, SubmissionState.SUBMITTED);
+        return ResponseEntity.accepted().body(event);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
+    HttpEntity<?> processEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
+        Event event = getStateEngine().advanceStateOfEnvelope(submissionEnvelope, SubmissionState.PROCESSING);
+        return ResponseEntity.accepted().body(event);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.CLEANUP_URL, method = RequestMethod.PUT)
+    HttpEntity<?> cleanupEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
+        Event event = getStateEngine().advanceStateOfEnvelope(submissionEnvelope, SubmissionState.CLEANUP);
+        return ResponseEntity.accepted().body(event);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
+    HttpEntity<?> completeEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
+        Event event = getStateEngine().advanceStateOfEnvelope(submissionEnvelope, SubmissionState.COMPLETE);
         return ResponseEntity.accepted().body(event);
     }
 }
