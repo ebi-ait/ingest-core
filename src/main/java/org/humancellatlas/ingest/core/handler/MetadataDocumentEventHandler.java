@@ -24,8 +24,8 @@ public class MetadataDocumentEventHandler extends AbstractMongoEventListener<Met
     public void onAfterSave(AfterSaveEvent<MetadataDocument> documentAfterSaveEvent) {
         MetadataDocument document = documentAfterSaveEvent.getSource();
 
-        doValidation(document);
-        doAccession(document);
+//        doValidation(document);
+//        doAccession(document);
     }
 
     private void doValidation(MetadataDocument document) {
