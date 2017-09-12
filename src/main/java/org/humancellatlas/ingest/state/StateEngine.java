@@ -114,6 +114,7 @@ public class StateEngine {
     public void notifySubmissionEnvelopeOfMetadataDocumentChange(SubmissionEnvelope submissionEnvelope,
                                                                  MetadataDocument metadataDocument) {
         submissionEnvelope.notifyOfMetadataDocumentState(metadataDocument);
+        postMessageIfRequired(metadataDocument, metadataDocument.getValidationState());
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
     }
 

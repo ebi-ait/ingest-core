@@ -77,6 +77,6 @@ public class MetadataDocumentMessageBuilder {
     public MetadataDocumentMessage getCallbackLink() {
         String callbackLink =
                 ControllerLinkBuilder.linkTo(controllerClass).slash(metadataDocId).withSelfRel().getHref();
-        return new MetadataDocumentMessage(documentType.getName(), metadataDocId, callbackLink);
+        return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(), metadataDocId, callbackLink);
     }
 }
