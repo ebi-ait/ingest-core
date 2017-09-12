@@ -60,6 +60,13 @@ public class SubmissionEnvelopeStateEngine {
     }
 
     public Event advanceStateOfEnvelope(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
+        if (!submissionEnvelope.allowedStateTransitions().contains(targetState)) {
+            throw new IllegalStateException(String.format(
+                    "It is not possible to transition envelope '%s' to the state '%s'",
+                    submissionEnvelope.getId(),
+                    targetState));
+        }
+
         final Event event = new SubmissionEvent(submissionEnvelope.getSubmissionState(), targetState);
         executorService.submit(() -> {
             submissionEnvelope.addEvent(event).enactStateTransition(targetState);
@@ -72,9 +79,15 @@ public class SubmissionEnvelopeStateEngine {
         return event;
     }
 
-    public
-    <S extends MetadataDocument, T extends MongoRepository<S, String>>
+    public <S extends MetadataDocument, T extends MongoRepository<S, String>>
     Event advanceStateOfMetadataDocument(T repository, S metadataDocument, ValidationState targetState) {
+        if (!metadataDocument.allowedStateTransitions().contains(targetState)) {
+            throw new IllegalStateException(String.format(
+                    "It is not possible to transition metadata document '%s' to the state '%s'",
+                    metadataDocument.getId(),
+                    targetState));
+        }
+
         final Event event = new ValidationEvent(metadataDocument.getValidationState(), targetState);
         executorService.submit(() -> {
             metadataDocument.addEvent(event).enactStateTransition(targetState);
