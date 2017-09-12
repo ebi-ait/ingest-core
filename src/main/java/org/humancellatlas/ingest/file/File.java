@@ -65,9 +65,6 @@ public class File extends MetadataDocument {
     public File addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
         this.submissionEnvelope = submissionEnvelope;
 
-        // mark this submission envelope as having received new metadata
-        this.submissionEnvelope.markDraft();
-
         return this;
     }
 

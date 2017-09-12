@@ -76,11 +76,8 @@ public class Analysis extends BioMetadataDocument {
              new ValidationChecksum());
     }
 
-    public Analysis addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+    public Analysis addToEnvelope(SubmissionEnvelope submissionEnvelope) {
         this.submissionEnvelope = submissionEnvelope;
-
-        // mark this submission envelope as having received new metadata
-        this.submissionEnvelope.markDraft();
 
         return this;
     }

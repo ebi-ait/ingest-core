@@ -80,9 +80,6 @@ public class Assay extends BioMetadataDocument {
     public Assay addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
         this.submissionEnvelope = submissionEnvelope;
 
-        // mark this submission envelope as having received new metadata
-        this.submissionEnvelope.markDraft();
-
         return this;
     }
 

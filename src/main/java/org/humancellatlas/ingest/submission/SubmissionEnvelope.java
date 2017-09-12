@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Javadocs go here!
@@ -19,8 +18,6 @@ import java.util.Set;
  */
 @Getter
 public class SubmissionEnvelope extends AbstractEntity {
-    private final Set<MetadataDocument> draftDocuments;
-
     private final List<Event> events;
 
     private SubmissionState submissionState;
@@ -36,7 +33,6 @@ public class SubmissionEnvelope extends AbstractEntity {
                               UpdateDate updateDate,
                               SubmissionState submissionState) {
         super(EntityType.SUBMISSION, uuid, submissionDate, updateDate);
-
         this.events = new ArrayList<>();
         this.submissionState = submissionState;
     }
@@ -87,10 +83,6 @@ public class SubmissionEnvelope extends AbstractEntity {
 
     public List<SubmissionState> allowedStateTransitions() {
         return allowedStateTransitions(getSubmissionState());
-    }
-
-    public void markDraft() {
-        enactStateTransition(SubmissionState.DRAFT);
     }
 
     public SubmissionEnvelope addEvent(Event event) {
