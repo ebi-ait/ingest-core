@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
@@ -63,16 +64,22 @@ public class SubmissionEnvelopeStateEngine {
         executorService.submit(() -> {
             submissionEnvelope.addEvent(event).enactStateTransition(targetState);
 
+            getSubmissionEnvelopeRepository().save(submissionEnvelope);
+
             // is this an event that needs to be posted to a queue?
             postMessageIfRequired(submissionEnvelope, targetState);
         });
         return event;
     }
 
-    public Event advanceStateOfMetadataDocument(MetadataDocument metadataDocument, ValidationState targetState) {
+    public
+    <S extends MetadataDocument, T extends MongoRepository<S, String>>
+    Event advanceStateOfMetadataDocument(T repository, S metadataDocument, ValidationState targetState) {
         final Event event = new ValidationEvent(metadataDocument.getValidationState(), targetState);
         executorService.submit(() -> {
             metadataDocument.addEvent(event).enactStateTransition(targetState);
+
+            repository.save(metadataDocument);
 
             // is this an event that needs to be posted to a queue?
             postMessageIfRequired(metadataDocument, targetState);

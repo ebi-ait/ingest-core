@@ -3,6 +3,9 @@ package org.humancellatlas.ingest.sample.web;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.Event;
+import org.humancellatlas.ingest.core.ValidationState;
+import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.sample.Sample;
 import org.humancellatlas.ingest.sample.SampleService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -13,6 +16,7 @@ import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,5 +46,15 @@ public class SampleController {
         Sample entity = getSampleService().addSampleToSubmissionEnvelope(submissionEnvelope, sample);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
+    }
+
+    @RequestMapping(path = "/samples/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
+    HttpEntity<?> validateSample(@PathVariable("id") Sample sample) {
+        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+                getSampleService().getSampleRepository(),
+                sample,
+                ValidationState.VALIDATING);
+
+        return ResponseEntity.accepted().body(event);
     }
 }
