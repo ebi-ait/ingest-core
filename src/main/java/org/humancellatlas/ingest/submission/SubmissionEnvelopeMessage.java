@@ -12,7 +12,7 @@ import org.springframework.util.Assert;
 @Getter
 public class SubmissionEnvelopeMessage {
     private final String documentType;
-    private final String documentId;
+    private final String id;
     private final String uuid;
     private final String callbackLink;
 }
