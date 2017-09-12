@@ -116,7 +116,7 @@ public class SubmissionEnvelope extends AbstractEntity {
         return this;
     }
 
-    public SubmissionEnvelope notifyMetadataDocumentState(MetadataDocument metadataDocument) {
+    public SubmissionEnvelope notifyOfMetadataDocumentState(MetadataDocument metadataDocument) {
         if (!isMetadataDocumentBeingTracked(metadataDocument)) {
             // if it's pending it's a new document or has new content, so it's ok to add to state tracker
             if (!metadataDocument.getValidationState().equals(ValidationState.PENDING)) {

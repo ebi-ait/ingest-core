@@ -34,6 +34,8 @@ public class AnalysisService {
 
     public Analysis addAnalysisToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Analysis analysis) {
         analysis.addToSubmissionEnvelope(submissionEnvelope);
+        submissionEnvelope.notifyOfMetadataDocumentState(analysis);
+        getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return getAnalysisRepository().save(analysis);
     }
 

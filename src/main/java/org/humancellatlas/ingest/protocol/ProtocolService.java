@@ -22,6 +22,8 @@ public class ProtocolService {
 
     public Protocol addProtocolToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Protocol protocol) {
         protocol.addToSubmissionEnvelope(submissionEnvelope);
+        submissionEnvelope.notifyOfMetadataDocumentState(protocol);
+        getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return getProtocolRepository().save(protocol);
     }
 }
