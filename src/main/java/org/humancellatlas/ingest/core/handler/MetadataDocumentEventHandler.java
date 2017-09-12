@@ -6,17 +6,13 @@ import lombok.NonNull;
 import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.core.service.AccessionMetadataService;
 import org.humancellatlas.ingest.core.service.ValidateMetadataService;
-import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;
-import org.springframework.data.mongodb.core.mapping.event.AfterSaveEvent;
 import org.springframework.data.rest.core.annotation.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.security.MessageDigest;
 import java.util.Arrays;
-import java.util.UUID;
 
 /**
  * Created by rolando on 06/09/2017.
@@ -30,14 +26,17 @@ public class MetadataDocumentEventHandler{
 
     @HandleAfterCreate
     public void onAfterCreate(BioMetadataDocument document){
-        doValidation(document);
         doAccession(document);
     }
 
     @HandleAfterSave
     public void onAfterSave(BioMetadataDocument document){
-        doValidation(document);
         doAccession(document);
+    }
+
+    @HandleBeforeCreate
+    public void onBeforeCreate(MetadataDocument document) {
+        doValidation(document);
     }
 
     @HandleBeforeCreate
@@ -48,13 +47,13 @@ public class MetadataDocumentEventHandler{
     }
 
     @HandleBeforeSave
-    public void handleBeforeSave(BioMetadataDocument document) {
+    public void handleBeforeSave(MetadataDocument document) {
         if (! validChecksum(document)) {
             doValidation(document);
         }
     }
 
-    private void doValidation(BioMetadataDocument document){
+    private void doValidation(MetadataDocument document){
         validateMetadataService.validateMetadata(document);
         document.setValidationStatus(ValidationStatus.VALIDATING);
     }
@@ -65,7 +64,7 @@ public class MetadataDocumentEventHandler{
         }
     }
 
-    private boolean validChecksum(BioMetadataDocument document) {
+    private boolean validChecksum(MetadataDocument document) {
         try {
             if(document.getContent() != null) {
                 byte[] contentAsBytes = new ObjectMapper().writeValueAsString(document.getContent()).getBytes();

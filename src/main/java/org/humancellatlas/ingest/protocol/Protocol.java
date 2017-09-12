@@ -24,7 +24,7 @@ public class Protocol extends BioMetadataDocument {
     private @DBRef SubmissionEnvelope submissionEnvelope;
 
     protected Protocol() {
-        super(EntityType.PROTOCOL, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING);
+        super(EntityType.PROTOCOL, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING, new ValidationChecksum());
         this.submissionEnvelope = null;
     }
 
@@ -35,8 +35,9 @@ public class Protocol extends BioMetadataDocument {
                     Accession accession,
                     SubmissionEnvelope submissionEnvelope,
                     Object content,
-                    ValidationStatus validationStatus) {
-        super(type, uuid, submissionDate, updateDate, accession, content, validationStatus);
+                    ValidationStatus validationStatus,
+                    ValidationChecksum validationChecksum) {
+        super(type, uuid, submissionDate, updateDate, accession, content, validationStatus, validationChecksum);
         this.submissionEnvelope = submissionEnvelope;
     }
 
@@ -49,7 +50,8 @@ public class Protocol extends BioMetadataDocument {
              null,
              null,
              content,
-             ValidationStatus.PENDING);
+             ValidationStatus.PENDING,
+                new ValidationChecksum());
     }
 
     public Protocol addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {

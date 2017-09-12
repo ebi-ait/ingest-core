@@ -31,7 +31,7 @@ public class Assay extends BioMetadataDocument {
     private @DBRef SubmissionEnvelope submissionEnvelope;
 
     protected Assay() {
-        super(EntityType.ASSAY, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING);
+        super(EntityType.ASSAY, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING, new ValidationChecksum());
         this.samples = new ArrayList<>();
         this.projects = new ArrayList<>();
         this.protocols = new ArrayList<>();
@@ -50,8 +50,9 @@ public class Assay extends BioMetadataDocument {
                  List<File> files,
                  SubmissionEnvelope submissionEnvelope,
                  Object content,
-                 ValidationStatus validationStatus) {
-        super(type, uuid, submissionDate, updateDate, accession, content, validationStatus);
+                 ValidationStatus validationStatus,
+                 ValidationChecksum validationChecksum) {
+        super(type, uuid, submissionDate, updateDate, accession, content, validationStatus, validationChecksum);
         this.samples = samples;
         this.projects = projects;
         this.protocols = protocols;
@@ -72,7 +73,8 @@ public class Assay extends BioMetadataDocument {
              new ArrayList<>(),
              null,
              content,
-             ValidationStatus.PENDING);
+             ValidationStatus.PENDING,
+             new ValidationChecksum());
     }
 
     public Assay addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {

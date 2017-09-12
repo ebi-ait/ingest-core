@@ -30,7 +30,7 @@ public class Analysis extends BioMetadataDocument {
     private @DBRef SubmissionEnvelope submissionEnvelope;
 
     protected Analysis() {
-        super(EntityType.ANALYSIS, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING);
+        super(EntityType.ANALYSIS, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING, new ValidationChecksum());
         this.projects = new ArrayList<>();
         this.assays = new ArrayList<>();
         this.files = new ArrayList<>();
@@ -49,8 +49,9 @@ public class Analysis extends BioMetadataDocument {
                     List<BundleManifest> inputBundleManifests,
                     SubmissionEnvelope submissionEnvelope,
                     Object content,
-                    ValidationStatus validationStatus) {
-        super(type, uuid, submissionDate, updateDate, accession, content, validationStatus);
+                    ValidationStatus validationStatus,
+                    ValidationChecksum validationChecksum) {
+        super(type, uuid, submissionDate, updateDate, accession, content, validationStatus, validationChecksum);
         this.projects = projects;
         this.assays = assays;
         this.files = files;
@@ -71,7 +72,8 @@ public class Analysis extends BioMetadataDocument {
              new ArrayList<>(),
              null,
              content,
-             ValidationStatus.PENDING);
+             ValidationStatus.PENDING,
+             new ValidationChecksum());
     }
 
     public Analysis addToEnvelope(SubmissionEnvelope submissionEnvelope) {

@@ -28,7 +28,7 @@ public class Sample extends BioMetadataDocument {
     private @DBRef SubmissionEnvelope submissionEnvelope;
 
     protected Sample() {
-        super(EntityType.SAMPLE, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING);
+        super(EntityType.SAMPLE, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING, new ValidationChecksum());
         this.derivedFromSamples = new ArrayList<>();
         this.projects = new ArrayList<>();
         this.protocols = new ArrayList<>();
@@ -45,8 +45,9 @@ public class Sample extends BioMetadataDocument {
                   List<Protocol> protocols,
                   SubmissionEnvelope submissionEnvelope,
                   Object content,
-                  ValidationStatus validationStatus) {
-        super(type, uuid, submissionDate, updateDate, accession, content, validationStatus);
+                  ValidationStatus validationStatus,
+                  ValidationChecksum validationChecksum) {
+        super(type, uuid, submissionDate, updateDate, accession, content, validationStatus, validationChecksum);
         this.submissionEnvelope = submissionEnvelope;
         this.derivedFromSamples = derivedFromSamples;
         this.projects = projects;
@@ -65,7 +66,8 @@ public class Sample extends BioMetadataDocument {
              new ArrayList<>(),
              null,
              content,
-             ValidationStatus.PENDING);
+             ValidationStatus.PENDING,
+             new ValidationChecksum());
     }
 
     public Sample addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {

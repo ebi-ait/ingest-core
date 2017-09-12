@@ -25,7 +25,7 @@ public class Project extends BioMetadataDocument {
     private @DBRef SubmissionEnvelope submissionEnvelope;
 
     protected Project() {
-        super(EntityType.PROJECT, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING);
+        super(EntityType.PROJECT, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, ValidationStatus.PENDING, new ValidationChecksum());
         this.submissionEnvelope = null;
     }
 
@@ -36,14 +36,15 @@ public class Project extends BioMetadataDocument {
                    Accession accession,
                    SubmissionEnvelope submissionEnvelope,
                    Object content,
-                   ValidationStatus validationStatus) {
-        super(type, uuid, submissionDate, updateDate, accession, content, validationStatus);
+                   ValidationStatus validationStatus,
+                   ValidationChecksum validationChecksum) {
+        super(type, uuid, submissionDate, updateDate, accession, content, validationStatus, validationChecksum);
         this.submissionEnvelope = submissionEnvelope;
     }
 
     @JsonCreator
     public Project(Object content) {
-        this(EntityType.PROJECT, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, content, ValidationStatus.PENDING);
+        this(EntityType.PROJECT, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, null, content, ValidationStatus.PENDING, new ValidationChecksum());
     }
 
     public Project addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {

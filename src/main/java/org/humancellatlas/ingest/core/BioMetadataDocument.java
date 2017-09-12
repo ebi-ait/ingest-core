@@ -8,14 +8,10 @@ import lombok.Setter;
  */
 @Getter
 public class BioMetadataDocument extends MetadataDocument {
-    private @Setter ValidationStatus validationStatus;
-    private @Setter ValidationChecksum validationChecksum;
     private final Accession accession;
 
-    protected BioMetadataDocument(EntityType type, Uuid uuid, SubmissionDate submissionDate, UpdateDate updateDate, Accession accession, Object content, ValidationStatus validationStatus) {
-        super(type, uuid, submissionDate, updateDate, content);
+    protected BioMetadataDocument(EntityType type, Uuid uuid, SubmissionDate submissionDate, UpdateDate updateDate, Accession accession, Object content, ValidationStatus validationStatus, ValidationChecksum validationChecksum) {
+        super(type, uuid, submissionDate, updateDate, content, validationStatus, validationChecksum);
         this.accession = accession;
-        this.validationStatus = validationStatus;
-        this.validationChecksum = new ValidationChecksum();
     }
 }

@@ -2,7 +2,7 @@ package org.humancellatlas.ingest.core.service;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import org.humancellatlas.ingest.core.BioMetadataDocument;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.messaging.Constants;
 import org.humancellatlas.ingest.messaging.ValidationMessage;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class ValidateMetadataService {
     private final @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
 
-    public void validateMetadata(BioMetadataDocument document){
+    public void validateMetadata(MetadataDocument document){
         ValidationMessage validationMessage = new ValidationMessage(document.getType(), document.getUuid(), document.getContent());
         rabbitMessagingTemplate.convertAndSend(Constants.Exchanges.VALIDATION_FANOUT, "", validationMessage);
     }

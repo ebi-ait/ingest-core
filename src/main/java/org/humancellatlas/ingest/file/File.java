@@ -4,13 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.humancellatlas.ingest.core.Accession;
-import org.humancellatlas.ingest.core.Checksums;
-import org.humancellatlas.ingest.core.EntityType;
-import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.SubmissionDate;
-import org.humancellatlas.ingest.core.UpdateDate;
-import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.envelope.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
@@ -26,7 +20,7 @@ public class File extends MetadataDocument {
     private Checksums checksums;
 
     protected File() {
-        super(EntityType.FILE, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null);
+        super(EntityType.FILE, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, ValidationStatus.PENDING, new ValidationChecksum());
         this.submissionEnvelope = null;
         this.cloudUrl = "";
         this.fileName = "";
@@ -41,8 +35,10 @@ public class File extends MetadataDocument {
                    String fileName,
                    String cloudUrl,
                    Checksums checksums,
-                   Object content) {
-        super(type, uuid, submissionDate, updateDate, content);
+                   Object content,
+                   ValidationStatus validationStatus,
+                   ValidationChecksum validationChecksum) {
+        super(type, uuid, submissionDate, updateDate, content, validationStatus, validationChecksum);
         this.submissionEnvelope = submissionEnvelope;
         this.fileName = fileName;
         this.cloudUrl = cloudUrl;
@@ -60,7 +56,9 @@ public class File extends MetadataDocument {
              fileName,
              "",
              null,
-             content);
+             content,
+                ValidationStatus.PENDING,
+                new ValidationChecksum());
     }
 
     public File addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
