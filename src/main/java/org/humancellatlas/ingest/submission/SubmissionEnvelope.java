@@ -19,6 +19,8 @@ import java.util.Set;
  */
 @Getter
 public class SubmissionEnvelope extends AbstractEntity {
+    private final Set<MetadataDocument> draftDocuments;
+
     private final List<Event> events;
 
     private SubmissionState submissionState;
