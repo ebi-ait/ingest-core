@@ -4,12 +4,12 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Event;
-import org.humancellatlas.ingest.core.ValidationState;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
-import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
+import org.humancellatlas.ingest.state.StateEngine;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Getter
 public class ProjectController {
     private final @NonNull ProjectService projectService;
-    private final @NonNull SubmissionEnvelopeStateEngine submissionEnvelopeStateEngine;
+    private final @NonNull StateEngine stateEngine;
 
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -47,7 +47,7 @@ public class ProjectController {
 
     @RequestMapping(path = "/projects/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingProject(@PathVariable("id") Project project) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getProjectService().getProjectRepository(),
                 project,
                 ValidationState.VALIDATING);
@@ -57,7 +57,7 @@ public class ProjectController {
 
     @RequestMapping(path = "/projects/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> validateProject(@PathVariable("id") Project project) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getProjectService().getProjectRepository(),
                 project,
                 ValidationState.VALID);
@@ -67,7 +67,7 @@ public class ProjectController {
 
     @RequestMapping(path = "/projects/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> invalidateProject(@PathVariable("id") Project project) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getProjectService().getProjectRepository(),
                 project,
                 ValidationState.INVALID);
@@ -77,7 +77,7 @@ public class ProjectController {
 
     @RequestMapping(path = "/projects/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
     HttpEntity<?> processingProject(@PathVariable("id") Project project) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getProjectService().getProjectRepository(),
                 project,
                 ValidationState.PROCESSING);
@@ -87,7 +87,7 @@ public class ProjectController {
 
     @RequestMapping(path = "/projects/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
     HttpEntity<?> completeProject(@PathVariable("id") Project project) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getProjectService().getProjectRepository(),
                 project,
                 ValidationState.COMPLETE);

@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.submission.state;
+package org.humancellatlas.ingest.state;
 
 /**
  * Javadocs go here!

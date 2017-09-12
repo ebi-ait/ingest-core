@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.core;
 
 import lombok.Getter;
+import org.humancellatlas.ingest.state.ValidationState;
 
 import java.util.Date;
 

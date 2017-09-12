@@ -4,12 +4,12 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Event;
-import org.humancellatlas.ingest.core.ValidationState;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.sample.Sample;
 import org.humancellatlas.ingest.sample.SampleService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
+import org.humancellatlas.ingest.state.StateEngine;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Getter
 public class SampleController {
     private final @NonNull SampleService sampleService;
-    private final @NonNull SubmissionEnvelopeStateEngine submissionEnvelopeStateEngine;
+    private final @NonNull StateEngine stateEngine;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/samples",
                     method = RequestMethod.POST,
@@ -50,7 +50,7 @@ public class SampleController {
 
     @RequestMapping(path = "/samples/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingSample(@PathVariable("id") Sample sample) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getSampleService().getSampleRepository(),
                 sample,
                 ValidationState.VALIDATING);
@@ -60,7 +60,7 @@ public class SampleController {
 
     @RequestMapping(path = "/samples/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> validateSample(@PathVariable("id") Sample sample) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getSampleService().getSampleRepository(),
                 sample,
                 ValidationState.VALID);
@@ -70,7 +70,7 @@ public class SampleController {
 
     @RequestMapping(path = "/samples/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> invalidateSample(@PathVariable("id") Sample sample) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getSampleService().getSampleRepository(),
                 sample,
                 ValidationState.INVALID);
@@ -80,7 +80,7 @@ public class SampleController {
 
     @RequestMapping(path = "/samples/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
     HttpEntity<?> processingSample(@PathVariable("id") Sample sample) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getSampleService().getSampleRepository(),
                 sample,
                 ValidationState.PROCESSING);
@@ -90,7 +90,7 @@ public class SampleController {
 
     @RequestMapping(path = "/samples/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
     HttpEntity<?> completeSample(@PathVariable("id") Sample sample) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getSampleService().getSampleRepository(),
                 sample,
                 ValidationState.COMPLETE);

@@ -4,12 +4,12 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Event;
-import org.humancellatlas.ingest.core.ValidationState;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileService;
-import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
+import org.humancellatlas.ingest.state.StateEngine;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 public class FileController {
     private final @NonNull FileService fileService;
-    private final @NonNull SubmissionEnvelopeStateEngine submissionEnvelopeStateEngine;
+    private final @NonNull StateEngine stateEngine;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
                     method = RequestMethod.POST,
@@ -51,7 +51,7 @@ public class FileController {
 
     @RequestMapping(path = "/files/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingFile(@PathVariable("id") File file) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getFileService().getFileRepository(),
                 file,
                 ValidationState.VALIDATING);
@@ -61,7 +61,7 @@ public class FileController {
 
     @RequestMapping(path = "/files/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> validateFile(@PathVariable("id") File file) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getFileService().getFileRepository(),
                 file,
                 ValidationState.VALID);
@@ -71,7 +71,7 @@ public class FileController {
 
     @RequestMapping(path = "/files/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> invalidateFile(@PathVariable("id") File file) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getFileService().getFileRepository(),
                 file,
                 ValidationState.INVALID);
@@ -81,7 +81,7 @@ public class FileController {
 
     @RequestMapping(path = "/files/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
     HttpEntity<?> processingFile(@PathVariable("id") File file) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getFileService().getFileRepository(),
                 file,
                 ValidationState.PROCESSING);
@@ -91,7 +91,7 @@ public class FileController {
 
     @RequestMapping(path = "/files/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
     HttpEntity<?> completeFile(@PathVariable("id") File file) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getFileService().getFileRepository(),
                 file,
                 ValidationState.COMPLETE);

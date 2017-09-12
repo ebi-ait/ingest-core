@@ -7,12 +7,12 @@ import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.SubmissionDate;
-import org.humancellatlas.ingest.core.SubmissionState;
+import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.core.UpdateDate;
 import org.humancellatlas.ingest.core.Uuid;
-import org.humancellatlas.ingest.core.ValidationState;
-import org.humancellatlas.ingest.core.exception.MetadataDocumentStateException;
-import org.humancellatlas.ingest.submission.state.InvalidSubmissionStateException;
+import org.humancellatlas.ingest.state.ValidationState;
+import org.humancellatlas.ingest.state.MetadataDocumentStateException;
+import org.humancellatlas.ingest.state.InvalidSubmissionStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

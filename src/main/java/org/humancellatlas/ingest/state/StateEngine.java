@@ -1,12 +1,10 @@
-package org.humancellatlas.ingest.submission.state;
+package org.humancellatlas.ingest.state;
 
 import lombok.Getter;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.SubmissionState;
 import org.humancellatlas.ingest.core.ValidationEvent;
-import org.humancellatlas.ingest.core.ValidationState;
 import org.humancellatlas.ingest.messaging.Constants;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessage;
@@ -32,7 +30,7 @@ import java.util.concurrent.Executors;
  */
 @Service
 @Getter
-public class SubmissionEnvelopeStateEngine {
+public class StateEngine {
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
 
@@ -44,8 +42,8 @@ public class SubmissionEnvelopeStateEngine {
         return log;
     }
 
-    @Autowired SubmissionEnvelopeStateEngine(SubmissionEnvelopeRepository submissionEnvelopeRepository,
-                                             RabbitMessagingTemplate rabbitMessagingTemplate) {
+    @Autowired StateEngine(SubmissionEnvelopeRepository submissionEnvelopeRepository,
+                           RabbitMessagingTemplate rabbitMessagingTemplate) {
         this.submissionEnvelopeRepository = submissionEnvelopeRepository;
         this.rabbitMessagingTemplate = rabbitMessagingTemplate;
 

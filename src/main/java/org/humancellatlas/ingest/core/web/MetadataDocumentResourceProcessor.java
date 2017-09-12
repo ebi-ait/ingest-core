@@ -3,7 +3,7 @@ package org.humancellatlas.ingest.core.web;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.ValidationState;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;

@@ -1,7 +1,8 @@
 package org.humancellatlas.ingest.core;
 
 import lombok.Getter;
-import org.humancellatlas.ingest.core.exception.InvalidMetadataDocumentStateException;
+import org.humancellatlas.ingest.state.InvalidMetadataDocumentStateException;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

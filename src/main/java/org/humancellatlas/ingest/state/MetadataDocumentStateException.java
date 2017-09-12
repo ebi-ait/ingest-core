@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.core.exception;
+package org.humancellatlas.ingest.state;
 
 /**
  * Javadocs go here!

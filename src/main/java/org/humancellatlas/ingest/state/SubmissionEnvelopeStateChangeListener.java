@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.submission.state;
+package org.humancellatlas.ingest.state;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Getter
 public class SubmissionEnvelopeStateChangeListener extends AbstractMongoEventListener<MetadataDocument> {
-    private final @NonNull SubmissionEnvelopeStateEngine submissionEnvelopeStateEngine;
+    private final @NonNull StateEngine stateEngine;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -33,8 +33,8 @@ public class SubmissionEnvelopeStateChangeListener extends AbstractMongoEventLis
         MetadataDocument metadataDocument = event.getSource();
         SubmissionEnvelope envelope = metadataDocument.getSubmissionEnvelope();
 
-        getSubmissionEnvelopeStateEngine().notifySubmissionEnvelopeOfMetadataDocumentChange(envelope, metadataDocument);
-        getSubmissionEnvelopeStateEngine()
+        this.getStateEngine().notifySubmissionEnvelopeOfMetadataDocumentChange(envelope, metadataDocument);
+        this.getStateEngine()
                 .analyseStateOfEnvelope(envelope)
                 .ifPresent(event1 -> getLog().debug("Event triggered on submission envelope", event1));
     }

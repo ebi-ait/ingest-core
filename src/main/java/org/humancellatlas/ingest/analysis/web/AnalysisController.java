@@ -7,13 +7,12 @@ import org.humancellatlas.ingest.analysis.Analysis;
 import org.humancellatlas.ingest.analysis.AnalysisService;
 import org.humancellatlas.ingest.analysis.BundleReference;
 import org.humancellatlas.ingest.core.Event;
-import org.humancellatlas.ingest.core.ValidationState;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.core.web.Links;
-import org.humancellatlas.ingest.sample.Sample;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
-import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
+import org.humancellatlas.ingest.state.StateEngine;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -38,7 +37,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Getter
 public class AnalysisController {
     private final @NonNull AnalysisService analysisService;
-    private final @NonNull SubmissionEnvelopeStateEngine submissionEnvelopeStateEngine;
+    private final @NonNull StateEngine stateEngine;
 
     private final @NonNull FileRepository fileRepository;
 
@@ -74,7 +73,7 @@ public class AnalysisController {
 
     @RequestMapping(path = "/analyses/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingAnalysis(@PathVariable("id") Analysis analysis) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getAnalysisService().getAnalysisRepository(),
                 analysis,
                 ValidationState.VALIDATING);
@@ -84,7 +83,7 @@ public class AnalysisController {
 
     @RequestMapping(path = "/analyses/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> validateAnalysis(@PathVariable("id") Analysis analysis) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getAnalysisService().getAnalysisRepository(),
                 analysis,
                 ValidationState.VALID);
@@ -94,7 +93,7 @@ public class AnalysisController {
 
     @RequestMapping(path = "/analyses/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> invalidateAnalysis(@PathVariable("id") Analysis analysis) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getAnalysisService().getAnalysisRepository(),
                 analysis,
                 ValidationState.INVALID);
@@ -104,7 +103,7 @@ public class AnalysisController {
 
     @RequestMapping(path = "/analyses/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
     HttpEntity<?> processingAnalysis(@PathVariable("id") Analysis analysis) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getAnalysisService().getAnalysisRepository(),
                 analysis,
                 ValidationState.PROCESSING);
@@ -114,7 +113,7 @@ public class AnalysisController {
 
     @RequestMapping(path = "/analyses/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
     HttpEntity<?> completeAnalysis(@PathVariable("id") Analysis analysis) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getAnalysisService().getAnalysisRepository(),
                 analysis,
                 ValidationState.COMPLETE);

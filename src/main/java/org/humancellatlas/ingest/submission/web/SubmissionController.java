@@ -8,7 +8,7 @@ import org.humancellatlas.ingest.analysis.AnalysisRepository;
 import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.assay.AssayRepository;
 import org.humancellatlas.ingest.core.Event;
-import org.humancellatlas.ingest.core.SubmissionState;
+import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -19,7 +19,7 @@ import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.sample.Sample;
 import org.humancellatlas.ingest.sample.SampleRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
+import org.humancellatlas.ingest.state.StateEngine;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequiredArgsConstructor
 @Getter
 public class SubmissionController {
-    private final @NonNull SubmissionEnvelopeStateEngine stateEngine;
+    private final @NonNull StateEngine stateEngine;
 
     private final @NonNull AnalysisRepository analysisRepository;
     private final @NonNull AssayRepository assayRepository;

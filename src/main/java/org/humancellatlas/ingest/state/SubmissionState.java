@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.core;
+package org.humancellatlas.ingest.state;
 
 /**
  * @author Simon Jupp

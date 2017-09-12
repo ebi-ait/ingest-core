@@ -6,12 +6,12 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.assay.AssayService;
 import org.humancellatlas.ingest.core.Event;
-import org.humancellatlas.ingest.core.ValidationState;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
-import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
+import org.humancellatlas.ingest.state.StateEngine;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Getter
 public class AssayController {
     private final @NonNull AssayService assayService;
-    private final @NonNull SubmissionEnvelopeStateEngine submissionEnvelopeStateEngine;
+    private final @NonNull StateEngine stateEngine;
     
     private final @NonNull FileRepository fileRepository;
 
@@ -62,7 +62,7 @@ public class AssayController {
 
     @RequestMapping(path = "/assays/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingAssay(@PathVariable("id") Assay assay) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getAssayService().getAssayRepository(),
                 assay,
                 ValidationState.VALIDATING);
@@ -72,7 +72,7 @@ public class AssayController {
 
     @RequestMapping(path = "/assays/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> validateAssay(@PathVariable("id") Assay assay) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getAssayService().getAssayRepository(),
                 assay,
                 ValidationState.VALID);
@@ -82,7 +82,7 @@ public class AssayController {
 
     @RequestMapping(path = "/assays/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> invalidateAssay(@PathVariable("id") Assay assay) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getAssayService().getAssayRepository(),
                 assay,
                 ValidationState.INVALID);
@@ -92,7 +92,7 @@ public class AssayController {
 
     @RequestMapping(path = "/assays/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
     HttpEntity<?> processingAssay(@PathVariable("id") Assay assay) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getAssayService().getAssayRepository(),
                 assay,
                 ValidationState.PROCESSING);
@@ -102,7 +102,7 @@ public class AssayController {
 
     @RequestMapping(path = "/assays/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
     HttpEntity<?> completeAssay(@PathVariable("id") Assay assay) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getAssayService().getAssayRepository(),
                 assay,
                 ValidationState.COMPLETE);

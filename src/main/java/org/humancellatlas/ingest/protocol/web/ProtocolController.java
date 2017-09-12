@@ -4,12 +4,12 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Event;
-import org.humancellatlas.ingest.core.ValidationState;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolService;
-import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
+import org.humancellatlas.ingest.state.StateEngine;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Getter
 public class ProtocolController {
     private final @NonNull ProtocolService protocolService;
-    private final @NonNull SubmissionEnvelopeStateEngine submissionEnvelopeStateEngine;
+    private final @NonNull StateEngine stateEngine;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProtocolToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -47,7 +47,7 @@ public class ProtocolController {
 
     @RequestMapping(path = "/protocols/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingProtocol(@PathVariable("id") Protocol protocol) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getProtocolService().getProtocolRepository(),
                 protocol,
                 ValidationState.VALIDATING);
@@ -57,7 +57,7 @@ public class ProtocolController {
 
     @RequestMapping(path = "/protocols/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> validateProtocol(@PathVariable("id") Protocol protocol) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getProtocolService().getProtocolRepository(),
                 protocol,
                 ValidationState.VALID);
@@ -67,7 +67,7 @@ public class ProtocolController {
 
     @RequestMapping(path = "/protocols/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> invalidateProtocol(@PathVariable("id") Protocol protocol) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getProtocolService().getProtocolRepository(),
                 protocol,
                 ValidationState.INVALID);
@@ -77,7 +77,7 @@ public class ProtocolController {
 
     @RequestMapping(path = "/protocols/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
     HttpEntity<?> processingProtocol(@PathVariable("id") Protocol protocol) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getProtocolService().getProtocolRepository(),
                 protocol,
                 ValidationState.PROCESSING);
@@ -87,7 +87,7 @@ public class ProtocolController {
 
     @RequestMapping(path = "/protocols/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
     HttpEntity<?> completeProtocol(@PathVariable("id") Protocol protocol) {
-        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
                 getProtocolService().getProtocolRepository(),
                 protocol,
                 ValidationState.COMPLETE);

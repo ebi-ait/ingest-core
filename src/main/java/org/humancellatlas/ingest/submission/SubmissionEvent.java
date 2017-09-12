@@ -3,8 +3,8 @@ package org.humancellatlas.ingest.submission;
 import lombok.Getter;
 import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.SubmissionDate;
-import org.humancellatlas.ingest.core.SubmissionState;
-import org.humancellatlas.ingest.submission.state.InvalidSubmissionStateException;
+import org.humancellatlas.ingest.state.SubmissionState;
+import org.humancellatlas.ingest.state.InvalidSubmissionStateException;
 
 import java.util.Date;
 
