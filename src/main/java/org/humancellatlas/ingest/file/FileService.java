@@ -27,8 +27,6 @@ public class FileService {
 
     public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
         file.addToSubmissionEnvelope(submissionEnvelope);
-        submissionEnvelope.notifyOfMetadataDocumentState(file);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return getFileRepository().save(file);
     }
 

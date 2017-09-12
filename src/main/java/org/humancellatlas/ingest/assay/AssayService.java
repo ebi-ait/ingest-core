@@ -22,8 +22,6 @@ public class AssayService {
 
     public Assay addAssayToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Assay assay) {
         assay.addToSubmissionEnvelope(submissionEnvelope);
-        submissionEnvelope.notifyOfMetadataDocumentState(assay);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return getAssayRepository().save(assay);
     }
 }

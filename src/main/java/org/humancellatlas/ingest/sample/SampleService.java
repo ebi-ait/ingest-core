@@ -22,8 +22,6 @@ public class SampleService {
 
     public Sample addSampleToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Sample sample) {
         sample.addToSubmissionEnvelope(submissionEnvelope);
-        submissionEnvelope.notifyOfMetadataDocumentState(sample);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return getSampleRepository().save(sample);
     }
 }

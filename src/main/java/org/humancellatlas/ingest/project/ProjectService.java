@@ -22,8 +22,6 @@ public class ProjectService {
 
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
         project.addToSubmissionEnvelope(submissionEnvelope);
-        submissionEnvelope.notifyOfMetadataDocumentState(project);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return getProjectRepository().save(project);
     }
 }
