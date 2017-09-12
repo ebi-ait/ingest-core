@@ -27,13 +27,10 @@ import java.util.concurrent.Executors;
 @Service
 @Getter
 public class SubmissionEnvelopeStateEngine {
-    private final @NonNull
-    SubmissionEnvelopeRepository submissionEnvelopeRepository;
-    private final @NonNull
-    RabbitMessagingTemplate rabbitMessagingTemplate;
+    private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
+    private final @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
 
-    private final @NonNull
-    ExecutorService executorService;
+    private final @NonNull ExecutorService executorService;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -41,9 +38,9 @@ public class SubmissionEnvelopeStateEngine {
         return log;
     }
 
-    @Autowired
-    SubmissionEnvelopeStateEngine(SubmissionEnvelopeRepository submissionEnvelopeRepository, RabbitMessagingTemplate
-            rabbitMessagingTemplate) {
+    @Autowired SubmissionEnvelopeStateEngine(SubmissionEnvelopeRepository submissionEnvelopeRepository,
+                                             RabbitMessagingTemplate
+                                                     rabbitMessagingTemplate) {
         this.submissionEnvelopeRepository = submissionEnvelopeRepository;
         this.rabbitMessagingTemplate = rabbitMessagingTemplate;
 
@@ -71,7 +68,8 @@ public class SubmissionEnvelopeStateEngine {
     private void postMessageIfRequired(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
         switch (targetState) {
             case SUBMITTED:
-                log.info(String.format("Congratulations! You have submitted your envelope '%s'", submissionEnvelope.getId()));
+                log.info(String.format("Congratulations! You have submitted your envelope '%s'",
+                                       submissionEnvelope.getId()));
                 getRabbitMessagingTemplate().convertAndSend(
                         Constants.Exchanges.ENVELOPE_FANOUT,
                         "",
@@ -80,7 +78,7 @@ public class SubmissionEnvelopeStateEngine {
             default:
                 getLog().debug(
                         String.format("No notification required for state transition to '%s'",
-                        targetState.name()));
+                                      targetState.name()));
         }
     }
 }
