@@ -7,6 +7,7 @@ import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.SubmissionDate;
+import org.humancellatlas.ingest.core.SubmissionState;
 import org.humancellatlas.ingest.core.UpdateDate;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.ValidationState;
@@ -45,9 +46,10 @@ public class SubmissionEnvelope extends AbstractEntity {
     public SubmissionEnvelope(Uuid uuid,
                               SubmissionDate submissionDate,
                               UpdateDate updateDate,
+                              List<Event> events,
                               SubmissionState submissionState) {
         super(EntityType.SUBMISSION, uuid, submissionDate, updateDate);
-        this.events = new ArrayList<>();
+        this.events = events;
         this.validationStateMap = new HashMap<>();
         this.submissionState = submissionState;
     }
@@ -56,6 +58,7 @@ public class SubmissionEnvelope extends AbstractEntity {
         this(null,
              new SubmissionDate(new Date()),
              new UpdateDate(new Date()),
+             new ArrayList<>(),
              SubmissionState.DRAFT);
     }
 
@@ -121,7 +124,7 @@ public class SubmissionEnvelope extends AbstractEntity {
         if (!isTrackingMetadata(metadataDocument)) {
             // if this doc is pending, it's either a new document or has new content, so it's ok to add to state tracker
             // but if not, we need to throw an exception here
-            if (!metadataDocument.getValidationState().equals(ValidationState.PENDING)) {
+            if (!metadataDocument.getValidationState().equals(ValidationState.DRAFT)) {
                 throw new MetadataDocumentStateException(String.format(
                         "Metadata document '%s' was not being tracked by containing envelope '%s' and does not have new content",
                         metadataDocument,
@@ -168,7 +171,7 @@ public class SubmissionEnvelope extends AbstractEntity {
         // according to spec...
         //     - if >=1 metadata documents are invalid, the envelope is invalid
         //     - otherwise, if >=1 metadata documents are validating, then the envelope is validating
-        //     - if everything is now valid (state > PENDING and nothing in the validationStateMap) the envelope is valid
+        //     - if everything is now valid (state > DRAFT and nothing in the validationStateMap) the envelope is valid
         //     - otherwise, nothing changes
 
         if (isSomethingInvalid) {

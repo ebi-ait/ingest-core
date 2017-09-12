@@ -18,7 +18,7 @@ import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.sample.Sample;
 import org.humancellatlas.ingest.sample.SampleRepository;
-import org.humancellatlas.ingest.submission.SubmissionState;
+import org.humancellatlas.ingest.core.SubmissionState;
 import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

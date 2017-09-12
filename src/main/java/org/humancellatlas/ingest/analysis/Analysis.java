@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.Accession;
 import org.humancellatlas.ingest.core.EntityType;
+import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.SubmissionDate;
 import org.humancellatlas.ingest.core.UpdateDate;
@@ -38,8 +39,8 @@ public class Analysis extends MetadataDocument {
               null,
               new SubmissionDate(new Date()),
               new UpdateDate(new Date()),
-              null,
-              ValidationState.PENDING,
+              new ArrayList<>(), null,
+              ValidationState.DRAFT,
               null,
               null);
         this.projects = new ArrayList<>();
@@ -52,6 +53,7 @@ public class Analysis extends MetadataDocument {
                     Uuid uuid,
                     SubmissionDate submissionDate,
                     UpdateDate updateDate,
+                    List<Event> events,
                     Accession accession,
                     ValidationState validationState,
                     List<Project> projects,
@@ -60,7 +62,7 @@ public class Analysis extends MetadataDocument {
                     List<BundleManifest> inputBundleManifests,
                     SubmissionEnvelope submissionEnvelope,
                     Object content) {
-        super(type, uuid, submissionDate, updateDate, accession, validationState, submissionEnvelope, content);
+        super(type, uuid, submissionDate, updateDate, events, accession, validationState, submissionEnvelope, content);
         this.projects = projects;
         this.assays = assays;
         this.files = files;
@@ -73,6 +75,7 @@ public class Analysis extends MetadataDocument {
              null,
              new SubmissionDate(new Date()),
              new UpdateDate(new Date()),
+             new ArrayList<>(),
              null,
              null,
              new ArrayList<>(),

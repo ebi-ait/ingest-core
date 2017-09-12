@@ -3,9 +3,10 @@ package org.humancellatlas.ingest.sample.web;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.sample.Sample;
 import org.humancellatlas.ingest.sample.SampleService;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Getter
 public class SampleController {
     private final @NonNull SampleService sampleService;
+    private final @NonNull SubmissionEnvelopeStateEngine submissionEnvelopeStateEngine;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/samples",
                     method = RequestMethod.POST,

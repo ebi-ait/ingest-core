@@ -4,11 +4,14 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.SubmissionState;
+import org.humancellatlas.ingest.core.ValidationEvent;
+import org.humancellatlas.ingest.core.ValidationState;
 import org.humancellatlas.ingest.messaging.Constants;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
-import org.humancellatlas.ingest.submission.SubmissionState;
+import org.humancellatlas.ingest.submission.SubmissionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
@@ -56,7 +59,7 @@ public class SubmissionEnvelopeStateEngine {
     }
 
     public Event advanceStateOfEnvelope(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
-        final Event event = new Event(submissionEnvelope.getSubmissionState(), targetState);
+        final Event event = new SubmissionEvent(submissionEnvelope.getSubmissionState(), targetState);
         executorService.submit(() -> {
             submissionEnvelope.addEvent(event).enactStateTransition(targetState);
 
@@ -64,6 +67,18 @@ public class SubmissionEnvelopeStateEngine {
             postMessageIfRequired(submissionEnvelope, targetState);
         });
         return event;
+    }
+
+    public Event advanceStateOfMetadataDocument(MetadataDocument metadataDocument, ValidationState targetState) {
+        final Event event = new ValidationEvent(metadataDocument.getValidationState(), targetState);
+        executorService.submit(() -> {
+            metadataDocument.addEvent(event).enactStateTransition(targetState);
+
+            // is this an event that needs to be posted to a queue?
+            postMessageIfRequired(metadataDocument, targetState);
+        });
+        return event;
+
     }
 
     public Optional<Event> analyseStateOfEnvelope(SubmissionEnvelope submissionEnvelope) {
@@ -97,5 +112,11 @@ public class SubmissionEnvelopeStateEngine {
                         String.format("No notification required for state transition to '%s'",
                                       targetState.name()));
         }
+    }
+
+    private void postMessageIfRequired(MetadataDocument metadataDocument, ValidationState targetState) {
+        getLog().debug(
+                String.format("No notification required for state transition to '%s'",
+                              targetState.name()));
     }
 }

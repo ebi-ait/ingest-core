@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import org.humancellatlas.ingest.core.Accession;
 import org.humancellatlas.ingest.core.EntityType;
+import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.SubmissionDate;
 import org.humancellatlas.ingest.core.UpdateDate;
@@ -38,8 +39,8 @@ public class Assay extends MetadataDocument {
               null,
               new SubmissionDate(new Date()),
               new UpdateDate(new Date()),
-              null,
-              ValidationState.PENDING,
+              new ArrayList<>(), null,
+              ValidationState.DRAFT,
               null,
               null);
         this.samples = new ArrayList<>();
@@ -52,6 +53,7 @@ public class Assay extends MetadataDocument {
                  Uuid uuid,
                  SubmissionDate submissionDate,
                  UpdateDate updateDate,
+                 List<Event> events,
                  Accession accession,
                  ValidationState validationState,
                  List<Sample> samples,
@@ -60,7 +62,7 @@ public class Assay extends MetadataDocument {
                  List<File> files,
                  SubmissionEnvelope submissionEnvelope,
                  Object content) {
-        super(type, uuid, submissionDate, updateDate, accession, validationState, submissionEnvelope, content);
+        super(type, uuid, submissionDate, updateDate, events, accession, validationState, submissionEnvelope, content);
         this.samples = samples;
         this.projects = projects;
         this.protocols = protocols;
@@ -73,8 +75,9 @@ public class Assay extends MetadataDocument {
              null,
              new SubmissionDate(new Date()),
              new UpdateDate(new Date()),
+             new ArrayList<>(),
              null,
-             ValidationState.PENDING, new ArrayList<>(),
+             ValidationState.DRAFT, new ArrayList<>(),
              new ArrayList<>(),
              new ArrayList<>(),
              new ArrayList<>(),

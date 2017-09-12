@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import org.humancellatlas.ingest.core.Accession;
 import org.humancellatlas.ingest.core.EntityType;
+import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.SubmissionDate;
 import org.humancellatlas.ingest.core.UpdateDate;
@@ -35,8 +36,9 @@ public class Sample extends MetadataDocument {
               null,
               new SubmissionDate(new Date()),
               new UpdateDate(new Date()),
+              new ArrayList<>(),
               null,
-              ValidationState.PENDING,
+              ValidationState.DRAFT,
               null,
               null);
         this.derivedFromSamples = new ArrayList<>();
@@ -48,13 +50,14 @@ public class Sample extends MetadataDocument {
                   Uuid uuid,
                   SubmissionDate submissionDate,
                   UpdateDate updateDate,
+                  List<Event> events,
                   Accession accession,
                   ValidationState validationState, List<Sample> derivedFromSamples,
                   List<Project> projects,
                   List<Protocol> protocols,
                   SubmissionEnvelope submissionEnvelope,
                   Object content) {
-        super(type, uuid, submissionDate, updateDate, accession, validationState, submissionEnvelope, content);
+        super(type, uuid, submissionDate, updateDate, events, accession, validationState, submissionEnvelope, content);
         this.derivedFromSamples = derivedFromSamples;
         this.projects = projects;
         this.protocols = protocols;
@@ -66,8 +69,9 @@ public class Sample extends MetadataDocument {
              null,
              new SubmissionDate(new Date()),
              new UpdateDate(new Date()),
+             new ArrayList<>(),
              null,
-             ValidationState.PENDING, new ArrayList<>(),
+             ValidationState.DRAFT, new ArrayList<>(),
              new ArrayList<>(),
              new ArrayList<>(),
              null,
