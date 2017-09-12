@@ -49,11 +49,51 @@ public class SampleController {
     }
 
     @RequestMapping(path = "/samples/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validateSample(@PathVariable("id") Sample sample) {
+    HttpEntity<?> validatingSample(@PathVariable("id") Sample sample) {
         Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
                 getSampleService().getSampleRepository(),
                 sample,
                 ValidationState.VALIDATING);
+
+        return ResponseEntity.accepted().body(event);
+    }
+
+    @RequestMapping(path = "/samples/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
+    HttpEntity<?> validateSample(@PathVariable("id") Sample sample) {
+        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+                getSampleService().getSampleRepository(),
+                sample,
+                ValidationState.VALID);
+
+        return ResponseEntity.accepted().body(event);
+    }
+
+    @RequestMapping(path = "/samples/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
+    HttpEntity<?> invalidateSample(@PathVariable("id") Sample sample) {
+        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+                getSampleService().getSampleRepository(),
+                sample,
+                ValidationState.INVALID);
+
+        return ResponseEntity.accepted().body(event);
+    }
+
+    @RequestMapping(path = "/samples/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
+    HttpEntity<?> processingSample(@PathVariable("id") Sample sample) {
+        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+                getSampleService().getSampleRepository(),
+                sample,
+                ValidationState.PROCESSING);
+
+        return ResponseEntity.accepted().body(event);
+    }
+
+    @RequestMapping(path = "/samples/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
+    HttpEntity<?> completeSample(@PathVariable("id") Sample sample) {
+        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+                getSampleService().getSampleRepository(),
+                sample,
+                ValidationState.COMPLETE);
 
         return ResponseEntity.accepted().body(event);
     }

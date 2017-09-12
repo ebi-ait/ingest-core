@@ -46,8 +46,6 @@ public class MetadataDocumentResourceProcessor implements ResourceProcessor<Reso
 
     private Optional<String> getRelNameForValidationState(ValidationState validationState) {
         switch (validationState) {
-            case DRAFT:
-                return Optional.of(Links.DRAFT_REL);
             case VALIDATING:
                 return Optional.of(Links.VALIDATING_REL);
             case VALID:
@@ -66,8 +64,6 @@ public class MetadataDocumentResourceProcessor implements ResourceProcessor<Reso
 
     private Optional<String> getSubresourceNameForValidationState(ValidationState validationState) {
         switch (validationState) {
-            case DRAFT:
-                return Optional.of(Links.DRAFT_URL);
             case VALIDATING:
                 return Optional.of(Links.VALIDATING_URL);
             case VALID:
