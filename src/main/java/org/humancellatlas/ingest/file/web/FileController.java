@@ -3,15 +3,20 @@ package org.humancellatlas.ingest.file.web;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.Event;
+import org.humancellatlas.ingest.core.ValidationState;
+import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileService;
+import org.humancellatlas.ingest.submission.state.SubmissionEnvelopeStateEngine;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 public class FileController {
     private final @NonNull FileService fileService;
+    private final @NonNull SubmissionEnvelopeStateEngine submissionEnvelopeStateEngine;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
                     method = RequestMethod.POST,
@@ -43,4 +49,53 @@ public class FileController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @RequestMapping(path = "/files/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
+    HttpEntity<?> validatingFile(@PathVariable("id") File file) {
+        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+                getFileService().getFileRepository(),
+                file,
+                ValidationState.VALIDATING);
+
+        return ResponseEntity.accepted().body(event);
+    }
+
+    @RequestMapping(path = "/files/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
+    HttpEntity<?> validateFile(@PathVariable("id") File file) {
+        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+                getFileService().getFileRepository(),
+                file,
+                ValidationState.VALID);
+
+        return ResponseEntity.accepted().body(event);
+    }
+
+    @RequestMapping(path = "/files/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
+    HttpEntity<?> invalidateFile(@PathVariable("id") File file) {
+        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+                getFileService().getFileRepository(),
+                file,
+                ValidationState.INVALID);
+
+        return ResponseEntity.accepted().body(event);
+    }
+
+    @RequestMapping(path = "/files/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
+    HttpEntity<?> processingFile(@PathVariable("id") File file) {
+        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+                getFileService().getFileRepository(),
+                file,
+                ValidationState.PROCESSING);
+
+        return ResponseEntity.accepted().body(event);
+    }
+
+    @RequestMapping(path = "/files/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
+    HttpEntity<?> completeFile(@PathVariable("id") File file) {
+        Event event = getSubmissionEnvelopeStateEngine().advanceStateOfMetadataDocument(
+                getFileService().getFileRepository(),
+                file,
+                ValidationState.COMPLETE);
+
+        return ResponseEntity.accepted().body(event);
+    }
 }
