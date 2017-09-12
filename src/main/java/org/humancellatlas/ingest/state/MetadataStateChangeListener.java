@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Getter
-public class SubmissionEnvelopeStateChangeListener extends AbstractMongoEventListener<MetadataDocument> {
+public class MetadataStateChangeListener extends AbstractMongoEventListener<MetadataDocument> {
     private final @NonNull StateEngine stateEngine;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
