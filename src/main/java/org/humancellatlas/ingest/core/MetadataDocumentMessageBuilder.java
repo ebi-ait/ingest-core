@@ -82,7 +82,7 @@ public class MetadataDocumentMessageBuilder {
         return this;
     }
 
-    public MetadataDocumentMessage getCallbackLink() {
+    public MetadataDocumentMessage build() {
         String callbackLink = repositoryEntityLinks.linkToSingleResource(
                 documentType, metadataDocId).withSelfRel().getHref();
 

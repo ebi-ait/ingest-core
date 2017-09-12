@@ -4,10 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.messaging.Constants;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessage;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
-import org.humancellatlas.ingest.submission.SubmissionEvent;
+import org.humancellatlas.ingest.submission.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
@@ -124,10 +121,14 @@ public class StateEngine {
             case SUBMITTED:
                 log.info(String.format("Congratulations! You have submitted your envelope '%s'",
                                        submissionEnvelope.getId()));
+                SubmissionEnvelopeMessage submissionMessage =
+                        SubmissionEnvelopeMessageBuilder.usingLinkBuilder(repositoryEntityLinks)
+                        .messageFor(submissionEnvelope).build();
+
                 getRabbitMessagingTemplate().convertAndSend(
                         Constants.Exchanges.ENVELOPE_FANOUT,
                         "",
-                        new SubmissionEnvelopeMessage(submissionEnvelope));
+                        submissionMessage);
                 break;
             default:
                 getLog().debug(
@@ -144,7 +145,7 @@ public class StateEngine {
                         metadataDocument.getId()));
                 MetadataDocumentMessage validationMessage =
                         MetadataDocumentMessageBuilder.usingLinkBuilder(repositoryEntityLinks).messageFor
-                                (metadataDocument).getCallbackLink();
+                                (metadataDocument).build();
                 getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.VALIDATION_FANOUT,
                         "",
                         validationMessage);
@@ -155,7 +156,7 @@ public class StateEngine {
                         metadataDocument.getId()));
                 MetadataDocumentMessage accessioningMessage =
                         MetadataDocumentMessageBuilder.usingLinkBuilder(repositoryEntityLinks).messageFor
-                                (metadataDocument).getCallbackLink();
+                                (metadataDocument).build();
                 getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.ACCESSION_FANOUT,
                         "",
                         accessioningMessage);
