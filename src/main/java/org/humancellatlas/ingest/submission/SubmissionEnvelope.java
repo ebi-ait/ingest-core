@@ -186,11 +186,11 @@ public class SubmissionEnvelope extends AbstractEntity {
         return getSubmissionState().compareTo(SubmissionState.PENDING) > 0;
     }
 
-    public boolean isTrackingMetadata() {
+    public @JsonIgnore boolean isTrackingMetadata() {
         return validationStateMap.size() > 0;
     }
 
-    public boolean isTrackingMetadata(MetadataDocument metadataDocument) {
+    public @JsonIgnore boolean isTrackingMetadata(MetadataDocument metadataDocument) {
         return validationStateMap.containsKey(metadataDocument.getId());
     }
 }
