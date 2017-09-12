@@ -12,7 +12,9 @@ import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.web.ProtocolController;
 import org.humancellatlas.ingest.sample.Sample;
 import org.humancellatlas.ingest.sample.web.SampleController;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
+import org.springframework.data.rest.webmvc.support.RepositoryLinkBuilder;
+import org.springframework.hateoas.Link;
 
 /**
  * Javadocs go here!
@@ -21,45 +23,51 @@ import org.springframework.hateoas.mvc.ControllerLinkBuilder;
  * @date 12/09/17
  */
 public class MetadataDocumentMessageBuilder {
-    public static MetadataDocumentMessageBuilder messageFor(MetadataDocument metadataDocument) {
-        MetadataDocumentMessageBuilder builder = null;
-        if (metadataDocument instanceof Analysis) {
-            builder = new MetadataDocumentMessageBuilder(AnalysisController.class);
-        }
-        if (metadataDocument instanceof Assay) {
-            builder = new MetadataDocumentMessageBuilder(AssayController.class);
-        }
-        if (metadataDocument instanceof File) {
-            builder = new MetadataDocumentMessageBuilder(FileController.class);
-        }
-        if (metadataDocument instanceof Project) {
-            builder = new MetadataDocumentMessageBuilder(ProjectController.class);
-        }
-        if (metadataDocument instanceof Protocol) {
-            builder = new MetadataDocumentMessageBuilder(ProtocolController.class);
-        }
-        if (metadataDocument instanceof Sample) {
-            builder = new MetadataDocumentMessageBuilder(SampleController.class);
-        }
-
-        if (builder == null) {
-            // couldn't match type
-            throw new RuntimeException(String.format(
-                    "Unable to make metadata document message - unknown type of doc '%s'",
-                    metadataDocument.getClass()));
-        }
-        else {
-            return builder.withDocumentType(metadataDocument.getClass()).withId(metadataDocument.getId());
-        }
+    public static MetadataDocumentMessageBuilder usingLinkBuilder(RepositoryEntityLinks repositoryEntityLinks) {
+        return new MetadataDocumentMessageBuilder(repositoryEntityLinks);
     }
 
-    private final Class<?> controllerClass;
+    private final RepositoryEntityLinks repositoryEntityLinks;
 
+    private Class<?> controllerClass;
     private Class<?> documentType;
     private String metadataDocId;
 
-    private MetadataDocumentMessageBuilder(Class<?> controllerClass) {
+    private MetadataDocumentMessageBuilder(RepositoryEntityLinks repositoryEntityLinks) {
+        this.repositoryEntityLinks = repositoryEntityLinks;
+    }
+
+    public MetadataDocumentMessageBuilder messageFor(MetadataDocument metadataDocument) {
+        withDocumentType(metadataDocument.getClass()).withId(metadataDocument.getId());
+        if (metadataDocument instanceof Analysis) {
+            return withControllerClass(AnalysisController.class);
+        }
+        if (metadataDocument instanceof Assay) {
+            return withControllerClass(AssayController.class);
+        }
+        if (metadataDocument instanceof File) {
+            return withControllerClass(FileController.class);
+        }
+        if (metadataDocument instanceof Project) {
+            return withControllerClass(ProjectController.class);
+        }
+        if (metadataDocument instanceof Protocol) {
+            return withControllerClass(ProtocolController.class);
+        }
+        if (metadataDocument instanceof Sample) {
+            return withControllerClass(SampleController.class);
+        }
+
+        // couldn't match type
+        throw new RuntimeException(String.format(
+                "Unable to make metadata document message - unknown type of doc '%s'",
+                metadataDocument.getClass()));
+    }
+
+    private MetadataDocumentMessageBuilder withControllerClass(Class<?> controllerClass) {
         this.controllerClass = controllerClass;
+
+        return this;
     }
 
     private <T extends MetadataDocument> MetadataDocumentMessageBuilder withDocumentType(Class<T> documentClass) {
@@ -75,8 +83,12 @@ public class MetadataDocumentMessageBuilder {
     }
 
     public MetadataDocumentMessage getCallbackLink() {
-        String callbackLink =
-                ControllerLinkBuilder.linkTo(controllerClass).slash(metadataDocId).withSelfRel().getHref();
+        String callbackLink = repositoryEntityLinks.linkToSingleResource(
+                documentType, metadataDocId).withSelfRel().getHref();
+
+        // todo make link relative so clients can fill in domain - must be a better way of doing this!
+        callbackLink = callbackLink.replace("http://localhost:8080", "");
+
         return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(), metadataDocId, callbackLink);
     }
 }

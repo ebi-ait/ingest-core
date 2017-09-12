@@ -2,11 +2,7 @@ package org.humancellatlas.ingest.state;
 
 import lombok.Getter;
 import lombok.NonNull;
-import org.humancellatlas.ingest.core.Event;
-import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.MetadataDocumentMessage;
-import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
-import org.humancellatlas.ingest.core.ValidationEvent;
+import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.messaging.Constants;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessage;
@@ -17,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
@@ -36,6 +33,8 @@ public class StateEngine {
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
 
+    private final @NonNull RepositoryEntityLinks repositoryEntityLinks;
+
     private final @NonNull ExecutorService executorService;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -45,9 +44,11 @@ public class StateEngine {
     }
 
     @Autowired StateEngine(SubmissionEnvelopeRepository submissionEnvelopeRepository,
-                           RabbitMessagingTemplate rabbitMessagingTemplate) {
+                           RabbitMessagingTemplate rabbitMessagingTemplate,
+                           RepositoryEntityLinks repositoryEntityLinks) {
         this.submissionEnvelopeRepository = submissionEnvelopeRepository;
         this.rabbitMessagingTemplate = rabbitMessagingTemplate;
+        this.repositoryEntityLinks = repositoryEntityLinks;
 
         this.executorService = Executors.newCachedThreadPool();
     }
@@ -142,20 +143,22 @@ public class StateEngine {
                         "Metadata document '%s' has been put into a valid state... notifying validation service",
                         metadataDocument.getId()));
                 MetadataDocumentMessage validationMessage =
-                        MetadataDocumentMessageBuilder.messageFor(metadataDocument).getCallbackLink();
+                        MetadataDocumentMessageBuilder.usingLinkBuilder(repositoryEntityLinks).messageFor
+                                (metadataDocument).getCallbackLink();
                 getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.VALIDATION_FANOUT,
-                                                            "",
-                                                            validationMessage);
+                        "",
+                        validationMessage);
                 break;
             case VALID:
                 getLog().info(String.format(
                         "Metadata document '%s' has been put into a valid state... notifying accessioning service",
                         metadataDocument.getId()));
                 MetadataDocumentMessage accessioningMessage =
-                        MetadataDocumentMessageBuilder.messageFor(metadataDocument).getCallbackLink();
+                        MetadataDocumentMessageBuilder.usingLinkBuilder(repositoryEntityLinks).messageFor
+                                (metadataDocument).getCallbackLink();
                 getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.ACCESSION_FANOUT,
-                                                            "",
-                                                            accessioningMessage);
+                        "",
+                        accessioningMessage);
                 break;
             default:
                 getLog().debug(
