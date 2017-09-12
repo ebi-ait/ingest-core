@@ -30,8 +30,6 @@ public class Sample extends MetadataDocument {
     private final @DBRef List<Project> projects;
     private final @DBRef List<Protocol> protocols;
 
-    private @DBRef SubmissionEnvelope submissionEnvelope;
-
     protected Sample() {
         super(EntityType.SAMPLE,
               null,
@@ -39,11 +37,11 @@ public class Sample extends MetadataDocument {
               new UpdateDate(new Date()),
               null,
               ValidationState.PENDING,
+              null,
               null);
         this.derivedFromSamples = new ArrayList<>();
         this.projects = new ArrayList<>();
         this.protocols = new ArrayList<>();
-        this.submissionEnvelope = null;
     }
 
     public Sample(EntityType type,
@@ -56,8 +54,7 @@ public class Sample extends MetadataDocument {
                   List<Protocol> protocols,
                   SubmissionEnvelope submissionEnvelope,
                   Object content) {
-        super(type, uuid, submissionDate, updateDate, accession, validationState, content);
-        this.submissionEnvelope = submissionEnvelope;
+        super(type, uuid, submissionDate, updateDate, accession, validationState, submissionEnvelope, content);
         this.derivedFromSamples = derivedFromSamples;
         this.projects = projects;
         this.protocols = protocols;
@@ -79,7 +76,7 @@ public class Sample extends MetadataDocument {
     }
 
     public Sample addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        this.submissionEnvelope = submissionEnvelope;
+        super.addToSubmissionEnvelope(submissionEnvelope);
 
         return this;
     }

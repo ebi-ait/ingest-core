@@ -33,8 +33,6 @@ public class Analysis extends MetadataDocument {
     private final @DBRef List<File> files;
     private final @DBRef List<BundleManifest> inputBundleManifests;
 
-    private @DBRef SubmissionEnvelope submissionEnvelope;
-
     protected Analysis() {
         super(EntityType.ANALYSIS,
               null,
@@ -42,12 +40,12 @@ public class Analysis extends MetadataDocument {
               new UpdateDate(new Date()),
               null,
               ValidationState.PENDING,
+              null,
               null);
         this.projects = new ArrayList<>();
         this.assays = new ArrayList<>();
         this.files = new ArrayList<>();
         this.inputBundleManifests = new ArrayList<>();
-        this.submissionEnvelope = null;
     }
 
     public Analysis(EntityType type,
@@ -62,12 +60,11 @@ public class Analysis extends MetadataDocument {
                     List<BundleManifest> inputBundleManifests,
                     SubmissionEnvelope submissionEnvelope,
                     Object content) {
-        super(type, uuid, submissionDate, updateDate, accession, validationState, content);
+        super(type, uuid, submissionDate, updateDate, accession, validationState, submissionEnvelope, content);
         this.projects = projects;
         this.assays = assays;
         this.files = files;
         this.inputBundleManifests = inputBundleManifests;
-        this.submissionEnvelope = submissionEnvelope;
     }
 
     @JsonCreator
@@ -88,7 +85,7 @@ public class Analysis extends MetadataDocument {
     }
 
     public Analysis addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        this.submissionEnvelope = submissionEnvelope;
+        super.addToSubmissionEnvelope(submissionEnvelope);
 
         return this;
     }

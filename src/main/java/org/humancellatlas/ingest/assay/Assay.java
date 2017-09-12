@@ -33,8 +33,6 @@ public class Assay extends MetadataDocument {
     private final @DBRef List<Protocol> protocols;
     private final @DBRef List<File> files;
 
-    private @DBRef SubmissionEnvelope submissionEnvelope;
-
     protected Assay() {
         super(EntityType.ASSAY,
               null,
@@ -42,12 +40,12 @@ public class Assay extends MetadataDocument {
               new UpdateDate(new Date()),
               null,
               ValidationState.PENDING,
+              null,
               null);
         this.samples = new ArrayList<>();
         this.projects = new ArrayList<>();
         this.protocols = new ArrayList<>();
         this.files = new ArrayList<>();
-        this.submissionEnvelope = null;
     }
 
     public Assay(EntityType type,
@@ -62,12 +60,11 @@ public class Assay extends MetadataDocument {
                  List<File> files,
                  SubmissionEnvelope submissionEnvelope,
                  Object content) {
-        super(type, uuid, submissionDate, updateDate, accession, validationState, content);
+        super(type, uuid, submissionDate, updateDate, accession, validationState, submissionEnvelope, content);
         this.samples = samples;
         this.projects = projects;
         this.protocols = protocols;
         this.files = files;
-        this.submissionEnvelope = submissionEnvelope;
     }
 
     @JsonCreator
@@ -87,7 +84,7 @@ public class Assay extends MetadataDocument {
     }
 
     public Assay addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        this.submissionEnvelope = submissionEnvelope;
+        super.addToSubmissionEnvelope(submissionEnvelope);
 
         return this;
     }

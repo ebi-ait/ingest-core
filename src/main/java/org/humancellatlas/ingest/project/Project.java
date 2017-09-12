@@ -10,7 +10,6 @@ import org.humancellatlas.ingest.core.UpdateDate;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.util.Date;
 
@@ -22,8 +21,6 @@ import java.util.Date;
  */
 @Getter
 public class Project extends MetadataDocument {
-    private @DBRef SubmissionEnvelope submissionEnvelope;
-
     protected Project() {
         super(EntityType.PROJECT,
               null,
@@ -31,8 +28,8 @@ public class Project extends MetadataDocument {
               new UpdateDate(new Date()),
               null,
               ValidationState.PENDING,
+              null,
               null);
-        this.submissionEnvelope = null;
     }
 
     public Project(EntityType type,
@@ -42,8 +39,7 @@ public class Project extends MetadataDocument {
                    Accession accession,
                    ValidationState validationState, SubmissionEnvelope submissionEnvelope,
                    Object content) {
-        super(type, uuid, submissionDate, updateDate, accession, validationState, content);
-        this.submissionEnvelope = submissionEnvelope;
+        super(type, uuid, submissionDate, updateDate, accession, validationState, submissionEnvelope, content);
     }
 
     @JsonCreator
@@ -58,7 +54,7 @@ public class Project extends MetadataDocument {
     }
 
     public Project addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        this.submissionEnvelope = submissionEnvelope;
+        super.addToSubmissionEnvelope(submissionEnvelope);
 
         return this;
     }

@@ -13,7 +13,6 @@ import org.humancellatlas.ingest.core.UpdateDate;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.util.Date;
 
@@ -25,11 +24,16 @@ public class File extends MetadataDocument {
     private String cloudUrl;
     private Checksums checksums;
 
-    private @DBRef SubmissionEnvelope submissionEnvelope;
-
     protected File() {
-        super(EntityType.FILE, null, new SubmissionDate(new Date()), new UpdateDate(new Date()), null, ValidationState.PENDING, null);
-        this.submissionEnvelope = null;
+        super(EntityType.FILE,
+              null,
+              new SubmissionDate(new Date()),
+              new UpdateDate(new Date()),
+              null,
+              ValidationState.PENDING,
+              null,
+              null
+        );
         this.cloudUrl = "";
         this.fileName = "";
         this.checksums = null;
@@ -46,11 +50,10 @@ public class File extends MetadataDocument {
                    Checksums checksums,
                    SubmissionEnvelope submissionEnvelope,
                    Object content) {
-        super(type, uuid, submissionDate, updateDate, accession, validationState, content);
+        super(type, uuid, submissionDate, updateDate, accession, validationState, submissionEnvelope, content);
         this.fileName = fileName;
         this.cloudUrl = cloudUrl;
         this.checksums = checksums;
-        this.submissionEnvelope = submissionEnvelope;
     }
 
     @JsonCreator
@@ -70,16 +73,8 @@ public class File extends MetadataDocument {
     }
 
     public File addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        this.submissionEnvelope = submissionEnvelope;
+        super.addToSubmissionEnvelope(submissionEnvelope);
 
         return this;
-    }
-
-    public boolean isInEnvelope(SubmissionEnvelope submissionEnvelope) {
-        return this.submissionEnvelope.equals(submissionEnvelope);
-    }
-
-    public boolean isInEnvelopeWithUuid(Uuid uuid) {
-        return this.submissionEnvelope.getUuid().equals(uuid);
     }
 }
