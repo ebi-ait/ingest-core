@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.MetadataDocumentMessage;
+import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
 import org.humancellatlas.ingest.core.ValidationEvent;
 import org.humancellatlas.ingest.messaging.Constants;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -133,8 +135,31 @@ public class StateEngine {
     }
 
     private void postMessageIfRequired(MetadataDocument metadataDocument, ValidationState targetState) {
-        getLog().debug(
-                String.format("No notification required for state transition to '%s'",
-                              targetState.name()));
+        switch (targetState) {
+            case DRAFT:
+                getLog().info(String.format(
+                        "Metadata document '%s' has been put into a valid state... notifying validation service",
+                        metadataDocument.getId()));
+                MetadataDocumentMessage validationMessage =
+                        MetadataDocumentMessageBuilder.messageFor(metadataDocument).getCallbackLink();
+                getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.VALIDATION_FANOUT,
+                                                            "",
+                                                            validationMessage);
+                break;
+            case VALID:
+                getLog().info(String.format(
+                        "Metadata document '%s' has been put into a valid state... notifying accessioning service",
+                        metadataDocument.getId()));
+                MetadataDocumentMessage accessioningMessage =
+                        MetadataDocumentMessageBuilder.messageFor(metadataDocument).getCallbackLink();
+                getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.ACCESSION_FANOUT,
+                                                            "",
+                                                            accessioningMessage);
+                break;
+            default:
+                getLog().debug(
+                        String.format("No notification required for state transition to '%s'",
+                                      targetState.name()));
+        }
     }
 }

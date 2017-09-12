@@ -34,8 +34,7 @@ public class MetadataStateChangeListener extends AbstractMongoEventListener<Meta
         SubmissionEnvelope envelope = metadataDocument.getSubmissionEnvelope();
 
         this.getStateEngine().notifySubmissionEnvelopeOfMetadataDocumentChange(envelope, metadataDocument);
-        this.getStateEngine()
-                .analyseStateOfEnvelope(envelope)
+        this.getStateEngine().analyseStateOfEnvelope(envelope)
                 .ifPresent(event1 -> getLog().debug("Event triggered on submission envelope", event1));
     }
 }
