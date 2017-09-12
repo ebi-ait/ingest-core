@@ -5,6 +5,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;
 import org.springframework.data.mongodb.core.mapping.event.AfterSaveEvent;
 import org.springframework.stereotype.Component;
@@ -21,11 +23,19 @@ import org.springframework.stereotype.Component;
 public class SubmissionEnvelopeStateChangeListener extends AbstractMongoEventListener<MetadataDocument> {
     private final @NonNull SubmissionEnvelopeStateEngine submissionEnvelopeStateEngine;
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
+    protected Logger getLog() {
+        return log;
+    }
+
     @Override public void onAfterSave(AfterSaveEvent<MetadataDocument> event) {
         MetadataDocument metadataDocument = event.getSource();
         SubmissionEnvelope envelope = metadataDocument.getSubmissionEnvelope();
 
         getSubmissionEnvelopeStateEngine().notifySubmissionEnvelopeOfMetadataDocumentChange(envelope, metadataDocument);
-        getSubmissionEnvelopeStateEngine().analyseStateOfEnvelope(envelope);
+        getSubmissionEnvelopeStateEngine()
+                .analyseStateOfEnvelope(envelope)
+                .ifPresent(event1 -> getLog().debug("Event triggered on submission envelope", event1));
     }
 }
