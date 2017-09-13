@@ -87,6 +87,7 @@ public class SubmissionEnvelope extends AbstractEntity {
 
     public SubmissionEnvelope addEvent(Event event) {
         this.events.add(event);
+        update();
 
         return this;
     }
@@ -97,7 +98,11 @@ public class SubmissionEnvelope extends AbstractEntity {
                                                                             "as a submission envelope state that can be set",
                                                                     submissionState.name()));
         }
-        this.submissionState = targetState;
+
+        if (this.submissionState != targetState) {
+            this.submissionState = targetState;
+            update();
+        }
 
         return this;
     }
@@ -114,6 +119,7 @@ public class SubmissionEnvelope extends AbstractEntity {
             }
         }
         this.validationStateMap.put(metadataDocument.getId(), metadataDocument.getValidationState());
+        update();
 
         return this;
     }
