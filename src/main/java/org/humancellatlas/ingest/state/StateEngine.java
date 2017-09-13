@@ -141,7 +141,7 @@ public class StateEngine {
         switch (targetState) {
             case DRAFT:
                 getLog().info(String.format(
-                        "Metadata document '%s' has been put into a valid state... notifying validation service",
+                        "Metadata document '%s' has been put into a draft state... notifying validation service",
                         metadataDocument.getId()));
                 MetadataDocumentMessage validationMessage =
                         MetadataDocumentMessageBuilder.usingLinkBuilder(repositoryEntityLinks).messageFor
