@@ -23,7 +23,7 @@ public class FileListener {
     @RabbitListener(queues = Constants.Queues.FILE_STAGED)
     public void handleFileStagedEvent(FileMessage fileMessage) {
         try {
-            fileService.updateStagedFileUrl(new Uuid(fileMessage.getStagingAreaId()),
+            fileService.updateStagedFileUrl(fileMessage.getStagingAreaId(),
                     fileMessage.getFileName(),
                     fileMessage.getCloudUrl());
         } catch (CoreEntityNotFoundException | RuntimeException e) {

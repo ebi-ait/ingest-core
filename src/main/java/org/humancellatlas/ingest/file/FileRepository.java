@@ -2,9 +2,11 @@ package org.humancellatlas.ingest.file;
 
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
@@ -17,5 +19,5 @@ public interface FileRepository extends MongoRepository<File, String> {
 
     public Page<File> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
-    public List<File> findBySubmissionEnvelopeUuid(Uuid uuid);
+    public List<File> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 }

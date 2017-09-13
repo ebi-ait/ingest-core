@@ -11,7 +11,7 @@ import org.humancellatlas.ingest.core.Checksums;
 @Getter
 @AllArgsConstructor
 public class FileMessage {
-    @JsonProperty("cloud_url")
+    @JsonProperty("url")
     private final String cloudUrl;
     @JsonProperty("name")
     private final String fileName;

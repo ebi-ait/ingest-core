@@ -30,11 +30,11 @@ public class FileService {
         return getFileRepository().save(file);
     }
 
-    public File updateStagedFileUrl(Uuid envelopeUuid, String fileName, String newFileUrl) throws CoreEntityNotFoundException {
-        Optional<SubmissionEnvelope> envelope = Optional.ofNullable(submissionEnvelopeRepository.findByUuid(envelopeUuid));
+    public File updateStagedFileUrl(String envelopeUuid, String fileName, String newFileUrl) throws CoreEntityNotFoundException {
+        Optional<SubmissionEnvelope> envelope = Optional.ofNullable(submissionEnvelopeRepository.findByUuid(new Uuid(envelopeUuid)));
 
         if(envelope.isPresent()) {
-            List<File> filesInEnvelope = fileRepository.findBySubmissionEnvelopeUuid(envelopeUuid);
+            List<File> filesInEnvelope = fileRepository.findBySubmissionEnvelope(envelope.get());
 
             Optional<File> fileToUpdate = filesInEnvelope.stream()
                     .filter(file -> file.getFileName().equals(fileName))
