@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.core;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
@@ -10,6 +11,7 @@ public class Checksums {
     private String sha1;
     private String sha256;
     private String crc32c;
+    @JsonProperty("s3_etag")
     private String s3Etag;
 
     protected Checksums(String sha1, String sha256, String crc32c, String s3Etag) {
