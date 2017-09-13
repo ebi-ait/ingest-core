@@ -26,9 +26,9 @@ import java.util.*;
  */
 @Getter
 public class SubmissionEnvelope extends AbstractEntity {
-    private final List<Event> events;
+    private final List<Event> events = new ArrayList<>();
 
-    private final @JsonIgnore Map<String, ValidationState> validationStateMap;
+    private final @JsonIgnore Map<String, ValidationState> validationStateMap = new HashMap<>();
 
     private SubmissionState submissionState;
 
@@ -38,23 +38,10 @@ public class SubmissionEnvelope extends AbstractEntity {
         return log;
     }
 
-    public SubmissionEnvelope(Uuid uuid,
-                              SubmissionDate submissionDate,
-                              UpdateDate updateDate,
-                              List<Event> events,
-                              SubmissionState submissionState) {
-        super(EntityType.SUBMISSION, uuid, submissionDate, updateDate);
-        this.events = events;
-        this.validationStateMap = new HashMap<>();
-        this.submissionState = submissionState;
-    }
-
     public SubmissionEnvelope() {
-        this(new Uuid(), // OK to create a new Uuid for submission envelopes, but we expect accessioning service to do this for metadata docs
-             new SubmissionDate(new Date()),
-             new UpdateDate(new Date()),
-             new ArrayList<>(),
-             SubmissionState.PENDING);
+        super(EntityType.SUBMISSION);
+        this.submissionState = SubmissionState.PENDING;
+        setUuid(new Uuid());
     }
 
     public static List<SubmissionState> allowedStateTransitions(SubmissionState fromState) {

@@ -24,40 +24,9 @@ import java.util.List;
  */
 @Getter
 public class Project extends MetadataDocument {
-    protected Project() {
-        super(EntityType.PROJECT,
-              null,
-              new SubmissionDate(new Date()),
-              new UpdateDate(new Date()),
-              new ArrayList<>(),
-              null,
-              ValidationState.DRAFT,
-              null,
-              null);
-    }
-
-    public Project(EntityType type,
-                   Uuid uuid,
-                   SubmissionDate submissionDate,
-                   UpdateDate updateDate,
-                   List<Event> events,
-                   Accession accession,
-                   ValidationState validationState,
-                   SubmissionEnvelope submissionEnvelope,
-                   Object content) {
-        super(type, uuid, submissionDate, updateDate, events, accession, validationState, submissionEnvelope, content);
-    }
-
     @JsonCreator
     public Project(Object content) {
-        this(EntityType.PROJECT,
-             null,
-             new SubmissionDate(new Date()),
-             new UpdateDate(new Date()),
-             new ArrayList<>(),
-             null,
-             ValidationState.DRAFT, null,
-             null);
+        super(EntityType.PROJECT, content);
     }
 
     public Project addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {

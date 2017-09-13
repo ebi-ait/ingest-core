@@ -24,39 +24,9 @@ import java.util.List;
  */
 @Getter
 public class Protocol extends MetadataDocument {
-    protected Protocol() {
-        super(EntityType.PROTOCOL,
-              null,
-              new SubmissionDate(new Date()),
-              new UpdateDate(new Date()),
-              new ArrayList<>(), null,
-              ValidationState.DRAFT,
-              null,
-              null);
-    }
-
-    public Protocol(EntityType type,
-                    Uuid uuid,
-                    SubmissionDate submissionDate,
-                    UpdateDate updateDate,
-                    List<Event> events,
-                    Accession accession,
-                    ValidationState validationState, SubmissionEnvelope submissionEnvelope,
-                    Object content) {
-        super(type, uuid, submissionDate, updateDate, events, accession, validationState, submissionEnvelope, content);
-    }
-
     @JsonCreator
     public Protocol(Object content) {
-        this(EntityType.PROTOCOL,
-             null,
-             new SubmissionDate(new Date()),
-             new UpdateDate(new Date()),
-             new ArrayList<>(),
-             null,
-             ValidationState.DRAFT, null,
-             content
-        );
+        super(EntityType.PROTOCOL, content);
     }
 
     public Protocol addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {

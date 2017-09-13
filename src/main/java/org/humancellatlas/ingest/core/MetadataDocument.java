@@ -35,11 +35,10 @@ public abstract class MetadataDocument extends AbstractEntity {
     }
 
     protected MetadataDocument(EntityType type,
-                               List<Event> events,
                                Object content) {
         super(type);
-        this.events.addAll(events);
         this.content = content;
+        this.validationState = ValidationState.DRAFT;
     }
 
     public MetadataDocument addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {

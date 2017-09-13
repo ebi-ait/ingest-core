@@ -27,56 +27,13 @@ import java.util.List;
  */
 @Getter
 public class Sample extends MetadataDocument {
-    private final @DBRef List<Sample> derivedFromSamples;
-    private final @DBRef List<Project> projects;
-    private final @DBRef List<Protocol> protocols;
-
-    protected Sample() {
-        super(EntityType.SAMPLE,
-              null,
-              new SubmissionDate(new Date()),
-              new UpdateDate(new Date()),
-              new ArrayList<>(),
-              null,
-              ValidationState.DRAFT,
-              null,
-              null);
-        this.derivedFromSamples = new ArrayList<>();
-        this.projects = new ArrayList<>();
-        this.protocols = new ArrayList<>();
-    }
-
-    public Sample(EntityType type,
-                  Uuid uuid,
-                  SubmissionDate submissionDate,
-                  UpdateDate updateDate,
-                  List<Event> events,
-                  Accession accession,
-                  ValidationState validationState, List<Sample> derivedFromSamples,
-                  List<Project> projects,
-                  List<Protocol> protocols,
-                  SubmissionEnvelope submissionEnvelope,
-                  Object content) {
-        super(type, uuid, submissionDate, updateDate, events, accession, validationState, submissionEnvelope, content);
-        this.derivedFromSamples = derivedFromSamples;
-        this.projects = projects;
-        this.protocols = protocols;
-    }
+    private final @DBRef List<Sample> derivedFromSamples = new ArrayList<>();
+    private final @DBRef List<Project> projects = new ArrayList<>();
+    private final @DBRef List<Protocol> protocols = new ArrayList<>();
 
     @JsonCreator
     public Sample(Object content) {
-        this(EntityType.SAMPLE,
-             null,
-             new SubmissionDate(new Date()),
-             new UpdateDate(new Date()),
-             new ArrayList<>(),
-             null,
-             ValidationState.DRAFT, new ArrayList<>(),
-             new ArrayList<>(),
-             new ArrayList<>(),
-             null,
-             content
-        );
+        super(EntityType.SAMPLE, content);
     }
 
     public Sample addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
