@@ -54,7 +54,7 @@ public class SubmissionEnvelope extends AbstractEntity {
              new SubmissionDate(new Date()),
              new UpdateDate(new Date()),
              new ArrayList<>(),
-             SubmissionState.DRAFT);
+             SubmissionState.PENDING);
     }
 
     public static List<SubmissionState> allowedStateTransitions(SubmissionState fromState) {
