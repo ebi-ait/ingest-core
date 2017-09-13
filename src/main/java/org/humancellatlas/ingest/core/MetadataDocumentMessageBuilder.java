@@ -97,7 +97,7 @@ public class MetadataDocumentMessageBuilder {
             callbackLink = callbackLink.replace("http://localhost:8080", "");
         }
         catch (IllegalStateException e) {
-            getLog().error("Unable to construct callback link, leaving blank");
+            getLog().error("Unable to construct callback link, leaving blank", e);
             callbackLink = "";
         }
 
