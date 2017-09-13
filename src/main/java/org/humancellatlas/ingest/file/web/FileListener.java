@@ -26,7 +26,7 @@ public class FileListener {
             fileService.updateStagedFileUrl(new Uuid(fileMessage.getStagingAreaId()),
                     fileMessage.getFileName(),
                     fileMessage.getCloudUrl());
-        } catch (CoreEntityNotFoundException e) {
+        } catch (CoreEntityNotFoundException | RuntimeException e) {
             throw new AmqpRejectAndDontRequeueException(e.getMessage());
         }
 
