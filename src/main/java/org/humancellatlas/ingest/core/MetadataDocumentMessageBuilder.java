@@ -14,7 +14,13 @@ import org.humancellatlas.ingest.sample.Sample;
 import org.humancellatlas.ingest.sample.web.SampleController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
+import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
+import org.springframework.data.rest.core.mapping.ResourceMappings;
+import org.springframework.data.rest.webmvc.BaseUri;
+import org.springframework.data.rest.webmvc.support.RepositoryLinkBuilder;
+import org.springframework.hateoas.Link;
+
+import java.net.URI;
 
 /**
  * Javadocs go here!
@@ -23,11 +29,14 @@ import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
  * @date 12/09/17
  */
 public class MetadataDocumentMessageBuilder {
-    public static MetadataDocumentMessageBuilder usingLinkBuilder(RepositoryEntityLinks repositoryEntityLinks) {
-        return new MetadataDocumentMessageBuilder(repositoryEntityLinks);
+    public static MetadataDocumentMessageBuilder using(ResourceMappings mappings, RepositoryRestConfiguration config) {
+        return new MetadataDocumentMessageBuilder(mappings, config);
     }
 
-    private final RepositoryEntityLinks repositoryEntityLinks;
+    private final String DUMMY_BASE_URI = "http://localhost:8080";
+
+    private final ResourceMappings mappings;
+    private final RepositoryRestConfiguration config;
 
     private Class<?> controllerClass;
     private Class<?> documentType;
@@ -39,8 +48,9 @@ public class MetadataDocumentMessageBuilder {
         return log;
     }
 
-    private MetadataDocumentMessageBuilder(RepositoryEntityLinks repositoryEntityLinks) {
-        this.repositoryEntityLinks = repositoryEntityLinks;
+    private MetadataDocumentMessageBuilder(ResourceMappings mappings, RepositoryRestConfiguration config) {
+        this.mappings = mappings;
+        this.config = config;
     }
 
     public MetadataDocumentMessageBuilder messageFor(MetadataDocument metadataDocument) {
@@ -89,17 +99,13 @@ public class MetadataDocumentMessageBuilder {
     }
 
     public MetadataDocumentMessage build() {
-        String callbackLink;
-        try {
-            callbackLink =
-                    repositoryEntityLinks.linkToSingleResource(documentType, metadataDocId).withSelfRel().getHref();
-            // todo make link relative so clients can fill in domain - must be a better way of doing this!
-            callbackLink = callbackLink.replace("http://localhost:8080", "");
-        }
-        catch (IllegalStateException e) {
-            getLog().error("Unable to construct callback link, leaving blank", e);
-            callbackLink = "";
-        }
+        // todo - here, we make link with DUMMY_BASE_URI and then take it out again so clients can fill in domain - must be a better way of doing this!
+        RepositoryLinkBuilder rlb = new RepositoryLinkBuilder(mappings.getMetadataFor(documentType),
+                                                              new BaseUri(URI.create(DUMMY_BASE_URI)));
+        Link link = rlb
+                .slash(metadataDocId)
+                .withRel(mappings.getMetadataFor(documentType).getItemResourceRel());
+        String callbackLink = link.withSelfRel().getHref().replace(DUMMY_BASE_URI, "");
 
         return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(), metadataDocId, callbackLink);
     }

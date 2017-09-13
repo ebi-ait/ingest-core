@@ -2,15 +2,24 @@ package org.humancellatlas.ingest.state;
 
 import lombok.Getter;
 import lombok.NonNull;
-import org.humancellatlas.ingest.core.*;
+import org.humancellatlas.ingest.core.Event;
+import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.MetadataDocumentMessage;
+import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
+import org.humancellatlas.ingest.core.ValidationEvent;
 import org.humancellatlas.ingest.messaging.Constants;
-import org.humancellatlas.ingest.submission.*;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessage;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessageBuilder;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.humancellatlas.ingest.submission.SubmissionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
+import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
+import org.springframework.data.rest.core.mapping.ResourceMappings;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
@@ -30,7 +39,8 @@ public class StateEngine {
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
 
-    private final @NonNull RepositoryEntityLinks repositoryEntityLinks;
+    private final @NonNull ResourceMappings mappings;
+    private final @NonNull RepositoryRestConfiguration config;
 
     private final @NonNull ExecutorService executorService;
 
@@ -42,10 +52,13 @@ public class StateEngine {
 
     @Autowired StateEngine(SubmissionEnvelopeRepository submissionEnvelopeRepository,
                            RabbitMessagingTemplate rabbitMessagingTemplate,
-                           RepositoryEntityLinks repositoryEntityLinks) {
+                           ResourceMappings mappings,
+                           RepositoryRestConfiguration config) {
         this.submissionEnvelopeRepository = submissionEnvelopeRepository;
         this.rabbitMessagingTemplate = rabbitMessagingTemplate;
-        this.repositoryEntityLinks = repositoryEntityLinks;
+
+        this.mappings = mappings;
+        this.config = config;
 
         this.executorService = Executors.newCachedThreadPool();
     }
@@ -122,8 +135,7 @@ public class StateEngine {
                 log.info(String.format("Congratulations! You have submitted your envelope '%s'",
                                        submissionEnvelope.getId()));
                 SubmissionEnvelopeMessage submissionMessage =
-                        SubmissionEnvelopeMessageBuilder.usingLinkBuilder(repositoryEntityLinks)
-                        .messageFor(submissionEnvelope).build();
+                        SubmissionEnvelopeMessageBuilder.using(mappings, config).messageFor(submissionEnvelope).build();
 
                 getRabbitMessagingTemplate().convertAndSend(
                         Constants.Exchanges.ENVELOPE_FANOUT,
@@ -144,22 +156,20 @@ public class StateEngine {
                         "Metadata document '%s' has been put into a draft state... notifying validation service",
                         metadataDocument.getId()));
                 MetadataDocumentMessage validationMessage =
-                        MetadataDocumentMessageBuilder.usingLinkBuilder(repositoryEntityLinks).messageFor
-                                (metadataDocument).build();
+                        MetadataDocumentMessageBuilder.using(mappings, config).messageFor(metadataDocument).build();
                 getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.VALIDATION_FANOUT,
-                        "",
-                        validationMessage);
+                                                            "",
+                                                            validationMessage);
                 break;
             case VALID:
                 getLog().info(String.format(
                         "Metadata document '%s' has been put into a valid state... notifying accessioning service",
                         metadataDocument.getId()));
                 MetadataDocumentMessage accessioningMessage =
-                        MetadataDocumentMessageBuilder.usingLinkBuilder(repositoryEntityLinks).messageFor
-                                (metadataDocument).build();
+                        MetadataDocumentMessageBuilder.using(mappings, config).messageFor(metadataDocument).build();
                 getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.ACCESSION_FANOUT,
-                        "",
-                        accessioningMessage);
+                                                            "",
+                                                            accessioningMessage);
                 break;
             default:
                 getLog().debug(
