@@ -155,9 +155,9 @@ public class StateEngine {
 
         switch (targetState) {
             case DRAFT:
-                if (metadataDocument.getAccession() == null) {
+                if (metadataDocument.getUuid() == null) {
                     getLog().info(String.format(
-                            "Draft metadata document '%s' has no accession... notifying accessioning service",
+                            "Draft metadata document '%s' has no uuid... notifying accessioning service",
                             metadataDocument.getId()));
                     getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.ACCESSION_FANOUT,
                             "",
