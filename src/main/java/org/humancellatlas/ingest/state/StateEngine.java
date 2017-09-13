@@ -150,26 +150,26 @@ public class StateEngine {
     }
 
     private void postMessageIfRequired(MetadataDocument metadataDocument, ValidationState targetState) {
+        MetadataDocumentMessage message =
+                MetadataDocumentMessageBuilder.using(mappings, config).messageFor(metadataDocument).build();
+
         switch (targetState) {
             case DRAFT:
+                if (metadataDocument.getAccession() == null) {
+                    getLog().info(String.format(
+                            "Draft metadata document '%s' has no accession... notifying accessioning service",
+                            metadataDocument.getId()));
+                    getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.ACCESSION_FANOUT,
+                            "",
+                            message);
+                }
+
                 getLog().info(String.format(
                         "Metadata document '%s' has been put into a draft state... notifying validation service",
                         metadataDocument.getId()));
-                MetadataDocumentMessage validationMessage =
-                        MetadataDocumentMessageBuilder.using(mappings, config).messageFor(metadataDocument).build();
                 getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.VALIDATION_FANOUT,
                                                             "",
-                                                            validationMessage);
-                break;
-            case VALID:
-                getLog().info(String.format(
-                        "Metadata document '%s' has been put into a valid state... notifying accessioning service",
-                        metadataDocument.getId()));
-                MetadataDocumentMessage accessioningMessage =
-                        MetadataDocumentMessageBuilder.using(mappings, config).messageFor(metadataDocument).build();
-                getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.ACCESSION_FANOUT,
-                                                            "",
-                                                            accessioningMessage);
+                                                            message);
                 break;
             default:
                 getLog().debug(

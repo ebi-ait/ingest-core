@@ -41,6 +41,7 @@ public class MetadataDocumentMessageBuilder {
     private Class<?> controllerClass;
     private Class<?> documentType;
     private String metadataDocId;
+    private String metadataDocUuid;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -55,6 +56,9 @@ public class MetadataDocumentMessageBuilder {
 
     public MetadataDocumentMessageBuilder messageFor(MetadataDocument metadataDocument) {
         withDocumentType(metadataDocument.getClass()).withId(metadataDocument.getId());
+        if (metadataDocument.getUuid() != null) {
+            withUuid(metadataDocument.getUuid().toString());
+        }
         if (metadataDocument instanceof Analysis) {
             return withControllerClass(AnalysisController.class);
         }
@@ -98,6 +102,12 @@ public class MetadataDocumentMessageBuilder {
         return this;
     }
 
+    private MetadataDocumentMessageBuilder withUuid(String metadataDocUuid) {
+        this.metadataDocUuid = metadataDocUuid;
+
+        return this;
+    }
+
     public MetadataDocumentMessage build() {
         // todo - here, we make link with DUMMY_BASE_URI and then take it out again so clients can fill in domain - must be a better way of doing this!
         RepositoryLinkBuilder rlb = new RepositoryLinkBuilder(mappings.getMetadataFor(documentType),
@@ -107,6 +117,6 @@ public class MetadataDocumentMessageBuilder {
                 .withRel(mappings.getMetadataFor(documentType).getItemResourceRel());
         String callbackLink = link.withSelfRel().getHref().replace(DUMMY_BASE_URI, "");
 
-        return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(), metadataDocId, callbackLink);
+        return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(), metadataDocId, metadataDocUuid, callbackLink);
     }
 }

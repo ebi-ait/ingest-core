@@ -14,5 +14,6 @@ import lombok.Getter;
 public class MetadataDocumentMessage {
     private final String documentType;
     private final String documentId;
+    private final String documentUuid;
     private final String callbackLink;
 }
