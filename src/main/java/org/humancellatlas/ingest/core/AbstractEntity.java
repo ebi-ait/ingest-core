@@ -7,6 +7,8 @@ import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.hateoas.Identifiable;
 
+import java.util.Date;
+
 /**
  * Javadocs go here!
  *
@@ -21,17 +23,18 @@ public abstract class AbstractEntity implements Identifiable<String> {
 
     private final @JsonIgnore EntityType type;
 
-    private final Uuid uuid;
     private final SubmissionDate submissionDate;
-    private final UpdateDate updateDate;
 
-    protected AbstractEntity(EntityType type,
-                             Uuid uuid,
-                             SubmissionDate submissionDate,
-                             UpdateDate updateDate) {
+    private Uuid uuid;
+    private UpdateDate updateDate;
+
+    protected AbstractEntity(EntityType type) {
         this.type = type;
-        this.uuid = uuid;
-        this.submissionDate = submissionDate;
-        this.updateDate = updateDate;
+        this.submissionDate = new SubmissionDate(new Date());
+        update();
+    }
+
+    public void update() {
+        this.updateDate = new UpdateDate(new Date());
     }
 }

@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.core;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.humancellatlas.ingest.state.InvalidMetadataDocumentStateException;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -19,13 +20,13 @@ import java.util.List;
  */
 @Getter
 public abstract class MetadataDocument extends AbstractEntity {
-    private final List<Event> events;
-    private final Accession accession;
+    private final List<Event> events = new ArrayList<>();
     private final Object content;
 
     private @DBRef SubmissionEnvelope submissionEnvelope;
 
-    private ValidationState validationState;
+    private @Setter Accession accession;
+    private @Setter ValidationState validationState;
 
     private static final Logger log = LoggerFactory.getLogger(SubmissionEnvelope.class);
 
@@ -34,20 +35,10 @@ public abstract class MetadataDocument extends AbstractEntity {
     }
 
     protected MetadataDocument(EntityType type,
-                               Uuid uuid,
-                               SubmissionDate submissionDate,
-                               UpdateDate updateDate,
                                List<Event> events,
-                               Accession accession,
-                               ValidationState validationState,
-                               SubmissionEnvelope submissionEnvelope,
                                Object content) {
-        super(type, uuid, submissionDate, updateDate);
-        this.events = events;
-        this.accession = accession;
-        this.validationState = validationState;
-        this.submissionEnvelope = submissionEnvelope;
-
+        super(type);
+        this.events.addAll(events);
         this.content = content;
     }
 
