@@ -12,9 +12,9 @@ import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.web.ProtocolController;
 import org.humancellatlas.ingest.sample.Sample;
 import org.humancellatlas.ingest.sample.web.SampleController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
-import org.springframework.data.rest.webmvc.support.RepositoryLinkBuilder;
-import org.springframework.hateoas.Link;
 
 /**
  * Javadocs go here!
@@ -32,6 +32,12 @@ public class MetadataDocumentMessageBuilder {
     private Class<?> controllerClass;
     private Class<?> documentType;
     private String metadataDocId;
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
+    protected Logger getLog() {
+        return log;
+    }
 
     private MetadataDocumentMessageBuilder(RepositoryEntityLinks repositoryEntityLinks) {
         this.repositoryEntityLinks = repositoryEntityLinks;
@@ -83,11 +89,17 @@ public class MetadataDocumentMessageBuilder {
     }
 
     public MetadataDocumentMessage build() {
-        String callbackLink = repositoryEntityLinks.linkToSingleResource(
-                documentType, metadataDocId).withSelfRel().getHref();
-
-        // todo make link relative so clients can fill in domain - must be a better way of doing this!
-        callbackLink = callbackLink.replace("http://localhost:8080", "");
+        String callbackLink;
+        try {
+            callbackLink =
+                    repositoryEntityLinks.linkToSingleResource(documentType, metadataDocId).withSelfRel().getHref();
+            // todo make link relative so clients can fill in domain - must be a better way of doing this!
+            callbackLink = callbackLink.replace("http://localhost:8080", "");
+        }
+        catch (IllegalStateException e) {
+            getLog().error("Unable to construct callback link, leaving blank");
+            callbackLink = "";
+        }
 
         return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(), metadataDocId, callbackLink);
     }
