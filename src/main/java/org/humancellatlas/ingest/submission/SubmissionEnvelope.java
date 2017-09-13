@@ -117,7 +117,7 @@ public class SubmissionEnvelope extends AbstractEntity {
 
     public SubmissionEnvelope notifyOfMetadataDocumentState(MetadataDocument metadataDocument) {
         if (!isTrackingMetadata(metadataDocument)) {
-            // if this doc is pending, it's either a new document or has new content, so it's ok to add to state tracker
+            // if this doc is in draft, it's either a new document or has new content, so it's ok to add to state tracker
             // but if not, we need to throw an exception here
             if (!metadataDocument.getValidationState().equals(ValidationState.DRAFT)) {
                 throw new MetadataDocumentStateException(String.format(
@@ -167,6 +167,7 @@ public class SubmissionEnvelope extends AbstractEntity {
         //     - if >=1 metadata documents are invalid, the envelope is invalid
         //     - otherwise, if >=1 metadata documents are validating, then the envelope is validating
         //     - if everything is now valid (state > DRAFT and nothing in the validationStateMap) the envelope is valid
+        //     - if there are documents in the queue but state is PENDING, upgrade to DRAFT
         //     - otherwise, nothing changes
 
         if (isSomethingInvalid) {
@@ -177,6 +178,9 @@ public class SubmissionEnvelope extends AbstractEntity {
         }
         if (hasReceivedDocuments() && !isTrackingMetadata()) {
             return SubmissionState.VALID;
+        }
+        if (!hasReceivedDocuments() && isTrackingMetadata()) {
+            return SubmissionState.DRAFT;
         }
 
         return getSubmissionState();
