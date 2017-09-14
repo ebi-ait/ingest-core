@@ -56,6 +56,7 @@ public class SubmissionEnvelope extends AbstractEntity {
                 allowedStates.add(SubmissionState.VALIDATING);
                 break;
             case VALIDATING:
+                allowedStates.add(SubmissionState.DRAFT);
                 allowedStates.add(SubmissionState.VALID);
                 allowedStates.add(SubmissionState.INVALID);
                 break;
@@ -115,9 +116,11 @@ public class SubmissionEnvelope extends AbstractEntity {
             // but if not, we need to throw an exception here
             if (!metadataDocument.getValidationState().equals(ValidationState.DRAFT)) {
                 throw new MetadataDocumentStateException(String.format(
-                        "Metadata document '%s' was not being tracked by containing envelope '%s' and does not have new content",
-                        metadataDocument,
-                        this));
+                        "Metadata document '%s: %s', in state '%s', was not being tracked by containing envelope",
+                        metadataDocument.getClass().getSimpleName(),
+                        metadataDocument.getId(),
+                        metadataDocument.getValidationState(),
+                        this.getId()));
             }
             else {
                 doValidationStateUpdate(metadataDocument);
@@ -188,7 +191,8 @@ public class SubmissionEnvelope extends AbstractEntity {
         if (hasReceivedDocuments() && !isTrackingMetadata()) {
             return SubmissionState.VALID;
         }
-        if (!hasReceivedDocuments() && isTrackingMetadata()) {
+        if (isTrackingMetadata()) {
+            // PENDING -> DRAFT or there are non-invalid docs still being tracked
             return SubmissionState.DRAFT;
         }
 

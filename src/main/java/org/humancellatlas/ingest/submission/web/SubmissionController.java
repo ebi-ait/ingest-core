@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.Optional;
+
 /**
  * Spring controller that will handle submission events on a {@link SubmissionEnvelope}
  *
@@ -124,5 +126,16 @@ public class SubmissionController {
     HttpEntity<?> completeEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
         Event event = getStateEngine().advanceStateOfEnvelope(submissionEnvelope, SubmissionState.COMPLETE);
         return ResponseEntity.accepted().body(event);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}/sync", method = RequestMethod.GET)
+    HttpEntity<?> forceStateCheck(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
+        Optional<Event> eventOpt = getStateEngine().analyseStateOfEnvelope(submissionEnvelope);
+        if (eventOpt.isPresent()) {
+            return ResponseEntity.ok().body(eventOpt.get());
+        }
+        else {
+            return ResponseEntity.noContent().build();
+        }
     }
 }

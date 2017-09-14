@@ -23,6 +23,7 @@ import org.springframework.data.rest.core.mapping.ResourceMappings;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -72,10 +73,22 @@ public class StateEngine {
 
     public Event advanceStateOfEnvelope(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
         if (!submissionEnvelope.allowedStateTransitions().contains(targetState)) {
+            StringBuilder msgBuilder = new StringBuilder();
+            msgBuilder.append("\n\nState report for envelope ").append(submissionEnvelope.getId()).append(":\n");
+            int trackedDocs = submissionEnvelope.getValidationStateMap().size();
+            msgBuilder.append("\tTracking ").append(trackedDocs).append(" documents\n");
+            msgBuilder.append("\tAll states: {\n");
+            for (Map.Entry<String, ValidationState> entry : submissionEnvelope.getValidationStateMap().entrySet()) {
+                msgBuilder.append("\t\t").append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+            }
+            msgBuilder.append("\t}\n");
+
             throw new IllegalStateException(String.format(
-                    "It is not possible to transition envelope '%s' to the state '%s'",
+                    "It is not possible to transition envelope '%s' from state '%s' to state '%s'\n%s",
                     submissionEnvelope.getId(),
-                    targetState));
+                    submissionEnvelope.getSubmissionState(),
+                    targetState,
+                    msgBuilder.toString()));
         }
 
         final Event event = new SubmissionEvent(submissionEnvelope.getSubmissionState(), targetState);
@@ -94,8 +107,10 @@ public class StateEngine {
     Event advanceStateOfMetadataDocument(T repository, S metadataDocument, ValidationState targetState) {
         if (!metadataDocument.allowedStateTransitions().contains(targetState)) {
             throw new IllegalStateException(String.format(
-                    "It is not possible to transition metadata document '%s' to the state '%s'",
+                    "It is not possible to transition document '%s: %s' from state '%s' to state '%s'",
+                    metadataDocument.getClass().getSimpleName(), 
                     metadataDocument.getId(),
+                    metadataDocument.getValidationState(),
                     targetState));
         }
 
