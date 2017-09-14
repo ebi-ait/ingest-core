@@ -12,7 +12,7 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 @Getter
 @Setter
 public class File extends MetadataDocument {
-    private final String fileName;
+    private String fileName;
 
     private String cloudUrl;
     private Checksums checksums;

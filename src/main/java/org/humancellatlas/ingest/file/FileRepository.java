@@ -19,5 +19,6 @@ public interface FileRepository extends MongoRepository<File, String> {
 
     public Page<File> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
-    public List<File> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+    public List<File> findBySubmissionEnvelopeAndFileName(SubmissionEnvelope submissionEnvelope, String fileName);
+
 }
