@@ -124,9 +124,10 @@ public class StateEngine {
 
     public void notifySubmissionEnvelopeOfMetadataDocumentChange(SubmissionEnvelope submissionEnvelope,
                                                                  MetadataDocument metadataDocument) {
-        submissionEnvelope.notifyOfMetadataDocumentState(metadataDocument);
         postMessageIfRequired(metadataDocument, metadataDocument.getValidationState());
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        if (submissionEnvelope.flagPossibleMetadataDocumentStateChange(metadataDocument)) {
+            getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        }
     }
 
     private void postMessageIfRequired(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
@@ -157,24 +158,24 @@ public class StateEngine {
             case DRAFT:
                 if (metadataDocument.getUuid() == null) {
                     getLog().info(String.format(
-                            "Draft metadata document '%s' has no uuid... notifying accessioning service",
-                            metadataDocument.getId()));
+                            "Draft metadata document '%s: %s' has no uuid... notifying accessioning service",
+                            metadataDocument.getClass().getSimpleName(), metadataDocument.getId()));
                     getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.ACCESSION_FANOUT,
-                            "",
-                            message);
+                                                                "",
+                                                                message);
                 }
 
                 getLog().info(String.format(
-                        "Metadata document '%s' has been put into a draft state... notifying validation service",
-                        metadataDocument.getId()));
+                        "Metadata document '%s: %s' has been put into a draft state... notifying validation service",
+                        metadataDocument.getClass().getSimpleName(), metadataDocument.getId()));
                 getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.VALIDATION_FANOUT,
                                                             "",
                                                             message);
                 break;
             default:
-                getLog().debug(
-                        String.format("No notification required for state transition to '%s'",
-                                      targetState.name()));
+                getLog().info(
+                        String.format("No notification required for metadata document '%s: %s' state transition to '%s'",
+                                      metadataDocument.getClass().getSimpleName(), metadataDocument.getId(), targetState.name()));
         }
     }
 }

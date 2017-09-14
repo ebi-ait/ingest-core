@@ -6,17 +6,19 @@ import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.SubmissionDate;
-import org.humancellatlas.ingest.state.SubmissionState;
-import org.humancellatlas.ingest.core.UpdateDate;
 import org.humancellatlas.ingest.core.Uuid;
-import org.humancellatlas.ingest.state.ValidationState;
-import org.humancellatlas.ingest.state.MetadataDocumentStateException;
 import org.humancellatlas.ingest.state.InvalidSubmissionStateException;
+import org.humancellatlas.ingest.state.MetadataDocumentStateException;
+import org.humancellatlas.ingest.state.SubmissionState;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Javadocs go here!
@@ -107,7 +109,7 @@ public class SubmissionEnvelope extends AbstractEntity {
         return this;
     }
 
-    public SubmissionEnvelope notifyOfMetadataDocumentState(MetadataDocument metadataDocument) {
+    public boolean flagPossibleMetadataDocumentStateChange(MetadataDocument metadataDocument) {
         if (!isTrackingMetadata(metadataDocument)) {
             // if this doc is in draft, it's either a new document or has new content, so it's ok to add to state tracker
             // but if not, we need to throw an exception here
@@ -117,11 +119,25 @@ public class SubmissionEnvelope extends AbstractEntity {
                         metadataDocument,
                         this));
             }
+            else {
+                doValidationStateUpdate(metadataDocument);
+                return true;
+            }
         }
+        else {
+            // already tracking, update if this is a change
+            if (!this.validationStateMap.get(metadataDocument.getId()).equals(metadataDocument.getValidationState())) {
+                doValidationStateUpdate(metadataDocument);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void doValidationStateUpdate(MetadataDocument metadataDocument) {
         this.validationStateMap.put(metadataDocument.getId(), metadataDocument.getValidationState());
         update();
-
-        return this;
     }
 
     public SubmissionState determineEnvelopeState() {
