@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Version;
 import org.springframework.hateoas.Identifiable;
 
 import java.util.Date;
@@ -22,6 +24,9 @@ import java.util.Date;
 public abstract class AbstractEntity implements Identifiable<String> {
     private @Id @JsonIgnore String id;
 
+    private @Version Long version;
+    private @LastModifiedDate Date date;
+
     private final @JsonIgnore EntityType type;
 
     private final SubmissionDate submissionDate;
@@ -37,5 +42,6 @@ public abstract class AbstractEntity implements Identifiable<String> {
 
     public void update() {
         this.updateDate = new UpdateDate(new Date());
+        this.date = updateDate.getDate();
     }
 }
