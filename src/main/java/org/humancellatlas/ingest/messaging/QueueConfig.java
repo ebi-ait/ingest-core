@@ -1,22 +1,13 @@
 package org.humancellatlas.ingest.messaging;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.FanoutExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistrar;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -43,7 +34,7 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean Queue queueValidationRequired() { return new Queue(Constants.Queues.VALIDATION_REQUIRED, false); }
 
-    @Bean FanoutExchange validationExchange() { return new FanoutExchange(Constants.Exchanges.VALIDATION_FANOUT); }
+    @Bean DirectExchange validationExchange() { return new DirectExchange(Constants.Exchanges.VALIDATION); }
 
     @Bean Queue queueAccessionRequired() { return new Queue(Constants.Queues.ACCESSION_REQUIRED, false); }
 
@@ -65,8 +56,8 @@ public class QueueConfig implements RabbitListenerConfigurer {
                 .to(envelopeExchange);
     }
 
-    @Bean Binding bindingValidation(Queue queueValidationRequired, FanoutExchange validationExchange) {
-        return BindingBuilder.bind(queueValidationRequired).to(validationExchange);
+    @Bean Binding bindingValidation(Queue queueValidationRequired, DirectExchange validationExchange) {
+        return BindingBuilder.bind(queueValidationRequired).to(validationExchange).with(Constants.Queues.VALIDATION_REQUIRED);
     }
 
     @Bean Binding bindingAccession(Queue queueAccessionRequired, FanoutExchange accessionExchange) {

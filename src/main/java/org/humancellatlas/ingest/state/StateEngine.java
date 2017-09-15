@@ -183,8 +183,8 @@ public class StateEngine {
                 getLog().info(String.format(
                         "Metadata document '%s: %s' has been put into a draft state... notifying validation service",
                         metadataDocument.getClass().getSimpleName(), metadataDocument.getId()));
-                getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.VALIDATION_FANOUT,
-                                                            "",
+                getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.VALIDATION,
+                                                            Constants.Queues.VALIDATION_REQUIRED,
                                                             message);
                 break;
             default:

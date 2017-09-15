@@ -15,7 +15,7 @@ public class Constants {
     }
 
     public class Exchanges {
-        public static final String VALIDATION_FANOUT = "ingest.validation.exchange";
+        public static final String VALIDATION = "ingest.validation.exchange";
         public static final String FILE_FANOUT = "ingest.file.update.exchange";
         public static final String FILE_STAGED_FANOUT = "ingest.file.staged.exchange";
         public static final String ENVELOPE_FANOUT = "ingest.envelope.submitted.exchange";

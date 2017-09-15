@@ -18,6 +18,6 @@ public class ValidateMetadataService {
 
     public void validateMetadata(MetadataDocument document){
         ValidationMessage validationMessage = new ValidationMessage(document.getType(), document.getUuid(), document.getContent());
-        rabbitMessagingTemplate.convertAndSend(Constants.Exchanges.VALIDATION_FANOUT, "", validationMessage);
+        rabbitMessagingTemplate.convertAndSend(Constants.Exchanges.VALIDATION, "", validationMessage);
     }
 }
