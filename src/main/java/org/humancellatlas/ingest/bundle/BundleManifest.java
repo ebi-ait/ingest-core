@@ -19,12 +19,12 @@ import java.util.Map;
 public class BundleManifest implements Identifiable<String> {
     private @Id @JsonIgnore String id;
 
-    private final Uuid bundleUuid;
+    private final String bundleUuid;
 
-    private final List<Uuid> fileUuids;
-    private final Map<Uuid, Collection<Uuid>> fileSampleMap;
-    private final Map<Uuid, Collection<Uuid>> fileAssayMap;
-    private final Map<Uuid, Collection<Uuid>> fileAnalysisMap;
-    private final Map<Uuid, Collection<Uuid>> fileProjectMap;
-    private final Map<Uuid, Collection<Uuid>> fileProtocolMap;
+    private final List<String> files;
+    private final Map<String, Collection<String>> fileSampleMap;
+    private final Map<String, Collection<String>> fileAssayMap;
+    private final Map<String, Collection<String>> fileAnalysisMap;
+    private final Map<String, Collection<String>> fileProjectMap;
+    private final Map<String, Collection<String>> fileProtocolMap;
 }
