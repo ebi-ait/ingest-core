@@ -29,7 +29,9 @@ dependencies {
 	compile('org.springframework.data:spring-data-rest-hal-browser')
 	compile('org.springframework.boot:spring-boot-starter-hateoas')
 	compile('org.springframework.boot:spring-boot-starter-amqp')
-	
+
+	compile('joda-time:joda-time')
+	compile('com.fasterxml.jackson.datatype:jackson-datatype-joda')
 	compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
 	compile('com.fasterxml.jackson.module:jackson-module-parameter-names')
 	compileOnly('org.projectlombok:lombok')

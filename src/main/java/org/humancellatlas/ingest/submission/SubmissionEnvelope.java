@@ -95,7 +95,6 @@ public class SubmissionEnvelope extends AbstractEntity {
 
     public SubmissionEnvelope addEvent(Event event) {
         this.events.add(event);
-        update();
 
         return this;
     }
@@ -115,7 +114,6 @@ public class SubmissionEnvelope extends AbstractEntity {
 
         if (this.submissionState != targetState) {
             this.submissionState = targetState;
-            update();
         }
 
         return this;
@@ -151,7 +149,6 @@ public class SubmissionEnvelope extends AbstractEntity {
 
     private void doValidationStateUpdate(MetadataDocument metadataDocument) {
         this.validationStateMap.put(metadataDocument.getId(), metadataDocument.getValidationState());
-        update();
     }
 
     public SubmissionState determineEnvelopeState() {
