@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.submission;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Uuid;
@@ -10,9 +11,8 @@ import org.humancellatlas.ingest.core.Uuid;
  * @author Tony Burdett
  * @date 15/09/17
  */
-@RequiredArgsConstructor
-@Getter
+@Data
 class StagingDetails {
-    private final Uuid stagingAreaUuid;
-    private final StagingUrn stagingAreaLocation;
+    private Uuid stagingAreaUuid;
+    private StagingUrn stagingAreaLocation;
 }

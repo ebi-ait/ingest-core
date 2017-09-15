@@ -13,7 +13,7 @@ import java.net.URI;
  */
 @Data
 class StagingUrn {
-    private final URI value;
+    private URI value;
 
     @JsonCreator
     public StagingUrn(String name) {
@@ -23,5 +23,9 @@ class StagingUrn {
         if (!value.isOpaque()) {
             throw new IllegalArgumentException(String.format("Staging URN is malformed: %s", value.toString()));
         }
+    }
+
+    StagingUrn() {
+
     }
 }
