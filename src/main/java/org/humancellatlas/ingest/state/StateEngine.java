@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.core.MetadataDocumentMessage;
 import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
 import org.humancellatlas.ingest.core.ValidationEvent;
 import org.humancellatlas.ingest.messaging.Constants;
+import org.humancellatlas.ingest.messaging.MessageSender;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessageBuilder;
@@ -15,7 +16,6 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -38,8 +38,7 @@ import java.util.concurrent.Executors;
 @Getter
 public class StateEngine {
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
-    private final @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
-
+    private final @NonNull MessageSender messageSender;
     private final @NonNull ResourceMappings mappings;
     private final @NonNull RepositoryRestConfiguration config;
 
@@ -52,12 +51,11 @@ public class StateEngine {
     }
 
     @Autowired StateEngine(SubmissionEnvelopeRepository submissionEnvelopeRepository,
-                           RabbitMessagingTemplate rabbitMessagingTemplate,
+                           MessageSender messageSender,
                            ResourceMappings mappings,
                            RepositoryRestConfiguration config) {
         this.submissionEnvelopeRepository = submissionEnvelopeRepository;
-        this.rabbitMessagingTemplate = rabbitMessagingTemplate;
-
+        this.messageSender = messageSender;
         this.mappings = mappings;
         this.config = config;
 
@@ -153,7 +151,7 @@ public class StateEngine {
                 SubmissionEnvelopeMessage submissionMessage =
                         SubmissionEnvelopeMessageBuilder.using(mappings, config).messageFor(submissionEnvelope).build();
 
-                getRabbitMessagingTemplate().convertAndSend(
+                getMessageSender().queueMessage(
                         Constants.Exchanges.ENVELOPE_FANOUT,
                         "",
                         submissionMessage);
@@ -175,7 +173,7 @@ public class StateEngine {
                     getLog().info(String.format(
                             "Draft metadata document '%s: %s' has no uuid... notifying accessioning service",
                             metadataDocument.getClass().getSimpleName(), metadataDocument.getId()));
-                    getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.ACCESSION_FANOUT,
+                    getMessageSender().queueMessage(Constants.Exchanges.ACCESSION_FANOUT,
                                                                 "",
                                                                 message);
                 }
@@ -183,7 +181,7 @@ public class StateEngine {
                 getLog().info(String.format(
                         "Metadata document '%s: %s' has been put into a draft state... notifying validation service",
                         metadataDocument.getClass().getSimpleName(), metadataDocument.getId()));
-                getRabbitMessagingTemplate().convertAndSend(Constants.Exchanges.VALIDATION,
+                getMessageSender().queueMessage(Constants.Exchanges.VALIDATION,
                                                             Constants.Queues.VALIDATION_REQUIRED,
                                                             message);
                 break;
