@@ -42,6 +42,7 @@ public class AnalysisService {
             BundleManifest bundleManifest = getBundleManifestRepository().findByBundleUuid(bundleUuid);
             if (bundleManifest != null) {
                 getLog().info(String.format("Adding bundle manifest link to analysis '%s'", analysis.getId()));
+                analysis.getInputBundleManifests().add(bundleManifest);
             }
             else {
                 getLog().warn(String.format(
