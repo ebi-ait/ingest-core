@@ -32,7 +32,7 @@ import java.util.Map;
 public class SubmissionEnvelope extends AbstractEntity {
     private final List<Event> events = new ArrayList<>();
 
-    private final @JsonIgnore Map<String, ValidationState> validationStateMap = new HashMap<>();
+    private final Map<String, ValidationState> validationStateMap = new HashMap<>();
 
     private @Setter StagingDetails stagingDetails;
     private SubmissionState submissionState;
