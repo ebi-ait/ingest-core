@@ -39,15 +39,14 @@ public class AnalysisService {
 
     public Analysis resolveBundleReferencesForAnalysis(Analysis analysis, BundleReference bundleReference) {
         for (String bundleUuid : bundleReference.getBundleUuids()) {
-            Uuid uuid = new Uuid(bundleUuid);
-            BundleManifest bundleManifest = getBundleManifestRepository().findByBundleUuid(uuid);
+            BundleManifest bundleManifest = getBundleManifestRepository().findByBundleUuid(bundleUuid);
             if (bundleManifest != null) {
                 getLog().info("Adding bundle manifest link to analysis '%s'", analysis.getId());
             }
             else {
                 getLog().warn(String.format(
                         "No Bundle Manifest present with bundle UUID '%s' - in future this will cause a critical error",
-                        uuid.getUuid()));
+                        bundleUuid));
             }
         }
         return analysisRepository.save(analysis);
