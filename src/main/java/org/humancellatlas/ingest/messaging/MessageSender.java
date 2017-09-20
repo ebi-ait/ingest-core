@@ -36,7 +36,7 @@ public class MessageSender {
         while(!messageQueue.isEmpty()){
             QueuedMessage nextMessage = messageQueue.peek();
             // get one minute ago
-            Date oneMinuteAgo = Date.from(Instant.now().minus(10, ChronoUnit.SECONDS));
+            Date oneMinuteAgo = Date.from(Instant.now().minus(60, ChronoUnit.SECONDS));
             if (nextMessage.getQueuedDate().before(oneMinuteAgo)) {
                 QueuedMessage message = messageQueue.remove();
                 this.rabbitMessagingTemplate.convertAndSend(message.getExchange(), message.getRoutingKey(), message.getPayload());
