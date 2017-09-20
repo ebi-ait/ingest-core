@@ -65,6 +65,8 @@ public class AnalysisController {
     ResponseEntity<Resource<?>> addFileReference(@PathVariable("analysis_id") Analysis analysis,
                                                  @RequestBody File file,
                                                  final PersistentEntityResourceAssembler assembler) {
+        SubmissionEnvelope submissionEnvelope = analysis.getSubmissionEnvelope();
+        file.addToSubmissionEnvelope(submissionEnvelope);
         File entity = getFileRepository().save(file);
         Analysis result = getAnalysisService().getAnalysisRepository().save(analysis.addFile(entity));
         PersistentEntityResource resource = assembler.toFullResource(result);
