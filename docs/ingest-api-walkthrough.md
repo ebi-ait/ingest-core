@@ -79,5 +79,5 @@ To do the submission:
 
 ```bash
 # returns a dummy receipt confirming submission
->: curl -X PUT -H "Content-Type: application/json" http://api.ingest.dev.data.humancellatlas.org/submissionEnvelopes/{sub_id}/confirmation
+>: curl -X PUT -H "Content-Type: application/json" http://api.ingest.dev.data.humancellatlas.org/submissionEnvelopes/{sub_id}/submissionEvent
 ```
