@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.submission;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.Event;
@@ -14,7 +15,7 @@ import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,11 +32,12 @@ import java.util.Map;
 @Getter
 public class SubmissionEnvelope extends AbstractEntity {
     private final List<Event> events = new ArrayList<>();
-
     private final Map<String, ValidationState> validationStateMap = new HashMap<>();
 
     private @Setter StagingDetails stagingDetails;
     private SubmissionState submissionState;
+
+    private @DBRef List<BundleManifest> bundleManifests = new ArrayList<>();
 
     private static final Logger log = LoggerFactory.getLogger(SubmissionEnvelope.class);
 
@@ -94,6 +96,12 @@ public class SubmissionEnvelope extends AbstractEntity {
     public SubmissionEnvelope addEvent(Event event) {
         this.events.add(event);
         update();
+
+        return this;
+    }
+
+    public SubmissionEnvelope addCreatedBundleManifest(BundleManifest bundleManifest) {
+        this.bundleManifests.add(bundleManifest);
 
         return this;
     }

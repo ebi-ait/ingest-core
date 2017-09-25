@@ -20,6 +20,7 @@ public class BundleManifest implements Identifiable<String> {
     private @Id @JsonIgnore String id;
 
     private final String bundleUuid;
+    private final String envelopeUuid;
 
     private final List<String> files;
     private final Map<String, Collection<String>> fileSampleMap;
