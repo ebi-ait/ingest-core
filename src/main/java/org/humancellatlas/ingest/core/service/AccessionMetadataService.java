@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class AccessionMetadataService {
     private final @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
-
-    public void accessionMetadata(MetadataDocument document) {
-        rabbitMessagingTemplate.convertAndSend(Constants.Exchanges.ACCESSION_FANOUT, "", document);
-    }
+//
+//    public void accessionMetadata(MetadataDocument document) {
+//        rabbitMessagingTemplate.convertAndSend(Constants.Exchanges.ACCESSION, "", document);
+//    }
 }

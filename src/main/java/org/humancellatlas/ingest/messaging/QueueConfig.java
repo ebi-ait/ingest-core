@@ -42,7 +42,7 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean Queue queueAccessionRequired() { return new Queue(Constants.Queues.ACCESSION_REQUIRED, false); }
 
-    @Bean FanoutExchange accessionExchange() { return new FanoutExchange(Constants.Exchanges.ACCESSION_FANOUT); }
+    @Bean DirectExchange accessionExchange() { return new DirectExchange(Constants.Exchanges.ACCESSION); }
 
     /* bindings */
 
@@ -68,8 +68,8 @@ public class QueueConfig implements RabbitListenerConfigurer {
         return BindingBuilder.bind(queueValidationRequired).to(validationExchange).with(Constants.Queues.VALIDATION_REQUIRED);
     }
 
-    @Bean Binding bindingAccession(Queue queueAccessionRequired, FanoutExchange accessionExchange) {
-        return BindingBuilder.bind(queueAccessionRequired).to(accessionExchange);
+    @Bean Binding bindingAccession(Queue queueAccessionRequired, DirectExchange accessionExchange) {
+        return BindingBuilder.bind(queueAccessionRequired).to(accessionExchange).with(Constants.Queues.ACCESSION_REQUIRED);
     }
 
     /* rabbit config */

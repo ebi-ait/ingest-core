@@ -9,9 +9,9 @@ import lombok.Getter;
  * @author Tony Burdett
  * @date 12/09/17
  */
-@AllArgsConstructor
 @Getter
-public class MetadataDocumentMessage {
+@AllArgsConstructor
+public class MetadataDocumentMessage implements AbstractEntityMessage {
     private final String documentType;
     private final String documentId;
     private final String documentUuid;

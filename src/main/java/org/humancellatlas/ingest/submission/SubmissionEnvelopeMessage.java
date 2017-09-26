@@ -2,7 +2,7 @@ package org.humancellatlas.ingest.submission;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.util.Assert;
+import org.humancellatlas.ingest.core.AbstractEntityMessage;
 
 /**
  * @author Simon Jupp
@@ -10,9 +10,9 @@ import org.springframework.util.Assert;
  */
 @AllArgsConstructor
 @Getter
-public class SubmissionEnvelopeMessage {
+public class SubmissionEnvelopeMessage implements AbstractEntityMessage {
     private final String documentType;
-    private final String id;
-    private final String uuid;
+    private final String documentId;
+    private final String documentUuid;
     private final String callbackLink;
 }

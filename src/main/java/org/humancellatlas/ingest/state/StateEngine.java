@@ -16,6 +16,7 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -50,9 +51,9 @@ public class StateEngine {
         return log;
     }
 
-    @Autowired StateEngine(SubmissionEnvelopeRepository submissionEnvelopeRepository,
-                           MessageSender messageSender,
+    public StateEngine(SubmissionEnvelopeRepository submissionEnvelopeRepository,
                            ResourceMappings mappings,
+                           MessageSender messageSender,
                            RepositoryRestConfiguration config) {
         this.submissionEnvelopeRepository = submissionEnvelopeRepository;
         this.messageSender = messageSender;
@@ -151,7 +152,7 @@ public class StateEngine {
                 SubmissionEnvelopeMessage submissionMessage =
                         SubmissionEnvelopeMessageBuilder.using(mappings, config).messageFor(submissionEnvelope).build();
 
-                getMessageSender().queueMessage(
+                getMessageSender().queueExportMessage(
                         Constants.Exchanges.ENVELOPE_SUBMITTED_FANOUT,
                         "",
                         submissionMessage);
@@ -173,15 +174,15 @@ public class StateEngine {
                     getLog().info(String.format(
                             "Draft metadata document '%s: %s' has no uuid... notifying accessioning service",
                             metadataDocument.getClass().getSimpleName(), metadataDocument.getId()));
-                    getMessageSender().queueMessage(Constants.Exchanges.ACCESSION_FANOUT,
-                                                                "",
+                    getMessageSender().queueAccessionMessage(Constants.Exchanges.ACCESSION,
+                                                                Constants.Queues.ACCESSION_REQUIRED,
                                                                 message);
                 }
 
                 getLog().info(String.format(
                         "Metadata document '%s: %s' has been put into a draft state... notifying validation service",
                         metadataDocument.getClass().getSimpleName(), metadataDocument.getId()));
-                getMessageSender().queueMessage(Constants.Exchanges.VALIDATION,
+                getMessageSender().queueValidationMessage(Constants.Exchanges.VALIDATION,
                                                             Constants.Queues.VALIDATION_REQUIRED,
                                                             message);
                 break;

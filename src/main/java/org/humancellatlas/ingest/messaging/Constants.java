@@ -21,6 +21,6 @@ public class Constants {
         public static final String FILE_STAGED_FANOUT = "ingest.file.staged.exchange";
         public static final String ENVELOPE_CREATED_FANOUT = "ingest.envelope.created.exchange";
         public static final String ENVELOPE_SUBMITTED_FANOUT = "ingest.envelope.submitted.exchange";
-        public static final String ACCESSION_FANOUT = "ingest.metadata.accession.exchange";
+        public static final String ACCESSION = "ingest.accession.exchange";
     }
 }
