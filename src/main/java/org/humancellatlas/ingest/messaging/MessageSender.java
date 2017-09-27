@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Getter
@@ -22,12 +21,9 @@ public class MessageSender {
 
     private @Autowired @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
 
-    private final @NonNull Set<QueuedMessage> validationMessageBatch = Collections.newSetFromMap(new ConcurrentHashMap<QueuedMessage, Boolean>());
-    private final @NonNull Set<QueuedMessage> accessionMessageBatch = Collections.newSetFromMap(new ConcurrentHashMap<QueuedMessage, Boolean>());
-    private final @NonNull Set<QueuedMessage> exportMessageBatch = Collections.newSetFromMap(new ConcurrentHashMap<QueuedMessage, Boolean>());
-
-    private Map<String, Boolean> processedIds = new HashMap<>();
-
+    private final @NonNull Queue<QueuedMessage> validationMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
+    private final @NonNull Queue<QueuedMessage> accessionMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
+    private final @NonNull Queue<QueuedMessage> exportMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
 
     public void queueValidationMessage(String exchange, String routingKey, MetadataDocumentMessage payload){
         QueuedMessage message = new QueuedMessage(new Date(), exchange, routingKey, payload);
@@ -46,27 +42,26 @@ public class MessageSender {
 
     @Scheduled(fixedDelay = 1000)
     private void sendValidationMessages(){
-        sendFromQueue(this.validationMessageBatch, 60);
+        sendFromQueue(this.validationMessageBatch, 40);
     }
 
     @Scheduled(fixedDelay = 1000)
     private void sendAccessionMessages(){
-        sendFromQueue(this.accessionMessageBatch, 30);
+        sendFromQueue(this.accessionMessageBatch, 20);
     }
 
     @Scheduled(fixedDelay = 1000)
     private void sendExportMessages(){
-        sendFromQueue(this.exportMessageBatch, 15);
+        sendFromQueue(this.exportMessageBatch, 10);
     }
 
-    private void sendFromQueue(Set<QueuedMessage> messageBatch, int delayTimeSeconds){
-        ArrayList<QueuedMessage> messages = new ArrayList<>(messageBatch);
-        messages.sort(Comparator.comparing(QueuedMessage::getQueuedDate));
-        for (QueuedMessage message : messages) {
+    private void sendFromQueue(Queue<QueuedMessage> messageQueue, int delayTimeSeconds){
+        while(!messageQueue.isEmpty()){
+            QueuedMessage nextMessage = messageQueue.peek();
             Date messageWaitTime = Date.from(Instant.now().minus(delayTimeSeconds, ChronoUnit.SECONDS));
-            if (message.getQueuedDate().before(messageWaitTime)) {
+            if (nextMessage.getQueuedDate().before(messageWaitTime)) {
+                QueuedMessage message = messageQueue.remove();
                 this.rabbitMessagingTemplate.convertAndSend(message.getExchange(), message.getRoutingKey(), message.getPayload());
-                messageBatch.remove(message);
             } else {
                 break;
             }
