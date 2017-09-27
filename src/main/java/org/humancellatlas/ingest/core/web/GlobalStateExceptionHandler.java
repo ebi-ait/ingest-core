@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.core.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -27,7 +28,14 @@ public class GlobalStateExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(IllegalStateException.class)
     public @ResponseBody ExceptionInfo handleIllegalStateException(HttpServletRequest request, Exception e) {
-        getLog().error("Handling IllegalStateException and returing CONFLICT response", e);
+        getLog().error("Handling IllegalStateException and returning CONFLICT response", e);
+        return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public @ResponseBody ExceptionInfo handleOptimisticLock(HttpServletRequest request, Exception e) {
+        getLog().error("Handling OptimisticLockingFailureException and returning CONFLICT response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 }
