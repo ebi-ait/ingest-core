@@ -28,14 +28,18 @@ public class GlobalStateExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(IllegalStateException.class)
     public @ResponseBody ExceptionInfo handleIllegalStateException(HttpServletRequest request, Exception e) {
-        getLog().error("Handling IllegalStateException and returning CONFLICT response", e);
+        getLog().warn("Attempted an illegal state transition at '%s';" +
+                              "this will generate a CONFLICT RESPONSE", request.getRequestURL().toString());
+        getLog().debug("Handling IllegalStateException and returning CONFLICT response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public @ResponseBody ExceptionInfo handleOptimisticLock(HttpServletRequest request, Exception e) {
-        getLog().error("Handling OptimisticLockingFailureException and returning CONFLICT response", e);
+        getLog().warn("Attempt a failed save, likely due to multiple requests, at '%s'; " +
+                              "this will generate a CONFLICT RESPONSE", request.getRequestURL().toString());
+        getLog().debug("Handling OptimisticLockingFailureException and returning CONFLICT response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 }
