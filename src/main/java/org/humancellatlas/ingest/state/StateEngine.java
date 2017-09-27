@@ -104,25 +104,13 @@ public class StateEngine {
 
     public <S extends MetadataDocument, T extends MongoRepository<S, String>>
     Event advanceStateOfMetadataDocument(T repository, S metadataDocument, ValidationState targetState) {
-        if (metadataDocument.getValidationState().equals(targetState)) {
-            // attempting a state transition that was already carried out, nothing to do
-            getLog().error("Attempted a state transition that already completed (" +
-                                   "transition document '%s: %s' from state '%s' to state '%s'), " +
-                                   "no action will be taken",
-                           metadataDocument.getClass().getSimpleName(),
-                           metadataDocument.getId(),
-                           metadataDocument.getValidationState(),
-                           targetState);
-        }
-        else {
-            if (!metadataDocument.allowedStateTransitions().contains(targetState)) {
-                throw new IllegalStateException(String.format(
-                        "It is not possible to transition document '%s: %s' from state '%s' to state '%s'",
-                        metadataDocument.getClass().getSimpleName(),
-                        metadataDocument.getId(),
-                        metadataDocument.getValidationState(),
-                        targetState));
-            }
+        if (!metadataDocument.allowedStateTransitions().contains(targetState)) {
+            throw new IllegalStateException(String.format(
+                    "It is not possible to transition document '%s: %s' from state '%s' to state '%s'",
+                    metadataDocument.getClass().getSimpleName(),
+                    metadataDocument.getId(),
+                    metadataDocument.getValidationState(),
+                    targetState));
         }
 
         final Event event = new ValidationEvent(metadataDocument.getValidationState(), targetState);
