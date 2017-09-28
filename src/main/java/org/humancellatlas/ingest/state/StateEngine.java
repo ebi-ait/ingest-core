@@ -116,14 +116,14 @@ public class StateEngine {
                             "Encountered exception whilst running submission envelope operation... " +
                                     "will reattempt (tries now = %s)",
                             tries));
-                    // refresh submission envelope
-                    envelope = getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
                     try {
                         TimeUnit.SECONDS.sleep(1);
                     }
                     catch (InterruptedException e1) {
                         // just continue
                     }
+                    // refresh submission envelope
+                    envelope = getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
                 }
             }
             throw new StatePropagationException(
@@ -180,14 +180,14 @@ public class StateEngine {
                         "Encountered exception whilst analysing envelope state... " +
                                 "will reattempt (tries now = %s)",
                         tries));
-                // refresh submission envelope
-                envelope = getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
                 try {
                     TimeUnit.SECONDS.sleep(1);
                 }
                 catch (InterruptedException e1) {
                     // just continue
                 }
+                // refresh submission envelope
+                envelope = getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
             }
         }
         throw new StatePropagationException(
@@ -219,14 +219,14 @@ public class StateEngine {
                         "Encountered exception whilst updating submission envelope of metadata change... " +
                                 "will reattempt (tries now = %s)",
                         tries));
-                // refresh submission envelope
-                envelope = getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
                 try {
                     TimeUnit.SECONDS.sleep(1);
                 }
                 catch (InterruptedException e1) {
                     // just continue
                 }
+                // refresh submission envelope
+                envelope = getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
             }
         }
         throw new StatePropagationException(
