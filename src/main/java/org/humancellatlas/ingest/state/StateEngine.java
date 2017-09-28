@@ -97,18 +97,16 @@ public class StateEngine {
             // we'll retry events here if they fail
             int tries = 0;
             Exception lastException = null;
+            SubmissionEnvelope envelope = submissionEnvelope;
             while (tries < MAX_RETRIES) {
                 tries++;
                 try {
-                    SubmissionEnvelope latestEnvelope =
-                            getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
+                    envelope.addEvent(event).enactStateTransition(targetState);
 
-                    latestEnvelope.addEvent(event).enactStateTransition(targetState);
-
-                    getSubmissionEnvelopeRepository().save(latestEnvelope);
+                    getSubmissionEnvelopeRepository().save(envelope);
 
                     // is this an event that needs to be posted to a queue?
-                    postMessageIfRequired(latestEnvelope, targetState);
+                    postMessageIfRequired(envelope, targetState);
                     return;
                 }
                 catch (Exception e) {
@@ -118,6 +116,8 @@ public class StateEngine {
                             "Encountered exception whilst running submission envelope operation... " +
                                     "will reattempt (tries now = %s)",
                             tries));
+                    // refresh submission envelope
+                    envelope = getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
                     try {
                         TimeUnit.SECONDS.sleep(1);
                     }
@@ -158,19 +158,19 @@ public class StateEngine {
         // we'll retry events here if they fail
         int tries = 0;
         Exception lastException = null;
+        SubmissionEnvelope envelope = submissionEnvelope;
         while (tries < MAX_RETRIES) {
             tries++;
             try {
-                SubmissionEnvelope latestEnvelope = getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
-                SubmissionState determinedState = latestEnvelope.determineEnvelopeState();
+                SubmissionState determinedState = envelope.determineEnvelopeState();
                 // state map cleaned but not saved
-                if (latestEnvelope.getSubmissionState().equals(determinedState)) {
+                if (envelope.getSubmissionState().equals(determinedState)) {
                     // save to flush any state map updates
-                    getSubmissionEnvelopeRepository().save(latestEnvelope);
+                    getSubmissionEnvelopeRepository().save(envelope);
                     return Optional.empty();
                 }
                 else {
-                    return Optional.of(advanceStateOfEnvelope(latestEnvelope, determinedState));
+                    return Optional.of(advanceStateOfEnvelope(envelope, determinedState));
                 }
             }
             catch (Exception e) {
@@ -180,6 +180,8 @@ public class StateEngine {
                         "Encountered exception whilst analysing envelope state... " +
                                 "will reattempt (tries now = %s)",
                         tries));
+                // refresh submission envelope
+                envelope = getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
                 try {
                     TimeUnit.SECONDS.sleep(1);
                 }
@@ -198,16 +200,16 @@ public class StateEngine {
         // we'll retry events here if they fail
         int tries = 0;
         Exception lastException = null;
+        SubmissionEnvelope envelope = submissionEnvelope;
         while (tries < MAX_RETRIES) {
             tries++;
             try {
                 postMessageIfRequired(metadataDocument, metadataDocument.getValidationState());
-                SubmissionEnvelope latestEnvelope = getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
-                if (latestEnvelope.flagPossibleMetadataDocumentStateChange(metadataDocument)) {
-                    return getSubmissionEnvelopeRepository().save(latestEnvelope);
+                if (envelope.flagPossibleMetadataDocumentStateChange(metadataDocument)) {
+                    return getSubmissionEnvelopeRepository().save(envelope);
                 }
                 else {
-                    return latestEnvelope;
+                    return envelope;
                 }
             }
             catch (Exception e) {
@@ -217,6 +219,8 @@ public class StateEngine {
                         "Encountered exception whilst updating submission envelope of metadata change... " +
                                 "will reattempt (tries now = %s)",
                         tries));
+                // refresh submission envelope
+                envelope = getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
                 try {
                     TimeUnit.SECONDS.sleep(1);
                 }
