@@ -22,6 +22,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.ResourceMappings;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PreDestroy;
 import java.util.Map;
@@ -127,10 +128,12 @@ public class StateEngine {
 
     public Optional<Event> analyseStateOfEnvelope(SubmissionEnvelope submissionEnvelope) {
         SubmissionState determinedState = submissionEnvelope.determineEnvelopeState();
-        if (submissionEnvelope.getSubmissionState().equals(determinedState)) {
+        // state map cleaned but not saved
+        if(submissionEnvelope.getSubmissionState().equals(determinedState)) {
+            // save to flush any state map updates
+            getSubmissionEnvelopeRepository().save(submissionEnvelope);
             return Optional.empty();
-        }
-        else {
+        } else {
             return Optional.of(advanceStateOfEnvelope(submissionEnvelope, determinedState));
         }
     }
