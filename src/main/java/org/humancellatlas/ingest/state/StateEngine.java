@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
 import org.humancellatlas.ingest.core.ValidationEvent;
 import org.humancellatlas.ingest.messaging.Constants;
 import org.humancellatlas.ingest.messaging.MessageSender;
+import org.humancellatlas.ingest.submission.StatePropagationException;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessageBuilder;
@@ -16,19 +17,17 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.ResourceMappings;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PreDestroy;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Javadocs go here!
@@ -46,6 +45,8 @@ public class StateEngine {
 
     private final @NonNull ExecutorService executorService;
 
+    private static final int MAX_RETRIES = 25;
+
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     protected Logger getLog() {
@@ -53,9 +54,9 @@ public class StateEngine {
     }
 
     public StateEngine(SubmissionEnvelopeRepository submissionEnvelopeRepository,
-                           ResourceMappings mappings,
-                           MessageSender messageSender,
-                           RepositoryRestConfiguration config) {
+                       MessageSender messageSender,
+                       ResourceMappings mappings,
+                       RepositoryRestConfiguration config) {
         this.submissionEnvelopeRepository = submissionEnvelopeRepository;
         this.messageSender = messageSender;
         this.mappings = mappings;
@@ -93,12 +94,41 @@ public class StateEngine {
 
         final Event event = new SubmissionEvent(submissionEnvelope.getSubmissionState(), targetState);
         executorService.submit(() -> {
-            submissionEnvelope.addEvent(event).enactStateTransition(targetState);
+            // we'll retry events here if they fail
+            int tries = 0;
+            Exception lastException = null;
+            while (tries < MAX_RETRIES) {
+                tries++;
+                try {
+                    SubmissionEnvelope latestEnvelope =
+                            getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
 
-            getSubmissionEnvelopeRepository().save(submissionEnvelope);
+                    latestEnvelope.addEvent(event).enactStateTransition(targetState);
 
-            // is this an event that needs to be posted to a queue?
-            postMessageIfRequired(submissionEnvelope, targetState);
+                    getSubmissionEnvelopeRepository().save(latestEnvelope);
+
+                    // is this an event that needs to be posted to a queue?
+                    postMessageIfRequired(latestEnvelope, targetState);
+                    return;
+                }
+                catch (Exception e) {
+                    lastException = e;
+                    getLog().debug("Exception on envelope operation", e);
+                    getLog().warn(String.format(
+                            "Encountered exception whilst running submission envelope operation... " +
+                                    "will reattempt (tries now = %s)",
+                            tries));
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    }
+                    catch (InterruptedException e1) {
+                        // just continue
+                    }
+                }
+            }
+            throw new StatePropagationException(
+                    "Critical error - failed to run submission envelope operation after multiple attempts!",
+                    lastException);
         });
         return event;
     }
@@ -127,23 +157,77 @@ public class StateEngine {
     }
 
     public Optional<Event> analyseStateOfEnvelope(SubmissionEnvelope submissionEnvelope) {
-        SubmissionState determinedState = submissionEnvelope.determineEnvelopeState();
-        // state map cleaned but not saved
-        if(submissionEnvelope.getSubmissionState().equals(determinedState)) {
-            // save to flush any state map updates
-            getSubmissionEnvelopeRepository().save(submissionEnvelope);
-            return Optional.empty();
-        } else {
-            return Optional.of(advanceStateOfEnvelope(submissionEnvelope, determinedState));
+        // we'll retry events here if they fail
+        int tries = 0;
+        Exception lastException = null;
+        while (tries < MAX_RETRIES) {
+            tries++;
+            try {
+                SubmissionEnvelope latestEnvelope = getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
+                SubmissionState determinedState = latestEnvelope.determineEnvelopeState();
+                // state map cleaned but not saved
+                if (latestEnvelope.getSubmissionState().equals(determinedState)) {
+                    // save to flush any state map updates
+                    getSubmissionEnvelopeRepository().save(latestEnvelope);
+                    return Optional.empty();
+                }
+                else {
+                    return Optional.of(advanceStateOfEnvelope(latestEnvelope, determinedState));
+                }
+            }
+            catch (Exception e) {
+                lastException = e;
+                getLog().error("Exception on metadata operation", e);
+                getLog().warn(String.format(
+                        "Encountered exception whilst running metadata operation... " +
+                                "will reattempt (tries now = %s)",
+                        tries));
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                }
+                catch (InterruptedException e1) {
+                    // just continue
+                }
+            }
         }
+        throw new StatePropagationException(
+                "Critical error - failed to run metadata document operation after multiple attempts!",
+                lastException);
     }
 
     public void notifySubmissionEnvelopeOfMetadataDocumentChange(SubmissionEnvelope submissionEnvelope,
                                                                  MetadataDocument metadataDocument) {
-        postMessageIfRequired(metadataDocument, metadataDocument.getValidationState());
-        if (submissionEnvelope.flagPossibleMetadataDocumentStateChange(metadataDocument)) {
-            getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        // we'll retry events here if they fail
+        int tries = 0;
+        Exception lastException = null;
+        while (tries < MAX_RETRIES) {
+            tries++;
+            try {
+                postMessageIfRequired(metadataDocument, metadataDocument.getValidationState());
+                SubmissionEnvelope latestEnvelope = getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
+                if (latestEnvelope.flagPossibleMetadataDocumentStateChange(metadataDocument)) {
+                    getSubmissionEnvelopeRepository().save(latestEnvelope);
+                }
+                return;
+            }
+            catch (Exception e) {
+                lastException = e;
+                getLog().debug("Exception on metadata operation", e);
+                getLog().warn(String.format(
+                        "Encountered exception whilst running metadata operation... " +
+                                "will reattempt (tries now = %s)",
+                        tries));
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                }
+                catch (InterruptedException e1) {
+                    // just continue
+                }
+            }
         }
+        throw new StatePropagationException(
+                "Critical error - failed to run metadata document operation after multiple attempts!",
+                lastException);
     }
 
     private void postMessageIfRequired(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
@@ -173,25 +257,27 @@ public class StateEngine {
         switch (targetState) {
             case DRAFT:
                 if (metadataDocument.getUuid() == null) {
-                    getLog().info(String.format(
+                    getLog().debug(String.format(
                             "Draft metadata document '%s: %s' has no uuid... notifying accessioning service",
                             metadataDocument.getClass().getSimpleName(), metadataDocument.getId()));
                     getMessageSender().queueAccessionMessage(Constants.Exchanges.ACCESSION,
-                                                                Constants.Queues.ACCESSION_REQUIRED,
-                                                                message);
+                                                             Constants.Queues.ACCESSION_REQUIRED,
+                                                             message);
                 }
 
-                getLog().info(String.format(
+                getLog().debug(String.format(
                         "Metadata document '%s: %s' has been put into a draft state... notifying validation service",
                         metadataDocument.getClass().getSimpleName(), metadataDocument.getId()));
                 getMessageSender().queueValidationMessage(Constants.Exchanges.VALIDATION,
-                                                            Constants.Queues.VALIDATION_REQUIRED,
-                                                            message);
+                                                          Constants.Queues.VALIDATION_REQUIRED,
+                                                          message);
                 break;
             default:
-                getLog().info(
+                getLog().debug(
                         String.format("No notification required for metadata document '%s: %s' state transition to '%s'",
-                                      metadataDocument.getClass().getSimpleName(), metadataDocument.getId(), targetState.name()));
+                                      metadataDocument.getClass().getSimpleName(),
+                                      metadataDocument.getId(),
+                                      targetState.name()));
         }
     }
 }
