@@ -30,11 +30,17 @@ public class MetadataStateChangeListener extends AbstractMongoEventListener<Meta
     }
 
     @Override public void onAfterSave(AfterSaveEvent<MetadataDocument> event) {
-        MetadataDocument metadataDocument = event.getSource();
-        SubmissionEnvelope envelope = metadataDocument.getSubmissionEnvelope();
+        try {
+            MetadataDocument metadataDocument = event.getSource();
+            SubmissionEnvelope envelope = metadataDocument.getSubmissionEnvelope();
 
-        this.getStateEngine().notifySubmissionEnvelopeOfMetadataDocumentChange(envelope, metadataDocument);
-        this.getStateEngine().analyseStateOfEnvelope(envelope)
-                .ifPresent(event1 -> getLog().debug("Event triggered on submission envelope", event1));
+            SubmissionEnvelope latestEnvelope =
+                    this.getStateEngine().notifySubmissionEnvelopeOfMetadataDocumentChange(envelope, metadataDocument);
+            this.getStateEngine().analyseStateOfEnvelope(latestEnvelope)
+                    .ifPresent(event1 -> getLog().debug("Event triggered on submission envelope", event1));
+        }
+        catch (Exception e) {
+            getLog().error("Save propagation error", e);
+        }
     }
 }

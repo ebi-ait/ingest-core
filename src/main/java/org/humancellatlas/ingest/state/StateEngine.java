@@ -113,8 +113,8 @@ public class StateEngine {
                 }
                 catch (Exception e) {
                     lastException = e;
-                    getLog().debug("Exception on envelope operation", e);
-                    getLog().warn(String.format(
+                    getLog().trace("Exception on envelope operation", e);
+                    getLog().debug(String.format(
                             "Encountered exception whilst running submission envelope operation... " +
                                     "will reattempt (tries now = %s)",
                             tries));
@@ -145,14 +145,12 @@ public class StateEngine {
         }
 
         final Event event = new ValidationEvent(metadataDocument.getValidationState(), targetState);
-        executorService.submit(() -> {
-            metadataDocument.addEvent(event).enactStateTransition(targetState);
+        metadataDocument.addEvent(event).enactStateTransition(targetState);
 
-            repository.save(metadataDocument);
+        repository.save(metadataDocument);
 
-            // is this an event that needs to be posted to a queue?
-            postMessageIfRequired(metadataDocument, targetState);
-        });
+        // is this an event that needs to be posted to a queue?
+        postMessageIfRequired(metadataDocument, targetState);
         return event;
     }
 
@@ -177,9 +175,9 @@ public class StateEngine {
             }
             catch (Exception e) {
                 lastException = e;
-                getLog().error("Exception on metadata operation", e);
-                getLog().warn(String.format(
-                        "Encountered exception whilst running metadata operation... " +
+                getLog().trace("Exception on metadata operation", e);
+                getLog().debug(String.format(
+                        "Encountered exception whilst analysing envelope state... " +
                                 "will reattempt (tries now = %s)",
                         tries));
                 try {
@@ -195,7 +193,7 @@ public class StateEngine {
                 lastException);
     }
 
-    public void notifySubmissionEnvelopeOfMetadataDocumentChange(SubmissionEnvelope submissionEnvelope,
+    public SubmissionEnvelope notifySubmissionEnvelopeOfMetadataDocumentChange(SubmissionEnvelope submissionEnvelope,
                                                                  MetadataDocument metadataDocument) {
         // we'll retry events here if they fail
         int tries = 0;
@@ -206,15 +204,17 @@ public class StateEngine {
                 postMessageIfRequired(metadataDocument, metadataDocument.getValidationState());
                 SubmissionEnvelope latestEnvelope = getSubmissionEnvelopeRepository().findOne(submissionEnvelope.getId());
                 if (latestEnvelope.flagPossibleMetadataDocumentStateChange(metadataDocument)) {
-                    getSubmissionEnvelopeRepository().save(latestEnvelope);
+                    return getSubmissionEnvelopeRepository().save(latestEnvelope);
                 }
-                return;
+                else {
+                    return latestEnvelope;
+                }
             }
             catch (Exception e) {
                 lastException = e;
-                getLog().debug("Exception on metadata operation", e);
-                getLog().warn(String.format(
-                        "Encountered exception whilst running metadata operation... " +
+                getLog().trace("Exception on metadata operation", e);
+                getLog().debug(String.format(
+                        "Encountered exception whilst updating submission envelope of metadata change... " +
                                 "will reattempt (tries now = %s)",
                         tries));
                 try {
