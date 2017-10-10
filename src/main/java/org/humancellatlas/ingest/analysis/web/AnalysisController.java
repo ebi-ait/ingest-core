@@ -19,6 +19,7 @@ import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,6 +49,12 @@ public class AnalysisController {
         Analysis entity = getAnalysisService().addAnalysisToSubmissionEnvelope(submissionEnvelope, analysis);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
+    }
+
+
+    @RequestMapping(path = "/analyses/{analysis_id}/" + Links.BUNDLE_REF_URL)
+    ResponseEntity<Resource<?>> addBundleReference(){
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
     @RequestMapping(path = "/analyses/{analysis_id}/" + Links.BUNDLE_REF_URL,
