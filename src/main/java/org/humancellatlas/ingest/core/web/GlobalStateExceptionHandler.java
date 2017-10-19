@@ -78,6 +78,9 @@ public class GlobalStateExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public @ResponseBody
     ExceptionInfo handleIllegalArgument(HttpServletRequest request, Exception e) {
+        getLog().warn(String.format("Caught an illegal argument at '%s'; " +
+                        "this will generate a BAD_REQUEST RESPONSE",
+                request.getRequestURL().toString()));
         getLog().debug("Handling IllegalArgumentException and returning BAD_REQUEST response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
@@ -93,7 +96,7 @@ public class GlobalStateExceptionHandler {
         }
 
         getLog().warn(String.format("Runtime exception encountered on %s request to resource %s with payload:\n %s ", request.getMethod(),
-                request.getRequestURL().toString()), requestBody);
+                request.getRequestURL().toString(), requestBody));
         getLog().debug("Handling RuntimeException and returning INTERNAL_SERVER_ERROR response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), "Internal server error");
     }
