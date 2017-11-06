@@ -3,7 +3,6 @@ package org.humancellatlas.ingest.file.web;
 import lombok.AllArgsConstructor;
 
 import lombok.NonNull;
-import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.exception.CoreEntityNotFoundException;
 import org.humancellatlas.ingest.file.FileService;
 import org.humancellatlas.ingest.messaging.Constants;
@@ -23,7 +22,7 @@ public class FileListener {
     @RabbitListener(queues = Constants.Queues.FILE_STAGED)
     public void handleFileStagedEvent(FileMessage fileMessage) {
         if(!StringUtils.isEmpty(fileMessage.getContentType()) &&
-            fileMessage.getContentType().equals(FileContentTypes.HCA_DATA_FILE)){
+            fileMessage.getMediaType().equals(FileMediaTypes.HCA_DATA_FILE)){
             try {
                 fileService.updateStagedFileUrl(fileMessage.getStagingAreaId(),
                         fileMessage.getFileName(),
