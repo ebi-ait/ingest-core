@@ -18,7 +18,7 @@ public class FileMessage {
     private final String cloudUrl;
     @JsonProperty("name")
     private final String fileName;
-    @JsonProperty("staging_area_id")
+    @JsonProperty("upload_area_id")
     private final String stagingAreaId;
     @JsonProperty("content_type")
     private final String contentType;
