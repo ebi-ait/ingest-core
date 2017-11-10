@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.submission;
 
 import org.humancellatlas.ingest.core.Uuid;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 /**
@@ -12,5 +13,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
  */
 @CrossOrigin
 public interface SubmissionEnvelopeRepository extends MongoRepository<SubmissionEnvelope, String> {
-    public SubmissionEnvelope findByUuid(Uuid uuid);
+    public SubmissionEnvelope findByUuid(@Param("uuid") Uuid uuid);
+
 }

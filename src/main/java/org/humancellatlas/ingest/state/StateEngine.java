@@ -243,7 +243,7 @@ public class StateEngine {
                         SubmissionEnvelopeMessageBuilder.using(mappings, config).messageFor(submissionEnvelope).build();
 
                 getMessageSender().queueExportMessage(
-                        Constants.Exchanges.ENVELOPE_SUBMITTED_FANOUT,
+                        Constants.Exchanges.SUBMISSION_ARCHIVAL_DIRECT,
                         "",
                         submissionMessage);
                 break;
