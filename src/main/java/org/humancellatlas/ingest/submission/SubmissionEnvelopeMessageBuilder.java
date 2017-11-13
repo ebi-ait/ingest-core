@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.submission;
 
-import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.submission.web.SubmissionController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +10,6 @@ import org.springframework.data.rest.webmvc.support.RepositoryLinkBuilder;
 import org.springframework.hateoas.Link;
 
 import java.net.URI;
-import java.util.UUID;
 
 /**
  * Javadocs go here!
