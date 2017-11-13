@@ -244,7 +244,7 @@ public class StateEngine {
 
                 getMessageSender().queueExportMessage(
                         Constants.Exchanges.SUBMISSION_ARCHIVAL_DIRECT,
-                        "",
+                        Constants.Queues.SUBMISSION_ARCHIVAL,
                         submissionMessage);
                 break;
             default:
