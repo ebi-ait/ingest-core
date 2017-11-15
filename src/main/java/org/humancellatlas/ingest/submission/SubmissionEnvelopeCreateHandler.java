@@ -29,7 +29,7 @@ public class SubmissionEnvelopeCreateHandler {
     public void handleSubmissionEnvelopeCreation(SubmissionEnvelope submissionEnvelope) {
         SubmissionEnvelopeMessage message =
                 SubmissionEnvelopeMessageBuilder.using(mappings, config).messageFor(submissionEnvelope).build();
-        rabbitMessagingTemplate.convertAndSend(Constants.Exchanges.SUBMISSION_ARCHIVAL_DIRECT,
+        rabbitMessagingTemplate.convertAndSend(Constants.Exchanges.ENVELOPE_CREATED_FANOUT,
                                                "",
                                                message);
     }
