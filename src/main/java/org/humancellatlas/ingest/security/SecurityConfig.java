@@ -25,6 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .configure(http)
                 .cors().and()
                 .authorizeRequests()
+                .antMatchers(HttpMethod.GET, "/users/summary").hasAuthority("read:profile")
                 .antMatchers(HttpMethod.GET, "/users/secured").hasAuthority("read:profile")
                 .antMatchers(HttpMethod.GET, "/**").permitAll()
                 .anyRequest().authenticated();
