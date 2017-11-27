@@ -125,11 +125,11 @@ public class SubmissionEnvelope extends AbstractEntity {
             // but if not, we need to throw an exception here
             if (!metadataDocument.getValidationState().equals(ValidationState.DRAFT)) {
                 throw new MetadataDocumentStateException(String.format(
-                        "Metadata document '%s: %s', in state '%s', was not being tracked by containing envelope",
+                        "Metadata document '%s: %s', in state '%s', was not being tracked by containing envelope %s",
                         metadataDocument.getClass().getSimpleName(),
                         metadataDocument.getId(),
                         metadataDocument.getValidationState(),
-                        this.getId()));
+                        this.getId(), metadataDocument.getLatestSubmissionEnvelope().getId()));
             }
             else {
                 doValidationStateUpdate(metadataDocument);

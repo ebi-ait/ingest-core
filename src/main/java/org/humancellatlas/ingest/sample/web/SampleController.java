@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Event;
+import org.humancellatlas.ingest.core.MetadataReference;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.sample.Sample;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import java.util.List;
 
 /**
  * Javadocs go here!
@@ -44,6 +47,17 @@ public class SampleController {
                                                     @RequestBody Sample sample,
                                                     final PersistentEntityResourceAssembler assembler) {
         Sample entity = getSampleService().addSampleToSubmissionEnvelope(submissionEnvelope, sample);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/samples",
+            method = RequestMethod.PUT,
+            produces = MediaTypes.HAL_JSON_VALUE)
+    ResponseEntity<Resource<?>> linkSamplesToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                     @RequestBody MetadataReference sampleReference,
+                                                     final PersistentEntityResourceAssembler assembler) {
+        SubmissionEnvelope entity = getSampleService().resolveSampleReferencesForSubmission(submissionEnvelope, sampleReference);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }

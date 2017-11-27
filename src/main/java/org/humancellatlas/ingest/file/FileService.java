@@ -37,7 +37,7 @@ public class FileService {
 
 
         if(envelope.isPresent()) {
-            List<File> filesInEnvelope = fileRepository.findBySubmissionEnvelopeAndFileName(envelope.get(), fileName);
+            List<File> filesInEnvelope = fileRepository.findBySubmissionEnvelopesInAndFileName(envelope.get(), fileName);
 
             if(filesInEnvelope.size() != 1) {
                 throw new RuntimeException(String.format("Expected 1 file with name %s, but found %s", fileName, filesInEnvelope.size()));

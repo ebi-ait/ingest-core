@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Event;
+import org.humancellatlas.ingest.core.MetadataReference;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -14,6 +15,7 @@ import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +41,26 @@ public class ProtocolController {
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProtocolToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                       @RequestBody Protocol protocol,
+                                                      PersistentEntityResourceAssembler assembler) {
+        Protocol entity = getProtocolService().addProtocolToSubmissionEnvelope(submissionEnvelope, protocol);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols",
+            method = RequestMethod.PUT,
+            produces = MediaTypes.HAL_JSON_VALUE)
+    ResponseEntity<Resource<?>> linkProtocolsToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                     @RequestBody MetadataReference protocolReference,
+                                                     final PersistentEntityResourceAssembler assembler) {
+        SubmissionEnvelope entity = getProtocolService().resolveProtocolReferencesForSubmission(submissionEnvelope, protocolReference);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols/{protocol_id}", method = RequestMethod.PUT)
+    ResponseEntity<Resource<?>> linkProtocolToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                       @PathVariable("id") Protocol protocol,
                                                       PersistentEntityResourceAssembler assembler) {
         Protocol entity = getProtocolService().addProtocolToSubmissionEnvelope(submissionEnvelope, protocol);
         PersistentEntityResource resource = assembler.toFullResource(entity);

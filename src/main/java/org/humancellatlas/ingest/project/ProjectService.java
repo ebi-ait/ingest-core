@@ -3,9 +3,16 @@ package org.humancellatlas.ingest.project;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.MetadataReference;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Javadocs go here!
@@ -20,8 +27,38 @@ public class ProjectService {
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull ProjectRepository projectRepository;
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
+    protected Logger getLog() {
+        return log;
+    }
+
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
         project.addToSubmissionEnvelope(submissionEnvelope);
         return getProjectRepository().save(project);
+    }
+
+    public SubmissionEnvelope resolveProjectReferencesForSubmission(SubmissionEnvelope submissionEnvelope, MetadataReference reference) {
+        List<Project> projects = new ArrayList<>();
+
+        for (String uuid : reference.getUuids()) {
+            Uuid uuidObj = new Uuid(uuid);
+            Project project = getProjectRepository().findByUuid(uuidObj);
+
+            if (project != null) {
+                project.addToSubmissionEnvelope(submissionEnvelope);
+                projects.add(project);
+                getLog().info(String.format("Adding project to submission envelope '%s'", project.getId()));
+            }
+            else {
+                getLog().warn(String.format(
+                        "No Project present with UUID '%s' - in future this will cause a critical error",
+                        uuid));
+            }
+        }
+
+        getProjectRepository().save(projects);
+
+        return submissionEnvelope;
     }
 }

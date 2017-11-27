@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.assay.AssayService;
 import org.humancellatlas.ingest.core.Event;
+import org.humancellatlas.ingest.core.MetadataReference;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -16,6 +17,7 @@ import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +47,26 @@ public class AssayController {
                                                     @RequestBody Assay assay,
                                                     PersistentEntityResourceAssembler assembler) {
         Assay entity = getAssayService().addAssayToSubmissionEnvelope(submissionEnvelope, assay);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays/{id}", method = RequestMethod.PUT)
+    ResponseEntity<Resource<?>> linkAssayToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                   @PathVariable("id") Assay assay,
+                                                   PersistentEntityResourceAssembler assembler) {
+        Assay entity = getAssayService().addAssayToSubmissionEnvelope(submissionEnvelope, assay);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays",
+            method = RequestMethod.PUT,
+            produces = MediaTypes.HAL_JSON_VALUE)
+    ResponseEntity<Resource<?>> linkAssaysToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                       @RequestBody MetadataReference assayReference,
+                                                       final PersistentEntityResourceAssembler assembler) {
+        SubmissionEnvelope entity = getAssayService().resolveAssayReferencesForSubmission(submissionEnvelope, assayReference);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }

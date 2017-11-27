@@ -1,9 +1,13 @@
 package org.humancellatlas.ingest.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.humancellatlas.ingest.core.exception.LinkToNewSubmissionNotAllowedException;
 import org.humancellatlas.ingest.state.InvalidMetadataDocumentStateException;
+import org.humancellatlas.ingest.state.InvalidSubmissionStateException;
 import org.humancellatlas.ingest.state.ValidationState;
+import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +27,7 @@ public abstract class MetadataDocument extends AbstractEntity {
     private final List<Event> events = new ArrayList<>();
     private final Object content;
 
-    private @DBRef SubmissionEnvelope submissionEnvelope;
+    private final @DBRef List<SubmissionEnvelope> submissionEnvelopes = new ArrayList<>();
 
     private @Setter Accession accession;
     private @Setter ValidationState validationState;
@@ -42,17 +46,30 @@ public abstract class MetadataDocument extends AbstractEntity {
     }
 
     public MetadataDocument addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        this.submissionEnvelope = submissionEnvelope;
-
+        if(!this.isLinkedToOpenSubmissionEnvelope()){
+            this.validationState = ValidationState.DRAFT;
+            this.submissionEnvelopes.add(submissionEnvelope);
+        }
+        else{
+            SubmissionEnvelope latest = this.getLatestSubmissionEnvelope();
+            throw new LinkToNewSubmissionNotAllowedException(
+                    String.format("The %s metadata %s is still linked to a %s submission envelope %s.",
+                    this.getType(), this.getId(), latest.getSubmissionState(), latest.getId()));
+        }
         return this;
     }
 
+    public boolean isLinkedToOpenSubmissionEnvelope(){
+        SubmissionEnvelope  latestSubmission = this.getLatestSubmissionEnvelope();
+        return !(latestSubmission == null || latestSubmission.getSubmissionState() == SubmissionState.SUBMITTED);
+    }
+
     public boolean isInEnvelope(SubmissionEnvelope submissionEnvelope) {
-        return this.submissionEnvelope.equals(submissionEnvelope);
+        return this.getLatestSubmissionEnvelope().equals(submissionEnvelope);
     }
 
     public boolean isInEnvelopeWithUuid(Uuid uuid) {
-        return this.submissionEnvelope.getUuid().equals(uuid);
+        return this.getLatestSubmissionEnvelope().getUuid().equals(uuid);
     }
 
     public static List<ValidationState> allowedStateTransitions(ValidationState fromState) {
@@ -67,12 +84,14 @@ public abstract class MetadataDocument extends AbstractEntity {
                 break;
             case VALID:
                 allowedStates.add(ValidationState.PROCESSING);
+                allowedStates.add(ValidationState.DRAFT);
                 break;
             case INVALID:
                 allowedStates.add(ValidationState.DRAFT);
                 break;
             case PROCESSING:
                 allowedStates.add(ValidationState.COMPLETE);
+                allowedStates.add(ValidationState.DRAFT);
                 break;
             default:
                 getLog().warn(String.format("There are no legal state transitions for '%s' state", fromState.name()));
@@ -100,5 +119,13 @@ public abstract class MetadataDocument extends AbstractEntity {
         this.validationState = targetState;
 
         return this;
+    }
+
+    @JsonIgnore
+    public SubmissionEnvelope getLatestSubmissionEnvelope(){
+        if(this.submissionEnvelopes.size() > 0){
+            return this.submissionEnvelopes.get(this.submissionEnvelopes.size() - 1);
+        }
+        return null;
     }
 }

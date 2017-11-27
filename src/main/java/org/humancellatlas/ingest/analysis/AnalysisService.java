@@ -5,12 +5,16 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
+import org.humancellatlas.ingest.core.MetadataReference;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Javadocs go here!
@@ -51,5 +55,29 @@ public class AnalysisService {
             }
         }
         return analysisRepository.save(analysis);
+    }
+
+    public SubmissionEnvelope resolveAnalysisReferencesForSubmission(SubmissionEnvelope submissionEnvelope, MetadataReference reference) {
+        List<Analysis> analyses = new ArrayList<>();
+
+        for (String uuid : reference.getUuids()) {
+            Uuid uuidObj = new Uuid(uuid);
+            Analysis analysis = getAnalysisRepository().findByUuid(uuidObj);
+
+            if (analysis != null) {
+                analysis.addToSubmissionEnvelope(submissionEnvelope);
+                analyses.add(analysis);
+                getLog().info(String.format("Adding assay to submission envelope '%s'", analysis.getId()));
+            }
+            else {
+                getLog().warn(String.format(
+                        "No Analysis present with UUID '%s' - in future this will cause a critical error",
+                        uuid));
+            }
+        }
+
+        getAnalysisRepository().save(analyses);
+
+        return submissionEnvelope;
     }
 }
