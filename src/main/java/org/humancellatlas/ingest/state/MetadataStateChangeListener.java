@@ -33,7 +33,7 @@ public class MetadataStateChangeListener extends AbstractMongoEventListener<Meta
         try {
             MetadataDocument metadataDocument = event.getSource();
             SubmissionEnvelope envelope = metadataDocument.getLatestSubmissionEnvelope();
-            getLog().debug(String.format("latest envelope %s", envelope.getId()));
+
             SubmissionEnvelope latestEnvelope =
                     this.getStateEngine().notifySubmissionEnvelopeOfMetadataDocumentChange(envelope, metadataDocument);
             this.getStateEngine().analyseStateOfEnvelope(latestEnvelope)
