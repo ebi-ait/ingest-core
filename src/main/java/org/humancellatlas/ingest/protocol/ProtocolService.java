@@ -38,27 +38,4 @@ public class ProtocolService {
         return getProtocolRepository().save(protocol);
     }
 
-    public SubmissionEnvelope resolveProtocolReferencesForSubmission(SubmissionEnvelope submissionEnvelope, MetadataReference protocolReference) {
-        List<Protocol> protocols = new ArrayList<>();
-
-        for (String protocolUuid : protocolReference.getUuids()) {
-            Uuid protocolUuidObj = new Uuid(protocolUuid);
-            Protocol protocol = getProtocolRepository().findByUuid(protocolUuidObj);
-
-            if (protocol != null) {
-                protocol.addToSubmissionEnvelope(submissionEnvelope);
-                protocols.add(protocol);
-                getLog().info(String.format("Adding protocol to submission envelope '%s'", protocol.getId()));
-            }
-            else {
-                getLog().warn(String.format(
-                        "No Protocol present with UUID '%s' - in future this will cause a critical error",
-                        protocolUuid));
-            }
-        }
-
-        getProtocolRepository().save(protocols);
-
-        return submissionEnvelope;
-    }
 }

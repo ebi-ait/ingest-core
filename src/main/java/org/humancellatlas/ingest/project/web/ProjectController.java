@@ -47,17 +47,6 @@ public class ProjectController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/projects",
-            method = RequestMethod.PUT,
-            produces = MediaTypes.HAL_JSON_VALUE)
-    ResponseEntity<Resource<?>> linkProjectsToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                        @RequestBody MetadataReference projectReference,
-                                                        final PersistentEntityResourceAssembler assembler) {
-        SubmissionEnvelope entity = getProjectService().resolveProjectReferencesForSubmission(submissionEnvelope, projectReference);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
-        return ResponseEntity.accepted().body(resource);
-    }
-
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects/{id}", method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> linkProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                       @PathVariable("id") Project project,

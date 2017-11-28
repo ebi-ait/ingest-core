@@ -37,28 +37,4 @@ public class ProjectService {
         project.addToSubmissionEnvelope(submissionEnvelope);
         return getProjectRepository().save(project);
     }
-
-    public SubmissionEnvelope resolveProjectReferencesForSubmission(SubmissionEnvelope submissionEnvelope, MetadataReference reference) {
-        List<Project> projects = new ArrayList<>();
-
-        for (String uuid : reference.getUuids()) {
-            Uuid uuidObj = new Uuid(uuid);
-            Project project = getProjectRepository().findByUuid(uuidObj);
-
-            if (project != null) {
-                project.addToSubmissionEnvelope(submissionEnvelope);
-                projects.add(project);
-                getLog().info(String.format("Adding project to submission envelope '%s'", project.getId()));
-            }
-            else {
-                getLog().warn(String.format(
-                        "No Project present with UUID '%s' - in future this will cause a critical error",
-                        uuid));
-            }
-        }
-
-        getProjectRepository().save(projects);
-
-        return submissionEnvelope;
-    }
 }

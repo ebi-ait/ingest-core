@@ -51,13 +51,11 @@ public class SampleController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/samples",
-            method = RequestMethod.PUT,
-            produces = MediaTypes.HAL_JSON_VALUE)
-    ResponseEntity<Resource<?>> linkSamplesToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                     @RequestBody MetadataReference sampleReference,
-                                                     final PersistentEntityResourceAssembler assembler) {
-        SubmissionEnvelope entity = getSampleService().resolveSampleReferencesForSubmission(submissionEnvelope, sampleReference);
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/samples/{id}", method = RequestMethod.PUT)
+    ResponseEntity<Resource<?>> linkAnalysisToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                       @PathVariable("id") Sample sample,
+                                                       final PersistentEntityResourceAssembler assembler) {
+        Sample entity = getSampleService().addSampleToSubmissionEnvelope(submissionEnvelope, sample);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }

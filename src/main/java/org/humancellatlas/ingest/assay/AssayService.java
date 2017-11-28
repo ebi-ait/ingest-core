@@ -37,27 +37,4 @@ public class AssayService {
         return getAssayRepository().save(assay);
     }
 
-    public SubmissionEnvelope resolveAssayReferencesForSubmission(SubmissionEnvelope submissionEnvelope, MetadataReference reference) {
-        List<Assay> assays = new ArrayList<>();
-
-        for (String uuid : reference.getUuids()) {
-            Uuid uuidObj = new Uuid(uuid);
-            Assay assay = getAssayRepository().findByUuid(uuidObj);
-
-            if (assay != null) {
-                assay.addToSubmissionEnvelope(submissionEnvelope);
-                assays.add(assay);
-                getLog().info(String.format("Adding assay to submission envelope '%s'", assay.getId()));
-            }
-            else {
-                getLog().warn(String.format(
-                        "No Assay present with UUID '%s' - in future this will cause a critical error",
-                        uuid));
-            }
-        }
-
-        getAssayRepository().save(assays);
-
-        return submissionEnvelope;
-    }
 }

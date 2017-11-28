@@ -38,27 +38,4 @@ public class SampleService {
         return getSampleRepository().save(sample);
     }
 
-    public SubmissionEnvelope resolveSampleReferencesForSubmission(SubmissionEnvelope submissionEnvelope, MetadataReference sampleReference) {
-        List<Sample> samples = new ArrayList<>();
-
-        for (String sampleUuid : sampleReference.getUuids()) {
-            Uuid sampleUuidObj = new Uuid(sampleUuid);
-            Sample sample = getSampleRepository().findByUuid(sampleUuidObj);
-
-            if (sample != null) {
-                sample.addToSubmissionEnvelope(submissionEnvelope);
-                samples.add(sample);
-                getLog().info(String.format("Adding sample to submission envelope '%s'", sample.getId()));
-            }
-            else {
-                getLog().warn(String.format(
-                        "No Sample present with UUID '%s' - in future this will cause a critical error",
-                        sampleUuid));
-            }
-        }
-
-        getSampleRepository().save(samples);
-
-        return submissionEnvelope;
-    }
 }

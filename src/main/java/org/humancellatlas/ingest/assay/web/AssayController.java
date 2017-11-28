@@ -53,20 +53,9 @@ public class AssayController {
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays/{id}", method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> linkAssayToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                   @PathVariable("id") Assay assay,
+                                                    @PathVariable("id") Assay assay,
                                                    PersistentEntityResourceAssembler assembler) {
         Assay entity = getAssayService().addAssayToSubmissionEnvelope(submissionEnvelope, assay);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
-        return ResponseEntity.accepted().body(resource);
-    }
-
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays",
-            method = RequestMethod.PUT,
-            produces = MediaTypes.HAL_JSON_VALUE)
-    ResponseEntity<Resource<?>> linkAssaysToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                       @RequestBody MetadataReference assayReference,
-                                                       final PersistentEntityResourceAssembler assembler) {
-        SubmissionEnvelope entity = getAssayService().resolveAssayReferencesForSubmission(submissionEnvelope, assayReference);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }

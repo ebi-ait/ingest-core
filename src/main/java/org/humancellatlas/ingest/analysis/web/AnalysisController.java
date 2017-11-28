@@ -62,17 +62,6 @@ public class AnalysisController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/analyses",
-            method = RequestMethod.PUT,
-            produces = MediaTypes.HAL_JSON_VALUE)
-    ResponseEntity<Resource<?>> linkAnalysesToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                     @RequestBody MetadataReference analysisReference,
-                                                     final PersistentEntityResourceAssembler assembler) {
-        SubmissionEnvelope entity = getAnalysisService().resolveAnalysisReferencesForSubmission(submissionEnvelope, analysisReference);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
-        return ResponseEntity.accepted().body(resource);
-    }
-
     @RequestMapping(path = "/analyses/{analysis_id}/" + Links.BUNDLE_REF_URL)
     ResponseEntity<Resource<?>> addBundleReference(){
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();

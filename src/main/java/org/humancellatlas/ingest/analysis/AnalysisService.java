@@ -56,28 +56,4 @@ public class AnalysisService {
         }
         return analysisRepository.save(analysis);
     }
-
-    public SubmissionEnvelope resolveAnalysisReferencesForSubmission(SubmissionEnvelope submissionEnvelope, MetadataReference reference) {
-        List<Analysis> analyses = new ArrayList<>();
-
-        for (String uuid : reference.getUuids()) {
-            Uuid uuidObj = new Uuid(uuid);
-            Analysis analysis = getAnalysisRepository().findByUuid(uuidObj);
-
-            if (analysis != null) {
-                analysis.addToSubmissionEnvelope(submissionEnvelope);
-                analyses.add(analysis);
-                getLog().info(String.format("Adding assay to submission envelope '%s'", analysis.getId()));
-            }
-            else {
-                getLog().warn(String.format(
-                        "No Analysis present with UUID '%s' - in future this will cause a critical error",
-                        uuid));
-            }
-        }
-
-        getAnalysisRepository().save(analyses);
-
-        return submissionEnvelope;
-    }
 }
