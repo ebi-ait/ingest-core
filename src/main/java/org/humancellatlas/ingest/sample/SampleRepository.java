@@ -18,6 +18,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 public interface SampleRepository extends MongoRepository<Sample, String> {
     public Sample findByUuid(@Param("uuid") Uuid uuid);
 
-    public Page<Sample> findBySubmissionEnvelopesIn(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+    public Page<Sample> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
 }

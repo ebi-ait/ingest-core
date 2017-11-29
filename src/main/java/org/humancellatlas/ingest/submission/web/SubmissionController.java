@@ -68,7 +68,7 @@ public class SubmissionController {
     ResponseEntity<?> getAssays(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                 Pageable pageable,
                                 final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Assay> assays = getAssayRepository().findBySubmissionEnvelopesIn(submissionEnvelope, pageable);
+        Page<Assay> assays = getAssayRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(assays, resourceAssembler));
     }
 
@@ -76,7 +76,7 @@ public class SubmissionController {
     ResponseEntity<?> getFiles(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                Pageable pageable,
                                final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<File> files = getFileRepository().findBySubmissionEnvelopesIn(submissionEnvelope, pageable);
+        Page<File> files = getFileRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
     }
 
@@ -84,7 +84,7 @@ public class SubmissionController {
     ResponseEntity<?> getProjects(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                   Pageable pageable,
                                   final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Project> projects = getProjectRepository().findBySubmissionEnvelopesIn(submissionEnvelope, pageable);
+        Page<Project> projects = getProjectRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(projects, resourceAssembler));
     }
 
@@ -92,7 +92,7 @@ public class SubmissionController {
     ResponseEntity<?> getProtocols(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                    Pageable pageable,
                                    final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Protocol> protocols = getProtocolRepository().findBySubmissionEnvelopesIn(submissionEnvelope, pageable);
+        Page<Protocol> protocols = getProtocolRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
     }
 
@@ -100,7 +100,7 @@ public class SubmissionController {
     ResponseEntity<?> getSamples(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                  Pageable pageable,
                                  final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Sample> samples = getSampleRepository().findBySubmissionEnvelopesIn(submissionEnvelope, pageable);
+        Page<Sample> samples = getSampleRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(samples, resourceAssembler));
     }
 

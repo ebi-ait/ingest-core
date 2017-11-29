@@ -18,5 +18,5 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 public interface ProjectRepository extends MongoRepository<Project, String> {
     public Project findByUuid(@Param("uuid") Uuid uuid);
 
-    public Page<Project> findBySubmissionEnvelopesIn(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+    public Page<Project> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 }

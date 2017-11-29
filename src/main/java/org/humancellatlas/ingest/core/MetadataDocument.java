@@ -47,30 +47,29 @@ public abstract class MetadataDocument extends AbstractEntity {
     }
 
     public MetadataDocument addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        if(!this.isLinkedToOpenSubmissionEnvelope()){
-            this.validationState = ValidationState.DRAFT;
+        SubmissionEnvelope openSubmission = this.getOpenSubmissionEnvelope();
+        if( openSubmission == null ){
+            if(this.validationState != ValidationState.DRAFT){
+                this.enactStateTransition(ValidationState.DRAFT);
+            }
             this.submissionEnvelopes.add(submissionEnvelope);
         }
         else{
-            SubmissionEnvelope latest = this.getLatestSubmissionEnvelope();
-            throw new LinkToNewSubmissionNotAllowedException(
-                    String.format("The %s metadata %s is still linked to a %s submission envelope %s.",
-                    this.getType(), this.getId(), latest.getSubmissionState(), latest.getId()));
+            String errorMessage = String.format("The %s metadata %s is still linked to a %s submission envelope %s.",
+                    this.getType(), this.getId(), openSubmission.getSubmissionState(), openSubmission.getId());
+            getLog().error(errorMessage);
+
+            throw new LinkToNewSubmissionNotAllowedException(errorMessage);
         }
         return this;
     }
 
-    public boolean isLinkedToOpenSubmissionEnvelope(){
-        SubmissionEnvelope  latestSubmission = this.getLatestSubmissionEnvelope();
-        return !(latestSubmission == null || latestSubmission.getSubmissionState() == SubmissionState.SUBMITTED);
-    }
-
     public boolean isInEnvelope(SubmissionEnvelope submissionEnvelope) {
-        return this.getLatestSubmissionEnvelope().equals(submissionEnvelope);
+        return this.getOpenSubmissionEnvelope().equals(submissionEnvelope);
     }
 
     public boolean isInEnvelopeWithUuid(Uuid uuid) {
-        return this.getLatestSubmissionEnvelope().getUuid().equals(uuid);
+        return this.getOpenSubmissionEnvelope().getUuid().equals(uuid);
     }
 
     public static List<ValidationState> allowedStateTransitions(ValidationState fromState) {
@@ -123,9 +122,11 @@ public abstract class MetadataDocument extends AbstractEntity {
     }
 
     @JsonIgnore
-    public SubmissionEnvelope getLatestSubmissionEnvelope(){
-        if(this.submissionEnvelopes.size() > 0){
-            return this.submissionEnvelopes.get(this.submissionEnvelopes.size() - 1);
+    public SubmissionEnvelope getOpenSubmissionEnvelope(){
+        for (SubmissionEnvelope submissionEnvelope : this.submissionEnvelopes) {
+            if (submissionEnvelope.isOpen()){
+                return submissionEnvelope;
+            }
         }
         return null;
     }

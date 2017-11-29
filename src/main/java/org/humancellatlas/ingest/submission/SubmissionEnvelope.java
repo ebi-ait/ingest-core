@@ -129,7 +129,7 @@ public class SubmissionEnvelope extends AbstractEntity {
                         metadataDocument.getClass().getSimpleName(),
                         metadataDocument.getId(),
                         metadataDocument.getValidationState(),
-                        this.getId(), metadataDocument.getLatestSubmissionEnvelope().getId()));
+                        this.getId(), metadataDocument.getOpenSubmissionEnvelope().getId()));
             }
             else {
                 doValidationStateUpdate(metadataDocument);
@@ -217,5 +217,9 @@ public class SubmissionEnvelope extends AbstractEntity {
 
     public @JsonIgnore boolean isTrackingMetadata(MetadataDocument metadataDocument) {
         return validationStateMap.containsKey(metadataDocument.getId());
+    }
+
+    public boolean isOpen() {
+        return this.getSubmissionState() != SubmissionState.COMPLETE;
     }
 }
