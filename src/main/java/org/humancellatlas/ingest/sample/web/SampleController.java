@@ -48,6 +48,15 @@ public class SampleController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/samples/{id}", method = RequestMethod.PUT)
+    ResponseEntity<Resource<?>> linkAnalysisToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                       @PathVariable("id") Sample sample,
+                                                       final PersistentEntityResourceAssembler assembler) {
+        Sample entity = getSampleService().addSampleToSubmissionEnvelope(submissionEnvelope, sample);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
     @RequestMapping(path = "/samples/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingSample(@PathVariable("id") Sample sample) {
         Event event = this.getStateEngine().advanceStateOfMetadataDocument(

@@ -235,16 +235,26 @@ public class StateEngine {
     }
 
     private void postMessageIfRequired(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
+        SubmissionEnvelopeMessage submissionMessage =
+                SubmissionEnvelopeMessageBuilder.using(mappings, config).messageFor(submissionEnvelope).build();
+
         switch (targetState) {
             case SUBMITTED:
                 log.info(String.format("Congratulations! You have submitted your envelope '%s'",
                                        submissionEnvelope.getId()));
-                SubmissionEnvelopeMessage submissionMessage =
-                        SubmissionEnvelopeMessageBuilder.using(mappings, config).messageFor(submissionEnvelope).build();
 
                 getMessageSender().queueExportMessage(
                         Constants.Exchanges.ENVELOPE_SUBMITTED_FANOUT,
                         "",
+                        submissionMessage);
+                break;
+            case COMPLETE:
+                log.info(String.format("Congratulations! You have exported bundle to DSS '%s'",
+                        submissionEnvelope.getId()));
+
+                getMessageSender().queueExportMessage(
+                        Constants.Exchanges.SUBMISSION_ARCHIVAL_DIRECT,
+                        Constants.Queues.SUBMISSION_ARCHIVAL,
                         submissionMessage);
                 break;
             default:

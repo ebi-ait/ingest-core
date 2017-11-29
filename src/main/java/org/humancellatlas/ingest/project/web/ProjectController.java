@@ -45,6 +45,15 @@ public class ProjectController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects/{id}", method = RequestMethod.PUT)
+    ResponseEntity<Resource<?>> linkProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                      @PathVariable("id") Project project,
+                                                     PersistentEntityResourceAssembler assembler) {
+        Project entity = getProjectService().addProjectToSubmissionEnvelope(submissionEnvelope, project);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
     @RequestMapping(path = "/projects/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingProject(@PathVariable("id") Project project) {
         Event event = this.getStateEngine().advanceStateOfMetadataDocument(

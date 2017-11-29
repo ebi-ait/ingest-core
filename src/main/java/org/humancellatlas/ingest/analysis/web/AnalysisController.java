@@ -51,6 +51,14 @@ public class AnalysisController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/analyses/{id}", method = RequestMethod.PUT)
+    ResponseEntity<Resource<?>> linkAnalysisToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                      @PathVariable("id") Analysis analysis,
+                                                      final PersistentEntityResourceAssembler assembler) {
+        Analysis entity = getAnalysisService().addAnalysisToSubmissionEnvelope(submissionEnvelope, analysis);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
 
     @RequestMapping(path = "/analyses/{analysis_id}/" + Links.BUNDLE_REF_URL)
     ResponseEntity<Resource<?>> addBundleReference(){
@@ -72,7 +80,7 @@ public class AnalysisController {
     ResponseEntity<Resource<?>> addFileReference(@PathVariable("analysis_id") Analysis analysis,
                                                  @RequestBody File file,
                                                  final PersistentEntityResourceAssembler assembler) {
-        SubmissionEnvelope submissionEnvelope = analysis.getSubmissionEnvelope();
+        SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
         file.addToSubmissionEnvelope(submissionEnvelope);
         File entity = getFileRepository().save(file);
         Analysis result = getAnalysisService().getAnalysisRepository().save(analysis.addFile(entity));

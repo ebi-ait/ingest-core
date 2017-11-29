@@ -45,6 +45,15 @@ public class ProtocolController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols/{protocol_id}", method = RequestMethod.PUT)
+    ResponseEntity<Resource<?>> linkProtocolToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                       @PathVariable("id") Protocol protocol,
+                                                      PersistentEntityResourceAssembler assembler) {
+        Protocol entity = getProtocolService().addProtocolToSubmissionEnvelope(submissionEnvelope, protocol);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
     @RequestMapping(path = "/protocols/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingProtocol(@PathVariable("id") Protocol protocol) {
         Event event = this.getStateEngine().advanceStateOfMetadataDocument(

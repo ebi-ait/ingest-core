@@ -44,6 +44,9 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean DirectExchange accessionExchange() { return new DirectExchange(Constants.Exchanges.ACCESSION); }
 
+    @Bean Queue queueArchival() { return new Queue(Constants.Queues.SUBMISSION_ARCHIVAL, false); }
+
+    @Bean DirectExchange archivalExchange() { return new DirectExchange(Constants.Exchanges.SUBMISSION_ARCHIVAL_DIRECT); }
     /* bindings */
 
     @Bean Binding bindingFileStaged(Queue queueFileStaged, FanoutExchange fileStagedExchange) {
@@ -70,6 +73,10 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean Binding bindingAccession(Queue queueAccessionRequired, DirectExchange accessionExchange) {
         return BindingBuilder.bind(queueAccessionRequired).to(accessionExchange).with(Constants.Queues.ACCESSION_REQUIRED);
+    }
+
+    @Bean Binding bindingArchival(Queue queueArchival, DirectExchange archivalExchange) {
+        return BindingBuilder.bind(queueArchival).to(archivalExchange).with(Constants.Queues.SUBMISSION_ARCHIVAL);
     }
 
     /* rabbit config */

@@ -47,7 +47,8 @@ public class SubmissionEnvelopeMessageBuilder {
     public SubmissionEnvelopeMessageBuilder messageFor(SubmissionEnvelope submissionEnvelope) {
         withControllerClass(SubmissionController.class)
                 .withDocumentType(submissionEnvelope.getClass())
-                .withId(submissionEnvelope.getId());
+                .withId(submissionEnvelope.getId())
+                .withUuid(submissionEnvelope.getUuid().getUuid().toString());
 
         return this;
     }

@@ -49,6 +49,15 @@ public class AssayController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays/{id}", method = RequestMethod.PUT)
+    ResponseEntity<Resource<?>> linkAssayToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                    @PathVariable("id") Assay assay,
+                                                   PersistentEntityResourceAssembler assembler) {
+        Assay entity = getAssayService().addAssayToSubmissionEnvelope(submissionEnvelope, assay);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
     @RequestMapping(path = "/assays/{assay_id}/" + Links.FILE_REF_URL,
                     method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> addFileReference(@PathVariable("analysis_id") Assay assay,

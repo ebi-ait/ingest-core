@@ -5,6 +5,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,8 +22,15 @@ public class ProtocolService {
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull ProtocolRepository protocolRepository;
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
+    protected Logger getLog() {
+        return log;
+    }
+
     public Protocol addProtocolToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Protocol protocol) {
         protocol.addToSubmissionEnvelope(submissionEnvelope);
         return getProtocolRepository().save(protocol);
     }
+
 }

@@ -19,8 +19,8 @@ import java.util.List;
 public interface FileRepository extends MongoRepository<File, String> {
     public File findByUuid(@Param("uuid") Uuid uuid);
 
-    public Page<File> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+    public Page<File> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
-    public List<File> findBySubmissionEnvelopeAndFileName(SubmissionEnvelope submissionEnvelope, String fileName);
+    public List<File> findBySubmissionEnvelopesInAndFileName(SubmissionEnvelope submissionEnvelope, String fileName);
 
 }

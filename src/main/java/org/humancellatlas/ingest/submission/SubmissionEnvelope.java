@@ -17,11 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Javadocs go here!
@@ -125,11 +121,11 @@ public class SubmissionEnvelope extends AbstractEntity {
             // but if not, we need to throw an exception here
             if (!metadataDocument.getValidationState().equals(ValidationState.DRAFT)) {
                 throw new MetadataDocumentStateException(String.format(
-                        "Metadata document '%s: %s', in state '%s', was not being tracked by containing envelope",
+                        "Metadata document '%s: %s', in state '%s', was not being tracked by containing envelope %s",
                         metadataDocument.getClass().getSimpleName(),
                         metadataDocument.getId(),
                         metadataDocument.getValidationState(),
-                        this.getId()));
+                        this.getId(), metadataDocument.getOpenSubmissionEnvelope().getId()));
             }
             else {
                 doValidationStateUpdate(metadataDocument);
@@ -217,5 +213,10 @@ public class SubmissionEnvelope extends AbstractEntity {
 
     public @JsonIgnore boolean isTrackingMetadata(MetadataDocument metadataDocument) {
         return validationStateMap.containsKey(metadataDocument.getId());
+    }
+
+    public boolean isOpen() {
+        List<SubmissionState> states = Arrays.asList(SubmissionState.values());
+        return states.indexOf(this.getSubmissionState()) < states.indexOf(SubmissionState.SUBMITTED);
     }
 }
