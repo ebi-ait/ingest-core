@@ -24,3 +24,4 @@ dist/
 nbdist/
 .nb-gradle/
 /src/main/java/org/humancellatlas/ingest/security/SecurityConstants.java
+/src/test/resources/curl-examples.txt
