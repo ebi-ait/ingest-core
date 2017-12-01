@@ -1,0 +1,10 @@
+curl --request POST \
+  --url https://danielvaughan.eu.auth0.com/oauth/token \
+  --header 'content-type: application/json' \
+  --data '{"client_id":"Zdsog4nDAnhQ99yiKwMQWAPc2qUDlR99","client_secret":"t-OAE-GQk_nZZtWn-QQezJxDsLXmU7VSzlAh9cKW5vb87i90qlXGTvVNAjfT9weF","audience":"http://localhost:8080","grant_type":"client_credentials"}'
+
+
+curl --request GET \
+  --url http://localhost:8080/users/secured \
+  --header 'authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ik1qTkZRa1U0UWtGRlFqUXdRVVEwUlVZNFJqWkZOa1kxUmtVMk9EWXdORE5EUWprd1FrRTFPQSJ9.eyJpc3MiOiJodHRwczovL2RhbmllbHZhdWdoYW4uZXUuYXV0aDAuY29tLyIsInN1YiI6Ilpkc29nNG5EQW5oUTk5eWlLd01RV0FQYzJxVURsUjk5QGNsaWVudHMiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJpYXQiOjE1MTE5NDg0ODYsImV4cCI6MTUxMjAzNDg4NiwiZ3R5IjoiY2xpZW50LWNyZWRlbnRpYWxzIn0.HHi-3LHNXTkyeXhChPiXij4vSUYqhVIea1pDPwvusETDi1ssAGAi3vxu4qMTPZnCY9Xumj8XQat7tobBmLZyhO6aGM4srTxTgZmMdcSJvXwy8Wda0gCA9PV_uBTZjWzPze-rgAc8Do_0U_D3vzQoQ921HWtL8snCmcay0A-aYBHuHrW8_U6bJW0O50o4Etk1uXXLJAM8TGOLg-S9kghknlSvpVje0KP8HfIF5abyi-HBV5ZHAl1MCky9OjF8xDXRShUHTsLKsD3WlHn1-j1hiQh3aeogvLp7jqVhQlewi_EpUUBghg5rqMbP3j-cOUPtyFsKAbUMAmNlNwm9Rf90_Q'
+
