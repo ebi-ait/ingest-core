@@ -9,9 +9,12 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.ResourceProcessor;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @CrossOrigin
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements ResourceProcessor<RepositoryLinksResource> {
 
     @Autowired
     SubmissionEnvelopeRepository submissionEnvelopeRepository;
@@ -38,7 +41,7 @@ public class UserController {
         long validatingubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.VALIDATING, user);
         long validSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.VALID, user);
         long invalidSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.INVALID, user);
-        long submitteddSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.SUBMITTED, user);
+        long submittedSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.SUBMITTED, user);
         long processingSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.PROCESSING, user);
         long cleanupSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.CLEANUP, user);
         long completedSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.COMPLETE, user);
@@ -54,6 +57,12 @@ public class UserController {
     private String getPrincipal() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return principal.toString();
+    }
+
+    @Override
+    public RepositoryLinksResource process(RepositoryLinksResource resource) {
+        resource.add(ControllerLinkBuilder.linkTo(UserController.class).withRel("user"));
+        return resource;
     }
 
     @Getter
