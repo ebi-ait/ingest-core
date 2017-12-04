@@ -3,6 +3,8 @@ package org.humancellatlas.ingest.user;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
@@ -30,12 +32,19 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
     SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
     @Autowired
-    private PagedResourcesAssembler<SubmissionEnvelope> pagedResourcesAssembler;
+    ProjectRepository projectRepository;
+
+    @Autowired
+    private PagedResourcesAssembler<SubmissionEnvelope> submissionEnvelopePagedResourcesAssembler;
+
+    @Autowired
+    private PagedResourcesAssembler<Project> projectPagedResourcesAssembler;
 
     @RequestMapping(value = "/summary")
     @ResponseBody
     public Summary summary() {
         String user = getPrincipal();
+
         long pendingSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.PENDING, user);
         long draftSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.DRAFT, user);
         long validatingubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.VALIDATING, user);
@@ -45,13 +54,20 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
         long processingSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.PROCESSING, user);
         long cleanupSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.CLEANUP, user);
         long completedSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.COMPLETE, user);
-        return new Summary(pendingSubmissions, draftSubmissions, completedSubmissions);
+        long projects = projectRepository.countByUser(user);
+        return new Summary(pendingSubmissions, draftSubmissions, completedSubmissions, projects);
     }
 
     @RequestMapping(value = "/submissionEnvelopes")
     public PagedResources<Resource<SubmissionEnvelope>> getUserSubmissionEnvelopes(Pageable pageable) {
         Page<SubmissionEnvelope> submissionEnvelopes = submissionEnvelopeRepository.findByUser(getPrincipal(), pageable);
-        return pagedResourcesAssembler.toResource(submissionEnvelopes);
+        return submissionEnvelopePagedResourcesAssembler.toResource(submissionEnvelopes);
+    }
+
+    @RequestMapping(value = "/projects")
+    public PagedResources<Resource<Project>> getUserProjects(Pageable pageable) {
+        Page<Project> projects = projectRepository.findByUser(getPrincipal(), pageable);
+        return projectPagedResourcesAssembler.toResource(projects);
     }
 
     private String getPrincipal() {
@@ -73,11 +89,13 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
         private Long draftSubmissions = 0L;
         private Long pendingSubmissions = 0L;
         private Long completedSubmissions = 0L;
+        private Long projects = 0L;
 
-        public Summary(long pendingSubmissions, long draftSubmissions, long completedSubmissions) {
+        public Summary(long pendingSubmissions, long draftSubmissions, long completedSubmissions, long projects) {
             this.pendingSubmissions = pendingSubmissions;
             this.draftSubmissions = draftSubmissions;
             this.completedSubmissions = completedSubmissions;
+            this.projects = projects;
         }
     }
 
