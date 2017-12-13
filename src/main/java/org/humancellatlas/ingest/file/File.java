@@ -16,6 +16,7 @@ public class File extends MetadataDocument {
 
     private String cloudUrl;
     private Checksums checksums;
+    private String validationId;
 
     @JsonCreator
     protected File(@JsonProperty("fileName") String fileName,
