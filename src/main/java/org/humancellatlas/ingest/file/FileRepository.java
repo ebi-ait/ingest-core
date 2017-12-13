@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.file;
 
+import java.util.UUID;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.annotation.Id;
@@ -23,4 +24,5 @@ public interface FileRepository extends MongoRepository<File, String> {
 
     public List<File> findBySubmissionEnvelopesInAndFileName(SubmissionEnvelope submissionEnvelope, String fileName);
 
+    public File findByValidationId(@Param("validationId") UUID id);
 }
