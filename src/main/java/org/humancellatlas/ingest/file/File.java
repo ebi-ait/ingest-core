@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.file;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import org.humancellatlas.ingest.core.Checksums;
@@ -16,6 +17,7 @@ public class File extends MetadataDocument {
 
     private String cloudUrl;
     private Checksums checksums;
+    private UUID validationId;
 
     @JsonCreator
     protected File(@JsonProperty("fileName") String fileName,

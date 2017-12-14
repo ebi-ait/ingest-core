@@ -5,6 +5,7 @@ import org.humancellatlas.ingest.state.InvalidSubmissionStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -82,6 +83,16 @@ public class GlobalStateExceptionHandler {
                         "this will generate a BAD_REQUEST RESPONSE",
                 request.getRequestURL().toString()));
         getLog().debug("Handling IllegalArgumentException and returning BAD_REQUEST response", e);
+        return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public @ResponseBody ExceptionInfo handleResourceNotFound(HttpServletRequest request, Exception e) {
+        getLog().warn(String.format("Caught a resource not found exception argument at '%s'; " +
+                "this will generate a NOT_FOUND RESPONSE",
+            request.getRequestURL().toString()));
+        getLog().debug("Handling ResourceNotFoundException and returning NOT_FOUND response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 
