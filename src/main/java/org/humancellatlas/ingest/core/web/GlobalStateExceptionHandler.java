@@ -88,8 +88,8 @@ public class GlobalStateExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(RuntimeException.class)
     public @ResponseBody ExceptionInfo handleRuntimeException(HttpServletRequest request, Exception e) {
-        getLog().warn(String.format("Runtime exception encountered on %s request to resource %s ", request.getMethod(),
-                request.getRequestURL().toString() ));
+        getLog().error(String.format("Runtime exception encountered on %s request to resource %s ", request.getMethod(),
+                request.getRequestURL().toString()), e);
         getLog().debug("Handling RuntimeException and returning INTERNAL_SERVER_ERROR response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), "Internal server error");
     }
