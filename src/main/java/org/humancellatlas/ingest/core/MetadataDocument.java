@@ -32,6 +32,7 @@ public abstract class MetadataDocument extends AbstractEntity {
     private @Setter Accession accession;
     private @Setter ValidationState validationState;
     private @Setter List<Object> validationErrors;
+    private @Setter String validationChecksum;
 
     private static final Logger log = LoggerFactory.getLogger(SubmissionEnvelope.class);
 

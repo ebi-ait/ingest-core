@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.exception.CoreEntityNotFoundException;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.springframework.data.domain.PageRequest;
@@ -44,6 +45,7 @@ public class FileService {
             } else {
                 File file = filesInEnvelope.get(0);
                 file.setCloudUrl(newFileUrl);
+                file.setValidationState(ValidationState.DRAFT);
                 File updatedFile = fileRepository.save(file);
                 return updatedFile;
             }
