@@ -2,7 +2,9 @@ package org.humancellatlas.ingest.user;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
+import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
@@ -12,8 +14,11 @@ import org.humancellatlas.ingest.submission.web.SubmissionEnvelopeResourceProces
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.data.rest.core.support.SelfLinkProvider;
 import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceProcessor;
@@ -44,11 +49,16 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
     @Autowired
     private SubmissionEnvelopeResourceProcessor submissionEnvelopeResourceProcessor;
 
+    @Autowired
+    private SelfLinkProvider linkProvider;
+
+    @Autowired
+    private EntityLinks entityLinks;
+
     @RequestMapping(value = "/summary")
     @ResponseBody
     public Summary summary() {
         String user = getPrincipal();
-
         long pendingSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.PENDING, user);
         long draftSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.DRAFT, user);
         long validatingubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.VALIDATING, user);
@@ -68,6 +78,7 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
         PagedResources<Resource<SubmissionEnvelope>> pagedResources =  submissionEnvelopePagedResourcesAssembler.toResource(submissionEnvelopes);
         for (Resource<SubmissionEnvelope> resource : pagedResources)
         {
+            resource.add(entityLinks.linkForSingleResource(resource.getContent()).withRel("self"));
             submissionEnvelopeResourceProcessor.process(resource);
         }
         return pagedResources;
