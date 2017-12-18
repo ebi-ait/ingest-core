@@ -45,7 +45,7 @@ public class FileService {
             } else {
                 File file = filesInEnvelope.get(0);
                 file.setCloudUrl(newFileUrl);
-                file.setValidationState(ValidationState.DRAFT);
+                file.enactStateTransition(ValidationState.DRAFT);
                 File updatedFile = fileRepository.save(file);
                 return updatedFile;
             }
