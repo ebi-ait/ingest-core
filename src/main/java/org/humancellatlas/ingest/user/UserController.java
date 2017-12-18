@@ -18,10 +18,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.support.SelfLinkProvider;
 import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.EntityLinks;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceProcessor;
+import org.springframework.hateoas.*;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -78,7 +75,7 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
         PagedResources<Resource<SubmissionEnvelope>> pagedResources =  submissionEnvelopePagedResourcesAssembler.toResource(submissionEnvelopes);
         for (Resource<SubmissionEnvelope> resource : pagedResources)
         {
-            resource.add(entityLinks.linkForSingleResource(resource.getContent()).withRel("self"));
+            resource.add(entityLinks.linkForSingleResource(resource.getContent()).withRel(Link.REL_SELF));
             submissionEnvelopeResourceProcessor.process(resource);
         }
         return pagedResources;
