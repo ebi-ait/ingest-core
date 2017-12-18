@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.humancellatlas.ingest.submission.web.SubmissionEnvelopeResourceProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +41,9 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
     @Autowired
     private PagedResourcesAssembler<Project> projectPagedResourcesAssembler;
 
+    @Autowired
+    private SubmissionEnvelopeResourceProcessor submissionEnvelopeResourceProcessor;
+
     @RequestMapping(value = "/summary")
     @ResponseBody
     public Summary summary() {
@@ -61,7 +65,12 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
     @RequestMapping(value = "/submissionEnvelopes")
     public PagedResources<Resource<SubmissionEnvelope>> getUserSubmissionEnvelopes(Pageable pageable) {
         Page<SubmissionEnvelope> submissionEnvelopes = submissionEnvelopeRepository.findByUser(getPrincipal(), pageable);
-        return submissionEnvelopePagedResourcesAssembler.toResource(submissionEnvelopes);
+        PagedResources<Resource<SubmissionEnvelope>> pagedResources =  submissionEnvelopePagedResourcesAssembler.toResource(submissionEnvelopes);
+        for (Resource<SubmissionEnvelope> resource : pagedResources)
+        {
+            submissionEnvelopeResourceProcessor.process(resource);
+        }
+        return pagedResources;
     }
 
     @RequestMapping(value = "/projects")
