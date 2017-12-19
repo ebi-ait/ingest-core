@@ -29,7 +29,7 @@ dependencies {
 	compile('org.springframework.data:spring-data-rest-hal-browser')
 	compile('org.springframework.boot:spring-boot-starter-hateoas')
 	compile('org.springframework.boot:spring-boot-starter-amqp')
-
+	compile('com.auth0:auth0-spring-security-api:1.0.0-rc.2')
 	compile('joda-time:joda-time')
 	compile('com.fasterxml.jackson.datatype:jackson-datatype-joda')
 	compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')

@@ -6,12 +6,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.joda.time.DateTime;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Version;
+import org.springframework.data.annotation.*;
 import org.springframework.hateoas.Identifiable;
 
+import java.time.Instant;
 import java.util.Date;
 
 /**
@@ -27,8 +25,14 @@ public abstract class AbstractEntity implements Identifiable<String> {
     private @Id @JsonIgnore String id;
 
     private @Version Long version;
+
     private @CreatedDate DateTime submissionDate;
+
     private @LastModifiedDate DateTime updateDate;
+
+    private @CreatedBy String user;
+
+    private @LastModifiedBy String lastModifiedUser;
 
     private final @JsonIgnore EntityType type;
 
