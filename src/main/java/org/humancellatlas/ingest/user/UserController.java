@@ -84,7 +84,12 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
     @RequestMapping(value = "/projects")
     public PagedResources<Resource<Project>> getUserProjects(Pageable pageable) {
         Page<Project> projects = projectRepository.findByUser(getPrincipal(), pageable);
-        return projectPagedResourcesAssembler.toResource(projects);
+        PagedResources<Resource<Project>> pagedResources = projectPagedResourcesAssembler.toResource(projects);
+        for (Resource<Project> resource : pagedResources)
+        {
+            resource.add(entityLinks.linkForSingleResource(resource.getContent()).withRel(Link.REL_SELF));
+        }
+        return pagedResources;
     }
 
     private String getPrincipal() {
