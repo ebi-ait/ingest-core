@@ -224,13 +224,13 @@ public class StateEngine {
             }
             catch (Exception e) {
                 lastException = e;
+                int backoff = new Random().nextInt(Math.min(cap * 1000, ((int) Math.pow(base * 2, tries)) * 1000));
                 getLog().trace("Exception on metadata operation", e);
                 getLog().debug(String.format(
                         "Encountered exception whilst updating submission envelope of metadata change... " +
-                                "will reattempt (tries now = %s)",
-                        tries));
+                                "will reattempt (tries now = %s) after sleeping for backoff of %s milliseconds",
+                        tries, backoff));
                 try {
-                    int backoff = new Random().nextInt(Math.min(cap * 1000, ((int) Math.pow(base * 2, tries)) * 1000));
                     TimeUnit.MILLISECONDS.sleep(backoff);
                 }
                 catch (InterruptedException e1) {
