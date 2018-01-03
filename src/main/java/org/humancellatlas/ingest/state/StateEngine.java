@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.state;
 
+import java.util.Random;
 import lombok.Getter;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.Event;
@@ -95,7 +96,10 @@ public class StateEngine {
         final Event event = new SubmissionEvent(submissionEnvelope.getSubmissionState(), targetState);
         executorService.submit(() -> {
             // we'll retry events here if they fail
+            // see https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
             int tries = 0;
+            int cap = 20; // max of 20 seconds of backoff
+            int base = 1; // initially 1 second of backoff
             Exception lastException = null;
             SubmissionEnvelope envelope = submissionEnvelope;
             while (tries < MAX_RETRIES) {
@@ -117,7 +121,8 @@ public class StateEngine {
                                     "will reattempt (tries now = %s)",
                             tries));
                     try {
-                        TimeUnit.SECONDS.sleep(1);
+                        int backoff = new Random().nextInt(Math.min(cap * 1000, ((int) Math.pow(base * 2, tries)) * 1000));
+                        TimeUnit.MILLISECONDS.sleep(backoff);
                     }
                     catch (InterruptedException e1) {
                         // just continue
@@ -157,6 +162,8 @@ public class StateEngine {
     public Optional<Event> analyseStateOfEnvelope(SubmissionEnvelope submissionEnvelope) {
         // we'll retry events here if they fail
         int tries = 0;
+        int cap = 20; // max of 20 seconds of backoff
+        int base = 1; // initially 1 second of backoff
         Exception lastException = null;
         SubmissionEnvelope envelope = submissionEnvelope;
         while (tries < MAX_RETRIES) {
@@ -181,7 +188,8 @@ public class StateEngine {
                                 "will reattempt (tries now = %s)",
                         tries));
                 try {
-                    TimeUnit.SECONDS.sleep(1);
+                    int backoff = new Random().nextInt(Math.min(cap * 1000, ((int) Math.pow(base * 2, tries)) * 1000));
+                    TimeUnit.MILLISECONDS.sleep(backoff);
                 }
                 catch (InterruptedException e1) {
                     // just continue
@@ -199,6 +207,8 @@ public class StateEngine {
                                                                  MetadataDocument metadataDocument) {
         // we'll retry events here if they fail
         int tries = 0;
+        int cap = 20; // max of 20 seconds of backoff
+        int base = 1; // initially 1 second of backoff
         Exception lastException = null;
         SubmissionEnvelope envelope = submissionEnvelope;
         while (tries < MAX_RETRIES) {
@@ -220,7 +230,8 @@ public class StateEngine {
                                 "will reattempt (tries now = %s)",
                         tries));
                 try {
-                    TimeUnit.SECONDS.sleep(1);
+                    int backoff = new Random().nextInt(Math.min(cap * 1000, ((int) Math.pow(base * 2, tries)) * 1000));
+                    TimeUnit.MILLISECONDS.sleep(backoff);
                 }
                 catch (InterruptedException e1) {
                     // just continue
