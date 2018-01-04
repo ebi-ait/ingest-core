@@ -25,9 +25,9 @@ public class MessageSender {
     private final @NonNull Queue<QueuedMessage> accessionMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
     private final @NonNull Queue<QueuedMessage> exportMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
 
-    private final @NonNull int DELAY_TIME_VALIDATION_MESSAGES = 0;
-    private final @NonNull int DELAY_TIME_EXPORTER_MESSAGES = 0;
-    private final @NonNull int DELAY_TIME_ACCESSIONER_MESSAGES = 0;
+    private final int DELAY_TIME_VALIDATION_MESSAGES = 0;
+    private final int DELAY_TIME_EXPORTER_MESSAGES = 0;
+    private final int DELAY_TIME_ACCESSIONER_MESSAGES = 0;
 
 
     public void queueValidationMessage(String exchange, String routingKey, MetadataDocumentMessage payload){
