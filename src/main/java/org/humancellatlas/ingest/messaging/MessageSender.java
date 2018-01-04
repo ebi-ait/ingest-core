@@ -25,6 +25,11 @@ public class MessageSender {
     private final @NonNull Queue<QueuedMessage> accessionMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
     private final @NonNull Queue<QueuedMessage> exportMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
 
+    private final @NonNull int DELAY_TIME_VALIDATION_MESSAGES = 0;
+    private final @NonNull int DELAY_TIME_EXPORTER_MESSAGES = 0;
+    private final @NonNull int DELAY_TIME_ACCESSIONER_MESSAGES = 0;
+
+
     public void queueValidationMessage(String exchange, String routingKey, MetadataDocumentMessage payload){
         QueuedMessage message = new QueuedMessage(new Date(), exchange, routingKey, payload);
         this.validationMessageBatch.add(message);
@@ -42,17 +47,17 @@ public class MessageSender {
 
     @Scheduled(fixedDelay = 1000)
     private void sendValidationMessages(){
-        sendFromQueue(this.validationMessageBatch, 40);
+        sendFromQueue(this.validationMessageBatch, this.DELAY_TIME_VALIDATION_MESSAGES);
     }
 
     @Scheduled(fixedDelay = 1000)
     private void sendAccessionMessages(){
-        sendFromQueue(this.accessionMessageBatch, 20);
+        sendFromQueue(this.accessionMessageBatch, this.DELAY_TIME_ACCESSIONER_MESSAGES);
     }
 
     @Scheduled(fixedDelay = 1000)
     private void sendExportMessages(){
-        sendFromQueue(this.exportMessageBatch, 10);
+        sendFromQueue(this.exportMessageBatch, this.DELAY_TIME_EXPORTER_MESSAGES);
     }
 
     private void sendFromQueue(Queue<QueuedMessage> messageQueue, int delayTimeSeconds){
