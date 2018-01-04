@@ -112,8 +112,9 @@ public class StateEngine {
                     // is this an event that needs to be posted to a queue?
                     postMessageIfRequired(envelope, targetState);
                     return;
-                }
-                catch (Exception e) {
+                } catch (InvalidSubmissionStateException e) {
+                    throw e;
+                } catch (Exception e) {
                     lastException = e;
                     getLog().trace("Exception on envelope operation", e);
                     getLog().debug(String.format(
@@ -221,8 +222,7 @@ public class StateEngine {
                 else {
                     return envelope;
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 lastException = e;
                 int backoff = new Random().nextInt(Math.min(cap * 1000, ((int) Math.pow(base * 2, tries)) * 1000));
                 getLog().trace("Exception on metadata operation", e);
