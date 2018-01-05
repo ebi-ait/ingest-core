@@ -33,14 +33,18 @@ public class MetadataStateChangeListener extends AbstractMongoEventListener<Meta
         SubmissionEnvelope latestEnvelope = null;
         MetadataDocument metadataDocument = event.getSource();
         SubmissionEnvelope envelope = metadataDocument.getOpenSubmissionEnvelope();
-        try {
-            latestEnvelope = this.getStateEngine().notifySubmissionEnvelopeOfMetadataDocumentChange(envelope, metadataDocument);
-        } catch (Exception e) {
-            getLog().error("Save propagation error", e);
-            latestEnvelope = envelope;
-        } finally {
-            this.getStateEngine().analyseStateOfEnvelope(latestEnvelope)
-                .ifPresent(event1 -> getLog().debug("Event triggered on submission envelope", event1));
+        if(envelope != null) {
+            try {
+                latestEnvelope = this.getStateEngine()
+                    .notifySubmissionEnvelopeOfMetadataDocumentChange(envelope, metadataDocument);
+            } catch (Exception e) {
+                getLog().error("Save propagation error", e);
+                latestEnvelope = envelope;
+            } finally {
+                this.getStateEngine().analyseStateOfEnvelope(latestEnvelope)
+                    .ifPresent(
+                        event1 -> getLog().debug("Event triggered on submission envelope", event1));
+            }
         }
     }
 }
