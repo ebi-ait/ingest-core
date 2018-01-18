@@ -10,7 +10,6 @@ import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.state.InvalidSubmissionStateException;
-import org.humancellatlas.ingest.state.MetadataDocumentStateException;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.slf4j.Logger;
@@ -120,12 +119,7 @@ public class SubmissionEnvelope extends AbstractEntity {
             // if this doc is in draft, it's either a new document or has new content, so it's ok to add to state tracker
             // but if not, we need to throw an exception here
             if (!metadataDocument.getValidationState().equals(ValidationState.DRAFT)) {
-                throw new MetadataDocumentStateException(String.format(
-                        "Metadata document '%s: %s', in state '%s', was not being tracked by containing envelope %s",
-                        metadataDocument.getClass().getSimpleName(),
-                        metadataDocument.getId(),
-                        metadataDocument.getValidationState(),
-                        this.getId(), metadataDocument.getOpenSubmissionEnvelope().getId()));
+               getLog().debug(String.format("Attempted to track a document(type: %s, id: %s) for an envelope(id: %s) that was not in DRAFT state", metadataDocument.getType(), metadataDocument.getId(), this.getId()));
             }
             else {
                 doValidationStateUpdate(metadataDocument);
