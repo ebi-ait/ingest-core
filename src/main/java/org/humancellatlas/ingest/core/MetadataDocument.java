@@ -25,7 +25,7 @@ import java.util.List;
 @Getter
 public abstract class MetadataDocument extends AbstractEntity {
     private final List<Event> events = new ArrayList<>();
-    private final Object content;
+    private Object content;
 
     private final @DBRef List<SubmissionEnvelope> submissionEnvelopes = new ArrayList<>();
 
@@ -37,6 +37,10 @@ public abstract class MetadataDocument extends AbstractEntity {
 
     private static Logger getLog() {
         return log;
+    }
+
+    protected MetadataDocument(){
+
     }
 
     protected MetadataDocument(EntityType type,

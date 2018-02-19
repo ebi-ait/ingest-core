@@ -1,0 +1,12 @@
+package org.humancellatlas.ingest.biomaterial;
+
+import java.util.List;
+import org.humancellatlas.ingest.process.Process;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+/**
+ * Created by rolando on 16/02/2018.
+ */
+public interface BiomaterialRepository extends MongoRepository<Biomaterial, String> {
+  public List<Biomaterial> findByProvenantProcesses(Process process);
+}

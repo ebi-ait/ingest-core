@@ -9,9 +9,8 @@ package org.humancellatlas.ingest.core;
 public enum EntityType {
     SUBMISSION,
     PROJECT,
-    SAMPLE,
-    ASSAY,
-    ANALYSIS,
+    BIOMATERIAL,
+    PROCESS,
     PROTOCOL,
     FILE
 }

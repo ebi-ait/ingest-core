@@ -1,17 +1,15 @@
 package org.humancellatlas.ingest.core;
 
-import org.humancellatlas.ingest.analysis.Analysis;
-import org.humancellatlas.ingest.analysis.web.AnalysisController;
-import org.humancellatlas.ingest.assay.Assay;
-import org.humancellatlas.ingest.assay.web.AssayController;
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
+import org.humancellatlas.ingest.biomaterial.web.BiomaterialController;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.web.FileController;
+import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.process.web.ProcessController;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.web.ProjectController;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.web.ProtocolController;
-import org.humancellatlas.ingest.sample.Sample;
-import org.humancellatlas.ingest.sample.web.SampleController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -59,11 +57,8 @@ public class MetadataDocumentMessageBuilder {
         if (metadataDocument.getUuid() != null) {
             withUuid(metadataDocument.getUuid().toString());
         }
-        if (metadataDocument instanceof Analysis) {
-            return withControllerClass(AnalysisController.class);
-        }
-        if (metadataDocument instanceof Assay) {
-            return withControllerClass(AssayController.class);
+        if (metadataDocument instanceof Process) {
+            return withControllerClass(ProcessController.class);
         }
         if (metadataDocument instanceof File) {
             return withControllerClass(FileController.class);
@@ -74,8 +69,8 @@ public class MetadataDocumentMessageBuilder {
         if (metadataDocument instanceof Protocol) {
             return withControllerClass(ProtocolController.class);
         }
-        if (metadataDocument instanceof Sample) {
-            return withControllerClass(SampleController.class);
+        if(metadataDocument instanceof Biomaterial) {
+            return withControllerClass(BiomaterialController.class);
         }
 
         // couldn't match type

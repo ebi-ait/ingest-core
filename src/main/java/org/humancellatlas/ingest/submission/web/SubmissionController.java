@@ -3,10 +3,6 @@ package org.humancellatlas.ingest.submission.web;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.analysis.Analysis;
-import org.humancellatlas.ingest.analysis.AnalysisRepository;
-import org.humancellatlas.ingest.assay.Assay;
-import org.humancellatlas.ingest.assay.AssayRepository;
 import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.core.web.Links;
@@ -16,8 +12,7 @@ import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
-import org.humancellatlas.ingest.sample.Sample;
-import org.humancellatlas.ingest.sample.SampleRepository;
+
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.state.StateEngine;
 import org.springframework.data.domain.Page;
@@ -47,30 +42,11 @@ import java.util.Optional;
 public class SubmissionController {
     private final @NonNull StateEngine stateEngine;
 
-    private final @NonNull AnalysisRepository analysisRepository;
-    private final @NonNull AssayRepository assayRepository;
     private final @NonNull FileRepository fileRepository;
     private final @NonNull ProjectRepository projectRepository;
     private final @NonNull ProtocolRepository protocolRepository;
-    private final @NonNull SampleRepository sampleRepository;
 
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
-
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/analyses", method = RequestMethod.GET)
-    ResponseEntity<?> getAnalyses(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                  Pageable pageable,
-                                  final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Analysis> analyses = getAnalysisRepository().findBySubmissionEnvelopesIn(submissionEnvelope, pageable);
-        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(analyses, resourceAssembler));
-    }
-
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays", method = RequestMethod.GET)
-    ResponseEntity<?> getAssays(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                Pageable pageable,
-                                final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Assay> assays = getAssayRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
-        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(assays, resourceAssembler));
-    }
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files", method = RequestMethod.GET)
     ResponseEntity<?> getFiles(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -96,13 +72,6 @@ public class SubmissionController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/samples", method = RequestMethod.GET)
-    ResponseEntity<?> getSamples(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                 Pageable pageable,
-                                 final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Sample> samples = getSampleRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
-        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(samples, resourceAssembler));
-    }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMIT_URL, method = RequestMethod.PUT)
     HttpEntity<?> submitEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {

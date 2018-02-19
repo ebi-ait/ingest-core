@@ -34,11 +34,15 @@ public abstract class AbstractEntity implements Identifiable<String> {
 
     private @LastModifiedBy String lastModifiedUser;
 
-    private final @JsonIgnore EntityType type;
+    private @JsonIgnore EntityType type;
 
     private @Setter Uuid uuid;
 
     protected AbstractEntity(EntityType type) {
         this.type = type;
+    }
+
+    protected AbstractEntity() {
+
     }
 }
