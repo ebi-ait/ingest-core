@@ -12,6 +12,7 @@ import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
+import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 /**
  * Created by rolando on 16/02/2018.
  */
-@Service
+@RepositoryRestController
 @RequiredArgsConstructor
 @ExposesResourceFor(Biomaterial.class)
 @Getter
