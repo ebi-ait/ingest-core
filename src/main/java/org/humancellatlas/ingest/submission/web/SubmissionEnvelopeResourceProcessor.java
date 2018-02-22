@@ -24,16 +24,16 @@ import java.util.Optional;
 public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Resource<SubmissionEnvelope>> {
     private final @NonNull EntityLinks entityLinks;
 
-    private Link getAnalysesLink(SubmissionEnvelope submissionEnvelope) {
+    private Link getBiomaterialsLink(SubmissionEnvelope submissionEnvelope) {
         return entityLinks.linkForSingleResource(submissionEnvelope)
-                .slash(Links.ANALYSES_URL)
-                .withRel(Links.ANALYSES_REL);
+            .slash(Links.BIOMATERIALS_URL)
+            .withRel(Links.BIOMATERIALS_REL);
     }
 
-    private Link getAssaysLink(SubmissionEnvelope submissionEnvelope) {
+    private Link getProcessesLink(SubmissionEnvelope submissionEnvelope) {
         return entityLinks.linkForSingleResource(submissionEnvelope)
-                .slash(Links.ASSAYS_URL)
-                .withRel(Links.ASSAYS_REL);
+            .slash(Links.PROCESSES_URL)
+            .withRel(Links.PROCESSES_REL);
     }
 
     private Link getFilesLink(SubmissionEnvelope submissionEnvelope) {
@@ -54,11 +54,6 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 .withRel(Links.PROTOCOLS_REL);
     }
 
-    private Link getSamplesLink(SubmissionEnvelope submissionEnvelope) {
-        return entityLinks.linkForSingleResource(submissionEnvelope)
-                .slash(Links.SAMPLES_URL)
-                .withRel(Links.SAMPLES_REL);
-    }
 
     private Optional<Link> getStateTransitionLink(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
         Optional<String> transitionResourceName = getSubresourceNameForSubmissionState(targetState);
@@ -113,12 +108,11 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         SubmissionEnvelope submissionEnvelope = resource.getContent();
 
         // add subresource links for each type of metadata document in a submission envelope
-        resource.add(getAnalysesLink(submissionEnvelope));
-        resource.add(getAssaysLink(submissionEnvelope));
+        resource.add(getBiomaterialsLink(submissionEnvelope));
+        resource.add(getProcessesLink(submissionEnvelope));
         resource.add(getFilesLink(submissionEnvelope));
         resource.add(getProjectsLink(submissionEnvelope));
         resource.add(getProtocolsLink(submissionEnvelope));
-        resource.add(getSamplesLink(submissionEnvelope));
 
         // add subresource links for events that occur in response to state transitions
         submissionEnvelope.allowedStateTransitions().stream()
