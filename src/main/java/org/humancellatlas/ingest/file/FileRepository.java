@@ -26,4 +26,6 @@ public interface FileRepository extends MongoRepository<File, String> {
     public File findByValidationId(@Param("validationId") UUID id);
 
     public List<File> findByProvenantProcesses(Process process);
+
+    public List<File> findByProvenantProcessesIn(@Param("ids") List<Process> processes);
 }

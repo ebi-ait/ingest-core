@@ -27,10 +27,8 @@ public class File extends MetadataDocument {
     private UUID validationId;
 
     @JsonCreator
-    protected File(@JsonProperty("fileName") String fileName,
-                   @JsonProperty("content") Object content) {
+    protected File(@JsonProperty("content") Object content) {
         super(EntityType.FILE, content);
-        this.fileName = fileName;
     }
 
     public File addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
