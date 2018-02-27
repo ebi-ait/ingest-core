@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.process.web.projection;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import java.util.List;
 import org.humancellatlas.ingest.process.Process;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,4 +13,7 @@ import org.springframework.data.rest.core.config.Projection;
 public interface WithDependingProcesses {
   @Value("#{@processRepository.findByInputProcess(target)}")
   List<Process> getDependingProcesses();
+
+  @Value("#{target}")
+  @JsonUnwrapped Process getProcess();
 }

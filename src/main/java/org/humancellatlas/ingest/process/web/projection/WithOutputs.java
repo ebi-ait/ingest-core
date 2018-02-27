@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.process.web.projection;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import java.util.List;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.file.File;
@@ -20,4 +21,7 @@ public interface WithOutputs {
 
   @Value("#{@fileRepository.findByProvenantProcesses(target)}")
   List<File> getOutputFiles();
+
+  @Value("#{target}")
+  @JsonUnwrapped Process getProcess();
 }
