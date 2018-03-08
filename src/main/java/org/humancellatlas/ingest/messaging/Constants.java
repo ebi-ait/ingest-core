@@ -14,6 +14,8 @@ public class Constants {
         public static final String VALIDATION_REQUIRED = "ingest.metadata.validation.queue";
         public static final String ACCESSION_REQUIRED = "ingest.metadata.accession.queue";
         public static final String SUBMISSION_ARCHIVAL = "ingest.archival.queue";
+        public static final String STATE_TRACKING = "ingest.state-tracking.queue";
+
     }
 
     public class Exchanges {
@@ -24,5 +26,7 @@ public class Constants {
         public static final String ENVELOPE_SUBMITTED_FANOUT = "ingest.envelope.submitted.exchange";
         public static final String ACCESSION = "ingest.accession.exchange";
         public static final String SUBMISSION_ARCHIVAL_DIRECT = "ingest.archival.exchange";
+        public static final String STATE_TRACKING_DIRECT = "ingest.state-tracking.exchange";
+
     }
 }
