@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.humancellatlas.ingest.core.exception.LinkToNewSubmissionNotAllowedException;
-import org.humancellatlas.ingest.state.InvalidMetadataDocumentStateException;
-import org.humancellatlas.ingest.state.InvalidSubmissionStateException;
 import org.humancellatlas.ingest.state.ValidationState;
-import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +21,6 @@ import java.util.List;
  */
 @Getter
 public abstract class MetadataDocument extends AbstractEntity {
-    private final List<Event> events = new ArrayList<>();
     private final Object content;
 
     private final @DBRef List<SubmissionEnvelope> submissionEnvelopes = new ArrayList<>();
@@ -64,14 +60,6 @@ public abstract class MetadataDocument extends AbstractEntity {
         return this;
     }
 
-    public boolean isInEnvelope(SubmissionEnvelope submissionEnvelope) {
-        return this.getOpenSubmissionEnvelope().equals(submissionEnvelope);
-    }
-
-    public boolean isInEnvelopeWithUuid(Uuid uuid) {
-        return this.getOpenSubmissionEnvelope().getUuid().equals(uuid);
-    }
-
     public static List<ValidationState> allowedStateTransitions(ValidationState fromState) {
         List<ValidationState> allowedStates = new ArrayList<>();
         switch (fromState) {
@@ -104,18 +92,8 @@ public abstract class MetadataDocument extends AbstractEntity {
         return allowedStateTransitions(getValidationState());
     }
 
-    public MetadataDocument addEvent(Event event) {
-        this.events.add(event);
-
-        return this;
-    }
 
     public MetadataDocument enactStateTransition(ValidationState targetState) {
-        if (!allowedStateTransitions().contains(targetState)) {
-            throw new InvalidMetadataDocumentStateException(
-                    String.format("The validation state '%s' is not recognised as a state that can be set",
-                                  targetState.name()));
-        }
         this.validationState = targetState;
 
         return this;

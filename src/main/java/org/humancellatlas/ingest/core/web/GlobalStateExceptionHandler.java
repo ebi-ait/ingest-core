@@ -1,7 +1,5 @@
 package org.humancellatlas.ingest.core.web;
 
-import org.humancellatlas.ingest.state.InvalidMetadataDocumentStateException;
-import org.humancellatlas.ingest.state.InvalidSubmissionStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -13,9 +11,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.stream.Collectors;
 
 /**
  * Javadocs go here!
@@ -50,28 +45,6 @@ public class GlobalStateExceptionHandler {
                         "this will generate a CONFLICT RESPONSE",
                 request.getRequestURL().toString()));
         getLog().debug("Handling OptimisticLockingFailureException and returning CONFLICT response", e);
-        return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
-    }
-
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(InvalidMetadataDocumentStateException.class)
-    public @ResponseBody
-    ExceptionInfo handleInvalidMetadataDocumentState(HttpServletRequest request, Exception e) {
-        getLog().warn(String.format("Attempt a failed metadata document state transition at '%s'; " +
-                        "this will generate a CONFLICT RESPONSE",
-                request.getRequestURL().toString()));
-        getLog().debug("Handling InvalidMetadataDocumentStateException and returning CONFLICT response", e);
-        return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
-    }
-
-
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(InvalidSubmissionStateException.class)
-    public @ResponseBody ExceptionInfo handleInvalidSubmissionState(HttpServletRequest request, Exception e) {
-        getLog().warn(String.format("Attempt a failed submission envelope state transition at '%s'; " +
-                        "this will generate a CONFLICT RESPONSE",
-                request.getRequestURL().toString()));
-        getLog().debug("Handling InvalidSubmissionStateException and returning CONFLICT response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 
