@@ -101,12 +101,6 @@ public class SubmissionEnvelope extends AbstractEntity {
     }
 
     public SubmissionEnvelope enactStateTransition(SubmissionState targetState) {
-        if (!allowedStateTransitions().contains(targetState)) {
-            throw new InvalidSubmissionStateException(String.format("The submission state '%s' is not recognised " +
-                                                                            "as a submission envelope state that can be set",
-                                                                    submissionState.name()));
-        }
-
         if (this.submissionState != targetState) {
             this.submissionState = targetState;
         }
