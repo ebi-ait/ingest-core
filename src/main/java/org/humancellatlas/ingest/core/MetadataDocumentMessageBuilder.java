@@ -33,6 +33,7 @@ public class MetadataDocumentMessageBuilder {
         return new MetadataDocumentMessageBuilder(mappings, config);
     }
 
+
     private final String DUMMY_BASE_URI = "http://localhost:8080";
 
     private final ResourceMappings mappings;

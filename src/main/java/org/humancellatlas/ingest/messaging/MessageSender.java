@@ -47,6 +47,10 @@ public class MessageSender {
         this.exportMessageBatch.add(message);
     }
 
+    public void queueStateTrackingMessage(String exchange, String routingKey, AbstractEntityMessage payload){
+        QueuedMessage message = new QueuedMessage(new Date(), exchange, routingKey, payload);
+        this.stateTrackingMessageBatch.add(message);
+    }
 
 
     @Scheduled(fixedDelay = 1000)
