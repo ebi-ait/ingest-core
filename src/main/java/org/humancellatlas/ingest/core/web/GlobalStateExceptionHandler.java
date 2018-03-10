@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.core.web;
 
+import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -68,6 +69,17 @@ public class GlobalStateExceptionHandler {
         getLog().debug("Handling ResourceNotFoundException and returning NOT_FOUND response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(StateTransitionNotAllowed.class)
+    public @ResponseBody ExceptionInfo handleStateTransitionNotAllowed(HttpServletRequest request, Exception e) {
+        getLog().warn(String.format("Caught a state transition not allowed exception at '%s'; " +
+                                            "this will generate a BAD_REQUEST RESPONSE",
+                                    request.getRequestURL().toString()));
+        getLog().debug("Handling StateTransitionNotAllowed and returning BAD_REQUEST response", e);
+        return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
+    }
+
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(RuntimeException.class)
