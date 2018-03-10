@@ -24,4 +24,8 @@ public class SubmissionEnvelopeService {
             messageRouter.routeStateTrackingUpdateMessageForEnvelopeEvent(envelope, state);
         }
     }
+
+    public void triggerExportFor(SubmissionEnvelope envelope) {
+        messageRouter.routeExportMessageFor(envelope);
+    }
 }

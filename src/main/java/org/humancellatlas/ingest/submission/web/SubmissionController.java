@@ -166,6 +166,7 @@ public class SubmissionController {
         Preconditions.checkState(submissionEnvelope.allowedStateTransitions().contains(SubmissionState.SUBMITTED));
         submissionEnvelope.enactStateTransition(SubmissionState.SUBMITTED);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        submissionEnvelopeService.triggerExportFor(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
