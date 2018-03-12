@@ -33,7 +33,7 @@ public class ProcessController {
   private final @NonNull ProcessService processService;
   private final @NonNull StateEngine stateEngine;
 
-  @RequestMapping(path = "submissionEnvelopes/{sub_id}/processs", method = RequestMethod.POST)
+  @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes", method = RequestMethod.POST)
   ResponseEntity<Resource<?>> addProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
       @RequestBody Process process,
       PersistentEntityResourceAssembler assembler) {
@@ -42,7 +42,7 @@ public class ProcessController {
     return ResponseEntity.accepted().body(resource);
   }
 
-  @RequestMapping(path = "submissionEnvelopes/{sub_id}/processs/{id}", method = RequestMethod.PUT)
+  @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes/{id}", method = RequestMethod.PUT)
   ResponseEntity<Resource<?>> linkProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
       @PathVariable("id") Process process,
       PersistentEntityResourceAssembler assembler) {
@@ -51,7 +51,7 @@ public class ProcessController {
     return ResponseEntity.accepted().body(resource);
   }
 
-  @RequestMapping(path = "/processs/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
+  @RequestMapping(path = "/processes/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
   HttpEntity<?> validatingProcess(@PathVariable("id") Process process) {
     Event event = this.getStateEngine().advanceStateOfMetadataDocument(
         getProcessService().getProcessRepository(),
@@ -61,7 +61,7 @@ public class ProcessController {
     return ResponseEntity.accepted().body(event);
   }
 
-  @RequestMapping(path = "/processs/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
+  @RequestMapping(path = "/processes/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
   HttpEntity<?> validateProcess(@PathVariable("id") Process process) {
     Event event = this.getStateEngine().advanceStateOfMetadataDocument(
         getProcessService().getProcessRepository(),
@@ -71,7 +71,7 @@ public class ProcessController {
     return ResponseEntity.accepted().body(event);
   }
 
-  @RequestMapping(path = "/processs/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
+  @RequestMapping(path = "/processes/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
   HttpEntity<?> invalidateProcess(@PathVariable("id") Process process) {
     Event event = this.getStateEngine().advanceStateOfMetadataDocument(
         getProcessService().getProcessRepository(),
@@ -81,7 +81,7 @@ public class ProcessController {
     return ResponseEntity.accepted().body(event);
   }
 
-  @RequestMapping(path = "/processs/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
+  @RequestMapping(path = "/processes/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
   HttpEntity<?> processingProcess(@PathVariable("id") Process process) {
     Event event = this.getStateEngine().advanceStateOfMetadataDocument(
         getProcessService().getProcessRepository(),
@@ -91,7 +91,7 @@ public class ProcessController {
     return ResponseEntity.accepted().body(event);
   }
 
-  @RequestMapping(path = "/processs/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
+  @RequestMapping(path = "/processes/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
   HttpEntity<?> completeProcess(@PathVariable("id") Process process) {
     Event event = this.getStateEngine().advanceStateOfMetadataDocument(
         getProcessService().getProcessRepository(),

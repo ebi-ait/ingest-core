@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
-public class UserAudtiting implements AuditorAware<String> {
+public class UserAuditing implements AuditorAware<String> {
 
     @Override
     public String getCurrentAuditor() {
