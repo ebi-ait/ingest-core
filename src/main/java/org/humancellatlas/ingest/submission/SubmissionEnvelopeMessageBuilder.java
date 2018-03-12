@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.submission;
 
+import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.submission.web.SubmissionController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

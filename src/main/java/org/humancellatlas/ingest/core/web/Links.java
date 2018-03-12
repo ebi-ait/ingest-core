@@ -42,10 +42,10 @@ public class Links {
     public static final String COMMIT_INVALID_URL = "/commitInvalidEvent";
     public static final String COMMIT_PROCESSING_REL ="commitProcessing";
     public static final String COMMIT_PROCESSING_URL ="/commitProcessingEvent";
-    public static final String COMMIT_CLEANUP_REL = "commitCleaning";
+    public static final String COMMIT_CLEANUP_REL = "commitCleanup";
     public static final String COMMIT_CLEANUP_URL = "/commitCleanupEvent";
     public static final String COMMIT_COMPLETE_REL = "commitComplete";
-    public static final String COMMIT_COMPLETE_URL = "/commitCompletionEvent";
+    public static final String COMMIT_COMPLETE_URL = "/commitCompleteEvent";
     
     // Links to entities for submission envelopes
     public static final String ANALYSES_URL = "/analyses";

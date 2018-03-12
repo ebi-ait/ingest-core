@@ -50,7 +50,7 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean Queue queueStateTracking() { return new Queue(Constants.Queues.STATE_TRACKING, false); }
 
-    @Bean DirectExchange stateTrackingExchange() { return new DirectExchange(Constants.Exchanges.STATE_TRACKING_DIRECT); }
+    @Bean TopicExchange stateTrackingExchange() { return new TopicExchange(Constants.Exchanges.STATE_TRACKING); }
     /* bindings */
 
     @Bean Binding bindingFileStaged(Queue queueFileStaged, FanoutExchange fileStagedExchange) {
@@ -83,7 +83,7 @@ public class QueueConfig implements RabbitListenerConfigurer {
         return BindingBuilder.bind(queueArchival).to(archivalExchange).with(Constants.Queues.SUBMISSION_ARCHIVAL);
     }
 
-    @Bean Binding bindingStateTracking(Queue queueStateTracking, DirectExchange stateTrackingExchange) {
+    @Bean Binding bindingStateTracking(Queue queueStateTracking, TopicExchange stateTrackingExchange) {
         return BindingBuilder.bind(queueStateTracking).to(stateTrackingExchange).with(Constants.Queues.STATE_TRACKING);
     }
 

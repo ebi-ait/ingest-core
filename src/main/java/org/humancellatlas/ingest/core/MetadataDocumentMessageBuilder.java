@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.assay.web.AssayController;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.web.FileController;
+import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.web.ProjectController;
 import org.humancellatlas.ingest.protocol.Protocol;

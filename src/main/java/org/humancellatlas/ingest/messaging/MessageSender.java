@@ -2,9 +2,9 @@ package org.humancellatlas.ingest.messaging;
 
 import lombok.*;
 
-import org.humancellatlas.ingest.core.MetadataDocumentMessage;
-import org.humancellatlas.ingest.core.AbstractEntityMessage;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessage;
+import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
+import org.humancellatlas.ingest.messaging.model.AbstractEntityMessage;
+import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;

@@ -2,13 +2,16 @@ package org.humancellatlas.ingest.messaging;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.MetadataDocumentMessage;
+import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
+import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeStateUpdateMessage;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessage;
+import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessageBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -45,8 +48,11 @@ public class MessageRouter {
 
     public boolean routeAccessionMessageFor(MetadataDocument document) {
         // queue an accession message if the document has no uuid
-        Optional<UUID> uuidOptional = Optional.ofNullable(document.getUuid().getUuid());
-        if(uuidOptional.isPresent()) {
+        Optional<UUID> uuidOptional = Optional.of(document)
+                                              .map(AbstractEntity::getUuid)
+                                              .map(Uuid::getUuid);
+
+        if(! uuidOptional.isPresent()) {
             this.messageSender.queueAccessionMessage(Constants.Exchanges.ACCESSION,
                                                      Constants.Queues.ACCESSION_REQUIRED,
                                                      messageFor(document));
@@ -61,15 +67,25 @@ public class MessageRouter {
     public boolean routeStateTrackingUpdateMessageFor(MetadataDocument document) {
         // TODO: consider filtering whether the state tracker requires messages for every state change
         // let the state tracker know about everything for now
-        this.messageSender.queueStateTrackingMessage(Constants.Exchanges.STATE_TRACKING_DIRECT,
-                                                     "",
+        this.messageSender.queueStateTrackingMessage(Constants.Exchanges.STATE_TRACKING,
+                                                     Constants.Routing.METADATA_UPDATE,
                                                      messageFor(document));
         return true;
     }
 
     public boolean routeStateTrackingUpdateMessageForEnvelopeEvent(SubmissionEnvelope envelope, SubmissionState state) {
-        // TODO: call this when a user clicks submit on an envelope
-        return false;
+        // TODO: call this when a user requests a state change on an envelope
+        this.messageSender.queueStateTrackingMessage(Constants.Exchanges.STATE_TRACKING,
+                                                     Constants.Routing.ENVELOPE_STATE_UPDATE,
+                                                     messageFor(envelope, state));
+        return true;
+    }
+
+    public boolean routeStateTrackingNewSubmissionEnvelope(SubmissionEnvelope envelope) {
+        this.messageSender.queueStateTrackingMessage(Constants.Exchanges.STATE_TRACKING,
+                                                     Constants.Routing.ENVELOPE_CREATE,
+                                                     messageFor(envelope));
+        return true;
     }
 
     /* messages to exporter */
@@ -91,5 +107,11 @@ public class MessageRouter {
         return SubmissionEnvelopeMessageBuilder.using(resourceMappings, config)
                                                .messageFor(envelope)
                                                .build();
+    }
+
+    private SubmissionEnvelopeStateUpdateMessage messageFor(SubmissionEnvelope envelope, SubmissionState state) {
+        SubmissionEnvelopeStateUpdateMessage message = SubmissionEnvelopeStateUpdateMessage.fromSubmissionEnvelopeMessage(messageFor(envelope));
+        message.setRequestedStated(state);
+        return message;
     }
 }
