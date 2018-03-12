@@ -49,7 +49,7 @@ public class BiomaterialController {
 
   private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
-  @RequestMapping(path = "/biomaterials/{id}/inputBiomaterials", method = RequestMethod.GET)
+  @RequestMapping(path = "/biomaterials/{id}/inputToProcesses", method = RequestMethod.GET)
   ResponseEntity<?> getBiomaterialByInputBiomaterials(@PathVariable("id") Biomaterial biomaterial,
                              Pageable pageable,
                              final PersistentEntityResourceAssembler resourceAssembler) {
@@ -57,7 +57,7 @@ public class BiomaterialController {
     return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
   }
 
-  @RequestMapping(path = "/biomaterials/{id}/derivedBiomaterials", method = RequestMethod.GET)
+  @RequestMapping(path = "/biomaterials/{id}/derivedByProcesses", method = RequestMethod.GET)
   ResponseEntity<?> getBiomaterialByDerivedBiomaterials(@PathVariable("id") Biomaterial biomaterial,
                                          Pageable pageable,
                                          final PersistentEntityResourceAssembler resourceAssembler) {
