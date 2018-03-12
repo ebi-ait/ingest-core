@@ -25,8 +25,6 @@ public class Process extends MetadataDocument {
   @RestResource @DBRef private final List<Protocol> protocols = new ArrayList<>();
   @RestResource @DBRef private final List<BundleManifest> inputBundleManifests = new ArrayList<>();
 
-  @DBRef private final Protocol protocol = null;
-
   @JsonCreator
   public Process(Object content) {
     super(EntityType.PROCESS, content);
