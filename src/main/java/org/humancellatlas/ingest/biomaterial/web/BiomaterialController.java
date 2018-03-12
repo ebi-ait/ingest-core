@@ -7,14 +7,24 @@ import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialService;
 import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.web.Links;
+import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.state.StateEngine;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.user.UserController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
+import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.Resource;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.*;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -31,8 +41,29 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @ExposesResourceFor(Biomaterial.class)
 @Getter
 public class BiomaterialController {
+
+  private final @NonNull ProcessRepository processRepository;
+
   private final @NonNull BiomaterialService biomaterialService;
   private final @NonNull StateEngine stateEngine;
+
+  private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
+
+  @RequestMapping(path = "/biomaterials/{id}/inputBiomaterials", method = RequestMethod.GET)
+  ResponseEntity<?> getBiomaterialByInputBiomaterials(@PathVariable("id") Biomaterial biomaterial,
+                             Pageable pageable,
+                             final PersistentEntityResourceAssembler resourceAssembler) {
+    Page<Process> processes = getProcessRepository().findByInputBiomaterials(biomaterial, pageable);
+    return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
+  }
+
+  @RequestMapping(path = "/biomaterials/{id}/derivedBiomaterials", method = RequestMethod.GET)
+  ResponseEntity<?> getBiomaterialByDerivedBiomaterials(@PathVariable("id") Biomaterial biomaterial,
+                                         Pageable pageable,
+                                         final PersistentEntityResourceAssembler resourceAssembler) {
+    Page<Process> processes = getProcessRepository().findByDerivedBiomaterials(biomaterial, pageable);
+    return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
+  }
 
   @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.POST)
   ResponseEntity<Resource<?>> addBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -101,4 +132,5 @@ public class BiomaterialController {
 
     return ResponseEntity.accepted().body(event);
   }
+
 }

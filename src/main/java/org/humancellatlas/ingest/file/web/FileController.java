@@ -4,15 +4,20 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Event;
+import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileService;
 import org.humancellatlas.ingest.state.StateEngine;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
@@ -36,6 +41,29 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 public class FileController {
     private final @NonNull FileService fileService;
+
+    private final @NonNull
+    ProcessRepository processRepository;
+
+    private final @NonNull
+    PagedResourcesAssembler pagedResourcesAssembler;
+
+    @RequestMapping(path = "/files/{id}/inputFiles", method = RequestMethod.GET)
+    ResponseEntity<?> getProcessByInputFiles(@PathVariable("id") File file,
+                                    Pageable pageable,
+                                    final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Process> processes = getProcessRepository().findByInputFiles(file, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
+    }
+
+    @RequestMapping(path = "/files/{id}/derivedFiles", method = RequestMethod.GET)
+    ResponseEntity<?> getProcessByDerivedFiles(@PathVariable("id") File file,
+                                    Pageable pageable,
+                                    final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Process> processes = getProcessRepository().findByDerivedFiles(file, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
+    }
+
     private final @NonNull StateEngine stateEngine;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",

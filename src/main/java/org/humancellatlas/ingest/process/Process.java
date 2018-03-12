@@ -23,7 +23,11 @@ public class Process extends MetadataDocument {
 
   @RestResource @DBRef private final List<Project> projects = new ArrayList<>();
   @RestResource @DBRef private final List<Protocol> protocols = new ArrayList<>();
+  @RestResource @DBRef private final List<Biomaterial> inputBiomaterials = new ArrayList<>();
+  @RestResource @DBRef private final List<Biomaterial> derivedBiomaterials = new ArrayList<>();
   @RestResource @DBRef private final List<BundleManifest> inputBundleManifests = new ArrayList<>();
+  @RestResource @DBRef private final List<Process> inputFiles = new ArrayList<>();
+  @RestResource @DBRef private final List<Process> derivedFiles = new ArrayList<>();
 
   @JsonCreator
   public Process(Object content) {
