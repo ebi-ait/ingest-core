@@ -111,7 +111,7 @@ public class MessageRouter {
 
     private SubmissionEnvelopeStateUpdateMessage messageFor(SubmissionEnvelope envelope, SubmissionState state) {
         SubmissionEnvelopeStateUpdateMessage message = SubmissionEnvelopeStateUpdateMessage.fromSubmissionEnvelopeMessage(messageFor(envelope));
-        message.setRequestedStated(state);
+        message.setRequestedState(state);
         return message;
     }
 }

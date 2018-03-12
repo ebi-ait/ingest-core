@@ -9,7 +9,7 @@ import org.humancellatlas.ingest.state.SubmissionState;
  * Created by rolando on 10/03/2018.
  */
 public class SubmissionEnvelopeStateUpdateMessage extends SubmissionEnvelopeMessage {
-    @Getter @Setter private SubmissionState requestedStated;
+    @Getter @Setter private SubmissionState requestedState;
 
     public SubmissionEnvelopeStateUpdateMessage(String documentType, String documentId, String documentUuid, String callbackLink) {
         super(documentType, documentId, documentUuid, callbackLink);
