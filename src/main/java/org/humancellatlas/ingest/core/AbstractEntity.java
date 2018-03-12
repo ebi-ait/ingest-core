@@ -9,9 +9,7 @@ import org.joda.time.DateTime;
 import org.springframework.data.annotation.*;
 import org.springframework.hateoas.Identifiable;
 
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**

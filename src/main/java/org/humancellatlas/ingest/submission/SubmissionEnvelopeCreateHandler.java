@@ -31,6 +31,7 @@ public class SubmissionEnvelopeCreateHandler {
     @HandleAfterCreate
     public boolean handleSubmissionEnvelopeCreation(SubmissionEnvelope submissionEnvelope) {
         this.messageRouter.routeStateTrackingNewSubmissionEnvelope(submissionEnvelope);
+        this.messageRouter.routeRequestUploadAreaCredentials(submissionEnvelope);
         return true;
     }
 }
