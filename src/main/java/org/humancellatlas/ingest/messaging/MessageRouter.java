@@ -97,6 +97,15 @@ public class MessageRouter {
         return true;
     }
 
+    /* messages to the upload/staging area manager */
+
+    public boolean routeRequestUploadAreaCredentials(SubmissionEnvelope envelope) {
+        this.messageSender.queueUploadManagerMessage(Constants.Exchanges.ENVELOPE_CREATED_FANOUT,
+                                                     "",
+                                                     messageFor(envelope));
+        return true;
+    }
+
     private MetadataDocumentMessage messageFor(MetadataDocument document) {
         return MetadataDocumentMessageBuilder.using(resourceMappings, config)
                                              .messageFor(document)

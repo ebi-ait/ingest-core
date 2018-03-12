@@ -24,10 +24,12 @@ public class MessageSender {
     private final @NonNull Queue<QueuedMessage> validationMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
     private final @NonNull Queue<QueuedMessage> accessionMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
     private final @NonNull Queue<QueuedMessage> exportMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
+    private final @NonNull Queue<QueuedMessage> uploadManagerMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
     private final @NonNull Queue<QueuedMessage> stateTrackingMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
 
     private final int DELAY_TIME_VALIDATION_MESSAGES = 10;
     private final int DELAY_TIME_EXPORTER_MESSAGES = 5;
+    private final int DELAY_TIME_UPLOAD_MANAGER_MESSAGES = 1;
     private final int DELAY_TIME_ACCESSIONER_MESSAGES = 2;
     private final int DELAY_TIME_STATE_TRACKING_MESSAGES = 1;
 
@@ -52,6 +54,11 @@ public class MessageSender {
         this.stateTrackingMessageBatch.add(message);
     }
 
+    public void queueUploadManagerMessage(String exchange, String routingKey, SubmissionEnvelopeMessage payload) {
+        QueuedMessage message = new QueuedMessage(new Date(), exchange, routingKey, payload);
+        this.uploadManagerMessageBatch.add(message);
+    }
+
 
     @Scheduled(fixedDelay = 1000)
     private void sendValidationMessages(){
@@ -71,6 +78,11 @@ public class MessageSender {
     @Scheduled(fixedDelay = 1000)
     private void sendStateTrackerMessages(){
         sendFromQueue(this.stateTrackingMessageBatch, this.DELAY_TIME_STATE_TRACKING_MESSAGES);
+    }
+
+    @Scheduled(fixedDelay = 1000)
+    private void sendUploadManagerMessages(){
+        sendFromQueue(this.uploadManagerMessageBatch, this.DELAY_TIME_UPLOAD_MANAGER_MESSAGES);
     }
 
     private void sendFromQueue(Queue<QueuedMessage> messageQueue, int delayTimeSeconds){
