@@ -61,7 +61,7 @@ public class ProtocolController {
 
     @RequestMapping(path = "/protocols/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> validateProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
-        protocol.setValidationState(ValidationState.VALIDATING);
+        protocol.setValidationState(ValidationState.VALID);
         protocol = getProtocolService().getProtocolRepository().save(protocol);
         return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
     }
