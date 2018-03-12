@@ -61,9 +61,9 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
     }
 
     private Optional<Link> getStateTransitionLink(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
-        Optional<String> transitionResourceName = getSubresourceNameForSubmissionState(targetState);
+        Optional<String> transitionResourceName = getSubresourceNameForRequestSubmissionState(targetState);
         if (transitionResourceName.isPresent()) {
-            Optional<String> rel = getRelNameForSubmissionState(targetState);
+            Optional<String> rel = getRelNameForRequestSubmissionState(targetState);
             if (rel.isPresent()) {
                 return Optional.of(entityLinks.linkForSingleResource(submissionEnvelope)
                         .slash(transitionResourceName.get())
@@ -77,7 +77,24 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         }
     }
 
-    private Optional<String> getRelNameForSubmissionState(SubmissionState submissionState) {
+    private Optional<Link> getCommitStateTransitionLink(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
+        Optional<String> transitionResourceName = getSubresourceNameForCommitSubmissionState(targetState);
+        if (transitionResourceName.isPresent()) {
+            Optional<String> rel = getRelNameForCommitSubmissionState(targetState);
+            if (rel.isPresent()) {
+                return Optional.of(entityLinks.linkForSingleResource(submissionEnvelope)
+                                              .slash(transitionResourceName.get())
+                                              .withRel(rel.get()));
+            } else {
+                throw new RuntimeException(String.format("Unexpected link/rel mismatch exception (link = '%s', rel = " +
+                                                                 "'%s')", transitionResourceName.toString(), rel.toString()));
+            }
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<String> getRelNameForRequestSubmissionState(SubmissionState submissionState) {
         switch (submissionState) {
             case SUBMITTED:
                 return Optional.of(Links.SUBMIT_REL);
@@ -93,7 +110,7 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         }
     }
 
-    private Optional<String> getSubresourceNameForSubmissionState(SubmissionState submissionState) {
+    private Optional<String> getSubresourceNameForRequestSubmissionState(SubmissionState submissionState) {
         switch (submissionState) {
             case SUBMITTED:
                 return Optional.of(Links.SUBMIT_URL);
@@ -109,6 +126,55 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         }
     }
 
+    private Optional<String> getRelNameForCommitSubmissionState(SubmissionState submissionState) {
+        switch (submissionState) {
+            case DRAFT:
+                return Optional.of(Links.COMMIT_DRAFT_REL);
+            case VALIDATING:
+                return Optional.of(Links.COMMIT_VALIDATING_REL);
+            case INVALID:
+                return Optional.of(Links.COMMIT_INVALID_REL);
+            case VALID:
+                return Optional.of(Links.COMMIT_VALID_REL);
+            case SUBMITTED:
+                return Optional.of(Links.COMMIT_SUBMIT_REL);
+            case PROCESSING:
+                return Optional.of(Links.COMMIT_PROCESSING_REL);
+            case CLEANUP:
+                return Optional.of(Links.COMMIT_CLEANUP_REL);
+            case COMPLETE:
+                return Optional.of(Links.COMMIT_COMPLETE_REL);
+            default:
+                // default returns no links (not expecting external user interaction)
+                return Optional.empty();
+        }
+    }
+
+    private Optional<String> getSubresourceNameForCommitSubmissionState(SubmissionState submissionState) {
+        switch (submissionState) {
+            case DRAFT:
+                return Optional.of(Links.COMMIT_DRAFT_URL);
+            case VALIDATING:
+                return Optional.of(Links.COMMIT_VALIDATING_URL);
+            case INVALID:
+                return Optional.of(Links.COMMIT_INVALID_URL);
+            case VALID:
+                return Optional.of(Links.COMMIT_VALID_URL);
+            case SUBMITTED:
+                return Optional.of(Links.COMMIT_SUBMIT_URL);
+            case PROCESSING:
+                return Optional.of(Links.COMMIT_PROCESSING_URL);
+            case CLEANUP:
+                return Optional.of(Links.COMMIT_CLEANUP_URL);
+            case COMPLETE:
+                return Optional.of(Links.COMMIT_COMPLETE_URL);
+            default:
+                // default returns no subresource name (not expecting external user interaction)
+                return Optional.empty();
+        }
+    }
+
+
     public Resource<SubmissionEnvelope> process(Resource<SubmissionEnvelope> resource) {
         SubmissionEnvelope submissionEnvelope = resource.getContent();
 
@@ -120,12 +186,19 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         resource.add(getProtocolsLink(submissionEnvelope));
         resource.add(getSamplesLink(submissionEnvelope));
 
-        // add subresource links for events that occur in response to state transitions
+        // add subresource links for allowed state transition requests
         submissionEnvelope.allowedStateTransitions().stream()
                 .map(submissionState -> getStateTransitionLink(submissionEnvelope, submissionState))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(resource::add);
+
+        // add subresource links for state tracker to commit state transitions
+        submissionEnvelope.allowedStateTransitions().stream()
+                          .map(submissionState -> getCommitStateTransitionLink(submissionEnvelope, submissionState))
+                          .filter(Optional::isPresent)
+                          .map(Optional::get)
+                          .forEach(resource::add);
 
         return resource;
     }

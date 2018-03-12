@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.assay.Assay;
 import org.humancellatlas.ingest.assay.web.AssayController;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.web.FileController;
+import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.web.ProjectController;
 import org.humancellatlas.ingest.protocol.Protocol;
@@ -32,6 +33,7 @@ public class MetadataDocumentMessageBuilder {
     public static MetadataDocumentMessageBuilder using(ResourceMappings mappings, RepositoryRestConfiguration config) {
         return new MetadataDocumentMessageBuilder(mappings, config);
     }
+
 
     private final String DUMMY_BASE_URI = "http://localhost:8080";
 

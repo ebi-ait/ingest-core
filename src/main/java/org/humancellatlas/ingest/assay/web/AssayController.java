@@ -11,7 +11,6 @@ import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
-import org.humancellatlas.ingest.state.StateEngine;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -36,8 +35,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Getter
 public class AssayController {
     private final @NonNull AssayService assayService;
-    private final @NonNull StateEngine stateEngine;
-    
     private final @NonNull FileRepository fileRepository;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays", method = RequestMethod.POST)
@@ -70,52 +67,37 @@ public class AssayController {
     }
 
     @RequestMapping(path = "/assays/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validatingAssay(@PathVariable("id") Assay assay) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getAssayService().getAssayRepository(),
-                assay,
-                ValidationState.VALIDATING);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> validatingAssay(@PathVariable("id") Assay assay, final PersistentEntityResourceAssembler assembler) {
+        assay.setValidationState(ValidationState.VALIDATING);
+        assay = getAssayService().getAssayRepository().save(assay);
+        return ResponseEntity.accepted().body(assembler.toFullResource(assay));
     }
 
     @RequestMapping(path = "/assays/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validateAssay(@PathVariable("id") Assay assay) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getAssayService().getAssayRepository(),
-                assay,
-                ValidationState.VALID);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> validateAssay(@PathVariable("id") Assay assay, final PersistentEntityResourceAssembler assembler) {
+        assay.setValidationState(ValidationState.VALID);
+        assay = getAssayService().getAssayRepository().save(assay);
+        return ResponseEntity.accepted().body(assembler.toFullResource(assay));
     }
 
     @RequestMapping(path = "/assays/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> invalidateAssay(@PathVariable("id") Assay assay) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getAssayService().getAssayRepository(),
-                assay,
-                ValidationState.INVALID);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> invalidateAssay(@PathVariable("id") Assay assay, final PersistentEntityResourceAssembler assembler) {
+        assay.setValidationState(ValidationState.INVALID);
+        assay = getAssayService().getAssayRepository().save(assay);
+        return ResponseEntity.accepted().body(assembler.toFullResource(assay));
     }
 
     @RequestMapping(path = "/assays/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> processingAssay(@PathVariable("id") Assay assay) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getAssayService().getAssayRepository(),
-                assay,
-                ValidationState.PROCESSING);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> processingAssay(@PathVariable("id") Assay assay, final PersistentEntityResourceAssembler assembler) {
+        assay.setValidationState(ValidationState.PROCESSING);
+        getAssayService().getAssayRepository().save(assay);
+        return ResponseEntity.accepted().body(assembler.toFullResource(assay));
     }
 
     @RequestMapping(path = "/assays/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
-    HttpEntity<?> completeAssay(@PathVariable("id") Assay assay) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getAssayService().getAssayRepository(),
-                assay,
-                ValidationState.COMPLETE);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> completeAssay(@PathVariable("id") Assay assay, final PersistentEntityResourceAssembler assembler) {
+        assay.setValidationState(ValidationState.COMPLETE);
+        assay = getAssayService().getAssayRepository().save(assay);
+        return ResponseEntity.accepted().body(assembler.toFullResource(assay));
     }
 }

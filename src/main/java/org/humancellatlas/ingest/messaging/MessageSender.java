@@ -2,9 +2,9 @@ package org.humancellatlas.ingest.messaging;
 
 import lombok.*;
 
-import org.humancellatlas.ingest.core.MetadataDocumentMessage;
-import org.humancellatlas.ingest.core.AbstractEntityMessage;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessage;
+import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
+import org.humancellatlas.ingest.messaging.model.AbstractEntityMessage;
+import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,10 +24,12 @@ public class MessageSender {
     private final @NonNull Queue<QueuedMessage> validationMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
     private final @NonNull Queue<QueuedMessage> accessionMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
     private final @NonNull Queue<QueuedMessage> exportMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
+    private final @NonNull Queue<QueuedMessage> stateTrackingMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
 
     private final int DELAY_TIME_VALIDATION_MESSAGES = 10;
     private final int DELAY_TIME_EXPORTER_MESSAGES = 5;
     private final int DELAY_TIME_ACCESSIONER_MESSAGES = 2;
+    private final int DELAY_TIME_STATE_TRACKING_MESSAGES = 1;
 
 
     public void queueValidationMessage(String exchange, String routingKey, MetadataDocumentMessage payload){
@@ -45,6 +47,12 @@ public class MessageSender {
         this.exportMessageBatch.add(message);
     }
 
+    public void queueStateTrackingMessage(String exchange, String routingKey, AbstractEntityMessage payload){
+        QueuedMessage message = new QueuedMessage(new Date(), exchange, routingKey, payload);
+        this.stateTrackingMessageBatch.add(message);
+    }
+
+
     @Scheduled(fixedDelay = 1000)
     private void sendValidationMessages(){
         sendFromQueue(this.validationMessageBatch, this.DELAY_TIME_VALIDATION_MESSAGES);
@@ -58,6 +66,11 @@ public class MessageSender {
     @Scheduled(fixedDelay = 1000)
     private void sendExportMessages(){
         sendFromQueue(this.exportMessageBatch, this.DELAY_TIME_EXPORTER_MESSAGES);
+    }
+
+    @Scheduled(fixedDelay = 1000)
+    private void sendStateTrackerMessages(){
+        sendFromQueue(this.stateTrackingMessageBatch, this.DELAY_TIME_STATE_TRACKING_MESSAGES);
     }
 
     private void sendFromQueue(Queue<QueuedMessage> messageQueue, int delayTimeSeconds){
