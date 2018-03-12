@@ -21,15 +21,11 @@ import java.util.List;
 @Getter
 public class Process extends MetadataDocument {
 
-  @RestResource @DBRef private final List<Biomaterial> inputBiomaterials = new ArrayList<>();
-  @RestResource @DBRef private final List<File> inputFiles = new ArrayList<>();
   @RestResource @DBRef private final List<Project> projects = new ArrayList<>();
   @RestResource @DBRef private final List<Protocol> protocols = new ArrayList<>();
   @RestResource @DBRef private final List<BundleManifest> inputBundleManifests = new ArrayList<>();
 
-  @DBRef private final Process inputProcess = null;
   @DBRef private final Protocol protocol = null;
-
 
   @JsonCreator
   public Process(Object content) {

@@ -19,8 +19,10 @@ import java.util.List;
 @CrossOrigin
 @Getter
 public class Biomaterial extends MetadataDocument {
-  @RestResource @DBRef private final List<Process> provenantProcesses = new ArrayList<>();
-  @RestResource @DBRef private final List<Project> projects = new ArrayList<>();
+
+  @RestResource @DBRef private final List<Process> inputToProcess = new ArrayList<>();
+  @RestResource @DBRef private final List<Process> derivedByProcess = new ArrayList<>();
+  @RestResource @DBRef private final List<Project> project = new ArrayList<>();
 
   @JsonCreator
   public Biomaterial(Object content) {

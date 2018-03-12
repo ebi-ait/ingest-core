@@ -19,7 +19,8 @@ import org.springframework.data.rest.core.annotation.RestResource;
 @Setter
 public class File extends MetadataDocument {
 
-    @DBRef @RestResource private List<Process> provenantProcesses = new ArrayList<>();
+    @RestResource @DBRef private List<Process> inputToProcess = new ArrayList<>();
+    @RestResource @DBRef private List<Process> derivedByProcess = new ArrayList<>();
 
     private String fileName;
     private String cloudUrl;

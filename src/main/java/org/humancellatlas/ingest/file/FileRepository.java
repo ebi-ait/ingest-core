@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.file;
 
-import java.util.UUID;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -11,21 +10,23 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by rolando on 06/09/2017.
  */
 @CrossOrigin
 public interface FileRepository extends MongoRepository<File, String> {
-    public File findByUuid(@Param("uuid") Uuid uuid);
 
-    public Page<File> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+    File findByUuid(@Param("uuid") Uuid uuid);
 
-    public List<File> findBySubmissionEnvelopesInAndFileName(SubmissionEnvelope submissionEnvelope, String fileName);
+    Page<File> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
-    public File findByValidationId(@Param("validationId") UUID id);
+    List<File> findBySubmissionEnvelopesInAndFileName(SubmissionEnvelope submissionEnvelope, String fileName);
 
-    public List<File> findByProvenantProcesses(Process process);
+    File findByValidationId(@Param("validationId") UUID id);
 
-    public List<File> findByProvenantProcessesIn(@Param("ids") List<Process> processes);
+    File findByInputToProcess(Process process);
+
+    File findByDerivedByProcess(Process processes);
 }

@@ -11,7 +11,9 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  * Created by rolando on 16/02/2018.
  */
 public interface BiomaterialRepository extends MongoRepository<Biomaterial, String> {
-  public List<Biomaterial> findByProvenantProcesses(Process process);
+  Biomaterial findByInputToProcess(Process process);
 
-  public Page<Biomaterial> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+  Biomaterial findByDerivedByProcess(Process process);
+
+  Page<Biomaterial> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 }
