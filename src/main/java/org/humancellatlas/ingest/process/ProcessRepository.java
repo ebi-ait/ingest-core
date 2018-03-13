@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 import java.util.List;
 
@@ -23,4 +24,20 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
     Page<Process> findByInputFiles(File file, Pageable pageable);
 
     Page<Process> findByDerivedFiles(File file, Pageable pageable);
+
+    //TODO find assaying Processes:
+    /*
+    Sample query:
+    { inputBiomaterials: {
+        $exists: true,
+        $ne: []
+      },
+      defivedFiles: {
+        $exists: true,
+        $ne: []
+      }
+    }
+    see [https://stackoverflow.com/a/25142571/404604] for more ideas
+    */
+
 }
