@@ -86,7 +86,7 @@ public class ProcessServiceTest {
         Pageable pageable = new PageRequest(2, 7);
 
         //when:
-        Page<Process> analyses = processService.retrieveAnalyses(submissionEnvelope, pageable);
+        Page<Process> analyses = processService.retrieveAnalysesFrom(submissionEnvelope, pageable);
 
         //then:
         assertThat(analyses.getContent()).containsExactly(analysis);

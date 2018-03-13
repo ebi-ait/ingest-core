@@ -57,7 +57,7 @@ public class ProcessService {
         return new PageImpl<>(assays, pageable, assays.size());
     }
 
-    public Page<Process> retrieveAnalyses(SubmissionEnvelope submissionEnvelope,
+    public Page<Process> retrieveAnalysesFrom(SubmissionEnvelope submissionEnvelope,
             Pageable pageable) {
         Page<Process> processes = processRepository
                 .findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
