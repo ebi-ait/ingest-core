@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.process;
 
-import org.assertj.core.api.Assertions;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static java.util.Arrays.asList;
@@ -43,7 +41,6 @@ public class ProcessServiceTest {
     private ProcessRepository processRepository;
 
     @Test
-    @WithMockUser
     public void testRetrieveAssays() throws Exception {
         //given:
         Process assayingProcess = mock(Process.class);
