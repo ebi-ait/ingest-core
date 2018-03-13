@@ -54,16 +54,20 @@ public class Process extends MetadataDocument {
         return !inputBiomaterials.isEmpty() && !derivedFiles.isEmpty();
     }
 
+    public boolean isAnalysis() {
+        return !inputFiles.isEmpty() && !derivedFiles.isEmpty();
+    }
+
     public void addInput(Biomaterial biomaterial) {
         inputBiomaterials.add(biomaterial);
     }
 
-    public void addDerivative(File file) {
-        derivedFiles.add(file);
+    public void addInput(File file) {
+        inputFiles.add(file);
     }
 
-    public boolean isAnalysis() {
-        return false;
+    public void addDerivative(File file) {
+        derivedFiles.add(file);
     }
 
 }

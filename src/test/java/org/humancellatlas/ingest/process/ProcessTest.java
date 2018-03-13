@@ -27,13 +27,13 @@ public class ProcessTest {
         assayingProcess.addDerivative(new File(null));
 
         //expect:
-        String notAssaying = "Expected process to be NON assaying.";
+        String notAssaying = "Expected Process to be NON assaying.";
         assertThat(nonAssayingProcess.isAssaying()).as(notAssaying).isFalse();
         assertThat(hasInputBiomaterial.isAssaying()).as(notAssaying).isFalse();
         assertThat(hasDerivedFile.isAssaying()).as(notAssaying).isFalse();
 
         //and:
-        assertThat(assayingProcess.isAssaying()).as("Expected process to be assaying.").isTrue();
+        assertThat(assayingProcess.isAssaying()).as("Expected Process to be assaying.").isTrue();
     }
 
     @Test
@@ -41,8 +41,27 @@ public class ProcessTest {
         //given:
         Process nonAnalysis = new Process();
 
+        //and:
+        Process hasInputFile = new Process();
+        hasInputFile.addInput(new File("input"));
+
+        //and:
+        Process hasDerivedFile = new Process();
+        hasDerivedFile.addDerivative(new File("output"));
+
+        //and:
+        Process analysis = new Process();
+        analysis.addInput(new File("input"));
+        analysis.addDerivative(new File("output"));
+
         //then:
-        assertThat(nonAnalysis.isAnalysis()).isFalse();
+        String notAnalysis = "Expected Process to be non Analysis";
+        assertThat(nonAnalysis.isAnalysis()).as(notAnalysis).isFalse();
+        assertThat(hasInputFile.isAnalysis()).as(notAnalysis).isFalse();
+        assertThat(hasDerivedFile.isAnalysis()).as(notAnalysis).isFalse();
+
+        //then:
+        assertThat(analysis.isAnalysis()).as("Expected Process to be Analysis.").isTrue();
     }
 
 }
