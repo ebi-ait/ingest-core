@@ -35,4 +35,9 @@ public class Process extends MetadataDocument {
   }
 
   public Process() {}
+
+  public boolean isAssaying() {
+    return false;
+  }
+
 }
