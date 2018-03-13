@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.process;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.bundle.BundleManifest;
@@ -50,10 +51,12 @@ public class Process extends MetadataDocument {
 
     public Process() {}
 
+    @JsonIgnore
     public boolean isAssaying() {
         return !inputBiomaterials.isEmpty() && !derivedFiles.isEmpty();
     }
 
+    @JsonIgnore
     public boolean isAnalysis() {
         return !inputFiles.isEmpty() && !derivedFiles.isEmpty();
     }
