@@ -36,4 +36,13 @@ public class ProcessTest {
         assertThat(assayingProcess.isAssaying()).as("Expected process to be assaying.").isTrue();
     }
 
+    @Test
+    public void testIsAnalysis() {
+        //given:
+        Process nonAnalysis = new Process();
+
+        //then:
+        assertThat(nonAnalysis.isAnalysis()).isFalse();
+    }
+
 }

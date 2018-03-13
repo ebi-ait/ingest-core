@@ -48,8 +48,7 @@ public class Process extends MetadataDocument {
         super(EntityType.PROCESS, content);
     }
 
-    public Process() {
-    }
+    public Process() {}
 
     public boolean isAssaying() {
         return !inputBiomaterials.isEmpty() && !derivedFiles.isEmpty();
@@ -61,6 +60,10 @@ public class Process extends MetadataDocument {
 
     public void addDerivative(File file) {
         derivedFiles.add(file);
+    }
+
+    public boolean isAnalysis() {
+        return false;
     }
 
 }
