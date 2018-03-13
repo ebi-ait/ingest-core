@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
@@ -52,6 +53,7 @@ public class SubmissionController {
     private final @NonNull BiomaterialRepository biomaterialRepository;
     private final @NonNull ProcessRepository processRepository;
 
+    private final @NonNull ProcessService processService;
 
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
@@ -96,6 +98,14 @@ public class SubmissionController {
             , resourceAssembler));
     }
 
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays", method = RequestMethod.GET)
+    ResponseEntity<?> getAssays(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                   Pageable pageable,
+                                   final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Process> processes = getProcessService().retrieveAssaysFrom(submissionEnvelope, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes
+                , resourceAssembler));
+    }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMIT_URL, method = RequestMethod.PUT)
     HttpEntity<?> submitEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {

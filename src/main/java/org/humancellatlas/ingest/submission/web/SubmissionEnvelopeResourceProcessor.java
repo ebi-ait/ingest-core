@@ -54,6 +54,18 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 .withRel(Links.PROTOCOLS_REL);
     }
 
+    private Link getAssaysLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                .slash(Links.ASSAYS_URL)
+                .withRel(Links.ASSAYS_REL);
+    }
+
+    private Link getAnalysesLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                .slash(Links.ANALYSES_URL)
+                .withRel(Links.ANALYSES_REL);
+    }
+
 
     private Optional<Link> getStateTransitionLink(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
         Optional<String> transitionResourceName = getSubresourceNameForSubmissionState(targetState);
@@ -113,6 +125,8 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         resource.add(getFilesLink(submissionEnvelope));
         resource.add(getProjectsLink(submissionEnvelope));
         resource.add(getProtocolsLink(submissionEnvelope));
+        resource.add(getAssaysLink(submissionEnvelope));
+        resource.add(getAnalysesLink(submissionEnvelope));
 
         // add subresource links for events that occur in response to state transitions
         submissionEnvelope.allowedStateTransitions().stream()

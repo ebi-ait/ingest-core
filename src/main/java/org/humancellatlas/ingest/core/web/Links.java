@@ -39,6 +39,10 @@ public class Links {
     public static final String PROJECTS_REL = "projects";
     public static final String PROTOCOLS_URL = "/protocols";
     public static final String PROTOCOLS_REL = "protocols";
+    public static final String ASSAYS_URL = "/assays";
+    public static final String ASSAYS_REL = "assays";
+    public static final String ANALYSES_URL = "/analyses";
+    public static final String ANALYSES_REL = "analyses";
 
     // Links for analyses
     public static final String BUNDLE_REF_URL = "/bundleReferences";
