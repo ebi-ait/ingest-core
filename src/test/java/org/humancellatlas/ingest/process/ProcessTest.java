@@ -15,16 +15,16 @@ public class ProcessTest {
 
         //and:
         Process hasInputBiomaterial = new Process();
-        hasInputBiomaterial.addInputBiomaterial(new Biomaterial(null));
+        hasInputBiomaterial.addInput(new Biomaterial(null));
 
         //and:
         Process hasDerivedFile = new Process();
-        hasDerivedFile.addDerivedFile(new File(null));
+        hasDerivedFile.addDerivative(new File(null));
 
         //and:
         Process assayingProcess = new Process();
-        assayingProcess.addInputBiomaterial(new Biomaterial(null));
-        assayingProcess.addDerivedFile(new File(null));
+        assayingProcess.addInput(new Biomaterial(null));
+        assayingProcess.addDerivative(new File(null));
 
         //expect:
         String notAssaying = "Expected process to be NON assaying.";
