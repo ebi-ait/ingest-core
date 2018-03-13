@@ -25,7 +25,7 @@ public class File extends MetadataDocument {
     private UUID validationId;
 
     @JsonCreator
-    protected File(@JsonProperty("content") Object content) {
+    public File(@JsonProperty("content") Object content) {
         super(EntityType.FILE, content);
     }
 

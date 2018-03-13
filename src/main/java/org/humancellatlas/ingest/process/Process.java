@@ -21,23 +21,46 @@ import java.util.List;
 @Getter
 public class Process extends MetadataDocument {
 
-  @RestResource @DBRef private final List<Project> projects = new ArrayList<>();
-  @RestResource @DBRef private final List<Protocol> protocols = new ArrayList<>();
-  @RestResource @DBRef private final List<Biomaterial> inputBiomaterials = new ArrayList<>();
-  @RestResource @DBRef private final List<Biomaterial> derivedBiomaterials = new ArrayList<>();
-  @RestResource @DBRef private final List<BundleManifest> inputBundleManifests = new ArrayList<>();
-  @RestResource @DBRef private final List<Process> inputFiles = new ArrayList<>();
-  @RestResource @DBRef private final List<Process> derivedFiles = new ArrayList<>();
+    @RestResource
+    @DBRef
+    private final List<Project> projects = new ArrayList<>();
+    @RestResource
+    @DBRef
+    private final List<Protocol> protocols = new ArrayList<>();
+    @RestResource
+    @DBRef
+    private final List<Biomaterial> inputBiomaterials = new ArrayList<>();
+    @RestResource
+    @DBRef
+    private final List<Biomaterial> derivedBiomaterials = new ArrayList<>();
+    @RestResource
+    @DBRef
+    private final List<BundleManifest> inputBundleManifests = new ArrayList<>();
+    @RestResource
+    @DBRef
+    private final List<File> inputFiles = new ArrayList<>();
+    @RestResource
+    @DBRef
+    private final List<File> derivedFiles = new ArrayList<>();
 
-  @JsonCreator
-  public Process(Object content) {
-    super(EntityType.PROCESS, content);
-  }
+    @JsonCreator
+    public Process(Object content) {
+        super(EntityType.PROCESS, content);
+    }
 
-  public Process() {}
+    public Process() {
+    }
 
-  public boolean isAssaying() {
-    return false;
-  }
+    public boolean isAssaying() {
+        return !inputBiomaterials.isEmpty() && !derivedFiles.isEmpty();
+    }
+
+    public void addInputBiomaterial(Biomaterial biomaterial) {
+        inputBiomaterials.add(biomaterial);
+    }
+
+    public void addDerivedFile(File file) {
+        derivedFiles.add(file);
+    }
 
 }
