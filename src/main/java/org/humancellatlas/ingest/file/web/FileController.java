@@ -3,15 +3,13 @@ package org.humancellatlas.ingest.file.web;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.core.Event;
+import org.humancellatlas.ingest.core.web.Links;
+import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.file.FileService;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.state.ValidationState;
-import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.humancellatlas.ingest.file.File;
-import org.humancellatlas.ingest.file.FileService;
-import org.humancellatlas.ingest.state.StateEngine;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -40,13 +38,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Getter
 
 public class FileController {
-    private final @NonNull FileService fileService;
 
-    private final @NonNull
-    ProcessRepository processRepository;
+    @NonNull
+    private final FileService fileService;
 
-    private final @NonNull
-    PagedResourcesAssembler pagedResourcesAssembler;
+    @NonNull
+    private final ProcessRepository processRepository;
+
+    @NonNull
+    private final PagedResourcesAssembler pagedResourcesAssembler;
 
     @RequestMapping(path = "/files/{id}/inputFiles", method = RequestMethod.GET)
     ResponseEntity<?> getProcessByInputFiles(@PathVariable("id") File file,
@@ -64,7 +64,6 @@ public class FileController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
     }
 
-    private final @NonNull StateEngine stateEngine;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
                     method = RequestMethod.POST,
@@ -89,52 +88,37 @@ public class FileController {
     }
 
     @RequestMapping(path = "/files/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validatingFile(@PathVariable("id") File file) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getFileService().getFileRepository(),
-                file,
-                ValidationState.VALIDATING);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> validatingFile(@PathVariable("id") File file, final PersistentEntityResourceAssembler assembler) {
+        file.setValidationState(ValidationState.VALIDATING);
+        file = getFileService().getFileRepository().save(file);
+        return ResponseEntity.accepted().body(assembler.toFullResource(file));
     }
 
     @RequestMapping(path = "/files/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validateFile(@PathVariable("id") File file) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getFileService().getFileRepository(),
-                file,
-                ValidationState.VALID);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> validateFile(@PathVariable("id") File file, final PersistentEntityResourceAssembler assembler) {
+        file.setValidationState(ValidationState.VALID);
+        file = getFileService().getFileRepository().save(file);
+        return ResponseEntity.accepted().body(assembler.toFullResource(file));
     }
 
     @RequestMapping(path = "/files/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> invalidateFile(@PathVariable("id") File file) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getFileService().getFileRepository(),
-                file,
-                ValidationState.INVALID);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> invalidateFile(@PathVariable("id") File file, final PersistentEntityResourceAssembler assembler) {
+        file.setValidationState(ValidationState.INVALID);
+        file = getFileService().getFileRepository().save(file);
+        return ResponseEntity.accepted().body(assembler.toFullResource(file));
     }
 
     @RequestMapping(path = "/files/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> processingFile(@PathVariable("id") File file) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getFileService().getFileRepository(),
-                file,
-                ValidationState.PROCESSING);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> processingFile(@PathVariable("id") File file, final PersistentEntityResourceAssembler assembler) {
+        file.setValidationState(ValidationState.PROCESSING);
+        file = getFileService().getFileRepository().save(file);
+        return ResponseEntity.accepted().body(assembler.toFullResource(file));
     }
 
     @RequestMapping(path = "/files/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
-    HttpEntity<?> completeFile(@PathVariable("id") File file) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getFileService().getFileRepository(),
-                file,
-                ValidationState.COMPLETE);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> completeFile(@PathVariable("id") File file, final PersistentEntityResourceAssembler assembler) {
+        file.setValidationState(ValidationState.COMPLETE);
+        file = getFileService().getFileRepository().save(file);
+        return ResponseEntity.accepted().body(assembler.toFullResource(file));
     }
 }

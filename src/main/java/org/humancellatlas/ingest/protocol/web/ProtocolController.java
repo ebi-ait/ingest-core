@@ -9,7 +9,6 @@ import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolService;
-import org.humancellatlas.ingest.state.StateEngine;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -34,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Getter
 public class ProtocolController {
     private final @NonNull ProtocolService protocolService;
-    private final @NonNull StateEngine stateEngine;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProtocolToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -55,52 +53,37 @@ public class ProtocolController {
     }
 
     @RequestMapping(path = "/protocols/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validatingProtocol(@PathVariable("id") Protocol protocol) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getProtocolService().getProtocolRepository(),
-                protocol,
-                ValidationState.VALIDATING);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> validatingProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
+        protocol.setValidationState(ValidationState.VALIDATING);
+        protocol = getProtocolService().getProtocolRepository().save(protocol);
+        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
     }
 
     @RequestMapping(path = "/protocols/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validateProtocol(@PathVariable("id") Protocol protocol) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getProtocolService().getProtocolRepository(),
-                protocol,
-                ValidationState.VALID);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> validateProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
+        protocol.setValidationState(ValidationState.VALID);
+        protocol = getProtocolService().getProtocolRepository().save(protocol);
+        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
     }
 
     @RequestMapping(path = "/protocols/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> invalidateProtocol(@PathVariable("id") Protocol protocol) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getProtocolService().getProtocolRepository(),
-                protocol,
-                ValidationState.INVALID);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> invalidateProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
+        protocol.setValidationState(ValidationState.INVALID);
+        protocol = getProtocolService().getProtocolRepository().save(protocol);
+        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
     }
 
     @RequestMapping(path = "/protocols/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> processingProtocol(@PathVariable("id") Protocol protocol) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getProtocolService().getProtocolRepository(),
-                protocol,
-                ValidationState.PROCESSING);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> processingProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
+        protocol.setValidationState(ValidationState.PROCESSING);
+        protocol = getProtocolService().getProtocolRepository().save(protocol);
+        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
     }
 
     @RequestMapping(path = "/protocols/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
-    HttpEntity<?> completeProtocol(@PathVariable("id") Protocol protocol) {
-        Event event = this.getStateEngine().advanceStateOfMetadataDocument(
-                getProtocolService().getProtocolRepository(),
-                protocol,
-                ValidationState.COMPLETE);
-
-        return ResponseEntity.accepted().body(event);
+    HttpEntity<?> completeProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
+        protocol.setValidationState(ValidationState.COMPLETE);
+        protocol = getProtocolService().getProtocolRepository().save(protocol);
+        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
     }
 }
