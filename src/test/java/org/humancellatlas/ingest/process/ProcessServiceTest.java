@@ -89,7 +89,7 @@ public class ProcessServiceTest {
         Page<Process> analyses = processService.retrieveAnalyses(submissionEnvelope, pageable);
 
         //then:
-        assertThat(analyses.getContent()).isNotNull();
+        assertThat(analyses.getContent()).containsExactly(analysis);
     }
 
 }

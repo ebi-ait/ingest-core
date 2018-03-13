@@ -59,6 +59,13 @@ public class ProcessService {
 
     public Page<Process> retrieveAnalyses(SubmissionEnvelope submissionEnvelope,
             Pageable pageable) {
-        return new PageImpl<>(Arrays.asList());
+        Page<Process> processes = processRepository
+                .findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        List<Process> analyses = new ArrayList<>();
+        processes.forEach(process -> {
+            if (process.isAnalysis()) analyses.add(process);
+        });
+        return new PageImpl<>(analyses, pageable, analyses.size());
     }
+
 }
