@@ -48,7 +48,7 @@ public class FileController {
     @NonNull
     private final PagedResourcesAssembler pagedResourcesAssembler;
 
-    @RequestMapping(path = "/files/{id}/inputFiles", method = RequestMethod.GET)
+    @RequestMapping(path = "/files/{id}/inputToProcesses", method = RequestMethod.GET)
     ResponseEntity<?> getProcessByInputFiles(@PathVariable("id") File file,
                                     Pageable pageable,
                                     final PersistentEntityResourceAssembler resourceAssembler) {
@@ -56,7 +56,7 @@ public class FileController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
     }
 
-    @RequestMapping(path = "/files/{id}/derivedFiles", method = RequestMethod.GET)
+    @RequestMapping(path = "/files/{id}/derivedByProcesses", method = RequestMethod.GET)
     ResponseEntity<?> getProcessByDerivedFiles(@PathVariable("id") File file,
                                     Pageable pageable,
                                     final PersistentEntityResourceAssembler resourceAssembler) {
