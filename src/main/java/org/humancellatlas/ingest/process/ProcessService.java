@@ -57,4 +57,8 @@ public class ProcessService {
         return new PageImpl<>(assays, pageable, assays.size());
     }
 
+    public Page<Process> retrieveAnalyses(SubmissionEnvelope submissionEnvelope,
+            Pageable pageable) {
+        return new PageImpl<>(Arrays.asList());
+    }
 }

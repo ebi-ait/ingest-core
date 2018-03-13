@@ -66,4 +66,30 @@ public class ProcessServiceTest {
         assertThat(assays.getContent()).containsExactly(assayingProcess);
     }
 
+    @Test
+    public void testRetrieveAnalyses() {
+        //given:
+        Process analysis = mock(Process.class);
+        doReturn(true).when(analysis).isAnalysis();
+
+        //and:
+        Process nonAnalysis = mock(Process.class);
+        doReturn(false).when(nonAnalysis).isAnalysis();
+
+        //and:
+        PageImpl<Process> processes = new PageImpl<>(asList(analysis, nonAnalysis));
+        doReturn(processes).when(processRepository).findBySubmissionEnvelopesContaining(
+                any(SubmissionEnvelope.class), any(Pageable.class));
+
+        //and:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        Pageable pageable = new PageRequest(2, 7);
+
+        //when:
+        Page<Process> analyses = processService.retrieveAnalyses(submissionEnvelope, pageable);
+
+        //then:
+        assertThat(analyses.getContent()).isNotNull();
+    }
+
 }
