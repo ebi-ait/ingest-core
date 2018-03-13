@@ -70,12 +70,8 @@ public class Links {
     public static final String FILE_REF_REL = "add-file-reference";
 
     // Links to Processes
-    public static final String BIOMATERIALS_INPUT_TO_PROCESSES_URL = "/inputToProcesses";
-    public static final String BIOMATERIALS_INPUT_TO_PROCESSES_REL = "inputToProcesses";
-    public static final String BIOMATERIALS_DERIVED_BY_PROCESSES_URL = "/derivedByProcesses";
-    public static final String BIOMATERIALS_DERIVED_BY_PROCESSES_REL = "derivedByProcesses";
-    public static final String FILES_INPUT_TO_PROCESSES_URL = "/inputToProcesses";
-    public static final String FILES_INPUT_TO_PROCESSES_REL = "inputToProcesses";
-    public static final String FILES_DERIVED_BY_PROCESSES_URL = "/derivedByProcesses";
-    public static final String FILES_DERIVED_BY_PROCESSES_REL = "derivedByProcesses";
+    public static final String INPUT_TO_PROCESSES_URL = "/inputToProcesses";
+    public static final String INPUT_TO_PROCESSES_REL = "inputToProcesses";
+    public static final String DERIVED_BY_PROCESSES_URL = "/derivedByProcesses";
+    public static final String DERIVED_BY_PROCESSES_REL = "derivedByProcesses";
 }
