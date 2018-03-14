@@ -26,6 +26,7 @@ import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -100,11 +101,19 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays", method = RequestMethod.GET)
     ResponseEntity<?> getAssays(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                   Pageable pageable,
-                                   final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Process> processes = getProcessService().retrieveAssaysFrom(submissionEnvelope, pageable);
-        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes
-                , resourceAssembler));
+            Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Process> assays = getProcessService().retrieveAssaysFrom(submissionEnvelope, pageable);
+        PagedResources body = getPagedResourcesAssembler().toResource(assays, resourceAssembler);
+        return ResponseEntity.ok(body);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/analyses", method = RequestMethod.GET)
+    ResponseEntity<?> getAnalyses(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+            Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Process> analyses = getProcessService().retrieveAnalysesFrom(submissionEnvelope,
+                pageable);
+        PagedResources body = getPagedResourcesAssembler().toResource(analyses, resourceAssembler);
+        return ResponseEntity.ok(body);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMIT_URL, method = RequestMethod.PUT)

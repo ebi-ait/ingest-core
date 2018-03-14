@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Created by rolando on 19/02/2018.
@@ -48,13 +50,23 @@ public class ProcessService {
 
     public Page<Process> retrieveAssaysFrom(SubmissionEnvelope submissionEnvelope,
             Pageable pageable) {
+        List<Process> assays = findAndFilter(submissionEnvelope, pageable, Process::isAssaying);
+        return new PageImpl<>(assays, pageable, assays.size());
+    }
+
+    public Page<Process> retrieveAnalysesFrom(SubmissionEnvelope submissionEnvelope,
+            Pageable pageable) {
+        List<Process> analyses = findAndFilter(submissionEnvelope, pageable, Process::isAnalysis);
+        return new PageImpl<>(analyses, pageable, analyses.size());
+    }
+
+    private List<Process> findAndFilter(SubmissionEnvelope submissionEnvelope,
+            Pageable pageable, Predicate<Process> processFilter) {
         Page<Process> processes = processRepository
                 .findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
-        List<Process> assays = new ArrayList<>();
-        processes.forEach(process -> {
-            if (process.isAssaying()) assays.add(process);
-        });
-        return new PageImpl<>(assays, pageable, assays.size());
+        return processes.getContent().stream()
+                .filter(processFilter)
+                .collect(Collectors.toList());
     }
 
 }
