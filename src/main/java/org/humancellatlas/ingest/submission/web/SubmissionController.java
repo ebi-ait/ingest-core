@@ -141,7 +141,6 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_DRAFT_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactDraftEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        Preconditions.checkState(submissionEnvelope.allowedStateTransitions().contains(SubmissionState.DRAFT));
         submissionEnvelope.enactStateTransition(SubmissionState.DRAFT);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
@@ -149,7 +148,6 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactValidatingEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        Preconditions.checkState(submissionEnvelope.allowedStateTransitions().contains(SubmissionState.VALIDATING));
         submissionEnvelope.enactStateTransition(SubmissionState.VALIDATING);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
@@ -157,7 +155,6 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_INVALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactInvalidEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        Preconditions.checkState(submissionEnvelope.allowedStateTransitions().contains(SubmissionState.INVALID));
         submissionEnvelope.enactStateTransition(SubmissionState.INVALID);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
@@ -165,7 +162,6 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_VALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactValidEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        Preconditions.checkState(submissionEnvelope.allowedStateTransitions().contains(SubmissionState.VALID));
         submissionEnvelope.enactStateTransition(SubmissionState.VALID);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
@@ -173,7 +169,6 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_SUBMIT_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactSubmitEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        Preconditions.checkState(submissionEnvelope.allowedStateTransitions().contains(SubmissionState.SUBMITTED));
         submissionEnvelope.enactStateTransition(SubmissionState.SUBMITTED);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         submissionEnvelopeService.triggerExportFor(submissionEnvelope);
@@ -182,7 +177,6 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_PROCESSING_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactProcessEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        Preconditions.checkState(submissionEnvelope.allowedStateTransitions().contains(SubmissionState.PROCESSING));
         submissionEnvelope.enactStateTransition(SubmissionState.PROCESSING);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
@@ -190,7 +184,6 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_CLEANUP_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactCleanupEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        Preconditions.checkState(submissionEnvelope.allowedStateTransitions().contains(SubmissionState.CLEANUP));
         submissionEnvelope.enactStateTransition(SubmissionState.CLEANUP);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
@@ -198,7 +191,6 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_COMPLETE_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactCompleteEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        Preconditions.checkState(submissionEnvelope.allowedStateTransitions().contains(SubmissionState.COMPLETE));
         submissionEnvelope.enactStateTransition(SubmissionState.COMPLETE);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
