@@ -11,6 +11,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -202,11 +203,11 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 .forEach(resource::add);
 
         // add subresource links for state tracker to commit state transitions
-        submissionEnvelope.allowedStateTransitions().stream()
-                          .map(submissionState -> getCommitStateTransitionLink(submissionEnvelope, submissionState))
-                          .filter(Optional::isPresent)
-                          .map(Optional::get)
-                          .forEach(resource::add);
+        Arrays.stream(SubmissionState.values())
+              .map(submissionState -> getCommitStateTransitionLink(submissionEnvelope, submissionState))
+              .filter(Optional::isPresent)
+              .map(Optional::get)
+              .forEach(resource::add);
 
         return resource;
     }
