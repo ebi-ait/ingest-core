@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.CrossOrigin;
  */
 @CrossOrigin
 public interface ProtocolRepository extends MongoRepository<Protocol, String> {
-    public Protocol findByUuid(@Param("uuid") Uuid uuid);
 
     public Page<Protocol> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
     public Page<Protocol> findBySubmissionEnvelopesContainingAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState state, Pageable pageable);
+
+    Protocol findByUuid(@Param("uuid") Uuid uuid);
+
 }

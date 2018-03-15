@@ -1,8 +1,8 @@
-package org.humancellatlas.ingest.submission;
+package org.humancellatlas.ingest.messaging.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.humancellatlas.ingest.core.AbstractEntityMessage;
+import org.humancellatlas.ingest.messaging.model.AbstractEntityMessage;
 
 /**
  * @author Simon Jupp

@@ -4,6 +4,7 @@ import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.web.BiomaterialController;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.web.FileController;
+import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.web.ProcessController;
 import org.humancellatlas.ingest.project.Project;
@@ -30,6 +31,7 @@ public class MetadataDocumentMessageBuilder {
     public static MetadataDocumentMessageBuilder using(ResourceMappings mappings, RepositoryRestConfiguration config) {
         return new MetadataDocumentMessageBuilder(mappings, config);
     }
+
 
     private final String DUMMY_BASE_URI = "http://localhost:8080";
 

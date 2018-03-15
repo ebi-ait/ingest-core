@@ -4,11 +4,13 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;
 import org.springframework.data.mongodb.core.mapping.event.AfterSaveEvent;
+
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,7 +23,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Getter
 public class MetadataStateChangeListener extends AbstractMongoEventListener<MetadataDocument> {
-    private final @NonNull StateEngine stateEngine;
+    @Autowired @NonNull private final MessageRouter messageRouter;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -29,22 +31,13 @@ public class MetadataStateChangeListener extends AbstractMongoEventListener<Meta
         return log;
     }
 
-    @Override public void onAfterSave(AfterSaveEvent<MetadataDocument> event) {
-        SubmissionEnvelope latestEnvelope = null;
-        MetadataDocument metadataDocument = event.getSource();
-        SubmissionEnvelope envelope = metadataDocument.getOpenSubmissionEnvelope();
-        if(envelope != null) {
-            try {
-                latestEnvelope = this.getStateEngine()
-                    .notifySubmissionEnvelopeOfMetadataDocumentChange(envelope, metadataDocument);
-            } catch (Exception e) {
-                getLog().error("Save propagation error", e);
-                latestEnvelope = envelope;
-            } finally {
-                this.getStateEngine().analyseStateOfEnvelope(latestEnvelope)
-                    .ifPresent(
-                        event1 -> getLog().debug("Event triggered on submission envelope", event1));
-            }
-        }
+    @Override
+    public void onAfterSave(AfterSaveEvent<MetadataDocument> event) {
+        MetadataDocument document = event.getSource();
+
+        messageRouter.routeValidationMessageFor(document);
+        messageRouter.routeStateTrackingUpdateMessageFor(document);
+        messageRouter.routeAccessionMessageFor(document);
     }
+
 }

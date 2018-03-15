@@ -19,15 +19,13 @@ import org.springframework.data.rest.core.annotation.RestResource;
 @Setter
 public class File extends MetadataDocument {
 
-    @DBRef @RestResource private List<Process> provenantProcesses = new ArrayList<>();
-
     private String fileName;
     private String cloudUrl;
     private Checksums checksums;
     private UUID validationId;
 
     @JsonCreator
-    protected File(@JsonProperty("content") Object content) {
+    public File(@JsonProperty("content") Object content) {
         super(EntityType.FILE, content);
     }
 

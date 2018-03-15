@@ -9,8 +9,8 @@ import org.joda.time.DateTime;
 import org.springframework.data.annotation.*;
 import org.springframework.hateoas.Identifiable;
 
-import java.time.Instant;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Javadocs go here!
@@ -37,6 +37,8 @@ public abstract class AbstractEntity implements Identifiable<String> {
     private @JsonIgnore EntityType type;
 
     private @Setter Uuid uuid;
+
+    private @Setter List<Event> events = new ArrayList<>();
 
     protected AbstractEntity(EntityType type) {
         this.type = type;

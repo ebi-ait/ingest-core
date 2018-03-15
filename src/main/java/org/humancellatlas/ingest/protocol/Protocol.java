@@ -24,6 +24,7 @@ import java.util.List;
  */
 @Getter
 public class Protocol extends MetadataDocument {
+
     @JsonCreator
     public Protocol(Object content) {
         super(EntityType.PROTOCOL, content);

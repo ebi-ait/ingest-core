@@ -1,0 +1,15 @@
+{
+  "describedBy" : "https://schema.humancellatlas.org/type/protocol/5.0.0/protocol",
+  "schema_version" : "5.0.0",
+  "schema_type" : "protocol",
+  "protocol_core" : {
+    "protocol_id" : "Q4_DEMO-protocol",
+    "document" : "Q4_DEMO-protocol.pdf",
+    "describedBy" : "https://schema.humancellatlas.org/core/protocol/5.0.0/protocol_core",
+    "schema_version" : "5.0.0"
+  },
+  "protocol_type" : {
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/protocol_type_ontology",
+    "text" : "single cell sequencing protocol"
+  }
+}

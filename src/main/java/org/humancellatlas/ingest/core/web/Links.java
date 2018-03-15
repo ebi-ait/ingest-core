@@ -9,7 +9,7 @@ package org.humancellatlas.ingest.core.web;
  * @date 05/09/17
  */
 public class Links {
-    // Links to states for submission envelopes
+    // Links to request state changes for submission envelopes
     public static final String SUBMIT_URL = "/submissionEvent";
     public static final String SUBMIT_REL = "submit";
 
@@ -28,6 +28,25 @@ public class Links {
     public static final String COMPLETE_REL = "complete";
     public static final String COMPLETE_URL = "/completionEvent";
 
+    // links to commit state changes
+    public static final String COMMIT_SUBMIT_URL = "/commitSubmissionEvent";
+    public static final String COMMIT_SUBMIT_REL = "commitSubmit";
+
+    public static final String COMMIT_DRAFT_REL = "commitDraft";
+    public static final String COMMIT_DRAFT_URL = "/commitDraftEvent";
+    public static final String COMMIT_VALIDATING_REL = "commitValidating";
+    public static final String COMMIT_VALIDATING_URL = "/commitValidatingEvent";
+    public static final String COMMIT_VALID_REL = "commitValid";
+    public static final String COMMIT_VALID_URL = "/commitValidEvent";
+    public static final String COMMIT_INVALID_REL = "commitInvalid";
+    public static final String COMMIT_INVALID_URL = "/commitInvalidEvent";
+    public static final String COMMIT_PROCESSING_REL ="commitProcessing";
+    public static final String COMMIT_PROCESSING_URL ="/commitProcessingEvent";
+    public static final String COMMIT_CLEANUP_REL = "commitCleanup";
+    public static final String COMMIT_CLEANUP_URL = "/commitCleanupEvent";
+    public static final String COMMIT_COMPLETE_REL = "commitComplete";
+    public static final String COMMIT_COMPLETE_URL = "/commitCompleteEvent";
+    
     // Links to entities for submission envelopes
     public static final String BIOMATERIALS_URL = "/biomaterials";
     public static final String BIOMATERIALS_REL = "biomaterials";
@@ -39,10 +58,20 @@ public class Links {
     public static final String PROJECTS_REL = "projects";
     public static final String PROTOCOLS_URL = "/protocols";
     public static final String PROTOCOLS_REL = "protocols";
+    public static final String ASSAYS_URL = "/assays";
+    public static final String ASSAYS_REL = "assays";
+    public static final String ANALYSES_URL = "/analyses";
+    public static final String ANALYSES_REL = "analyses";
 
     // Links for analyses
     public static final String BUNDLE_REF_URL = "/bundleReferences";
     public static final String BUNDLE_REF_REL = "add-input-bundles";
     public static final String FILE_REF_URL = "/fileReference";
     public static final String FILE_REF_REL = "add-file-reference";
+
+    // Links to Processes
+    public static final String INPUT_TO_PROCESSES_URL = "/inputToProcesses";
+    public static final String INPUT_TO_PROCESSES_REL = "inputToProcesses";
+    public static final String DERIVED_BY_PROCESSES_URL = "/derivedByProcesses";
+    public static final String DERIVED_BY_PROCESSES_REL = "derivedByProcesses";
 }

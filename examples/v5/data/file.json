@@ -1,0 +1,14 @@
+{
+  "describedBy" : "https://schema.humancellatlas.org/type/file/5.0.0/sequence_file",
+  "schema_version" : "5.0.0",
+  "schema_type" : "file",
+  "file_core" : {
+    "file_name" : "R1.fastq.gz",
+    "file_format" : "fastq.gz",
+    "describedBy" : "https://schema.humancellatlas.org/core/file/5.0.0/file_core",
+    "schema_version" : "5.0.0"
+  },
+  "read_index" : "read1",
+  "lane_index" : 1,
+  "read_length" : 187
+}
