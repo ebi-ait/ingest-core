@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.protocol;
 
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +18,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin
 public interface ProtocolRepository extends MongoRepository<Protocol, String> {
 
+    public Page<Protocol> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+
+    public Page<Protocol> findBySubmissionEnvelopesContainingAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState state, Pageable pageable);
+
     Protocol findByUuid(@Param("uuid") Uuid uuid);
 
-    Page<Protocol> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 }
