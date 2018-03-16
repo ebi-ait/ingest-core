@@ -90,9 +90,9 @@ public class ProcessService {
         List<Process> results = new ArrayList<>();
         List<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope);
         for (Process process : processes) {
-            if (! biomaterialRepository.findByInputToProcessesContaining(process, new PageRequest(1,1)).getContent().isEmpty()) {
+            if (!biomaterialRepository.findByInputToProcessesContains(process).isEmpty()) {
                 // input to process is a biomaterial
-                if (! fileRepository.findByDerivedByProcessesContaining(process, new PageRequest(1, 1)).getContent().isEmpty()) {
+                if (! fileRepository.findByDerivedByProcessesContains(process).isEmpty()) {
                     results.add(process);
                 }
             }
@@ -104,9 +104,9 @@ public class ProcessService {
         List<Process> results = new ArrayList<>();
         List<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope);
         for (Process process : processes) {
-            if (! fileRepository.findByInputToProcessesContaining(process, new PageRequest(1,1)).getContent().isEmpty()) {
-                // input to process is a file
-                if (! fileRepository.findByDerivedByProcessesContaining(process, new PageRequest(1, 1)).getContent().isEmpty()) {
+            if (!fileRepository.findByInputToProcessesContains(process).isEmpty()) {
+                // input to process is a biomaterial
+                if (! fileRepository.findByDerivedByProcessesContains(process).isEmpty()) {
                     results.add(process);
                 }
             }
