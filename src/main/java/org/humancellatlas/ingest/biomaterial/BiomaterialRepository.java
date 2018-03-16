@@ -19,8 +19,8 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
 
   public Page<Biomaterial> findBySubmissionEnvelopesContainingAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState state, Pageable pageable);
 
-  public List<Biomaterial> findByInputToProcessesContaining(Process process);
+  public Page<Biomaterial> findByInputToProcessesContaining(Process process, Pageable pageable);
 
-  public List<Biomaterial> findByDerivedByProcessesContaining(Process process);
+  public Page<Biomaterial> findByDerivedByProcessesContaining(Process process, Pageable pageable);
 }
 

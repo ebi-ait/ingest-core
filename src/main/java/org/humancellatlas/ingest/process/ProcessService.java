@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -51,20 +52,20 @@ public class ProcessService {
         return log;
     }
 
-    public List<Biomaterial> findInputBiomaterialsForProcess(Process process) {
-        return biomaterialRepository.findByInputToProcessesContaining(process);
+    public Page<Biomaterial> findInputBiomaterialsForProcess(Process process, Pageable pageable) {
+        return biomaterialRepository.findByInputToProcessesContaining(process, pageable);
     }
 
-    public List<File> findInputFilesForProcess(Process process) {
-        return fileRepository.findByInputToProcessesContaining(process);
+    public Page<File> findInputFilesForProcess(Process process, Pageable pageable) {
+        return fileRepository.findByInputToProcessesContaining(process, pageable);
     }
 
-    public List<Biomaterial> findOutputBiomaterialsForProcess(Process process) {
-        return biomaterialRepository.findByDerivedByProcessesContaining(process);
+    public Page<Biomaterial> findOutputBiomaterialsForProcess(Process process, Pageable pageable) {
+        return biomaterialRepository.findByDerivedByProcessesContaining(process, pageable);
     }
 
-    public List<File> findOutputFilesForProcess(Process process) {
-        return fileRepository.findByDerivedByProcessesContaining(process);
+    public Page<File> findOutputFilesForProcess(Process process, Pageable pageable) {
+        return fileRepository.findByDerivedByProcessesContaining(process, pageable);
     }
 
     public Process addProcessToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
@@ -89,9 +90,9 @@ public class ProcessService {
         List<Process> results = new ArrayList<>();
         Page<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
         for (Process process : processes) {
-            if (! biomaterialRepository.findByInputToProcessesContaining(process).isEmpty()) {
+            if (! biomaterialRepository.findByInputToProcessesContaining(process, new PageRequest(1,1)).getContent().isEmpty()) {
                 // input to process is a biomaterial
-                if (! fileRepository.findByDerivedByProcessesContaining(process).isEmpty()) {
+                if (! fileRepository.findByDerivedByProcessesContaining(process, new PageRequest(1, 1)).getContent().isEmpty()) {
                     results.add(process);
                 }
             }
@@ -103,9 +104,9 @@ public class ProcessService {
         List<Process> results = new ArrayList<>();
         Page<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
         for (Process process : processes) {
-            if (! fileRepository.findByInputToProcessesContaining(process).isEmpty()) {
+            if (! fileRepository.findByInputToProcessesContaining(process, new PageRequest(1,1)).getContent().isEmpty()) {
                 // input to process is a file
-                if (! fileRepository.findByDerivedByProcessesContaining(process).isEmpty()) {
+                if (! fileRepository.findByDerivedByProcessesContaining(process, new PageRequest(1, 1)).getContent().isEmpty()) {
                     results.add(process);
                 }
             }

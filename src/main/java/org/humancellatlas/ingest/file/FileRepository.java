@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.file;
 
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -26,7 +27,7 @@ public interface FileRepository extends MongoRepository<File, String> {
 
     File findByValidationId(@Param("validationId") UUID id);
 
-    public List<File> findByInputToProcessesContaining(Process process);
+    public Page<File> findByInputToProcessesContaining(Process process, Pageable pageable);
 
-    public List<File> findByDerivedByProcessesContaining(Process process);
+    public Page<File> findByDerivedByProcessesContaining(Process process, Pageable pageable);
 }

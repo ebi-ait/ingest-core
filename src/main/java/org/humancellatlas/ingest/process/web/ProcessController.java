@@ -10,10 +10,15 @@ import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -33,34 +38,39 @@ import java.util.List;
 @Getter
 public class ProcessController {
   private final @NonNull ProcessService processService;
-
+  private final @Autowired
+  @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
     @RequestMapping(path = "processes/{proc_id}/inputBiomaterials", method = RequestMethod.GET)
-    ResponseEntity<Resource<?>> getProcessInputBiomaterials(@PathVariable("proc_id") Process process,
-                                                            PersistentEntityResourceAssembler assembler){
-        List<Biomaterial> inputBiomaterials = getProcessService().findInputBiomaterialsForProcess(process);
-        return ResponseEntity.ok(assembler.toFullResource(inputBiomaterials));
+    ResponseEntity<?> getProcessInputBiomaterials(@PathVariable("proc_id") Process process,
+                                                                  Pageable pageable,
+                                                                  PersistentEntityResourceAssembler assembler){
+        Page<Biomaterial> inputBiomaterials = getProcessService().findInputBiomaterialsForProcess(process, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(inputBiomaterials, assembler));
     }
 
     @RequestMapping(path = "processes/{proc_id}/inputFiles", method = RequestMethod.GET)
-    ResponseEntity<Resource<?>> getProcessInputFiles(@PathVariable("proc_id") Process process,
-                                                            PersistentEntityResourceAssembler assembler){
-        List<File> inputFiles = getProcessService().findInputFilesForProcess(process);
-        return ResponseEntity.ok(assembler.toFullResource(inputFiles));
+    ResponseEntity<?> getProcessInputFiles(@PathVariable("proc_id") Process process,
+                                           Pageable pageable,
+                                           PersistentEntityResourceAssembler assembler){
+        Page<File> inputFiles = getProcessService().findInputFilesForProcess(process, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(inputFiles, assembler));
     }
 
     @RequestMapping(path = "processes/{proc_id}/derivedBiomaterials", method = RequestMethod.GET)
-    ResponseEntity<Resource<?>> getProcessOutputBiomaterials(@PathVariable("proc_id") Process process,
-                                                     PersistentEntityResourceAssembler assembler){
-        List<Biomaterial> outputBiomaterials = getProcessService().findOutputBiomaterialsForProcess(process);
-        return ResponseEntity.ok(assembler.toFullResource(outputBiomaterials));
+    ResponseEntity<?> getProcessOutputBiomaterials(@PathVariable("proc_id") Process process,
+                                                   Pageable pageable,
+                                                   PersistentEntityResourceAssembler assembler){
+        Page<Biomaterial> outputBiomaterials = getProcessService().findOutputBiomaterialsForProcess(process, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(outputBiomaterials, assembler));
     }
 
     @RequestMapping(path = "processes/{proc_id}/derivedFiles", method = RequestMethod.GET)
-    ResponseEntity<Resource<?>> getProcessOutputFiles(@PathVariable("proc_id") Process process,
-                                                     PersistentEntityResourceAssembler assembler){
-        List<File> inputFiles = getProcessService().findInputFilesForProcess(process);
-        return ResponseEntity.ok(assembler.toFullResource(inputFiles));
+    ResponseEntity<?> getProcessOutputFiles(@PathVariable("proc_id") Process process,
+                                            Pageable pageable,
+                                            PersistentEntityResourceAssembler assembler){
+        Page<File> outputFiles = getProcessService().findOutputFilesForProcess(process, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(outputFiles, assembler));
     }
 
 
