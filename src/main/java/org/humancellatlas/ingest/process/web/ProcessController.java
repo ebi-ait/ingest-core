@@ -3,7 +3,9 @@ package org.humancellatlas.ingest.process.web;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.web.Links;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.state.ValidationState;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.List;
+
 /**
  * Created by rolando on 16/02/2018.
  */
@@ -30,7 +34,37 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class ProcessController {
   private final @NonNull ProcessService processService;
 
-  @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes", method = RequestMethod.POST)
+
+    @RequestMapping(path = "processes/{proc_id}/inputBiomaterials", method = RequestMethod.GET)
+    ResponseEntity<Resource<?>> getProcessInputBiomaterials(@PathVariable("proc_id") Process process,
+                                                            PersistentEntityResourceAssembler assembler){
+        List<Biomaterial> inputBiomaterials = getProcessService().findInputBiomaterialsForProcess(process);
+        return ResponseEntity.ok(assembler.toFullResource(inputBiomaterials));
+    }
+
+    @RequestMapping(path = "processes/{proc_id}/inputFiles", method = RequestMethod.GET)
+    ResponseEntity<Resource<?>> getProcessInputFiles(@PathVariable("proc_id") Process process,
+                                                            PersistentEntityResourceAssembler assembler){
+        List<File> inputFiles = getProcessService().findInputFilesForProcess(process);
+        return ResponseEntity.ok(assembler.toFullResource(inputFiles));
+    }
+
+    @RequestMapping(path = "processes/{proc_id}/derivedBiomaterials", method = RequestMethod.GET)
+    ResponseEntity<Resource<?>> getProcessOutputBiomaterials(@PathVariable("proc_id") Process process,
+                                                     PersistentEntityResourceAssembler assembler){
+        List<Biomaterial> outputBiomaterials = getProcessService().findOutputBiomaterialsForProcess(process);
+        return ResponseEntity.ok(assembler.toFullResource(outputBiomaterials));
+    }
+
+    @RequestMapping(path = "processes/{proc_id}/derivedFiles", method = RequestMethod.GET)
+    ResponseEntity<Resource<?>> getProcessOutputFiles(@PathVariable("proc_id") Process process,
+                                                     PersistentEntityResourceAssembler assembler){
+        List<File> inputFiles = getProcessService().findInputFilesForProcess(process);
+        return ResponseEntity.ok(assembler.toFullResource(inputFiles));
+    }
+
+
+    @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes", method = RequestMethod.POST)
   ResponseEntity<Resource<?>> addProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
       @RequestBody Process process,
       PersistentEntityResourceAssembler assembler) {

@@ -40,22 +40,6 @@ public class BiomaterialController {
 
   private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
-  @RequestMapping(path = "/biomaterials/{id}/inputToProcesses", method = RequestMethod.GET)
-  ResponseEntity<?> getBiomaterialByInputBiomaterials(@PathVariable("id") Biomaterial biomaterial,
-                             Pageable pageable,
-                             final PersistentEntityResourceAssembler resourceAssembler) {
-    Page<Process> processes = getProcessRepository().findByInputBiomaterials(biomaterial, pageable);
-    return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
-  }
-
-  @RequestMapping(path = "/biomaterials/{id}/derivedByProcesses", method = RequestMethod.GET)
-  ResponseEntity<?> getBiomaterialByDerivedBiomaterials(@PathVariable("id") Biomaterial biomaterial,
-                                         Pageable pageable,
-                                         final PersistentEntityResourceAssembler resourceAssembler) {
-    Page<Process> processes = getProcessRepository().findByDerivedBiomaterials(biomaterial, pageable);
-    return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
-  }
-
   @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.POST)
   ResponseEntity<Resource<?>> addBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
       @RequestBody Biomaterial biomaterial,

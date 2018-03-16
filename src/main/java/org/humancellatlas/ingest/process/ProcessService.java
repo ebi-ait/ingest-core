@@ -5,7 +5,9 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
@@ -17,10 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Created by rolando on 19/02/2018.
@@ -37,17 +36,35 @@ public class ProcessService {
     @NonNull
     @Autowired
     private ProcessRepository processRepository;
-    @NonNull
-    @Autowired
-    private BiomaterialRepository biomaterialRepository;
+
     @NonNull
     @Autowired
     private FileRepository fileRepository;
+
+    @NonNull
+    @Autowired
+    private BiomaterialRepository biomaterialRepository;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     protected Logger getLog() {
         return log;
+    }
+
+    public List<Biomaterial> findInputBiomaterialsForProcess(Process process) {
+        return biomaterialRepository.findByInputToProcessesContaining(process);
+    }
+
+    public List<File> findInputFilesForProcess(Process process) {
+        return fileRepository.findByInputToProcessesContaining(process);
+    }
+
+    public List<Biomaterial> findOutputBiomaterialsForProcess(Process process) {
+        return biomaterialRepository.findByDerivedByProcessesContaining(process);
+    }
+
+    public List<File> findOutputFilesForProcess(Process process) {
+        return fileRepository.findByDerivedByProcessesContaining(process);
     }
 
     public Process addProcessToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
@@ -72,9 +89,9 @@ public class ProcessService {
         List<Process> results = new ArrayList<>();
         Page<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
         for (Process process : processes) {
-            if (biomaterialRepository.findByInputToProcessesContaining(process)) {
+            if (! biomaterialRepository.findByInputToProcessesContaining(process).isEmpty()) {
                 // input to process is a biomaterial
-                if (fileRepository.findByDerivedByProcessesContaining(process)) {
+                if (! fileRepository.findByDerivedByProcessesContaining(process).isEmpty()) {
                     results.add(process);
                 }
             }
@@ -86,9 +103,9 @@ public class ProcessService {
         List<Process> results = new ArrayList<>();
         Page<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
         for (Process process : processes) {
-            if (fileRepository.findByInputToProcessesContaining(process)) {
-                // input to process is a biomaterial
-                if (fileRepository.findByDerivedByProcessesContaining(process)) {
+            if (! fileRepository.findByInputToProcessesContaining(process).isEmpty()) {
+                // input to process is a file
+                if (! fileRepository.findByDerivedByProcessesContaining(process).isEmpty()) {
                     results.add(process);
                 }
             }

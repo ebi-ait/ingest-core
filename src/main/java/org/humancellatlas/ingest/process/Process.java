@@ -30,19 +30,8 @@ public class Process extends MetadataDocument {
     private final List<Protocol> protocols = new ArrayList<>();
     @RestResource
     @DBRef
-    private final List<Biomaterial> inputBiomaterials = new ArrayList<>();
-    @RestResource
-    @DBRef
-    private final List<Biomaterial> derivedBiomaterials = new ArrayList<>();
-    @RestResource
-    @DBRef
     private final List<BundleManifest> inputBundleManifests = new ArrayList<>();
-    @RestResource
-    @DBRef
-    private final List<File> inputFiles = new ArrayList<>();
-    @RestResource
-    @DBRef
-    private final List<File> derivedFiles = new ArrayList<>();
+
     private final @DBRef List<Process> chainedProcesses = new ArrayList<>();
 
     @JsonCreator
@@ -51,27 +40,5 @@ public class Process extends MetadataDocument {
     }
 
     public Process() {}
-
-    @JsonIgnore
-    public boolean isAssaying() {
-        return !inputBiomaterials.isEmpty() && !derivedFiles.isEmpty();
-    }
-
-    @JsonIgnore
-    public boolean isAnalysis() {
-        return !inputFiles.isEmpty() && !derivedFiles.isEmpty();
-    }
-
-    public void addInput(Biomaterial biomaterial) {
-        inputBiomaterials.add(biomaterial);
-    }
-
-    public void addInput(File file) {
-        inputFiles.add(file);
-    }
-
-    public void addDerivative(File file) {
-        derivedFiles.add(file);
-    }
 
 }

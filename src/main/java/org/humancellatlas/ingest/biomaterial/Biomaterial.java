@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.project.Project;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,6 +22,10 @@ import java.util.List;
 public class Biomaterial extends MetadataDocument {
 
   @RestResource @DBRef private final List<Project> projects= new ArrayList<>();
+
+  @RestResource @DBRef private final List<Process> inputToProcesses = new ArrayList<>();
+
+  @RestResource @DBRef private final List<Process> derivedByProcesses = new ArrayList<>();
 
   @JsonCreator
   public Biomaterial(Object content) {

@@ -74,4 +74,16 @@ public class Links {
     public static final String INPUT_TO_PROCESSES_REL = "inputToProcesses";
     public static final String DERIVED_BY_PROCESSES_URL = "/derivedByProcesses";
     public static final String DERIVED_BY_PROCESSES_REL = "derivedByProcesses";
+
+    // Links from Processes
+    public static final String INPUT_BIOMATERIALS_URL = "/inputBiomaterials";
+    public static final String INPUT_BIOMATERIALS_REL = "inputBiomaterials";
+    public static final String INPUT_FILES_URL = "/inputFiles";
+    public static final String INPUT_FILES_REL = "inputFiles";
+    
+    public static final String DERIVED_BY_BIOMATERIALS_URL = "/derivedBiomaterials";
+    public static final String DERIVED_BY_BIOMATERIALS_REL = "derivedBiomaterials";
+    public static final String DERIVED_BY_FILES_URL = "/derivedFiles";
+    public static final String DERIVED_BY_FILES_REL = "derivedFiles";
+    
 }
