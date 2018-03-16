@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
+import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
@@ -35,6 +37,12 @@ public class ProcessService {
     @NonNull
     @Autowired
     private ProcessRepository processRepository;
+    @NonNull
+    @Autowired
+    private BiomaterialRepository biomaterialRepository;
+    @NonNull
+    @Autowired
+    private FileRepository fileRepository;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -50,23 +58,41 @@ public class ProcessService {
 
     public Page<Process> retrieveAssaysFrom(SubmissionEnvelope submissionEnvelope,
             Pageable pageable) {
-        List<Process> assays = findAndFilter(submissionEnvelope, pageable, Process::isAssaying);
+        List<Process> assays = findAssays(submissionEnvelope, pageable);
         return new PageImpl<>(assays, pageable, assays.size());
     }
 
     public Page<Process> retrieveAnalysesFrom(SubmissionEnvelope submissionEnvelope,
             Pageable pageable) {
-        List<Process> analyses = findAndFilter(submissionEnvelope, pageable, Process::isAnalysis);
+        List<Process> analyses = findAnalyses(submissionEnvelope, pageable);
         return new PageImpl<>(analyses, pageable, analyses.size());
     }
 
-    private List<Process> findAndFilter(SubmissionEnvelope submissionEnvelope,
-            Pageable pageable, Predicate<Process> processFilter) {
-        Page<Process> processes = processRepository
-                .findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
-        return processes.getContent().stream()
-                .filter(processFilter)
-                .collect(Collectors.toList());
+    private List<Process> findAssays(SubmissionEnvelope submissionEnvelope, Pageable pageable) {
+        List<Process> results = new ArrayList<>();
+        Page<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        for (Process process : processes) {
+            if (biomaterialRepository.findByInputToProcessesContaining(process)) {
+                // input to process is a biomaterial
+                if (fileRepository.findByDerivedByProcessesContaining(process)) {
+                    results.add(process);
+                }
+            }
+        }
+        return results;
     }
 
+    private List<Process> findAnalyses(SubmissionEnvelope submissionEnvelope, Pageable pageable) {
+        List<Process> results = new ArrayList<>();
+        Page<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        for (Process process : processes) {
+            if (fileRepository.findByInputToProcessesContaining(process)) {
+                // input to process is a biomaterial
+                if (fileRepository.findByDerivedByProcessesContaining(process)) {
+                    results.add(process);
+                }
+            }
+        }
+        return results;
+    }
 }
