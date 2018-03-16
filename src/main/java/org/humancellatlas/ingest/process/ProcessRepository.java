@@ -22,21 +22,5 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
 
     Page<Process> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
-    //TODO find assaying Processes:
-    /*
-    Sample query:
-    { inputBiomaterials: {
-        $exists: true,
-        $ne: []
-      },
-      defivedFiles: {
-        $exists: true,
-        $ne: []
-      }
-    }
-    see [https://stackoverflow.com/a/25142571/404604] for more ideas
-    */
-
-  public Page<Process> findBySubmissionEnvelopesContainingAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState state, Pageable pageable);
-
+    Page<Process> findBySubmissionEnvelopesContainingAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState state, Pageable pageable);
 }
