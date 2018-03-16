@@ -43,6 +43,7 @@ public class Process extends MetadataDocument {
     @RestResource
     @DBRef
     private final List<File> derivedFiles = new ArrayList<>();
+    private final @DBRef List<Process> chainedProcesses = new ArrayList<>();
 
     @JsonCreator
     public Process(Object content) {
