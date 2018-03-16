@@ -88,7 +88,7 @@ public class ProcessService {
 
     private List<Process> findAssays(SubmissionEnvelope submissionEnvelope, Pageable pageable) {
         List<Process> results = new ArrayList<>();
-        Page<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        List<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope);
         for (Process process : processes) {
             if (! biomaterialRepository.findByInputToProcessesContaining(process, new PageRequest(1,1)).getContent().isEmpty()) {
                 // input to process is a biomaterial
@@ -102,7 +102,7 @@ public class ProcessService {
 
     private List<Process> findAnalyses(SubmissionEnvelope submissionEnvelope, Pageable pageable) {
         List<Process> results = new ArrayList<>();
-        Page<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        List<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope);
         for (Process process : processes) {
             if (! fileRepository.findByInputToProcessesContaining(process, new PageRequest(1,1)).getContent().isEmpty()) {
                 // input to process is a file
