@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -75,8 +76,14 @@ public class ProcessService {
 
     private Page<Process> findAssays(SubmissionEnvelope submissionEnvelope, Pageable pageable) {
         Set<Process> results = new LinkedHashSet<>();
+        long fileStartTime = System.currentTimeMillis();
         List<File> derivedFiles =
                 fileRepository.findBySubmissionEnvelopesContains(submissionEnvelope);
+        long fileEndTime = System.currentTimeMillis();
+        float fileQueryTime = ((float)(fileEndTime - fileStartTime)) / 1000;
+        String fileQt = new DecimalFormat("#,###.##").format(fileQueryTime);
+        getLog().info("Retrieving assays: file query time: {} s", fileQt);
+        long allBioStartTime = System.currentTimeMillis();
         for (File derivedFile : derivedFiles) {
             for (Process derivedByProcess : derivedFile.getDerivedByProcesses()) {
                 if (!biomaterialRepository.findByInputToProcessesContains(derivedByProcess).isEmpty()) {
@@ -84,6 +91,10 @@ public class ProcessService {
                 }
             }
         }
+        long allBioEndTime = System.currentTimeMillis();
+        float allBioQueryTime = ((float)(allBioEndTime - allBioStartTime)) / 1000;
+        String allBioQt = new DecimalFormat("#,###.##").format(allBioQueryTime);
+        getLog().info("Retrieving assays: biomaterial query time: {} s", allBioQt);
         return makePage(results, pageable);
     }
 
