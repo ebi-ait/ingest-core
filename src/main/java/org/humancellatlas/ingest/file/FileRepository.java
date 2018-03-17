@@ -23,6 +23,9 @@ public interface FileRepository extends MongoRepository<File, String> {
 
     File findByUuid(@Param("uuid") Uuid uuid);
 
+    @RestResource(exported = false)
+    List<File> findBySubmissionEnvelopesContains(SubmissionEnvelope submissionEnvelope);
+
     Page<File> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
     List<File> findBySubmissionEnvelopesInAndFileName(SubmissionEnvelope submissionEnvelope, String fileName);
