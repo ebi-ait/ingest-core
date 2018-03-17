@@ -1,50 +1,40 @@
 package org.humancellatlas.ingest.process;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.jni.Proc;
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
-import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.text.DecimalFormat;
+import java.util.*;
 
 /**
  * Created by rolando on 19/02/2018.
  */
 @Service
-@NoArgsConstructor
 @RequiredArgsConstructor
 @Getter
 public class ProcessService {
-
-    @NonNull
-    private SubmissionEnvelopeRepository submissionEnvelopeRepository;
-
-    @NonNull
-    @Autowired
-    private ProcessRepository processRepository;
-
-    @NonNull
-    @Autowired
-    private FileRepository fileRepository;
-
-    @NonNull
-    @Autowired
-    private BiomaterialRepository biomaterialRepository;
+    private final @NonNull
+    SubmissionEnvelopeRepository submissionEnvelopeRepository;
+    private final @NonNull
+    ProcessRepository processRepository;
+    private final @NonNull
+    FileRepository fileRepository;
+    private final @NonNull
+    BiomaterialRepository biomaterialRepository;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -69,48 +59,71 @@ public class ProcessService {
     }
 
     public Process addProcessToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
-            Process process) {
+                                                  Process process) {
         process.addToSubmissionEnvelope(submissionEnvelope);
         return getProcessRepository().save(process);
     }
 
     public Page<Process> retrieveAssaysFrom(SubmissionEnvelope submissionEnvelope,
-            Pageable pageable) {
-        List<Process> assays = findAssays(submissionEnvelope, pageable);
-        return new PageImpl<>(assays, pageable, assays.size());
+                                            Pageable pageable) {
+        return findAssays(submissionEnvelope, pageable);
     }
 
     public Page<Process> retrieveAnalysesFrom(SubmissionEnvelope submissionEnvelope,
-            Pageable pageable) {
-        List<Process> analyses = findAnalyses(submissionEnvelope, pageable);
-        return new PageImpl<>(analyses, pageable, analyses.size());
+                                              Pageable pageable) {
+        return findAnalyses(submissionEnvelope, pageable);
     }
 
-    private List<Process> findAssays(SubmissionEnvelope submissionEnvelope, Pageable pageable) {
-        List<Process> results = new ArrayList<>();
-        List<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope);
-        for (Process process : processes) {
-            if (! biomaterialRepository.findByInputToProcessesContaining(process, new PageRequest(1,1)).getContent().isEmpty()) {
-                // input to process is a biomaterial
-                if (! fileRepository.findByDerivedByProcessesContaining(process, new PageRequest(1, 1)).getContent().isEmpty()) {
-                    results.add(process);
+    private Page<Process> findAssays(SubmissionEnvelope submissionEnvelope, Pageable pageable) {
+        Set<Process> results = new LinkedHashSet<>();
+        long fileStartTime = System.currentTimeMillis();
+        List<File> derivedFiles =
+                fileRepository.findBySubmissionEnvelopesContains(submissionEnvelope);
+        long fileEndTime = System.currentTimeMillis();
+        float fileQueryTime = ((float)(fileEndTime - fileStartTime)) / 1000;
+        String fileQt = new DecimalFormat("#,###.##").format(fileQueryTime);
+        getLog().info("Retrieving assays: file query time: {} s", fileQt);
+        long allBioStartTime = System.currentTimeMillis();
+        for (File derivedFile : derivedFiles) {
+            for (Process derivedByProcess : derivedFile.getDerivedByProcesses()) {
+                if (!biomaterialRepository.findByInputToProcessesContains(derivedByProcess).isEmpty()) {
+                    results.add(derivedByProcess);
                 }
             }
         }
-        return results;
+        long allBioEndTime = System.currentTimeMillis();
+        float allBioQueryTime = ((float)(allBioEndTime - allBioStartTime)) / 1000;
+        String allBioQt = new DecimalFormat("#,###.##").format(allBioQueryTime);
+        getLog().info("Retrieving assays: biomaterial query time: {} s", allBioQt);
+        return makePage(results, pageable);
     }
 
-    private List<Process> findAnalyses(SubmissionEnvelope submissionEnvelope, Pageable pageable) {
-        List<Process> results = new ArrayList<>();
-        List<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope);
-        for (Process process : processes) {
-            if (! fileRepository.findByInputToProcessesContaining(process, new PageRequest(1,1)).getContent().isEmpty()) {
-                // input to process is a file
-                if (! fileRepository.findByDerivedByProcessesContaining(process, new PageRequest(1, 1)).getContent().isEmpty()) {
-                    results.add(process);
+    private Page<Process> findAnalyses(SubmissionEnvelope submissionEnvelope, Pageable pageable) {
+        Set<Process> results = new LinkedHashSet<>();
+        List<File> derivedFiles =
+                fileRepository.findBySubmissionEnvelopesContains(submissionEnvelope);
+        for (File derivedFile : derivedFiles) {
+            for (Process derivedByProcess : derivedFile.getDerivedByProcesses()) {
+                if (!fileRepository.findByInputToProcessesContains(derivedByProcess).isEmpty()) {
+                    results.add(derivedByProcess);
                 }
             }
         }
-        return results;
+        return makePage(results, pageable);
+    }
+
+    private Page<Process> makePage(Set<Process> processes, Pageable pageable) {
+        List<Process> processesList = new ArrayList<>();
+        processesList.addAll(processes);
+        int from = pageable.getOffset();
+        int to = pageable.getOffset() + pageable.getPageSize();
+        if (processesList.size() < to) {
+            to = processesList.size();
+        }
+        Page<Process> page = new PageImpl<>(
+                processesList.subList(from, to),
+                pageable,
+                processesList.size());
+        return page;
     }
 }

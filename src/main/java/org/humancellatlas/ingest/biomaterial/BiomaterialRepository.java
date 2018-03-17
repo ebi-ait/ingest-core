@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.rest.core.annotation.RestResource;
 
 import java.util.List;
 
@@ -15,12 +16,18 @@ import java.util.List;
  */
 public interface BiomaterialRepository extends MongoRepository<Biomaterial, String> {
 
-  public Page<Biomaterial> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+  Page<Biomaterial> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
-  public Page<Biomaterial> findBySubmissionEnvelopesContainingAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState state, Pageable pageable);
+  Page<Biomaterial> findBySubmissionEnvelopesContainingAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState state, Pageable pageable);
 
-  public Page<Biomaterial> findByInputToProcessesContaining(Process process, Pageable pageable);
+  @RestResource(exported = false)
+  List<Biomaterial> findByInputToProcessesContains(Process process);
 
-  public Page<Biomaterial> findByDerivedByProcessesContaining(Process process, Pageable pageable);
+  Page<Biomaterial> findByInputToProcessesContaining(Process process, Pageable pageable);
+
+  @RestResource(exported = false)
+  List<Biomaterial> findByDerivedByProcessesContains(Process process);
+
+  Page<Biomaterial> findByDerivedByProcessesContaining(Process process, Pageable pageable);
 }
 
