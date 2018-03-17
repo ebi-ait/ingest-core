@@ -22,10 +22,11 @@ public class BundleManifest implements Identifiable<String> {
     private final String bundleUuid;
     private final String envelopeUuid;
 
-    private final List<String> files;
-    private final Map<String, Collection<String>> fileSampleMap;
-    private final Map<String, Collection<String>> fileAssayMap;
-    private final Map<String, Collection<String>> fileAnalysisMap;
+    private final List<String> dataFiles;
+    private final Map<String, Collection<String>> fileBiomaterialMap;
+    private final Map<String, Collection<String>> fileProcessMap;
     private final Map<String, Collection<String>> fileProjectMap;
     private final Map<String, Collection<String>> fileProtocolMap;
+    private final Map<String, Collection<String>> fileFilesMap;
+
 }
