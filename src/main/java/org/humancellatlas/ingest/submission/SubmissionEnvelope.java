@@ -74,7 +74,6 @@ public class SubmissionEnvelope extends AbstractEntity {
                 allowedStates.add(SubmissionState.COMPLETE);
                 break;
             default:
-                getLog().warn(String.format("There are no legal state transitions for '%s' state", fromState.name()));
                 break;
         }
         return allowedStates;
