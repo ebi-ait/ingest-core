@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.humancellatlas.ingest.messaging.model.AbstractEntityMessage;
 
+import java.util.Collection;
+
 /**
  * Javadocs go here!
  *
@@ -17,4 +19,5 @@ public class MetadataDocumentMessage implements AbstractEntityMessage {
     private final String documentId;
     private final String documentUuid;
     private final String callbackLink;
+    private final Collection<String> envelopeIds;
 }
