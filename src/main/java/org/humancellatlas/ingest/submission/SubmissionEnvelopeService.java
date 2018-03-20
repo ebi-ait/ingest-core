@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.submission;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
+import org.humancellatlas.ingest.core.service.AssayService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SubmissionEnvelopeService {
     @Autowired @NonNull private final MessageRouter messageRouter;
+    @Autowired @NonNull private final AssayService assayService;
+
 
     public void handleEnvelopeStateUpdateRequest(SubmissionEnvelope envelope, SubmissionState state) {
         if(! envelope.allowedStateTransitions().contains(state)) {
@@ -25,7 +28,7 @@ public class SubmissionEnvelopeService {
         }
     }
 
-    public void triggerExportFor(SubmissionEnvelope envelope) {
-        messageRouter.routeExportMessageFor(envelope);
+    public void handleAssaysIn(SubmissionEnvelope envelope) {
+        assayService.identifyAssaysFor(envelope);
     }
 }
