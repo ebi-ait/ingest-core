@@ -87,6 +87,6 @@ public class GlobalStateExceptionHandler {
         getLog().error(String.format("Runtime exception encountered on %s request to resource %s ", request.getMethod(),
                 request.getRequestURL().toString()), e);
         getLog().debug("Handling RuntimeException and returning INTERNAL_SERVER_ERROR response", e);
-        return new ExceptionInfo(request.getRequestURL().toString(), "Internal server error");
+        return new ExceptionInfo(request.getRequestURL().toString(), "Unexpected server error");
     }
 }

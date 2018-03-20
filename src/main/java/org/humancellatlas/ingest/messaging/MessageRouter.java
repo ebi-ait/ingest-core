@@ -18,8 +18,11 @@ import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.ResourceMappings;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by rolando on 09/03/2018.
@@ -69,7 +72,7 @@ public class MessageRouter {
         // let the state tracker know about everything for now
         this.messageSender.queueStateTrackingMessage(Constants.Exchanges.STATE_TRACKING,
                                                      Constants.Routing.METADATA_UPDATE,
-                                                     messageFor(document));
+                                                     stateTrackingMessageFor(document));
         return true;
     }
 
@@ -109,6 +112,16 @@ public class MessageRouter {
     private MetadataDocumentMessage messageFor(MetadataDocument document) {
         return MetadataDocumentMessageBuilder.using(resourceMappings, config)
                                              .messageFor(document)
+                                             .build();
+    }
+
+    private MetadataDocumentMessage stateTrackingMessageFor(MetadataDocument document) {
+        Collection<String> envelopeIds = document.getSubmissionEnvelopes().stream()
+                                                 .map(AbstractEntity::getId)
+                                                 .collect(Collectors.toList());
+        return MetadataDocumentMessageBuilder.using(resourceMappings, config)
+                                             .messageFor(document)
+                                             .withEnvelopeIds(envelopeIds)
                                              .build();
     }
 

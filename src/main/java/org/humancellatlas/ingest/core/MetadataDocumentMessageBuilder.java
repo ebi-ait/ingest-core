@@ -20,6 +20,8 @@ import org.springframework.data.rest.webmvc.support.RepositoryLinkBuilder;
 import org.springframework.hateoas.Link;
 
 import java.net.URI;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Javadocs go here!
@@ -42,6 +44,7 @@ public class MetadataDocumentMessageBuilder {
     private Class<?> documentType;
     private String metadataDocId;
     private String metadataDocUuid;
+    private Collection<String> envelopeIds;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -105,6 +108,13 @@ public class MetadataDocumentMessageBuilder {
         return this;
     }
 
+    public MetadataDocumentMessageBuilder withEnvelopeIds(Collection<String> envelopeIds) {
+        this.envelopeIds = envelopeIds;
+
+        return this;
+    }
+
+
     public MetadataDocumentMessage build() {
         // todo - here, we make link with DUMMY_BASE_URI and then take it out again so clients can fill in domain - must be a better way of doing this!
         RepositoryLinkBuilder rlb = new RepositoryLinkBuilder(mappings.getMetadataFor(documentType),
@@ -114,6 +124,6 @@ public class MetadataDocumentMessageBuilder {
                 .withRel(mappings.getMetadataFor(documentType).getItemResourceRel());
         String callbackLink = link.withSelfRel().getHref().replace(DUMMY_BASE_URI, "");
 
-        return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(), metadataDocId, metadataDocUuid, callbackLink);
+        return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(), metadataDocId, metadataDocUuid, callbackLink, envelopeIds);
     }
 }

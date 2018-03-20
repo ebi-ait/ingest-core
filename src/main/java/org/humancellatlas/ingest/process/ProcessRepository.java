@@ -9,12 +9,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 
 /**
  * Created by rolando on 16/02/2018.
  */
+@CrossOrigin
 public interface ProcessRepository extends MongoRepository<Process, String> {
 
     @RestResource(exported = false)
