@@ -1,9 +1,9 @@
 package org.humancellatlas.ingest.file;
 
-import org.apache.tomcat.jni.Proc;
-import org.humancellatlas.ingest.biomaterial.Biomaterial;
+
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,4 +41,7 @@ public interface FileRepository extends MongoRepository<File, String> {
     List<File> findByDerivedByProcessesContains(Process process);
 
     Page<File> findByDerivedByProcessesContaining(Process process, Pageable pageable);
+
+    @RestResource(exported = false)
+    public Page<File> findBySubmissionEnvelopesContainingAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState state, Pageable pageable);
 }

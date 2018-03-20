@@ -120,6 +120,13 @@ public class SubmissionController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
     }
 
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files/{state}", method = RequestMethod.GET)
+    ResponseEntity<?> getFilesWithValidationState(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope, @PathVariable("state") String state,
+                                                      Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<File> files = getFileRepository().findBySubmissionEnvelopesContainingAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
+    }
+
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays", method = RequestMethod.GET)
     ResponseEntity<?> getAssays(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
             Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
