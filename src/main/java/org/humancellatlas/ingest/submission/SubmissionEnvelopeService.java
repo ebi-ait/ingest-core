@@ -28,7 +28,7 @@ public class SubmissionEnvelopeService {
         }
     }
 
-    public void handleAssaysIn(SubmissionEnvelope envelope) {
+    public void handleSubmit(SubmissionEnvelope envelope) {
         assayService.identifyAssaysFor(envelope);
     }
 }

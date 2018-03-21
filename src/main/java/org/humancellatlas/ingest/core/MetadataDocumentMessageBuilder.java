@@ -46,6 +46,8 @@ public class MetadataDocumentMessageBuilder {
     private String metadataDocUuid;
     private String envelopeId;
     private String envelopeUuid;
+    private int assayIndex;
+    private int totalAssays;
     private Collection<String> envelopeIds;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -104,6 +106,18 @@ public class MetadataDocumentMessageBuilder {
         return this;
     }
 
+    public MetadataDocumentMessageBuilder withAssayIndex(int assayIndex) {
+        this.assayIndex = assayIndex;
+
+        return this;
+    }
+
+    public MetadataDocumentMessageBuilder withTotalAssays(int totalAssays) {
+        this.totalAssays = totalAssays;
+
+        return this;
+    }
+
 
     public MetadataDocumentMessage build() {
         // todo - here, we make link with DUMMY_BASE_URI and then take it out again so clients can fill in domain - must be a better way of doing this!
@@ -125,6 +139,6 @@ public class MetadataDocumentMessageBuilder {
                 .withRel(mappings.getMetadataFor(documentType).getItemResourceRel());
         String callbackLink = link.withSelfRel().getHref().replace(DUMMY_BASE_URI, "");
 
-        return new AssaySubmittedMessage(metadataDocId, metadataDocUuid, callbackLink, documentType.getSimpleName(), envelopeId, envelopeUuid);
+        return new AssaySubmittedMessage(metadataDocId, metadataDocUuid, callbackLink, documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
 }

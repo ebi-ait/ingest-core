@@ -94,10 +94,10 @@ public class MessageRouter {
 
     /* message for when a new assay has been submitted */
 
-    public boolean routeFoundAssayMessage(Process assayProcess, SubmissionEnvelope envelope) {
+    public boolean routeFoundAssayMessage(Process assayProcess, SubmissionEnvelope envelope, int assayIndex, int totalAssays) {
         this.messageSender.queueNewAssayMessage(Constants.Exchanges.ASSAY_EXCHANGE,
                                                 Constants.Routing.ASSAY_SUBMITTED,
-                                                assaySubmittedMessageFor(assayProcess, envelope));
+                                                assaySubmittedMessageFor(assayProcess, envelope, assayIndex, totalAssays));
         return true;
     }
 
@@ -134,13 +134,15 @@ public class MessageRouter {
                                              .build();
     }
 
-    private AssaySubmittedMessage assaySubmittedMessageFor(Process assayProcess, SubmissionEnvelope submissionEnvelope) {
+    private AssaySubmittedMessage assaySubmittedMessageFor(Process assayProcess, SubmissionEnvelope submissionEnvelope, int assayIndex, int totalAssays) {
         String envelopeId = submissionEnvelope.getId();
         String envelopeUuid = submissionEnvelope.getUuid().getUuid().toString();
         return MetadataDocumentMessageBuilder.using(resourceMappings, config)
                                              .messageFor(assayProcess)
                                              .withEnvelopeId(envelopeId)
                                              .withEnvelopeUuid(envelopeUuid)
+                                             .withAssayIndex(assayIndex)
+                                             .withTotalAssays(totalAssays)
                                              .buildAssaySubmittedMessage();
     }
 

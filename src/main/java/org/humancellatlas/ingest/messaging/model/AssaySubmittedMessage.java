@@ -15,4 +15,6 @@ public class AssaySubmittedMessage implements AbstractEntityMessage {
     private final String documentType;
     private final String envelopeId;
     private final String envelopeUuid;
+    private final int assayIndex;
+    private final int totalAssays;
 }
