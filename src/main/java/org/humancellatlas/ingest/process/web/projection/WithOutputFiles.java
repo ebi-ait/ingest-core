@@ -12,7 +12,7 @@ import org.springframework.data.rest.core.config.Projection;
  */
 @Projection(name = "withOutputFiles", types = {Process.class})
 public interface WithOutputFiles {
-  @Value("#{@fileRepository.findByProvenantProcesses(target)}")
+  @Value("#{@fileRepository.findByDerivedByProcessesContains(target)}")
   List<File> getOutputFiles();
 
   @Value("#{target}")
