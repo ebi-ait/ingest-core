@@ -136,9 +136,11 @@ public class MessageRouter {
 
     private AssaySubmittedMessage assaySubmittedMessageFor(Process assayProcess, SubmissionEnvelope submissionEnvelope) {
         String envelopeId = submissionEnvelope.getId();
+        String envelopeUuid = submissionEnvelope.getUuid().getUuid().toString();
         return MetadataDocumentMessageBuilder.using(resourceMappings, config)
                                              .messageFor(assayProcess)
                                              .withEnvelopeId(envelopeId)
+                                             .withEnvelopeUuid(envelopeUuid)
                                              .buildAssaySubmittedMessage();
     }
 
