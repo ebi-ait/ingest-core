@@ -38,4 +38,28 @@ public class File extends MetadataDocument {
 
         return this;
     }
+
+    /**
+     * Adds to the collection of processes that this file serves as an input to
+     *
+     * @param process the process to add
+     * @return a reference to this file
+     */
+    public File addAsInputToProcess(Process process) {
+        this.inputToProcesses.add(process);
+
+        return this;
+    }
+
+    /**
+     * Adds to the collection of processes that this file was derived by
+     *
+     * @param process the process to add
+     * @return a reference to this file
+     */
+    public File addAsDerivedByProcess(Process process) {
+        this.derivedByProcesses.add(process);
+
+        return this;
+    }
 }
