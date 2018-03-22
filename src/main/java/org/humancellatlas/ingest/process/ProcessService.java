@@ -64,7 +64,7 @@ public class ProcessService {
     }
 
     public Process addFileToAnalysisProcess(Process analysis, File file) {
-        getFileRepository().save(file.addAsInputToProcess(analysis));
+        getFileRepository().save(file.addAsDerivedByProcess(analysis));
         return analysis;
     }
 
