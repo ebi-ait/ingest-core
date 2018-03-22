@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.messaging;
 
 import lombok.*;
 
+import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.messaging.model.AbstractEntityMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
@@ -23,12 +24,12 @@ public class MessageSender {
 
     private final @NonNull Queue<QueuedMessage> validationMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
     private final @NonNull Queue<QueuedMessage> accessionMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
-    private final @NonNull Queue<QueuedMessage> exportMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
+    private final @NonNull Queue<QueuedMessage> assayMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
     private final @NonNull Queue<QueuedMessage> uploadManagerMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
     private final @NonNull Queue<QueuedMessage> stateTrackingMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
 
     private final int DELAY_TIME_VALIDATION_MESSAGES = 3;
-    private final int DELAY_TIME_EXPORTER_MESSAGES = 5;
+    private final int DELAY_TIME_NEW_ASSAY_MESSAGES = 5;
     private final int DELAY_TIME_UPLOAD_MANAGER_MESSAGES = 1;
     private final int DELAY_TIME_ACCESSIONER_MESSAGES = 2;
     private final int DELAY_TIME_STATE_TRACKING_MESSAGES = 0;
@@ -44,9 +45,9 @@ public class MessageSender {
         this.accessionMessageBatch.add(message);
     }
 
-    public void queueExportMessage(String exchange, String routingKey, SubmissionEnvelopeMessage payload){
+    public void queueNewAssayMessage(String exchange, String routingKey, AssaySubmittedMessage payload){
         QueuedMessage message = new QueuedMessage(new Date(), exchange, routingKey, payload);
-        this.exportMessageBatch.add(message);
+        this.assayMessageBatch.add(message);
     }
 
     public void queueStateTrackingMessage(String exchange, String routingKey, AbstractEntityMessage payload){
@@ -71,8 +72,8 @@ public class MessageSender {
     }
 
     @Scheduled(fixedDelay = 1000)
-    private void sendExportMessages(){
-        sendFromQueue(this.exportMessageBatch, this.DELAY_TIME_EXPORTER_MESSAGES);
+    private void sendNewAssayMessages(){
+        sendFromQueue(this.assayMessageBatch, this.DELAY_TIME_NEW_ASSAY_MESSAGES);
     }
 
     @Scheduled(fixedDelay = 1000)

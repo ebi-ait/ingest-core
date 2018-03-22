@@ -27,7 +27,6 @@ import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -127,23 +126,6 @@ public class SubmissionController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays", method = RequestMethod.GET)
-    ResponseEntity<?> getAssays(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-            Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Process> assays = getProcessService().retrieveAssaysFrom(submissionEnvelope, pageable);
-        PagedResources body = getPagedResourcesAssembler().toResource(assays, resourceAssembler);
-        return ResponseEntity.ok(body);
-    }
-
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/analyses", method = RequestMethod.GET)
-    ResponseEntity<?> getAnalyses(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-            Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Process> analyses = getProcessService().retrieveAnalysesFrom(submissionEnvelope,
-                pageable);
-        PagedResources body = getPagedResourcesAssembler().toResource(analyses, resourceAssembler);
-        return ResponseEntity.ok(body);
-    }
-
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMIT_URL, method = RequestMethod.PUT)
     HttpEntity<?> submitEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.SUBMITTED);
@@ -200,7 +182,7 @@ public class SubmissionController {
     HttpEntity<?> enactSubmitEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelope.enactStateTransition(SubmissionState.SUBMITTED);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        submissionEnvelopeService.triggerExportFor(submissionEnvelope);
+        submissionEnvelopeService.handleSubmit(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 

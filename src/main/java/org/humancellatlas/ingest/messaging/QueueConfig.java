@@ -51,6 +51,9 @@ public class QueueConfig implements RabbitListenerConfigurer {
     @Bean Queue queueStateTracking() { return new Queue(Constants.Queues.STATE_TRACKING, false); }
 
     @Bean TopicExchange stateTrackingExchange() { return new TopicExchange(Constants.Exchanges.STATE_TRACKING); }
+
+    @Bean TopicExchange assayExchange() { return new TopicExchange(Constants.Exchanges.ASSAY_EXCHANGE); }
+
     /* bindings */
 
     @Bean Binding bindingFileStaged(Queue queueFileStaged, FanoutExchange fileStagedExchange) {
