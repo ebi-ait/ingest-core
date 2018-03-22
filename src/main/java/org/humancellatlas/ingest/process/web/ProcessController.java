@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.process.BundleReference;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.state.ValidationState;
@@ -19,6 +20,7 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -87,6 +89,38 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL)
+    ResponseEntity<Resource<?>> addBundleReference(){
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+    }
+
+    @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL,
+                    method = RequestMethod.PUT)
+    ResponseEntity<Resource<?>> addBundleReference(@PathVariable("analysis_id") Process analysis,
+                                                   @RequestBody BundleReference bundleReference,
+                                                   final PersistentEntityResourceAssembler assembler) {
+        Process entity = getProcessService().resolveBundleReferencesForProcess(analysis, bundleReference);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
+    @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL)
+    ResponseEntity<Resource<?>> addFileReference(){
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+    }
+
+    @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL,
+                    method = RequestMethod.PUT)
+    ResponseEntity<Resource<?>> addFileReference(@PathVariable("analysis_id") Process analysis,
+                                                 @RequestBody File file,
+                                                 final PersistentEntityResourceAssembler assembler) {
+        SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
+        file.addToSubmissionEnvelope(submissionEnvelope);
+        Process result = getProcessService().addFileToAnalysisProcess(analysis, file);
+        PersistentEntityResource resource = assembler.toFullResource(result);
+        return ResponseEntity.accepted().body(resource);
+    }
+
     @RequestMapping(path = "/processes/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingProcess(@PathVariable("id") Process process,
                                     PersistentEntityResourceAssembler assembler) {
@@ -126,6 +160,5 @@ public class ProcessController {
         process = getProcessService().getProcessRepository().save(process);
         return ResponseEntity.accepted().body(assembler.toFullResource(process));
     }
-
 }
 

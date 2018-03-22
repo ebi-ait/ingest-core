@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.jni.Proc;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
+import org.humancellatlas.ingest.bundle.BundleManifest;
+import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -27,14 +29,11 @@ import java.util.*;
 @RequiredArgsConstructor
 @Getter
 public class ProcessService {
-    private final @NonNull
-    SubmissionEnvelopeRepository submissionEnvelopeRepository;
-    private final @NonNull
-    ProcessRepository processRepository;
-    private final @NonNull
-    FileRepository fileRepository;
-    private final @NonNull
-    BiomaterialRepository biomaterialRepository;
+    private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
+    private final @NonNull ProcessRepository processRepository;
+    private final @NonNull FileRepository fileRepository;
+    private final @NonNull BiomaterialRepository biomaterialRepository;
+    private final @NonNull BundleManifestRepository bundleManifestRepository;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -64,7 +63,28 @@ public class ProcessService {
         return getProcessRepository().save(process);
     }
 
-    public Collection<Process> findAssays(SubmissionEnvelope submissionEnvelope) {
+    public Process addFileToAnalysisProcess(Process analysis, File file) {
+        getFileRepository().save(file.addAsInputToProcess(analysis));
+        return analysis;
+    }
+
+    public Process resolveBundleReferencesForProcess(Process analysis, BundleReference bundleReference) {
+        for (String bundleUuid : bundleReference.getBundleUuids()) {
+            BundleManifest bundleManifest = getBundleManifestRepository().findByBundleUuid(bundleUuid);
+            if (bundleManifest != null) {
+                getLog().info(String.format("Adding bundle manifest link to process '%s'", analysis.getId()));
+                analysis.addInputBundleManifest(bundleManifest);
+            }
+            else {
+                getLog().warn(String.format(
+                        "No Bundle Manifest present with bundle UUID '%s' - in future this will cause a critical error",
+                        bundleUuid));
+            }
+        }
+        return getProcessRepository().save(analysis);
+    }
+
+    private Page<Process> findAssays(SubmissionEnvelope submissionEnvelope, Pageable pageable) {
         Set<Process> results = new LinkedHashSet<>();
         long fileStartTime = System.currentTimeMillis();
         List<File> derivedFiles = fileRepository.findBySubmissionEnvelopesContains(submissionEnvelope);
