@@ -84,7 +84,7 @@ public class ProcessService {
         return getProcessRepository().save(analysis);
     }
 
-    private Page<Process> findAssays(SubmissionEnvelope submissionEnvelope, Pageable pageable) {
+    public Collection<Process> findAssays(SubmissionEnvelope submissionEnvelope) {
         Set<Process> results = new LinkedHashSet<>();
         long fileStartTime = System.currentTimeMillis();
         List<File> derivedFiles = fileRepository.findBySubmissionEnvelopesContains(submissionEnvelope);
