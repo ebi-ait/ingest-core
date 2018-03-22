@@ -10,7 +10,6 @@ import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -35,8 +34,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Getter
 public class ProcessController {
     private final @NonNull ProcessService processService;
-    private final @Autowired
-    @NonNull PagedResourcesAssembler pagedResourcesAssembler;
+    private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
     @RequestMapping(path = "processes/{proc_id}/inputBiomaterials", method = RequestMethod.GET)
     ResponseEntity<?> getProcessInputBiomaterials(@PathVariable("proc_id") Process process,
