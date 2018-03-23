@@ -63,8 +63,14 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
 
     private Link getAnalysesLink(SubmissionEnvelope submissionEnvelope) {
         return entityLinks.linkForSingleResource(submissionEnvelope)
-                .slash(Links.ANALYSES_URL)
-                .withRel(Links.ANALYSES_REL);
+                          .slash(Links.ANALYSES_URL)
+                          .withRel(Links.ANALYSES_REL);
+    }
+
+    private Link getBundleManifestsLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                          .slash(Links.BUNDLE_MANIFESTS_URL)
+                          .withRel(Links.BUNDLE_MANIFESTS_REL);
     }
 
 
@@ -194,6 +200,8 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         resource.add(getProtocolsLink(submissionEnvelope));
         resource.add(getAssaysLink(submissionEnvelope));
         resource.add(getAnalysesLink(submissionEnvelope));
+        resource.add(getBundleManifestsLink(submissionEnvelope));
+
 
         // add subresource links for allowed state transition requests
         submissionEnvelope.allowedStateTransitions().stream()
