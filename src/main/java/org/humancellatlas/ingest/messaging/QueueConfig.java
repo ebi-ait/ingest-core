@@ -32,6 +32,10 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean FanoutExchange envelopeCreatedExchange() { return new FanoutExchange(Constants.Exchanges.ENVELOPE_CREATED_FANOUT); }
 
+    @Bean Queue queueEnvelopeCleanup() { return new Queue(Constants.Queues.ENVELOPE_CLEANUP, false); }
+
+    @Bean FanoutExchange envelopeCleanupExchange() { return new FanoutExchange(Constants.Exchanges.ENVELOPE_CLEANUP_FANOUT); }
+
     @Bean Queue queueEnvelopeSubmitted() { return new Queue(Constants.Queues.ENVELOPE_SUBMITTED, false); }
 
     @Bean FanoutExchange envelopeSubmittedExchange() { return new FanoutExchange(Constants.Exchanges.ENVELOPE_SUBMITTED_FANOUT); }
@@ -67,6 +71,11 @@ public class QueueConfig implements RabbitListenerConfigurer {
     @Bean Binding bindingCreation(Queue queueEnvelopeCreated,
                                   FanoutExchange envelopeCreatedExchange) {
         return BindingBuilder.bind(queueEnvelopeCreated).to(envelopeCreatedExchange);
+    }
+
+    @Bean Binding bindingCleanup(Queue queueEnvelopeCleanup,
+                                  FanoutExchange envelopeCleanupExchange) {
+        return BindingBuilder.bind(queueEnvelopeCleanup).to(envelopeCleanupExchange);
     }
 
     @Bean Binding bindingSubmission(Queue queueEnvelopeSubmitted,

@@ -11,6 +11,7 @@ public class Constants {
         public static final String FILE_UPDATE = "ingest.file.update.queue";
         public static final String ENVELOPE_CREATED = "ingest.envelope.created.queue";
         public static final String ENVELOPE_SUBMITTED = "ingest.envelope.submitted.queue";
+        public static final String ENVELOPE_CLEANUP = "ingest.envelope.cleanup.queue";
         public static final String VALIDATION_REQUIRED = "ingest.metadata.validation.queue";
         public static final String ACCESSION_REQUIRED = "ingest.metadata.accession.queue";
         public static final String SUBMISSION_ARCHIVAL = "ingest.archival.queue";
@@ -23,6 +24,7 @@ public class Constants {
         public static final String FILE_STAGED_FANOUT = "ingest.file.staged.exchange";
         public static final String ENVELOPE_CREATED_FANOUT = "ingest.envelope.created.exchange";
         public static final String ENVELOPE_SUBMITTED_FANOUT = "ingest.envelope.submitted.exchange";
+        public static final String ENVELOPE_CLEANUP_FANOUT = "ingest.envelope.cleanup.exchange";
         public static final String ACCESSION = "ingest.accession.exchange";
         public static final String SUBMISSION_ARCHIVAL_DIRECT = "ingest.archival.exchange";
         public static final String STATE_TRACKING = "ingest.state-tracking.exchange";
