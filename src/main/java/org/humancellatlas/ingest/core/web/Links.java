@@ -62,12 +62,16 @@ public class Links {
     public static final String ASSAYS_REL = "assays";
     public static final String ANALYSES_URL = "/analyses";
     public static final String ANALYSES_REL = "analyses";
+    public static final String BUNDLE_MANIFESTS_URL = "/bundleManifests";
+    public static final String BUNDLE_MANIFESTS_REL = "bundleManifests";
 
     // Links for analyses
     public static final String BUNDLE_REF_URL = "/bundleReferences";
-    public static final String BUNDLE_REF_REL = "add-input-bundles";
+    public static final String BUNDLE_REF_REL = "inputBundleReferences";
+    public static final String BUNDLE_REF_OLD_EVIL_REL = "add-input-bundles";
     public static final String FILE_REF_URL = "/fileReference";
-    public static final String FILE_REF_REL = "add-file-reference";
+    public static final String FILE_REF_REL = "inputFileReferences";
+    public static final String FILE_REF_OLD_EVIL_REL = "add-file-reference";
 
     // Links to Processes
     public static final String INPUT_TO_PROCESSES_URL = "/inputToProcesses";
