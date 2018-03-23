@@ -112,6 +112,13 @@ public class MessageRouter {
         return true;
     }
 
+    public boolean routeRequestUploadAreaCleanup(SubmissionEnvelope envelope) {
+        this.messageSender.queueUploadManagerMessage(Constants.Exchanges.ENVELOPE_CLEANUP_FANOUT,
+                "",
+                messageFor(envelope));
+        return true;
+    }
+
     private MetadataDocumentMessage messageFor(MetadataDocument document) {
         return MetadataDocumentMessageBuilder.using(resourceMappings, config)
                                              .messageFor(document)
