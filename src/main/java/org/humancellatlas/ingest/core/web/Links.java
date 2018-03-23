@@ -62,6 +62,8 @@ public class Links {
     public static final String ASSAYS_REL = "assays";
     public static final String ANALYSES_URL = "/analyses";
     public static final String ANALYSES_REL = "analyses";
+    public static final String BUNDLE_MANIFESTS_URL = "/bundleManifests";
+    public static final String BUNDLE_MANIFESTS_REL = "bundleManifests";
 
     // Links for analyses
     public static final String BUNDLE_REF_URL = "/bundleReferences";

@@ -5,6 +5,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
+import org.humancellatlas.ingest.bundle.BundleManifest;
+import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -52,6 +54,8 @@ public class SubmissionController {
     private final @NonNull ProtocolRepository protocolRepository;
     private final @NonNull BiomaterialRepository biomaterialRepository;
     private final @NonNull ProcessRepository processRepository;
+    private final @NonNull BundleManifestRepository bundleManifestRepository;
+
 
     private final @NonNull ProcessService processService;
 
@@ -87,6 +91,14 @@ public class SubmissionController {
         final PersistentEntityResourceAssembler resourceAssembler) {
         Page<Biomaterial> biomaterials = getBiomaterialRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(biomaterials, resourceAssembler));
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/bundleManifests", method = RequestMethod.GET)
+    ResponseEntity<?> getBundleManifests(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                      Pageable pageable,
+                                      final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<BundleManifest> bundleManifests = getBundleManifestRepository().findByEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString(), pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(bundleManifests, resourceAssembler));
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/processes", method = RequestMethod.GET)
