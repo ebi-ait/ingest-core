@@ -28,8 +28,6 @@ public class SubmissionEnvelope extends AbstractEntity {
     private @Setter StagingDetails stagingDetails;
     private SubmissionState submissionState;
 
-    private @DBRef List<BundleManifest> bundleManifests = new ArrayList<>();
-
     private static final Logger log = LoggerFactory.getLogger(SubmissionEnvelope.class);
 
     private static Logger getLog() {
@@ -83,11 +81,6 @@ public class SubmissionEnvelope extends AbstractEntity {
         return allowedStateTransitions(getSubmissionState());
     }
 
-    public SubmissionEnvelope addCreatedBundleManifest(BundleManifest bundleManifest) {
-        this.bundleManifests.add(bundleManifest);
-
-        return this;
-    }
 
     public SubmissionEnvelope enactStateTransition(SubmissionState targetState) {
         if (this.submissionState != targetState) {
