@@ -5,6 +5,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
+import org.humancellatlas.ingest.bundle.BundleManifest;
+import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -27,7 +29,6 @@ import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,6 +54,8 @@ public class SubmissionController {
     private final @NonNull ProtocolRepository protocolRepository;
     private final @NonNull BiomaterialRepository biomaterialRepository;
     private final @NonNull ProcessRepository processRepository;
+    private final @NonNull BundleManifestRepository bundleManifestRepository;
+
 
     private final @NonNull ProcessService processService;
 
@@ -90,6 +93,14 @@ public class SubmissionController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(biomaterials, resourceAssembler));
     }
 
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/bundleManifests", method = RequestMethod.GET)
+    ResponseEntity<?> getBundleManifests(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                      Pageable pageable,
+                                      final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<BundleManifest> bundleManifests = getBundleManifestRepository().findByEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString(), pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(bundleManifests, resourceAssembler));
+    }
+
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/processes", method = RequestMethod.GET)
     ResponseEntity<?> getProcesses(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
         Pageable pageable,
@@ -125,23 +136,6 @@ public class SubmissionController {
                                                       Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
         Page<File> files = getFileRepository().findBySubmissionEnvelopesContainingAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
-    }
-
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/assays", method = RequestMethod.GET)
-    ResponseEntity<?> getAssays(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-            Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Process> assays = getProcessService().retrieveAssaysFrom(submissionEnvelope, pageable);
-        PagedResources body = getPagedResourcesAssembler().toResource(assays, resourceAssembler);
-        return ResponseEntity.ok(body);
-    }
-
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/analyses", method = RequestMethod.GET)
-    ResponseEntity<?> getAnalyses(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-            Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Process> analyses = getProcessService().retrieveAnalysesFrom(submissionEnvelope,
-                pageable);
-        PagedResources body = getPagedResourcesAssembler().toResource(analyses, resourceAssembler);
-        return ResponseEntity.ok(body);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMIT_URL, method = RequestMethod.PUT)
@@ -200,7 +194,7 @@ public class SubmissionController {
     HttpEntity<?> enactSubmitEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelope.enactStateTransition(SubmissionState.SUBMITTED);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        submissionEnvelopeService.triggerExportFor(submissionEnvelope);
+        submissionEnvelopeService.handleSubmit(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 

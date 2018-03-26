@@ -4,6 +4,7 @@ import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.web.BiomaterialController;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.web.FileController;
+import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.web.ProcessController;
@@ -40,10 +41,13 @@ public class MetadataDocumentMessageBuilder {
     private final ResourceMappings mappings;
     private final RepositoryRestConfiguration config;
 
-    private Class<?> controllerClass;
     private Class<?> documentType;
     private String metadataDocId;
     private String metadataDocUuid;
+    private String envelopeId;
+    private String envelopeUuid;
+    private int assayIndex;
+    private int totalAssays;
     private Collection<String> envelopeIds;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -58,36 +62,12 @@ public class MetadataDocumentMessageBuilder {
     }
 
     public MetadataDocumentMessageBuilder messageFor(MetadataDocument metadataDocument) {
-        withDocumentType(metadataDocument.getClass()).withId(metadataDocument.getId());
+        MetadataDocumentMessageBuilder builder = withDocumentType(metadataDocument.getClass()).withId(metadataDocument.getId());
         if (metadataDocument.getUuid() != null) {
-            withUuid(metadataDocument.getUuid().toString());
-        }
-        if (metadataDocument instanceof Process) {
-            return withControllerClass(ProcessController.class);
-        }
-        if (metadataDocument instanceof File) {
-            return withControllerClass(FileController.class);
-        }
-        if (metadataDocument instanceof Project) {
-            return withControllerClass(ProjectController.class);
-        }
-        if (metadataDocument instanceof Protocol) {
-            return withControllerClass(ProtocolController.class);
-        }
-        if(metadataDocument instanceof Biomaterial) {
-            return withControllerClass(BiomaterialController.class);
+            builder = builder.withUuid(metadataDocument.getUuid().toString());
         }
 
-        // couldn't match type
-        throw new RuntimeException(String.format(
-                "Unable to make metadata document message - unknown type of doc '%s'",
-                metadataDocument.getClass()));
-    }
-
-    private MetadataDocumentMessageBuilder withControllerClass(Class<?> controllerClass) {
-        this.controllerClass = controllerClass;
-
-        return this;
+        return builder;
     }
 
     private <T extends MetadataDocument> MetadataDocumentMessageBuilder withDocumentType(Class<T> documentClass) {
@@ -114,6 +94,30 @@ public class MetadataDocumentMessageBuilder {
         return this;
     }
 
+    public MetadataDocumentMessageBuilder withEnvelopeId(String envelopeId) {
+        this.envelopeId = envelopeId;
+
+        return this;
+    }
+
+    public MetadataDocumentMessageBuilder withEnvelopeUuid(String envelopeUuid) {
+        this.envelopeUuid = envelopeUuid;
+
+        return this;
+    }
+
+    public MetadataDocumentMessageBuilder withAssayIndex(int assayIndex) {
+        this.assayIndex = assayIndex;
+
+        return this;
+    }
+
+    public MetadataDocumentMessageBuilder withTotalAssays(int totalAssays) {
+        this.totalAssays = totalAssays;
+
+        return this;
+    }
+
 
     public MetadataDocumentMessage build() {
         // todo - here, we make link with DUMMY_BASE_URI and then take it out again so clients can fill in domain - must be a better way of doing this!
@@ -125,5 +129,16 @@ public class MetadataDocumentMessageBuilder {
         String callbackLink = link.withSelfRel().getHref().replace(DUMMY_BASE_URI, "");
 
         return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(), metadataDocId, metadataDocUuid, callbackLink, envelopeIds);
+    }
+
+    public AssaySubmittedMessage buildAssaySubmittedMessage() {
+        RepositoryLinkBuilder rlb = new RepositoryLinkBuilder(mappings.getMetadataFor(documentType),
+                                                              new BaseUri(URI.create(DUMMY_BASE_URI)));
+        Link link = rlb
+                .slash(metadataDocId)
+                .withRel(mappings.getMetadataFor(documentType).getItemResourceRel());
+        String callbackLink = link.withSelfRel().getHref().replace(DUMMY_BASE_URI, "");
+
+        return new AssaySubmittedMessage(metadataDocId, metadataDocUuid, callbackLink, documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
 }
