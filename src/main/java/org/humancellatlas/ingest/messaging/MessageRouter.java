@@ -151,4 +151,9 @@ public class MessageRouter {
         message.setRequestedState(state);
         return message;
     }
+
+    public void sendAssayForExport(Process assayingProcess) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+
 }
