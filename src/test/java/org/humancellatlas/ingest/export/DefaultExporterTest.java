@@ -13,6 +13,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -45,21 +49,30 @@ public class DefaultExporterTest {
     @Test
     public void testExportBundles() {
         //given:
-        Process assayingProcess = mock(Process.class);
-        doReturn(asList(assayingProcess))
-                .when(processService).findAssays(any(SubmissionEnvelope.class));
+        List<Process> assayingProcesses = IntStream.range(0, 2)
+                .mapToObj(count -> mock(Process.class))
+                .collect(Collectors.toList());
+        doReturn(assayingProcesses).when(processService).findAssays(any(SubmissionEnvelope.class));
 
         //and:
-        Process analysisProcess = mock(Process.class);
-        doReturn(asList(analysisProcess))
+        List<Process> analysisProcesses = IntStream.range(0, 3)
+                .mapToObj(count -> mock(Process.class))
+                .collect(Collectors.toList());
+        doReturn(analysisProcesses)
                 .when(processService).findAnalyses(any(SubmissionEnvelope.class));
 
         //when:
         exporter.exportBundles(new SubmissionEnvelope());
 
         //then:
-        verify(messageRouter).sendAssayForExport(assayingProcess);
-        verify(messageRouter).sendAnalysisForExport(analysisProcess);
+        assayingProcesses.forEach(assayingProcess -> {
+            verify(messageRouter).sendAssayForExport(assayingProcess);
+        });
+
+        //and:
+        analysisProcesses.forEach(analysisProcess -> {
+            verify(messageRouter).sendAnalysisForExport(analysisProcess);
+        });
     }
 
 }
