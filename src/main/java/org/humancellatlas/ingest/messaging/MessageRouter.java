@@ -156,4 +156,7 @@ public class MessageRouter {
         throw new UnsupportedOperationException("Method not implemented.");
     }
 
+    public void sendAnalysisForExport(Process analysisProcess) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
 }

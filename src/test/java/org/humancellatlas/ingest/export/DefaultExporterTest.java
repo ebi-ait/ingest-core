@@ -16,6 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @RunWith(SpringRunner.class)
@@ -44,15 +45,21 @@ public class DefaultExporterTest {
     @Test
     public void testExportBundles() {
         //given:
-        Process assayingProcess = new Process();
+        Process assayingProcess = mock(Process.class);
         doReturn(asList(assayingProcess))
                 .when(processService).findAssays(any(SubmissionEnvelope.class));
+
+        //and:
+        Process analysisProcess = mock(Process.class);
+        doReturn(asList(analysisProcess))
+                .when(processService).findAnalyses(any(SubmissionEnvelope.class));
 
         //when:
         exporter.exportBundles(new SubmissionEnvelope());
 
         //then:
         verify(messageRouter).sendAssayForExport(assayingProcess);
+        verify(messageRouter).sendAnalysisForExport(analysisProcess);
     }
 
 }
