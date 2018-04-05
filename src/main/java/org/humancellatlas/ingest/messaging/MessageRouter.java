@@ -4,16 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
-import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
+import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeStateUpdateMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessageBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -152,11 +152,11 @@ public class MessageRouter {
         return message;
     }
 
-    public void sendAssayForExport(Process assayingProcess) {
+    public void sendAssayForExport(ExportMessage exportMessage) {
         throw new UnsupportedOperationException("Method not implemented.");
     }
 
-    public void sendAnalysisForExport(Process analysisProcess) {
+    public void sendAnalysisForExport(ExportMessage exportMessage) {
         throw new UnsupportedOperationException("Method not implemented.");
     }
 }
