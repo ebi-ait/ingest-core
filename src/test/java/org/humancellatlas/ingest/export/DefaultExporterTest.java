@@ -49,30 +49,25 @@ public class DefaultExporterTest {
     @Test
     public void testExportBundles() {
         //given:
-        List<Process> assayingProcesses = IntStream.range(0, 2)
-                .mapToObj(count -> mock(Process.class))
-                .collect(Collectors.toList());
-        doReturn(assayingProcesses).when(processService).findAssays(any(SubmissionEnvelope.class));
+        List<Process> assays = mockProcesses(2);
+        doReturn(assays).when(processService).findAssays(any(SubmissionEnvelope.class));
 
         //and:
-        List<Process> analysisProcesses = IntStream.range(0, 3)
-                .mapToObj(count -> mock(Process.class))
-                .collect(Collectors.toList());
-        doReturn(analysisProcesses)
-                .when(processService).findAnalyses(any(SubmissionEnvelope.class));
+        List<Process> analyses = mockProcesses(3);
+        doReturn(analyses).when(processService).findAnalyses(any(SubmissionEnvelope.class));
 
         //when:
         exporter.exportBundles(new SubmissionEnvelope());
 
         //then:
-        assayingProcesses.forEach(assayingProcess -> {
-            verify(messageRouter).sendAssayForExport(assayingProcess);
-        });
+        assays.forEach(verify(messageRouter)::sendAssayForExport);
+        analyses.forEach(verify(messageRouter)::sendAnalysisForExport);
+    }
 
-        //and:
-        analysisProcesses.forEach(analysisProcess -> {
-            verify(messageRouter).sendAnalysisForExport(analysisProcess);
-        });
+    private List<Process> mockProcesses(int max) {
+        return IntStream.range(0, max)
+                .mapToObj(count -> mock(Process.class))
+                .collect(Collectors.toList());
     }
 
 }
