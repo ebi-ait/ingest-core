@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.export;
 
-import org.assertj.core.api.Assertions;
 import org.humancellatlas.ingest.messaging.ExportMessage;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
@@ -8,7 +7,6 @@ import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,10 +18,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -64,14 +61,18 @@ public class DefaultExporterTest {
         //when:
         exporter.exportBundles(new SubmissionEnvelope());
 
-        //then:
+        //then: messages have unique index
         assertThat(exportMessages).hasSize(5);
+        List<Integer> indexes = exportMessages.stream()
+                .map(ExportMessage::getIndex)
+                .collect(toList());
+        assertThat(indexes).containsOnlyOnce(0, 1, 2, 3, 4);
     }
 
     private List<Process> mockProcesses(int max) {
         return IntStream.range(0, max)
                 .mapToObj(count -> mock(Process.class))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     @Configuration

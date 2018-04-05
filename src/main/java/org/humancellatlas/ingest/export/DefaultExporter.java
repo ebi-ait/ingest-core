@@ -23,8 +23,9 @@ public class DefaultExporter implements Exporter {
         Collection<Process> assayingProcesses = processService.findAssays(submissionEnvelope);
         Collection<Process> analysisProcesses = processService.findAnalyses(submissionEnvelope);
         int totalCount = assayingProcesses.size() + analysisProcesses.size();
-        IntStream.range(0, totalCount).forEach(count ->
-                messageRouter.sendAnalysisForExport(new ExportMessage()));
+        IntStream.range(0, totalCount)
+                .mapToObj(count -> new ExportMessage(count))
+                .forEach(message -> messageRouter.sendAnalysisForExport(message));
     }
 
 }
