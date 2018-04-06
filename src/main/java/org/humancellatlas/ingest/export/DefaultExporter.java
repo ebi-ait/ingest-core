@@ -31,7 +31,13 @@ public class DefaultExporter implements Exporter {
         int totalCount = allProcesses.size();
         IntStream.range(0, totalCount)
                 .mapToObj(count -> new ExportMessage(count, totalCount, allProcesses.get(count)))
-                .forEach(message -> messageRouter.sendAnalysisForExport(message));
+                .forEach(message -> {
+                    if (assayingProcesses.contains(message.getProcess())) {
+                        messageRouter.sendAssayForExport(message);
+                    } else {
+                        messageRouter.sendAnalysisForExport(message);
+                    }
+                });
     }
 
 }

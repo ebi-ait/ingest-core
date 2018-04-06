@@ -61,6 +61,12 @@ public class DefaultExporterTest {
         assertUniqueIndexes(receivedMessages);
         assertCorrectTotalCount(receivedMessages, expectedCount);
         assertAllProcessesExported(assays, analyses, receivedMessages);
+
+        //and:
+        verify(messageRouter, times(assays.size()))
+                .sendAssayForExport(any(ExportMessage.class));
+        verify(messageRouter, times(analyses.size()))
+                .sendAnalysisForExport(any(ExportMessage.class));
     }
 
     private List<Process> mockProcesses(int max) {
