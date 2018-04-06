@@ -23,6 +23,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.ANALYSIS_SUBMITTED;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.ASSAY_SUBMITTED;
 
 /**
@@ -101,7 +102,7 @@ public class MessageRouter {
     }
 
     public void sendAnalysisForExport(ExportMessage exportMessage) {
-        messageSender.queueNewAssayMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED,
+        messageSender.queueNewAssayMessage(ASSAY_EXCHANGE, ANALYSIS_SUBMITTED,
                 exportMessage.toAssaySubmittedMessage(linkGenerator));
     }
 

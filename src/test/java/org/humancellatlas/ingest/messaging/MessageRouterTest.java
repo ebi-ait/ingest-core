@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.ANALYSIS_SUBMITTED;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.ASSAY_SUBMITTED;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.doReturn;
@@ -48,16 +49,16 @@ public class MessageRouterTest {
     @Test
     public void testSendAssayForExport() {
         //expect:
-        doTestSendForExport(messageRouter::sendAssayForExport);
+        doTestSendForExport(ASSAY_SUBMITTED, messageRouter::sendAssayForExport);
     }
 
     @Test
     public void testSendAnalysisForExport() {
         //expect:
-        doTestSendForExport(messageRouter::sendAnalysisForExport);
+        doTestSendForExport(ANALYSIS_SUBMITTED, messageRouter::sendAnalysisForExport);
     }
 
-    private void doTestSendForExport(Consumer<ExportMessage> testMethod) {
+    private void doTestSendForExport(String routingKey, Consumer<ExportMessage> testMethod) {
         //given:
         String processId = "78bbd9";
         Process process = new Process(processId);
@@ -83,7 +84,7 @@ public class MessageRouterTest {
         //then:
         ArgumentCaptor<AssaySubmittedMessage> messageCaptor =
                 ArgumentCaptor.forClass(AssaySubmittedMessage.class);
-        verify(messageSender).queueNewAssayMessage(eq(ASSAY_EXCHANGE), eq(ASSAY_SUBMITTED),
+        verify(messageSender).queueNewAssayMessage(eq(ASSAY_EXCHANGE), eq(routingKey),
                 messageCaptor.capture());
 
         //and:
