@@ -1,5 +1,8 @@
 package org.humancellatlas.ingest.messaging;
 
+import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
+import org.humancellatlas.ingest.core.web.LinkGenerator;
+import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 
@@ -34,6 +37,16 @@ public class ExportMessage {
 
     public SubmissionEnvelope getSubmissionEnvelope() {
         return submissionEnvelope;
+    }
+
+    public AssaySubmittedMessage toAssaySubmittedMessage(LinkGenerator linkGenerator) {
+        return MetadataDocumentMessageBuilder.using(linkGenerator)
+                .messageFor(process)
+                .withEnvelopeId(submissionEnvelope.getId())
+                .withEnvelopeUuid(submissionEnvelope.getUuid().toString())
+                .withAssayIndex(index)
+                .withTotalAssays(totalCount)
+                .buildAssaySubmittedMessage();
     }
 
 }

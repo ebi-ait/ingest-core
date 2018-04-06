@@ -96,14 +96,8 @@ public class MessageRouter {
     }
 
     public void sendAssayForExport(ExportMessage exportMessage) {
-        AssaySubmittedMessage message = MetadataDocumentMessageBuilder.using(linkGenerator)
-                .messageFor(exportMessage.getProcess())
-                .withEnvelopeId(exportMessage.getSubmissionEnvelope().getId())
-                .withEnvelopeUuid(exportMessage.getSubmissionEnvelope().getUuid().toString())
-                .withAssayIndex(exportMessage.getIndex())
-                .withTotalAssays(exportMessage.getTotalCount())
-                .buildAssaySubmittedMessage();
-        messageSender.queueNewAssayMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED, message);
+        messageSender.queueNewAssayMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED,
+                exportMessage.toAssaySubmittedMessage(linkGenerator));
     }
 
     public boolean routeFoundAssayMessage(Process assayProcess, SubmissionEnvelope envelope, int assayIndex, int totalAssays) {
