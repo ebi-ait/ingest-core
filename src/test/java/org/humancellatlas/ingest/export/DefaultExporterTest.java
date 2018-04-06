@@ -64,6 +64,13 @@ public class DefaultExporterTest {
         receivedMessages.stream().forEach(message -> {
             assertThat(message.getTotalCount()).isEqualTo(expectedCount);
         });
+
+        //and:
+        List<Process> sentProcesses = receivedMessages.stream()
+                .map(ExportMessage::getProcess)
+                .collect(toList());
+        assertThat(sentProcesses).containsAll(assays);
+        assertThat(sentProcesses).containsAll(analyses);
     }
 
     private List<Process> mockProcesses(int max) {

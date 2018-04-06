@@ -8,7 +8,10 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class DefaultExporter implements Exporter {
 
@@ -22,9 +25,12 @@ public class DefaultExporter implements Exporter {
     public void exportBundles(SubmissionEnvelope submissionEnvelope) {
         Collection<Process> assayingProcesses = processService.findAssays(submissionEnvelope);
         Collection<Process> analysisProcesses = processService.findAnalyses(submissionEnvelope);
-        int totalCount = assayingProcesses.size() + analysisProcesses.size();
+        List<Process> allProcesses = Stream
+                .concat(assayingProcesses.stream(), analysisProcesses.stream())
+                .collect(Collectors.toList());
+        int totalCount = allProcesses.size();
         IntStream.range(0, totalCount)
-                .mapToObj(count -> new ExportMessage(count, totalCount))
+                .mapToObj(count -> new ExportMessage(count, totalCount, allProcesses.get(count)))
                 .forEach(message -> messageRouter.sendAnalysisForExport(message));
     }
 
