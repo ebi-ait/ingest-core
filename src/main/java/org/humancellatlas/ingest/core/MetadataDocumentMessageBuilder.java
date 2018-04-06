@@ -152,13 +152,12 @@ public class MetadataDocumentMessageBuilder {
         if (linkGenerator != null) {
             callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
         } else {
-            RepositoryLinkBuilder rlb = new RepositoryLinkBuilder(
-                    mappings.getMetadataFor(documentType), new BaseUri(URI.create(DUMMY_BASE_URI)));
-            Link link = rlb
-                    .slash(metadataDocId)
-                    .withRel(mappings.getMetadataFor(documentType).getItemResourceRel());
-            callbackLink = link.withSelfRel().getHref().replace(DUMMY_BASE_URI, "");
+            //TODO completely remove dependency on ResourceMappings
+            throw new UnsupportedOperationException("No LinkGenerator instance was specified. " +
+                    "Using ResourceMappings to create callback link is now unsupported.");
         }
-        return new AssaySubmittedMessage(metadataDocId, metadataDocUuid, callbackLink, documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
+        return new AssaySubmittedMessage(metadataDocId, metadataDocUuid, callbackLink,
+                documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
+
 }
