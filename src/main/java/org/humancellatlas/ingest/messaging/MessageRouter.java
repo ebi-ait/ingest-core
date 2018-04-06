@@ -97,7 +97,13 @@ public class MessageRouter {
     }
 
     public void sendAssayForExport(ExportMessage exportMessage) {
-        messageSender.queueNewAssayMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED, null);
+        messageSender.queueNewAssayMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED,
+                new AssaySubmittedMessage(exportMessage.getProcess().getId(),
+                        exportMessage.getProcess().getUuid().toString(),
+                        "", Process.class.getSimpleName(),
+                        exportMessage.getSubmissionEnvelope().getId(),
+                        exportMessage.getSubmissionEnvelope().getUuid().toString(),
+                        exportMessage.getIndex(), exportMessage.getTotalCount()));
     }
 
     public boolean routeFoundAssayMessage(Process assayProcess, SubmissionEnvelope envelope, int assayIndex, int totalAssays) {

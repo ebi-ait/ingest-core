@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.submission;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.AbstractEntity;
@@ -38,6 +39,11 @@ public class SubmissionEnvelope extends AbstractEntity {
         super(EntityType.SUBMISSION);
         this.submissionState = SubmissionState.PENDING;
         setUuid(new Uuid());
+    }
+
+    public SubmissionEnvelope(String id) {
+        this();
+        this.id = id;
     }
 
     public static List<SubmissionState> allowedStateTransitions(SubmissionState fromState) {

@@ -38,10 +38,6 @@ public abstract class MetadataDocument extends AbstractEntity {
 
     protected MetadataDocument(){}
 
-    protected MetadataDocument(String id) {
-        super(id);
-    }
-
     protected MetadataDocument(EntityType type,
                                Object content) {
         super(type);
