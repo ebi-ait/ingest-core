@@ -38,7 +38,6 @@ public class DefaultExporterTest {
     @MockBean
     private MessageRouter messageRouter;
 
-
     @Test
     public void testExportBundles() {
         //given:
