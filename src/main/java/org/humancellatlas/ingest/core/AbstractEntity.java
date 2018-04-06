@@ -44,7 +44,10 @@ public abstract class AbstractEntity implements Identifiable<String> {
         this.type = type;
     }
 
-    protected AbstractEntity() {
+    protected AbstractEntity() {}
 
+    protected AbstractEntity(String id) {
+        this.id = id;
     }
+
 }

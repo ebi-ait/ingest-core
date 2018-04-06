@@ -34,12 +34,16 @@ public class Process extends MetadataDocument {
 
     private final @DBRef List<Process> chainedProcesses = new ArrayList<>();
 
+    public Process() {}
+
     @JsonCreator
     public Process(Object content) {
         super(EntityType.PROCESS, content);
     }
 
-    public Process() {}
+    public Process(String id) {
+        super(id);
+    }
 
 
     public Process addInputBundleManifest(BundleManifest bundleManifest) {

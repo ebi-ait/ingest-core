@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.messaging;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -29,14 +30,14 @@ import java.util.stream.Collectors;
  * Created by rolando on 09/03/2018.
  */
 @Component
-@AllArgsConstructor
+@NoArgsConstructor
 public class MessageRouter {
-    @Autowired @NonNull private final MessageSender messageSender;
-    @Autowired @NonNull private final ResourceMappings resourceMappings;
-    @Autowired @NonNull private final RepositoryRestConfiguration config;
+
+    @Autowired private MessageSender messageSender;
+    @Autowired private ResourceMappings resourceMappings;
+    @Autowired private RepositoryRestConfiguration config;
 
     /* messages to validator */
-
     public boolean routeValidationMessageFor(MetadataDocument document) {
         if(document.getValidationState().equals(ValidationState.DRAFT)) {
             this.messageSender.queueValidationMessage(Constants.Exchanges.VALIDATION,
@@ -92,7 +93,9 @@ public class MessageRouter {
         return true;
     }
 
-    /* message for when a new assay has been submitted */
+    public void sendAssayForExport(ExportMessage exportMessage) {
+        messageSender.queueNewAssayMessage("", "", null);
+    }
 
     public boolean routeFoundAssayMessage(Process assayProcess, SubmissionEnvelope envelope, int assayIndex, int totalAssays) {
         this.messageSender.queueNewAssayMessage(Constants.Exchanges.ASSAY_EXCHANGE,
@@ -150,10 +153,6 @@ public class MessageRouter {
         SubmissionEnvelopeStateUpdateMessage message = SubmissionEnvelopeStateUpdateMessage.fromSubmissionEnvelopeMessage(messageFor(envelope));
         message.setRequestedState(state);
         return message;
-    }
-
-    public void sendAssayForExport(ExportMessage exportMessage) {
-        throw new UnsupportedOperationException("Method not implemented.");
     }
 
     public void sendAnalysisForExport(ExportMessage exportMessage) {
