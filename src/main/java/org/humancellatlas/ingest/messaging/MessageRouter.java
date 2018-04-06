@@ -100,6 +100,11 @@ public class MessageRouter {
                 exportMessage.toAssaySubmittedMessage(linkGenerator));
     }
 
+    public void sendAnalysisForExport(ExportMessage exportMessage) {
+        messageSender.queueNewAssayMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED,
+                exportMessage.toAssaySubmittedMessage(linkGenerator));
+    }
+
     public boolean routeFoundAssayMessage(Process assayProcess, SubmissionEnvelope envelope, int assayIndex, int totalAssays) {
         this.messageSender.queueNewAssayMessage(ASSAY_EXCHANGE,
                                                 ASSAY_SUBMITTED,
@@ -156,10 +161,6 @@ public class MessageRouter {
         SubmissionEnvelopeStateUpdateMessage message = SubmissionEnvelopeStateUpdateMessage.fromSubmissionEnvelopeMessage(messageFor(envelope));
         message.setRequestedState(state);
         return message;
-    }
-
-    public void sendAnalysisForExport(ExportMessage exportMessage) {
-        throw new UnsupportedOperationException("Method not implemented.");
     }
 
 }

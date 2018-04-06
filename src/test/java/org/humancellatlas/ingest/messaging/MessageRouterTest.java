@@ -51,6 +51,12 @@ public class MessageRouterTest {
         doTestSendForExport(messageRouter::sendAssayForExport);
     }
 
+    @Test
+    public void testSendAnalysisForExport() {
+        //expect:
+        doTestSendForExport(messageRouter::sendAnalysisForExport);
+    }
+
     private void doTestSendForExport(Consumer<ExportMessage> testMethod) {
         //given:
         String processId = "78bbd9";
