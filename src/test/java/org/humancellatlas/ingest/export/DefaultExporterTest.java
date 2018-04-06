@@ -52,13 +52,15 @@ public class DefaultExporterTest {
         Set<ExportMessage> receivedMessages = mockSendingThroughMessageRouter();
 
         //when:
-        exporter.exportBundles(new SubmissionEnvelope());
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        exporter.exportBundles(submissionEnvelope);
 
         //then:
         int expectedCount = 5;
         assertThat(receivedMessages).hasSize(expectedCount);
         assertUniqueIndexes(receivedMessages);
         assertCorrectTotalCount(receivedMessages, expectedCount);
+        assertCorrectSubmissionEnvelope(receivedMessages, submissionEnvelope);
         assertAllProcessesExported(assays, analyses, receivedMessages);
 
         //and:
@@ -95,6 +97,13 @@ public class DefaultExporterTest {
     private void assertCorrectTotalCount(Set<ExportMessage> receivedMessages, int expectedCount) {
         receivedMessages.stream().forEach(message -> {
             assertThat(message.getTotalCount()).isEqualTo(expectedCount);
+        });
+    }
+
+    private void assertCorrectSubmissionEnvelope(Set<ExportMessage> receivedMessages,
+            SubmissionEnvelope submissionEnvelope) {
+        receivedMessages.forEach(message -> {
+            assertThat(message.getSubmissionEnvelope()).isEqualTo(submissionEnvelope);
         });
     }
 
