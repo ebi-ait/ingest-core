@@ -59,18 +59,8 @@ public class DefaultExporterTest {
         int expectedCount = 5;
         assertThat(receivedMessages).hasSize(expectedCount);
         assertUniqueIndexes(receivedMessages);
-
-        //and: each message has the same total count
-        receivedMessages.stream().forEach(message -> {
-            assertThat(message.getTotalCount()).isEqualTo(expectedCount);
-        });
-
-        //and:
-        List<Process> sentProcesses = receivedMessages.stream()
-                .map(ExportMessage::getProcess)
-                .collect(toList());
-        assertThat(sentProcesses).containsAll(assays);
-        assertThat(sentProcesses).containsAll(analyses);
+        assertCorrectTotalCount(receivedMessages, expectedCount);
+        assertAllProcessesExported(assays, analyses, receivedMessages);
     }
 
     private List<Process> mockProcesses(int max) {
@@ -95,6 +85,21 @@ public class DefaultExporterTest {
                 .map(ExportMessage::getIndex)
                 .collect(toList());
         assertThat(indexes).containsOnlyOnce(0, 1, 2, 3, 4);
+    }
+
+    private void assertCorrectTotalCount(Set<ExportMessage> receivedMessages, int expectedCount) {
+        receivedMessages.stream().forEach(message -> {
+            assertThat(message.getTotalCount()).isEqualTo(expectedCount);
+        });
+    }
+
+    private void assertAllProcessesExported(List<Process> assays, List<Process> analyses,
+            Set<ExportMessage> receivedMessages) {
+        List<Process> sentProcesses = receivedMessages.stream()
+                .map(ExportMessage::getProcess)
+                .collect(toList());
+        assertThat(sentProcesses).containsAll(assays);
+        assertThat(sentProcesses).containsAll(analyses);
     }
 
     @Configuration
