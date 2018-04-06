@@ -1,7 +1,6 @@
 package org.humancellatlas.ingest.messaging;
 
-import org.assertj.core.api.Assertions;
-import org.humancellatlas.ingest.core.LinkGenerator;
+import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
@@ -10,8 +9,6 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.ASSAY_SUBMITTED;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;

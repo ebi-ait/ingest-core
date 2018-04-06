@@ -1,12 +1,8 @@
 package org.humancellatlas.ingest.messaging;
 
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import org.humancellatlas.ingest.core.AbstractEntity;
-import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
-import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.*;
+import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
@@ -39,6 +35,9 @@ public class MessageRouter {
     @Autowired private MessageSender messageSender;
     @Autowired private ResourceMappings resourceMappings;
     @Autowired private RepositoryRestConfiguration config;
+
+    @Autowired
+    private LinkGenerator linkGenerator;
 
     /* messages to validator */
     public boolean routeValidationMessageFor(MetadataDocument document) {
@@ -97,13 +96,14 @@ public class MessageRouter {
     }
 
     public void sendAssayForExport(ExportMessage exportMessage) {
-        messageSender.queueNewAssayMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED,
-                new AssaySubmittedMessage(exportMessage.getProcess().getId(),
-                        exportMessage.getProcess().getUuid().toString(),
-                        "", Process.class.getSimpleName(),
-                        exportMessage.getSubmissionEnvelope().getId(),
-                        exportMessage.getSubmissionEnvelope().getUuid().toString(),
-                        exportMessage.getIndex(), exportMessage.getTotalCount()));
+        AssaySubmittedMessage message = MetadataDocumentMessageBuilder.using(linkGenerator)
+                .messageFor(exportMessage.getProcess())
+                .withEnvelopeId(exportMessage.getSubmissionEnvelope().getId())
+                .withEnvelopeUuid(exportMessage.getSubmissionEnvelope().getUuid().toString())
+                .withAssayIndex(exportMessage.getIndex())
+                .withTotalAssays(exportMessage.getTotalCount())
+                .buildAssaySubmittedMessage();
+        messageSender.queueNewAssayMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED, message);
     }
 
     public boolean routeFoundAssayMessage(Process assayProcess, SubmissionEnvelope envelope, int assayIndex, int totalAssays) {

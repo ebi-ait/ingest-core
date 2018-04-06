@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.core;
 
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.web.BiomaterialController;
+import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.web.FileController;
 import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
@@ -31,15 +32,15 @@ import java.util.List;
  * @date 12/09/17
  */
 public class MetadataDocumentMessageBuilder {
-    public static MetadataDocumentMessageBuilder using(ResourceMappings mappings, RepositoryRestConfiguration config) {
-        return new MetadataDocumentMessageBuilder(mappings, config);
-    }
-
 
     private final String DUMMY_BASE_URI = "http://localhost:8080";
 
-    private final ResourceMappings mappings;
-    private final RepositoryRestConfiguration config;
+    private ResourceMappings mappings;
+
+    //TODO this is unused, dead code
+    private RepositoryRestConfiguration config;
+
+    private LinkGenerator linkGenerator;
 
     private Class<?> documentType;
     private String metadataDocId;
@@ -52,13 +53,28 @@ public class MetadataDocumentMessageBuilder {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected Logger getLog() {
-        return log;
-    }
-
-    private MetadataDocumentMessageBuilder(ResourceMappings mappings, RepositoryRestConfiguration config) {
+    //TODO deprecate this constructor
+    private MetadataDocumentMessageBuilder(ResourceMappings mappings,
+            RepositoryRestConfiguration config) {
         this.mappings = mappings;
         this.config = config;
+    }
+
+    private MetadataDocumentMessageBuilder(LinkGenerator linkGenerator) {
+        this.linkGenerator = linkGenerator;
+    }
+
+    public static MetadataDocumentMessageBuilder using(LinkGenerator linkGenerator) {
+        return new MetadataDocumentMessageBuilder(linkGenerator);
+    }
+
+    public static MetadataDocumentMessageBuilder using(ResourceMappings mappings,
+            RepositoryRestConfiguration config) {
+        return new MetadataDocumentMessageBuilder(mappings, config);
+    }
+
+    protected Logger getLog() {
+        return log;
     }
 
     public MetadataDocumentMessageBuilder messageFor(MetadataDocument metadataDocument) {
@@ -132,13 +148,15 @@ public class MetadataDocumentMessageBuilder {
     }
 
     public AssaySubmittedMessage buildAssaySubmittedMessage() {
-        RepositoryLinkBuilder rlb = new RepositoryLinkBuilder(mappings.getMetadataFor(documentType),
-                                                              new BaseUri(URI.create(DUMMY_BASE_URI)));
-        Link link = rlb
-                .slash(metadataDocId)
-                .withRel(mappings.getMetadataFor(documentType).getItemResourceRel());
-        String callbackLink = link.withSelfRel().getHref().replace(DUMMY_BASE_URI, "");
-
+        String callbackLink = null;
+        if (linkGenerator == null) {
+            RepositoryLinkBuilder rlb = new RepositoryLinkBuilder(
+                    mappings.getMetadataFor(documentType), new BaseUri(URI.create(DUMMY_BASE_URI)));
+            Link link = rlb
+                    .slash(metadataDocId)
+                    .withRel(mappings.getMetadataFor(documentType).getItemResourceRel());
+            callbackLink = link.withSelfRel().getHref().replace(DUMMY_BASE_URI, "");
+        }
         return new AssaySubmittedMessage(metadataDocId, metadataDocUuid, callbackLink, documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
 }
