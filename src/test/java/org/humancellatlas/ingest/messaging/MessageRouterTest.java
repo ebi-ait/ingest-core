@@ -18,8 +18,11 @@ import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.ResourceMappings;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.ASSAY_SUBMITTED;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -57,7 +60,7 @@ public class MessageRouterTest {
         messageRouter.sendAssayForExport(message);
 
         //then:
-        verify(messageSender).queueNewAssayMessage(anyString(), anyString(),
+        verify(messageSender).queueNewAssayMessage(eq(ASSAY_EXCHANGE), eq(ASSAY_SUBMITTED),
                 any(AssaySubmittedMessage.class));
     }
 

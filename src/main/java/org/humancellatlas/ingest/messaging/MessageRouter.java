@@ -26,6 +26,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.ASSAY_SUBMITTED;
+
 /**
  * Created by rolando on 09/03/2018.
  */
@@ -94,12 +97,12 @@ public class MessageRouter {
     }
 
     public void sendAssayForExport(ExportMessage exportMessage) {
-        messageSender.queueNewAssayMessage("", "", null);
+        messageSender.queueNewAssayMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED, null);
     }
 
     public boolean routeFoundAssayMessage(Process assayProcess, SubmissionEnvelope envelope, int assayIndex, int totalAssays) {
-        this.messageSender.queueNewAssayMessage(Constants.Exchanges.ASSAY_EXCHANGE,
-                                                Constants.Routing.ASSAY_SUBMITTED,
+        this.messageSender.queueNewAssayMessage(ASSAY_EXCHANGE,
+                                                ASSAY_SUBMITTED,
                                                 assaySubmittedMessageFor(assayProcess, envelope, assayIndex, totalAssays));
         return true;
     }
