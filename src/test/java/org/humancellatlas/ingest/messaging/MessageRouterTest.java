@@ -17,6 +17,8 @@ import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.ResourceMappings;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.function.Consumer;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.ASSAY_SUBMITTED;
@@ -45,6 +47,11 @@ public class MessageRouterTest {
 
     @Test
     public void testSendAssayForExport() {
+        //expect:
+        doTestSendForExport(messageRouter::sendAssayForExport);
+    }
+
+    private void doTestSendForExport(Consumer<ExportMessage> testMethod) {
         //given:
         String processId = "78bbd9";
         Process process = new Process(processId);
@@ -65,7 +72,7 @@ public class MessageRouterTest {
         doReturn(callbackLink).when(linkGenerator).createCallback(any(Class.class), anyString());
 
         //when:
-        messageRouter.sendAssayForExport(message);
+        testMethod.accept(message);
 
         //then:
         ArgumentCaptor<AssaySubmittedMessage> messageCaptor =
