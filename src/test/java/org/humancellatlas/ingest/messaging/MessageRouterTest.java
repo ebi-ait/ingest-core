@@ -1,8 +1,7 @@
 package org.humancellatlas.ingest.messaging;
 
-import org.humancellatlas.ingest.core.web.LinkGenerator;
-import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -21,8 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.ASSAY_SUBMITTED;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -64,7 +62,7 @@ public class MessageRouterTest {
 
         //and:
         String callbackLink = "/processes/78bbd9";
-        doReturn(callbackLink).when(linkGenerator).createCallback(any(MetadataDocument.class));
+        doReturn(callbackLink).when(linkGenerator).createCallback(any(Class.class), anyString());
 
         //when:
         messageRouter.sendAssayForExport(message);
@@ -78,10 +76,10 @@ public class MessageRouterTest {
         //and:
         AssaySubmittedMessage submittedMessage = messageCaptor.getValue();
         assertThat(submittedMessage)
-                .extracting("documentId", "documentUuid", "documentType", "envelopeId",
-                        "envelopeUuid", "assayIndex", "totalAssays")
-                .containsExactly(processId, processUuid.toString(), Process.class.getSimpleName(),
-                        envelopeId, envelopeUuid.toString(), 2, 4);
+                .extracting("documentId", "documentUuid", "callbackLink", "documentType",
+                        "envelopeId", "envelopeUuid", "assayIndex", "totalAssays")
+                .containsExactly(processId, processUuid.toString(), callbackLink,
+                        Process.class.getSimpleName(), envelopeId, envelopeUuid.toString(), 2, 4);
     }
 
     @Configuration

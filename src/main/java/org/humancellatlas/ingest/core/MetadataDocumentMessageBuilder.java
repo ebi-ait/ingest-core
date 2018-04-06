@@ -149,7 +149,9 @@ public class MetadataDocumentMessageBuilder {
 
     public AssaySubmittedMessage buildAssaySubmittedMessage() {
         String callbackLink = null;
-        if (linkGenerator == null) {
+        if (linkGenerator != null) {
+            callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
+        } else {
             RepositoryLinkBuilder rlb = new RepositoryLinkBuilder(
                     mappings.getMetadataFor(documentType), new BaseUri(URI.create(DUMMY_BASE_URI)));
             Link link = rlb
