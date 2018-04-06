@@ -50,6 +50,29 @@ public class DefaultExporterTest {
         doReturn(analyses).when(processService).findAnalyses(any(SubmissionEnvelope.class));
 
         //and:
+        Set<ExportMessage> receivedMessages = mockSendingThroughMessageRouter();
+
+        //when:
+        exporter.exportBundles(new SubmissionEnvelope());
+
+        //then:
+        int expectedCount = 5;
+        assertThat(receivedMessages).hasSize(expectedCount);
+        assertUniqueIndexes(receivedMessages);
+
+        //and: each message has the same total count
+        receivedMessages.stream().forEach(message -> {
+            assertThat(message.getTotalCount()).isEqualTo(expectedCount);
+        });
+    }
+
+    private List<Process> mockProcesses(int max) {
+        return IntStream.range(0, max)
+                .mapToObj(count -> mock(Process.class))
+                .collect(toList());
+    }
+
+    private Set<ExportMessage> mockSendingThroughMessageRouter() {
         final Set<ExportMessage> exportMessages = new HashSet<>();
         Answer<Void> addToMessages = invocation ->  {
             exportMessages.add(invocation.getArgumentAt(0, ExportMessage.class));
@@ -57,22 +80,14 @@ public class DefaultExporterTest {
         };
         doAnswer(addToMessages).when(messageRouter).sendAssayForExport(any(ExportMessage.class));
         doAnswer(addToMessages).when(messageRouter).sendAnalysisForExport(any(ExportMessage.class));
+        return exportMessages;
+    }
 
-        //when:
-        exporter.exportBundles(new SubmissionEnvelope());
-
-        //then: messages have unique index
-        assertThat(exportMessages).hasSize(5);
-        List<Integer> indexes = exportMessages.stream()
+    private void assertUniqueIndexes(Set<ExportMessage> receivedMessages) {
+        List<Integer> indexes = receivedMessages.stream()
                 .map(ExportMessage::getIndex)
                 .collect(toList());
         assertThat(indexes).containsOnlyOnce(0, 1, 2, 3, 4);
-    }
-
-    private List<Process> mockProcesses(int max) {
-        return IntStream.range(0, max)
-                .mapToObj(count -> mock(Process.class))
-                .collect(toList());
     }
 
     @Configuration
