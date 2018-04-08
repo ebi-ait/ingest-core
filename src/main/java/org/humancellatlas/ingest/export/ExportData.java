@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.messaging;
+package org.humancellatlas.ingest.export;
 
 import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
@@ -6,7 +6,7 @@ import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 
-public class ExportMessage {
+public class ExportData {
 
     private final int index;
     private final int totalCount;
@@ -15,7 +15,7 @@ public class ExportMessage {
 
     private final SubmissionEnvelope submissionEnvelope;
 
-    public ExportMessage(int index, int totalCount, Process process, SubmissionEnvelope
+    public ExportData(int index, int totalCount, Process process, SubmissionEnvelope
             submissionEnvelope) {
         this.index = index;
         this.totalCount = totalCount;

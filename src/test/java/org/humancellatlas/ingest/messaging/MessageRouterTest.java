@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.messaging;
 
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
+import org.humancellatlas.ingest.export.ExportData;
 import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -58,7 +59,7 @@ public class MessageRouterTest {
         doTestSendForExport(ANALYSIS_SUBMITTED, messageRouter::sendAnalysisForExport);
     }
 
-    private void doTestSendForExport(String routingKey, Consumer<ExportMessage> testMethod) {
+    private void doTestSendForExport(String routingKey, Consumer<ExportData> testMethod) {
         //given:
         String processId = "78bbd9";
         Process process = new Process(processId);
@@ -72,14 +73,14 @@ public class MessageRouterTest {
         submissionEnvelope.setUuid(envelopeUuid);
 
         //and:
-        ExportMessage message = new ExportMessage(2, 4, process, submissionEnvelope);
+        ExportData exportData = new ExportData(2, 4, process, submissionEnvelope);
 
         //and:
         String callbackLink = "/processes/78bbd9";
         doReturn(callbackLink).when(linkGenerator).createCallback(any(Class.class), anyString());
 
         //when:
-        testMethod.accept(message);
+        testMethod.accept(exportData);
 
         //then:
         ArgumentCaptor<AssaySubmittedMessage> messageCaptor =

@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.export;
 
-import org.humancellatlas.ingest.messaging.ExportMessage;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessService;
@@ -32,13 +31,13 @@ public class DefaultExporter implements Exporter {
                 .collect(Collectors.toList());
         int totalCount = allProcesses.size();
         IntStream.range(0, totalCount)
-                .mapToObj(count -> new ExportMessage(count, totalCount, allProcesses.get(count),
+                .mapToObj(count -> new ExportData(count, totalCount, allProcesses.get(count),
                         submissionEnvelope))
-                .forEach(message -> {
-                    if (assayingProcesses.contains(message.getProcess())) {
-                        messageRouter.sendAssayForExport(message);
+                .forEach(exportData -> {
+                    if (assayingProcesses.contains(exportData.getProcess())) {
+                        messageRouter.sendAssayForExport(exportData);
                     } else {
-                        messageRouter.sendAnalysisForExport(message);
+                        messageRouter.sendAnalysisForExport(exportData);
                     }
                 });
     }

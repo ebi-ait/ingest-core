@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.messaging;
 import lombok.NoArgsConstructor;
 import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
+import org.humancellatlas.ingest.export.ExportData;
 import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
@@ -96,14 +97,14 @@ public class MessageRouter {
         return true;
     }
 
-    public void sendAssayForExport(ExportMessage exportMessage) {
+    public void sendAssayForExport(ExportData exportData) {
         messageSender.queueNewAssayMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED,
-                exportMessage.toAssaySubmittedMessage(linkGenerator));
+                exportData.toAssaySubmittedMessage(linkGenerator));
     }
 
-    public void sendAnalysisForExport(ExportMessage exportMessage) {
+    public void sendAnalysisForExport(ExportData exportData) {
         messageSender.queueNewAssayMessage(ASSAY_EXCHANGE, ANALYSIS_SUBMITTED,
-                exportMessage.toAssaySubmittedMessage(linkGenerator));
+                exportData.toAssaySubmittedMessage(linkGenerator));
     }
 
     public boolean routeFoundAssayMessage(Process assayProcess, SubmissionEnvelope envelope, int assayIndex, int totalAssays) {
