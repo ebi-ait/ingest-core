@@ -84,7 +84,7 @@ public class MessageRouterTest {
 
         //then:
         ArgumentCaptor<ExportMessage> messageCaptor = ArgumentCaptor.forClass(ExportMessage.class);
-        verify(messageSender).queueNewAssayMessage(eq(ASSAY_EXCHANGE), eq(routingKey),
+        verify(messageSender).queueNewExportMessage(eq(ASSAY_EXCHANGE), eq(routingKey),
                 messageCaptor.capture());
 
         //and:

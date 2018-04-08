@@ -20,10 +20,10 @@ public class MessageSenderTest {
 
         //when:
         Date timestamp = new Date();
-        sender.queueNewAssayMessage("queue.exchange", "queue.route", message);
+        sender.queueNewExportMessage("queue.exchange", "queue.route", message);
 
         //then:
-        Queue<MessageSender.QueuedMessage> queue = sender.getAssayMessageBatch();
+        Queue<MessageSender.QueuedMessage> queue = sender.getExportMessageBatch();
         assertThat(queue).hasSize(1);
 
         //and:

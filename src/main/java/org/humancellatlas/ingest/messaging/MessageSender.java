@@ -24,12 +24,12 @@ public class MessageSender {
 
     private final @NonNull Queue<QueuedMessage> validationMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
     private final @NonNull Queue<QueuedMessage> accessionMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
-    private final @NonNull Queue<QueuedMessage> assayMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
+    private final @NonNull Queue<QueuedMessage> exportMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
     private final @NonNull Queue<QueuedMessage> uploadManagerMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
     private final @NonNull Queue<QueuedMessage> stateTrackingMessageBatch = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getQueuedDate));
 
     private final int DELAY_TIME_VALIDATION_MESSAGES = 3;
-    private final int DELAY_TIME_NEW_ASSAY_MESSAGES = 5;
+    private final int DELAY_TIME_NEW_EXPORT_MESSAGES = 5;
     private final int DELAY_TIME_UPLOAD_MANAGER_MESSAGES = 1;
     private final int DELAY_TIME_ACCESSIONER_MESSAGES = 2;
     private final int DELAY_TIME_STATE_TRACKING_MESSAGES = 0;
@@ -45,9 +45,9 @@ public class MessageSender {
         this.accessionMessageBatch.add(message);
     }
 
-    public void queueNewAssayMessage(String exchange, String routingKey, ExportMessage payload){
+    public void queueNewExportMessage(String exchange, String routingKey, ExportMessage payload){
         QueuedMessage message = new QueuedMessage(new Date(), exchange, routingKey, payload);
-        this.assayMessageBatch.add(message);
+        this.exportMessageBatch.add(message);
     }
 
     public void queueStateTrackingMessage(String exchange, String routingKey, AbstractEntityMessage payload){
@@ -72,8 +72,8 @@ public class MessageSender {
     }
 
     @Scheduled(fixedDelay = 1000)
-    private void sendNewAssayMessages(){
-        sendFromQueue(this.assayMessageBatch, this.DELAY_TIME_NEW_ASSAY_MESSAGES);
+    private void sendExportMessages(){
+        sendFromQueue(this.exportMessageBatch, this.DELAY_TIME_NEW_EXPORT_MESSAGES);
     }
 
     @Scheduled(fixedDelay = 1000)

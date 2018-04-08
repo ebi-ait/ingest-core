@@ -98,17 +98,17 @@ public class MessageRouter {
     }
 
     public void sendAssayForExport(ExportData exportData) {
-        messageSender.queueNewAssayMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED,
+        messageSender.queueNewExportMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED,
                 exportData.toAssaySubmittedMessage(linkGenerator));
     }
 
     public void sendAnalysisForExport(ExportData exportData) {
-        messageSender.queueNewAssayMessage(ASSAY_EXCHANGE, ANALYSIS_SUBMITTED,
+        messageSender.queueNewExportMessage(ASSAY_EXCHANGE, ANALYSIS_SUBMITTED,
                 exportData.toAssaySubmittedMessage(linkGenerator));
     }
 
     public boolean routeFoundAssayMessage(Process assayProcess, SubmissionEnvelope envelope, int assayIndex, int totalAssays) {
-        this.messageSender.queueNewAssayMessage(ASSAY_EXCHANGE,
+        this.messageSender.queueNewExportMessage(ASSAY_EXCHANGE,
                                                 ASSAY_SUBMITTED,
                                                 assaySubmittedMessageFor(assayProcess, envelope, assayIndex, totalAssays));
         return true;
