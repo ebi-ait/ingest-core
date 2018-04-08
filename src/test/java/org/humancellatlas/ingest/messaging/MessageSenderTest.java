@@ -1,6 +1,6 @@
 package org.humancellatlas.ingest.messaging;
 
-import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
+import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.junit.Test;
 
 import java.util.Date;
@@ -16,7 +16,7 @@ public class MessageSenderTest {
         MessageSender sender = new MessageSender();
 
         //and:
-        AssaySubmittedMessage message = new AssaySubmittedMessage("", "", "", "", "", "", 0, 0);
+        ExportMessage message = new ExportMessage("", "", "", "", "", "", 0, 0);
 
         //when:
         Date timestamp = new Date();

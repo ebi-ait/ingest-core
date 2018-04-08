@@ -3,7 +3,7 @@ package org.humancellatlas.ingest.messaging;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportData;
-import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
+import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.junit.Test;
@@ -83,13 +83,12 @@ public class MessageRouterTest {
         testMethod.accept(exportData);
 
         //then:
-        ArgumentCaptor<AssaySubmittedMessage> messageCaptor =
-                ArgumentCaptor.forClass(AssaySubmittedMessage.class);
+        ArgumentCaptor<ExportMessage> messageCaptor = ArgumentCaptor.forClass(ExportMessage.class);
         verify(messageSender).queueNewAssayMessage(eq(ASSAY_EXCHANGE), eq(routingKey),
                 messageCaptor.capture());
 
         //and:
-        AssaySubmittedMessage submittedMessage = messageCaptor.getValue();
+        ExportMessage submittedMessage = messageCaptor.getValue();
         assertThat(submittedMessage)
                 .extracting("documentId", "documentUuid", "callbackLink", "documentType",
                         "envelopeId", "envelopeUuid", "index", "total")

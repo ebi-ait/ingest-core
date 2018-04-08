@@ -2,7 +2,7 @@ package org.humancellatlas.ingest.messaging;
 
 import lombok.*;
 
-import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
+import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.messaging.model.AbstractEntityMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
@@ -45,7 +45,7 @@ public class MessageSender {
         this.accessionMessageBatch.add(message);
     }
 
-    public void queueNewAssayMessage(String exchange, String routingKey, AssaySubmittedMessage payload){
+    public void queueNewAssayMessage(String exchange, String routingKey, ExportMessage payload){
         QueuedMessage message = new QueuedMessage(new Date(), exchange, routingKey, payload);
         this.assayMessageBatch.add(message);
     }

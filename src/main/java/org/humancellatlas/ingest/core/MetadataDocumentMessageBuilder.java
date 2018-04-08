@@ -1,18 +1,8 @@
 package org.humancellatlas.ingest.core;
 
-import org.humancellatlas.ingest.biomaterial.Biomaterial;
-import org.humancellatlas.ingest.biomaterial.web.BiomaterialController;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
-import org.humancellatlas.ingest.file.File;
-import org.humancellatlas.ingest.file.web.FileController;
-import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
+import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
-import org.humancellatlas.ingest.process.Process;
-import org.humancellatlas.ingest.process.web.ProcessController;
-import org.humancellatlas.ingest.project.Project;
-import org.humancellatlas.ingest.project.web.ProjectController;
-import org.humancellatlas.ingest.protocol.Protocol;
-import org.humancellatlas.ingest.protocol.web.ProtocolController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -23,7 +13,6 @@ import org.springframework.hateoas.Link;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Javadocs go here!
@@ -147,7 +136,7 @@ public class MetadataDocumentMessageBuilder {
         return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(), metadataDocId, metadataDocUuid, callbackLink, envelopeIds);
     }
 
-    public AssaySubmittedMessage buildAssaySubmittedMessage() {
+    public ExportMessage buildAssaySubmittedMessage() {
         String callbackLink = null;
         if (linkGenerator != null) {
             callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
@@ -156,7 +145,7 @@ public class MetadataDocumentMessageBuilder {
             throw new UnsupportedOperationException("No LinkGenerator instance was specified. " +
                     "Using ResourceMappings to create callback link is now unsupported.");
         }
-        return new AssaySubmittedMessage(metadataDocId, metadataDocUuid, callbackLink,
+        return new ExportMessage(metadataDocId, metadataDocUuid, callbackLink,
                 documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
 

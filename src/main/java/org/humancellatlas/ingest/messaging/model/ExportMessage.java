@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class AssaySubmittedMessage implements AbstractEntityMessage {
+public class ExportMessage implements AbstractEntityMessage {
 
     private final String documentId;
     private final String documentUuid;

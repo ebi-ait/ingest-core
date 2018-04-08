@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportData;
-import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
+import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeStateUpdateMessage;
@@ -147,7 +147,7 @@ public class MessageRouter {
                                              .build();
     }
 
-    private AssaySubmittedMessage assaySubmittedMessageFor(Process assayProcess, SubmissionEnvelope submissionEnvelope, int assayIndex, int totalAssays) {
+    private ExportMessage assaySubmittedMessageFor(Process assayProcess, SubmissionEnvelope submissionEnvelope, int assayIndex, int totalAssays) {
         String envelopeId = submissionEnvelope.getId();
         String envelopeUuid = submissionEnvelope.getUuid().getUuid().toString();
         return MetadataDocumentMessageBuilder.using(resourceMappings, config)
