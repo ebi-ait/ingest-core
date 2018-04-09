@@ -18,7 +18,7 @@ public class SpringLinkGenerator implements LinkGenerator {
     @Autowired
     private ResourceMappings resourceMappings;
 
-    //TODO verify that this works (ideally with some unit tests)
+    //TODO verify that this works (ideally with some automated tests)
     //It's quite difficult to write tests for this as the dependency is quite complicated to fake
     /**
     This was previously defined in
@@ -29,7 +29,7 @@ public class SpringLinkGenerator implements LinkGenerator {
     public String createCallback(Class<?> documentType, String documentId) {
         /* todo - here, we make link with DUMMY_BASE_URI and then take it out again so clients
            can fill in domain - must be a better way of doing this! */
-         ResourceMetadata metadata = resourceMappings.getMetadataFor(documentType);
+        ResourceMetadata metadata = resourceMappings.getMetadataFor(documentType);
         RepositoryLinkBuilder linkBuilder = new RepositoryLinkBuilder(metadata,
                 new BaseUri(URI.create(DUMMY_BASE_URI)));
         Link link = linkBuilder.slash(documentId).withRel(metadata.getItemResourceRel());
