@@ -25,6 +25,8 @@ public class AssayService {
 
     private final ExecutorService executor = Executors.newFixedThreadPool(3);
 
+
+    //TODO deprecate or delete this
     /**
      * identifies the assays in an envelope and sends a messages to the assay exchange
      * @param envelope
