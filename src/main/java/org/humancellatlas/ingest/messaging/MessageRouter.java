@@ -4,11 +4,9 @@ import lombok.NoArgsConstructor;
 import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportData;
-import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeStateUpdateMessage;
-import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -107,15 +105,6 @@ public class MessageRouter {
                 exportData.toAssaySubmittedMessage(linkGenerator));
     }
 
-    public boolean routeFoundAssayMessage(Process assayProcess, SubmissionEnvelope envelope, int assayIndex, int totalAssays) {
-        this.messageSender.queueNewExportMessage(ASSAY_EXCHANGE,
-                                                ASSAY_SUBMITTED,
-                                                assaySubmittedMessageFor(assayProcess, envelope, assayIndex, totalAssays));
-        return true;
-    }
-
-
-
     /* messages to the upload/staging area manager */
 
     public boolean routeRequestUploadAreaCredentials(SubmissionEnvelope envelope) {
@@ -126,7 +115,7 @@ public class MessageRouter {
     }
 
     private MetadataDocumentMessage messageFor(MetadataDocument document) {
-        return MetadataDocumentMessageBuilder.using(resourceMappings)
+        return MetadataDocumentMessageBuilder.using(linkGenerator)
                                              .messageFor(document)
                                              .build();
     }
@@ -141,22 +130,10 @@ public class MessageRouter {
         Collection<String> envelopeIds = document.getSubmissionEnvelopes().stream()
                                                  .map(AbstractEntity::getId)
                                                  .collect(Collectors.toList());
-        return MetadataDocumentMessageBuilder.using(resourceMappings)
+        return MetadataDocumentMessageBuilder.using(linkGenerator)
                                              .messageFor(document)
                                              .withEnvelopeIds(envelopeIds)
                                              .build();
-    }
-
-    private ExportMessage assaySubmittedMessageFor(Process assayProcess, SubmissionEnvelope submissionEnvelope, int assayIndex, int totalAssays) {
-        String envelopeId = submissionEnvelope.getId();
-        String envelopeUuid = submissionEnvelope.getUuid().getUuid().toString();
-        return MetadataDocumentMessageBuilder.using(resourceMappings)
-                                             .messageFor(assayProcess)
-                                             .withEnvelopeId(envelopeId)
-                                             .withEnvelopeUuid(envelopeUuid)
-                                             .withAssayIndex(assayIndex)
-                                             .withTotalAssays(totalAssays)
-                                             .buildAssaySubmittedMessage();
     }
 
     private SubmissionEnvelopeStateUpdateMessage messageFor(SubmissionEnvelope envelope, SubmissionState state) {

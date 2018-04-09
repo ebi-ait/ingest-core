@@ -15,10 +15,6 @@ import java.util.Collection;
 
 public class MetadataDocumentMessageBuilder {
 
-    private final String DUMMY_BASE_URI = "http://localhost:8080";
-
-    private ResourceMappings mappings;
-
     private LinkGenerator linkGenerator;
 
     private Class<?> documentType;
@@ -32,21 +28,12 @@ public class MetadataDocumentMessageBuilder {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    //TODO deprecate this constructor
-    private MetadataDocumentMessageBuilder(ResourceMappings mappings) {
-        this.mappings = mappings;
-    }
-
     private MetadataDocumentMessageBuilder(LinkGenerator linkGenerator) {
         this.linkGenerator = linkGenerator;
     }
 
     public static MetadataDocumentMessageBuilder using(LinkGenerator linkGenerator) {
         return new MetadataDocumentMessageBuilder(linkGenerator);
-    }
-
-    public static MetadataDocumentMessageBuilder using(ResourceMappings mappings) {
-        return new MetadataDocumentMessageBuilder(mappings);
     }
 
     protected Logger getLog() {
@@ -111,28 +98,14 @@ public class MetadataDocumentMessageBuilder {
         return this;
     }
 
-
     public MetadataDocumentMessage build() {
-        // todo - here, we make link with DUMMY_BASE_URI and then take it out again so clients can fill in domain - must be a better way of doing this!
-        RepositoryLinkBuilder rlb = new RepositoryLinkBuilder(mappings.getMetadataFor(documentType),
-                                                              new BaseUri(URI.create(DUMMY_BASE_URI)));
-        Link link = rlb
-                .slash(metadataDocId)
-                .withRel(mappings.getMetadataFor(documentType).getItemResourceRel());
-        String callbackLink = link.withSelfRel().getHref().replace(DUMMY_BASE_URI, "");
-
-        return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(), metadataDocId, metadataDocUuid, callbackLink, envelopeIds);
+        String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
+        return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(),
+                metadataDocId, metadataDocUuid, callbackLink, envelopeIds);
     }
 
     public ExportMessage buildAssaySubmittedMessage() {
-        String callbackLink = null;
-        if (linkGenerator != null) {
-            callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
-        } else {
-            //TODO completely remove dependency on ResourceMappings
-            throw new UnsupportedOperationException("No LinkGenerator instance was specified. " +
-                    "Using ResourceMappings to create callback link is now unsupported.");
-        }
+        String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
         return new ExportMessage(metadataDocId, metadataDocUuid, callbackLink,
                 documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
