@@ -32,7 +32,7 @@ public class SpringLinkGeneratorTest {
         String callbackLink = linkGenerator.createCallback(Process.class, "df00e2");
 
         //then:
-        assertThat(callbackLink).isNotNull();
+        assertThat(callbackLink).isEqualToIgnoringCase("/processes/df00e2");
     }
 
     @TestConfiguration

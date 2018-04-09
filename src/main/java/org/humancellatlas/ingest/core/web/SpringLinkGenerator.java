@@ -18,13 +18,6 @@ public class SpringLinkGenerator implements LinkGenerator {
     @Autowired
     private ResourceMappings resourceMappings;
 
-    //TODO verify that this works (ideally with some automated tests)
-    //It's quite difficult to write tests for this as the dependency is quite complicated to fake
-    /**
-    This was previously defined in
-     {@link org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder},
-     which is assumed to be working.
-    */
     @Override
     public String createCallback(Class<?> documentType, String documentId) {
         /* todo - here, we make link with DUMMY_BASE_URI and then take it out again so clients
