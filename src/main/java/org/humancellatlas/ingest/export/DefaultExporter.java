@@ -8,10 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 @Component
 public class DefaultExporter implements Exporter {
@@ -23,23 +19,28 @@ public class DefaultExporter implements Exporter {
     private MessageRouter messageRouter;
 
     @Override
-    public void exportBundles(SubmissionEnvelope submissionEnvelope) {
-        Collection<Process> assayingProcesses = processService.findAssays(submissionEnvelope);
-        Collection<Process> analysisProcesses = processService.findAnalyses(submissionEnvelope);
-        List<Process> allProcesses = Stream
-                .concat(assayingProcesses.stream(), analysisProcesses.stream())
-                .collect(Collectors.toList());
-        int totalCount = allProcesses.size();
-        IntStream.range(0, totalCount)
-                .mapToObj(count -> new ExportData(count, totalCount, allProcesses.get(count),
-                        submissionEnvelope))
-                .forEach(exportData -> {
-                    if (assayingProcesses.contains(exportData.getProcess())) {
-                        messageRouter.sendAssayForExport(exportData);
-                    } else {
-                        messageRouter.sendAnalysisForExport(exportData);
-                    }
-                });
+    public void exportBundles(SubmissionEnvelope envelope) {
+        Collection<Process> assayingProcesses = processService.findAssays(envelope);
+        Collection<Process> analysisProcesses = processService.findAnalyses(envelope);
+
+        IndexCounter counter = new IndexCounter();
+        int totalCount = assayingProcesses.size() + analysisProcesses.size();
+        assayingProcesses.stream()
+                .map(process -> new ExportData(counter.next(), totalCount, process,  envelope))
+                .forEach(messageRouter::sendAssayForExport);
+        analysisProcesses.stream()
+                .map(process -> new ExportData(counter.next(), totalCount, process, envelope))
+                .forEach(messageRouter::sendAnalysisForExport);
+    }
+
+    private static class IndexCounter {
+
+        int base = 0;
+
+        int next() {
+            return base++;
+        }
+
     }
 
 }
