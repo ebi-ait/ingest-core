@@ -1,17 +1,8 @@
 package org.humancellatlas.ingest.core;
 
-import org.humancellatlas.ingest.biomaterial.Biomaterial;
-import org.humancellatlas.ingest.biomaterial.web.BiomaterialController;
-import org.humancellatlas.ingest.file.File;
-import org.humancellatlas.ingest.file.web.FileController;
-import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
+import org.humancellatlas.ingest.core.web.LinkGenerator;
+import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
-import org.humancellatlas.ingest.process.Process;
-import org.humancellatlas.ingest.process.web.ProcessController;
-import org.humancellatlas.ingest.project.Project;
-import org.humancellatlas.ingest.project.web.ProjectController;
-import org.humancellatlas.ingest.protocol.Protocol;
-import org.humancellatlas.ingest.protocol.web.ProtocolController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -22,7 +13,6 @@ import org.springframework.hateoas.Link;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Javadocs go here!
@@ -31,15 +21,15 @@ import java.util.List;
  * @date 12/09/17
  */
 public class MetadataDocumentMessageBuilder {
-    public static MetadataDocumentMessageBuilder using(ResourceMappings mappings, RepositoryRestConfiguration config) {
-        return new MetadataDocumentMessageBuilder(mappings, config);
-    }
-
 
     private final String DUMMY_BASE_URI = "http://localhost:8080";
 
-    private final ResourceMappings mappings;
-    private final RepositoryRestConfiguration config;
+    private ResourceMappings mappings;
+
+    //TODO this is unused, dead code
+    private RepositoryRestConfiguration config;
+
+    private LinkGenerator linkGenerator;
 
     private Class<?> documentType;
     private String metadataDocId;
@@ -52,13 +42,28 @@ public class MetadataDocumentMessageBuilder {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected Logger getLog() {
-        return log;
-    }
-
-    private MetadataDocumentMessageBuilder(ResourceMappings mappings, RepositoryRestConfiguration config) {
+    //TODO deprecate this constructor
+    private MetadataDocumentMessageBuilder(ResourceMappings mappings,
+            RepositoryRestConfiguration config) {
         this.mappings = mappings;
         this.config = config;
+    }
+
+    private MetadataDocumentMessageBuilder(LinkGenerator linkGenerator) {
+        this.linkGenerator = linkGenerator;
+    }
+
+    public static MetadataDocumentMessageBuilder using(LinkGenerator linkGenerator) {
+        return new MetadataDocumentMessageBuilder(linkGenerator);
+    }
+
+    public static MetadataDocumentMessageBuilder using(ResourceMappings mappings,
+            RepositoryRestConfiguration config) {
+        return new MetadataDocumentMessageBuilder(mappings, config);
+    }
+
+    protected Logger getLog() {
+        return log;
     }
 
     public MetadataDocumentMessageBuilder messageFor(MetadataDocument metadataDocument) {
@@ -131,14 +136,17 @@ public class MetadataDocumentMessageBuilder {
         return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(), metadataDocId, metadataDocUuid, callbackLink, envelopeIds);
     }
 
-    public AssaySubmittedMessage buildAssaySubmittedMessage() {
-        RepositoryLinkBuilder rlb = new RepositoryLinkBuilder(mappings.getMetadataFor(documentType),
-                                                              new BaseUri(URI.create(DUMMY_BASE_URI)));
-        Link link = rlb
-                .slash(metadataDocId)
-                .withRel(mappings.getMetadataFor(documentType).getItemResourceRel());
-        String callbackLink = link.withSelfRel().getHref().replace(DUMMY_BASE_URI, "");
-
-        return new AssaySubmittedMessage(metadataDocId, metadataDocUuid, callbackLink, documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
+    public ExportMessage buildAssaySubmittedMessage() {
+        String callbackLink = null;
+        if (linkGenerator != null) {
+            callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
+        } else {
+            //TODO completely remove dependency on ResourceMappings
+            throw new UnsupportedOperationException("No LinkGenerator instance was specified. " +
+                    "Using ResourceMappings to create callback link is now unsupported.");
+        }
+        return new ExportMessage(metadataDocId, metadataDocUuid, callbackLink,
+                documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
+
 }

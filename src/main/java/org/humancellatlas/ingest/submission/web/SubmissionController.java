@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.web.Links;
+import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.process.Process;
@@ -47,7 +48,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Getter
 public class SubmissionController {
 
+    private final @NonNull Exporter exporter;
+
     private final @NonNull SubmissionEnvelopeService submissionEnvelopeService;
+    private final @NonNull ProcessService processService;
+
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull FileRepository fileRepository;
     private final @NonNull ProjectRepository projectRepository;
@@ -56,8 +61,6 @@ public class SubmissionController {
     private final @NonNull ProcessRepository processRepository;
     private final @NonNull BundleManifestRepository bundleManifestRepository;
 
-
-    private final @NonNull ProcessService processService;
 
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
@@ -190,11 +193,13 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_SUBMIT_URL, method = RequestMethod.PUT)
-    HttpEntity<?> enactSubmitEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+    @RequestMapping(path="/submissionEnvelopes/{id}" + Links.COMMIT_SUBMIT_URL,
+            method=RequestMethod.PUT)
+    HttpEntity<?> enactSubmitEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
+            final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelope.enactStateTransition(SubmissionState.SUBMITTED);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        submissionEnvelopeService.handleSubmit(submissionEnvelope);
+        exporter.exportBundles(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 

@@ -28,7 +28,9 @@ public class SubmissionEnvelopeService {
         }
     }
 
+    //TODO deprecate or delete this
     public void handleSubmit(SubmissionEnvelope envelope) {
         assayService.identifyAssaysFor(envelope);
     }
+
 }

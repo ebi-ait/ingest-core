@@ -1,13 +1,10 @@
 package org.humancellatlas.ingest.process;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
-import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -34,17 +31,21 @@ public class Process extends MetadataDocument {
 
     private final @DBRef List<Process> chainedProcesses = new ArrayList<>();
 
+    public Process() {}
+
     @JsonCreator
     public Process(Object content) {
         super(EntityType.PROCESS, content);
     }
 
-    public Process() {}
-
+    public Process(String id) {
+        this.id = id;
+    }
 
     public Process addInputBundleManifest(BundleManifest bundleManifest) {
         this.inputBundleManifests.add(bundleManifest);
 
         return this;
     }
+
 }
