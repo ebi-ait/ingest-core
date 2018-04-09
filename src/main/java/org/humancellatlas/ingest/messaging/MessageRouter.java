@@ -126,7 +126,7 @@ public class MessageRouter {
     }
 
     private MetadataDocumentMessage messageFor(MetadataDocument document) {
-        return MetadataDocumentMessageBuilder.using(resourceMappings, config)
+        return MetadataDocumentMessageBuilder.using(resourceMappings)
                                              .messageFor(document)
                                              .build();
     }
@@ -141,7 +141,7 @@ public class MessageRouter {
         Collection<String> envelopeIds = document.getSubmissionEnvelopes().stream()
                                                  .map(AbstractEntity::getId)
                                                  .collect(Collectors.toList());
-        return MetadataDocumentMessageBuilder.using(resourceMappings, config)
+        return MetadataDocumentMessageBuilder.using(resourceMappings)
                                              .messageFor(document)
                                              .withEnvelopeIds(envelopeIds)
                                              .build();
@@ -150,7 +150,7 @@ public class MessageRouter {
     private ExportMessage assaySubmittedMessageFor(Process assayProcess, SubmissionEnvelope submissionEnvelope, int assayIndex, int totalAssays) {
         String envelopeId = submissionEnvelope.getId();
         String envelopeUuid = submissionEnvelope.getUuid().getUuid().toString();
-        return MetadataDocumentMessageBuilder.using(resourceMappings, config)
+        return MetadataDocumentMessageBuilder.using(resourceMappings)
                                              .messageFor(assayProcess)
                                              .withEnvelopeId(envelopeId)
                                              .withEnvelopeUuid(envelopeUuid)

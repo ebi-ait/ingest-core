@@ -5,7 +5,6 @@ import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.ResourceMappings;
 import org.springframework.data.rest.webmvc.BaseUri;
 import org.springframework.data.rest.webmvc.support.RepositoryLinkBuilder;
@@ -14,20 +13,11 @@ import org.springframework.hateoas.Link;
 import java.net.URI;
 import java.util.Collection;
 
-/**
- * Javadocs go here!
- *
- * @author Tony Burdett
- * @date 12/09/17
- */
 public class MetadataDocumentMessageBuilder {
 
     private final String DUMMY_BASE_URI = "http://localhost:8080";
 
     private ResourceMappings mappings;
-
-    //TODO this is unused, dead code
-    private RepositoryRestConfiguration config;
 
     private LinkGenerator linkGenerator;
 
@@ -43,10 +33,8 @@ public class MetadataDocumentMessageBuilder {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     //TODO deprecate this constructor
-    private MetadataDocumentMessageBuilder(ResourceMappings mappings,
-            RepositoryRestConfiguration config) {
+    private MetadataDocumentMessageBuilder(ResourceMappings mappings) {
         this.mappings = mappings;
-        this.config = config;
     }
 
     private MetadataDocumentMessageBuilder(LinkGenerator linkGenerator) {
@@ -57,9 +45,8 @@ public class MetadataDocumentMessageBuilder {
         return new MetadataDocumentMessageBuilder(linkGenerator);
     }
 
-    public static MetadataDocumentMessageBuilder using(ResourceMappings mappings,
-            RepositoryRestConfiguration config) {
-        return new MetadataDocumentMessageBuilder(mappings, config);
+    public static MetadataDocumentMessageBuilder using(ResourceMappings mappings) {
+        return new MetadataDocumentMessageBuilder(mappings);
     }
 
     protected Logger getLog() {
@@ -67,7 +54,8 @@ public class MetadataDocumentMessageBuilder {
     }
 
     public MetadataDocumentMessageBuilder messageFor(MetadataDocument metadataDocument) {
-        MetadataDocumentMessageBuilder builder = withDocumentType(metadataDocument.getClass()).withId(metadataDocument.getId());
+        MetadataDocumentMessageBuilder builder = withDocumentType(metadataDocument.getClass())
+                .withId(metadataDocument.getId());
         if (metadataDocument.getUuid() != null) {
             builder = builder.withUuid(metadataDocument.getUuid().toString());
         }
@@ -75,9 +63,9 @@ public class MetadataDocumentMessageBuilder {
         return builder;
     }
 
-    private <T extends MetadataDocument> MetadataDocumentMessageBuilder withDocumentType(Class<T> documentClass) {
+    private <T extends MetadataDocument> MetadataDocumentMessageBuilder withDocumentType(
+            Class<T> documentClass) {
         this.documentType = documentClass;
-
         return this;
     }
 
