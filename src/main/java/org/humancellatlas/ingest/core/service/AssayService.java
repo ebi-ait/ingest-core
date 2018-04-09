@@ -30,6 +30,7 @@ public class AssayService {
      * @param envelope
      */
     public void identifyAssaysFor(SubmissionEnvelope envelope) {
+        //NOTE: this effectively does nothing but execute the routing process on a separate thread
         executor.submit(() -> {
             List<Process> assaysInEnvelope = new ArrayList<>(processService.findAssays(envelope));
             int totalAssays = assaysInEnvelope.size();
