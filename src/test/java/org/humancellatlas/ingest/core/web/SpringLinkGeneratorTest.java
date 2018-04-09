@@ -1,7 +1,11 @@
 package org.humancellatlas.ingest.core.web;
 
 import com.mongodb.DB;
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
+import org.humancellatlas.ingest.bundle.BundleManifest;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.protocol.Protocol;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +33,18 @@ public class SpringLinkGeneratorTest {
     @Test
     public void testCreateCallback() {
         //when:
-        String callbackLink = linkGenerator.createCallback(Process.class, "df00e2");
+        String processCallback = linkGenerator.createCallback(Process.class, "df00e2");
+        String biomaterialCallback = linkGenerator.createCallback(Biomaterial.class, "c80122");
+        String fileCallback = linkGenerator.createCallback(File.class, "98dd90");
+        String protocolCallback = linkGenerator.createCallback(Protocol.class, "846df1");
+        String bmCallback = linkGenerator.createCallback(BundleManifest.class, "332fd9");
 
         //then:
-        assertThat(callbackLink).isEqualToIgnoringCase("/processes/df00e2");
+        assertThat(processCallback).isEqualToIgnoringCase("/processes/df00e2");
+        assertThat(biomaterialCallback).isEqualToIgnoringCase("/biomaterials/c80122");
+        assertThat(fileCallback).isEqualToIgnoringCase("/files/98dd90");
+        assertThat(protocolCallback).isEqualToIgnoringCase("/protocols/846df1");
+        assertThat(bmCallback).isEqualToIgnoringCase("/bundlemanifests/332fd9");
     }
 
     @TestConfiguration
