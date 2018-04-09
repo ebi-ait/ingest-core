@@ -1,8 +1,8 @@
 package org.humancellatlas.ingest.submission.web;
 
-import org.assertj.core.api.Assertions;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
+import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
@@ -24,6 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={ SubmissionController.class })
@@ -31,6 +32,9 @@ public class SubmissionControllerTest {
 
     @Autowired
     private SubmissionController controller;
+
+    @MockBean
+    private Exporter exporter;
 
     @MockBean
     private SubmissionEnvelopeService submissionEnvelopeService;
@@ -68,6 +72,7 @@ public class SubmissionControllerTest {
 
         //then:
         assertThat(response).isNotNull();
+        verify(exporter).exportBundles(submissionEnvelope);
     }
 
     @Configuration
