@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
+import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
@@ -23,6 +24,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.humancellatlas.ingest.state.SubmissionState.SUBMITTED;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -62,16 +64,21 @@ public class SubmissionControllerTest {
     @Test
     public void testEnactSubmitEnvelope() {
         //given:
-        SubmissionEnvelope submissionEnvelope = mock(SubmissionEnvelope.class);
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        assertThat(submissionEnvelope.getSubmissionState()).isNotEqualTo(SUBMITTED);
+
+        //and:
         PersistentEntityResourceAssembler resourceAssembler =
                 mock(PersistentEntityResourceAssembler.class);
 
-        //when
+        //when:
         HttpEntity<?> response = controller.enactSubmitEnvelope(submissionEnvelope,
                 resourceAssembler);
 
         //then:
         assertThat(response).isNotNull();
+        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(SUBMITTED);
+        verify(submissionEnvelopeRepository).save(submissionEnvelope);
         verify(exporter).exportBundles(submissionEnvelope);
     }
 
