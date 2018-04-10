@@ -92,8 +92,8 @@ public class MessageRouterTest {
         assertThat(submittedMessage)
                 .extracting("documentId", "documentUuid", "callbackLink", "documentType",
                         "envelopeId", "envelopeUuid", "index", "total")
-                .containsExactly(processId, processUuid.toString(), callbackLink,
-                        Process.class.getSimpleName(), envelopeId, envelopeUuid.toString(), 2, 4);
+                .containsExactly(processId, processUuid.getUuid().toString(), callbackLink,
+                        Process.class.getSimpleName(), envelopeId, envelopeUuid.getUuid().toString(), 2, 4);
     }
 
     @Configuration
