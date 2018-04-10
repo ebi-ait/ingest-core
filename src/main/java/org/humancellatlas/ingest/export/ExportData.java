@@ -43,7 +43,7 @@ public class ExportData {
         return MetadataDocumentMessageBuilder.using(linkGenerator)
                 .messageFor(process)
                 .withEnvelopeId(submissionEnvelope.getId())
-                .withEnvelopeUuid(submissionEnvelope.getUuid().toString())
+                .withEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString())
                 .withAssayIndex(index)
                 .withTotalAssays(totalCount)
                 .buildAssaySubmittedMessage();

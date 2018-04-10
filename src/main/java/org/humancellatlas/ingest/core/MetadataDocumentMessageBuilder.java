@@ -44,7 +44,7 @@ public class MetadataDocumentMessageBuilder {
         MetadataDocumentMessageBuilder builder = withDocumentType(metadataDocument.getClass())
                 .withId(metadataDocument.getId());
         if (metadataDocument.getUuid() != null) {
-            builder = builder.withUuid(metadataDocument.getUuid().toString());
+            builder = builder.withUuid(metadataDocument.getUuid().getUuid().toString());
         }
 
         return builder;
