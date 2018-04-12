@@ -28,7 +28,7 @@ public class Constants {
         public static final String ACCESSION = "ingest.accession.exchange";
         public static final String SUBMISSION_ARCHIVAL_DIRECT = "ingest.archival.exchange";
         public static final String STATE_TRACKING = "ingest.state-tracking.exchange";
-        public static final String ASSAY_EXCHANGE = "ingest.assays.exchange";
+        public static final String ASSAY_EXCHANGE = "ingest.bundle.exchange";
 
     }
 
@@ -36,6 +36,8 @@ public class Constants {
         public static final String ENVELOPE_STATE_UPDATE = "ingest.state-tracking.envelope.state.update";
         public static final String ENVELOPE_CREATE = "ingest.state-tracking.envelope.create";
         public static final String METADATA_UPDATE = "ingest.state-tracking.document.update";
-        public static final String ASSAY_SUBMITTED = "ingest.assays.submitted";
+        public static final String ASSAY_SUBMITTED = "ingest.bundle.assay.submitted";
+        public static final String ANALYSIS_SUBMITTED = "ingest.bundle.analysis.submitted";
     }
+
 }

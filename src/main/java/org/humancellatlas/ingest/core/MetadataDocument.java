@@ -36,9 +36,7 @@ public abstract class MetadataDocument extends AbstractEntity {
         return log;
     }
 
-    protected MetadataDocument(){
-
-    }
+    protected MetadataDocument(){}
 
     protected MetadataDocument(EntityType type,
                                Object content) {

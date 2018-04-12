@@ -22,7 +22,7 @@ import java.util.List;
 @ToString
 @EqualsAndHashCode
 public abstract class AbstractEntity implements Identifiable<String> {
-    private @Id @JsonIgnore String id;
+    protected  @Id @JsonIgnore String id;
 
     private @Version Long version;
 
@@ -44,7 +44,6 @@ public abstract class AbstractEntity implements Identifiable<String> {
         this.type = type;
     }
 
-    protected AbstractEntity() {
+    protected AbstractEntity() {}
 
-    }
 }
