@@ -108,8 +108,15 @@ public class MessageRouter {
     /* messages to the upload/staging area manager */
 
     public boolean routeRequestUploadAreaCredentials(SubmissionEnvelope envelope) {
-        this.messageSender.queueUploadManagerMessage(Constants.Exchanges.ENVELOPE_CREATED_FANOUT,
-                                                     "",
+        this.messageSender.queueUploadManagerMessage(Constants.Exchanges.UPLOAD_AREA_EXCHANGE,
+                                                     Constants.Routing.UPLOAD_AREA_CREATE,
+                                                     messageFor(envelope));
+        return true;
+    }
+
+    public boolean routeRequestUploadAreaCleanup(SubmissionEnvelope envelope) {
+        this.messageSender.queueUploadManagerMessage(Constants.Exchanges.UPLOAD_AREA_EXCHANGE,
+                                                     Constants.Routing.UPLOAD_AREA_CLEANUP,
                                                      messageFor(envelope));
         return true;
     }

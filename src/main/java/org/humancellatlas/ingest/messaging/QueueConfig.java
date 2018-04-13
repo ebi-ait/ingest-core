@@ -28,14 +28,6 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean FanoutExchange fileStagedExchange() { return new FanoutExchange(Constants.Exchanges.FILE_STAGED_FANOUT); }
 
-    @Bean Queue queueEnvelopeCreated() { return new Queue(Constants.Queues.ENVELOPE_CREATED, false); }
-
-    @Bean FanoutExchange envelopeCreatedExchange() { return new FanoutExchange(Constants.Exchanges.ENVELOPE_CREATED_FANOUT); }
-
-    @Bean Queue queueEnvelopeSubmitted() { return new Queue(Constants.Queues.ENVELOPE_SUBMITTED, false); }
-
-    @Bean FanoutExchange envelopeSubmittedExchange() { return new FanoutExchange(Constants.Exchanges.ENVELOPE_SUBMITTED_FANOUT); }
-
     @Bean Queue queueValidationRequired() { return new Queue(Constants.Queues.VALIDATION_REQUIRED, false); }
 
     @Bean DirectExchange validationExchange() { return new DirectExchange(Constants.Exchanges.VALIDATION); }
@@ -54,6 +46,8 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean TopicExchange assayExchange() { return new TopicExchange(Constants.Exchanges.ASSAY_EXCHANGE); }
 
+    @Bean TopicExchange uploadAreaExchange() { return new TopicExchange(Constants.Exchanges.UPLOAD_AREA_EXCHANGE); }
+
     /* bindings */
 
     @Bean Binding bindingFileStaged(Queue queueFileStaged, FanoutExchange fileStagedExchange) {
@@ -62,16 +56,6 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean Binding bindingFile(Queue queueFileUpdate, FanoutExchange fileExchange) {
         return BindingBuilder.bind(queueFileUpdate).to(fileExchange);
-    }
-
-    @Bean Binding bindingCreation(Queue queueEnvelopeCreated,
-                                  FanoutExchange envelopeCreatedExchange) {
-        return BindingBuilder.bind(queueEnvelopeCreated).to(envelopeCreatedExchange);
-    }
-
-    @Bean Binding bindingSubmission(Queue queueEnvelopeSubmitted,
-                                    FanoutExchange envelopeSubmittedExchange) {
-        return BindingBuilder.bind(queueEnvelopeSubmitted).to(envelopeSubmittedExchange);
     }
 
     @Bean Binding bindingValidation(Queue queueValidationRequired, DirectExchange validationExchange) {
