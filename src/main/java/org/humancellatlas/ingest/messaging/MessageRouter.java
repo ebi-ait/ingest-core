@@ -1,19 +1,15 @@
 package org.humancellatlas.ingest.messaging;
 
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-import org.humancellatlas.ingest.core.AbstractEntity;
-import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.Uuid;
-import org.humancellatlas.ingest.messaging.model.AssaySubmittedMessage;
+import lombok.NoArgsConstructor;
+import org.humancellatlas.ingest.core.*;
+import org.humancellatlas.ingest.core.web.LinkGenerator;
+import org.humancellatlas.ingest.export.ExportData;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
-import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
+import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeStateUpdateMessage;
-import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessageBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -25,18 +21,25 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.ANALYSIS_SUBMITTED;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.ASSAY_SUBMITTED;
+
 /**
  * Created by rolando on 09/03/2018.
  */
 @Component
-@AllArgsConstructor
+@NoArgsConstructor
 public class MessageRouter {
-    @Autowired @NonNull private final MessageSender messageSender;
-    @Autowired @NonNull private final ResourceMappings resourceMappings;
-    @Autowired @NonNull private final RepositoryRestConfiguration config;
+
+    @Autowired private MessageSender messageSender;
+    @Autowired private ResourceMappings resourceMappings;
+    @Autowired private RepositoryRestConfiguration config;
+
+    @Autowired
+    private LinkGenerator linkGenerator;
 
     /* messages to validator */
-
     public boolean routeValidationMessageFor(MetadataDocument document) {
         if(document.getValidationState().equals(ValidationState.DRAFT)) {
             this.messageSender.queueValidationMessage(Constants.Exchanges.VALIDATION,
@@ -92,16 +95,15 @@ public class MessageRouter {
         return true;
     }
 
-    /* message for when a new assay has been submitted */
-
-    public boolean routeFoundAssayMessage(Process assayProcess, SubmissionEnvelope envelope, int assayIndex, int totalAssays) {
-        this.messageSender.queueNewAssayMessage(Constants.Exchanges.ASSAY_EXCHANGE,
-                                                Constants.Routing.ASSAY_SUBMITTED,
-                                                assaySubmittedMessageFor(assayProcess, envelope, assayIndex, totalAssays));
-        return true;
+    public void sendAssayForExport(ExportData exportData) {
+        messageSender.queueNewExportMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED,
+                exportData.toAssaySubmittedMessage(linkGenerator));
     }
 
-
+    public void sendAnalysisForExport(ExportData exportData) {
+        messageSender.queueNewExportMessage(ASSAY_EXCHANGE, ANALYSIS_SUBMITTED,
+                exportData.toAssaySubmittedMessage(linkGenerator));
+    }
 
     /* messages to the upload/staging area manager */
 
@@ -113,7 +115,7 @@ public class MessageRouter {
     }
 
     private MetadataDocumentMessage messageFor(MetadataDocument document) {
-        return MetadataDocumentMessageBuilder.using(resourceMappings, config)
+        return MetadataDocumentMessageBuilder.using(linkGenerator)
                                              .messageFor(document)
                                              .build();
     }
@@ -128,22 +130,10 @@ public class MessageRouter {
         Collection<String> envelopeIds = document.getSubmissionEnvelopes().stream()
                                                  .map(AbstractEntity::getId)
                                                  .collect(Collectors.toList());
-        return MetadataDocumentMessageBuilder.using(resourceMappings, config)
+        return MetadataDocumentMessageBuilder.using(linkGenerator)
                                              .messageFor(document)
                                              .withEnvelopeIds(envelopeIds)
                                              .build();
-    }
-
-    private AssaySubmittedMessage assaySubmittedMessageFor(Process assayProcess, SubmissionEnvelope submissionEnvelope, int assayIndex, int totalAssays) {
-        String envelopeId = submissionEnvelope.getId();
-        String envelopeUuid = submissionEnvelope.getUuid().getUuid().toString();
-        return MetadataDocumentMessageBuilder.using(resourceMappings, config)
-                                             .messageFor(assayProcess)
-                                             .withEnvelopeId(envelopeId)
-                                             .withEnvelopeUuid(envelopeUuid)
-                                             .withAssayIndex(assayIndex)
-                                             .withTotalAssays(totalAssays)
-                                             .buildAssaySubmittedMessage();
     }
 
     private SubmissionEnvelopeStateUpdateMessage messageFor(SubmissionEnvelope envelope, SubmissionState state) {
@@ -151,4 +141,5 @@ public class MessageRouter {
         message.setRequestedState(state);
         return message;
     }
+
 }

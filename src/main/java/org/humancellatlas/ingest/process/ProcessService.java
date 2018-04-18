@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -74,6 +75,13 @@ public class ProcessService {
             if (bundleManifest != null) {
                 getLog().info(String.format("Adding bundle manifest link to process '%s'", analysis.getId()));
                 analysis.addInputBundleManifest(bundleManifest);
+
+                // add the input files
+                bundleManifest.getDataFiles().forEach(fileUuid -> {
+                    File analysisInputFile = fileRepository.findByUuid(new Uuid(fileUuid));
+                    analysisInputFile.addAsInputToProcess(analysis);
+                    fileRepository.save(analysisInputFile);
+                });
             }
             else {
                 getLog().warn(String.format(
