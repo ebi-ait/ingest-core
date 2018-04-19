@@ -13,4 +13,9 @@ import org.springframework.stereotype.Service;
 @Getter
 public class SchemaService {
     private final @NonNull SchemaRepository schemaRepository;
+    private final @NonNull SchemaScraper schemaScraper;
+
+    public void updateSchemasCollection() {
+
+    }
 }
