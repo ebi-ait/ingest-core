@@ -14,4 +14,4 @@ COPY gradlew build.gradle ./
 
 RUN ./gradlew assemble
 
-CMD java -jar build/libs/*.jar --spring.data.mongodb.uri=$MONGO_URI --spring.rabbitmq.host=$RABBIT_HOST --spring.rabbitmq.port=$RABBIT_PORT
+CMD java -jar build/libs/*.jar --spring.data.mongodb.uri=$MONGO_URI --spring.rabbitmq.host=$RABBIT_HOST --spring.rabbitmq.port=$RABBIT_PORT --schema.base-uri=$SCHEMA_BASE_URI
