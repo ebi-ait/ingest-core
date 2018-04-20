@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.schemas;
 
+import org.humancellatlas.ingest.core.Uuid;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,4 +23,7 @@ public interface SchemaRepository extends MongoRepository<Schema, String> {
 
     @RestResource(exported = false)
     void delete(String schemaId);
+
+    @RestResource(exported = false)
+    List<Schema> findByUuidEquals(Uuid uuid);
 }
