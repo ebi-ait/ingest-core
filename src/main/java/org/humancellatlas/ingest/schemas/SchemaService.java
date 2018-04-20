@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.schemas;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.schemas.schemascraper.SchemaScraper;
 import org.humancellatlas.ingest.schemas.schemascraper.impl.SchemaScrapeException;
 import org.springframework.core.env.Environment;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -25,10 +28,20 @@ public class SchemaService {
     private final @NonNull Environment environment;
 
     public void updateSchemasCollection() {
-        schemaRepository.deleteAll();
-
         schemaScraper.getAllSchemaURIs(URI.create(environment.getProperty("SCHEMA_BASE_URI")))
-                     .forEach(schemaUri -> schemaRepository.save(schemaDescriptionFromSchemaUri(schemaUri)));
+                     .forEach(schemaUri -> {
+                         Schema schemaDocument = schemaDescriptionFromSchemaUri(schemaUri);
+
+                         // generate a uuid from the schema namespace
+                         UUID schemaUuid = UUID.nameUUIDFromBytes(schemaUri.toString().getBytes());
+                         schemaDocument.setUuid(new Uuid(schemaUuid.toString()));
+
+                         // delete/update matching schemas
+                         Collection<Schema> matchingSchemas = schemaRepository.findByUuidEquals(new Uuid(schemaUuid.toString()));
+                         schemaRepository.delete(matchingSchemas);
+
+                         schemaRepository.save(schemaDocument);
+                     });
     }
 
     public Collection<Schema> schemaDescriptionFromSchemaUris(Collection<URI> schemaUris) {
