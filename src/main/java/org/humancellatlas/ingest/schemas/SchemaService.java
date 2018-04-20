@@ -27,6 +27,7 @@ public class SchemaService {
     private final @NonNull SchemaScraper schemaScraper;
     private final @NonNull Environment environment;
 
+    @Scheduled(fixedDelay = 1000 * 60 * 60 * 24) // ever 24 hours
     public void updateSchemasCollection() {
         schemaScraper.getAllSchemaURIs(URI.create(environment.getProperty("SCHEMA_BASE_URI")))
                      .forEach(schemaUri -> {
