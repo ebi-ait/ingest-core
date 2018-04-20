@@ -6,6 +6,7 @@ ENV LC_ALL=C
 ENV MONGO_URI=mongodb://localhost:27017/admin
 ENV RABBIT_HOST=localhost
 ENV RABBIT_PORT=5672
+ENV SCHEMA_BASE_URI=https://schema.humancellatlas.org
 
 ADD gradle ./gradle
 ADD src ./src
