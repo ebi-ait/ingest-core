@@ -6,11 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.schemas.schemascraper.SchemaScraper;
 import org.humancellatlas.ingest.schemas.schemascraper.impl.SchemaScrapeException;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 

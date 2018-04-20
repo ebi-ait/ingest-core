@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.humancellatlas.ingest.core.AbstractEntity;
 
 /**
  * Created by rolando on 18/04/2018.
@@ -13,11 +14,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Schema {
+public class Schema extends AbstractEntity {
     @JsonProperty("high-level-entity")
     private String highLevelEntity;
-    @JsonProperty("version")
-    private String version;
+    @JsonProperty("schema-version")
+    private String schemaVersion;
     @JsonProperty("domain_entity")
     private String domainEntity;
     @JsonProperty("sub_domain_entity")
