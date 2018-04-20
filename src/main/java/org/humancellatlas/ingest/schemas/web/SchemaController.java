@@ -11,6 +11,7 @@ import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +30,6 @@ public class SchemaController {
     @RequestMapping(path = "/schemas/update", method = RequestMethod.POST)
     ResponseEntity<?> triggerSchemasUpdate() {
         schemaService.updateSchemasCollection();
-        return ResponseEntity.ok(ResponseEntity.EMPTY);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 }
