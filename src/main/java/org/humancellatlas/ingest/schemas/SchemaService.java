@@ -7,12 +7,13 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.schemas.schemascraper.SchemaScraper;
 import org.humancellatlas.ingest.schemas.schemascraper.impl.SchemaScrapeException;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -23,9 +24,24 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Getter
 public class SchemaService {
-    private final @NonNull SchemaRepository schemaRepository;
+    private final @NonNull
+    SchemaRepository schemaRepository;
     private final @NonNull SchemaScraper schemaScraper;
     private final @NonNull Environment environment;
+
+    public Page<Schema> querySchemas(String highLevelEntity,
+                                     String concreteEntity,
+                                     String domainEntity,
+                                     String subDomainEntity,
+                                     String schemaVersion,
+                                     Pageable pageable){
+        return schemaRepository.findByHighLevelEntityLikeAndConcreteEntityLikeAndDomainEntityLikeAndSubDomainEntityLikeAndSchemaVersionLike(highLevelEntity,
+                                                                                                                                            concreteEntity,
+                                                                                                                                            domainEntity,
+                                                                                                                                            subDomainEntity,
+                                                                                                                                            schemaVersion,
+                                                                                                                                            pageable);
+    }
 
     @Scheduled(fixedDelay = 1000 * 60 * 60 * 24) // ever 24 hours
     public void updateSchemasCollection() {
