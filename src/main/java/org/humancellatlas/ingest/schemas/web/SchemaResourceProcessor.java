@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * Created by rolando on 19/04/2018.
  */
 @Component
-public class SchemaResourceProcessor  implements ResourceProcessor<Resource<Schema>> {
+public class SchemaResourceProcessor implements ResourceProcessor<Resource<Schema>> {
 
     public Resource<Schema> process(Resource<Schema> resource) {
         resource.add(new Link(resource.getContent().getSchemaUri(), "json-schema"));

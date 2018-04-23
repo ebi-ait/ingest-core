@@ -19,11 +19,11 @@ public class Schema extends AbstractEntity {
     private String highLevelEntity;
     @JsonProperty("schema-version")
     private String schemaVersion;
-    @JsonProperty("domain_entity")
+    @JsonProperty("domain-entity")
     private String domainEntity;
-    @JsonProperty("sub_domain_entity")
+    @JsonProperty("sub-domain-entity")
     private String subDomainEntity;
-    @JsonProperty("concrete_entity")
+    @JsonProperty("concrete-entity")
     private String concreteEntity;
 
     @JsonIgnore
