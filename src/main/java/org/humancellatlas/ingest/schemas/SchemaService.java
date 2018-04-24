@@ -65,7 +65,8 @@ public class SchemaService {
 
     @Scheduled(fixedDelay = 1000 * 60 * 60 * 24) // ever 24 hours
     public void updateSchemasCollection() {
-        schemaScraper.getAllSchemaURIs(URI.create(environment.getProperty("SCHEMA_BASE_URI")))
+        schemaScraper.getAllSchemaURIs(URI.create(environment.getProperty("SCHEMA_BASE_URI"))).stream()
+                     .filter(schemaUri -> ! schemaUri.toString().contains("index.html"))
                      .forEach(schemaUri -> {
                          Schema schemaDocument = schemaDescriptionFromSchemaUri(schemaUri);
 
