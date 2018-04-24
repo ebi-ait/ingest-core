@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
+
 /**
  * Created by rolando on 19/04/2018.
  */
@@ -23,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 public class SchemaController {
     private final @NonNull SchemaService schemaService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
-
 
     @RequestMapping(path = "/schemas/update", method = RequestMethod.POST)
     ResponseEntity<?> triggerSchemasUpdate() {
@@ -49,4 +50,10 @@ public class SchemaController {
 
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(schemaPage, resourceAssembler));
     }
+
+    @RequestMapping(path = "/schemas/search/latestSchemas", method = RequestMethod.GET)
+    ResponseEntity<?> latestSchemas(final PersistentEntityResourceAssembler resourceAssembler) {
+        return ResponseEntity.ok(resourceAssembler.toResource(schemaService.getLatestSchemas()));
+    }
+
 }
