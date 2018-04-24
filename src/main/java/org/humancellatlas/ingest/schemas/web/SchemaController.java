@@ -63,7 +63,9 @@ public class SchemaController {
                                     final PersistentEntityResourceAssembler resourceAssembler) {
         List<Schema> latestSchemas = schemaService.getLatestSchemas();
         List<Schema> latestSchemasSubList = latestSchemas.subList(pageable.getOffset(),
-                                                                  pageable.getOffset() + pageable.getPageSize());
+                                                                  pageable.getOffset() + Math.min(pageable.getOffset() + pageable.getPageSize(),
+                                                                                                  latestSchemas.size() - pageable.getOffset()));
+
         Page<Schema> latestSchemasPage = new PageImpl<>(latestSchemasSubList, pageable, latestSchemas.size());
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(latestSchemasPage, resourceAssembler));
     }
