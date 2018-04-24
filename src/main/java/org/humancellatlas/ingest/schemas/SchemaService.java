@@ -13,8 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
-import java.util.Collection;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -24,8 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Getter
 public class SchemaService {
-    private final @NonNull
-    SchemaRepository schemaRepository;
+    private final @NonNull SchemaRepository schemaRepository;
     private final @NonNull SchemaScraper schemaScraper;
     private final @NonNull Environment environment;
 
@@ -41,6 +39,25 @@ public class SchemaService {
                                                                                                                                             subDomainEntity,
                                                                                                                                             schemaVersion,
                                                                                                                                             pageable);
+    }
+
+    public Collection<Schema> getLatestSchemas() {
+        // a set initialized with a Comparator that deems two schemas to be equal if their concrete,domain,high-level
+        // and sub-domain entities all match
+        Set<Schema> latestSchemas = new TreeSet<>((sch1,sch2) -> {
+           if(
+                   sch1.getConcreteEntity().equals(sch2.getConcreteEntity()) &&
+                   sch1.getDomainEntity().equals(sch2.getDomainEntity()) &&
+                   sch1.getHighLevelEntity().equals(sch2.getHighLevelEntity()) &&
+                   sch1.getSubDomainEntity().equals(sch2.getSubDomainEntity())) {
+               return 0;
+           } else {
+               return 1;
+           }
+        });
+
+        schemaRepository.findAllByOrderBySchemaVersionDesc().forEach(latestSchemas::add);
+        return latestSchemas;
     }
 
     @Scheduled(fixedDelay = 1000 * 60 * 60 * 24) // ever 24 hours

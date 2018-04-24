@@ -10,6 +10,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Created by rolando on 18/04/2018.
@@ -41,4 +42,7 @@ public interface SchemaRepository extends MongoRepository<Schema, String>{
                                                                                                                              @Param("sub-domain-entity") String subDomainEntity,
                                                                                                                              @Param("schema-version") String schemaVersion,
                                                                                                                              Pageable pageable);
+
+    @RestResource
+    Stream<Schema> findAllByOrderBySchemaVersionDesc();
 }
