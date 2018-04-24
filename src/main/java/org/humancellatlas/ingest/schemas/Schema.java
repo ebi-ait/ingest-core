@@ -15,15 +15,10 @@ import org.humancellatlas.ingest.core.AbstractEntity;
 @NoArgsConstructor
 @Data
 public class Schema extends AbstractEntity {
-    @JsonProperty("high-level-entity")
     private String highLevelEntity;
-    @JsonProperty("schema-version")
     private String schemaVersion;
-    @JsonProperty("domain-entity")
     private String domainEntity;
-    @JsonProperty("sub-domain-entity")
     private String subDomainEntity;
-    @JsonProperty("concrete-entity")
     private String concreteEntity;
 
     @JsonIgnore
