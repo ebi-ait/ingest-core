@@ -44,23 +44,14 @@ public class SchemaService {
     public List<Schema> getLatestSchemas() {
         // a set initialized with a Comparator that deems two schemas to be equal if their concrete,domain,high-level
         // and sub-domain entities all match
-        Set<Schema> latestSchemas = new TreeSet<>(this.latestSchemaComparator());
+        Set<LatestSchema> latestSchemas = new LinkedHashSet<>();
 
-        schemaRepository.findAllByOrderBySchemaVersionDesc().forEach(latestSchemas::add);
-        return new ArrayList<>(latestSchemas);
-    }
+        schemaRepository.findAllByOrderBySchemaVersionDesc()
+                        .forEach(schema -> latestSchemas.add(new LatestSchema(schema)));
 
-    private Comparator<Schema> latestSchemaComparator() {
-        return (sch1, sch2) -> {
-            if(sch1.getConcreteEntity().equals(sch2.getConcreteEntity()) &&
-                    sch1.getDomainEntity().equals(sch2.getDomainEntity()) &&
-                    sch1.getHighLevelEntity().equals(sch2.getHighLevelEntity()) &&
-                    sch1.getSubDomainEntity().equals(sch2.getSubDomainEntity())) {
-                return 0;
-            } else {
-                return 1;
-            }
-        };
+        return latestSchemas.stream()
+                            .map(LatestSchema::getSchema)
+                            .collect(Collectors.toList());
     }
 
     @Scheduled(fixedDelay = 1000 * 60 * 60 * 24) // ever 24 hours
@@ -100,6 +91,42 @@ public class SchemaService {
             return new Schema(splitString[0], splitString[3], splitString[1], splitString[2], splitString[4], schemaFullUri);
         } else {
             throw new SchemaScrapeException("Couldn't construct a Schema document from URI: " + schemaFullUri);
+        }
+    }
+
+    /**
+     *
+     * A representation of the Schema mongo document, but with a specialized equals()/hashCode() for determining latest
+     * schemas, which ignores the version
+     *
+     */
+    private class LatestSchema {
+        @Getter
+        private Schema schema;
+
+        LatestSchema(Schema schema) {
+            this.schema = schema;
+        }
+
+        @Override
+        public boolean equals(Object to) {
+            if (to == this) return true;
+            if (!(to instanceof LatestSchema)) {
+                return false;
+            }
+
+            LatestSchema schema = (LatestSchema) to;
+            return schema.hashCode() == this.hashCode();
+        }
+
+        @Override
+        public int hashCode(){
+            int result = 17;
+            result = 31 * result + this.schema.getConcreteEntity().hashCode();
+            result = 31 * result + this.schema.getHighLevelEntity().hashCode();
+            result = 31 * result + this.schema.getDomainEntity().hashCode();
+            result = 31 * result + this.schema.getSubDomainEntity().hashCode();
+            return result;
         }
     }
 }

@@ -44,5 +44,5 @@ public interface SchemaRepository extends MongoRepository<Schema, String>{
                                                                                                                              Pageable pageable);
 
     @RestResource
-    Stream<Schema> findAllByOrderBySchemaVersionDesc();
+    <S extends Schema> Stream<S> findAllByOrderBySchemaVersionDesc();
 }
