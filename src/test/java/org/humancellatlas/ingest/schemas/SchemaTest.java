@@ -8,6 +8,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.mock.env.MockEnvironment;
+import org.springframework.stereotype.Service;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
@@ -18,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -27,6 +33,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 @SpringBootTest
 public class SchemaTest {
     @Autowired SchemaService schemaService;
+
+    @MockBean SchemaRepository schemaRepository;
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8088);
@@ -43,7 +51,7 @@ public class SchemaTest {
                         .willReturn(aResponse()
                                             .withStatus(200)
                                             .withHeader("Content-Type", "application/xml")
-                                            .withBody(new String(Files.readAllBytes(Paths.get(new File(".").getAbsolutePath() + "/src/test/java/org/humancellatlas/ingest/schemas/testfiles/TestBucketListing.xml"))))));
+                                            .withBody(new String(Files.readAllBytes(Paths.get(new File(".").getAbsolutePath() + "/src/test/resources/testfiles/TestBucketListing.xml"))))));
 
         Collection<URI> mockSchemaUris = schemaScraper.getAllSchemaURIs(URI.create("http://localhost:8088"));
 
@@ -117,7 +125,7 @@ public class SchemaTest {
                         .willReturn(aResponse()
                                             .withStatus(200)
                                             .withHeader("Content-Type", "application/xml")
-                                            .withBody(new String(Files.readAllBytes(Paths.get(new File(".").getAbsolutePath() + "/src/test/java/org/humancellatlas/ingest/schemas/testfiles/TestBucketListing.xml"))))));
+                                            .withBody(new String(Files.readAllBytes(Paths.get(new File(".").getAbsolutePath() + "/src/test/resources/testfiles/TestBucketListing.xml"))))));
         // given
         Collection<URI> mockSchemaUris = schemaScraper.getAllSchemaURIs(URI.create("http://localhost:8088"));
 
@@ -130,4 +138,30 @@ public class SchemaTest {
 
         assert true;
     }
+
+    @Test
+    public void testGetLatestSchemas() throws Exception {
+        Schema mockSchemaA = new Schema("mockHighLevel-A", "2.0","mockDomain-A","mockSubdomain-A","mockConcrete-A", "mock.io/mock-schema-a");
+        Schema mockSchemaB = new Schema("mockHighLevel-B", "1.9","mockDomain-B","mockSubdomain-B","mockConcrete-B", "mock.io/mock-schema-a");
+        Schema mockSchemaOldA = new Schema("mockHighLevel-A", "1.9","mockDomain-A","mockSubdomain-A","mockConcrete-A", "mock.io/mock-schema-duplicate-a");
+
+        doReturn(Arrays.stream(new Schema[] {mockSchemaA, mockSchemaB, mockSchemaOldA}))
+                .when(schemaRepository).findAllByOrderBySchemaVersionDesc();
+
+        Collection<Schema> latestSchemas = schemaService.getLatestSchemas();
+        assert latestSchemas.size() == 2;
+        assert ! latestSchemas.contains(mockSchemaOldA);
+    }
+
+    @Configuration
+    class MockConfiguration {
+        @Autowired SchemaScraper schemaScraper;
+        @Autowired MockEnvironment mockEnvironment;
+
+        @Bean
+        SchemaService schemaService() {
+            return new SchemaService(schemaRepository, schemaScraper, mockEnvironment);
+        }
+    }
+
 }
