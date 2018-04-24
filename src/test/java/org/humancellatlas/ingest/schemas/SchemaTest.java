@@ -48,7 +48,63 @@ public class SchemaTest {
         Collection<URI> mockSchemaUris = schemaScraper.getAllSchemaURIs(URI.create("http://localhost:8088"));
 
         // we know there are 108 schemas in the test file
-        assert mockSchemaUris.size() == 108;
+        assert mockSchemaUris.size() == 107;
+    }
+
+    @Test
+    public void testSchemaParse_BundleUris() throws Exception {
+        try {
+            // when
+            schemaService.schemaDescriptionFromSchemaUris(Arrays.asList(URI.create("bundle/1.2.3/biomaterial"),
+                                                                        URI.create("bundle/2.3.4/links"),
+                                                                        URI.create("bundle/1.0/protocols")));
+        } catch (Exception e) {
+            assert false;
+        }
+
+        assert true;
+    }
+
+    @Test
+    public void testSchemaParse_ModuleUris() throws Exception {
+        try {
+            // when
+            schemaService.schemaDescriptionFromSchemaUris(Arrays.asList(URI.create("module/biomaterial/5.1.0/growth_condition"),
+                                                                        URI.create("module/ontology/5.0.0/biological_macromolecule_ontology"),
+                                                                        URI.create("module/process/5.1.0/purchased_reagents")));
+        } catch (Exception e) {
+            assert false;
+        }
+
+        assert true;
+    }
+
+    @Test
+    public void testSchemaParse_TypeUris() throws Exception {
+        try {
+            // when
+            schemaService.schemaDescriptionFromSchemaUris(Arrays.asList(URI.create("type/biomaterial/5.0.1/cell_line"),
+                                                                        URI.create("type/biomaterial/5.1.0/organoid"),
+                                                                        URI.create("type/file/5.0.0/sequence_file")));
+        } catch (Exception e) {
+            assert false;
+        }
+
+        assert true;
+    }
+
+    @Test
+    public void testSchemaParse_SubdomainTypeUris() throws Exception {
+        try {
+            // when
+            schemaService.schemaDescriptionFromSchemaUris(Arrays.asList(URI.create("type/process/biomaterial_collection/5.1.0/collection_process"),
+                                                                        URI.create("type/process/sequencing/5.0.0/sequencing_process"),
+                                                                        URI.create("type/process/sequencing/5.1.0/sequencing_process")));
+        } catch (Exception e) {
+            assert false;
+        }
+
+        assert true;
     }
 
     @Test
