@@ -2,7 +2,7 @@ package org.humancellatlas.ingest.schemas;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.humancellatlas.ingest.schemas.schemascraper.SchemaScraper;
-import org.humancellatlas.ingest.schemas.schemascraper.impl.SchemaScraperImpl;
+import org.humancellatlas.ingest.schemas.schemascraper.impl.S3BucketSchemaScraper;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,7 +12,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.env.MockEnvironment;
-import org.springframework.stereotype.Service;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
@@ -43,7 +42,7 @@ public class SchemaTest {
     public void testSchemaScrape() throws Exception {
         // given
         // an s3 bucket files listing as XML
-        SchemaScraper schemaScraper = new SchemaScraperImpl();
+        SchemaScraper schemaScraper = new S3BucketSchemaScraper();
 
         // when
         stubFor(
@@ -118,7 +117,7 @@ public class SchemaTest {
     @Test
     public void testSchemaParse() throws Exception {
         // pre-given
-        SchemaScraper schemaScraper = new SchemaScraperImpl();
+        SchemaScraper schemaScraper = new S3BucketSchemaScraper();
 
         stubFor(
                 get(urlEqualTo("/"))
