@@ -103,7 +103,7 @@ public class SchemaService {
      */
     private class LatestSchema {
         @Getter
-        private Schema schema;
+        private final Schema schema;
 
         LatestSchema(Schema schema) {
             this.schema = schema;
