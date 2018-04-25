@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.schemas.schemascraper;
 
-import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.util.Collection;
