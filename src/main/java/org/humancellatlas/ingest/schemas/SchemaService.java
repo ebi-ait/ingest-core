@@ -35,7 +35,7 @@ public class SchemaService {
                                      String subDomainEntity,
                                      String schemaVersion,
                                      Pageable pageable){
-        return schemaRepository.findByHighLevelEntityLikeAndConcreteEntityLikeAndDomainEntityLikeAndSubDomainEntityLikeAndSchemaVersionLike(highLevelEntity,
+        return schemaRepository.findByHighLevelEntityLikeAndConcreteEntityLikeAndDomainEntityLikeAndSubDomainEntityLikeAndSchemaVersionLikeOrderBySchemaVersionDesc(highLevelEntity,
                                                                                                                                             concreteEntity,
                                                                                                                                             domainEntity,
                                                                                                                                             subDomainEntity,
