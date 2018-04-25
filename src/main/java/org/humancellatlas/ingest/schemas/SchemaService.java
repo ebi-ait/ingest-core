@@ -27,6 +27,8 @@ public class SchemaService {
     private final @NonNull SchemaScraper schemaScraper;
     private final @NonNull Environment environment;
 
+    private static final int EVERY_24_HOURS = 1000 * 60 * 60 * 24;
+
     public Page<Schema> querySchemas(String highLevelEntity,
                                      String concreteEntity,
                                      String domainEntity,
@@ -42,8 +44,6 @@ public class SchemaService {
     }
 
     public List<Schema> getLatestSchemas() {
-        // a set initialized with a Comparator that deems two schemas to be equal if their concrete,domain,high-level
-        // and sub-domain entities all match
         Set<LatestSchema> latestSchemas = new LinkedHashSet<>();
 
         schemaRepository.findAllByOrderBySchemaVersionDesc()
@@ -54,7 +54,7 @@ public class SchemaService {
                             .collect(Collectors.toList());
     }
 
-    @Scheduled(fixedDelay = 1000 * 60 * 60 * 24) // ever 24 hours
+    @Scheduled(fixedDelay = EVERY_24_HOURS)
     public void updateSchemasCollection() {
         schemaScraper.getAllSchemaURIs(URI.create(environment.getProperty("SCHEMA_BASE_URI"))).stream()
                      .filter(schemaUri -> ! schemaUri.toString().contains("index.html"))
@@ -96,8 +96,9 @@ public class SchemaService {
 
     /**
      *
-     * A representation of the Schema mongo document, but with a specialized equals()/hashCode() for determining latest
-     * schemas, which ignores the version
+     * A wrapper for Schema documents used to define a looser equals()/hashCode()
+     * to determine equivalence of Schemas based only on a Schema's high level entity,
+     * type, etc.
      *
      */
     private class LatestSchema {
