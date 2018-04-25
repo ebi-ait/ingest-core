@@ -149,7 +149,12 @@ public class SchemaTest {
 
         Collection<Schema> latestSchemas = schemaService.getLatestSchemas();
         assert latestSchemas.size() == 2;
-        assert ! latestSchemas.contains(mockSchemaOldA);
+        latestSchemas.forEach(schema -> {
+            if(schema.getSchemaUri().equals("mock.io/mock-schema-duplicate-a")){
+                assert false;
+            }
+        });
+        assert true;
     }
 
     @Configuration
@@ -161,6 +166,12 @@ public class SchemaTest {
         SchemaService schemaService() {
             return new SchemaService(schemaRepository, schemaScraper, mockEnvironment);
         }
+
+        @Bean
+        SchemaScraper schemaScraper() {
+            return new S3BucketSchemaScraper();
+        }
+
     }
 
 }
