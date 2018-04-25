@@ -36,7 +36,7 @@ public interface SchemaRepository extends MongoRepository<Schema, String>{
     Page<Schema> findBySchemaVersionAfter(@Param("schema-version-range") String schemaVersionRange, Pageable pageable);
 
     @RestResource(exported = false)
-    Page<Schema> findByHighLevelEntityLikeAndConcreteEntityLikeAndDomainEntityLikeAndSubDomainEntityLikeAndSchemaVersionLike(@Param("high-level-entity") String highLevelEntity,
+    Page<Schema> findByHighLevelEntityLikeAndConcreteEntityLikeAndDomainEntityLikeAndSubDomainEntityLikeAndSchemaVersionLikeOrderBySchemaVersionDesc(@Param("high-level-entity") String highLevelEntity,
                                                                                                                              @Param("concrete-entity") String concreteEntity,
                                                                                                                              @Param("domain-entity") String domainEntity,
                                                                                                                              @Param("sub-domain-entity") String subDomainEntity,
