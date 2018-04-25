@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.humancellatlas.ingest.core.AbstractEntity;
 
@@ -12,15 +13,14 @@ import org.humancellatlas.ingest.core.AbstractEntity;
  * Created by rolando on 18/04/2018.
  */
 @AllArgsConstructor
-@NoArgsConstructor
-@Data
+@Getter
 public class Schema extends AbstractEntity {
-    private String highLevelEntity;
-    private String schemaVersion;
-    private String domainEntity;
-    private String subDomainEntity;
-    private String concreteEntity;
+    private final String highLevelEntity;
+    private final String schemaVersion;
+    private final String domainEntity;
+    private final String subDomainEntity;
+    private final String concreteEntity;
 
     @JsonIgnore
-    private String schemaUri;
+    private final String schemaUri;
 }
