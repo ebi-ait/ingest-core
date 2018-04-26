@@ -39,25 +39,6 @@ public class SchemaController {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
-    @RequestMapping(path = "/schemas/search/querySchemas", method = RequestMethod.GET)
-    ResponseEntity<?> querySchemas(@RequestParam String highLevelEntity,
-                                   @RequestParam String concreteEntity,
-                                   @RequestParam String domainEntity,
-                                   @RequestParam String subDomainEntity,
-                                   @RequestParam String schemaVersion,
-                                   Pageable pageable,
-                                   final PersistentEntityResourceAssembler resourceAssembler) {
-
-        Page<Schema> schemaPage = schemaService.querySchemas(highLevelEntity,
-                                                             concreteEntity,
-                                                             domainEntity,
-                                                             subDomainEntity,
-                                                             schemaVersion,
-                                                             pageable);
-
-        return ResponseEntity.ok(pagedResourcesAssembler.toResource(schemaPage, resourceAssembler));
-    }
-
     @RequestMapping(path = "/schemas/search/latestSchemas", method = RequestMethod.GET)
     ResponseEntity<?> latestSchemas(Pageable pageable,
                                     final PersistentEntityResourceAssembler resourceAssembler) {

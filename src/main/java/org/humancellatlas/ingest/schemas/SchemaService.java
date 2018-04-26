@@ -29,19 +29,6 @@ public class SchemaService {
 
     private static final int EVERY_24_HOURS = 1000 * 60 * 60 * 24;
 
-    public Page<Schema> querySchemas(String highLevelEntity,
-                                     String concreteEntity,
-                                     String domainEntity,
-                                     String subDomainEntity,
-                                     String schemaVersion,
-                                     Pageable pageable){
-        return schemaRepository.findByHighLevelEntityLikeAndConcreteEntityLikeAndDomainEntityLikeAndSubDomainEntityLikeAndSchemaVersionLikeOrderBySchemaVersionDesc(highLevelEntity,
-                                                                                                                                            concreteEntity,
-                                                                                                                                            domainEntity,
-                                                                                                                                            subDomainEntity,
-                                                                                                                                            schemaVersion,
-                                                                                                                                            pageable);
-    }
 
     public List<Schema> getLatestSchemas() {
         Set<LatestSchema> latestSchemas = new LinkedHashSet<>();
