@@ -2,12 +2,16 @@ package org.humancellatlas.ingest.schemas;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.humancellatlas.ingest.schemas.schemascraper.SchemaScraper;
-import org.humancellatlas.ingest.schemas.schemascraper.impl.SchemaScraperImpl;
+import org.humancellatlas.ingest.schemas.schemascraper.impl.S3BucketSchemaScraper;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
@@ -18,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -28,6 +33,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 public class SchemaTest {
     @Autowired SchemaService schemaService;
 
+    @MockBean SchemaRepository schemaRepository;
+
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8088);
 
@@ -35,7 +42,7 @@ public class SchemaTest {
     public void testSchemaScrape() throws Exception {
         // given
         // an s3 bucket files listing as XML
-        SchemaScraper schemaScraper = new SchemaScraperImpl();
+        SchemaScraper schemaScraper = new S3BucketSchemaScraper();
 
         // when
         stubFor(
@@ -43,7 +50,7 @@ public class SchemaTest {
                         .willReturn(aResponse()
                                             .withStatus(200)
                                             .withHeader("Content-Type", "application/xml")
-                                            .withBody(new String(Files.readAllBytes(Paths.get(new File(".").getAbsolutePath() + "/src/test/java/org/humancellatlas/ingest/schemas/testfiles/TestBucketListing.xml"))))));
+                                            .withBody(new String(Files.readAllBytes(Paths.get(new File(".").getAbsolutePath() + "/src/test/resources/testfiles/TestBucketListing.xml"))))));
 
         Collection<URI> mockSchemaUris = schemaScraper.getAllSchemaURIs(URI.create("http://localhost:8088"));
 
@@ -110,14 +117,14 @@ public class SchemaTest {
     @Test
     public void testSchemaParse() throws Exception {
         // pre-given
-        SchemaScraper schemaScraper = new SchemaScraperImpl();
+        SchemaScraper schemaScraper = new S3BucketSchemaScraper();
 
         stubFor(
                 get(urlEqualTo("/"))
                         .willReturn(aResponse()
                                             .withStatus(200)
                                             .withHeader("Content-Type", "application/xml")
-                                            .withBody(new String(Files.readAllBytes(Paths.get(new File(".").getAbsolutePath() + "/src/test/java/org/humancellatlas/ingest/schemas/testfiles/TestBucketListing.xml"))))));
+                                            .withBody(new String(Files.readAllBytes(Paths.get(new File(".").getAbsolutePath() + "/src/test/resources/testfiles/TestBucketListing.xml"))))));
         // given
         Collection<URI> mockSchemaUris = schemaScraper.getAllSchemaURIs(URI.create("http://localhost:8088"));
 
@@ -130,4 +137,41 @@ public class SchemaTest {
 
         assert true;
     }
+
+    @Test
+    public void testGetLatestSchemas() throws Exception {
+        Schema mockSchemaA = new Schema("mockHighLevel-A", "2.0","mockDomain-A","mockSubdomain-A","mockConcrete-A", "mock.io/mock-schema-a");
+        Schema mockSchemaB = new Schema("mockHighLevel-B", "1.9","mockDomain-B","mockSubdomain-B","mockConcrete-B", "mock.io/mock-schema-a");
+        Schema mockSchemaOldA = new Schema("mockHighLevel-A", "1.9","mockDomain-A","mockSubdomain-A","mockConcrete-A", "mock.io/mock-schema-duplicate-a");
+
+        doReturn(Arrays.stream(new Schema[] {mockSchemaA, mockSchemaB, mockSchemaOldA}))
+                .when(schemaRepository).findAllByOrderBySchemaVersionDesc();
+
+        Collection<Schema> latestSchemas = schemaService.getLatestSchemas();
+        assert latestSchemas.size() == 2;
+        latestSchemas.forEach(schema -> {
+            if(schema.getSchemaUri().equals("mock.io/mock-schema-duplicate-a")){
+                assert false;
+            }
+        });
+        assert true;
+    }
+
+    @Configuration
+    class MockConfiguration {
+        @Autowired SchemaScraper schemaScraper;
+        @Autowired MockEnvironment mockEnvironment;
+
+        @Bean
+        SchemaService schemaService() {
+            return new SchemaService(schemaRepository, schemaScraper, mockEnvironment);
+        }
+
+        @Bean
+        SchemaScraper schemaScraper() {
+            return new S3BucketSchemaScraper();
+        }
+
+    }
+
 }

@@ -22,11 +22,11 @@ import java.util.stream.Collectors;
  *
  */
 @Service
-public class SchemaScraperImpl implements SchemaScraper {
+public class S3BucketSchemaScraper implements SchemaScraper {
     private final @NonNull RestTemplate restTemplate;
     private final @NonNull XmlMapper xmlMapper;
 
-    public SchemaScraperImpl(){
+    public S3BucketSchemaScraper(){
         this.restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
         JacksonXmlModule xmlModule = new JacksonXmlModule();

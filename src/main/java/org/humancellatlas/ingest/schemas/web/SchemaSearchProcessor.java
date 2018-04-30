@@ -20,13 +20,7 @@ public class SchemaSearchProcessor implements ResourceProcessor<RepositorySearch
     @Override
     public RepositorySearchesResource process(RepositorySearchesResource searchesResource) {
         if(searchesResource.getDomainType().equals(Schema.class)) {
-            searchesResource.add(linkTo(methodOn(SchemaController.class).querySchemas(null,
-                                                                                      null,
-                                                                                      null,
-                                                                                      null,
-                                                                                      null,
-                                                                                      null,
-                                                                                      null)).withRel("querySchemas"));
+            searchesResource.add(linkTo(methodOn(SchemaController.class).latestSchemas(null, null)).withRel("latestSchemas"));
         }
 
         return searchesResource;

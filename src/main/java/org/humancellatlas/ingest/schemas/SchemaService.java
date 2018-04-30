@@ -13,8 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
-import java.util.Collection;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -24,28 +23,28 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Getter
 public class SchemaService {
-    private final @NonNull
-    SchemaRepository schemaRepository;
+    private final @NonNull SchemaRepository schemaRepository;
     private final @NonNull SchemaScraper schemaScraper;
     private final @NonNull Environment environment;
 
-    public Page<Schema> querySchemas(String highLevelEntity,
-                                     String concreteEntity,
-                                     String domainEntity,
-                                     String subDomainEntity,
-                                     String schemaVersion,
-                                     Pageable pageable){
-        return schemaRepository.findByHighLevelEntityLikeAndConcreteEntityLikeAndDomainEntityLikeAndSubDomainEntityLikeAndSchemaVersionLike(highLevelEntity,
-                                                                                                                                            concreteEntity,
-                                                                                                                                            domainEntity,
-                                                                                                                                            subDomainEntity,
-                                                                                                                                            schemaVersion,
-                                                                                                                                            pageable);
+    private static final int EVERY_24_HOURS = 1000 * 60 * 60 * 24;
+
+
+    public List<Schema> getLatestSchemas() {
+        Set<LatestSchema> latestSchemas = new LinkedHashSet<>();
+
+        schemaRepository.findAllByOrderBySchemaVersionDesc()
+                        .forEach(schema -> latestSchemas.add(new LatestSchema(schema)));
+
+        return latestSchemas.stream()
+                            .map(LatestSchema::getSchema)
+                            .collect(Collectors.toList());
     }
 
-    @Scheduled(fixedDelay = 1000 * 60 * 60 * 24) // ever 24 hours
+    @Scheduled(fixedDelay = EVERY_24_HOURS)
     public void updateSchemasCollection() {
-        schemaScraper.getAllSchemaURIs(URI.create(environment.getProperty("SCHEMA_BASE_URI")))
+        schemaScraper.getAllSchemaURIs(URI.create(environment.getProperty("SCHEMA_BASE_URI"))).stream()
+                     .filter(schemaUri -> ! schemaUri.toString().contains("index.html"))
                      .forEach(schemaUri -> {
                          Schema schemaDocument = schemaDescriptionFromSchemaUri(schemaUri);
 
@@ -79,6 +78,43 @@ public class SchemaService {
             return new Schema(splitString[0], splitString[3], splitString[1], splitString[2], splitString[4], schemaFullUri);
         } else {
             throw new SchemaScrapeException("Couldn't construct a Schema document from URI: " + schemaFullUri);
+        }
+    }
+
+    /**
+     *
+     * A wrapper for Schema documents used to define a looser equals()/hashCode()
+     * to determine equivalence of Schemas based only on a Schema's high level entity,
+     * type, etc.
+     *
+     */
+    private class LatestSchema {
+        @Getter
+        private final Schema schema;
+
+        LatestSchema(Schema schema) {
+            this.schema = schema;
+        }
+
+        @Override
+        public boolean equals(Object to) {
+            if (to == this) return true;
+            if (!(to instanceof LatestSchema)) {
+                return false;
+            }
+
+            LatestSchema schema = (LatestSchema) to;
+            return schema.hashCode() == this.hashCode();
+        }
+
+        @Override
+        public int hashCode(){
+            int result = 17;
+            result = 31 * result + this.schema.getConcreteEntity().hashCode();
+            result = 31 * result + this.schema.getHighLevelEntity().hashCode();
+            result = 31 * result + this.schema.getDomainEntity().hashCode();
+            result = 31 * result + this.schema.getSubDomainEntity().hashCode();
+            return result;
         }
     }
 }
