@@ -29,7 +29,7 @@ public interface SubmissionEnvelopeRepository extends MongoRepository<Submission
     @RestResource(path = "findByUser", rel = "findByUser")
     Page<SubmissionEnvelope> findByUser(@Param(value = "user") String user, Pageable pageable);
 
-    long countBySubmissionState(SubmissionState submissionState);
+    Page<SubmissionEnvelope> findBySubmissionState(@Param("submissionState") SubmissionState submissionState, Pageable pageable);
 
     long countBySubmissionStateAndUser(SubmissionState submissionState, String user);
 
