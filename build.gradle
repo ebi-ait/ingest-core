@@ -11,6 +11,11 @@ buildscript {
 }
 
 apply plugin: 'java'
+
+compileJava {
+    options.compilerArgs << '-parameters'
+}
+
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 
