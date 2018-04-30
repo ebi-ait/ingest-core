@@ -50,6 +50,9 @@ public interface SchemaRepository extends MongoRepository<Schema, String>{
                               @Param("schema-version") String schemaVersion,
                               Pageable pageable);
 
-    @RestResource
+    @RestResource(exported = false)
     <S extends Schema> Stream<S> findAllByOrderBySchemaVersionDesc();
+
+    <S extends Schema> Page<S> findAllByOrderBySchemaVersionDesc(Pageable pageable);
+
 }
