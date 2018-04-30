@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.UUID;
+
 /**
  * Javadocs go here!
  *
@@ -18,8 +20,11 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin
 public interface SubmissionEnvelopeRepository extends MongoRepository<SubmissionEnvelope, String> {
 
-    @RestResource(path="findByUuid", rel="findByUuid")
+    @RestResource(exported = false)
     SubmissionEnvelope findByUuid(Uuid uuid);
+
+    @RestResource(rel = "findByUuid")
+    SubmissionEnvelope findByUuidUuid(@Param("uuid") UUID uuid);
 
     @RestResource(path = "findByUser", rel = "findByUser")
     Page<SubmissionEnvelope> findByUser(@Param(value = "user") String user, Pageable pageable);
