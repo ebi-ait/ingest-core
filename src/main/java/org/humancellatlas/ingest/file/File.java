@@ -29,7 +29,7 @@ public class File extends MetadataDocument {
     private UUID validationId;
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public File(@JsonProperty("content") Object content) {
+    public File(Object content) {
         super(EntityType.FILE, content);
     }
 
