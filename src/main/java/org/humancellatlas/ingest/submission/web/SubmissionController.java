@@ -199,7 +199,7 @@ public class SubmissionController {
             final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelope.enactStateTransition(SubmissionState.SUBMITTED);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        exporter.exportBundles(submissionEnvelope);
+        submissionEnvelopeService.handleSubmissionRequest(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
