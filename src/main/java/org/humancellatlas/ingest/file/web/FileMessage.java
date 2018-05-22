@@ -8,6 +8,8 @@ import org.apache.http.entity.ContentType;
 import org.humancellatlas.ingest.core.Checksums;
 import org.springframework.util.StringUtils;
 
+import java.util.Optional;
+
 /**
  * Created by rolando on 07/09/2017.
  */
@@ -31,7 +33,7 @@ public class FileMessage {
      * @return the DCP media-type of the file uploaded that triggered this event
      */
     @JsonIgnore
-    public String getMediaType(){
-        return ContentType.parse(this.getContentType()).getParameter("dcp-type");
+    public Optional<String> getMediaType(){
+        return Optional.ofNullable(ContentType.parse(this.getContentType()).getParameter("dcp-type"));
     }
 }
