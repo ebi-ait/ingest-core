@@ -34,6 +34,6 @@ public class FileMessage {
      */
     @JsonIgnore
     public Optional<String> getMediaType(){
-        return Optional.of(ContentType.parse(this.getContentType()).getParameter("dcp-type"));
+        return Optional.ofNullable(ContentType.parse(this.getContentType()).getParameter("dcp-type"));
     }
 }
