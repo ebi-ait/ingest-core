@@ -48,7 +48,7 @@ public class SchemaController {
     }
 
     @RequestMapping(path = "/schemas/search/filterLatestSchemas", method = RequestMethod.GET)
-    ResponseEntity<?> latestSchemas(@RequestParam String highLevelEntity,
+    ResponseEntity<?> filterLatestSchemas(@RequestParam String highLevelEntity,
                                     Pageable pageable,
                                     final PersistentEntityResourceAssembler resourceAssembler) {
         List<Schema> latestSchemas = schemaService.filterLatestSchemas(highLevelEntity);
