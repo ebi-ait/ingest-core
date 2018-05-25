@@ -79,7 +79,7 @@ public class SubmissionControllerTest {
         assertThat(response).isNotNull();
         assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(SUBMITTED);
         verify(submissionEnvelopeRepository).save(submissionEnvelope);
-        verify(exporter).exportBundles(submissionEnvelope);
+        verify(submissionEnvelopeService).handleSubmissionRequest(submissionEnvelope);
     }
 
     @Configuration
