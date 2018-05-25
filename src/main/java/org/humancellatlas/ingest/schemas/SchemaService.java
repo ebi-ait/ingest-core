@@ -30,6 +30,12 @@ public class SchemaService {
     private static final int EVERY_24_HOURS = 1000 * 60 * 60 * 24;
 
 
+    public List<Schema> filterLatestSchemas(String highLevelEntity) {
+        return getLatestSchemas().stream()
+                                 .filter(schema -> schema.getHighLevelEntity().matches(highLevelEntity))
+                                 .collect(Collectors.toList());
+    }
+
     public List<Schema> getLatestSchemas() {
         Set<LatestSchema> latestSchemas = new LinkedHashSet<>();
 

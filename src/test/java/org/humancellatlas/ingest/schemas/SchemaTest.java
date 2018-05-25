@@ -157,6 +157,22 @@ public class SchemaTest {
         assert true;
     }
 
+    @Test
+    public void testFilterLatestSchemas() throws Exception {
+        Schema mockSchemaA = new Schema("mockHighLevel-A", "2.0","mockDomain-A","mockSubdomain-A","mockConcrete-A", "mock.io/mock-schema-a");
+        Schema mockSchemaB = new Schema("mockHighLevel-B", "1.9","mockDomain-B","mockSubdomain-B","mockConcrete-B", "mock.io/mock-schema-a");
+        Schema mockSchemaOldA = new Schema("mockHighLevel-A", "1.9","mockDomain-A","mockSubdomain-A","mockConcrete-A", "mock.io/mock-schema-duplicate-a");
+
+        doReturn(Arrays.stream(new Schema[] {mockSchemaA, mockSchemaB, mockSchemaOldA}))
+                .when(schemaRepository).findAllByOrderBySchemaVersionDesc();
+
+        Collection<Schema> latestSchemas = schemaService.filterLatestSchemas("mockHighLevel-B");
+        assert latestSchemas.size() == 1;
+        latestSchemas.forEach(schema -> {
+            assert schema.getHighLevelEntity().equals("mockHighLevel-B");
+        });
+    }
+
     @Configuration
     class MockConfiguration {
         @Autowired SchemaScraper schemaScraper;

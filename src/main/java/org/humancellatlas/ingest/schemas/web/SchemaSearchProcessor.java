@@ -21,6 +21,7 @@ public class SchemaSearchProcessor implements ResourceProcessor<RepositorySearch
     public RepositorySearchesResource process(RepositorySearchesResource searchesResource) {
         if(searchesResource.getDomainType().equals(Schema.class)) {
             searchesResource.add(linkTo(methodOn(SchemaController.class).latestSchemas(null, null)).withRel("latestSchemas"));
+            searchesResource.add(linkTo(methodOn(SchemaController.class).filterLatestSchemas(null, null, null)).withRel("filterLatestSchemas"));
         }
 
         return searchesResource;

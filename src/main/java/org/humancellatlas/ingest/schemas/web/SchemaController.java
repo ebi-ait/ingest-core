@@ -43,11 +43,24 @@ public class SchemaController {
     ResponseEntity<?> latestSchemas(Pageable pageable,
                                     final PersistentEntityResourceAssembler resourceAssembler) {
         List<Schema> latestSchemas = schemaService.getLatestSchemas();
-        List<Schema> latestSchemasSubList = latestSchemas.subList(pageable.getOffset(),
-                                                                  pageable.getOffset() + Math.min(pageable.getOffset() + pageable.getPageSize(),
-                                                                                                  latestSchemas.size() - pageable.getOffset()));
-
-        Page<Schema> latestSchemasPage = new PageImpl<>(latestSchemasSubList, pageable, latestSchemas.size());
+        Page<Schema> latestSchemasPage = generatePageFromSchemaList(pageable, latestSchemas);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(latestSchemasPage, resourceAssembler));
+    }
+
+    @RequestMapping(path = "/schemas/search/filterLatestSchemas", method = RequestMethod.GET)
+    ResponseEntity<?> filterLatestSchemas(@RequestParam String highLevelEntity,
+                                    Pageable pageable,
+                                    final PersistentEntityResourceAssembler resourceAssembler) {
+        List<Schema> latestSchemas = schemaService.filterLatestSchemas(highLevelEntity);
+        Page<Schema> latestSchemasPage = generatePageFromSchemaList(pageable, latestSchemas);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(latestSchemasPage, resourceAssembler));
+    }
+
+    private Page<Schema> generatePageFromSchemaList(Pageable pageable, List<Schema> schemaList) {
+        List<Schema> latestSchemasSubList = schemaList.subList(pageable.getOffset(),
+                                                               pageable.getOffset() + Math.min(pageable.getOffset() + pageable.getPageSize(),
+                                                                                               schemaList.size() - pageable.getOffset()));
+
+        return new PageImpl<>(latestSchemasSubList, pageable, schemaList.size());
     }
 }
