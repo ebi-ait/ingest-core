@@ -11,4 +11,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 public interface SubmissionManifestRepository extends MongoRepository<SubmissionManifest, String> {
     @RestResource(exported = false)
     <S extends SubmissionManifest> S save(S submissionManifest);
+
+    <S extends SubmissionManifest> S findBySubmissionEnvelopeId(String envelopeId);
 }

@@ -11,6 +11,8 @@ import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.manifest.SubmissionManifest;
+import org.humancellatlas.ingest.manifest.SubmissionManifestRepository;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
@@ -60,6 +62,7 @@ public class SubmissionController {
     private final @NonNull BiomaterialRepository biomaterialRepository;
     private final @NonNull ProcessRepository processRepository;
     private final @NonNull BundleManifestRepository bundleManifestRepository;
+    private final @NonNull SubmissionManifestRepository submissionManifestRepository;
 
 
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
@@ -102,6 +105,13 @@ public class SubmissionController {
                                       final PersistentEntityResourceAssembler resourceAssembler) {
         Page<BundleManifest> bundleManifests = getBundleManifestRepository().findByEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString(), pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(bundleManifests, resourceAssembler));
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/submissionManifest", method = RequestMethod.GET)
+    ResponseEntity<?> getSubmissionManifests(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope, 
+                                             final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<SubmissionManifest> submissionManifest = getSubmissionManifestRepository().findBySubmissionEnvelopeId(submissionEnvelope.getId());
+        return ResponseEntity.ok(resourceAssembler.toFullResource(submissionManifest));
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/processes", method = RequestMethod.GET)
