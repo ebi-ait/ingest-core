@@ -10,5 +10,5 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin
 public interface SubmissionManifestRepository extends MongoRepository<SubmissionManifest, String> {
     @RestResource(exported = false)
-    <S extends SubmissionManifest> S save(S schema);
+    <S extends SubmissionManifest> S save(S submissionManifest);
 }

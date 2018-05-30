@@ -5,12 +5,9 @@ import lombok.Setter;
 import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.Uuid;
-import org.humancellatlas.ingest.manifest.EmptyManifest;
 import org.humancellatlas.ingest.state.SubmissionState;
-import org.humancellatlas.ingest.manifest.SubmissionManifest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.util.*;
 
