@@ -24,8 +24,6 @@ import java.util.*;
  */
 @Getter
 public class SubmissionEnvelope extends AbstractEntity {
-    private final Map<String, ValidationState> validationStateMap = new HashMap<>();
-
     private @Setter StagingDetails stagingDetails;
     private SubmissionState submissionState;
 
