@@ -20,9 +20,12 @@ import java.util.List;
 public interface BiomaterialRepository extends MongoRepository<Biomaterial, String> {
 
   Page<Biomaterial> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
-  
-  @RestResource(exported = false)
-  Page<Biomaterial> findBySubmissionEnvelopesContainingAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState state, Pageable pageable);
+
+
+  @RestResource(rel = "findBySubmissionAndValidationState")
+  public Page<Biomaterial> findBySubmissionEnvelopesContainingAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
+                                                                                 @Param("state") ValidationState state,
+                                                                                 Pageable pageable);
 
   @RestResource(exported = false)
   List<Biomaterial> findByInputToProcessesContains(Process process);
