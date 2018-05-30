@@ -73,7 +73,7 @@ public class ProcessService {
         for (String bundleUuid : bundleReference.getBundleUuids()) {
             BundleManifest bundleManifest = getBundleManifestRepository().findByBundleUuid(bundleUuid);
             if (bundleManifest != null) {
-                getLog().info(String.format("Adding bundle submissionmanifest link to process '%s'", analysis.getId()));
+                getLog().info(String.format("Adding bundle manifest link to process '%s'", analysis.getId()));
                 analysis.addInputBundleManifest(bundleManifest);
 
                 // add the input files
