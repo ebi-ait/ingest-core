@@ -1,6 +1,7 @@
-package org.humancellatlas.ingest.submission.manifest;
+package org.humancellatlas.ingest.manifest;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 /**
@@ -8,5 +9,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
  */
 @CrossOrigin
 public interface SubmissionManifestRepository extends MongoRepository<SubmissionManifest, String> {
-
+    @RestResource(exported = false)
+    <S extends SubmissionManifest> S save(S schema);
 }

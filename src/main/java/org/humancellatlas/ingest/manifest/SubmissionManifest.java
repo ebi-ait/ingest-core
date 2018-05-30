@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.submission.manifest;
+package org.humancellatlas.ingest.manifest;
 
 
 /**

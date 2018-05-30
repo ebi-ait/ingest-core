@@ -1,16 +1,13 @@
 package org.humancellatlas.ingest.submission;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.EntityType;
-import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.manifest.EmptyManifest;
 import org.humancellatlas.ingest.state.SubmissionState;
-import org.humancellatlas.ingest.state.ValidationState;
-import org.humancellatlas.ingest.submission.manifest.SubmissionManifest;
+import org.humancellatlas.ingest.manifest.SubmissionManifest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -25,7 +22,6 @@ import java.util.*;
  */
 @Getter
 public class SubmissionEnvelope extends AbstractEntity {
-    private @DBRef SubmissionManifest submissionManifest;
     private @Setter StagingDetails stagingDetails;
     private SubmissionState submissionState;
 
