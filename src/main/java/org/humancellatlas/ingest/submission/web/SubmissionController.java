@@ -30,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpEntity;
@@ -37,6 +38,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import java.util.Optional;
 
 /**
  * Spring controller that will handle submission events on a {@link SubmissionEnvelope}
@@ -110,8 +113,12 @@ public class SubmissionController {
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/submissionManifest", method = RequestMethod.GET)
     ResponseEntity<?> getSubmissionManifests(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope, 
                                              final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<SubmissionManifest> submissionManifest = getSubmissionManifestRepository().findBySubmissionEnvelopeId(submissionEnvelope.getId());
-        return ResponseEntity.ok(resourceAssembler.toFullResource(submissionManifest));
+        Optional<SubmissionManifest> submissionManifest = Optional.ofNullable(getSubmissionManifestRepository().findBySubmissionEnvelopeId(submissionEnvelope.getId()));
+        if(submissionManifest.isPresent()){
+            return ResponseEntity.ok(resourceAssembler.toFullResource(submissionManifest));
+        } else {
+            throw new ResourceNotFoundException(String.format("Envelope %s has no submission manifest", submissionEnvelope.getId()));
+        }
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/processes", method = RequestMethod.GET)

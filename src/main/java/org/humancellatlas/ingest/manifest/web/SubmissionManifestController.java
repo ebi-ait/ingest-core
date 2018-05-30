@@ -5,7 +5,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.manifest.SubmissionManifest;
 import org.humancellatlas.ingest.manifest.SubmissionManifestRepository;
-import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -22,15 +21,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Created by rolando on 30/05/2018.
  */
 @RepositoryRestController
-@ExposesResourceFor(Project.class)
+@ExposesResourceFor(SubmissionManifest.class)
 @RequiredArgsConstructor
 @Getter
 public class SubmissionManifestController {
     private final @NonNull SubmissionManifestRepository submissionManifestRepository;
 
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/submissionManifests", method = RequestMethod.POST)
-    ResponseEntity<Resource<?>> addManifestToEnvelope(@PathVariable("sub_id") final SubmissionEnvelope submissionEnvelope,
-                                                      @RequestBody final SubmissionManifest submissionManifest,
+    @RequestMapping(path = "submissionEnvelopes/{sub_id}/submissionManifest", method = RequestMethod.POST)
+    ResponseEntity<Resource<?>> addManifestToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                      @RequestBody SubmissionManifest submissionManifest,
                                                       PersistentEntityResourceAssembler assembler) {
         submissionManifest.setSubmissionEnvelope(submissionEnvelope);
         SubmissionManifest manifest = submissionManifestRepository.save(submissionManifest);

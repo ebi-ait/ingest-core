@@ -75,8 +75,8 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
 
     private Link getSubmissionManifestsLink(SubmissionEnvelope submissionEnvelope) {
         return entityLinks.linkForSingleResource(submissionEnvelope)
-                          .slash(Links.SUBMISSION_MANIFESTS_URL)
-                          .withRel(Links.SUBMISSION_MANIFESTS_REL);
+                          .slash(Links.SUBMISSION_MANIFEST_URL)
+                          .withRel(Links.SUBMISSION_MANIFEST_REL);
     }
 
 
