@@ -11,8 +11,8 @@ import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
-import org.humancellatlas.ingest.manifest.SubmissionManifest;
-import org.humancellatlas.ingest.manifest.SubmissionManifestRepository;
+import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
+import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
@@ -117,7 +117,7 @@ public class SubmissionController {
         if(submissionManifest.isPresent()){
             return ResponseEntity.ok(resourceAssembler.toFullResource(submissionManifest));
         } else {
-            throw new ResourceNotFoundException(String.format("Envelope %s has no submission manifest", submissionEnvelope.getId()));
+            throw new ResourceNotFoundException(String.format("Envelope %s has no submission submissionmanifest", submissionEnvelope.getId()));
         }
     }
 

@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.manifest;
+package org.humancellatlas.ingest.submissionmanifest;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

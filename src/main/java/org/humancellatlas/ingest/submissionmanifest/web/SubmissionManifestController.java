@@ -1,10 +1,10 @@
-package org.humancellatlas.ingest.manifest.web;
+package org.humancellatlas.ingest.submissionmanifest.web;
 
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.manifest.SubmissionManifest;
-import org.humancellatlas.ingest.manifest.SubmissionManifestRepository;
+import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
+import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
