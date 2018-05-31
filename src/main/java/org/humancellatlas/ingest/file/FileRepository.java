@@ -42,6 +42,8 @@ public interface FileRepository extends MongoRepository<File, String> {
 
     Page<File> findByDerivedByProcessesContaining(Process process, Pageable pageable);
 
-    @RestResource(exported = false)
-    public Page<File> findBySubmissionEnvelopesContainingAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState state, Pageable pageable);
+    @RestResource(rel = "findBySubmissionAndValidationState")
+    public Page<File> findBySubmissionEnvelopesContainingAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
+                                                                               @Param("state") ValidationState state,
+                                                                               Pageable pageable);
 }
