@@ -12,6 +12,7 @@ import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
+import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,8 @@ public class SubmissionControllerTest {
     private ProcessRepository processRepository;
     @MockBean
     private BundleManifestRepository bundleManifestRepository;
+    @MockBean
+    private SubmissionManifestRepository submissionManifestRepository;
 
     @MockBean
     private PagedResourcesAssembler pagedResourcesAssembler;
