@@ -34,6 +34,7 @@ public class FileService {
                                                  fileName);
         } else {
             file.setFileName(fileName);
+            file.addToSubmissionEnvelope(submissionEnvelope);
             return fileRepository.save(file);
         }
     }
