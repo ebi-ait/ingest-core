@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.file.FileAlreadyExistsException;
 import org.humancellatlas.ingest.file.FileService;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
@@ -55,7 +56,11 @@ public class FileController {
                                            @PathVariable("filename") String fileName,
                                            @RequestBody File file,
                                            final PersistentEntityResourceAssembler assembler) {
-        return ResponseEntity.accepted().body(assembler.toFullResource(fileService.createFile(fileName, file, submissionEnvelope)));
+        try {
+            return ResponseEntity.accepted().body(assembler.toFullResource(fileService.createFile(fileName, file, submissionEnvelope)));
+        } catch (FileAlreadyExistsException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
 
