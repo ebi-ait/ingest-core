@@ -49,18 +49,6 @@ public class FileController {
     private final PagedResourcesAssembler pagedResourcesAssembler;
 
 
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
-                    method = RequestMethod.POST,
-                    produces = MediaTypes.HAL_JSON_VALUE)
-    ResponseEntity<Resource<?>> addFileToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                  @RequestBody File file,
-                                                  final PersistentEntityResourceAssembler assembler) {
-        File entity = getFileService().addFileToSubmissionEnvelope(submissionEnvelope, file);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
-        return ResponseEntity.accepted().body(resource);
-    }
-
-
     @RequestMapping(path = "/files/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingFile(@PathVariable("id") File file, final PersistentEntityResourceAssembler assembler) {
         file.setValidationState(ValidationState.VALIDATING);
