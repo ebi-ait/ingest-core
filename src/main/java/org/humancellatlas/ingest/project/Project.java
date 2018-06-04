@@ -24,7 +24,8 @@ import java.util.List;
  */
 @Getter
 public class Project extends MetadataDocument {
-    @JsonCreator
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Project(Object content) {
         super(EntityType.PROJECT, content);
     }

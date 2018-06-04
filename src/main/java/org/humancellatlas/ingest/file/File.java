@@ -28,7 +28,6 @@ public class File extends MetadataDocument {
     private Checksums checksums;
     private UUID validationId;
 
-    @JsonCreator
     public File(@JsonProperty("content") Object content) {
         super(EntityType.FILE, content);
     }

@@ -25,7 +25,7 @@ import java.util.List;
 @Getter
 public class Protocol extends MetadataDocument {
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Protocol(Object content) {
         super(EntityType.PROTOCOL, content);
     }
