@@ -115,7 +115,7 @@ public class SubmissionController {
                                              final PersistentEntityResourceAssembler resourceAssembler) {
         Optional<SubmissionManifest> submissionManifest = Optional.ofNullable(getSubmissionManifestRepository().findBySubmissionEnvelopeId(submissionEnvelope.getId()));
         if(submissionManifest.isPresent()){
-            return ResponseEntity.ok(resourceAssembler.toFullResource(submissionManifest));
+            return ResponseEntity.ok(resourceAssembler.toFullResource(submissionManifest.get()));
         } else {
             throw new ResourceNotFoundException(String.format("Envelope %s has no submission submissionmanifest", submissionEnvelope.getId()));
         }
