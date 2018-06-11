@@ -49,7 +49,7 @@ public class FileController {
     @NonNull
     private final PagedResourcesAssembler pagedResourcesAssembler;
 
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files/{filename}",
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files/{filename:.+}",
                                 method = RequestMethod.POST,
                                 produces = MediaTypes.HAL_JSON_VALUE)
     ResponseEntity<Resource<?>> createFile(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
