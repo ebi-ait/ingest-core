@@ -21,6 +21,7 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -97,5 +98,10 @@ public class FileController {
         file.setValidationState(ValidationState.COMPLETE);
         file = getFileService().getFileRepository().save(file);
         return ResponseEntity.accepted().body(assembler.toFullResource(file));
+    }
+
+    @RequestMapping(path = "/files/{id}/", method = {RequestMethod.PUT, RequestMethod.POST})
+    HttpEntity<?> notAllowed(@PathVariable("id") File file) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(ResponseEntity.EMPTY);
     }
 }
