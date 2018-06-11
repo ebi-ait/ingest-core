@@ -28,14 +28,20 @@ public class FileService {
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull FileRepository fileRepository;
 
-    public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
-        file.addToSubmissionEnvelope(submissionEnvelope);
-        return getFileRepository().save(file);
+    public File createFile(String fileName, File file, SubmissionEnvelope submissionEnvelope) {
+        if(! fileRepository.findBySubmissionEnvelopesInAndFileName(submissionEnvelope, fileName).isEmpty()) {
+            throw new FileAlreadyExistsException(String.format("File with name %s already exists in envelope %s", fileName, submissionEnvelope.getId()),
+                                                 fileName);
+        } else {
+            file.setFileName(fileName);
+            file.addToSubmissionEnvelope(submissionEnvelope);
+            return fileRepository.save(file);
+        }
     }
+
 
     public File updateStagedFileUrl(String envelopeUuid, String fileName, String newFileUrl) throws CoreEntityNotFoundException {
         Optional<SubmissionEnvelope> envelope = Optional.ofNullable(submissionEnvelopeRepository.findByUuid(new Uuid(envelopeUuid)));
-
 
         if(envelope.isPresent()) {
             List<File> filesInEnvelope = fileRepository.findBySubmissionEnvelopesInAndFileName(envelope.get(), fileName);
