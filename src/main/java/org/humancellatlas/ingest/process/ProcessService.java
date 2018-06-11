@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.ResourceLinker;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -43,12 +44,9 @@ public class ProcessService {
     private final @NonNull BiomaterialRepository biomaterialRepository;
     private final @NonNull BundleManifestRepository bundleManifestRepository;
 
+    private final @NonNull ResourceLinker resourceLinker;
+
     private final Logger log = LoggerFactory.getLogger(getClass());
-
-    private RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
-
-    private final @NonNull
-    EntityLinks entityLinks;
 
     protected Logger getLog() {
         return log;
@@ -86,12 +84,12 @@ public class ProcessService {
             BundleManifest bundleManifest = getBundleManifestRepository().findByBundleUuid(bundleUuid);
             if (bundleManifest != null) {
                 getLog().info(String.format("Adding bundle manifest link to process '%s'", analysis.getId()));
-                linkEntities(analysis, bundleManifest, "inputBundleManifests");
+                resourceLinker.addToRefList(analysis, bundleManifest, "inputBundleManifests");
 
                 // add the input files
                 bundleManifest.getDataFiles().forEach(fileUuid -> {
                     File analysisInputFile = fileRepository.findByUuid(new Uuid(fileUuid));
-                    linkEntities(analysisInputFile, analysis, "derivedByProcesses");
+                    resourceLinker.addToRefList(analysisInputFile, analysis, "derivedByProcesses");
                 });
             }
             else {
@@ -100,26 +98,7 @@ public class ProcessService {
                         bundleUuid));
             }
         }
-        return analysis;
-    }
-
-    private void linkEntities(Identifiable sourceEntity, Identifiable targetEntity, String relationship) {
-        LinkBuilder processLinkBuilder = entityLinks.linkForSingleResource(sourceEntity);
-        String relationshipUri = processLinkBuilder.slash(relationship).toString();
-        String targetUri = entityLinks.linkForSingleResource(targetEntity).toString();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-type", "text/uri-list");
-
-        HttpEntity<String> httpEntity = new HttpEntity<>(
-                targetUri, headers);
-
-        try {
-            this.restTemplate.exchange(relationshipUri, HttpMethod.PATCH, httpEntity, String.class);
-        } catch (HttpClientErrorException e) {
-            log.trace("Failed to patch link %s to %s", targetUri, relationshipUri);
-            throw e;
-        }
+        return this.getProcessRepository().findOne(analysis.getId());
     }
 
     public Collection<Process> findAssays(SubmissionEnvelope submissionEnvelope) {
