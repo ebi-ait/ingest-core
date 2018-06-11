@@ -38,14 +38,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Created by rolando on 11/06/2018.
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "server.port=80")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = "server.port=8088")
 public class ResourceLinkerTest {
     @Autowired ResourceLinker resourceLinker;
     @Autowired ProcessRepository processRepository;
     @Autowired FileRepository fileRepository;
-
-    @LocalServerPort
-    int port = 80;
 
     @Test
     public void testAddRefToList() {
