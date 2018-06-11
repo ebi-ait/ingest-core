@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.file.FileAlreadyExistsException;
 import org.humancellatlas.ingest.file.FileService;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
@@ -48,28 +49,20 @@ public class FileController {
     @NonNull
     private final PagedResourcesAssembler pagedResourcesAssembler;
 
-
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
-                    method = RequestMethod.POST,
-                    produces = MediaTypes.HAL_JSON_VALUE)
-    ResponseEntity<Resource<?>> addFileToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                  @RequestBody File file,
-                                                  final PersistentEntityResourceAssembler assembler) {
-        File entity = getFileService().addFileToSubmissionEnvelope(submissionEnvelope, file);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
-        return ResponseEntity.accepted().body(resource);
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files/{filename}",
+                                method = RequestMethod.POST,
+                                produces = MediaTypes.HAL_JSON_VALUE)
+    ResponseEntity<Resource<?>> createFile(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                           @PathVariable("filename") String fileName,
+                                           @RequestBody File file,
+                                           final PersistentEntityResourceAssembler assembler) {
+        try {
+            return ResponseEntity.accepted().body(assembler.toFullResource(fileService.createFile(fileName, file, submissionEnvelope)));
+        } catch (FileAlreadyExistsException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files/{id}",
-            method = RequestMethod.PUT,
-            produces = MediaTypes.HAL_JSON_VALUE)
-    ResponseEntity<Resource<?>> linkFileToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                   @PathVariable("id") File file,
-                                                  final PersistentEntityResourceAssembler assembler) {
-        File entity = getFileService().addFileToSubmissionEnvelope(submissionEnvelope, file);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
-        return ResponseEntity.accepted().body(resource);
-    }
 
     @RequestMapping(path = "/files/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingFile(@PathVariable("id") File file, final PersistentEntityResourceAssembler assembler) {

@@ -21,6 +21,14 @@ import java.util.UUID;
 @CrossOrigin
 public interface FileRepository extends MongoRepository<File, String> {
 
+    @Override
+    @RestResource(exported = false)
+    <S extends File> S save(S file);
+
+    @Override
+    @RestResource(exported = false)
+    <S extends File> List<S> save(Iterable<S> entites);
+
     File findByUuid(@Param("uuid") Uuid uuid);
 
     @RestResource(exported = false)

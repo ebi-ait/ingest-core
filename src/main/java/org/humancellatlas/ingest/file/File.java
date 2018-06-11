@@ -28,6 +28,10 @@ public class File extends MetadataDocument {
     private Checksums checksums;
     private UUID validationId;
 
+    public File(){
+        super(EntityType.FILE, null);
+    }
+
     public File(@JsonProperty("content") Object content) {
         super(EntityType.FILE, content);
     }
