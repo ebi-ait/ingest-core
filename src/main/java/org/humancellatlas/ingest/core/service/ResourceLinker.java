@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.core.service;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,14 +23,15 @@ import java.net.URI;
 /**
  * Created by rolando on 11/06/2018.
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class ResourceLinker {
     private final @NonNull EntityLinks entityLinks;
     private final @NonNull RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
 
-    private final String serverPort = "8088";
+    @Value("${server.port}")
+    private String serverPort;
 
     private final HttpHeaders URI_LIST_HEADERS = uriListHeaders();
 
