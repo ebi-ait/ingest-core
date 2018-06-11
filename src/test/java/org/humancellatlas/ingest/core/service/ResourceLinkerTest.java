@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
@@ -32,6 +33,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 
 /**
@@ -60,6 +62,8 @@ public class ResourceLinkerTest {
         file.setValidationState(ValidationState.DRAFT);
         file = fileRepository.save(file);
 
+        assertThat(fileRepository.findOne(file.getId()).getDerivedByProcesses().size() == 0);
+
         resourceLinker.addToRefList(file, process, "derivedByProcesses");
 
         assertThat(fileRepository.findOne(file.getId()).getDerivedByProcesses().size() > 0);
@@ -67,7 +71,35 @@ public class ResourceLinkerTest {
 
     @Test
     public void testAddRefToList_DoesNotTriggerOptimisticLock() {
-        assert false;
+        HttpServletRequest httpServletRequestMock = new MockHttpServletRequest();
+        ServletRequestAttributes servletRequestAttributes = new ServletRequestAttributes(httpServletRequestMock);
+        RequestContextHolder.setRequestAttributes(servletRequestAttributes);
+
+        // TODO: use generic mock HTTP resources here
+        Process process = new Process();
+        process.setValidationState(ValidationState.DRAFT);
+        process = processRepository.save(process);
+
+        File file = new File();
+        file.setValidationState(ValidationState.DRAFT);
+        file = fileRepository.save(file);
+
+        // let's modify the File/Processes through mongo and then try to link
+        long fileVersion = file.getVersion();
+        file.setFileName("mock-file-name");
+        fileRepository.save(file);
+        assertThat(fileRepository.findOne(file.getId()).getVersion() != fileVersion);
+
+        long processVersion = file.getVersion();
+        process.setValidationState(ValidationState.INVALID);
+        processRepository.save(process);
+        assertThat(processRepository.findOne(process.getId()).getVersion() != processVersion);
+
+        try {
+            resourceLinker.addToRefList(file, process, "derivedByProcesses");
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
     }
 
 }
