@@ -36,7 +36,9 @@ public class SchemaTest {
     @MockBean SchemaRepository schemaRepository;
 
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8088);
+    public WireMockRule wireMockRule = new WireMockRule(8089);
+
+    String mockSchemaUri = "http://localhost:8089";
 
     @Test
     public void testSchemaScrape() throws Exception {
@@ -52,7 +54,7 @@ public class SchemaTest {
                                             .withHeader("Content-Type", "application/xml")
                                             .withBody(new String(Files.readAllBytes(Paths.get(new File(".").getAbsolutePath() + "/src/test/resources/testfiles/TestBucketListing.xml"))))));
 
-        Collection<URI> mockSchemaUris = schemaScraper.getAllSchemaURIs(URI.create("http://localhost:8088"));
+        Collection<URI> mockSchemaUris = schemaScraper.getAllSchemaURIs(URI.create(mockSchemaUri));
 
         // we know there are 108 schemas in the test file
         assert mockSchemaUris.size() == 107;
@@ -126,7 +128,7 @@ public class SchemaTest {
                                             .withHeader("Content-Type", "application/xml")
                                             .withBody(new String(Files.readAllBytes(Paths.get(new File(".").getAbsolutePath() + "/src/test/resources/testfiles/TestBucketListing.xml"))))));
         // given
-        Collection<URI> mockSchemaUris = schemaScraper.getAllSchemaURIs(URI.create("http://localhost:8088"));
+        Collection<URI> mockSchemaUris = schemaScraper.getAllSchemaURIs(URI.create(mockSchemaUri));
 
         try {
             // when

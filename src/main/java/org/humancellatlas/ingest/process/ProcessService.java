@@ -3,12 +3,12 @@ package org.humancellatlas.ingest.process;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.jni.Proc;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.ResourceLinker;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -16,9 +16,17 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.EntityLinks;
+import org.springframework.hateoas.Identifiable;
+import org.springframework.hateoas.LinkBuilder;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -35,6 +43,8 @@ public class ProcessService {
     private final @NonNull FileRepository fileRepository;
     private final @NonNull BiomaterialRepository biomaterialRepository;
     private final @NonNull BundleManifestRepository bundleManifestRepository;
+
+    private final @NonNull ResourceLinker resourceLinker;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -74,13 +84,12 @@ public class ProcessService {
             BundleManifest bundleManifest = getBundleManifestRepository().findByBundleUuid(bundleUuid);
             if (bundleManifest != null) {
                 getLog().info(String.format("Adding bundle manifest link to process '%s'", analysis.getId()));
-                analysis.addInputBundleManifest(bundleManifest);
+                resourceLinker.addToRefList(analysis, bundleManifest, "inputBundleManifests");
 
                 // add the input files
                 bundleManifest.getDataFiles().forEach(fileUuid -> {
                     File analysisInputFile = fileRepository.findByUuid(new Uuid(fileUuid));
-                    analysisInputFile.addAsInputToProcess(analysis);
-                    fileRepository.save(analysisInputFile);
+                    resourceLinker.addToRefList(analysisInputFile, analysis, "derivedByProcesses");
                 });
             }
             else {
@@ -89,7 +98,7 @@ public class ProcessService {
                         bundleUuid));
             }
         }
-        return getProcessRepository().save(analysis);
+        return this.getProcessRepository().findOne(analysis.getId());
     }
 
     public Collection<Process> findAssays(SubmissionEnvelope submissionEnvelope) {
