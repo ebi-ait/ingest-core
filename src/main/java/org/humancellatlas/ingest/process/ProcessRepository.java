@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.process;
 
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -14,7 +15,7 @@ import java.util.List;
 @CrossOrigin
 public interface ProcessRepository extends MongoRepository<Process, String> {
 
-    Process findByUuid(@Param("uuid") String uuid);
+    Process findByUuid(@Param("uuid") Uuid uuid);
 
     @RestResource(exported = false)
     List<Process> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope);

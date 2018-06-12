@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.biomaterial;
 
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -16,7 +17,7 @@ import java.util.List;
 @CrossOrigin
 public interface BiomaterialRepository extends MongoRepository<Biomaterial, String> {
 
-    Biomaterial findByUuid(@Param("uuid") String uuid);
+    Biomaterial findByUuid(@Param("uuid") Uuid uuid);
 
     Page<Biomaterial> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope,
             Pageable pageable);
