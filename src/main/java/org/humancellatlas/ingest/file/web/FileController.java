@@ -64,6 +64,28 @@ public class FileController {
         }
     }
 
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
+                   method = RequestMethod.POST,
+                   produces = MediaTypes.HAL_JSON_VALUE)
+    ResponseEntity<Resource<?>> addFileToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                  @RequestBody File file,
+                                                  final PersistentEntityResourceAssembler assembler) {
+        File entity = getFileService().addFileToSubmissionEnvelope(submissionEnvelope, file);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files/{id}",
+            method = RequestMethod.PUT,
+            produces = MediaTypes.HAL_JSON_VALUE)
+    ResponseEntity<Resource<?>> linkFileToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                   @PathVariable("id") File file,
+                                                   final PersistentEntityResourceAssembler assembler) {
+        File entity = getFileService().addFileToSubmissionEnvelope(submissionEnvelope, file);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
 
     @RequestMapping(path = "/files/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingFile(@PathVariable("id") File file, final PersistentEntityResourceAssembler assembler) {
@@ -99,9 +121,9 @@ public class FileController {
         file = getFileService().getFileRepository().save(file);
         return ResponseEntity.accepted().body(assembler.toFullResource(file));
     }
-
-    @RequestMapping(path = "/files/{id}/", method = {RequestMethod.PUT, RequestMethod.POST})
-    HttpEntity<?> notAllowed(@PathVariable("id") File file) {
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(ResponseEntity.EMPTY);
-    }
+//
+//    @RequestMapping(path = "/files/{id}/", method = {RequestMethod.PUT, RequestMethod.POST})
+//    HttpEntity<?> notAllowed(@PathVariable("id") File file) {
+//        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(ResponseEntity.EMPTY);
+//    }
 }

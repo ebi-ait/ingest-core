@@ -39,6 +39,10 @@ public class FileService {
         }
     }
 
+    public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
+        file.addToSubmissionEnvelope(submissionEnvelope);
+        return getFileRepository().save(file);
+    }
 
     public File updateStagedFileUrl(String envelopeUuid, String fileName, String newFileUrl) throws CoreEntityNotFoundException {
         Optional<SubmissionEnvelope> envelope = Optional.ofNullable(submissionEnvelopeRepository.findByUuid(new Uuid(envelopeUuid)));
