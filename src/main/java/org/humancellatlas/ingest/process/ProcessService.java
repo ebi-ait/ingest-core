@@ -98,6 +98,8 @@ public class ProcessService {
                         bundleUuid));
             }
         }
+
+
         return this.getProcessRepository().findOne(analysis.getId());
     }
 

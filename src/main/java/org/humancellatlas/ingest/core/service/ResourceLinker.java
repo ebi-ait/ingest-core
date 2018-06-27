@@ -29,18 +29,14 @@ public class ResourceLinker {
     private final @NonNull EntityLinks entityLinks;
     private final @NonNull RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
-
-    @Value("${server.port}")
-    private String serverPort;
-
     private final HttpHeaders URI_LIST_HEADERS = uriListHeaders();
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     public void addToRefList(Identifiable sourceEntity, Identifiable targetEntity, String relationship) {
         LinkBuilder processLinkBuilder = entityLinks.linkForSingleResource(sourceEntity);
-        URI relationshipUri = addPortToResourceUri(processLinkBuilder.slash(relationship).toUri());
-        URI targetUri = addPortToResourceUri(entityLinks.linkForSingleResource(targetEntity).toUri());
+        URI relationshipUri = processLinkBuilder.slash(relationship).toUri();
+        URI targetUri = entityLinks.linkForSingleResource(targetEntity).toUri();
 
         HttpEntity httpEntity = new HttpEntity<>(targetUri.toString(), URI_LIST_HEADERS);
 
@@ -58,13 +54,4 @@ public class ResourceLinker {
         return headers;
     }
 
-    private URI addPortToResourceUri(URI uri) {
-        return addPortToResourceUri(uri, Integer.valueOf(this.serverPort));
-    }
-
-    private URI addPortToResourceUri(URI uri, int port) {
-        return UriComponentsBuilder.fromUri(uri)
-                                   .port(port)
-                                   .build().toUri();
-    }
 }
