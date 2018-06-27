@@ -89,7 +89,7 @@ public class ProcessService {
                 // add the input files
                 bundleManifest.getDataFiles().forEach(fileUuid -> {
                     File analysisInputFile = fileRepository.findByUuid(new Uuid(fileUuid));
-                    resourceLinker.addToRefList(analysisInputFile, analysis, "derivedByProcesses");
+                    resourceLinker.addToRefList(analysisInputFile, analysis, "inputToProcesses");
                 });
             }
             else {
