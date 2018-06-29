@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.LinkBuilder;
@@ -101,6 +102,16 @@ public class ProcessService {
 
 
         return this.getProcessRepository().findOne(analysis.getId());
+    }
+
+    public Page<Process> processesByInputBundleUuid(UUID bundleUuid, Pageable pageable) {
+        Optional<BundleManifest> maybeBundleManifest = Optional.ofNullable(bundleManifestRepository.findByBundleUuid(bundleUuid.toString()));
+
+        if(maybeBundleManifest.isPresent()){
+            return processRepository.findByInputBundleManifestsContaining(maybeBundleManifest.get(), pageable);
+        } else {
+            throw new ResourceNotFoundException(String.format("Bundle with UUID %s not found", bundleUuid.toString()));
+        }
     }
 
     public Collection<Process> findAssays(SubmissionEnvelope submissionEnvelope) {
