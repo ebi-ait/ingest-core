@@ -50,10 +50,12 @@ public class ProcessServiceTest {
         File file = spy(new File());
 
         //when:
-        service.addFileToAnalysisProcess(analysis, file);
+        Process result = service.addFileToAnalysisProcess(analysis, file);
 
         //then:
+        assertThat(result).isEqualTo(analysis);
         verify(file).addToSubmissionEnvelope(submissionEnvelope);
+        verify(fileRepository).save(file);
     }
 
     @Configuration
