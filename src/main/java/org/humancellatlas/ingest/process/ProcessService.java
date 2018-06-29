@@ -87,9 +87,7 @@ public class ProcessService {
 
     private File determineTargetFile(File file) {
         File targetFile = fileRepository.findByUuid(file.getUuid());
-        if (targetFile == null) {
-            targetFile = file;
-        }
+        targetFile = Optional.ofNullable(targetFile).orElse(file);
         return targetFile;
     }
 
