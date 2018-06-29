@@ -124,7 +124,7 @@ public class ProcessController {
     ResponseEntity<?> findProcesessByInputBundleUuid(@RequestParam String bundleUuid,
                                                      Pageable pageable,
                                                      final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Process> processes = processService.processesByInputBundleUuid(UUID.fromString(bundleUuid), pageable);
+        Page<Process> processes = processService.findProcessesByInputBundleUuid(UUID.fromString(bundleUuid), pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
     }
 

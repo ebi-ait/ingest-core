@@ -104,7 +104,7 @@ public class ProcessService {
         return this.getProcessRepository().findOne(analysis.getId());
     }
 
-    public Page<Process> processesByInputBundleUuid(UUID bundleUuid, Pageable pageable) {
+    public Page<Process> findProcessesByInputBundleUuid(UUID bundleUuid, Pageable pageable) {
         Optional<BundleManifest> maybeBundleManifest = Optional.ofNullable(bundleManifestRepository.findByBundleUuid(bundleUuid.toString()));
 
         if(maybeBundleManifest.isPresent()){
