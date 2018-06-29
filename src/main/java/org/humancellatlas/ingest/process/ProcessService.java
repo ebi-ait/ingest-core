@@ -15,6 +15,7 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -32,20 +33,23 @@ import org.springframework.web.client.RestTemplate;
 import java.text.DecimalFormat;
 import java.util.*;
 
-/**
- * Created by rolando on 19/02/2018.
- */
 @Service
-@RequiredArgsConstructor
 @Getter
 public class ProcessService {
-    private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
-    private final @NonNull ProcessRepository processRepository;
-    private final @NonNull FileRepository fileRepository;
-    private final @NonNull BiomaterialRepository biomaterialRepository;
-    private final @NonNull BundleManifestRepository bundleManifestRepository;
 
-    private final @NonNull ResourceLinker resourceLinker;
+    @Autowired
+    private SubmissionEnvelopeRepository submissionEnvelopeRepository;
+    @Autowired
+    private ProcessRepository processRepository;
+    @Autowired
+    private FileRepository fileRepository;
+    @Autowired
+    private BiomaterialRepository biomaterialRepository;
+    @Autowired
+    private BundleManifestRepository bundleManifestRepository;
+
+    @Autowired
+    private ResourceLinker resourceLinker;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -75,9 +79,17 @@ public class ProcessService {
         return getProcessRepository().save(process);
     }
 
-    public Process addFileToAnalysisProcess(Process analysis, File file) {
-        getFileRepository().save(file.addAsDerivedByProcess(analysis));
+    public Process addFileToAnalysisProcess(final Process analysis, final File file) {
+        File targetFile = determineTargetFile(file);
+        targetFile.addToAnalysis(analysis);
+        getFileRepository().save(targetFile);
         return analysis;
+    }
+
+    private File determineTargetFile(File file) {
+        File targetFile = fileRepository.findByUuid(file.getUuid());
+        targetFile = Optional.ofNullable(targetFile).orElse(file);
+        return targetFile;
     }
 
     public Process resolveBundleReferencesForProcess(Process analysis, BundleReference bundleReference) {

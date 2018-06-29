@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.humancellatlas.ingest.core.Checksums;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -27,9 +28,11 @@ public class File extends MetadataDocument {
     private String cloudUrl;
     private Checksums checksums;
     private UUID validationId;
+    private UUID dataFileUuid;
 
     public File(){
         super(EntityType.FILE, null);
+        setDataFileUuid(UUID.randomUUID());
     }
 
     public File(@JsonProperty("content") Object content) {
@@ -65,4 +68,11 @@ public class File extends MetadataDocument {
 
         return this;
     }
+
+    public void addToAnalysis(Process analysis) {
+        SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
+        addToSubmissionEnvelope(submissionEnvelope);
+        addAsDerivedByProcess(analysis);
+    }
+
 }
