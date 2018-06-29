@@ -79,15 +79,17 @@ public class ProcessService {
     }
 
     public Process addFileToAnalysisProcess(final Process analysis, final File file) {
-        File targetFile = determineTargetFile(file);
+        SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
+        File targetFile = determineTargetFile(submissionEnvelope, file);
         targetFile.addToAnalysis(analysis);
         getFileRepository().save(targetFile);
         return analysis;
     }
 
-    private File determineTargetFile(File file) {
-        File targetFile = fileRepository.findByUuid(file.getUuid());
-        targetFile = Optional.ofNullable(targetFile).orElse(file);
+    private File determineTargetFile(SubmissionEnvelope submissionEnvelope, File file) {
+        List<File> persistentFiles = fileRepository
+                .findBySubmissionEnvelopesInAndFileName(submissionEnvelope, file.getFileName());
+        File targetFile = persistentFiles.stream().findFirst().orElse(file);
         return targetFile;
     }
 

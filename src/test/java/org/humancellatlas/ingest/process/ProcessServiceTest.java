@@ -2,10 +2,10 @@ package org.humancellatlas.ingest.process;
 
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
-import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.ResourceLinker;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +14,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -43,10 +47,17 @@ public class ProcessServiceTest {
     public void testAddFileToAnalysisProcess() {
         //given:
         Process analysis = new Process();
-        File file = spy(new File());
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        analysis.addToSubmissionEnvelope(submissionEnvelope);
 
         //and:
-        doReturn(null).when(fileRepository).findByUuid(any(Uuid.class));
+        File file = new File();
+        file.setFileName("ERR1630013.fastq.gz");
+        file = spy(file);
+
+        //and:
+        doReturn(Collections.emptyList()).when(fileRepository)
+                .findBySubmissionEnvelopesInAndFileName(any(SubmissionEnvelope.class), anyString());
 
         //when:
         Process result = service.addFileToAnalysisProcess(analysis, file);
@@ -61,15 +72,19 @@ public class ProcessServiceTest {
     public void testAddFileToAnalysisProcessWhenFileAlreadyExists() {
         //given:
         Process analysis = new Process();
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        analysis.addToSubmissionEnvelope(submissionEnvelope);
 
         //and:
         File file = new File();
-        Uuid fileUuid = new Uuid();
-        file.setUuid(fileUuid);
+        String fileName = "ERR1630013.fastq.gz";
+        file.setFileName(fileName);
 
         //and:
         File persistentFile = spy(new File());
-        doReturn(persistentFile).when(fileRepository).findByUuid(fileUuid);
+        List<File> persistentFiles = Arrays.asList(persistentFile);
+        doReturn(persistentFiles).when(fileRepository)
+                .findBySubmissionEnvelopesInAndFileName(submissionEnvelope, fileName);
 
         //when:
         Process result = service.addFileToAnalysisProcess(analysis, file);
