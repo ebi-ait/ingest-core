@@ -81,6 +81,9 @@ public class ProcessService {
     public Process addFileToAnalysisProcess(final Process analysis, final File file) {
         SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
         File targetFile = fileRepository.findByUuid(file.getUuid());
+        if (targetFile == null) {
+            targetFile = file;
+        }
         targetFile.addToSubmissionEnvelope(submissionEnvelope);
         targetFile.addAsDerivedByProcess(analysis);
         getFileRepository().save(targetFile);

@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -51,6 +52,7 @@ public class ProcessServiceTest {
 
         //and:
         File file = spy(new File());
+        doReturn(null).when(fileRepository).findByUuid(any(Uuid.class));
 
         //when:
         Process result = service.addFileToAnalysisProcess(analysis, file);
@@ -58,6 +60,7 @@ public class ProcessServiceTest {
         //then:
         assertThat(result).isEqualTo(analysis);
         verify(file).addToSubmissionEnvelope(submissionEnvelope);
+        verify(file).addAsDerivedByProcess(analysis);
         verify(fileRepository).save(file);
     }
 
