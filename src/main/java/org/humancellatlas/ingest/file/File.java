@@ -65,4 +65,9 @@ public class File extends MetadataDocument {
 
         return this;
     }
+
+    public void addToAnalysis(Process analysis) {
+        addAsDerivedByProcess(analysis);
+    }
+
 }
