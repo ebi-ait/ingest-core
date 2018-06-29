@@ -78,10 +78,12 @@ public class ProcessService {
         return getProcessRepository().save(process);
     }
 
-    public Process addFileToAnalysisProcess(Process analysis, File file) {
+    public Process addFileToAnalysisProcess(final Process analysis, final File file) {
         SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
-        file.addToSubmissionEnvelope(submissionEnvelope);
-        getFileRepository().save(file.addAsDerivedByProcess(analysis));
+        File targetFile = fileRepository.findByUuid(file.getUuid());
+        targetFile.addToSubmissionEnvelope(submissionEnvelope);
+        targetFile.addAsDerivedByProcess(analysis);
+        getFileRepository().save(targetFile);
         return analysis;
     }
 

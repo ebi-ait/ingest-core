@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.process;
 
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.ResourceLinker;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -43,10 +45,11 @@ public class ProcessServiceTest {
     @Test
     public void testAddFileToAnalysisProcess() {
         //given:
-        Process analysis = spy(new Process());
+        Process analysis = new Process();
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         analysis.addToSubmissionEnvelope(submissionEnvelope);
 
+        //and:
         File file = spy(new File());
 
         //when:
@@ -56,6 +59,34 @@ public class ProcessServiceTest {
         assertThat(result).isEqualTo(analysis);
         verify(file).addToSubmissionEnvelope(submissionEnvelope);
         verify(fileRepository).save(file);
+    }
+
+    @Test
+    public void testAddFileToAnalysisProcessWhenFileAlreadyExists() {
+        //given:
+        Process analysis = new Process();
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        analysis.addToSubmissionEnvelope(submissionEnvelope);
+
+        //and:
+        File file = new File();
+        Uuid fileUuid = new Uuid();
+        file.setUuid(fileUuid);
+
+        //and:
+        File persistentFile = spy(new File());
+        doReturn(persistentFile).when(fileRepository).findByUuid(fileUuid);
+
+        //when:
+        Process result = service.addFileToAnalysisProcess(analysis, file);
+
+        //then:
+        assertThat(result).isEqualTo(analysis);
+
+        //and:
+        verify(persistentFile).addToSubmissionEnvelope(submissionEnvelope);
+        verify(persistentFile).addAsDerivedByProcess(analysis);
+        verify(fileRepository).save(persistentFile);
     }
 
     @Configuration
