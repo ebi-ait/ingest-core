@@ -24,6 +24,7 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
     Page<Process> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope,
             Pageable pageable);
 
+    @RestResource(exported = false)
     Page<Process> findByInputBundleManifestsContaining(BundleManifest bundleManifest, Pageable pageable);
 
     @RestResource(rel = "findBySubmissionAndValidationState")
