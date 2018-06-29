@@ -44,11 +44,9 @@ public class ProcessServiceTest {
     public void testAddFileToAnalysisProcess() {
         //given:
         Process analysis = new Process();
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        analysis.addToSubmissionEnvelope(submissionEnvelope);
+        File file = spy(new File());
 
         //and:
-        File file = spy(new File());
         doReturn(null).when(fileRepository).findByUuid(any(Uuid.class));
 
         //when:
@@ -56,8 +54,7 @@ public class ProcessServiceTest {
 
         //then:
         assertThat(result).isEqualTo(analysis);
-        verify(file).addToSubmissionEnvelope(submissionEnvelope);
-        verify(file).addAsDerivedByProcess(analysis);
+        verify(file).addToAnalysis(analysis);
         verify(fileRepository).save(file);
     }
 
@@ -65,8 +62,6 @@ public class ProcessServiceTest {
     public void testAddFileToAnalysisProcessWhenFileAlreadyExists() {
         //given:
         Process analysis = new Process();
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        analysis.addToSubmissionEnvelope(submissionEnvelope);
 
         //and:
         File file = new File();
@@ -84,8 +79,7 @@ public class ProcessServiceTest {
         assertThat(result).isEqualTo(analysis);
 
         //and:
-        verify(persistentFile).addToSubmissionEnvelope(submissionEnvelope);
-        verify(persistentFile).addAsDerivedByProcess(analysis);
+        verify(persistentFile).addToAnalysis(analysis);
         verify(fileRepository).save(persistentFile);
     }
 
