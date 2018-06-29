@@ -63,11 +63,16 @@ public class ResourceLinkerTest {
 
         // try link a Process to a File through the inputFiles link
         // TODO: use generic mock HTTP resources here
-        Process process = new RestTemplate().exchange("http://localhost:8088/processes", HttpMethod.POST, httpEntity, Process.class).getBody();
-        File file =  new RestTemplate().exchange("http://localhost:8088/files", HttpMethod.POST, httpEntity, File.class).getBody();
+        Process process = new Process();
+        process.setValidationState(ValidationState.DRAFT);
+        process = processRepository.save(process);
+
+        File file = new File();
+        file.setValidationState(ValidationState.DRAFT);
+        file = fileRepository.save(file);
 
 
-       // assertThat(fileRepository.findOne(file.getId()).getDerivedByProcesses().size() == 0);
+        assertThat(fileRepository.findOne(file.getId()).getDerivedByProcesses().size() == 0);
 
         resourceLinker.addToRefList(file, process, "derivedByProcesses");
 
