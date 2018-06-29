@@ -80,14 +80,19 @@ public class ProcessService {
 
     public Process addFileToAnalysisProcess(final Process analysis, final File file) {
         SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
-        File targetFile = fileRepository.findByUuid(file.getUuid());
-        if (targetFile == null) {
-            targetFile = file;
-        }
+        File targetFile = determineTargetFile(file);
         targetFile.addToSubmissionEnvelope(submissionEnvelope);
         targetFile.addAsDerivedByProcess(analysis);
         getFileRepository().save(targetFile);
         return analysis;
+    }
+
+    private File determineTargetFile(File file) {
+        File targetFile = fileRepository.findByUuid(file.getUuid());
+        if (targetFile == null) {
+            targetFile = file;
+        }
+        return targetFile;
     }
 
     public Process resolveBundleReferencesForProcess(Process analysis, BundleReference bundleReference) {
