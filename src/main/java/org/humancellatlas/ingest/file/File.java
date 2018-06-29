@@ -67,6 +67,8 @@ public class File extends MetadataDocument {
     }
 
     public void addToAnalysis(Process analysis) {
+        SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
+        addToSubmissionEnvelope(submissionEnvelope);
         addAsDerivedByProcess(analysis);
     }
 

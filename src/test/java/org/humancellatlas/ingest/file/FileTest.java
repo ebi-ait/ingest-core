@@ -21,6 +21,7 @@ public class FileTest {
 
         //then:
         assertThat(file.getDerivedByProcesses()).contains(analysis);
+        assertThat(file.getSubmissionEnvelopes()).contains(submissionEnvelope);
     }
 
 }
