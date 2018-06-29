@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.core.service;
 
 
+import org.humancellatlas.ingest.IngestCoreApplication;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.file.web.FileController;
@@ -21,11 +22,15 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
 import org.springframework.data.rest.webmvc.config.RepositoryRestMvcConfiguration;
 import org.springframework.hateoas.EntityLinks;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -40,7 +45,7 @@ import static org.assertj.core.api.Assertions.fail;
  * Created by rolando on 11/06/2018.
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = "server.port=8088")
+@SpringBootTest(classes = IngestCoreApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = "server.port=8088")
 public class ResourceLinkerTest {
     @Autowired ResourceLinker resourceLinker;
     @Autowired ProcessRepository processRepository;
@@ -52,6 +57,10 @@ public class ResourceLinkerTest {
         ServletRequestAttributes servletRequestAttributes = new ServletRequestAttributes(httpServletRequestMock);
         RequestContextHolder.setRequestAttributes(servletRequestAttributes);
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-type", "application/json");
+        HttpEntity httpEntity = new HttpEntity<>("{}", headers);
+
         // try link a Process to a File through the inputFiles link
         // TODO: use generic mock HTTP resources here
         Process process = new Process();
@@ -61,6 +70,7 @@ public class ResourceLinkerTest {
         File file = new File();
         file.setValidationState(ValidationState.DRAFT);
         file = fileRepository.save(file);
+
 
         assertThat(fileRepository.findOne(file.getId()).getDerivedByProcesses().size() == 0);
 

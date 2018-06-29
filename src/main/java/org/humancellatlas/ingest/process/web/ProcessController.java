@@ -22,10 +22,9 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 /**
  * Created by rolando on 16/02/2018.
@@ -117,6 +116,14 @@ public class ProcessController {
         Process result = processService.addFileToAnalysisProcess(analysis, file);
         PersistentEntityResource resource = assembler.toFullResource(result);
         return ResponseEntity.accepted().body(resource);
+    }
+
+    @RequestMapping(path = "/processes/search/findByInputBundleUuid", method = RequestMethod.GET)
+    ResponseEntity<?> findProcesessByInputBundleUuid(@RequestParam String bundleUuid,
+                                                     Pageable pageable,
+                                                     final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Process> processes = processService.findProcessesByInputBundleUuid(UUID.fromString(bundleUuid), pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
     }
 
     @RequestMapping(path = "/processes/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
