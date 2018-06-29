@@ -114,9 +114,7 @@ public class ProcessController {
     ResponseEntity<Resource<?>> addFileReference(@PathVariable("analysis_id") Process analysis,
                                                  @RequestBody File file,
                                                  final PersistentEntityResourceAssembler assembler) {
-        SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
-        file.addToSubmissionEnvelope(submissionEnvelope);
-        Process result = getProcessService().addFileToAnalysisProcess(analysis, file);
+        Process result = processService.addFileToAnalysisProcess(analysis, file);
         PersistentEntityResource resource = assembler.toFullResource(result);
         return ResponseEntity.accepted().body(resource);
     }
