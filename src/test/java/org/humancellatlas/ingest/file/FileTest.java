@@ -38,16 +38,10 @@ public class FileTest {
         assertThat(file.getDerivedByProcesses()).hasSize(1);
     }
 
-    private Process createTestProcess() {
-        Process process = spy(new Process());
-        doReturn("fe89a0").when(process).getId();
-        return process;
-    }
-
     @Test
     public void testAddToAnalysis() {
         //given:
-        Process analysis = new Process();
+        Process analysis = createTestProcess();
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         analysis.addToSubmissionEnvelope(submissionEnvelope);
 
@@ -63,7 +57,7 @@ public class FileTest {
     @Test
     public void testAddToAnalysisWhenFileAlreadyLinkedToSubmissionEnvelope() {
         //given:
-        Process analysis = new Process();
+        Process analysis = createTestProcess();
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         analysis.addToSubmissionEnvelope(submissionEnvelope);
 
@@ -77,6 +71,12 @@ public class FileTest {
         //then:
         assertThat(file.getDerivedByProcesses()).contains(analysis);
         assertThat(file.getSubmissionEnvelopes()).contains(submissionEnvelope);
+    }
+
+    private Process createTestProcess() {
+        Process process = spy(new Process());
+        doReturn("fe89a0").when(process).getId();
+        return process;
     }
 
 }

@@ -76,7 +76,8 @@ public class File extends MetadataDocument {
 
     public void addToAnalysis(Process analysis) {
         //TODO check if this File and the Analysis belong to the same Submission?
-        if (getSubmissionEnvelopes() == null) {
+        List<SubmissionEnvelope> submissionEnvelopes = getSubmissionEnvelopes();
+        if (submissionEnvelopes == null || submissionEnvelopes.isEmpty()) {
             SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
             addToSubmissionEnvelope(submissionEnvelope);
         }
