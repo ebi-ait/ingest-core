@@ -24,4 +24,23 @@ public class FileTest {
         assertThat(file.getSubmissionEnvelopes()).contains(submissionEnvelope);
     }
 
+    @Test
+    public void testAddToAnalysisWhenFileAlreadyLinkedToSubmissionEnvelope() {
+        //given:
+        Process analysis = new Process();
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        analysis.addToSubmissionEnvelope(submissionEnvelope);
+
+        //and:
+        File file = new File();
+        file.addToSubmissionEnvelope(submissionEnvelope);
+
+        //when:
+        file.addToAnalysis(analysis);
+
+        //then:
+        assertThat(file.getDerivedByProcesses()).contains(analysis);
+        assertThat(file.getSubmissionEnvelopes()).contains(submissionEnvelope);
+    }
+
 }
