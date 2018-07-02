@@ -64,8 +64,13 @@ public class File extends MetadataDocument {
      * @return a reference to this file
      */
     public File addAsDerivedByProcess(Process process) {
-        this.derivedByProcesses.add(process);
-
+        String processId = process.getId();
+        boolean processInList = derivedByProcesses.stream()
+                .map(Process::getId)
+                .anyMatch(processId::equals);
+        if (!processInList) {
+            this.derivedByProcesses.add(process);
+        }
         return this;
     }
 
