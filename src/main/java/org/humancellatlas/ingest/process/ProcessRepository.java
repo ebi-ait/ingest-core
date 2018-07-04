@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.process;
 
+import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -22,6 +23,9 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
 
     Page<Process> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope,
             Pageable pageable);
+
+    @RestResource(exported = false)
+    Page<Process> findByInputBundleManifestsContaining(BundleManifest bundleManifest, Pageable pageable);
 
     @RestResource(rel = "findBySubmissionAndValidationState")
     public Page<Process> findBySubmissionEnvelopesContainingAndValidationState(@Param
