@@ -8,16 +8,14 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.*;
 
-/**
- * Javadocs go here!
- *
- * @author Tony Burdett
- * @date 30/08/17
- */
 @Getter
+@Document
+@CompoundIndex(def="{ 'uuid': 1 }")
 public class SubmissionEnvelope extends AbstractEntity {
     private @Setter StagingDetails stagingDetails;
     private SubmissionState submissionState;
