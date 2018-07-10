@@ -8,16 +8,18 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.*;
 
-/**
- * Javadocs go here!
- *
- * @author Tony Burdett
- * @date 30/08/17
- */
 @Getter
+@Document
+/*
+Used as a workaround to inheritance issue.
+Not proper to annotate uuid in parent class as we don't want uuid index for all subtypes.
+*/
+@CompoundIndex(def="{ 'uuid': 1 }", unique=true)
 public class SubmissionEnvelope extends AbstractEntity {
     private @Setter StagingDetails stagingDetails;
     private SubmissionState submissionState;
