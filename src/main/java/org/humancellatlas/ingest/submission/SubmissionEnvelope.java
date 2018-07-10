@@ -15,6 +15,10 @@ import java.util.*;
 
 @Getter
 @Document
+/*
+Used as a workaround to inheritance issue.
+Not proper to annotate uuid in parent class as we don't want uuid index for all subtypes.
+*/
 @CompoundIndex(def="{ 'uuid': 1 }", unique=true)
 public class SubmissionEnvelope extends AbstractEntity {
     private @Setter StagingDetails stagingDetails;
