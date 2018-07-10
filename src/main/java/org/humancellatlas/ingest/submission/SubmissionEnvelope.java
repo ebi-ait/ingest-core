@@ -15,7 +15,7 @@ import java.util.*;
 
 @Getter
 @Document
-@CompoundIndex(def="{ 'uuid': 1 }")
+@CompoundIndex(def="{ 'uuid': 1 }", unique=true)
 public class SubmissionEnvelope extends AbstractEntity {
     private @Setter StagingDetails stagingDetails;
     private SubmissionState submissionState;
