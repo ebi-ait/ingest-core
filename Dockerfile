@@ -2,7 +2,7 @@ FROM java:8-alpine
 
 # security-related updates:
 # https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-8287
-RUN apk update &&
+RUN apk update && \
     apk upgrade freetype 2.6.3-r1
 
 WORKDIR /opt
