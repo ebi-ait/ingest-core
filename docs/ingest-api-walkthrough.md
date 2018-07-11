@@ -81,3 +81,6 @@ To do the submission:
 # returns a dummy receipt confirming submission
 >: curl -X PUT -H "Content-Type: application/json" http://api.ingest.dev.data.humancellatlas.org/submissionEnvelopes/{sub_id}/submissionEvent
 ```
+
+# Privacy
+This API require limited processing of personal data. For more information, please read our [privacy policy](http://www.ebi.ac.uk/data-protection/privacy-notice/human-cell-atlas-ingest-access-service).
