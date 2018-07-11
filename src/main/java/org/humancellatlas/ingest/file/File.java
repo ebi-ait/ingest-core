@@ -67,7 +67,7 @@ public class File extends MetadataDocument {
         String processId = process.getId();
         boolean processInList = derivedByProcesses.stream()
                 .map(Process::getId)
-                .anyMatch(processId::equals);
+                .anyMatch(id -> id.equals(processId));
         if (!processInList) {
             this.derivedByProcesses.add(process);
         }
