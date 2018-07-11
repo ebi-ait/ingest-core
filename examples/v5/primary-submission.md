@@ -204,3 +204,6 @@ curl -X PUT \
   http://localhost:8080/submissionEnvelopes/5aa4ec8a1b41fe298594e531/submit \
   -H 'content-type: application/json'
 ```
+
+# Privacy
+This API require limited processing of personal data. For more information, please read our [privacy policy](http://www.ebi.ac.uk/data-protection/privacy-notice/human-cell-atlas-ingest-access-service).
