@@ -33,13 +33,20 @@ dependencies {
 	compile('org.springframework.data:spring-data-rest-hal-browser')
 	compile('org.springframework.boot:spring-boot-starter-hateoas')
 	compile('org.springframework.boot:spring-boot-starter-amqp')
-	compile('com.auth0:auth0-spring-security-api:1.0.0-rc.2')
+
+    compile('com.auth0:auth0-spring-security-api:1.0.0-rc.2')
+
 	compile('joda-time:joda-time')
+
 	compile('com.fasterxml.jackson.datatype:jackson-datatype-joda')
 	compile('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
 	compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
 	compile('com.fasterxml.jackson.module:jackson-module-parameter-names')
-	compileOnly('org.projectlombok:lombok')
+
+    compile('org.jolokia:jolokia-core')
+
+    compileOnly('org.projectlombok:lombok')
+
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
 	testCompile('com.github.tomakehurst:wiremock-standalone:2.14.0')
