@@ -49,7 +49,15 @@ public class SchemaService {
 
     @Scheduled(fixedDelay = EVERY_24_HOURS)
     public void updateSchemasCollection() {
-        schemaScraper.getAllSchemaURIs(URI.create(environment.getProperty("SCHEMA_BASE_URI"))).stream()
+        String schemaBaseUri = environment.getProperty("SCHEMA_BASE_URI");
+
+        if (schemaBaseUri.endsWith("/")) {
+            schemaBaseUri = schemaBaseUri.substring(0, schemaBaseUri.length() - 1);
+        }
+
+        String schemaBucketUrl = schemaBaseUri + ".s3.amazonaws.com";
+
+        schemaScraper.getAllSchemaURIs(URI.create(schemaBucketUrl)).stream()
                      .filter(schemaUri -> ! schemaUri.toString().contains("index.html"))
                      .forEach(schemaUri -> {
                          Schema schemaDocument = schemaDescriptionFromSchemaUri(schemaUri);
