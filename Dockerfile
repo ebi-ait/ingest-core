@@ -16,6 +16,7 @@ ENV RABBIT_HOST=localhost
 ENV RABBIT_PORT=5672
 ENV SCHEMA_BASE_URI=https://schema.humancellatlas.org
 
+#JMX related variables
 ENV JMX_PORT=9091
 ENV RMI_HOSTNAME=localhost
 
@@ -28,11 +29,6 @@ RUN ./gradlew assemble
 
 CMD java \
     -XX:+UseG1GC \
-    -Dcom.sun.management.jmxremote.authenticate=false \
-    -Dcom.sun.management.jmxremote.ssl=false \
-    -Dcom.sun.management.jmxremote.port=$JMX_PORT \
-    -Dcom.sun.management.jmxremote.rmi.port=$JMX_PORT \
-    -Djava.rmi.server.hostname=$RMI_HOSTNAME \
     -jar build/libs/*.jar \
     --spring.data.mongodb.uri=$MONGO_URI \
     --spring.rabbitmq.host=$RABBIT_HOST \
