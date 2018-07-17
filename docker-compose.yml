@@ -2,11 +2,13 @@ version: '3'
 services:
   api:
     build: .
-    ports: 
+    ports:
       - "8080:8080"
+      - "9091:9091"
     environment:
       - MONGO_URI=mongodb://db:27017/admin
       - RABBIT_HOST=mq
+      - JMX_PORT=9091
     links:
       - "mongo:db"
       - "rabbitmq:mq"
@@ -20,5 +22,3 @@ services:
       - "5672:5672"
 networks:
   default:
-    
-

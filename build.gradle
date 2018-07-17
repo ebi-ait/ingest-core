@@ -1,13 +1,13 @@
 buildscript {
-	ext {
-		springBootVersion = '1.5.6.RELEASE'
-	}
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-	}
+    ext {
+        springBootVersion = '1.5.6.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
 }
 
 apply plugin: 'java'
@@ -23,25 +23,34 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	compile('org.springframework.boot:spring-boot-starter-actuator')
-	compile('org.springframework.boot:spring-boot-starter-data-mongodb')
-	compile('org.springframework.boot:spring-boot-starter-data-rest')
-	compile('org.springframework.data:spring-data-rest-hal-browser')
-	compile('org.springframework.boot:spring-boot-starter-hateoas')
-	compile('org.springframework.boot:spring-boot-starter-amqp')
-	compile('com.auth0:auth0-spring-security-api:1.0.0-rc.2')
-	compile('joda-time:joda-time')
-	compile('com.fasterxml.jackson.datatype:jackson-datatype-joda')
-	compile('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
-	compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
-	compile('com.fasterxml.jackson.module:jackson-module-parameter-names')
-	compileOnly('org.projectlombok:lombok')
-	testCompile('org.springframework.boot:spring-boot-starter-test')
-	testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
-	testCompile('com.github.tomakehurst:wiremock-standalone:2.14.0')
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+    compile('org.springframework.boot:spring-boot-starter-data-rest')
+    compile('org.springframework.boot:spring-boot-starter-hateoas')
+    compile('org.springframework.boot:spring-boot-starter-amqp')
+    compile('org.springframework.boot:spring-boot-starter-jetty')
+
+    compile('org.springframework.data:spring-data-rest-hal-browser')
+
+    compile('com.auth0:auth0-spring-security-api:1.0.0-rc.2')
+
+    compile('joda-time:joda-time')
+
+    compile('com.fasterxml.jackson.datatype:jackson-datatype-joda')
+    compile('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
+    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
+    compile('com.fasterxml.jackson.module:jackson-module-parameter-names')
+
+    compile('org.jolokia:jolokia-core')
+
+    compileOnly('org.projectlombok:lombok')
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
+    testCompile('com.github.tomakehurst:wiremock-standalone:2.14.0')
 
 }
