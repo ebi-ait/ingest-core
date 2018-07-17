@@ -23,6 +23,7 @@ Not proper to annotate uuid in parent class as we don't want uuid index for all 
 public class SubmissionEnvelope extends AbstractEntity {
     private @Setter StagingDetails stagingDetails;
     private SubmissionState submissionState;
+    private Boolean triggersAnalysis;
 
     private static final Logger log = LoggerFactory.getLogger(SubmissionEnvelope.class);
 
@@ -33,6 +34,7 @@ public class SubmissionEnvelope extends AbstractEntity {
     public SubmissionEnvelope() {
         super(EntityType.SUBMISSION);
         this.submissionState = SubmissionState.PENDING;
+        this.triggersAnalysis = true;
         setUuid(new Uuid());
     }
 
