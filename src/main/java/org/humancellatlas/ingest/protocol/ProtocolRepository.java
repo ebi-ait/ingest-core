@@ -21,8 +21,10 @@ public interface ProtocolRepository extends MongoRepository<Protocol, String> {
 
     public Page<Protocol> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
-    @RestResource(exported = false)
-    public Page<Protocol> findBySubmissionEnvelopesContainingAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState state, Pageable pageable);
+    @RestResource(rel = "findBySubmissionAndValidationState")
+    public Page<Protocol> findBySubmissionEnvelopesContainingAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
+                                                                                @Param("state") ValidationState state,
+                                                                                Pageable pageable);
 
     Protocol findByUuid(@Param("uuid") Uuid uuid);
 

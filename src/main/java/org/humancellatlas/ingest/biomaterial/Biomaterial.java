@@ -26,7 +26,7 @@ public class Biomaterial extends MetadataDocument {
 
     @RestResource @DBRef private final List<Process> derivedByProcesses = new ArrayList<>();
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Biomaterial(Object content) {
         super(EntityType.BIOMATERIAL, content);
     }

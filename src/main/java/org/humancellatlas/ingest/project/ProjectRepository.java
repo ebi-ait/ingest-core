@@ -1,6 +1,8 @@
 package org.humancellatlas.ingest.project;
 
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.protocol.Protocol;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +26,11 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
     Page<Project> findByUser(@Param(value = "user") String user, Pageable pageable);
 
     Page<Project> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+
+    @RestResource(rel = "findBySubmissionAndValidationState")
+    public Page<Project> findBySubmissionEnvelopesContainingAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
+                                                                               @Param("state") ValidationState state,
+                                                                               Pageable pageable);
 
     long countByUser(String user);
 }

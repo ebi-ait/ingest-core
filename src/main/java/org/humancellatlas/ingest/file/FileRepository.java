@@ -26,7 +26,8 @@ public interface FileRepository extends MongoRepository<File, String> {
     @RestResource(exported = false)
     List<File> findBySubmissionEnvelopesContains(SubmissionEnvelope submissionEnvelope);
 
-    Page<File> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+    @RestResource(rel = "findBySubmissionEnvelope")
+    Page<File> findBySubmissionEnvelopesContaining(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
     List<File> findBySubmissionEnvelopesInAndFileName(SubmissionEnvelope submissionEnvelope, String fileName);
 
@@ -42,6 +43,8 @@ public interface FileRepository extends MongoRepository<File, String> {
 
     Page<File> findByDerivedByProcessesContaining(Process process, Pageable pageable);
 
-    @RestResource(exported = false)
-    public Page<File> findBySubmissionEnvelopesContainingAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState state, Pageable pageable);
+    @RestResource(rel = "findBySubmissionAndValidationState")
+    public Page<File> findBySubmissionEnvelopesContainingAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
+                                                                            @Param("state") ValidationState state,
+                                                                            Pageable pageable);
 }

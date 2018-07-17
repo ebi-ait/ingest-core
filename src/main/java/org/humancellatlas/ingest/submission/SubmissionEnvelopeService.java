@@ -3,9 +3,13 @@ package org.humancellatlas.ingest.submission;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
+import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 @RequiredArgsConstructor
@@ -13,6 +17,12 @@ public class SubmissionEnvelopeService {
 
     @NonNull
     private final MessageRouter messageRouter;
+
+    @NonNull
+    private final Exporter exporter;
+
+    @NonNull
+    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     public void handleEnvelopeStateUpdateRequest(SubmissionEnvelope envelope,
             SubmissionState state) {
@@ -23,6 +33,10 @@ public class SubmissionEnvelopeService {
         } else {
             messageRouter.routeStateTrackingUpdateMessageForEnvelopeEvent(envelope, state);
         }
+    }
+
+    public void handleSubmissionRequest(SubmissionEnvelope envelope) {
+        executorService.submit(() -> exporter.exportBundles(envelope));
     }
 
 }

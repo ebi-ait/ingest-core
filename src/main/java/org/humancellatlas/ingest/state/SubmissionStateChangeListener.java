@@ -32,6 +32,7 @@ public class SubmissionStateChangeListener extends AbstractMongoEventListener<Su
         SubmissionEnvelope submissionEnvelope = event.getSource();
 
         if(submissionEnvelope.getSubmissionState().equals(SubmissionState.CLEANUP)){
+            log.info(String.format("Requesting cleanup for envelope with ID %s", submissionEnvelope.getId()));
             this.messageRouter.routeRequestUploadAreaCleanup(submissionEnvelope);
         }
     }

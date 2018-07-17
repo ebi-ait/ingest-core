@@ -179,7 +179,7 @@ curl -X POST \
 ## Add File to Submission Envelope
 ```
 curl -X POST \
-  http://localhost:8080/submissionEnvelopes/5aa4ec8a1b41fe298594e531/files \
+  http://localhost:8080/submissionEnvelopes/5aa4ec8a1b41fe298594e531/files/R1.fastq.gz \
   -H 'content-type: application/json' \
   -d '{
     "describedBy" : "https://schema.humancellatlas.org/type/file/5.0.0/sequence_file",
@@ -204,3 +204,6 @@ curl -X PUT \
   http://localhost:8080/submissionEnvelopes/5aa4ec8a1b41fe298594e531/submit \
   -H 'content-type: application/json'
 ```
+
+# Privacy
+This API require limited processing of personal data. For more information, please read our [privacy policy](http://www.ebi.ac.uk/data-protection/privacy-notice/human-cell-atlas-ingest-access-service).

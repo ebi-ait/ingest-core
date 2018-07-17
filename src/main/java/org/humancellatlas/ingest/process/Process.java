@@ -33,7 +33,7 @@ public class Process extends MetadataDocument {
 
     public Process() {}
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Process(Object content) {
         super(EntityType.PROCESS, content);
     }

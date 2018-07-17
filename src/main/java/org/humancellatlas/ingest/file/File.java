@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.humancellatlas.ingest.core.Checksums;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -27,8 +28,13 @@ public class File extends MetadataDocument {
     private String cloudUrl;
     private Checksums checksums;
     private UUID validationId;
+    private UUID dataFileUuid;
 
-    @JsonCreator
+    public File(){
+        super(EntityType.FILE, null);
+        setDataFileUuid(UUID.randomUUID());
+    }
+
     public File(@JsonProperty("content") Object content) {
         super(EntityType.FILE, content);
     }
@@ -58,8 +64,24 @@ public class File extends MetadataDocument {
      * @return a reference to this file
      */
     public File addAsDerivedByProcess(Process process) {
-        this.derivedByProcesses.add(process);
-
+        String processId = process.getId();
+        boolean processInList = derivedByProcesses.stream()
+                .map(Process::getId)
+                .anyMatch(id -> id.equals(processId));
+        if (!processInList) {
+            this.derivedByProcesses.add(process);
+        }
         return this;
     }
+
+    public void addToAnalysis(Process analysis) {
+        //TODO check if this File and the Analysis belong to the same Submission?
+        List<SubmissionEnvelope> submissionEnvelopes = getSubmissionEnvelopes();
+        if (submissionEnvelopes == null || submissionEnvelopes.isEmpty()) {
+            SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
+            addToSubmissionEnvelope(submissionEnvelope);
+        }
+        addAsDerivedByProcess(analysis);
+    }
+
 }
