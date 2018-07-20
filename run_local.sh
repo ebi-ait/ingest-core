@@ -7,6 +7,8 @@ export RABBIT_HOST=localhost
 export RABBIT_PORT=5672
 export SCHEMA_BASE_URI=https://schema.humancellatlas.org
 
+./gradlew clean assemble
+
 java \
     -XX:+UseG1GC \
     -jar build/libs/*.jar \
