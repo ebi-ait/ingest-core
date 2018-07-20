@@ -55,11 +55,9 @@ public class SchemaService {
             schemaBaseUri = schemaBaseUri.substring(0, schemaBaseUri.length() - 1);
         }
 
-        String schemaBucketUrl = schemaBaseUri + ".s3.amazonaws.com";
-
-        schemaScraper.getAllSchemaURIs(URI.create(schemaBucketUrl)).stream()
-                     .filter(schemaUri -> ! schemaUri.toString().contains("index.html"))
-                     .forEach(schemaUri -> {
+        schemaScraper.getAllSchemaURIs(URI.create(schemaBaseUri)).stream()
+                .filter(schemaUri -> ! schemaUri.toString().contains("index.html"))
+                .forEach(schemaUri -> {
                          Schema schemaDocument = schemaDescriptionFromSchemaUri(schemaUri);
 
                          // generate a uuid from the schema namespace
