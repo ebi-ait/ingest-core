@@ -55,23 +55,25 @@ public class SchemaService {
             schemaBaseUri = schemaBaseUri.substring(0, schemaBaseUri.length() - 1);
         }
 
-        String schemaBucketUrl = schemaBaseUri + ".s3.amazonaws.com";
+        schemaScraper.getAllSchemaURIs(URI.create(schemaBaseUri)).stream()
+                .filter(schemaUri -> !schemaUri.toString().contains("index.html"))
+                .forEach(this::doUpdate);
+    }
 
-        schemaScraper.getAllSchemaURIs(URI.create(schemaBucketUrl)).stream()
-                     .filter(schemaUri -> ! schemaUri.toString().contains("index.html"))
-                     .forEach(schemaUri -> {
-                         Schema schemaDocument = schemaDescriptionFromSchemaUri(schemaUri);
+    private void doUpdate(URI schemaUri) {
+        Schema schemaDocument = schemaDescriptionFromSchemaUri(schemaUri);
 
-                         // generate a uuid from the schema namespace
-                         UUID schemaUuid = UUID.nameUUIDFromBytes(schemaUri.toString().getBytes());
-                         schemaDocument.setUuid(new Uuid(schemaUuid.toString()));
+        UUID schemaUuid = UUID.nameUUIDFromBytes(schemaUri.toString().getBytes());
+        schemaDocument.setUuid(new Uuid(schemaUuid.toString()));
 
-                         // delete/update matching schemas
-                         Collection<Schema> matchingSchemas = schemaRepository.findByUuidEquals(new Uuid(schemaUuid.toString()));
-                         schemaRepository.delete(matchingSchemas);
+        deleteMatchingSchemas(schemaUuid);
+        schemaRepository.save(schemaDocument);
+    }
 
-                         schemaRepository.save(schemaDocument);
-                     });
+    private void deleteMatchingSchemas(UUID schemaUuid) {
+        Collection<Schema> matchingSchemas = schemaRepository
+                .findByUuidEquals(new Uuid(schemaUuid.toString()));
+        schemaRepository.delete(matchingSchemas);
     }
 
     public Collection<Schema> schemaDescriptionFromSchemaUris(Collection<URI> schemaUris) {

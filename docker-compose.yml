@@ -9,6 +9,7 @@ services:
       - MONGO_URI=mongodb://db:27017/admin
       - RABBIT_HOST=mq
       - JMX_PORT=9091
+      - SCHEMA_BASE_URI=http://schema.dev.data.humancellatlas.org/
     links:
       - "mongo:db"
       - "rabbitmq:mq"
