@@ -56,20 +56,24 @@ public class SchemaService {
         }
 
         schemaScraper.getAllSchemaURIs(URI.create(schemaBaseUri)).stream()
-                .filter(schemaUri -> ! schemaUri.toString().contains("index.html"))
-                .forEach(schemaUri -> {
-                         Schema schemaDocument = schemaDescriptionFromSchemaUri(schemaUri);
+                .filter(schemaUri -> !schemaUri.toString().contains("index.html"))
+                .forEach(this::doUpdate);
+    }
 
-                         // generate a uuid from the schema namespace
-                         UUID schemaUuid = UUID.nameUUIDFromBytes(schemaUri.toString().getBytes());
-                         schemaDocument.setUuid(new Uuid(schemaUuid.toString()));
+    private void doUpdate(URI schemaUri) {
+        Schema schemaDocument = schemaDescriptionFromSchemaUri(schemaUri);
 
-                         // delete/update matching schemas
-                         Collection<Schema> matchingSchemas = schemaRepository.findByUuidEquals(new Uuid(schemaUuid.toString()));
-                         schemaRepository.delete(matchingSchemas);
+        UUID schemaUuid = UUID.nameUUIDFromBytes(schemaUri.toString().getBytes());
+        schemaDocument.setUuid(new Uuid(schemaUuid.toString()));
 
-                         schemaRepository.save(schemaDocument);
-                     });
+        deleteMatchingSchemas(schemaUuid);
+        schemaRepository.save(schemaDocument);
+    }
+
+    private void deleteMatchingSchemas(UUID schemaUuid) {
+        Collection<Schema> matchingSchemas = schemaRepository
+                .findByUuidEquals(new Uuid(schemaUuid.toString()));
+        schemaRepository.delete(matchingSchemas);
     }
 
     public Collection<Schema> schemaDescriptionFromSchemaUris(Collection<URI> schemaUris) {
