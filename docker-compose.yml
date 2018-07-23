@@ -21,5 +21,16 @@ services:
     image: rabbitmq:3.7.7-alpine
     ports:
       - "5672:5672"
+  staging-manager:
+    image: quay.io/humancellatlas/ingest-staging-manager:master_7c4c332
+    environment:
+      - INGEST_API=http://api:8080
+      - RABBIT_URL=amqp://mq:5672
+      - STAGING_API=https://upload.dev.data.humancellatlas.org
+      - INGEST_API_KEY=${INGEST_API_KEY}
+    links:
+      - "api:api"
+      - "mongo:db"
+      - "rabbitmq:mq"
 networks:
   default:
