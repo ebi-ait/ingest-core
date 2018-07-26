@@ -9,9 +9,13 @@ import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.SubmissionDate;
 import org.humancellatlas.ingest.core.UpdateDate;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.rest.core.annotation.RestResource;
 
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,6 +28,9 @@ import java.util.List;
  */
 @Getter
 public class Project extends MetadataDocument {
+    @RestResource
+    @DBRef
+    private final List<File> supplementaryFiles = new ArrayList<>();
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Project(Object content) {
