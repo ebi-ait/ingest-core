@@ -58,12 +58,12 @@ public class MessageSender {
 
 
     @Scheduled(fixedDelay = 1000)
-    private void sendValidationMessages(){
+    private void sendValidationMessages() {
         MessageBuffer.VALIDATION.send(rabbitMessagingTemplate);
     }
 
     @Scheduled(fixedDelay = 1000)
-    private void sendAccessionMessages(){
+    private void sendAccessionMessages() {
         MessageBuffer.ACCESSIONER.send(rabbitMessagingTemplate);
     }
 
@@ -73,12 +73,12 @@ public class MessageSender {
     }
 
     @Scheduled(fixedDelay = 1000)
-    private void sendStateTrackerMessages(){
+    private void sendStateTrackerMessages() {
         MessageBuffer.STATE_TRACKING.send(rabbitMessagingTemplate);
     }
 
     @Scheduled(fixedDelay = 1000)
-    private void sendUploadManagerMessages(){
+    private void sendUploadManagerMessages() {
         MessageBuffer.UPLOAD_MANAGER.send(rabbitMessagingTemplate);
     }
 
@@ -142,6 +142,7 @@ public class MessageSender {
         void send(RabbitMessagingTemplate messagingTemplate) {
             try {
                 QueuedMessage message = messageQueue.take();
+                LOGGER.debug("Sending message to [%s]...", message.getExchange());
                 messagingTemplate.convertAndSend(message.exchange, message.routingKey,
                         message.payload);
             } catch (InterruptedException e) {
