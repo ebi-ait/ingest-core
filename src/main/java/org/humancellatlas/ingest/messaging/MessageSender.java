@@ -21,8 +21,7 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
-import static java.util.concurrent.TimeUnit.MICROSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.*;
 
 @Service
 @Getter
@@ -86,54 +85,60 @@ public class MessageSender {
     @Data
     private static class QueuedMessage implements Delayed {
 
-        private String exchange;
-        private String routingKey;
-        private AbstractEntityMessage payload;
+        private final String exchange;
+        private final String routingKey;
+        private final AbstractEntityMessage payload;
 
-        private Long delayMs = 0L;
+        private final long intendedStartTime;
 
         public QueuedMessage(String exchange, String routingKey, AbstractEntityMessage payload,
-                Long delayMs) {
+                long delayMillis) {
             this.exchange = exchange;
             this.routingKey = routingKey;
             this.payload = payload;
-            this.delayMs = delayMs;
+            this.intendedStartTime = System.currentTimeMillis() + delayMillis;
         }
 
         @Override
         public long getDelay(TimeUnit unit) {
-            return MICROSECONDS.convert(delayMs, unit);
+            long delay = intendedStartTime - System.currentTimeMillis();
+            return unit.convert(delay, MILLISECONDS);
+        }
+
+        private long getDelay() {
+            return getDelay(MILLISECONDS);
         }
 
         @Override
         public int compareTo(Delayed other) {
-            long otherDelay = other.getDelay(MICROSECONDS);
-            return (int) (this.delayMs - otherDelay);
+            long otherDelay = other.getDelay(MILLISECONDS);
+            return Math.toIntExact(getDelay() - otherDelay);
         }
 
     }
 
     private enum MessageBuffer {
 
-        VALIDATION(SECONDS.toMicros(3)),
-        EXPORT(SECONDS.toMicros(5)),
-        UPLOAD_MANAGER(SECONDS.toMicros(1)),
-        ACCESSIONER(SECONDS.toMicros(2)),
+        VALIDATION(SECONDS.toMillis(3)),
+        EXPORT(SECONDS.toMillis(5)),
+        UPLOAD_MANAGER(SECONDS.toMillis(1)),
+        ACCESSIONER(SECONDS.toMillis(2)),
         STATE_TRACKING(0L);
 
-        private final Long delayMs;
+        private final Long delayMillis;
 
         private final BlockingQueue<QueuedMessage> messageQueue = new DelayQueue<>();
 
-        MessageBuffer(Long delayInMicroseconds) {
-            this.delayMs = delayInMicroseconds;
+        MessageBuffer(Long delayMillis) {
+            this.delayMillis = delayMillis;
         }
 
         //TODO each enum should already know exchange and routing key
         //Why was this part of the contract when they're already defined in Constants?
         void queue(String exchange, String routingKey, AbstractEntityMessage payload) {
             try {
-                QueuedMessage message = new QueuedMessage(exchange, routingKey, payload, delayMs);
+                QueuedMessage message = new QueuedMessage(exchange, routingKey, payload,
+                        delayMillis);
                 messageQueue.put(message);
             } catch (InterruptedException e) {
                 LOGGER.error(e.getMessage(), e);
