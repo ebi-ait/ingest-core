@@ -30,6 +30,8 @@ public class MessageSender {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageSender.class);
 
+    private static final long TASK_DELAY_MILLIS = 500;
+
     private @Autowired @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
 
     public void queueValidationMessage(String exchange, String routingKey,
@@ -57,27 +59,27 @@ public class MessageSender {
     }
 
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay=TASK_DELAY_MILLIS)
     private void sendValidationMessages() {
         MessageBuffer.VALIDATION.send(rabbitMessagingTemplate);
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay=TASK_DELAY_MILLIS)
     private void sendAccessionMessages() {
         MessageBuffer.ACCESSIONER.send(rabbitMessagingTemplate);
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay=TASK_DELAY_MILLIS)
     private void sendExportMessages(){
         MessageBuffer.EXPORT.send(rabbitMessagingTemplate);
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay=TASK_DELAY_MILLIS)
     private void sendStateTrackerMessages() {
         MessageBuffer.STATE_TRACKING.send(rabbitMessagingTemplate);
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay=TASK_DELAY_MILLIS)
     private void sendUploadManagerMessages() {
         MessageBuffer.UPLOAD_MANAGER.send(rabbitMessagingTemplate);
     }
