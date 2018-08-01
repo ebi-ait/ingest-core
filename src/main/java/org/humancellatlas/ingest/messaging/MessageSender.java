@@ -20,6 +20,7 @@ import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -142,7 +143,7 @@ public class MessageSender {
         void send(RabbitMessagingTemplate messagingTemplate) {
             try {
                 QueuedMessage message = messageQueue.take();
-                LOGGER.debug("Sending message to [%s]...", message.getExchange());
+                LOGGER.debug(format("Sending message to [%s]...", message.getExchange()));
                 messagingTemplate.convertAndSend(message.exchange, message.routingKey,
                         message.payload);
             } catch (InterruptedException e) {
