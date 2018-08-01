@@ -148,7 +148,6 @@ public class MessageSender {
         void send(RabbitMessagingTemplate messagingTemplate) {
             try {
                 QueuedMessage message = messageQueue.take();
-                LOGGER.debug(format("Sending message to [%s]...", message.getExchange()));
                 messagingTemplate.convertAndSend(message.exchange, message.routingKey,
                         message.payload);
             } catch (InterruptedException e) {
