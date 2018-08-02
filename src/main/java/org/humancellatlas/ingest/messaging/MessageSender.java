@@ -1,5 +1,8 @@
 package org.humancellatlas.ingest.messaging;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -112,6 +115,12 @@ public class MessageSender {
 
         private final BlockingQueue<QueuedMessage> messageQueue = new DelayQueue<>();
 
+        private final Logger log = LoggerFactory.getLogger(getClass());
+
+        protected Logger getLog() {
+            return log;
+        }
+
         MessageBuffer(Long delayMillis) {
             this.delayMillis = delayMillis;
         }
@@ -133,10 +142,31 @@ public class MessageSender {
                 QueuedMessage message = messageQueue.take();
                 messagingTemplate.convertAndSend(message.exchange, message.routingKey,
                         message.payload);
+
+                AbstractEntityMessage payload = message.payload;
+
+                log.debug(String.format("Publishing message on exchange %s, routingKey = %s",
+                        message.exchange, message.routingKey));
+
+                log.debug(String.format("Message: %s", convertToString(payload)));
+
             } catch (InterruptedException e) {
                 LOGGER.error(e.getMessage(), e);
             }
 
+        }
+
+        private String convertToString(Object object) {
+            ObjectMapper mapper = new ObjectMapper();
+
+            String jsonString = "";
+            try {
+                jsonString = mapper.writeValueAsString(object);
+            } catch (JsonProcessingException e) {
+                log.debug(String.format("An error in converting message object to string occurred: %s", e.getMessage()));
+            }
+
+            return jsonString;
         }
 
     }
