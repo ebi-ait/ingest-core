@@ -30,7 +30,7 @@ public class MessageSender {
 
     private static final long TASK_DELAY_MILLIS = 500;
 
-    private final ExecutorService threadPool = new ScheduledThreadPoolExecutor(5);
+    private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
     private @Autowired @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
 
