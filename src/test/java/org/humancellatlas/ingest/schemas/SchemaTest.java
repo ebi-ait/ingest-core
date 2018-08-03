@@ -30,6 +30,19 @@ public class SchemaTest {
         assertThat(schemaVersion6_7.compareTo(schemaVersion6_3)).isGreaterThan(0);
     }
 
+    @Test
+    public void testCompareNewer() {
+        //given:
+        Schema schemaVersion5 = createTestSchema("5");
+        Schema schemaVersion5_1 = createTestSchema("5.1");
+        Schema schemaVersion5_1_3 = createTestSchema("5.1.3");
+
+        //expect:
+        assertThat(schemaVersion5.compareTo(schemaVersion5_1)).isLessThan(0);
+        assertThat(schemaVersion5_1.compareTo(schemaVersion5_1_3)).isLessThan(0);
+        assertThat(schemaVersion5.compareTo(schemaVersion5_1_3)).isLessThan(0);
+    }
+
     private Schema createTestSchema(String schemaVersion) {
         return new Schema("core", schemaVersion, "process", "", "process_core",
                 "http://schema.humancellatlas.org");
