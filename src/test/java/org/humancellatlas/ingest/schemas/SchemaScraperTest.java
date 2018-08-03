@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class SchemaTest {
+public class SchemaScraperTest {
     @Autowired SchemaService schemaService;
 
     @MockBean SchemaRepository schemaRepository;
