@@ -9,12 +9,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.humancellatlas.ingest.core.AbstractEntity;
 
-/**
- * Created by rolando on 18/04/2018.
- */
 @AllArgsConstructor
 @Getter
-public class Schema extends AbstractEntity {
+public class Schema extends AbstractEntity implements Comparable<Schema> {
+
     private final String highLevelEntity;
     private final String schemaVersion;
     private final String domainEntity;
@@ -23,4 +21,10 @@ public class Schema extends AbstractEntity {
 
     @JsonIgnore
     private final String schemaUri;
+
+    @Override
+    public int compareTo(Schema o) {
+        return 0;
+    }
+
 }
