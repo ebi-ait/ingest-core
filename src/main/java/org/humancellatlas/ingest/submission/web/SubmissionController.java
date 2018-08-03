@@ -117,7 +117,7 @@ public class SubmissionController {
         if(submissionManifest.isPresent()){
             return ResponseEntity.ok(resourceAssembler.toFullResource(submissionManifest.get()));
         } else {
-            throw new ResourceNotFoundException(String.format("Envelope %s has no submission submissionmanifest", submissionEnvelope.getId()));
+            return ResponseEntity.notFound().build();
         }
     }
 
