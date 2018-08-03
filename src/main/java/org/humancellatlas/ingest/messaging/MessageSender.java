@@ -66,7 +66,7 @@ public class MessageSender {
     }
 
     @Data
-    private static class QueuedMessage implements Delayed {
+    static class QueuedMessage implements Delayed {
 
         private final String exchange;
         private final String routingKey;
