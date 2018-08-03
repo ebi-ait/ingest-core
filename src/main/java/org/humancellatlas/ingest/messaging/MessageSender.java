@@ -12,16 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.concurrent.*;
 
-import static java.lang.String.format;
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Service
 @Getter
@@ -31,6 +29,8 @@ public class MessageSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageSender.class);
 
     private static final long TASK_DELAY_MILLIS = 500;
+
+    private final ExecutorService threadPool = new ScheduledThreadPoolExecutor(5);
 
     private @Autowired @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
 
@@ -58,30 +58,11 @@ public class MessageSender {
         MessageBuffer.UPLOAD_MANAGER.queue(exchange, routingKey, payload);
     }
 
-
-    @Scheduled(fixedDelay=TASK_DELAY_MILLIS)
-    private void sendValidationMessages() {
-        MessageBuffer.VALIDATION.send(rabbitMessagingTemplate);
-    }
-
-    @Scheduled(fixedDelay=TASK_DELAY_MILLIS)
-    private void sendAccessionMessages() {
-        MessageBuffer.ACCESSIONER.send(rabbitMessagingTemplate);
-    }
-
-    @Scheduled(fixedDelay=TASK_DELAY_MILLIS)
-    private void sendExportMessages(){
-        MessageBuffer.EXPORT.send(rabbitMessagingTemplate);
-    }
-
-    @Scheduled(fixedDelay=TASK_DELAY_MILLIS)
-    private void sendStateTrackerMessages() {
-        MessageBuffer.STATE_TRACKING.send(rabbitMessagingTemplate);
-    }
-
-    @Scheduled(fixedDelay=TASK_DELAY_MILLIS)
-    private void sendUploadManagerMessages() {
-        MessageBuffer.UPLOAD_MANAGER.send(rabbitMessagingTemplate);
+    @PostConstruct
+    private void initiateSending() {
+        Arrays.stream(MessageBuffer.values())
+                .map(buffer -> new BufferSender(buffer, rabbitMessagingTemplate))
+                .forEach(threadPool::submit);
     }
 
     @Data
@@ -136,7 +117,7 @@ public class MessageSender {
         }
 
         //TODO each enum should already know exchange and routing key
-        //Why was this part of the contract when they're already defined in Constants?
+        //Why are these part of the contract when they're already defined in Constants?
         void queue(String exchange, String routingKey, AbstractEntityMessage payload) {
             try {
                 QueuedMessage message = new QueuedMessage(exchange, routingKey, payload,
@@ -156,6 +137,25 @@ public class MessageSender {
                 LOGGER.error(e.getMessage(), e);
             }
 
+        }
+
+    }
+
+    private static class BufferSender implements Runnable {
+
+        private final MessageBuffer buffer;
+        private final RabbitMessagingTemplate messagingTemplate;
+
+        private BufferSender(MessageBuffer buffer, RabbitMessagingTemplate messagingTemplate) {
+            this.buffer = buffer;
+            this.messagingTemplate = messagingTemplate;
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                buffer.send(messagingTemplate);
+            }
         }
 
     }
