@@ -1,14 +1,15 @@
 package org.humancellatlas.ingest.schemas;
 
-import org.assertj.core.api.Assertions;
+
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 public class SchemaTest {
 
     @Test
-    public void testCompareSame() {
+    public void testCompareToSameVersion() {
         //given:
         Schema schema = createTestSchema("7.3.1");
 
@@ -17,7 +18,7 @@ public class SchemaTest {
     }
 
     @Test
-    public void testCompareOlder() {
+    public void testCompareToOlderVersion() {
         //given:
         Schema schemaVersion10 = createTestSchema("10.9");
         Schema schemaVersion7 = createTestSchema("7.3.1");
@@ -31,7 +32,7 @@ public class SchemaTest {
     }
 
     @Test
-    public void testCompareNewer() {
+    public void testCompareToNewerVersion() {
         //given:
         Schema schemaVersion5 = createTestSchema("5");
         Schema schemaVersion5_1 = createTestSchema("5.1");
@@ -41,6 +42,20 @@ public class SchemaTest {
         assertThat(schemaVersion5.compareTo(schemaVersion5_1)).isLessThan(0);
         assertThat(schemaVersion5_1.compareTo(schemaVersion5_1_3)).isLessThan(0);
         assertThat(schemaVersion5.compareTo(schemaVersion5_1_3)).isLessThan(0);
+    }
+
+    @Test
+    public void testCompareDifferentSchemas() {
+        //given:
+        Schema biomaterialCore = new Schema("core", "5.9.10", "biomaterial", "",
+                "biomaterial_core", "http://schema.humancellatlas.org");
+        Schema processCore = createTestSchema("7.4.3");
+        assumeThat(biomaterialCore.getConcreteEntity())
+                .isNotEqualToIgnoringCase(processCore.getConcreteEntity());
+
+        //expect:
+        assertThat(biomaterialCore.compareTo(processCore)).isLessThan(0);
+        assertThat(processCore.compareTo(biomaterialCore)).isGreaterThan(0);
     }
 
     private Schema createTestSchema(String schemaVersion) {

@@ -1,18 +1,14 @@
 package org.humancellatlas.ingest.schemas;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.humancellatlas.ingest.core.AbstractEntity;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@AllArgsConstructor
+import static java.lang.String.format;
+
 @Getter
 public class Schema extends AbstractEntity implements Comparable<Schema> {
 
@@ -22,13 +18,35 @@ public class Schema extends AbstractEntity implements Comparable<Schema> {
     private final String subDomainEntity;
     private final String concreteEntity;
 
+    private final String compoundKeys;
+
     @JsonIgnore
     private final String schemaUri;
 
+    public Schema(String highLevelEntity, String schemaVersion, String domainEntity,
+            String subDomainEntity, String concreteEntity, String schemaUri) {
+        this.highLevelEntity = highLevelEntity;
+        this.schemaVersion = schemaVersion;
+        this.domainEntity = domainEntity;
+        this.subDomainEntity = subDomainEntity;
+        this.concreteEntity = concreteEntity;
+        this.schemaUri = schemaUri;
+        this.compoundKeys = concatenateKeys();
+    }
+
+    private String concatenateKeys() {
+        return format("%s/%s/%s/%s", highLevelEntity, domainEntity, subDomainEntity,
+                concreteEntity);
+    }
+
     @Override
     public int compareTo(Schema other) {
-        SemanticVersion otherSchemaVersion = SemanticVersion.parse(other.schemaVersion);
-        return SemanticVersion.parse(schemaVersion).compareTo(otherSchemaVersion);
+        int difference = compoundKeys.compareTo(other.compoundKeys);
+        if (difference == 0) {
+            SemanticVersion otherSchemaVersion = SemanticVersion.parse(other.schemaVersion);
+            difference = SemanticVersion.parse(schemaVersion).compareTo(otherSchemaVersion);
+        }
+        return difference;
     }
 
     private static class SemanticVersion implements Comparable<SemanticVersion> {
