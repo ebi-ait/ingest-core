@@ -49,7 +49,10 @@ dependencies {
 
     compileOnly('org.projectlombok:lombok')
 
-    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.assertj', module: 'assertj-core'
+    }
+    testCompile('org.assertj:assertj-core:3.10.0')
     testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
     testCompile('com.github.tomakehurst:wiremock-standalone:2.14.0')
 
