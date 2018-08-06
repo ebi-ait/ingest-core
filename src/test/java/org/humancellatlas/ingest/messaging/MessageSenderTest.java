@@ -1,21 +1,37 @@
 package org.humancellatlas.ingest.messaging;
 
+import org.humancellatlas.ingest.messaging.model.AbstractEntityMessage;
 import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
-import java.util.Queue;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
+@RunWith(SpringRunner.class)
 public class MessageSenderTest {
+
+    @Autowired
+    private MessageSender sender;
+
+    @MockBean
+    private RabbitMessagingTemplate messagingTemplate;
 
     @Test
     public void testQueueNewAssayMessage() {
         //given:
-        MessageSender sender = new MessageSender();
-
-        //and:
         ExportMessage message = new ExportMessage("", "", "", "", "", "", 0, 0);
 
         //when:
@@ -23,18 +39,19 @@ public class MessageSenderTest {
         sender.queueNewExportMessage("queue.exchange", "queue.route", message);
 
         //then:
-        Queue<MessageSender.QueuedMessage> queue = sender.getExportMessageBatch();
-        assertThat(queue).hasSize(1);
+        verify(messagingTemplate, timeout(SECONDS.toMillis(10)))
+                .convertAndSend(eq("queue.exchange"), eq("queue.route"),
+                        any(AbstractEntityMessage.class));
+    }
 
-        //and:
-        MessageSender.QueuedMessage queuedMessage = queue.peek();
-        assertThat(queuedMessage)
-                .extracting("exchange", "routingKey", "payload")
-                .containsExactly("queue.exchange", "queue.route", message);
+    @Configuration
+    static class TestConfiguration {
 
-        //and:
-        int _500MilliSeconds = 500;
-        assertThat(queuedMessage.getQueuedDate()).isCloseTo(timestamp, _500MilliSeconds);
+        @Bean
+        MessageSender messageSender() {
+            return new MessageSender();
+        }
+
     }
 
 }
