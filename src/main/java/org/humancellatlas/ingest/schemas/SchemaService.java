@@ -1,14 +1,11 @@
 package org.humancellatlas.ingest.schemas;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.schemas.schemascraper.SchemaScraper;
 import org.humancellatlas.ingest.schemas.schemascraper.impl.SchemaScrapeException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -16,19 +13,22 @@ import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Created by rolando on 19/04/2018.
- */
 @Service
-@RequiredArgsConstructor
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class SchemaService {
-    private final @NonNull SchemaRepository schemaRepository;
-    private final @NonNull SchemaScraper schemaScraper;
-    private final @NonNull Environment environment;
+
+    @Autowired
+    private SchemaRepository schemaRepository;
+
+    @Autowired
+    private SchemaScraper schemaScraper;
+
+    @Autowired
+    private Environment environment;
 
     private static final int EVERY_24_HOURS = 1000 * 60 * 60 * 24;
-
 
     public List<Schema> filterLatestSchemas(String highLevelEntity) {
         return getLatestSchemas().stream()
@@ -37,10 +37,13 @@ public class SchemaService {
     }
 
     public List<Schema> getLatestSchemas() {
-        Set<LatestSchema> latestSchemas = new LinkedHashSet<>();
+        List<Schema> allSchemas = schemaRepository.findAll();
+        Collections.sort(allSchemas, Collections.reverseOrder());
 
-        schemaRepository.findAllByOrderBySchemaVersionDesc()
-                        .forEach(schema -> latestSchemas.add(new LatestSchema(schema)));
+        Set<LatestSchema> latestSchemas = new LinkedHashSet<>();
+        allSchemas.stream()
+                .map(LatestSchema::new)
+                .forEach(latestSchemas::add);
 
         return latestSchemas.stream()
                             .map(LatestSchema::getSchema)
