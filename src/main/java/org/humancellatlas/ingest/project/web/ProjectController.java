@@ -52,6 +52,14 @@ public class ProjectController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @RequestMapping(path = "/projects/{id}" + Links.DRAFT_URL, method = RequestMethod.PUT)
+    HttpEntity<?> draftProject(@PathVariable("id") Project project,
+                               PersistentEntityResourceAssembler assembler) {
+        project.setValidationState(ValidationState.DRAFT);
+        project = getProjectService().getProjectRepository().save(project);
+        return ResponseEntity.accepted().body(assembler.toFullResource(project));
+    }
+    
     @RequestMapping(path = "/projects/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingProject(@PathVariable("id") Project project, PersistentEntityResourceAssembler assembler) {
         project.setValidationState(ValidationState.VALIDATING);

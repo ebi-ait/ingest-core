@@ -126,6 +126,15 @@ public class ProcessController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
     }
 
+
+    @RequestMapping(path = "/processs/{id}" + Links.DRAFT_URL, method = RequestMethod.PUT)
+    HttpEntity<?> draftProcess(@PathVariable("id") Process process,
+                                   PersistentEntityResourceAssembler assembler) {
+        process.setValidationState(ValidationState.DRAFT);
+        process = getProcessService().getProcessRepository().save(process);
+        return ResponseEntity.accepted().body(assembler.toFullResource(process));
+    }
+    
     @RequestMapping(path = "/processes/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingProcess(@PathVariable("id") Process process,
                                     PersistentEntityResourceAssembler assembler) {

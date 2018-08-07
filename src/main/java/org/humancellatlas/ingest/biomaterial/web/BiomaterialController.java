@@ -58,6 +58,14 @@ public class BiomaterialController {
     return ResponseEntity.accepted().body(resource);
   }
 
+  @RequestMapping(path = "/biomaterials/{id}" + Links.DRAFT_URL, method = RequestMethod.PUT)
+  HttpEntity<?> draftBiomaterial(@PathVariable("id") Biomaterial biomaterial,
+                                 PersistentEntityResourceAssembler assembler) {
+      biomaterial.setValidationState(ValidationState.DRAFT);
+      biomaterial = getBiomaterialService().getBiomaterialRepository().save(biomaterial);
+      return ResponseEntity.accepted().body(assembler.toFullResource(biomaterial));
+  }
+
   @RequestMapping(path = "/biomaterials/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
   HttpEntity<?> validatingBiomaterial(@PathVariable("id") Biomaterial biomaterial,
           PersistentEntityResourceAssembler assembler) {
