@@ -44,7 +44,8 @@ public class MessageRouter {
         if(document.getValidationState().equals(ValidationState.DRAFT)) {
             this.messageSender.queueValidationMessage(Constants.Exchanges.VALIDATION,
                                                       Constants.Queues.VALIDATION_REQUIRED,
-                                                      messageFor(document));
+                                                      messageFor(document),
+                                                      document.getUpdateDate().getMillis());
             return true;
         } else {
             return false;
@@ -62,7 +63,8 @@ public class MessageRouter {
         if(! uuidOptional.isPresent()) {
             this.messageSender.queueAccessionMessage(Constants.Exchanges.ACCESSION,
                                                      Constants.Queues.ACCESSION_REQUIRED,
-                                                     messageFor(document));
+                                                     messageFor(document),
+                                                     document.getUpdateDate().getMillis());
             return true;
         } else {
             return false;
@@ -76,7 +78,8 @@ public class MessageRouter {
         // let the state tracker know about everything for now
         this.messageSender.queueStateTrackingMessage(Constants.Exchanges.STATE_TRACKING,
                                                      Constants.Routing.METADATA_UPDATE,
-                                                     stateTrackingMessageFor(document));
+                                                     stateTrackingMessageFor(document),
+                                                     document.getUpdateDate().getMillis());
         return true;
     }
 
@@ -84,25 +87,29 @@ public class MessageRouter {
         // TODO: call this when a user requests a state change on an envelope
         this.messageSender.queueStateTrackingMessage(Constants.Exchanges.STATE_TRACKING,
                                                      Constants.Routing.ENVELOPE_STATE_UPDATE,
-                                                     messageFor(envelope, state));
+                                                     messageFor(envelope, state),
+                                                     envelope.getUpdateDate().getMillis());
         return true;
     }
 
     public boolean routeStateTrackingNewSubmissionEnvelope(SubmissionEnvelope envelope) {
         this.messageSender.queueStateTrackingMessage(Constants.Exchanges.STATE_TRACKING,
                                                      Constants.Routing.ENVELOPE_CREATE,
-                                                     messageFor(envelope));
+                                                     messageFor(envelope),
+                                                     envelope.getUpdateDate().getMillis());
         return true;
     }
 
     public void sendAssayForExport(ExportData exportData) {
         messageSender.queueNewExportMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED,
-                exportData.toAssaySubmittedMessage(linkGenerator));
+                                            exportData.toAssaySubmittedMessage(linkGenerator),
+                                            System.currentTimeMillis());
     }
 
     public void sendAnalysisForExport(ExportData exportData) {
         messageSender.queueNewExportMessage(ASSAY_EXCHANGE, ANALYSIS_SUBMITTED,
-                exportData.toAssaySubmittedMessage(linkGenerator));
+                                            exportData.toAssaySubmittedMessage(linkGenerator),
+                                            System.currentTimeMillis());
     }
 
     /* messages to the upload/staging area manager */
@@ -110,14 +117,16 @@ public class MessageRouter {
     public boolean routeRequestUploadAreaCredentials(SubmissionEnvelope envelope) {
         this.messageSender.queueUploadManagerMessage(Constants.Exchanges.UPLOAD_AREA_EXCHANGE,
                                                      Constants.Routing.UPLOAD_AREA_CREATE,
-                                                     messageFor(envelope));
+                                                     messageFor(envelope),
+                                                     envelope.getUpdateDate().getMillis());
         return true;
     }
 
     public boolean routeRequestUploadAreaCleanup(SubmissionEnvelope envelope) {
         this.messageSender.queueUploadManagerMessage(Constants.Exchanges.UPLOAD_AREA_EXCHANGE,
                                                      Constants.Routing.UPLOAD_AREA_CLEANUP,
-                                                     messageFor(envelope));
+                                                     messageFor(envelope),
+                                                     envelope.getUpdateDate().getMillis());
         return true;
     }
 

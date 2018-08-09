@@ -36,7 +36,7 @@ public class MessageSenderTest {
 
         //when:
         Date timestamp = new Date();
-        sender.queueNewExportMessage("queue.exchange", "queue.route", message);
+        sender.queueNewExportMessage("queue.exchange", "queue.route", message, System.currentTimeMillis());
 
         //then:
         verify(messagingTemplate, timeout(SECONDS.toMillis(10)))
