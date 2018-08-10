@@ -129,8 +129,8 @@ public class SubmissionController {
     ResponseEntity<Resource<?>> addErrorToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                    @RequestBody SubmissionError submissionError,
                                                    PersistentEntityResourceAssembler assembler) {
-        submissionEnvelope.addError(submissionError);
-        SubmissionEnvelope envelope = submissionEnvelopeRepository.save(submissionEnvelope);
+
+        SubmissionEnvelope envelope = submissionEnvelopeService.addErrorToEnvelope(submissionError, submissionEnvelope);
         PersistentEntityResource resource = assembler.toFullResource(envelope);
         return ResponseEntity.accepted().body(resource);
     }

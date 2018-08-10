@@ -24,6 +24,9 @@ public class SubmissionEnvelopeService {
     @NonNull
     private final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
+    @NonNull
+    private final SubmissionEnvelopeRepository submissionEnvelopeRepository;
+
     public void handleEnvelopeStateUpdateRequest(SubmissionEnvelope envelope,
             SubmissionState state) {
         if(! envelope.allowedStateTransitions().contains(state)) {
@@ -39,4 +42,9 @@ public class SubmissionEnvelopeService {
         executorService.submit(() -> exporter.exportBundles(envelope));
     }
 
+
+    public SubmissionEnvelope addErrorToEnvelope(SubmissionError submissionError, SubmissionEnvelope submissionEnvelope) {
+        submissionEnvelope.addError(submissionError);
+        return submissionEnvelopeRepository.save(submissionEnvelope);
+    }
 }
