@@ -11,6 +11,8 @@ import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.submissionerror.SubmissionError;
+import org.humancellatlas.ingest.submissionerror.SubmissionErrorRepository;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.humancellatlas.ingest.process.Process;
@@ -66,6 +68,7 @@ public class SubmissionController {
     private final @NonNull ProcessRepository processRepository;
     private final @NonNull BundleManifestRepository bundleManifestRepository;
     private final @NonNull SubmissionManifestRepository submissionManifestRepository;
+    private final @NonNull SubmissionErrorRepository submissionErrorRepository;
 
 
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
@@ -119,6 +122,13 @@ public class SubmissionController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/submissionErrors", method = RequestMethod.GET)
+    ResponseEntity<?> getSubmissionErrors(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope, Pageable pageable,
+                                             final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<SubmissionError> submissionErrors = getSubmissionErrorRepository().findBySubmissionEnvelopeId(submissionEnvelope.getId(), pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(submissionErrors, resourceAssembler));
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/processes", method = RequestMethod.GET)
