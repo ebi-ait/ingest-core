@@ -146,8 +146,8 @@ public class SchemaScraperTest {
         Schema mockSchemaB = new Schema("mockHighLevel-B", "1.9","mockDomain-B","mockSubdomain-B","mockConcrete-B", "mock.io/mock-schema-a");
         Schema mockSchemaOldA = new Schema("mockHighLevel-A", "1.9","mockDomain-A","mockSubdomain-A","mockConcrete-A", "mock.io/mock-schema-duplicate-a");
 
-        doReturn(Arrays.stream(new Schema[] {mockSchemaA, mockSchemaB, mockSchemaOldA}))
-                .when(schemaRepository).findAllByOrderBySchemaVersionDesc();
+        doReturn(Arrays.asList(mockSchemaA, mockSchemaB, mockSchemaOldA))
+                .when(schemaRepository).findAll();
 
         Collection<Schema> latestSchemas = schemaService.getLatestSchemas();
         assert latestSchemas.size() == 2;
@@ -165,8 +165,8 @@ public class SchemaScraperTest {
         Schema mockSchemaB = new Schema("mockHighLevel-B", "1.9","mockDomain-B","mockSubdomain-B","mockConcrete-B", "mock.io/mock-schema-a");
         Schema mockSchemaOldA = new Schema("mockHighLevel-A", "1.9","mockDomain-A","mockSubdomain-A","mockConcrete-A", "mock.io/mock-schema-duplicate-a");
 
-        doReturn(Arrays.stream(new Schema[] {mockSchemaA, mockSchemaB, mockSchemaOldA}))
-                .when(schemaRepository).findAllByOrderBySchemaVersionDesc();
+        doReturn(Arrays.asList(mockSchemaA, mockSchemaB, mockSchemaOldA))
+                .when(schemaRepository).findAll();
 
         Collection<Schema> latestSchemas = schemaService.filterLatestSchemas("mockHighLevel-B");
         assert latestSchemas.size() == 1;
