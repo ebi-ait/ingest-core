@@ -24,6 +24,7 @@ public class SubmissionEnvelope extends AbstractEntity {
     private @Setter StagingDetails stagingDetails;
     private SubmissionState submissionState;
     private @Setter Boolean triggersAnalysis;
+    private final List<SubmissionError> submissionErrors = new ArrayList<>();
 
     private static final Logger log = LoggerFactory.getLogger(SubmissionEnvelope.class);
 
@@ -96,5 +97,9 @@ public class SubmissionEnvelope extends AbstractEntity {
     public boolean isOpen() {
         List<SubmissionState> states = Arrays.asList(SubmissionState.values());
         return states.indexOf(this.getSubmissionState()) < states.indexOf(SubmissionState.SUBMITTED);
+    }
+
+    public boolean addError(SubmissionError error){
+        return this.submissionErrors.add(error);
     }
 }

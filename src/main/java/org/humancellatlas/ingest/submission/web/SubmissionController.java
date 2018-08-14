@@ -11,6 +11,7 @@ import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.submission.SubmissionError;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.humancellatlas.ingest.process.Process;
@@ -28,17 +29,20 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -119,6 +123,16 @@ public class SubmissionController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @RequestMapping(path = "submissionEnvelopes/{sub_id}/submissionErrors", method = RequestMethod.POST)
+    ResponseEntity<Resource<?>> addErrorToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                                   @RequestBody SubmissionError submissionError,
+                                                   PersistentEntityResourceAssembler assembler) {
+
+        SubmissionEnvelope envelope = submissionEnvelopeService.addErrorToEnvelope(submissionError, submissionEnvelope);
+        PersistentEntityResource resource = assembler.toFullResource(envelope);
+        return ResponseEntity.accepted().body(resource);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/processes", method = RequestMethod.GET)
