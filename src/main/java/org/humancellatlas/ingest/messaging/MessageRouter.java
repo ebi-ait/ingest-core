@@ -149,6 +149,7 @@ public class MessageRouter {
         return MetadataDocumentMessageBuilder.using(linkGenerator)
                                              .messageFor(document)
                                              .withEnvelopeIds(envelopeIds)
+                                             .withValidationState(document.getValidationState())
                                              .build();
     }
 

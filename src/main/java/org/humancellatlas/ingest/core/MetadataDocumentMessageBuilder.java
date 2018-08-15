@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.core;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.rest.core.mapping.ResourceMappings;
@@ -22,6 +23,7 @@ public class MetadataDocumentMessageBuilder {
     private String metadataDocUuid;
     private String envelopeId;
     private String envelopeUuid;
+    private ValidationState validationState;
     private int assayIndex;
     private int totalAssays;
     private Collection<String> envelopeIds;
@@ -68,6 +70,12 @@ public class MetadataDocumentMessageBuilder {
         return this;
     }
 
+    public MetadataDocumentMessageBuilder withValidationState(ValidationState validationState) {
+        this.validationState = validationState;
+
+        return this;
+    }
+
     public MetadataDocumentMessageBuilder withEnvelopeIds(Collection<String> envelopeIds) {
         this.envelopeIds = envelopeIds;
 
@@ -101,7 +109,7 @@ public class MetadataDocumentMessageBuilder {
     public MetadataDocumentMessage build() {
         String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
         return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(),
-                metadataDocId, metadataDocUuid, callbackLink, envelopeIds);
+                metadataDocId, metadataDocUuid, validationState, callbackLink, envelopeIds);
     }
 
     public ExportMessage buildAssaySubmittedMessage() {
