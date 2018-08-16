@@ -102,7 +102,7 @@ public class ProcessService {
                 resourceLinker.addToRefList(analysis, bundleManifest, "inputBundleManifests");
 
                 // add the input files
-                bundleManifest.getDataFiles().forEach(fileUuid -> {
+                bundleManifest.getFileFilesMap().keySet().forEach(fileUuid -> {
                     File analysisInputFile = fileRepository.findByUuid(new Uuid(fileUuid));
                     resourceLinker.addToRefList(analysisInputFile, analysis, "inputToProcesses");
                 });
