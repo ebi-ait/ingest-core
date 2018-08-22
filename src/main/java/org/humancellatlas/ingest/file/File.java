@@ -13,6 +13,8 @@ import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 
@@ -27,6 +29,7 @@ public class File extends MetadataDocument {
     private String fileName;
     private String cloudUrl;
     private Checksums checksums;
+    @Indexed
     private UUID validationId;
     private UUID dataFileUuid;
 
