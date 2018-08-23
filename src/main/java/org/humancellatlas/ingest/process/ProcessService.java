@@ -111,6 +111,7 @@ public class ProcessService {
                 getLog().warn(String.format(
                         "No Bundle Manifest present with bundle UUID '%s' - in future this will cause a critical error",
                         bundleUuid));
+                throw new ResourceNotFoundException(String.format("No Bundle Manifest present with bundle UUID '%s'", bundleUuid));
             }
         }
 
