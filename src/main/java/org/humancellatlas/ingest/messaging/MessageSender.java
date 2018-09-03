@@ -95,7 +95,7 @@ public class MessageSender {
         EXPORT(SECONDS.toMillis(5)),
         UPLOAD_MANAGER(SECONDS.toMillis(1)),
         ACCESSIONER(SECONDS.toMillis(2)),
-        STATE_TRACKING(SECONDS.toMillis(1));
+        STATE_TRACKING(SECONDS.toMillis(3));
 
         @Getter
         private final Long delayMillis;
