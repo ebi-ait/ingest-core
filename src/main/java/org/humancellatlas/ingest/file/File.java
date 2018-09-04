@@ -16,16 +16,19 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 @Getter
 @Setter
+@Document
 public class File extends MetadataDocument {
 
     @RestResource @DBRef private final List<Process> inputToProcesses = new ArrayList<>();
 
     @RestResource @DBRef private final List<Process> derivedByProcesses = new ArrayList<>();
 
+    @Indexed
     private String fileName;
     private String cloudUrl;
     private Checksums checksums;

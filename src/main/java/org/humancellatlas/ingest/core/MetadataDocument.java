@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public abstract class MetadataDocument extends AbstractEntity {
 
     private Object content;
 
+    @Indexed
     private final @DBRef List<SubmissionEnvelope> submissionEnvelopes = new ArrayList<>();
 
     private @Setter Accession accession;
