@@ -85,6 +85,11 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 .withRel(Links.SUBMISSION_ERRORS_REL);
     }
 
+    private Link getSubmissionDocumentStateLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                          .slash(Links.SUBMISSION_DOCUMENTS_SM_URL)
+                          .withRel(Links.SUBMISSION_DOCUMENTS_SM_REL);
+    }
 
     private Optional<Link> getStateTransitionLink(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
         Optional<String> transitionResourceName = getSubresourceNameForRequestSubmissionState(targetState);
@@ -215,6 +220,7 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         resource.add(getBundleManifestsLink(submissionEnvelope));
         resource.add(getSubmissionManifestsLink(submissionEnvelope));
         resource.add(getSubmissionErrorsLink(submissionEnvelope));
+        resource.add(getSubmissionDocumentStateLink(submissionEnvelope));
 
 
         // add subresource links for allowed state transition requests

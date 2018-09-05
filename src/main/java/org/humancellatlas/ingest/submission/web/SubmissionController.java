@@ -11,7 +11,7 @@ import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
-import org.humancellatlas.ingest.submission.SubmissionError;
+import org.humancellatlas.ingest.submission.*;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.humancellatlas.ingest.process.Process;
@@ -24,9 +24,6 @@ import org.humancellatlas.ingest.protocol.ProtocolRepository;
 
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.state.SubmissionState;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -60,6 +57,7 @@ public class SubmissionController {
     private final @NonNull Exporter exporter;
 
     private final @NonNull SubmissionEnvelopeService submissionEnvelopeService;
+    private final @NonNull SubmissionStateMachineService submissionStateMachineService;
     private final @NonNull ProcessService processService;
 
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
@@ -253,6 +251,11 @@ public class SubmissionController {
         submissionEnvelope.enactStateTransition(SubmissionState.COMPLETE);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMISSION_DOCUMENTS_SM_URL, method = RequestMethod.GET)
+    ResponseEntity<?> getDocumentStateMachineReport(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
+        return ResponseEntity.ok(getSubmissionStateMachineService().documentStatesForEnvelope(submissionEnvelope));
     }
 
 
