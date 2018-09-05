@@ -10,13 +10,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConfigurationService implements InitializingBean {
-    @Value("${STATE_TRACKER_SCHEME:PLS_CONFIGURE_STATE_TRACKER_SCHEME_ENV_VAR}")
+    @Value("${STATE_TRACKER_SCHEME:http}")
     private String stateTrackerSchemeString;
-    @Value("${STATE_TRACKER_HOST:PLS_CONFIGURE_STATE_TRACKER_HOST_ENV_VAR}")
+    @Value("${STATE_TRACKER_HOST:localhost}")
     private String stateTrackerHostString;
-    @Value("${STATE_TRACKER_PORT:PLS_CONFIGURE_STATE_TRACKER_PORT_ENV_VAR}")
+    @Value("${STATE_TRACKER_PORT:8999}")
     private String stateTrackerPortString;
-    @Value("${STATE_TRACKER_DOCUMENT_STATES_PATH:PLS_CONFIGURE_STATE_TRACKER_DOCUMENT_STATES_PATH_ENV_VAR}")
+    @Value("${STATE_TRACKER_DOCUMENT_STATES_PATH:machine-reports}")
     private String documentStatesPathString;
 
     @Getter
