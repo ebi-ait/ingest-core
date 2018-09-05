@@ -11,6 +11,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import sun.applet.resources.MsgAppletViewer;
 
@@ -24,7 +25,7 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class SubmissionStateMachineService {
-    private final @NonNull RestOperations restOperations;
+    private final @NonNull RestOperations restOperations = new RestTemplate( );
     private final @NonNull ConfigurationService configurationService;
 
     private static HttpEntity DEFAULT_HTTP_ENTITY = defaultHttpEntity();
