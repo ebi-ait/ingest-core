@@ -2,16 +2,9 @@ package org.humancellatlas.ingest.core.web;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import org.humancellatlas.ingest.biomaterial.Biomaterial;
-import org.humancellatlas.ingest.biomaterial.BiomaterialService;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
-import org.humancellatlas.ingest.file.FileService;
-import org.humancellatlas.ingest.process.ProcessService;
-import org.humancellatlas.ingest.project.ProjectService;
-import org.humancellatlas.ingest.protocol.ProtocolService;
 import org.humancellatlas.ingest.state.ValidationState;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
