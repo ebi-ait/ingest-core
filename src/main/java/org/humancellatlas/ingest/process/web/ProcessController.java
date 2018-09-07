@@ -125,54 +125,5 @@ public class ProcessController {
         Page<Process> processes = processService.findProcessesByInputBundleUuid(UUID.fromString(bundleUuid), pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
     }
-
-
-    @RequestMapping(path = "/processs/{id}" + Links.DRAFT_URL, method = RequestMethod.PUT)
-    HttpEntity<?> draftProcess(@PathVariable("id") Process process,
-                                   PersistentEntityResourceAssembler assembler) {
-        process.setValidationState(ValidationState.DRAFT);
-        process = getProcessService().getProcessRepository().save(process);
-        return ResponseEntity.accepted().body(assembler.toFullResource(process));
-    }
-    
-    @RequestMapping(path = "/processes/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validatingProcess(@PathVariable("id") Process process,
-                                    PersistentEntityResourceAssembler assembler) {
-        process.setValidationState(ValidationState.VALIDATING);
-        process = getProcessService().getProcessRepository().save(process);
-        return ResponseEntity.accepted().body(assembler.toFullResource(process));
-    }
-
-    @RequestMapping(path = "/processes/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validateProcess(@PathVariable("id") Process process,
-                                  PersistentEntityResourceAssembler assembler) {
-        process.setValidationState(ValidationState.VALID);
-        process = getProcessService().getProcessRepository().save(process);
-        return ResponseEntity.accepted().body(assembler.toFullResource(process));
-    }
-
-    @RequestMapping(path = "/processes/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> invalidateProcess(@PathVariable("id") Process process,
-                                    PersistentEntityResourceAssembler assembler) {
-        process.setValidationState(ValidationState.INVALID);
-        process = getProcessService().getProcessRepository().save(process);
-        return ResponseEntity.accepted().body(assembler.toFullResource(process));
-    }
-
-    @RequestMapping(path = "/processes/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> processingProcess(@PathVariable("id") Process process,
-                                    PersistentEntityResourceAssembler assembler) {
-        process.setValidationState(ValidationState.PROCESSING);
-        process = getProcessService().getProcessRepository().save(process);
-        return ResponseEntity.accepted().body(assembler.toFullResource(process));
-    }
-
-    @RequestMapping(path = "/processes/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
-    HttpEntity<?> completeProcess(@PathVariable("id") Process process,
-                                  PersistentEntityResourceAssembler assembler) {
-        process.setValidationState(ValidationState.COMPLETE);
-        process = getProcessService().getProcessRepository().save(process);
-        return ResponseEntity.accepted().body(assembler.toFullResource(process));
-    }
 }
 

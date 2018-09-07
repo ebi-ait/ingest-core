@@ -51,47 +51,4 @@ public class ProtocolController {
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }
-    
-    @RequestMapping(path = "/protocols/{id}" + Links.DRAFT_URL, method = RequestMethod.PUT)
-    HttpEntity<?> draftProtocol(@PathVariable("id") Protocol protocol,
-                               PersistentEntityResourceAssembler assembler) {
-        protocol.setValidationState(ValidationState.DRAFT);
-        protocol = getProtocolService().getProtocolRepository().save(protocol);
-        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
-    }
-    
-    @RequestMapping(path = "/protocols/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validatingProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
-        protocol.setValidationState(ValidationState.VALIDATING);
-        protocol = getProtocolService().getProtocolRepository().save(protocol);
-        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
-    }
-
-    @RequestMapping(path = "/protocols/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validateProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
-        protocol.setValidationState(ValidationState.VALID);
-        protocol = getProtocolService().getProtocolRepository().save(protocol);
-        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
-    }
-
-    @RequestMapping(path = "/protocols/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> invalidateProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
-        protocol.setValidationState(ValidationState.INVALID);
-        protocol = getProtocolService().getProtocolRepository().save(protocol);
-        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
-    }
-
-    @RequestMapping(path = "/protocols/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> processingProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
-        protocol.setValidationState(ValidationState.PROCESSING);
-        protocol = getProtocolService().getProtocolRepository().save(protocol);
-        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
-    }
-
-    @RequestMapping(path = "/protocols/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
-    HttpEntity<?> completeProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
-        protocol.setValidationState(ValidationState.COMPLETE);
-        protocol = getProtocolService().getProtocolRepository().save(protocol);
-        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
-    }
 }

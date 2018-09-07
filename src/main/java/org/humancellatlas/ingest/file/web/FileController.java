@@ -82,48 +82,6 @@ public class FileController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/files/{id}" + Links.DRAFT_URL, method = RequestMethod.PUT)
-    HttpEntity<?> draftFile(@PathVariable("id") File file,
-                                   PersistentEntityResourceAssembler assembler) {
-        file.setValidationState(ValidationState.DRAFT);
-        file = getFileService().getFileRepository().save(file);
-        return ResponseEntity.accepted().body(assembler.toFullResource(file));
-    }
-
-    @RequestMapping(path = "/files/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validatingFile(@PathVariable("id") File file, final PersistentEntityResourceAssembler assembler) {
-        file.setValidationState(ValidationState.VALIDATING);
-        file = getFileService().getFileRepository().save(file);
-        return ResponseEntity.accepted().body(assembler.toFullResource(file));
-    }
-
-    @RequestMapping(path = "/files/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validateFile(@PathVariable("id") File file, final PersistentEntityResourceAssembler assembler) {
-        file.setValidationState(ValidationState.VALID);
-        file = getFileService().getFileRepository().save(file);
-        return ResponseEntity.accepted().body(assembler.toFullResource(file));
-    }
-
-    @RequestMapping(path = "/files/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> invalidateFile(@PathVariable("id") File file, final PersistentEntityResourceAssembler assembler) {
-        file.setValidationState(ValidationState.INVALID);
-        file = getFileService().getFileRepository().save(file);
-        return ResponseEntity.accepted().body(assembler.toFullResource(file));
-    }
-
-    @RequestMapping(path = "/files/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> processingFile(@PathVariable("id") File file, final PersistentEntityResourceAssembler assembler) {
-        file.setValidationState(ValidationState.PROCESSING);
-        file = getFileService().getFileRepository().save(file);
-        return ResponseEntity.accepted().body(assembler.toFullResource(file));
-    }
-
-    @RequestMapping(path = "/files/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
-    HttpEntity<?> completeFile(@PathVariable("id") File file, final PersistentEntityResourceAssembler assembler) {
-        file.setValidationState(ValidationState.COMPLETE);
-        file = getFileService().getFileRepository().save(file);
-        return ResponseEntity.accepted().body(assembler.toFullResource(file));
-    }
 //
 //    @RequestMapping(path = "/files/{id}/", method = {RequestMethod.PUT, RequestMethod.POST})
 //    HttpEntity<?> notAllowed(@PathVariable("id") File file) {
