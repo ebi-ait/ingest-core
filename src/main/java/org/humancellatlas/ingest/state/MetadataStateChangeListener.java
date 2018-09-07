@@ -36,7 +36,6 @@ public class MetadataStateChangeListener extends AbstractMongoEventListener<Meta
         MetadataDocument document = event.getSource();
 
         messageRouter.routeValidationMessageFor(document);
-        messageRouter.routeStateTrackingUpdateMessageFor(document);
         messageRouter.routeAccessionMessageFor(document);
     }
 
