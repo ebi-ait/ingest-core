@@ -5,6 +5,7 @@ import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.core.service.strategy.impl.*;
 import org.humancellatlas.ingest.state.ValidationState;
+import org.humancellatlas.ingest.state.ValidationStateEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,6 +17,8 @@ public class ValidationStateChangeService {
     private final @NonNull ProjectCrudStrategy projectCrudStrategy;
     private final @NonNull FileCrudStrategy fileCrudStrategy;
 
+    private final @NonNull ValidationStateEventPublisher validationStateEventPublisher;
+
     public MetadataDocument changeValidationState(String metadataType,
                                                               String metadataId,
                                                               ValidationState validationState) {
@@ -24,8 +27,11 @@ public class ValidationStateChangeService {
         metadataDocument.setValidationState(validationState);
         metadataDocument = crudStrategy.saveMetadataDocument(metadataDocument);
 
+        validationStateEventPublisher.publishValidationStateChangeEventFor(metadataDocument);
+
         return metadataDocument;
     }
+
 
     private MetadataCrudStrategy crudStrategyForMetadataType(String metadataType) {
         switch (metadataType) {
@@ -43,4 +49,5 @@ public class ValidationStateChangeService {
                 throw new RuntimeException(String.format("No such metadata type: %s", metadataType));
         }
     }
+
 }
