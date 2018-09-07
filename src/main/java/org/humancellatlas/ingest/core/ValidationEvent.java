@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.core;
 
 import lombok.Getter;
 import org.humancellatlas.ingest.state.ValidationState;
+import org.springframework.context.ApplicationEvent;
 
 import java.util.Date;
 
@@ -12,13 +13,14 @@ import java.util.Date;
  * @date 12/09/17
  */
 @Getter
-public class ValidationEvent extends Event {
-    private final ValidationState originalState;
-    private final ValidationState endState;
+public class ValidationEvent extends ApplicationEvent {
+    private String message;
 
-    public ValidationEvent(ValidationState originalState, ValidationState endState) {
-        super(new SubmissionDate(new Date()));
-        this.originalState = originalState;
-        this.endState = endState;
+    public ValidationEvent(Object source, String message) {
+        super(source);
+        this.message = message;
+    }
+    public String getMessage() {
+        return message;
     }
 }
