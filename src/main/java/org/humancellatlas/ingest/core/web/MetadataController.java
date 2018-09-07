@@ -6,6 +6,8 @@ import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
+import org.springframework.data.rest.webmvc.RepositoryRestController;
+import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,17 +17,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
 @RequiredArgsConstructor
+@RepositoryRestController
+@ExposesResourceFor(MetadataDocument.class)
 public class MetadataController {
     private final @NonNull ValidationStateChangeService validationStateChangeService;
 
     @RequestMapping(path = "/{metadataType}/{id}" + Links.DRAFT_URL, method = RequestMethod.PUT)
     HttpEntity<?> draftBiomaterial(@PathVariable("metadataType") String metadataType,
                                    @PathVariable("id") String metadataId,
-                                   MetadataDocumentResourceAssembler assembler) {
+                                   PersistentEntityResourceAssembler assembler) {
         MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(metadataType,
                                                                                                metadataId,
                                                                                                ValidationState.DRAFT);
-        return ResponseEntity.accepted().body(assembler.toResource(metadataDocument));
+        return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
     }
 
     @RequestMapping(path = "/{metadataType}/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
