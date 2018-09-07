@@ -15,6 +15,10 @@ public class MetadataDocumentEventHandler {
     private final @NonNull MessageRouter messageRouter;
 
     @HandleAfterCreate
+    public void metadataDocumentAfterCreate(MetadataDocument document) {
+        this.handleMetadataDocumentCreate(document);
+    }
+
     public void handleMetadataDocumentCreate(MetadataDocument document) {
         messageRouter.routeValidationMessageFor(document);
         messageRouter.routeStateTrackingUpdateMessageFor(document);

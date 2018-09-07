@@ -35,50 +35,50 @@ public class MetadataController {
     @RequestMapping(path = "/{metadataType}/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingBiomaterial(@PathVariable("metadataType") String metadataType,
                                         @PathVariable("id") String metadataId,
-                                        MetadataDocumentResourceAssembler assembler) {
+                                        PersistentEntityResourceAssembler assembler) {
         MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(metadataType,
                                                                                                metadataId,
                                                                                                ValidationState.VALIDATING);
-        return ResponseEntity.accepted().body(assembler.toResource(metadataDocument));
+        return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
     }
 
     @RequestMapping(path = "/{metadataType}/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> validateBiomaterial(@PathVariable("metadataType") String metadataType,
                                       @PathVariable("id") String metadataId,
-                                      MetadataDocumentResourceAssembler assembler) {
+                                      PersistentEntityResourceAssembler assembler) {
         MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(metadataType,
                                                                                                metadataId,
                                                                                                ValidationState.VALID);
-        return ResponseEntity.accepted().body(assembler.toResource(metadataDocument));
+        return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
     }
 
     @RequestMapping(path = "/{metadataType}/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> invalidateBiomaterial(@PathVariable("metadataType") String metadataType,
                                         @PathVariable("id") String metadataId,
-                                        MetadataDocumentResourceAssembler assembler) {
+                                        PersistentEntityResourceAssembler assembler) {
         MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(metadataType,
                                                                                                metadataId,
                                                                                                ValidationState.INVALID);
-        return ResponseEntity.accepted().body(assembler.toResource(metadataDocument));
+        return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
     }
 
     @RequestMapping(path = "/{metadataType}/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
     HttpEntity<?> processingBiomaterial(@PathVariable("metadataType") String metadataType,
                                         @PathVariable("id") String metadataId,
-                                        MetadataDocumentResourceAssembler assembler) {
+                                        PersistentEntityResourceAssembler assembler) {
         MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(metadataType,
                                                                                                metadataId,
                                                                                                ValidationState.PROCESSING);
-        return ResponseEntity.accepted().body(assembler.toResource(metadataDocument));
+        return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
     }
 
     @RequestMapping(path = "/{metadataType}/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
     HttpEntity<?> completeBiomaterial(@PathVariable("metadataType") String metadataType,
                                       @PathVariable("id") String metadataId,
-                                      MetadataDocumentResourceAssembler assembler) {
+                                      PersistentEntityResourceAssembler assembler) {
         MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(metadataType,
                                                                                                metadataId,
                                                                                                ValidationState.COMPLETE);
-        return ResponseEntity.accepted().body(assembler.toResource(metadataDocument));
+        return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
     }
 }

@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileAlreadyExistsException;
 import org.humancellatlas.ingest.file.FileService;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -46,6 +47,8 @@ public class FileController {
     @NonNull
     private final PagedResourcesAssembler pagedResourcesAssembler;
 
+    private final @NonNull MetadataDocumentEventHandler metadataDocumentEventHandler;
+
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files/{filename:.+}",
                                 method = RequestMethod.POST,
                                 produces = MediaTypes.HAL_JSON_VALUE)
@@ -54,7 +57,9 @@ public class FileController {
                                            @RequestBody File file,
                                            final PersistentEntityResourceAssembler assembler) {
         try {
-            return ResponseEntity.accepted().body(assembler.toFullResource(fileService.createFile(fileName, file, submissionEnvelope)));
+            File createdFile = fileService.createFile(fileName, file, submissionEnvelope);
+            metadataDocumentEventHandler.handleMetadataDocumentCreate(createdFile);
+            return ResponseEntity.accepted().body(assembler.toFullResource(createdFile));
         } catch (FileAlreadyExistsException e) {
             throw new IllegalStateException(e);
         }
