@@ -72,7 +72,7 @@ public class MessageSender {
     }
 
     @Data
-    static class QueuedMessage {
+    static class QueuedMessage implements Delayed {
 
         private final String exchange;
         private final String routingKey;
@@ -86,11 +86,24 @@ public class MessageSender {
             this.payload = payload;
             this.intendedStartTime = intendedStartTime;
         }
+
+
+        @Override
+        public long getDelay(TimeUnit unit) {
+            long delay = intendedStartTime - System.currentTimeMillis();
+            return unit.convert(delay, MILLISECONDS);
+        }
+
+
+        @Override
+        public int compareTo(Delayed other) {
+            long otherDelay = other.getDelay(MILLISECONDS);
+            return Math.toIntExact(getDelay(TimeUnit.MILLISECONDS) - otherDelay);
+      }
     }
 
     private enum MessageBuffer {
 
-        // TODO: move these delay times constructors as they now relate to sending instead of buffering
         VALIDATION(SECONDS.toMillis(3)),
         EXPORT(SECONDS.toMillis(5)),
         UPLOAD_MANAGER(SECONDS.toMillis(1)),
@@ -100,8 +113,7 @@ public class MessageSender {
         @Getter
         private final Long delayMillis;
 
-        private final BlockingQueue<QueuedMessage> messageQueue = new PriorityBlockingQueue<>(1000,
-                                                                                              Comparator.comparing(QueuedMessage::getIntendedStartTime));
+        private final BlockingQueue<QueuedMessage> messageQueue = new DelayQueue<>();
 
         private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -117,7 +129,7 @@ public class MessageSender {
         //Why are these part of the contract when they're already defined in Constants?
         void queue(String exchange, String routingKey, AbstractEntityMessage payload, long intendedStartTime) {
             try {
-                QueuedMessage message = new QueuedMessage(exchange, routingKey, payload, intendedStartTime);
+                QueuedMessage message = new QueuedMessage(exchange, routingKey, payload, intendedStartTime + delayMillis);
                 messageQueue.put(message);
             } catch (InterruptedException e) {
                 LOGGER.error(e.getMessage(), e);
