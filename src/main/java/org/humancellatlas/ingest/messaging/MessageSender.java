@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.humancellatlas.ingest.config.ConfigurationService;
 import org.humancellatlas.ingest.messaging.model.AbstractEntityMessage;
 import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
@@ -16,11 +17,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.nio.Buffer;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
@@ -37,6 +41,8 @@ public class MessageSender {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(5);
 
     private @Autowired @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
+    private @Autowired @NonNull ConfigurationService configurationService;
+
 
     public void queueValidationMessage(String exchange, String routingKey,
             MetadataDocumentMessage payload, long intendedSendTime){
@@ -63,12 +69,33 @@ public class MessageSender {
     }
 
     @PostConstruct
-    private void initiateSending() {
-        Arrays.stream(MessageBuffer.values())
-              .forEach(buffer -> scheduler.scheduleWithFixedDelay(new BufferSender(buffer, rabbitMessagingTemplate),
+    private void initiate(){
+        initiateAmqpSending();
+        initiateHttpSending();
+    }
+
+    private void initiateAmqpSending() {
+        List<MessageBuffer> amqpMessageBuffers = Arrays.asList(
+                MessageBuffer.ACCESSIONER,
+                MessageBuffer.EXPORT,
+                MessageBuffer.UPLOAD_MANAGER,
+                MessageBuffer.VALIDATION);
+
+        amqpMessageBuffers
+                .forEach(buffer -> scheduler.scheduleWithFixedDelay(new BufferSender(buffer, rabbitMessagingTemplate),
                                                                   0,
                                                                   buffer.getDelayMillis(),
                                                                   TimeUnit.MILLISECONDS));
+    }
+
+    private void initiateHttpSending() {
+        List<MessageBuffer> httpMessageBuffers = Collections.singletonList(MessageBuffer.STATE_TRACKING);
+
+        httpMessageBuffers
+                .forEach(buffer -> scheduler.scheduleWithFixedDelay(new BufferSender(buffer, rabbitMessagingTemplate),
+                        0,
+                        buffer.getDelayMillis(),
+                        TimeUnit.MILLISECONDS));
     }
 
     @Data
@@ -171,6 +198,45 @@ public class MessageSender {
                 log.debug(String.format("Publishing message on exchange %s, routingKey = %s",
                                         message.exchange,
                                         message.routingKey));
+                log.debug(String.format("Message: %s", convertToString(payload)));
+            });
+        }
+
+        private String convertToString(Object object) {
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonString = "";
+
+            try {
+                jsonString = mapper.writeValueAsString(object);
+            } catch (JsonProcessingException e) {
+                log.debug(String.format("An error in converting message object to string occurred: %s", e.getMessage()));
+            }
+
+            return jsonString;
+        }
+    }
+
+    private static class AmqpHttpMixinBufferSender implements Runnable {
+        private final MessageBuffer buffer;
+        private final RestTemplate restTemplate;
+        private final RabbitMessagingTemplate rabbitMessagingTemplate;
+        private final Logger log = LoggerFactory.getLogger(BufferSender.class);
+
+        private AmqpHttpMixinBufferSender(MessageBuffer buffer, RestTemplate restTemplate, RabbitMessagingTemplate rabbitMessagingTemplate) {
+            this.buffer = buffer;
+            this.restTemplate = restTemplate;
+            this.rabbitMessagingTemplate = rabbitMessagingTemplate;
+        }
+
+        @Override
+        public void run() {
+            buffer.takeAll().forEach(message -> {
+                if()
+                messagingTemplate.convertAndSend(message.exchange, message.routingKey, message.payload);
+                AbstractEntityMessage payload = message.payload;
+                log.debug(String.format("Publishing message on exchange %s, routingKey = %s",
+                        message.exchange,
+                        message.routingKey));
                 log.debug(String.format("Message: %s", convertToString(payload)));
             });
         }
