@@ -129,7 +129,7 @@ public class MessageSender {
         //Why are these part of the contract when they're already defined in Constants?
         void queue(String exchange, String routingKey, AbstractEntityMessage payload, long intendedStartTime) {
             try {
-                QueuedMessage message = new QueuedMessage(exchange, routingKey, payload, intendedStartTime);
+                QueuedMessage message = new QueuedMessage(exchange, routingKey, payload, intendedStartTime + delayMillis);
                 messageQueue.put(message);
             } catch (InterruptedException e) {
                 LOGGER.error(e.getMessage(), e);
