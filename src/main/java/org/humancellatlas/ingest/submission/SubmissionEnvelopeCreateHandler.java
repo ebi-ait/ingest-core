@@ -2,9 +2,7 @@ package org.humancellatlas.ingest.submission;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.messaging.Constants;
 import org.humancellatlas.ingest.messaging.MessageRouter;
-import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;

@@ -7,13 +7,7 @@ import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.rest.core.mapping.ResourceMappings;
-import org.springframework.data.rest.webmvc.BaseUri;
-import org.springframework.data.rest.webmvc.support.RepositoryLinkBuilder;
-import org.springframework.hateoas.Link;
-import org.springframework.messaging.MessageHandler;
 
-import java.net.URI;
 import java.util.Collection;
 
 public class MetadataDocumentMessageBuilder {

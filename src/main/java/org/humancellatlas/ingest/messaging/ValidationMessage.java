@@ -1,6 +1,8 @@
 package org.humancellatlas.ingest.messaging;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.Uuid;
 

@@ -1,8 +1,6 @@
 package org.humancellatlas.ingest.submission;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Uuid;
 
 /**

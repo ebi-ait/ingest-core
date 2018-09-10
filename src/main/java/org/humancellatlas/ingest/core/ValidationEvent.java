@@ -1,10 +1,7 @@
 package org.humancellatlas.ingest.core;
 
 import lombok.Getter;
-import org.humancellatlas.ingest.state.ValidationState;
 import org.springframework.context.ApplicationEvent;
-
-import java.util.Date;
 
 /**
  * Javadocs go here!

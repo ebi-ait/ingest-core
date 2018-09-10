@@ -1,6 +1,8 @@
 package org.humancellatlas.ingest.schemas;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.schemas.schemascraper.SchemaScraper;
 import org.humancellatlas.ingest.schemas.schemascraper.impl.SchemaScrapeException;

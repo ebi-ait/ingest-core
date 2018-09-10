@@ -2,7 +2,6 @@ package org.humancellatlas.ingest.messaging.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.humancellatlas.ingest.messaging.model.AbstractEntityMessage;
 
 /**
  * @author Simon Jupp

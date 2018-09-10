@@ -1,7 +1,6 @@
 package org.humancellatlas.ingest.project;
 
 import org.humancellatlas.ingest.core.Uuid;
-import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;

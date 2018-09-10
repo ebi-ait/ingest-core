@@ -1,7 +1,6 @@
 package org.humancellatlas.ingest.file.web;
 
 import lombok.AllArgsConstructor;
-
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.exception.CoreEntityNotFoundException;
 import org.humancellatlas.ingest.file.File;

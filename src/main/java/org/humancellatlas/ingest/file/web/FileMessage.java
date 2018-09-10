@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.http.entity.ContentType;
 import org.humancellatlas.ingest.core.Checksums;
-import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
