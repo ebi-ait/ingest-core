@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
 
 
 /**

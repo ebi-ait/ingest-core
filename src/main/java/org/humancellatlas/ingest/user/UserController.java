@@ -2,9 +2,7 @@ package org.humancellatlas.ingest.user;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.Setter;
-import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
@@ -14,7 +12,6 @@ import org.humancellatlas.ingest.submission.web.SubmissionEnvelopeResourceProces
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.support.SelfLinkProvider;
 import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.data.web.PagedResourcesAssembler;

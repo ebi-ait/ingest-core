@@ -1,11 +1,5 @@
 package org.humancellatlas.ingest.process;
 
-import org.humancellatlas.ingest.biomaterial.Biomaterial;
-import org.humancellatlas.ingest.file.File;
-import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class ProcessTest {
 
 //    @Test

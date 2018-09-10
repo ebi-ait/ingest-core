@@ -1,7 +1,11 @@
 package org.humancellatlas.ingest.messaging;
 
 import lombok.NoArgsConstructor;
-import org.humancellatlas.ingest.core.*;
+import org.humancellatlas.ingest.config.ConfigurationService;
+import org.humancellatlas.ingest.core.AbstractEntity;
+import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportData;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
@@ -15,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.ResourceMappings;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,6 +41,7 @@ public class MessageRouter {
     @Autowired private MessageSender messageSender;
     @Autowired private ResourceMappings resourceMappings;
     @Autowired private RepositoryRestConfiguration config;
+    @Autowired private ConfigurationService configurationService;
 
     @Autowired
     private LinkGenerator linkGenerator;
@@ -74,12 +81,16 @@ public class MessageRouter {
     /* messages to state tracker */
 
     public boolean routeStateTrackingUpdateMessageFor(MetadataDocument document) {
-        // TODO: consider filtering whether the state tracker requires messages for every state change
-        // let the state tracker know about everything for now
-        this.messageSender.queueStateTrackingMessage(Constants.Exchanges.STATE_TRACKING,
-                                                     Constants.Routing.METADATA_UPDATE,
-                                                     stateTrackingMessageFor(document),
-                                                     document.getUpdateDate().getMillis());
+        URI documentUpdateUri = UriComponentsBuilder.newInstance()
+                                                    .scheme(configurationService.getStateTrackerScheme())
+                                                    .host(configurationService.getStateTrackerHost())
+                                                    .port(configurationService.getStateTrackerPort())
+                                                    .pathSegment(configurationService.getDocumentStatesUpdatePath())
+                                                    .build().toUri();
+
+        this.messageSender.queueDocumentStateUpdateMessage(documentUpdateUri,
+                                                           documentStateUpdateMessage(document),
+                                                           document.getUpdateDate().getMillis());
         return true;
     }
 
@@ -142,10 +153,11 @@ public class MessageRouter {
                                                .build();
     }
 
-    private MetadataDocumentMessage stateTrackingMessageFor(MetadataDocument document) {
+    private MetadataDocumentMessage documentStateUpdateMessage(MetadataDocument document) {
         Collection<String> envelopeIds = document.getSubmissionEnvelopes().stream()
                                                  .map(AbstractEntity::getId)
                                                  .collect(Collectors.toList());
+
         return MetadataDocumentMessageBuilder.using(linkGenerator)
                                              .messageFor(document)
                                              .withEnvelopeIds(envelopeIds)

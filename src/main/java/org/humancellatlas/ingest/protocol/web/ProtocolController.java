@@ -3,18 +3,14 @@ package org.humancellatlas.ingest.protocol.web;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.core.Event;
-import org.humancellatlas.ingest.state.ValidationState;
-import org.humancellatlas.ingest.core.web.Links;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolService;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,48 +46,5 @@ public class ProtocolController {
         Protocol entity = getProtocolService().addProtocolToSubmissionEnvelope(submissionEnvelope, protocol);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
-    }
-    
-    @RequestMapping(path = "/protocols/{id}" + Links.DRAFT_URL, method = RequestMethod.PUT)
-    HttpEntity<?> draftProtocol(@PathVariable("id") Protocol protocol,
-                               PersistentEntityResourceAssembler assembler) {
-        protocol.setValidationState(ValidationState.DRAFT);
-        protocol = getProtocolService().getProtocolRepository().save(protocol);
-        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
-    }
-    
-    @RequestMapping(path = "/protocols/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validatingProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
-        protocol.setValidationState(ValidationState.VALIDATING);
-        protocol = getProtocolService().getProtocolRepository().save(protocol);
-        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
-    }
-
-    @RequestMapping(path = "/protocols/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validateProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
-        protocol.setValidationState(ValidationState.VALID);
-        protocol = getProtocolService().getProtocolRepository().save(protocol);
-        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
-    }
-
-    @RequestMapping(path = "/protocols/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> invalidateProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
-        protocol.setValidationState(ValidationState.INVALID);
-        protocol = getProtocolService().getProtocolRepository().save(protocol);
-        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
-    }
-
-    @RequestMapping(path = "/protocols/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> processingProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
-        protocol.setValidationState(ValidationState.PROCESSING);
-        protocol = getProtocolService().getProtocolRepository().save(protocol);
-        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
-    }
-
-    @RequestMapping(path = "/protocols/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
-    HttpEntity<?> completeProtocol(@PathVariable("id") Protocol protocol, PersistentEntityResourceAssembler assembler) {
-        protocol.setValidationState(ValidationState.COMPLETE);
-        protocol = getProtocolService().getProtocolRepository().save(protocol);
-        return ResponseEntity.accepted().body(assembler.toFullResource(protocol));
     }
 }

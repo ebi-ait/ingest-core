@@ -11,9 +11,6 @@ import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
-import org.humancellatlas.ingest.submission.*;
-import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
-import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
@@ -21,9 +18,11 @@ import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
-
-import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.state.SubmissionState;
+import org.humancellatlas.ingest.state.ValidationState;
+import org.humancellatlas.ingest.submission.*;
+import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
+import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -39,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.List;
 import java.util.Optional;
 
 /**

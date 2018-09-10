@@ -2,13 +2,12 @@ package org.humancellatlas.ingest.schemas.web;
 
 
 import org.humancellatlas.ingest.schemas.Schema;
-
 import org.springframework.data.rest.webmvc.RepositorySearchesResource;
 import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.stereotype.Component;
 
-
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 
 /**

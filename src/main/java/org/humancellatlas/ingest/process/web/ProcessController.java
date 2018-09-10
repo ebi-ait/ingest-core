@@ -9,7 +9,6 @@ import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.process.BundleReference;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessService;
-import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +18,6 @@ import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -124,55 +122,6 @@ public class ProcessController {
                                                      final PersistentEntityResourceAssembler resourceAssembler) {
         Page<Process> processes = processService.findProcessesByInputBundleUuid(UUID.fromString(bundleUuid), pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
-    }
-
-
-    @RequestMapping(path = "/processs/{id}" + Links.DRAFT_URL, method = RequestMethod.PUT)
-    HttpEntity<?> draftProcess(@PathVariable("id") Process process,
-                                   PersistentEntityResourceAssembler assembler) {
-        process.setValidationState(ValidationState.DRAFT);
-        process = getProcessService().getProcessRepository().save(process);
-        return ResponseEntity.accepted().body(assembler.toFullResource(process));
-    }
-    
-    @RequestMapping(path = "/processes/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validatingProcess(@PathVariable("id") Process process,
-                                    PersistentEntityResourceAssembler assembler) {
-        process.setValidationState(ValidationState.VALIDATING);
-        process = getProcessService().getProcessRepository().save(process);
-        return ResponseEntity.accepted().body(assembler.toFullResource(process));
-    }
-
-    @RequestMapping(path = "/processes/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validateProcess(@PathVariable("id") Process process,
-                                  PersistentEntityResourceAssembler assembler) {
-        process.setValidationState(ValidationState.VALID);
-        process = getProcessService().getProcessRepository().save(process);
-        return ResponseEntity.accepted().body(assembler.toFullResource(process));
-    }
-
-    @RequestMapping(path = "/processes/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> invalidateProcess(@PathVariable("id") Process process,
-                                    PersistentEntityResourceAssembler assembler) {
-        process.setValidationState(ValidationState.INVALID);
-        process = getProcessService().getProcessRepository().save(process);
-        return ResponseEntity.accepted().body(assembler.toFullResource(process));
-    }
-
-    @RequestMapping(path = "/processes/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> processingProcess(@PathVariable("id") Process process,
-                                    PersistentEntityResourceAssembler assembler) {
-        process.setValidationState(ValidationState.PROCESSING);
-        process = getProcessService().getProcessRepository().save(process);
-        return ResponseEntity.accepted().body(assembler.toFullResource(process));
-    }
-
-    @RequestMapping(path = "/processes/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
-    HttpEntity<?> completeProcess(@PathVariable("id") Process process,
-                                  PersistentEntityResourceAssembler assembler) {
-        process.setValidationState(ValidationState.COMPLETE);
-        process = getProcessService().getProcessRepository().save(process);
-        return ResponseEntity.accepted().body(assembler.toFullResource(process));
     }
 }
 

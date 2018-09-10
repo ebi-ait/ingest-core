@@ -2,22 +2,14 @@ package org.humancellatlas.ingest.project;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
-import org.humancellatlas.ingest.core.Accession;
 import org.humancellatlas.ingest.core.EntityType;
-import org.humancellatlas.ingest.core.Event;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.SubmissionDate;
-import org.humancellatlas.ingest.core.UpdateDate;
-import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.file.File;
-import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 
-import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**

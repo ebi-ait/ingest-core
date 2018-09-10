@@ -3,7 +3,6 @@ package org.humancellatlas.ingest.bundle;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.humancellatlas.ingest.core.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.hateoas.Identifiable;
 

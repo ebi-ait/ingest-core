@@ -9,4 +9,5 @@ public interface AbstractEntityMessage {
     String getDocumentType();
     String getDocumentId();
     String getCallbackLink();
+    MessageProtocol getMessageProtocol();
 }

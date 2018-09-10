@@ -2,22 +2,19 @@ package org.humancellatlas.ingest.core;
 
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.messaging.model.ExportMessage;
+import org.humancellatlas.ingest.messaging.model.MessageProtocol;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.rest.core.mapping.ResourceMappings;
-import org.springframework.data.rest.webmvc.BaseUri;
-import org.springframework.data.rest.webmvc.support.RepositoryLinkBuilder;
-import org.springframework.hateoas.Link;
 
-import java.net.URI;
 import java.util.Collection;
 
 public class MetadataDocumentMessageBuilder {
 
     private LinkGenerator linkGenerator;
 
+    private MessageProtocol messageProtocol;
     private Class<?> documentType;
     private String metadataDocId;
     private String metadataDocUuid;
@@ -50,6 +47,12 @@ public class MetadataDocumentMessageBuilder {
         }
 
         return builder;
+    }
+
+    public MetadataDocumentMessageBuilder withMessageProtocol(MessageProtocol messageProtocol) {
+        this.messageProtocol = messageProtocol;
+
+        return this;
     }
 
     private <T extends MetadataDocument> MetadataDocumentMessageBuilder withDocumentType(
@@ -108,13 +111,13 @@ public class MetadataDocumentMessageBuilder {
 
     public MetadataDocumentMessage build() {
         String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
-        return new MetadataDocumentMessage(documentType.getSimpleName().toLowerCase(),
+        return new MetadataDocumentMessage(messageProtocol, documentType.getSimpleName().toLowerCase(),
                 metadataDocId, metadataDocUuid, validationState, callbackLink, envelopeIds);
     }
 
     public ExportMessage buildAssaySubmittedMessage() {
         String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
-        return new ExportMessage(metadataDocId, metadataDocUuid, callbackLink,
+        return new ExportMessage(messageProtocol, metadataDocId, metadataDocUuid, callbackLink,
                 documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
 

@@ -3,18 +3,14 @@ package org.humancellatlas.ingest.project.web;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.core.Event;
-import org.humancellatlas.ingest.state.ValidationState;
-import org.humancellatlas.ingest.core.web.Links;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,48 +46,5 @@ public class ProjectController {
         Project entity = getProjectService().addProjectToSubmissionEnvelope(submissionEnvelope, project);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
-    }
-
-    @RequestMapping(path = "/projects/{id}" + Links.DRAFT_URL, method = RequestMethod.PUT)
-    HttpEntity<?> draftProject(@PathVariable("id") Project project,
-                               PersistentEntityResourceAssembler assembler) {
-        project.setValidationState(ValidationState.DRAFT);
-        project = getProjectService().getProjectRepository().save(project);
-        return ResponseEntity.accepted().body(assembler.toFullResource(project));
-    }
-    
-    @RequestMapping(path = "/projects/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validatingProject(@PathVariable("id") Project project, PersistentEntityResourceAssembler assembler) {
-        project.setValidationState(ValidationState.VALIDATING);
-        project = getProjectService().getProjectRepository().save(project);
-        return ResponseEntity.accepted().body(assembler.toFullResource(project));
-    }
-
-    @RequestMapping(path = "/projects/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validateProject(@PathVariable("id") Project project, PersistentEntityResourceAssembler assembler) {
-        project.setValidationState(ValidationState.VALID);
-        project = getProjectService().getProjectRepository().save(project);
-        return ResponseEntity.accepted().body(assembler.toFullResource(project));
-    }
-
-    @RequestMapping(path = "/projects/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> invalidateProject(@PathVariable("id") Project project, PersistentEntityResourceAssembler assembler) {
-        project.setValidationState(ValidationState.INVALID);
-        project = getProjectService().getProjectRepository().save(project);
-        return ResponseEntity.accepted().body(assembler.toFullResource(project));
-    }
-
-    @RequestMapping(path = "/projects/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> processingProject(@PathVariable("id") Project project, PersistentEntityResourceAssembler assembler) {
-        project.setValidationState(ValidationState.PROCESSING);
-        project = getProjectService().getProjectRepository().save(project);
-        return ResponseEntity.accepted().body(assembler.toFullResource(project));
-    }
-
-    @RequestMapping(path = "/projects/{id}" + Links.COMPLETE_URL, method = RequestMethod.PUT)
-    HttpEntity<?> completeProject(@PathVariable("id") Project project, PersistentEntityResourceAssembler assembler) {
-        project.setValidationState(ValidationState.COMPLETE);
-        project = getProjectService().getProjectRepository().save(project);
-        return ResponseEntity.accepted().body(assembler.toFullResource(project));
     }
 }
