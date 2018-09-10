@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.submission;
 
+import org.humancellatlas.ingest.messaging.model.MessageProtocol;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.submission.web.SubmissionController;
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.springframework.data.rest.core.mapping.ResourceMappings;
 import org.springframework.data.rest.webmvc.BaseUri;
 import org.springframework.data.rest.webmvc.support.RepositoryLinkBuilder;
 import org.springframework.hateoas.Link;
+import sun.plugin2.message.Message;
 
 import java.net.URI;
 
@@ -29,6 +31,7 @@ public class SubmissionEnvelopeMessageBuilder {
     private final ResourceMappings mappings;
     private final RepositoryRestConfiguration config;
 
+    private MessageProtocol messageProtocol;
     private Class<?> controllerClass;
     private Class<?> documentType;
     private String submissionEnvelopeId;
@@ -50,6 +53,12 @@ public class SubmissionEnvelopeMessageBuilder {
                 .withDocumentType(submissionEnvelope.getClass())
                 .withId(submissionEnvelope.getId())
                 .withUuid(submissionEnvelope.getUuid().getUuid().toString());
+
+        return this;
+    }
+
+    private SubmissionEnvelopeMessageBuilder withMessageProtocol(MessageProtocol messageProtocol) {
+        this.messageProtocol = messageProtocol;
 
         return this;
     }
@@ -88,6 +97,7 @@ public class SubmissionEnvelopeMessageBuilder {
         String callbackLink = link.withSelfRel().getHref().replace(DUMMY_BASE_URI, "");
 
         return new SubmissionEnvelopeMessage(
+                messageProtocol,
                 documentType.getSimpleName().toLowerCase(),
                 submissionEnvelopeId,
                 submissionEnvelopeUuid,

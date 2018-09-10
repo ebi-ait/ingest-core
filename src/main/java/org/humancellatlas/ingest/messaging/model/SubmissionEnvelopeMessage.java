@@ -11,6 +11,7 @@ import org.humancellatlas.ingest.messaging.model.AbstractEntityMessage;
 @AllArgsConstructor
 @Getter
 public class SubmissionEnvelopeMessage implements AbstractEntityMessage {
+    private final MessageProtocol messageProtocol;
     private final String documentType;
     private final String documentId;
     private final String documentUuid;
