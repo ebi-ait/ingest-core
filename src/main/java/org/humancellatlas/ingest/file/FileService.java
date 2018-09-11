@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.exception.CoreEntityNotFoundException;
+import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
@@ -25,6 +26,7 @@ import java.util.Optional;
 public class FileService {
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull FileRepository fileRepository;
+    private final @NonNull MetadataDocumentEventHandler metadataDocumentEventHandler;
 
     public File createFile(String fileName, File file, SubmissionEnvelope submissionEnvelope) {
         if(! fileRepository.findBySubmissionEnvelopesInAndFileName(submissionEnvelope, fileName).isEmpty()) {
@@ -33,13 +35,17 @@ public class FileService {
         } else {
             file.setFileName(fileName);
             file.addToSubmissionEnvelope(submissionEnvelope);
-            return fileRepository.save(file);
+            File createdFile = fileRepository.save(file);
+            metadataDocumentEventHandler.handleMetadataDocumentCreate(createdFile);
+            return createdFile;
         }
     }
 
     public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
         file.addToSubmissionEnvelope(submissionEnvelope);
-        return getFileRepository().save(file);
+        File createdFile = getFileRepository().save(file);
+        metadataDocumentEventHandler.handleMetadataDocumentCreate(createdFile);
+        return createdFile;
     }
 
     public File updateStagedFileUrl(String envelopeUuid, String fileName, String newFileUrl) throws CoreEntityNotFoundException {
