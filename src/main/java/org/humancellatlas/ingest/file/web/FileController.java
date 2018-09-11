@@ -69,6 +69,7 @@ public class FileController {
                                                   @RequestBody File file,
                                                   final PersistentEntityResourceAssembler assembler) {
         File entity = getFileService().addFileToSubmissionEnvelope(submissionEnvelope, file);
+        metadataDocumentEventHandler.handleMetadataDocumentCreate(entity);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }
