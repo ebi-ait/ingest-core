@@ -130,7 +130,7 @@ public class MessageSender {
         EXPORT(SECONDS.toMillis(5)),
         UPLOAD_MANAGER(SECONDS.toMillis(1)),
         ACCESSIONER(SECONDS.toMillis(2)),
-        STATE_TRACKING(SECONDS.toMillis(3));
+        STATE_TRACKING(500L);
 
         @Getter
         private final Long delayMillis;
