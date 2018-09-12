@@ -22,8 +22,10 @@ import java.util.UUID;
 @Document
 public class File extends MetadataDocument {
 
+    @Indexed
     @RestResource @DBRef private final List<Process> inputToProcesses = new ArrayList<>();
 
+    @Indexed
     @RestResource @DBRef private final List<Process> derivedByProcesses = new ArrayList<>();
 
     @Indexed
