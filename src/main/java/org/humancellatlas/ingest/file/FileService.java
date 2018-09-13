@@ -28,6 +28,7 @@ public class FileService {
     private final @NonNull FileRepository fileRepository;
     private final @NonNull MetadataDocumentEventHandler metadataDocumentEventHandler;
 
+    // TODO Refactor!!!
     public File createFile(String fileName, File file, SubmissionEnvelope submissionEnvelope) {
         if(! fileRepository.findBySubmissionEnvelopesInAndFileName(submissionEnvelope, fileName).isEmpty()) {
             throw new FileAlreadyExistsException(String.format("File with name %s already exists in envelope %s", fileName, submissionEnvelope.getId()),

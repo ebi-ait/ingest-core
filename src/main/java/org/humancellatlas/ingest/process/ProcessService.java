@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.ResourceLinker;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
@@ -40,6 +41,9 @@ public class ProcessService {
     @Autowired
     private ResourceLinker resourceLinker;
 
+    @Autowired
+    MetadataDocumentEventHandler metadataDocumentEventHandler;
+
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     protected Logger getLog() {
@@ -68,17 +72,22 @@ public class ProcessService {
         return getProcessRepository().save(process);
     }
 
+    // TODO Refactor this to use FileService
+    // Implement logic to have the option to only create and createOrUpdate
     public Process addFileToAnalysisProcess(final Process analysis, final File file) {
         SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
         File targetFile = determineTargetFile(submissionEnvelope, file);
         targetFile.addToAnalysis(analysis);
         getFileRepository().save(targetFile);
+        metadataDocumentEventHandler.handleMetadataDocumentCreate(targetFile);
+
         return analysis;
     }
 
     private File determineTargetFile(SubmissionEnvelope submissionEnvelope, File file) {
         List<File> persistentFiles = fileRepository
                 .findBySubmissionEnvelopesInAndFileName(submissionEnvelope, file.getFileName());
+
         File targetFile = persistentFiles.stream().findFirst().orElse(file);
         return targetFile;
     }
