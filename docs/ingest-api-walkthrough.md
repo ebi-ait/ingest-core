@@ -31,7 +31,7 @@ var subs_url = _links.submissionEnvelopes.href
 Evaluate the expression `_links.submissionEnvelopes.href` from the response to the request in step 1. This 'discovers' the link to use to create a submission envelope (and will protect your client for future changes to URL structures). A submission envelope provides a container for all submitted materials and will allocate staging space to upload any required files to (e.g. analysis outputs or workflow descriptors). We want to create a new empty envelope, so we send an empty JSON object.
 
 ```bash
-# returns the submission envelope, with embedded links to it's url {_links.self.href} and a link to use to create assays {_links.processes}
+# returns the submission envelope, with embedded links to its url {_links.self.href} and a link to use to create assays {_links.processes}
 >: curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN"  "http://api.ingest.integration.data.humancellatlas.org/submissionEnvelopes" -d {}
 ```
 
@@ -50,7 +50,7 @@ Evaluate the expression `_links.processes.href` from the response to the previou
 Evaluate the expression `_links.protocols.href` from the response to the previous "Create submission" request. This gives us the location to send protocols to. The below code assumes protocol metadata is held in a file called 'analysis_protocol.json' in the current directory.
 
 ```bash
-# returns a link with which to associate files to this analysis {_links.add-file-reference.href}
+# returns a link its url {_links.self.href}
 >: curl -X POST -H "Content-Type: application/json" -d @analysis_protocol.json http://api.ingest.integration.data.humancellatlas.org/submissionEnvelopes/5b769dc51c022d00079f1d8f/protocols
 ```
 
