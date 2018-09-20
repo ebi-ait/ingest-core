@@ -225,16 +225,12 @@ public class MessageSender {
             return headers;
         }
         private String convertToString(Object object) {
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonString = "";
-
             try {
-                jsonString = mapper.writeValueAsString(object);
+                return new ObjectMapper().writeValueAsString(object);
             } catch (JsonProcessingException e) {
                 log.debug(String.format("An error in converting message object to string occurred: %s", e.getMessage()));
+                return "";
             }
-
-            return jsonString;
         }
     }
 }
