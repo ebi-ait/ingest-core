@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * Created by rolando on 06/09/2017.
@@ -24,7 +25,7 @@ public interface FileRepository extends MongoRepository<File, String> {
     File findByUuid(@Param("uuid") Uuid uuid);
 
     @RestResource(exported = false)
-    List<File> findBySubmissionEnvelopesContains(SubmissionEnvelope submissionEnvelope);
+    Stream<File> findBySubmissionEnvelopesContains(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(rel = "findBySubmissionEnvelope")
     Page<File> findBySubmissionEnvelopesContaining(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope, Pageable pageable);

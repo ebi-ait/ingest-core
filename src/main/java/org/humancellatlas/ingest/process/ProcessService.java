@@ -130,7 +130,6 @@ public class ProcessService {
     public Collection<Process> findAssays(SubmissionEnvelope submissionEnvelope) {
         Set<Process> results = new LinkedHashSet<>();
         long fileStartTime = System.currentTimeMillis();
-        List<File> derivedFiles = fileRepository.findBySubmissionEnvelopesContains(submissionEnvelope);
 
         long fileEndTime = System.currentTimeMillis();
         float fileQueryTime = ((float)(fileEndTime - fileStartTime)) / 1000;
@@ -138,13 +137,15 @@ public class ProcessService {
         getLog().info("Retrieving assays: file query time: {} s", fileQt);
         long allBioStartTime = System.currentTimeMillis();
 
-        for (File derivedFile : derivedFiles) {
-            for (Process derivedByProcess : derivedFile.getDerivedByProcesses()) {
-                if (!biomaterialRepository.findByInputToProcessesContains(derivedByProcess).isEmpty()) {
-                    results.add(derivedByProcess);
-                }
-            }
-        }
+        fileRepository.findBySubmissionEnvelopesContains(submissionEnvelope)
+                      .forEach(derivedFile -> {
+                          for (Process derivedByProcess : derivedFile.getDerivedByProcesses()) {
+                              if (!biomaterialRepository.findByInputToProcessesContains(derivedByProcess).isEmpty()) {
+                                  results.add(derivedByProcess);
+                              }
+                          }
+                      });
+
         long allBioEndTime = System.currentTimeMillis();
         float allBioQueryTime = ((float)(allBioEndTime - allBioStartTime)) / 1000;
         String allBioQt = new DecimalFormat("#,###.##").format(allBioQueryTime);
@@ -154,15 +155,14 @@ public class ProcessService {
 
     public Collection<Process> findAnalyses(SubmissionEnvelope submissionEnvelope) {
         Set<Process> results = new LinkedHashSet<>();
-        List<File> derivedFiles = fileRepository.findBySubmissionEnvelopesContains(submissionEnvelope);
-
-        for (File derivedFile : derivedFiles) {
-            for (Process derivedByProcess : derivedFile.getDerivedByProcesses()) {
-                if (!fileRepository.findByInputToProcessesContains(derivedByProcess).isEmpty()) {
-                    results.add(derivedByProcess);
-                }
-            }
-        }
+        fileRepository.findBySubmissionEnvelopesContains(submissionEnvelope)
+                      .forEach(derivedFile -> {
+                          for (Process derivedByProcess : derivedFile.getDerivedByProcesses()) {
+                              if (!fileRepository.findByInputToProcessesContains(derivedByProcess).isEmpty()) {
+                                  results.add(derivedByProcess);
+                              }
+                          }
+                      });
         return results;
     }
 }
