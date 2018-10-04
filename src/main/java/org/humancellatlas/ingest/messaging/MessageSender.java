@@ -171,7 +171,8 @@ public class MessageSender {
         public Stream<QueuedMessage> takeAll() {
             Queue<QueuedMessage> drainedQueue = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getIntendedStartTime));
             this.messageQueue.drainTo(drainedQueue);
-            return Stream.generate(drainedQueue::remove);
+            return Stream.generate(drainedQueue::remove)
+                         .limit(drainedQueue.size());
         }
 
         private String convertToString(Object object) {
