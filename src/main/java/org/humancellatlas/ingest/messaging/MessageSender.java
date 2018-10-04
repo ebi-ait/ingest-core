@@ -202,11 +202,9 @@ public class MessageSender {
             buffer.takeAll().forEach(message -> {
                 if(message.getMessageProtocol().equals(MessageProtocol.AMQP)) {
                     messagingTemplate.convertAndSend(message.exchange, message.routingKey, message.payload);
-                    AbstractEntityMessage payload = message.payload;
                 } else {
                     try {
                         restTemplate.exchange(message.getUri(), HttpMethod.POST, new HttpEntity<>(message.getPayload(), headers), Object.class);
-                        AbstractEntityMessage payload = message.payload;
                     } catch (Exception e) {
                         log.error("", e);
                     }
