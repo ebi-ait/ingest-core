@@ -150,20 +150,22 @@ public class MessageSender {
         //TODO each enum should already know exchange and routing key
         //Why are these part of the contract when they're already defined in Constants?
         void queueAmqpMessage(String exchange, String routingKey, AbstractEntityMessage payload, long intendedStartTime) {
+            QueuedMessage message = new QueuedMessage(exchange, routingKey, payload, intendedStartTime + delayMillis);
             try {
-                QueuedMessage message = new QueuedMessage(exchange, routingKey, payload, intendedStartTime + delayMillis);
-                messageQueue.put(message);
-            } catch (InterruptedException e) {
-                LOGGER.error(e.getMessage(), e);
+                messageQueue.add(message);
+            } catch (IllegalStateException e) {
+                LOGGER.error(String.format("Failed to queue message: %s", convertToString(message)), e);
+                throw new RuntimeException(e);
             }
         }
 
         void queueHttpMessage(URI uri, AbstractEntityMessage payload, long intendedStartTime) {
+            QueuedMessage message = new QueuedMessage(uri, payload, intendedStartTime + delayMillis);
             try {
-                QueuedMessage message = new QueuedMessage(uri, payload, intendedStartTime + delayMillis);
-                messageQueue.put(message);
-            } catch (InterruptedException e) {
-                LOGGER.error(e.getMessage(), e);
+                messageQueue.add(message);
+            } catch (IllegalStateException e) {
+                LOGGER.error(String.format("Failed to queue message: %s", convertToString(message)), e);
+                throw new RuntimeException(e);
             }
         }
 
@@ -179,6 +181,15 @@ public class MessageSender {
         public Stream<QueuedMessage> takeAll() {
             return Stream.generate(this::take)
                          .limit(messageQueue.size());
+        }
+
+        private String convertToString(Object object) {
+            try {
+                return new ObjectMapper().writeValueAsString(object);
+            } catch (JsonProcessingException e) {
+                LOGGER.debug(String.format("An error in converting message object to string occurred: %s", e.getMessage()));
+                return "";
+            }
         }
 
     }
@@ -217,14 +228,6 @@ public class MessageSender {
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-type", "application/json");
             return headers;
-        }
-        private String convertToString(Object object) {
-            try {
-                return new ObjectMapper().writeValueAsString(object);
-            } catch (JsonProcessingException e) {
-                log.debug(String.format("An error in converting message object to string occurred: %s", e.getMessage()));
-                return "";
-            }
         }
     }
 }
