@@ -20,8 +20,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
@@ -169,18 +168,10 @@ public class MessageSender {
             }
         }
 
-        private QueuedMessage take() {
-            try {
-                return this.messageQueue.take();
-            } catch (InterruptedException e) {
-                LOGGER.error(e.getMessage(), e);
-                throw new RuntimeException(e);
-            }
-        }
-
         public Stream<QueuedMessage> takeAll() {
-            return Stream.generate(this::take)
-                         .limit(messageQueue.size());
+            Queue<QueuedMessage> drainedQueue = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getIntendedStartTime));
+            this.messageQueue.drainTo(drainedQueue);
+            return Stream.generate(drainedQueue::remove);
         }
 
         private String convertToString(Object object) {
@@ -191,7 +182,6 @@ public class MessageSender {
                 return "";
             }
         }
-
     }
 
     private static class AmqpHttpMixinBufferSender implements Runnable {
