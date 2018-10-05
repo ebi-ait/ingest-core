@@ -20,8 +20,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
@@ -169,18 +168,11 @@ public class MessageSender {
             }
         }
 
-        private QueuedMessage take() {
-            try {
-                return this.messageQueue.take();
-            } catch (InterruptedException e) {
-                LOGGER.error(e.getMessage(), e);
-                throw new RuntimeException(e);
-            }
-        }
-
         public Stream<QueuedMessage> takeAll() {
-            return Stream.generate(this::take)
-                         .limit(messageQueue.size());
+            Queue<QueuedMessage> drainedQueue = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getIntendedStartTime));
+            this.messageQueue.drainTo(drainedQueue);
+            return Stream.generate(drainedQueue::remove)
+                         .limit(drainedQueue.size());
         }
 
         private String convertToString(Object object) {
@@ -191,7 +183,6 @@ public class MessageSender {
                 return "";
             }
         }
-
     }
 
     private static class AmqpHttpMixinBufferSender implements Runnable {
@@ -212,11 +203,9 @@ public class MessageSender {
             buffer.takeAll().forEach(message -> {
                 if(message.getMessageProtocol().equals(MessageProtocol.AMQP)) {
                     messagingTemplate.convertAndSend(message.exchange, message.routingKey, message.payload);
-                    AbstractEntityMessage payload = message.payload;
                 } else {
                     try {
                         restTemplate.exchange(message.getUri(), HttpMethod.POST, new HttpEntity<>(message.getPayload(), headers), Object.class);
-                        AbstractEntityMessage payload = message.payload;
                     } catch (Exception e) {
                         log.error("", e);
                     }
