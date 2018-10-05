@@ -23,6 +23,8 @@ import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.*;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -69,6 +71,7 @@ public class SubmissionController {
 
 
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
+    private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files", method = RequestMethod.GET)
     ResponseEntity<?> getFiles(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -226,6 +229,7 @@ public class SubmissionController {
             final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelope.enactStateTransition(SubmissionState.SUBMITTED);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        log.info(String.format("Submission envelope with ID %s was submitted.", submissionEnvelope.getId()));
         submissionEnvelopeService.handleSubmissionRequest(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
