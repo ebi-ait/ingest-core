@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.file;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,6 +42,7 @@ public class File extends MetadataDocument {
         setDataFileUuid(UUID.randomUUID());
     }
 
+    @JsonCreator
     public File(@JsonProperty("content") Object content) {
         super(EntityType.FILE, content);
     }

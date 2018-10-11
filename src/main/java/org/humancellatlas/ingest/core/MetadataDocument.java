@@ -23,6 +23,7 @@ import java.util.List;
 @Getter
 public abstract class MetadataDocument extends AbstractEntity {
 
+    @Setter
     private Object content;
 
     @Indexed
@@ -55,7 +56,7 @@ public abstract class MetadataDocument extends AbstractEntity {
             }
             this.submissionEnvelopes.add(submissionEnvelope);
         }
-        else{
+        else if (!openSubmission.getId().equals(submissionEnvelope.getId())){
             String errorMessage = String.format("The %s metadata %s is still linked to a %s submission envelope %s.",
                     this.getType(), this.getId(), openSubmission.getSubmissionState(), openSubmission.getId());
             getLog().error(errorMessage);
