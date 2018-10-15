@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.submission;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ public class SubmissionEnvelopeCreateHandler {
 
     @HandleAfterCreate
     public boolean handleSubmissionEnvelopeCreation(SubmissionEnvelope submissionEnvelope) {
+        submissionEnvelope.setUuid(Uuid.newUuid());
         this.messageRouter.routeStateTrackingNewSubmissionEnvelope(submissionEnvelope);
         this.messageRouter.routeRequestUploadAreaCredentials(submissionEnvelope);
         log.info(String.format("Submission envelope with ID %s was created.", submissionEnvelope.getId()));

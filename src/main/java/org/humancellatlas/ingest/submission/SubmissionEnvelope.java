@@ -38,7 +38,6 @@ public class SubmissionEnvelope extends AbstractEntity {
         super(EntityType.SUBMISSION);
         this.submissionState = SubmissionState.PENDING;
         this.triggersAnalysis = true;
-        setUuid(new Uuid());
     }
 
     public SubmissionEnvelope(String id) {
