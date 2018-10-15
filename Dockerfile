@@ -29,6 +29,7 @@ RUN ./gradlew assemble
 
 CMD java \
     -XX:+UseG1GC \
+    -Djava.security.egd=file:/dev/./urandom \
     -jar build/libs/*.jar \
     --spring.data.mongodb.uri=$MONGO_URI \
     --spring.rabbitmq.host=$RABBIT_HOST \
