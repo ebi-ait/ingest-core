@@ -26,10 +26,10 @@ public class Biomaterial extends MetadataDocument {
     @RestResource @DBRef private final List<Project> projects = new ArrayList<>();
 
     @Indexed
-    @RestResource @DBRef private final List<Process> inputToProcesses = new ArrayList<>();
+    @RestResource @DBRef(lazy = true) private final List<Process> inputToProcesses = new ArrayList<>();
 
     @Indexed
-    @RestResource @DBRef private final List<Process> derivedByProcesses = new ArrayList<>();
+    @RestResource @DBRef(lazy = true) private final List<Process> derivedByProcesses = new ArrayList<>();
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Biomaterial(Object content) {
