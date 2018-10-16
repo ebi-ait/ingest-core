@@ -22,6 +22,11 @@ public class Uuid {
     }
 
     public Uuid() {
-        this.uuid = UUID.randomUUID();
+    }
+
+    public static Uuid newUuid() {
+        Uuid uuid = new Uuid();
+        uuid.setUuid(UUID.randomUUID());
+        return uuid;
     }
 }

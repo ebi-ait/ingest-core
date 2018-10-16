@@ -2,11 +2,13 @@ package org.humancellatlas.ingest.submission;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
+import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.ResourceMappings;
@@ -28,6 +30,12 @@ public class SubmissionEnvelopeCreateHandler {
     private final @NonNull ResourceMappings mappings;
     private final @NonNull RepositoryRestConfiguration config;
     private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
+
+    @HandleBeforeCreate
+    public boolean submissionEnvelopeBeforeCreate(SubmissionEnvelope submissionEnvelope) {
+        submissionEnvelope.setUuid(Uuid.newUuid());
+        return true;
+    }
 
     @HandleAfterCreate
     public boolean handleSubmissionEnvelopeCreation(SubmissionEnvelope submissionEnvelope) {
