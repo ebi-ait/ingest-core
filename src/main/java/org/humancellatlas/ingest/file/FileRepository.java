@@ -25,6 +25,9 @@ public interface FileRepository extends MongoRepository<File, String> {
     File findByUuid(@Param("uuid") Uuid uuid);
 
     @RestResource(exported = false)
+    File findByUuidUuid(UUID uuid);
+
+    @RestResource(exported = false)
     Stream<File> findBySubmissionEnvelopesContains(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(rel = "findBySubmissionEnvelope")
