@@ -21,16 +21,19 @@ public class ValidationStateChangeService {
     private final @NonNull ValidationStateEventPublisher validationStateEventPublisher;
 
     public MetadataDocument changeValidationState(String metadataType,
-                                                              String metadataId,
-                                                              ValidationState validationState) {
+                                                  String metadataId,
+                                                  ValidationState validationState) {
         MetadataCrudStrategy crudStrategy = crudStrategyForMetadataType(metadataType);
         MetadataDocument metadataDocument = crudStrategy.findMetadataDocument(metadataId);
-        metadataDocument.setValidationState(validationState);
-        metadataDocument = crudStrategy.saveMetadataDocument(metadataDocument);
 
-        validationStateEventPublisher.publishValidationStateChangeEventFor(metadataDocument);
-
-        return metadataDocument;
+        if(metadataDocument.getValidationState().equals(validationState)) {
+            throw new IllegalStateException(String.format("%s document with id %s already in state %s", metadataType, metadataId, validationState));
+        } else {
+            metadataDocument.setValidationState(validationState);
+            metadataDocument = crudStrategy.saveMetadataDocument(metadataDocument);
+            validationStateEventPublisher.publishValidationStateChangeEventFor(metadataDocument);
+            return metadataDocument;
+        }
     }
 
 
