@@ -62,10 +62,10 @@ public class FileController {
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
                    method = RequestMethod.POST,
                    produces = MediaTypes.HAL_JSON_VALUE)
-    ResponseEntity<Resource<?>> addFileToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+    ResponseEntity<Resource<?>> addNewFileToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                   @RequestBody File file,
                                                   final PersistentEntityResourceAssembler assembler) {
-        File entity = getFileService().addFileToSubmissionEnvelope(submissionEnvelope, file);
+        File entity = getFileService().addNewFileToSubmissionEnvelope(submissionEnvelope, file);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }

@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.ResourceLinker;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.file.FileService;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
@@ -33,6 +34,8 @@ public class ProcessService {
     private ProcessRepository processRepository;
     @Autowired
     private FileRepository fileRepository;
+    @Autowired
+    private FileService fileService;
     @Autowired
     private BiomaterialRepository biomaterialRepository;
     @Autowired
@@ -79,18 +82,21 @@ public class ProcessService {
         File targetFile = determineTargetFile(submissionEnvelope, file);
         targetFile.addToAnalysis(analysis);
         getFileRepository().save(targetFile);
-        metadataDocumentEventHandler.handleMetadataDocumentCreate(targetFile);
+
+        if(! Optional.ofNullable(targetFile.getId()).isPresent()) {
+            metadataDocumentEventHandler.handleMetadataDocumentCreate(targetFile);
+        }
 
         return analysis;
     }
 
     private File determineTargetFile(SubmissionEnvelope submissionEnvelope, File file) {
-        List<File> persistentFiles = fileRepository
-                .findBySubmissionEnvelopesInAndFileName(submissionEnvelope, file.getFileName());
+        List<File> persistentFiles = fileRepository.findBySubmissionEnvelopesInAndFileName(submissionEnvelope, file.getFileName());
 
         File targetFile = persistentFiles.stream().findFirst().orElse(file);
         return targetFile;
     }
+
 
     public Process resolveBundleReferencesForProcess(Process analysis, BundleReference bundleReference) {
         for (String bundleUuid : bundleReference.getBundleUuids()) {

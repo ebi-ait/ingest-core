@@ -42,10 +42,16 @@ public class FileService {
         }
     }
 
-    public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
+    public File addNewFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
         file.addToSubmissionEnvelope(submissionEnvelope);
         File createdFile = getFileRepository().save(file);
         metadataDocumentEventHandler.handleMetadataDocumentCreate(createdFile);
+        return createdFile;
+    }
+
+    public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
+        file.addToSubmissionEnvelope(submissionEnvelope);
+        File createdFile = getFileRepository().save(file);
         return createdFile;
     }
 
