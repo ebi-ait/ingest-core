@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -50,7 +51,7 @@ public class GlobalStateExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class})
     public @ResponseBody
     ExceptionInfo handleIllegalArgument(HttpServletRequest request, Exception e) {
         getLog().warn(String.format("Caught an illegal argument at '%s'; " +
