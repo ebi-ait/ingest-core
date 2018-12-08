@@ -50,6 +50,7 @@ public class MessagingControllerTest {
         //when:
         doThrow(MessageConversionException.class).when(rabbitMessagingTemplate).convertAndSend("","","");
 
+        //then:
         assertThatThrownBy(() -> { controller.publish(message); }).isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Unable to convert payload");
     }
@@ -62,10 +63,9 @@ public class MessagingControllerTest {
         //when:
         doThrow(MessagingException.class).when(rabbitMessagingTemplate).convertAndSend("","","");
 
+        //then:
         assertThatThrownBy(() -> { controller.publish(message); }).isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("There was a problem sending message");
-
-
     }
 
     @Configuration
