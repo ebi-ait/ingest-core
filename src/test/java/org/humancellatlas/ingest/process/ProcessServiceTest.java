@@ -2,9 +2,9 @@ package org.humancellatlas.ingest.process;
 
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
-import org.humancellatlas.ingest.core.service.ResourceLinker;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.Test;
@@ -39,9 +39,8 @@ public class ProcessServiceTest {
     private BiomaterialRepository biomaterialRepository;
     @MockBean
     private BundleManifestRepository bundleManifestRepository;
-
     @MockBean
-    private ResourceLinker resourceLinker;
+    private MetadataDocumentEventHandler metadataDocumentEventHandler;
 
     @Test
     public void testAddFileToAnalysisProcess() {
