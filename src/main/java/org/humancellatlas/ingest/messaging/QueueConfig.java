@@ -26,7 +26,7 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean Queue queueFileStaged() { return new Queue(Constants.Queues.FILE_STAGED, false); }
 
-    @Bean FanoutExchange fileStagedExchange() { return new FanoutExchange(Constants.Exchanges.FILE_STAGED_FANOUT); }
+    @Bean FanoutExchange fileStagedExchange() { return new FanoutExchange(Constants.Exchanges.FILE_STAGED_EXCHANGE); }
 
     @Bean Queue queueValidationRequired() { return new Queue(Constants.Queues.VALIDATION_REQUIRED, false); }
 
