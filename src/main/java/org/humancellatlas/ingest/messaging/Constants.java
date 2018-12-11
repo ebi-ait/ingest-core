@@ -8,6 +8,7 @@ package org.humancellatlas.ingest.messaging;
 public class Constants {
     public class Queues {
         public static final String FILE_STAGED = "ingest.file.create.staged";
+        public static final String FILE_VALIDATION = "ingest.file.validation.queue";
         public static final String FILE_UPDATE = "ingest.file.update.queue";
         public static final String VALIDATION_REQUIRED = "ingest.metadata.validation.queue";
         public static final String ACCESSION_REQUIRED = "ingest.metadata.accession.queue";

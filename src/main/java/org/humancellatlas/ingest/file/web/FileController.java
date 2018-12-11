@@ -47,9 +47,6 @@ public class FileController {
     @NonNull
     private final PagedResourcesAssembler pagedResourcesAssembler;
 
-    @NonNull
-    private final MessageService messageService;
-
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files/{filename:.+}",
                                 method = RequestMethod.POST,
                                 produces = MediaTypes.HAL_JSON_VALUE)
@@ -85,15 +82,5 @@ public class FileController {
         File entity = getFileService().addFileToSubmissionEnvelope(submissionEnvelope, file);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
-    }
-
-
-    @RequestMapping(path = "/files/uploadInfo",
-            method = RequestMethod.POST,
-            produces = MediaTypes.HAL_JSON_VALUE)
-    ResponseEntity<Resource<?>> publishUploadInfo(@RequestBody Object uploadInfo){
-        Message uploadInfoMessage = new Message(Constants.Exchanges.FILE_STAGED_EXCHANGE, Constants.Queues.FILE_STAGED, uploadInfo);
-        getMessageService().publish(uploadInfoMessage);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
