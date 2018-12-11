@@ -1,104 +1,41 @@
 package org.humancellatlas.ingest.core.web;
 
-import com.mongodb.DB;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
-import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
-import org.humancellatlas.ingest.bundle.BundleManifestRepository;
-import org.humancellatlas.ingest.core.service.strategy.impl.ProcessCrudStrategy;
-import org.humancellatlas.ingest.core.service.strategy.impl.ProjectCrudStrategy;
 import org.humancellatlas.ingest.file.File;
-import org.humancellatlas.ingest.file.FileRepository;
-import org.humancellatlas.ingest.file.FileService;
 import org.humancellatlas.ingest.process.Process;
-import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
-import org.humancellatlas.ingest.protocol.ProtocolRepository;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.support.PersistenceExceptionTranslator;
-import org.springframework.data.mongodb.MongoDbFactory;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.repository.support.Repositories;
-import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
-import org.springframework.data.rest.core.mapping.RepositoryResourceMappings;
 import org.springframework.data.rest.core.mapping.ResourceMappings;
-import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
-import org.springframework.hateoas.mvc.ControllerLinkBuilderFactory;
+import org.springframework.data.rest.core.mapping.ResourceMetadata;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes={ SpringLinkGenerator.class })
 public class SpringLinkGeneratorTest {
 
-    @Autowired
-    private LinkGenerator linkGenerator;
-
-    @Autowired
+    @MockBean
     private ResourceMappings mappings;
 
-    @MockBean
-    private SubmissionEnvelopeRepository submissionEnvelopeRepository;
-
-    @MockBean
-    private BiomaterialRepository biomaterialRepository;
-
-    @MockBean
-    ProcessRepository processRepository;
-
-    @MockBean
-    HateoasPageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
-
-    @MockBean
-    ProcessCrudStrategy processCrudStrategy;
-
-    @MockBean
-    MongoTemplate mongoTemplate;
-
-    @MockBean
-    ProtocolRepository protocolRepository;
-
-    @MockBean
-    ProjectCrudStrategy projectCrudStrategy;
-
-    @MockBean
-    FileService fileService;
-
-    @MockBean
-    MetadataDocumentResourceProcessor metadataDocumentResourceProcessor;
-
-    @MockBean
-    RepositoryResourceMappings repositoryResourceMappings;
-
-    @MockBean
-    FileRepository fileRepository;
-
-    @MockBean
-    BundleManifestRepository bundleManifestRepository;
-
-    @MockBean
-    Repositories repositories;
-
-    @MockBean
-    RepositoryRestConfiguration repositoryRestConfiguration;
-
-    @MockBean
-    ControllerLinkBuilderFactory controllerLinkBuilderFactory;
-
+    @Autowired
+    private SpringLinkGenerator linkGenerator = new SpringLinkGenerator();
 
 
     @Test
     public void testCreateCallback() {
+        ResourceMetadata resourceMetadata = mock(ResourceMetadata.class);
+        when(resourceMetadata.getRel()).thenReturn("metadata");
+        when(mappings.getMetadataFor(any())).thenReturn(resourceMetadata);
+
         //when:
         String processCallback = linkGenerator.createCallback(Process.class, "df00e2");
         String biomaterialCallback = linkGenerator.createCallback(Biomaterial.class, "c80122");
@@ -107,38 +44,11 @@ public class SpringLinkGeneratorTest {
         String bmCallback = linkGenerator.createCallback(BundleManifest.class, "332fd9");
 
         //then:
-        assertThat(processCallback).isEqualToIgnoringCase("/processes/df00e2");
-        assertThat(biomaterialCallback).isEqualToIgnoringCase("/biomaterials/c80122");
-        assertThat(fileCallback).isEqualToIgnoringCase("/files/98dd90");
-        assertThat(protocolCallback).isEqualToIgnoringCase("/protocols/846df1");
-        assertThat(bmCallback).isEqualToIgnoringCase("/bundlemanifests/332fd9");
-    }
-
-    @TestConfiguration
-    static class TestApplication {
-
-        @Bean
-        MongoDbFactory doNotConnectToLiveDatabase() {
-            return new MongoDbFactory() {
-
-                @Override
-                public DB getDb() throws DataAccessException {
-                    return null;
-                }
-
-                @Override
-                public DB getDb(String dbName) throws DataAccessException {
-                    return null;
-                }
-
-                @Override
-                public PersistenceExceptionTranslator getExceptionTranslator() {
-                    return null;
-                }
-
-            };
-        }
-
+        assertThat(processCallback).isEqualToIgnoringCase("/metadata/df00e2");
+        assertThat(biomaterialCallback).isEqualToIgnoringCase("/metadata/c80122");
+        assertThat(fileCallback).isEqualToIgnoringCase("/metadata/98dd90");
+        assertThat(protocolCallback).isEqualToIgnoringCase("/metadata/846df1");
+        assertThat(bmCallback).isEqualToIgnoringCase("/metadata/332fd9");
     }
 
 }
