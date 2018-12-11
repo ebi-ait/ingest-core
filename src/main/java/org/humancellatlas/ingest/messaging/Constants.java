@@ -8,6 +8,7 @@ package org.humancellatlas.ingest.messaging;
 public class Constants {
     public class Queues {
         public static final String FILE_STAGED = "ingest.file.create.staged";
+        public static final String FILE_VALIDATION = "ingest.file.validation.queue";
         public static final String FILE_UPDATE = "ingest.file.update.queue";
         public static final String VALIDATION_REQUIRED = "ingest.metadata.validation.queue";
         public static final String ACCESSION_REQUIRED = "ingest.metadata.accession.queue";
@@ -18,7 +19,7 @@ public class Constants {
     public class Exchanges {
         public static final String VALIDATION = "ingest.validation.exchange";
         public static final String FILE_FANOUT = "ingest.file.update.exchange";
-        public static final String FILE_STAGED_FANOUT = "ingest.file.staged.exchange";
+        public static final String FILE_STAGED_EXCHANGE = "ingest.file.staged.exchange";
         public static final String ACCESSION = "ingest.accession.exchange";
         public static final String SUBMISSION_ARCHIVAL_DIRECT = "ingest.archival.exchange";
         public static final String STATE_TRACKING = "ingest.state-tracking.exchange";

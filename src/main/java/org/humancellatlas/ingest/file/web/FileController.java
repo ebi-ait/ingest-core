@@ -6,8 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileAlreadyExistsException;
 import org.humancellatlas.ingest.file.FileService;
+import org.humancellatlas.ingest.messaging.Constants;
+import org.humancellatlas.ingest.messaging.Message;
+import org.humancellatlas.ingest.messaging.MessageService;
 import org.humancellatlas.ingest.process.ProcessRepository;
-import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -16,6 +18,7 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -80,10 +83,4 @@ public class FileController {
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }
-
-//
-//    @RequestMapping(path = "/files/{id}/", method = {RequestMethod.PUT, RequestMethod.POST})
-//    HttpEntity<?> notAllowed(@PathVariable("id") File file) {
-//        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(ResponseEntity.EMPTY);
-//    }
 }
