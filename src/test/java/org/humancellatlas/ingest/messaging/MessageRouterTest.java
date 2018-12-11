@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.messaging;
 
+import org.humancellatlas.ingest.config.ConfigurationService;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportData;
@@ -47,6 +48,9 @@ public class MessageRouterTest {
     @MockBean
     private LinkGenerator linkGenerator;
 
+    @MockBean
+    private ConfigurationService configurationService;
+
     @Test
     public void testSendAssayForExport() {
         //expect:
@@ -63,13 +67,13 @@ public class MessageRouterTest {
         //given:
         String processId = "78bbd9";
         Process process = new Process(processId);
-        Uuid processUuid = new Uuid();
+        Uuid processUuid = Uuid.newUuid();
         process.setUuid(processUuid);
 
         //and:
         String envelopeId = "87bcf3";
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope(envelopeId);
-        Uuid envelopeUuid = new Uuid();
+        Uuid envelopeUuid = Uuid.newUuid();
         submissionEnvelope.setUuid(envelopeUuid);
 
         //and:

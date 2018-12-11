@@ -11,6 +11,7 @@ import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
+import org.humancellatlas.ingest.submission.SubmissionStateMachineService;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,9 +60,10 @@ public class SubmissionControllerTest {
     private BundleManifestRepository bundleManifestRepository;
     @MockBean
     private SubmissionManifestRepository submissionManifestRepository;
-
     @MockBean
     private PagedResourcesAssembler pagedResourcesAssembler;
+    @MockBean
+    private SubmissionStateMachineService submissionStateMachineService;
 
     @Test
     public void testEnactSubmitEnvelope() {

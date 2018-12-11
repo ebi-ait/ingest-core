@@ -6,7 +6,6 @@ import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.Uuid;
-import org.humancellatlas.ingest.core.service.ResourceLinker;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
@@ -37,9 +36,6 @@ public class ProcessService {
     private BiomaterialRepository biomaterialRepository;
     @Autowired
     private BundleManifestRepository bundleManifestRepository;
-
-    @Autowired
-    private ResourceLinker resourceLinker;
 
     @Autowired
     MetadataDocumentEventHandler metadataDocumentEventHandler;
@@ -97,25 +93,25 @@ public class ProcessService {
             BundleManifest bundleManifest = getBundleManifestRepository().findByBundleUuid(bundleUuid);
             if (bundleManifest != null) {
                 getLog().info(String.format("Adding bundle manifest link to process '%s'", analysis.getId()));
-                resourceLinker.addToRefList(analysis, bundleManifest, "inputBundleManifests");
+                analysis.addInputBundleManifest(bundleManifest);
+                analysis = getProcessRepository().save(analysis);
 
                 // add the input files
-                bundleManifest.getFileFilesMap().keySet().forEach(fileUuid -> {
-                    File analysisInputFile = fileRepository.findByUuidUuid(UUID.fromString(fileUuid));
-                    resourceLinker.addToRefList(analysisInputFile, analysis, "inputToProcesses");
-                });
+                for (String fileUuid : bundleManifest.getDataFiles()) {
+                    File analysisInputFile = fileRepository.findByUuid(new Uuid(fileUuid));
+                    analysisInputFile.addAsInputToProcess(analysis);
+                    fileRepository.save(analysisInputFile);
+                }
             }
             else {
                 getLog().warn(String.format(
                         "No Bundle Manifest present with bundle UUID '%s' - in future this will cause a critical error",
                         bundleUuid));
-                throw new ResourceNotFoundException(String.format("No Bundle Manifest present with bundle UUID '%s'", bundleUuid));
             }
         }
-
-
-        return this.getProcessRepository().findOne(analysis.getId());
+        return getProcessRepository().save(analysis);
     }
+
 
     public Page<Process> findProcessesByInputBundleUuid(UUID bundleUuid, Pageable pageable) {
         Optional<BundleManifest> maybeBundleManifest = Optional.ofNullable(bundleManifestRepository.findByBundleUuid(bundleUuid.toString()));

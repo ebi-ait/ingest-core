@@ -1,10 +1,13 @@
 package org.humancellatlas.ingest.export;
 
 import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+
+import java.util.UUID;
 
 public class ExportData {
 
@@ -40,13 +43,18 @@ public class ExportData {
     }
 
     public ExportMessage toAssaySubmittedMessage(LinkGenerator linkGenerator) {
-        return MetadataDocumentMessageBuilder.using(linkGenerator)
+        Uuid submissionUuid = submissionEnvelope.getUuid();
+        MetadataDocumentMessageBuilder builder = MetadataDocumentMessageBuilder.using(linkGenerator)
                 .messageFor(process)
                 .withEnvelopeId(submissionEnvelope.getId())
-                .withEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString())
                 .withAssayIndex(index)
-                .withTotalAssays(totalCount)
-                .buildAssaySubmittedMessage();
+                .withTotalAssays(totalCount);
+
+        if(submissionUuid != null && submissionUuid.getUuid() != null){
+            builder.withEnvelopeUuid(submissionUuid.getUuid().toString());
+        }
+
+        return builder.buildAssaySubmittedMessage();
     }
 
 }

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.UUID;
 
 public class MetadataDocumentMessageBuilder {
 
@@ -42,7 +43,8 @@ public class MetadataDocumentMessageBuilder {
     public MetadataDocumentMessageBuilder messageFor(MetadataDocument metadataDocument) {
         MetadataDocumentMessageBuilder builder = withDocumentType(metadataDocument.getClass())
                 .withId(metadataDocument.getId());
-        if (metadataDocument.getUuid() != null) {
+        Uuid metadataDocumentUuid = metadataDocument.getUuid();
+        if (metadataDocumentUuid != null && metadataDocumentUuid.getUuid() != null) {
             builder = builder.withUuid(metadataDocument.getUuid().getUuid().toString());
         }
 
