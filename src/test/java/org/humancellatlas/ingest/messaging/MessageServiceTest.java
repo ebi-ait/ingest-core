@@ -1,29 +1,26 @@
 package org.humancellatlas.ingest.messaging;
 
-import org.humancellatlas.ingest.file.web.FileController;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.converter.MessageConversionException;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes={ MessageService.class })
+@RunWith(MockitoJUnitRunner.class)
 public class MessageServiceTest {
-    @Autowired
+    @InjectMocks
     private MessageService messageService;
 
-    @MockBean
+    @Mock
     private RabbitMessagingTemplate rabbitMessagingTemplate;
 
     @Test
