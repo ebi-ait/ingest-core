@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.security;
 
-
 import com.auth0.spring.security.api.JwtWebSecurityConfigurer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -18,11 +17,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Value(value = "${auth0.issuer}")
     private String issuer;
 
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        ServiceAuthenticationProvider serviceAuthenticationProvider= new ServiceAuthenticationProvider(apiAudience);
+
         JwtWebSecurityConfigurer
                 .forRS256(apiAudience, issuer)
                 .configure(http)
+                .authenticationProvider(serviceAuthenticationProvider)
                 .cors().and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/user/**").authenticated()
