@@ -33,8 +33,11 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-hateoas')
     compile('org.springframework.boot:spring-boot-starter-amqp')
     compile('org.springframework.boot:spring-boot-starter-jetty')
+    compile('org.springframework.boot:spring-boot-starter-security')
 
     compile('org.springframework.data:spring-data-rest-hal-browser')
+
+
     compile('com.auth0:java-jwt:3.4.1')
     implementation 'com.auth0:auth0-spring-security-api:1.1.0'
 
