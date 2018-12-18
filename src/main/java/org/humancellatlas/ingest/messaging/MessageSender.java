@@ -59,7 +59,7 @@ public class MessageSender {
     }
 
     public void queueDocumentStateUpdateMessage(URI uri, AbstractEntityMessage payload, long intendedSendTime) {
-        MessageBuffer.STATE_TRACKING.queueHttpMessage(uri, payload, intendedSendTime);
+        this.rabbitMessagingTemplate.convertAndSend(Constants.Exchanges.STATE_TRACKING, Constants.Routing.METADATA_UPDATE, payload);
     }
 
     public void queueUploadManagerMessage(String exchange, String routingKey,

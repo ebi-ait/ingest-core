@@ -2,6 +2,8 @@ package org.humancellatlas.ingest.messaging.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.humancellatlas.ingest.state.ValidationState;
 
 import java.util.Collection;
@@ -13,7 +15,7 @@ import java.util.Collection;
  * @date 12/09/17
  */
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class MetadataDocumentMessage implements AbstractEntityMessage {
     private final MessageProtocol messageProtocol;
     private final String documentType;
@@ -21,5 +23,6 @@ public class MetadataDocumentMessage implements AbstractEntityMessage {
     private final String documentUuid;
     private final ValidationState validationState;
     private final String callbackLink;
+    private final Long timestamp;
     private final Collection<String> envelopeIds;
 }

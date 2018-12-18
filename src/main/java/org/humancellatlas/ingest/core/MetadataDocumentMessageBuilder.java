@@ -24,6 +24,7 @@ public class MetadataDocumentMessageBuilder {
     private ValidationState validationState;
     private int assayIndex;
     private int totalAssays;
+    private Long timestamp;
     private Collection<String> envelopeIds;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -105,6 +106,12 @@ public class MetadataDocumentMessageBuilder {
         return this;
     }
 
+    public MetadataDocumentMessageBuilder withTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+
+        return this;
+    }
+
     public MetadataDocumentMessageBuilder withTotalAssays(int totalAssays) {
         this.totalAssays = totalAssays;
 
@@ -114,7 +121,7 @@ public class MetadataDocumentMessageBuilder {
     public MetadataDocumentMessage build() {
         String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
         return new MetadataDocumentMessage(messageProtocol, documentType.getSimpleName().toLowerCase(),
-                metadataDocId, metadataDocUuid, validationState, callbackLink, envelopeIds);
+                metadataDocId, metadataDocUuid, validationState, callbackLink, timestamp, envelopeIds);
     }
 
     public ExportMessage buildAssaySubmittedMessage() {

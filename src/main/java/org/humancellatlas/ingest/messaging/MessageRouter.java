@@ -162,6 +162,7 @@ public class MessageRouter {
                                              .messageFor(document)
                                              .withEnvelopeIds(envelopeIds)
                                              .withValidationState(document.getValidationState())
+                                             .withTimestamp(document.getUpdateDate().getMillis())
                                              .build();
     }
 
