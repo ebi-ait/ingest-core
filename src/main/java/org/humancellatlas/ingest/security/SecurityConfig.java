@@ -1,5 +1,8 @@
 package org.humancellatlas.ingest.security;
 
+import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.JwkProviderBuilder;
+import com.auth0.spring.security.api.JwtAuthenticationProvider;
 import com.auth0.spring.security.api.JwtWebSecurityConfigurer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -22,10 +25,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         ServiceAuthenticationProvider serviceAuthenticationProvider= new ServiceAuthenticationProvider(apiAudience);
 
+        // FIXME: This is temporary workaround to be able to also verify tokens created from Dan Vaughan's Auth0 account
+        String issuer2 = "https://danielvaughan.eu.auth0.com/";
+        String audience2 = "http://localhost:8080";
+        JwkProvider jwkProvider = new JwkProviderBuilder(issuer2).build();
+        JwtAuthenticationProvider auth0Provider = new JwtAuthenticationProvider(jwkProvider, issuer2, audience2);
+
         JwtWebSecurityConfigurer
                 .forRS256(apiAudience, issuer)
                 .configure(http)
                 .authenticationProvider(serviceAuthenticationProvider)
+                .authenticationProvider(auth0Provider) // FIXME: Remove soon
                 .cors().and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/user/**").authenticated()
