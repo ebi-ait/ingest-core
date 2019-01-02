@@ -97,7 +97,7 @@ public class ProcessService {
                 analysis = getProcessRepository().save(analysis);
 
                 // add the input files
-                for (String fileUuid : bundleManifest.getDataFiles()) {
+                for (String fileUuid : bundleManifest.getFileFilesMap().keySet()) {
                     File analysisInputFile = fileRepository.findByUuid(new Uuid(fileUuid));
                     analysisInputFile.addAsInputToProcess(analysis);
                     fileRepository.save(analysisInputFile);
