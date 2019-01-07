@@ -15,15 +15,22 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+//  TODO It would be better if we source the ff info from environment variables
     @Value(value = "${auth0.apiAudience}")
     private String apiAudience;
     @Value(value = "${auth0.issuer}")
     private String issuer;
 
+    @Value(value = "${gservice.audience}")
+    private String serviceAudience;
+    @Value(value = "${gservice.project}")
+    private String serviceProject;
+
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        ServiceAuthenticationProvider serviceAuthenticationProvider= new ServiceAuthenticationProvider(apiAudience);
+        ServiceJwtAuthenticationProvider serviceJwtAuthenticationProvider = new ServiceJwtAuthenticationProvider(serviceAudience, serviceProject);
 
         // FIXME: This is temporary workaround to be able to also verify tokens created from Dan Vaughan's Auth0 account
         String issuer2 = "https://danielvaughan.eu.auth0.com/";
@@ -34,7 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         JwtWebSecurityConfigurer
                 .forRS256(apiAudience, issuer)
                 .configure(http)
-                .authenticationProvider(serviceAuthenticationProvider)
+                .authenticationProvider(serviceJwtAuthenticationProvider)
                 .authenticationProvider(auth0Provider) // FIXME: Remove soon
                 .cors().and()
                 .authorizeRequests()

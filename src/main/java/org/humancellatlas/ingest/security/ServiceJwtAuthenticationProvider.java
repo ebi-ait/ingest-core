@@ -22,13 +22,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.interfaces.RSAPublicKey;
 
-public class ServiceAuthenticationProvider implements AuthenticationProvider {
+public class ServiceJwtAuthenticationProvider implements AuthenticationProvider {
 
-    private static Logger logger = LoggerFactory.getLogger(ServiceAuthenticationProvider.class);
+    private static Logger logger = LoggerFactory.getLogger(ServiceJwtAuthenticationProvider.class);
     private final String audience;
+    private final String project;
 
-    public ServiceAuthenticationProvider(String audience) {
+    public ServiceJwtAuthenticationProvider(String audience, String project) {
         this.audience = audience;
+        this.project = project;
     }
 
     @Override
@@ -56,6 +58,12 @@ public class ServiceAuthenticationProvider implements AuthenticationProvider {
         DecodedJWT jwt = JWT.decode(authentication.getToken());
         String issuer = jwt.getIssuer();
         JwkProvider urlJwkProvider;
+
+        String trustedIssuer = String.format("%s.iam.gserviceaccount.com", project);
+
+        if(!issuer.endsWith(trustedIssuer)){
+            throw new BadCredentialsException("Not a valid Google service project");
+        }
 
         try {
             URL url = new URL("https://www.googleapis.com/service_accounts/v1/jwk/" + issuer);
