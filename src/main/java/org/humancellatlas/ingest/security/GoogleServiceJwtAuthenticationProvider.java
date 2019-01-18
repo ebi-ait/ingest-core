@@ -21,16 +21,17 @@ import org.springframework.security.core.AuthenticationException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.interfaces.RSAPublicKey;
+import java.util.List;
 
-public class ServiceJwtAuthenticationProvider implements AuthenticationProvider {
+public class GoogleServiceJwtAuthenticationProvider implements AuthenticationProvider {
 
-    private static Logger logger = LoggerFactory.getLogger(ServiceJwtAuthenticationProvider.class);
+    private static Logger logger = LoggerFactory.getLogger(GoogleServiceJwtAuthenticationProvider.class);
     private final String audience;
-    private final String project;
+    private final List<String> projects;
 
-    public ServiceJwtAuthenticationProvider(String audience, String project) {
+    public GoogleServiceJwtAuthenticationProvider(String audience, List<String> projects) {
         this.audience = audience;
-        this.project = project;
+        this.projects = projects;
     }
 
     @Override
@@ -59,9 +60,9 @@ public class ServiceJwtAuthenticationProvider implements AuthenticationProvider 
         String issuer = jwt.getIssuer();
         JwkProvider urlJwkProvider;
 
-        String trustedIssuer = String.format("%s.iam.gserviceaccount.com", project);
+        boolean match = projects.stream().anyMatch(issuer::endsWith);
 
-        if(!issuer.endsWith(trustedIssuer)){
+        if(!match){
             throw new BadCredentialsException("Not a valid Google service project");
         }
 

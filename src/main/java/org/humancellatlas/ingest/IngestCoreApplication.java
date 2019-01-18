@@ -9,8 +9,7 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 @SpringBootApplication
 @EnableMongoAuditing(auditorAwareRef = "userAuditing")
 @PropertySources({
-        @PropertySource("classpath:application.properties"),
-        @PropertySource("classpath:auth0.properties")
+        @PropertySource("classpath:application.properties")
 })
 public class IngestCoreApplication {
 
