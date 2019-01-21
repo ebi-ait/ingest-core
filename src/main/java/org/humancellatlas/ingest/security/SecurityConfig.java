@@ -2,40 +2,63 @@ package org.humancellatlas.ingest.security;
 
 import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.JwkProviderBuilder;
+import com.auth0.spring.security.api.BearerSecurityContextRepository;
+import com.auth0.spring.security.api.JwtAuthenticationEntryPoint;
 import com.auth0.spring.security.api.JwtAuthenticationProvider;
-import com.auth0.spring.security.api.JwtWebSecurityConfigurer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+
+import java.util.Arrays;
+import java.util.List;
 
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Value(value = "${auth0.apiAudience}")
-    private String apiAudience;
-    @Value(value = "${auth0.issuer}")
+    @Value(value = "${AUTH_AUDIENCE}")
+    private String audience;
+    @Value(value = "${AUTH_ISSUER}")
     private String issuer;
 
+    @Value(value = "${AUTH_AUDIENCE}")
+    private String serviceAudience;
+
+    @Value(value= "${GCP_PROJECT_WHITELIST}")
+    private String projectWhitelist;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        ServiceAuthenticationProvider serviceAuthenticationProvider= new ServiceAuthenticationProvider(apiAudience);
+        List<String> trustedProjects = Arrays.asList(projectWhitelist.split(","));
+        GoogleServiceJwtAuthenticationProvider googleServiceJwtAuthenticationProvider = new GoogleServiceJwtAuthenticationProvider(serviceAudience, trustedProjects);
+
+        JwkProvider jwkProvider = new JwkProviderBuilder(issuer).build();
+        JwtAuthenticationProvider auth0Provider = new JwtAuthenticationProvider(jwkProvider, issuer, audience);
 
         // FIXME: This is temporary workaround to be able to also verify tokens created from Dan Vaughan's Auth0 account
         String issuer2 = "https://danielvaughan.eu.auth0.com/";
         String audience2 = "http://localhost:8080";
-        JwkProvider jwkProvider = new JwkProviderBuilder(issuer2).build();
-        JwtAuthenticationProvider auth0Provider = new JwtAuthenticationProvider(jwkProvider, issuer2, audience2);
 
-        JwtWebSecurityConfigurer
-                .forRS256(apiAudience, issuer)
-                .configure(http)
-                .authenticationProvider(serviceAuthenticationProvider)
-                .authenticationProvider(auth0Provider) // FIXME: Remove soon
+        JwkProvider jwkProvider2 = new JwkProviderBuilder(issuer2).build();
+        JwtAuthenticationProvider auth0Provider2 = new JwtAuthenticationProvider(jwkProvider2, issuer2, audience2);
+        // FIXME: Remove 'til here
+
+        http.authenticationProvider(auth0Provider)
+                .authenticationProvider(googleServiceJwtAuthenticationProvider)
+                .authenticationProvider(auth0Provider2) // FIXME: Remove soon
+                .securityContext()
+                .securityContextRepository(new BearerSecurityContextRepository())
+                .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                .and()
+                .httpBasic().disable()
+                .csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/user/**").authenticated()
@@ -45,5 +68,4 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/submissionEnvelopes/*/projects").authenticated()
                 .antMatchers(HttpMethod.GET, "/**").permitAll();
     }
-
 }
