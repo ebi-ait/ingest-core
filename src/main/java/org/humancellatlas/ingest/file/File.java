@@ -9,6 +9,8 @@ import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -21,6 +23,9 @@ import java.util.UUID;
 @Getter
 @Setter
 @Document
+@CompoundIndexes({
+        @CompoundIndex(name = "validationId", def = "{ 'validationJob.validationId': 1 }")
+})
 public class File extends MetadataDocument {
 
     @Indexed
@@ -33,7 +38,7 @@ public class File extends MetadataDocument {
     private String fileName;
     private String cloudUrl;
     private Checksums checksums;
-    @Indexed
+    private ValidationJob validationJob;
     private UUID validationId;
     private UUID dataFileUuid;
 

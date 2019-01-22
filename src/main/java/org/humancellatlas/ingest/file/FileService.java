@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.file;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.Checksums;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.exception.CoreEntityNotFoundException;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
@@ -24,13 +25,16 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Getter
 public class FileService {
-    private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
-    private final @NonNull FileRepository fileRepository;
-    private final @NonNull MetadataDocumentEventHandler metadataDocumentEventHandler;
+    private final @NonNull
+    SubmissionEnvelopeRepository submissionEnvelopeRepository;
+    private final @NonNull
+    FileRepository fileRepository;
+    private final @NonNull
+    MetadataDocumentEventHandler metadataDocumentEventHandler;
 
     // TODO Refactor!!!
     public File createFile(String fileName, File file, SubmissionEnvelope submissionEnvelope) {
-        if(! fileRepository.findBySubmissionEnvelopesInAndFileName(submissionEnvelope, fileName).isEmpty()) {
+        if (!fileRepository.findBySubmissionEnvelopesInAndFileName(submissionEnvelope, fileName).isEmpty()) {
             throw new FileAlreadyExistsException(String.format("File with name %s already exists in envelope %s", fileName, submissionEnvelope.getId()),
                                                  fileName);
         } else {
@@ -49,18 +53,19 @@ public class FileService {
         return createdFile;
     }
 
-    public File updateStagedFileUrl(String envelopeUuid, String fileName, String newFileUrl) throws CoreEntityNotFoundException {
+    public File updateStagedFile(String envelopeUuid, String fileName, String newFileUrl, Checksums checksums) throws CoreEntityNotFoundException {
         Optional<SubmissionEnvelope> envelope = Optional.ofNullable(submissionEnvelopeRepository.findByUuid(new Uuid(envelopeUuid)));
 
-        if(envelope.isPresent()) {
+        if (envelope.isPresent()) {
             List<File> filesInEnvelope = fileRepository.findBySubmissionEnvelopesInAndFileName(envelope.get(), fileName);
 
-            if(filesInEnvelope.size() != 1) {
+            if (filesInEnvelope.size() != 1) {
                 throw new RuntimeException(String.format("Expected 1 file with name %s, but found %s", fileName, filesInEnvelope.size()));
             } else {
                 File file = filesInEnvelope.get(0);
                 file.setCloudUrl(newFileUrl);
-                if(!file.getValidationState().equals(ValidationState.DRAFT)){
+                file.setChecksums(checksums);
+                if (!file.getValidationState().equals(ValidationState.DRAFT)) {
                     file.enactStateTransition(ValidationState.DRAFT);
                 }
                 File updatedFile = fileRepository.save(file);

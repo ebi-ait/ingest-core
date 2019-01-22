@@ -35,9 +35,10 @@ public class FileListener {
                 && fileMessage.getMediaType().get().equals(FileMediaTypes.HCA_DATA_FILE)){
             try {
                 this.createFileFromFileMessage(fileMessage);
-                fileService.updateStagedFileUrl(fileMessage.getStagingAreaId(),
-                                                fileMessage.getFileName(),
-                                                fileMessage.getCloudUrl());
+                fileService.updateStagedFile(fileMessage.getStagingAreaId(),
+                                             fileMessage.getFileName(),
+                                             fileMessage.getCloudUrl(),
+                                             fileMessage.getChecksums());
             } catch (CoreEntityNotFoundException e) {
                 log.warn(e.getMessage());
                 throw new AmqpRejectAndDontRequeueException(e.getMessage());
