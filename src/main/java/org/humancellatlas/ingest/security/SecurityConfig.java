@@ -20,15 +20,15 @@ import java.util.List;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Value(value = "${AUTH_AUDIENCE}")
+    @Value(value = "${AUTH_AUDIENCE:https://dev.data.humancellatlas.org/}")
     private String audience;
-    @Value(value = "${AUTH_ISSUER}")
+    @Value(value = "${AUTH_ISSUER:https://humancellatlas.auth0.com/}")
     private String issuer;
 
-    @Value(value = "${AUTH_AUDIENCE}")
+    @Value(value = "${AUTH_AUDIENCE:https://dev.data.humancellatlas.org/}")
     private String serviceAudience;
 
-    @Value(value= "${GCP_PROJECT_WHITELIST}")
+    @Value(value= "${GCP_PROJECT_WHITELIST:hca-dcp-production.iam.gserviceaccount.com,human-cell-atlas-travis-test.iam.gserviceaccount.com,broad-dsde-mint-dev.iam.gserviceaccount.com,broad-dsde-mint-test.iam.gserviceaccount.com,broad-dsde-mint-staging.iam.gserviceaccount.com}")
     private String projectWhitelist;
 
     @Override
