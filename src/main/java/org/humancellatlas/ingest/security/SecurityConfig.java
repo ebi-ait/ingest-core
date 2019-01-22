@@ -33,8 +33,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        List<String> trustedProjects = Arrays.asList(projectWhitelist.split(","));
-        GoogleServiceJwtAuthenticationProvider googleServiceJwtAuthenticationProvider = new GoogleServiceJwtAuthenticationProvider(serviceAudience, trustedProjects);
+        List<String> projectWhitelist = Arrays.asList(this.projectWhitelist.split(","));
+        GoogleServiceJwtAuthenticationProvider googleServiceJwtAuthenticationProvider = new GoogleServiceJwtAuthenticationProvider(serviceAudience, projectWhitelist);
 
         JwkProvider jwkProvider = new JwkProviderBuilder(issuer).build();
         JwtAuthenticationProvider auth0Provider = new JwtAuthenticationProvider(jwkProvider, issuer, audience);
