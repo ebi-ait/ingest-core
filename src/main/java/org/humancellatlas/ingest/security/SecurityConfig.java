@@ -20,21 +20,21 @@ import java.util.List;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Value(value = "${AUTH_AUDIENCE}")
+    @Value(value = "${AUTH_AUDIENCE:https://dev.data.humancellatlas.org/}")
     private String audience;
-    @Value(value = "${AUTH_ISSUER}")
+    @Value(value = "${AUTH_ISSUER:https://humancellatlas.auth0.com/}")
     private String issuer;
 
-    @Value(value = "${AUTH_AUDIENCE}")
+    @Value(value = "${AUTH_AUDIENCE:https://dev.data.humancellatlas.org/}")
     private String serviceAudience;
 
-    @Value(value= "${GCP_PROJECT_WHITELIST}")
+    @Value(value= "${GCP_PROJECT_WHITELIST:}")
     private String projectWhitelist;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        List<String> trustedProjects = Arrays.asList(projectWhitelist.split(","));
-        GoogleServiceJwtAuthenticationProvider googleServiceJwtAuthenticationProvider = new GoogleServiceJwtAuthenticationProvider(serviceAudience, trustedProjects);
+        List<String> projectWhitelist = Arrays.asList(this.projectWhitelist.split(","));
+        GoogleServiceJwtAuthenticationProvider googleServiceJwtAuthenticationProvider = new GoogleServiceJwtAuthenticationProvider(serviceAudience, projectWhitelist);
 
         JwkProvider jwkProvider = new JwkProviderBuilder(issuer).build();
         JwtAuthenticationProvider auth0Provider = new JwtAuthenticationProvider(jwkProvider, issuer, audience);
