@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileAlreadyExistsException;
 import org.humancellatlas.ingest.file.FileService;
+import org.humancellatlas.ingest.file.ValidationJob;
 import org.humancellatlas.ingest.messaging.Constants;
 import org.humancellatlas.ingest.messaging.Message;
 import org.humancellatlas.ingest.messaging.MessageService;
@@ -83,4 +84,17 @@ public class FileController {
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }
+
+    @RequestMapping(path = "/files/{id}/validationJob",
+            method = RequestMethod.PUT,
+            produces = MediaTypes.HAL_JSON_VALUE)
+    ResponseEntity<Resource<?>> addFileValidationJob(@PathVariable("id") File file,
+                                                     @RequestBody ValidationJob validationJob,
+                                                     final PersistentEntityResourceAssembler assembler) {
+        File entity = getFileService().addFileValidationJob(file, validationJob);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
+
 }

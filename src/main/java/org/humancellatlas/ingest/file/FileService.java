@@ -53,6 +53,15 @@ public class FileService {
         return createdFile;
     }
 
+    public File addFileValidationJob(File file, ValidationJob validationJob) {
+        if(file.getChecksums().getSha1().equals(validationJob.getChecksums().getSha1())) {
+            file.setValidationJob(validationJob);
+            return fileRepository.save(file);
+        } else {
+            throw new IllegalStateException(String.format("Failed to create validation job for file with ID %s : checksums mismatch", file.getId()));
+        }
+    }
+
     public File updateStagedFile(String envelopeUuid, String fileName, String newFileUrl, Checksums checksums) throws CoreEntityNotFoundException {
         Optional<SubmissionEnvelope> envelope = Optional.ofNullable(submissionEnvelopeRepository.findByUuid(new Uuid(envelopeUuid)));
 
