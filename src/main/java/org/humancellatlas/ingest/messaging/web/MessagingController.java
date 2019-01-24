@@ -1,4 +1,5 @@
 package org.humancellatlas.ingest.messaging.web;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -8,11 +9,12 @@ import org.humancellatlas.ingest.messaging.MessageService;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
 @RestController
 @RequiredArgsConstructor
 @Getter
@@ -20,19 +22,19 @@ public class MessagingController {
     @NonNull
     private final MessageService messageService;
 
-    @RequestMapping(path = "/messaging/fileUploadInfo",
-            method = RequestMethod.POST,
+    @PostMapping(path = "/messaging/fileUploadInfo",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaTypes.HAL_JSON_VALUE)
-    ResponseEntity<Resource<?>> publishFileUploadInfo(@RequestBody Object uploadInfo){
+    ResponseEntity<Resource<?>> publishFileUploadInfo(@RequestBody ObjectNode uploadInfo){
         Message uploadInfoMessage = new Message(Constants.Exchanges.FILE_STAGED_EXCHANGE, Constants.Queues.FILE_STAGED, uploadInfo);
         getMessageService().publish(uploadInfoMessage);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping(path = "/messaging/fileValidationResult",
-            method = RequestMethod.POST,
+    @PostMapping(path = "/messaging/fileValidationResult",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaTypes.HAL_JSON_VALUE)
-    ResponseEntity<Resource<?>> publishFileValidationResult(@RequestBody Object validationResult){
+    ResponseEntity<Resource<?>> publishFileValidationResult(@RequestBody ObjectNode validationResult){
         Message uploadInfoMessage = new Message(Constants.Exchanges.VALIDATION, Constants.Queues.FILE_VALIDATION, validationResult);
         getMessageService().publish(uploadInfoMessage);
         return new ResponseEntity<>(HttpStatus.OK);
