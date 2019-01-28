@@ -51,6 +51,7 @@ public class GoogleServiceJwtAuthenticationProvider implements AuthenticationPro
             logger.info("Authenticated with jwt with scopes {}", jwtAuth.getAuthorities());
             return jwtAuth;
         } catch (JWTVerificationException e) {
+            logger.error("BadCredentialsException: {}", e.getMessage());
             throw new BadCredentialsException("Not a valid token", e);
         }
     }
