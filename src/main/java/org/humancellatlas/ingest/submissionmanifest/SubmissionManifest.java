@@ -18,7 +18,12 @@ public class SubmissionManifest extends AbstractEntity {
     private final Integer expectedFiles;
     private final Integer expectedProtocols;
     private final Integer expectedProjects;
+
+    private @Setter Integer actualLinks;
+    private final Integer expectedLinks;
+
     private final Integer totalCount;
+
 
     @Setter private @DBRef SubmissionEnvelope submissionEnvelope;
 }
