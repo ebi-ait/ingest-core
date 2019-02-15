@@ -9,6 +9,7 @@ import java.util.UUID;
 public class ValidationJob {
     private UUID validationId;
     private Checksums checksums;
+    private boolean jobCompleted;
 
     protected ValidationJob() {}
 
