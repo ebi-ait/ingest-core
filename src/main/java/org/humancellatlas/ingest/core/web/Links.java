@@ -95,5 +95,9 @@ public class Links {
     public static final String DERIVED_BY_BIOMATERIALS_REL = "derivedBiomaterials";
     public static final String DERIVED_BY_FILES_URL = "/derivedFiles";
     public static final String DERIVED_BY_FILES_REL = "derivedFiles";
-    
+
+    // Links from Files
+    public static final String FILE_VALIDATION_JOB_URL = "/validationJob";
+    public static final String FILE_VALIDATION_JOB_REL = "validationJob";
+
 }

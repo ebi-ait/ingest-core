@@ -35,7 +35,8 @@ public interface FileRepository extends MongoRepository<File, String> {
 
     List<File> findBySubmissionEnvelopesInAndFileName(SubmissionEnvelope submissionEnvelope, String fileName);
 
-    File findByValidationId(@Param("validationId") UUID id);
+    @RestResource(rel = "findByValidationId")
+    File findByValidationJobValidationId(@Param("validationId") UUID id);
 
     @RestResource(exported = false)
     List<File> findByInputToProcessesContains(Process process);

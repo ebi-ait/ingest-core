@@ -28,7 +28,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Value(value = "${AUTH_AUDIENCE:https://dev.data.humancellatlas.org/}")
     private String serviceAudience;
 
-    @Value(value= "${GCP_PROJECT_WHITELIST:}")
+    @Value(value= "${GCP_PROJECT_WHITELIST:hca-dcp-production.iam.gserviceaccount.com,human-cell-atlas-travis-test.iam.gserviceaccount.com,broad-dsde-mint-dev.iam.gserviceaccount.com,broad-dsde-mint-test.iam.gserviceaccount.com,broad-dsde-mint-staging.iam.gserviceaccount.com}")
     private String projectWhitelist;
 
     @Override
