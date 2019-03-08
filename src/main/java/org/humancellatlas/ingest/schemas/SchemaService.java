@@ -60,8 +60,9 @@ public class SchemaService {
             schemaBaseUri = schemaBaseUri.substring(0, schemaBaseUri.length() - 1);
         }
 
+        // TODO Find a way how to neatly exclude the files
         schemaScraper.getAllSchemaURIs(URI.create(schemaBaseUri)).stream()
-                .filter(schemaUri -> !schemaUri.toString().contains("index.html"))
+                .filter(schemaUri -> !schemaUri.toString().contains("index.html") && !schemaUri.toString().contains("property_migrations"))
                 .forEach(this::doUpdate);
     }
 
