@@ -5,6 +5,7 @@ import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.messaging.model.MessageProtocol;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.state.ValidationState;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,7 +120,7 @@ public class MetadataDocumentMessageBuilder {
 
     public ExportMessage buildAssaySubmittedMessage() {
         String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
-        return new ExportMessage(messageProtocol, metadataDocId, metadataDocUuid, callbackLink,
+        return new ExportMessage(UUID.randomUUID(), DateTime.now(), messageProtocol, metadataDocId, metadataDocUuid, callbackLink,
                 documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
 
