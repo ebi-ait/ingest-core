@@ -120,7 +120,7 @@ public class MetadataDocumentMessageBuilder {
 
     public ExportMessage buildAssaySubmittedMessage() {
         String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
-        return new ExportMessage(UUID.randomUUID(), DateTime.now(), messageProtocol, metadataDocId, metadataDocUuid, callbackLink,
+        return new ExportMessage(UUID.randomUUID(), DateTime.now().toString(), messageProtocol, metadataDocId, metadataDocUuid, callbackLink,
                 documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
 
