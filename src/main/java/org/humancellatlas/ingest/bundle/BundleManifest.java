@@ -19,6 +19,7 @@ public class BundleManifest implements Identifiable<String> {
     private @Id @JsonIgnore String id;
 
     private final String bundleUuid;
+    private final String bundleVersion;
     private final String envelopeUuid;
 
     private final List<String> dataFiles;
