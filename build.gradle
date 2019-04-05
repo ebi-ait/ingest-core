@@ -29,7 +29,9 @@ repositories {
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
-    compile('org.springframework.boot:spring-boot-starter-data-rest')
+    compile('org.springframework.boot:spring-boot-starter-data-rest') {
+        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
+    }
     compile('org.springframework.boot:spring-boot-starter-hateoas')
     compile('org.springframework.boot:spring-boot-starter-amqp')
     compile('org.springframework.boot:spring-boot-starter-jetty')
@@ -43,10 +45,11 @@ dependencies {
 
     compile('com.fasterxml.jackson.datatype:jackson-datatype-joda')
     compile('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
-    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
+    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8')
     compile('com.fasterxml.jackson.module:jackson-module-parameter-names')
+    compile('com.fasterxml.jackson.core:jackson-databind:2.9.8')
 
-    compile('org.jolokia:jolokia-core')
+    compile('org.jolokia:jolokia-core:1.5.0')
 
     compileOnly('org.projectlombok:lombok')
 
