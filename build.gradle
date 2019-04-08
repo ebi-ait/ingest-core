@@ -27,7 +27,9 @@ repositories {
 }
 
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.boot:spring-boot-starter-actuator') {
+        exclude group: 'ch.qos.logback'
+    }
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
     compile('org.springframework.boot:spring-boot-starter-data-rest') {
         exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
@@ -37,6 +39,9 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-jetty')
     compile('org.springframework.data:spring-data-rest-hal-browser')
     compile('org.springframework.boot:spring-boot-starter-security')
+
+    compile('ch.qos.logback:logback-classic:1.2.3')
+    compile('ch.qos.logback:logback-core:1.2.3')
 
     compile('com.auth0:java-jwt:3.4.1')
     compile('com.auth0:auth0-spring-security-api:1.1.0')
