@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '1.5.6.RELEASE'
+        springBootVersion = '1.5.20.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -27,14 +27,21 @@ repositories {
 }
 
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.boot:spring-boot-starter-actuator') {
+        exclude group: 'ch.qos.logback'
+    }
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
-    compile('org.springframework.boot:spring-boot-starter-data-rest')
+    compile('org.springframework.boot:spring-boot-starter-data-rest') {
+        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
+    }
     compile('org.springframework.boot:spring-boot-starter-hateoas')
     compile('org.springframework.boot:spring-boot-starter-amqp')
     compile('org.springframework.boot:spring-boot-starter-jetty')
     compile('org.springframework.data:spring-data-rest-hal-browser')
     compile('org.springframework.boot:spring-boot-starter-security')
+
+    compile('ch.qos.logback:logback-classic:1.2.3')
+    compile('ch.qos.logback:logback-core:1.2.3')
 
     compile('com.auth0:java-jwt:3.4.1')
     compile('com.auth0:auth0-spring-security-api:1.1.0')
@@ -43,10 +50,11 @@ dependencies {
 
     compile('com.fasterxml.jackson.datatype:jackson-datatype-joda')
     compile('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
-    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
+    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8')
     compile('com.fasterxml.jackson.module:jackson-module-parameter-names')
+    compile('com.fasterxml.jackson.core:jackson-databind:2.9.8')
 
-    compile('org.jolokia:jolokia-core')
+    compile('org.jolokia:jolokia-core:1.5.0')
 
     compileOnly('org.projectlombok:lombok')
 
