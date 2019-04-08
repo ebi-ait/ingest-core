@@ -32,7 +32,7 @@ dependencies {
     }
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
     compile('org.springframework.boot:spring-boot-starter-data-rest') {
-        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
+        exclude group: 'com.fasterxml.jackson.core'
     }
     compile('org.springframework.boot:spring-boot-starter-hateoas')
     compile('org.springframework.boot:spring-boot-starter-amqp')
@@ -50,9 +50,14 @@ dependencies {
 
     compile('com.fasterxml.jackson.datatype:jackson-datatype-joda')
     compile('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
-    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8')
     compile('com.fasterxml.jackson.module:jackson-module-parameter-names')
-    compile('com.fasterxml.jackson.core:jackson-databind:2.9.8')
+
+    def jacksonVersion = '2.9.8'
+    def jacksonCoreModules = ['databind', 'annotations', 'core']
+    for(coreModule in jacksonCoreModules) {
+        compile("com.fasterxml.jackson.core:jackson-$coreModule:2.9.8")
+    }
+    compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     compile('org.jolokia:jolokia-core:1.5.0')
 
