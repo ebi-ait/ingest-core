@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.file.web;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import java.util.Optional;
  * Created by rolando on 07/09/2017.
  */
 @Getter
-@AllArgsConstructor
+@AllArgsConstructor(onConstructor = @__(@JsonCreator))
 public class FileMessage {
     @JsonProperty("url")
     private final String cloudUrl;

@@ -53,15 +53,14 @@ dependencies {
     compile('com.fasterxml.jackson.module:jackson-module-parameter-names')
 
     def jacksonVersion = '2.9.8'
-    def jacksonCoreModules = ['databind', 'annotations', 'core']
-    for(coreModule in jacksonCoreModules) {
+    for(coreModule in (['databind', 'annotations', 'core'])) {
         compile("com.fasterxml.jackson.core:jackson-$coreModule:2.9.8")
     }
     compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     compile('org.jolokia:jolokia-core:1.5.0')
 
-    compileOnly('org.projectlombok:lombok')
+    compileOnly('org.projectlombok:lombok:1.18.6')
 
     testCompile('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.assertj', module: 'assertj-core'
