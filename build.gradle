@@ -35,6 +35,8 @@ dependencies {
     compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8')
     compile('com.fasterxml.jackson.module:jackson-module-parameter-names')
 
+    compile('org.apache.httpcomponents:httpclient')
+
     compile('org.jolokia:jolokia-core:1.5.0')
 
     compileOnly('org.projectlombok:lombok:1.18.6')
