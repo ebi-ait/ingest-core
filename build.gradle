@@ -31,9 +31,7 @@ dependencies {
         exclude group: 'ch.qos.logback'
     }
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
-    compile('org.springframework.boot:spring-boot-starter-data-rest') {
-        exclude group: 'com.fasterxml.jackson.core'
-    }
+    compile('org.springframework.boot:spring-boot-starter-data-rest')
     compile('org.springframework.boot:spring-boot-starter-hateoas')
     compile('org.springframework.boot:spring-boot-starter-amqp')
     compile('org.springframework.boot:spring-boot-starter-jetty')
@@ -50,13 +48,8 @@ dependencies {
 
     compile('com.fasterxml.jackson.datatype:jackson-datatype-joda')
     compile('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
+    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
     compile('com.fasterxml.jackson.module:jackson-module-parameter-names')
-
-    def jacksonVersion = '2.9.8'
-    for(coreModule in (['databind', 'annotations', 'core'])) {
-        compile("com.fasterxml.jackson.core:jackson-$coreModule:2.9.8")
-    }
-    compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     compile('org.jolokia:jolokia-core:1.5.0')
 
