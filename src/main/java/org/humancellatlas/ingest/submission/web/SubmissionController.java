@@ -46,7 +46,7 @@ import java.util.Optional;
  * Spring controller that will handle submission events on a {@link SubmissionEnvelope}
  *
  * @author Tony Burdett
- * @date 31/08/17
+
  */
 @RepositoryRestController
 @ExposesResourceFor(SubmissionEnvelope.class)

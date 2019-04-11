@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
  * Javadocs go here!
  *
  * @author Tony Burdett
- * @date 27/09/17
+
  */
 @ControllerAdvice
 public class GlobalStateExceptionHandler {
