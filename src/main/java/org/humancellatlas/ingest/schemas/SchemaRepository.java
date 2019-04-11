@@ -24,12 +24,6 @@ public interface SchemaRepository extends MongoRepository<Schema, String>{
     <S extends Schema> List<S> save(Iterable<S> schemas);
 
     @RestResource(exported = false)
-    void delete(Schema schema);
-
-    @RestResource(exported = false)
-    void delete(String schemaId);
-
-    @RestResource(exported = false)
     List<Schema> findByUuidEquals(Uuid uuid);
 
     @RestResource
