@@ -1,0 +1,18 @@
+language: java
+
+services:
+        - mongodb
+
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -rf $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+env:
+  global:
+  - GCP_PROJECT_WHITELIST="hca-dcp-production.iam.gserviceaccount.com,human-cell-atlas-travis-test.iam.gserviceaccount.com,broad-dsde-mint-dev.iam.gserviceaccount.com,broad-dsde-mint-test.iam.gserviceaccount.com,broad-dsde-mint-staging.iam.gserviceaccount.com"
+  - USR_AUTH_AUDIENCE="https://dev.data.humancellatlas.org/"
+  - SVC_AUTH_AUDIENCE="https://dev.data.humancellatlas.org/"
+  - AUTH_ISSUER="https://humancellatlas.auth0.com/"

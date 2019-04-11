@@ -1,0 +1,45 @@
+version: '3'
+services:
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+      - "9091:9091"
+    environment:
+      - MONGO_URI=mongodb://db:27017/admin
+      - RABBIT_HOST=mq
+      - JMX_PORT=9091
+      - SCHEMA_BASE_URI=http://schema.dev.data.humancellatlas.org/
+    links:
+      - "mongo:db"
+      - "rabbitmq:mq"
+  mongo:
+    image: mongo:3.4.3
+    ports:
+      - "27017:27017"
+  rabbitmq:
+    image: rabbitmq:3.7.7-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  broker:
+    image: quay.io/humancellatlas/ingest-broker:master_dbd4096
+    ports:
+      - "5000:5000"
+    environment:
+      - INGEST_API=http://api:8080
+    links:
+      - "api:api"
+  staging-manager:
+    image: quay.io/humancellatlas/ingest-staging-manager:master_7c4c332
+    environment:
+      - INGEST_API=http://api:8080
+      - RABBIT_URL=amqp://mq:5672
+      - STAGING_API=https://upload.dev.data.humancellatlas.org
+      - INGEST_API_KEY=${INGEST_API_KEY}
+    links:
+      - "api:api"
+      - "mongo:db"
+      - "rabbitmq:mq"
+networks:
+  default:

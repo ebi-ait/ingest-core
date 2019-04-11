@@ -1,0 +1,10 @@
+{
+  "stagingDetails": {
+    "stagingAreaUuid": {
+      "uuid": "e341e853-2fbb-43f3-91a8-a53b3cb495b7"
+    },
+    "stagingAreaLocation": {
+      "value": "hca:sta:aws:21afcff2-d32c-4bec-bef4-6d6615eb428e:eyJBV1NfQUNDRVNTX0tFWV9JRCI6ICJBS0lBSkNRVEhNVEY3NU5FNkY3QSIsICJBV1NfU0VDUkVUX0FDQ0VTU19LRVkiOiAicEJTZ2l2UjhkQWZKZlRPbEc4UmlJa1UydzNSekVyMktDaXg3a2pldSJ9"
+    }
+  }
+}
