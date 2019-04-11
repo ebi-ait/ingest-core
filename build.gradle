@@ -17,6 +17,10 @@ compileJava {
     options.compilerArgs << '-parameters'
 }
 
+bootJar {
+    mainClassName = 'org.humancellatlas.ingest.IngestCoreApplication'
+}
+
 dependencies {
     def starterModules = ['actuator', 'data-mongodb', 'data-rest', 'hateoas', 'amqp', 'jetty',
             'security']
