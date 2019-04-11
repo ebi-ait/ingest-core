@@ -78,7 +78,7 @@ public class DefaultExporterTest {
     private Set<ExportData> mockSendingThroughMessageRouter() {
         final Set<ExportData> exportData = new HashSet<>();
         Answer<Void> addToSet = invocation ->  {
-            exportData.add(invocation.getArgumentAt(0, ExportData.class));
+            exportData.add(invocation.getArgument(0));
             return null;
         };
         doAnswer(addToSet).when(messageRouter).sendAssayForExport(any(ExportData.class));
