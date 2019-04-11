@@ -20,6 +20,6 @@ public class ProtocolCrudStrategy implements MetadataCrudStrategy<Protocol> {
 
     @Override
     public Protocol findMetadataDocument(String id) {
-        return protocolService.getProtocolRepository().findOne(id);
+        return protocolService.getProtocolRepository().findById(id).get();
     }
 }

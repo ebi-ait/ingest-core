@@ -20,6 +20,6 @@ public class FileCrudStrategy implements MetadataCrudStrategy<File> {
 
     @Override
     public File findMetadataDocument(String id) {
-        return fileService.getFileRepository().findOne(id);
+        return fileService.getFileRepository().findById(id).get();
     }
 }

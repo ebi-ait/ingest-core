@@ -20,6 +20,6 @@ public class ProjectCrudStrategy implements MetadataCrudStrategy<Project> {
 
     @Override
     public Project findMetadataDocument(String id) {
-        return projectService.getProjectRepository().findOne(id);
+        return projectService.getProjectRepository().findById(id).get();
     }
 }
