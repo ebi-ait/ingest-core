@@ -6,7 +6,7 @@ package org.humancellatlas.ingest.core.web;
  * breaking changes for clients.
  *
  * @author Tony Burdett
- * @date 05/09/17
+
  */
 public class Links {
     // Links to request state changes for submission envelopes

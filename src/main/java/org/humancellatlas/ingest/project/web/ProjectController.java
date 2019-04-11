@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Javadocs go here!
  *
  * @author Tony Burdett
- * @date 05/09/17
+
  */
 @RepositoryRestController
 @ExposesResourceFor(Project.class)

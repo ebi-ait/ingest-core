@@ -18,7 +18,7 @@ import java.util.List;
  * Javadocs go here!
  *
  * @author Tony Burdett
- * @date 31/08/17
+
  */
 @Getter
 public abstract class MetadataDocument extends AbstractEntity {

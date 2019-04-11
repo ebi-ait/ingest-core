@@ -10,7 +10,7 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
  * Javadocs go here!
  *
  * @author Tony Burdett
- * @date 30/08/17
+
  */
 @Getter
 public class Protocol extends MetadataDocument {

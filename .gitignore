@@ -1,5 +1,5 @@
+HELP.md
 .gradle
-classes
 /build/
 !gradle/wrapper/gradle-wrapper.jar
 
@@ -10,21 +10,21 @@ classes
 .project
 .settings
 .springBeans
+.sts4-cache
 
 ### IntelliJ IDEA ###
 .idea
 *.iws
 *.iml
 *.ipr
+/out/
 
 ### NetBeans ###
-nbproject/private/
-build/
-nbbuild/
-dist/
-nbdist/
-.nb-gradle/
-/src/main/java/org/humancellatlas/ingest/security/SecurityConstants.java
-/src/test/resources/curl-examples.txt
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 
-out
+### VS Code ###
+.vscode/

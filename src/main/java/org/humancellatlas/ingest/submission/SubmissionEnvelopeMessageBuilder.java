@@ -17,7 +17,7 @@ import java.net.URI;
  * Javadocs go here!
  *
  * @author tburdett
- * @date 12/09/2017
+
  */
 public class SubmissionEnvelopeMessageBuilder {
     public static SubmissionEnvelopeMessageBuilder using(ResourceMappings mappings,

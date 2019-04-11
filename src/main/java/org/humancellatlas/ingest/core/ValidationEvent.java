@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationEvent;
  * Javadocs go here!
  *
  * @author Tony Burdett
- * @date 12/09/17
+
  */
 @Getter
 public class ValidationEvent extends ApplicationEvent {

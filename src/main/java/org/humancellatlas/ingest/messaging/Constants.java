@@ -2,7 +2,7 @@ package org.humancellatlas.ingest.messaging;
 
 /**
  * @author Simon Jupp
- * @date 04/09/2017
+
  * Samples, Phenotypes and Ontologies Team, EMBL-EBI
  */
 public class Constants {

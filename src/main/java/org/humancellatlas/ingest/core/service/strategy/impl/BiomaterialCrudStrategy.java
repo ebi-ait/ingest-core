@@ -20,6 +20,6 @@ public class BiomaterialCrudStrategy implements MetadataCrudStrategy<Biomaterial
 
     @Override
     public Biomaterial findMetadataDocument(String id) {
-        return biomaterialService.getBiomaterialRepository().findOne(id);
+        return biomaterialService.getBiomaterialRepository().findById(id).get();
     }
 }

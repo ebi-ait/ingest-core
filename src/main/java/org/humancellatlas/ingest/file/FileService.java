@@ -15,12 +15,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Javadocs go here!
- *
- * @author Tony Burdett
- * @date 06/09/17
- */
 @Service
 @RequiredArgsConstructor
 @Getter

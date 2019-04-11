@@ -9,7 +9,7 @@ import java.net.URI;
  * Javadocs go here!
  *
  * @author Tony Burdett
- * @date 15/09/17
+
  */
 @Data
 class StagingUrn {

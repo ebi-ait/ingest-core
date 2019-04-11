@@ -20,6 +20,6 @@ public class ProcessCrudStrategy implements MetadataCrudStrategy<Process> {
 
     @Override
     public Process findMetadataDocument(String id) {
-        return processService.getProcessRepository().findOne(id);
+        return processService.getProcessRepository().findById(id).get();
     }
 }

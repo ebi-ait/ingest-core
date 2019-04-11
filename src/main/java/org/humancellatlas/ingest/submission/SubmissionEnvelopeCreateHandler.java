@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  * Javadocs go here!
  *
  * @author Tony Burdett
- * @date 15/09/17
+
  */
 @Component
 @RepositoryEventHandler

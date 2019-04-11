@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Javadocs go here!
  *
  * @author Tony Burdett
- * @date 06/09/17
+
  */
 @RepositoryRestController
 @ExposesResourceFor(File.class)
