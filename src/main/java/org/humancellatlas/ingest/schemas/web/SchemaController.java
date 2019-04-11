@@ -53,9 +53,10 @@ public class SchemaController {
     }
 
     private Page<Schema> generatePageFromSchemaList(Pageable pageable, List<Schema> schemaList) {
-        List<Schema> latestSchemasSubList = schemaList.subList(pageable.getOffset(),
-                                                               pageable.getOffset() + Math.min(pageable.getOffset() + pageable.getPageSize(),
-                                                                                               schemaList.size() - pageable.getOffset()));
+        int first = (int) pageable.getOffset();
+        int last = (int) (pageable.getOffset() + Math.min(pageable.getOffset() +
+                        pageable.getPageSize(), schemaList.size() - pageable.getOffset()));
+        List<Schema> latestSchemasSubList = schemaList.subList(first, last);
 
         return new PageImpl<>(latestSchemasSubList, pageable, schemaList.size());
     }
