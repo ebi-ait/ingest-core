@@ -62,10 +62,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/user/**").authenticated()
-                .antMatchers(HttpMethod.POST, "/submissionEnvelopes").authenticated()
+                .antMatchers(HttpMethod.POST, "/submissionEnvelopes/**").authenticated()
+                .antMatchers(HttpMethod.POST, "/projects**").authenticated()
+                .antMatchers(HttpMethod.POST, "/files**").authenticated()
+                .antMatchers(HttpMethod.POST, "/biomaterials**").authenticated()
+                .antMatchers(HttpMethod.POST, "/processes**").authenticated()
+                .antMatchers(HttpMethod.POST, "/protocols**").authenticated()
                 .antMatchers(HttpMethod.POST, "/messaging/**").authenticated()
-                .antMatchers(HttpMethod.POST, "/projects").authenticated()
-                .antMatchers(HttpMethod.POST, "/submissionEnvelopes/*/projects").authenticated()
                 .antMatchers(HttpMethod.GET, "/**").permitAll();
     }
 }
