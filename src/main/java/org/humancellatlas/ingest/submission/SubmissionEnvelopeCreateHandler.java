@@ -33,8 +33,13 @@ public class SubmissionEnvelopeCreateHandler {
 
     @HandleBeforeCreate
     public boolean submissionEnvelopeBeforeCreate(SubmissionEnvelope submissionEnvelope) {
-        submissionEnvelope.setUuid(Uuid.newUuid());
+        this.setUuid(submissionEnvelope);
         return true;
+    }
+
+    public SubmissionEnvelope setUuid(SubmissionEnvelope submissionEnvelope) {
+        submissionEnvelope.setUuid(Uuid.newUuid());
+        return submissionEnvelope;
     }
 
     @HandleAfterCreate
