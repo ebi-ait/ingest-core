@@ -39,17 +39,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         JwkProvider jwkProvider = new JwkProviderBuilder(issuer).build();
         JwtAuthenticationProvider auth0Provider = new JwtAuthenticationProvider(jwkProvider, issuer, audience);
 
-        // FIXME: This is temporary workaround to be able to also verify tokens created from Dan Vaughan's Auth0 account
-        String issuer2 = "https://danielvaughan.eu.auth0.com/";
-        String audience2 = "http://localhost:8080";
-
-        JwkProvider jwkProvider2 = new JwkProviderBuilder(issuer2).build();
-        JwtAuthenticationProvider auth0Provider2 = new JwtAuthenticationProvider(jwkProvider2, issuer2, audience2);
-        // FIXME: Remove 'til here
-
         http.authenticationProvider(auth0Provider)
                 .authenticationProvider(googleServiceJwtAuthenticationProvider)
-                .authenticationProvider(auth0Provider2) // FIXME: Remove soon
                 .securityContext()
                 .securityContextRepository(new BearerSecurityContextRepository())
                 .and()
@@ -62,10 +53,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/user/**").authenticated()
-                .antMatchers(HttpMethod.POST, "/submissionEnvelopes").authenticated()
+                .antMatchers(HttpMethod.POST, "/submissionEnvelopes/**").authenticated()
+                .antMatchers(HttpMethod.POST, "/projects**").authenticated()
+                .antMatchers(HttpMethod.POST, "/files**").authenticated()
+                .antMatchers(HttpMethod.POST, "/biomaterials**").authenticated()
+                .antMatchers(HttpMethod.POST, "/processes**").authenticated()
+                .antMatchers(HttpMethod.POST, "/protocols**").authenticated()
                 .antMatchers(HttpMethod.POST, "/messaging/**").authenticated()
-                .antMatchers(HttpMethod.POST, "/projects").authenticated()
-                .antMatchers(HttpMethod.POST, "/submissionEnvelopes/*/projects").authenticated()
                 .antMatchers(HttpMethod.GET, "/**").permitAll();
     }
 }
