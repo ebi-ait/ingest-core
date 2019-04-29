@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.project;
 
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -19,7 +20,11 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin
 public interface ProjectRepository extends MongoRepository<Project, String> {
 
-    Project findByUuid(@Param("uuid") Uuid uuid);
+    @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
+    Page<Project> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
+
+    @RestResource(rel = "findByUuid", path = "findByUuid")
+    Project findByUuidAndIsUpdateFalse(@Param("uuid") Uuid uuid);
 
     @RestResource(path = "findByUser", rel = "findByUser")
     Page<Project> findByUser(@Param(value = "user") String user, Pageable pageable);

@@ -22,7 +22,11 @@ import java.util.stream.Stream;
 @CrossOrigin
 public interface FileRepository extends MongoRepository<File, String> {
 
-    File findByUuid(@Param("uuid") Uuid uuid);
+    @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
+    Page<File> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
+
+    @RestResource(rel = "findByUuid", path = "findByUuid")
+    File findByUuidAndIsUpdateFalse(@Param("uuid") Uuid uuid);
 
     @RestResource(exported = false)
     File findByUuidUuid(UUID uuid);

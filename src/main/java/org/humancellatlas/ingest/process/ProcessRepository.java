@@ -16,7 +16,11 @@ import java.util.List;
 @CrossOrigin
 public interface ProcessRepository extends MongoRepository<Process, String> {
 
-    Process findByUuid(@Param("uuid") Uuid uuid);
+    @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
+    Page<Process> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
+
+    @RestResource(rel = "findByUuid", path = "findByUuid")
+    Process findByUuidAndIsUpdateFalse(@Param("uuid") Uuid uuid);
 
     @RestResource(exported = false)
     List<Process> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope);
