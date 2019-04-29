@@ -27,6 +27,9 @@ public class SubmissionEnvelopeService {
     @NonNull
     private final SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
+    @NonNull
+    private final SubmissionEnvelopeCreateHandler submissionEnvelopeCreateHandler;
+
     public void handleEnvelopeStateUpdateRequest(SubmissionEnvelope envelope,
             SubmissionState state) {
         if(! envelope.allowedStateTransitions().contains(state)) {
@@ -46,5 +49,13 @@ public class SubmissionEnvelopeService {
     public SubmissionEnvelope addErrorToEnvelope(SubmissionError submissionError, SubmissionEnvelope submissionEnvelope) {
         submissionEnvelope.addError(submissionError);
         return submissionEnvelopeRepository.save(submissionEnvelope);
+    }
+
+    public SubmissionEnvelope createUpdateSubmissionEnvelope() {
+        SubmissionEnvelope updateSubmissionEnvelope = new SubmissionEnvelope();
+        submissionEnvelopeCreateHandler.setUuid(updateSubmissionEnvelope);
+        updateSubmissionEnvelope.setIsUpdate(true);
+        SubmissionEnvelope insertedUpdateSubmissionEnvelope = submissionEnvelopeRepository.insert(updateSubmissionEnvelope);
+        return insertedUpdateSubmissionEnvelope;
     }
 }

@@ -26,6 +26,7 @@ public class BiomaterialService {
   }
 
   public Biomaterial addBiomaterialToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Biomaterial biomaterial) {
+    biomaterial.setIsUpdate(submissionEnvelope.getIsUpdate());
     biomaterial.addToSubmissionEnvelope(submissionEnvelope);
     return getBiomaterialRepository().save(biomaterial);
   }

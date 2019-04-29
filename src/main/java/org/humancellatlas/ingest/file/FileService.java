@@ -39,14 +39,13 @@ public class FileService {
                                                  fileName);
         } else {
             file.setFileName(fileName);
-            file.addToSubmissionEnvelope(submissionEnvelope);
-            File createdFile = fileRepository.save(file);
-            metadataDocumentEventHandler.handleMetadataDocumentCreate(createdFile);
+            File createdFile = addFileToSubmissionEnvelope(submissionEnvelope, file);
             return createdFile;
         }
     }
 
     public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
+        file.setIsUpdate(submissionEnvelope.getIsUpdate());
         file.addToSubmissionEnvelope(submissionEnvelope);
         File createdFile = getFileRepository().save(file);
         metadataDocumentEventHandler.handleMetadataDocumentCreate(createdFile);

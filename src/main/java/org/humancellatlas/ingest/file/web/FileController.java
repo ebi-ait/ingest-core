@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.file.web;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileAlreadyExistsException;
 import org.humancellatlas.ingest.file.FileService;
@@ -21,10 +22,10 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Javadocs go here!
@@ -68,7 +69,9 @@ public class FileController {
                    produces = MediaTypes.HAL_JSON_VALUE)
     ResponseEntity<Resource<?>> addFileToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                   @RequestBody File file,
+                                                  @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
                                                   final PersistentEntityResourceAssembler assembler) {
+        updatingUuid.ifPresent(uuid -> file.setUuid(new Uuid(uuid.toString())));
         File entity = getFileService().addFileToSubmissionEnvelope(submissionEnvelope, file);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);

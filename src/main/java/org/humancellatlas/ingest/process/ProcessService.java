@@ -64,6 +64,7 @@ public class ProcessService {
 
     public Process addProcessToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
                                                   Process process) {
+        process.setIsUpdate(submissionEnvelope.getIsUpdate());
         process.addToSubmissionEnvelope(submissionEnvelope);
         return getProcessRepository().save(process);
     }
@@ -98,7 +99,7 @@ public class ProcessService {
 
                 // add the input files
                 for (String fileUuid : bundleManifest.getFileFilesMap().keySet()) {
-                    File analysisInputFile = fileRepository.findByUuid(new Uuid(fileUuid));
+                    File analysisInputFile = fileRepository.findByUuidAndIsUpdateFalse(new Uuid(fileUuid));
                     analysisInputFile.addAsInputToProcess(analysis);
                     fileRepository.save(analysisInputFile);
                 }
