@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.process.BundleReference;
@@ -71,7 +72,9 @@ public class ProcessController {
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                      @RequestBody Process process,
+                                                     @RequestParam("updatingUuid") UUID updatingUuid,
                                                      PersistentEntityResourceAssembler assembler) {
+        process.setUuid(new Uuid(updatingUuid.toString()));
         Process entity = getProcessService().addProcessToSubmissionEnvelope(submissionEnvelope, process);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
