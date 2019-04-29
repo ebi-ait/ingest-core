@@ -17,6 +17,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -37,9 +38,9 @@ public class BiomaterialController {
   @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.POST)
   ResponseEntity<Resource<?>> addBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                        @RequestBody Biomaterial biomaterial,
-                                                       @RequestParam("updatingUuid") UUID updatingUuid,
+                                                       @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
                                                        PersistentEntityResourceAssembler assembler) {
-    biomaterial.setUuid(new Uuid(updatingUuid.toString()));
+    updatingUuid.ifPresent(uuid -> biomaterial.setUuid(new Uuid(uuid.toString())));
     Biomaterial entity = getBiomaterialService().addBiomaterialToSubmissionEnvelope(submissionEnvelope, biomaterial);
     PersistentEntityResource resource = assembler.toFullResource(entity);
     return ResponseEntity.accepted().body(resource);

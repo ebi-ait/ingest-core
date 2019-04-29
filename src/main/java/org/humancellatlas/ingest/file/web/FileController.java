@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -68,9 +69,9 @@ public class FileController {
                    produces = MediaTypes.HAL_JSON_VALUE)
     ResponseEntity<Resource<?>> addFileToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                   @RequestBody File file,
-                                                  @RequestParam("updatingUuid") UUID updatingUuid,
+                                                  @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
                                                   final PersistentEntityResourceAssembler assembler) {
-        file.setUuid(new Uuid(updatingUuid.toString()));
+        updatingUuid.ifPresent(uuid -> file.setUuid(new Uuid(uuid.toString())));
         File entity = getFileService().addFileToSubmissionEnvelope(submissionEnvelope, file);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);

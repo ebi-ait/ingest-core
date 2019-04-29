@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -72,9 +73,9 @@ public class ProcessController {
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                      @RequestBody Process process,
-                                                     @RequestParam("updatingUuid") UUID updatingUuid,
+                                                     @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
                                                      PersistentEntityResourceAssembler assembler) {
-        process.setUuid(new Uuid(updatingUuid.toString()));
+        updatingUuid.ifPresent(uuid -> process.setUuid(new Uuid(uuid.toString())));
         Process entity = getProcessService().addProcessToSubmissionEnvelope(submissionEnvelope, process);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);

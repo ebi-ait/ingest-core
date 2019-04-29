@@ -15,6 +15,8 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.text.html.Option;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -33,9 +35,9 @@ public class ProjectController {
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                      @RequestBody Project project,
-                                                     @RequestParam("updatingUuid") UUID updatingUuid,
+                                                     @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
                                                      PersistentEntityResourceAssembler assembler) {
-        project.setUuid(new Uuid(updatingUuid.toString()));
+        updatingUuid.ifPresent(uuid -> project.setUuid(new Uuid(uuid.toString())));
         Project entity = getProjectService().addProjectToSubmissionEnvelope(submissionEnvelope, project);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);

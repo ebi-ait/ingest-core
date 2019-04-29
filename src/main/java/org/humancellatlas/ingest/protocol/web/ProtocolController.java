@@ -15,6 +15,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -33,9 +34,9 @@ public class ProtocolController {
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProtocolToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                       @RequestBody Protocol protocol,
-                                                      @RequestParam("updatingUuid") UUID updatingUuid,
+                                                      @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
                                                       PersistentEntityResourceAssembler assembler) {
-        protocol.setUuid(new Uuid(updatingUuid.toString()));
+        updatingUuid.ifPresent(uuid -> protocol.setUuid(new Uuid(uuid.toString())));
         Protocol entity = getProtocolService().addProtocolToSubmissionEnvelope(submissionEnvelope, protocol);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
