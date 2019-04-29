@@ -64,6 +64,7 @@ public class ProcessService {
 
     public Process addProcessToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
                                                   Process process) {
+        process.setIsUpdate(submissionEnvelope.getIsUpdate());
         process.addToSubmissionEnvelope(submissionEnvelope);
         return getProcessRepository().save(process);
     }

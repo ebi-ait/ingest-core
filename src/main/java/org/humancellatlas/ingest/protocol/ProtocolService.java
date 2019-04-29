@@ -29,6 +29,7 @@ public class ProtocolService {
     }
 
     public Protocol addProtocolToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Protocol protocol) {
+        protocol.setIsUpdate(submissionEnvelope.getIsUpdate());
         protocol.addToSubmissionEnvelope(submissionEnvelope);
         return getProtocolRepository().save(protocol);
     }

@@ -29,6 +29,7 @@ public class ProjectService {
     }
 
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
+        project.setIsUpdate(submissionEnvelope.getIsUpdate());
         project.addToSubmissionEnvelope(submissionEnvelope);
         return getProjectRepository().save(project);
     }
