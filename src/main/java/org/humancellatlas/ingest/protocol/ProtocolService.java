@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.protocol;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ public class ProtocolService {
 
     public Protocol addProtocolToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Protocol protocol) {
         protocol.addToSubmissionEnvelope(submissionEnvelope);
+        protocol.setUuid(Uuid.newUuid());
         return getProtocolRepository().save(protocol);
     }
 
