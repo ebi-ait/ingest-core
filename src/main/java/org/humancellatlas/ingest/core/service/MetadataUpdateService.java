@@ -15,7 +15,7 @@ public class MetadataUpdateService {
     private final @NonNull MetadataDifferService metadataDifferService;
     private final @NonNull MetadataCrudService metadataCrudService;
 
-    public <T extends MetadataDocument> T doUpdate(T updateDocument, SubmissionEnvelope submissionEnvelope) {
+    public <T extends MetadataDocument> T acceptUpdate(T updateDocument, SubmissionEnvelope submissionEnvelope) {
         String documentType = updateDocument.getType().toString();
         MetadataCrudStrategy metadataCrudStrategy = metadataCrudService.crudStrategyForMetadataType(updateDocument.getType().toString());
         T originalDocument = (T) metadataCrudStrategy.findOriginalByUuid(updateDocument.getUuid().getUuid().toString());

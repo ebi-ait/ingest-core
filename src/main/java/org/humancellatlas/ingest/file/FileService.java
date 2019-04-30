@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Checksums;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.exception.CoreEntityNotFoundException;
+import org.humancellatlas.ingest.core.service.MetadataCrudService;
+import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -31,6 +33,10 @@ public class FileService {
     FileRepository fileRepository;
     private final @NonNull
     MetadataDocumentEventHandler metadataDocumentEventHandler;
+    private final @NonNull
+    MetadataCrudService metadataCrudService;
+    private final @NonNull
+    MetadataUpdateService metadataUpdateService;
 
     // TODO Refactor!!!
     public File createFile(String fileName, File file, SubmissionEnvelope submissionEnvelope) {
@@ -46,8 +52,14 @@ public class FileService {
 
     public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
         file.setIsUpdate(submissionEnvelope.getIsUpdate());
-        file.addToSubmissionEnvelope(submissionEnvelope);
-        File createdFile = getFileRepository().save(file);
+
+        File createdFile;
+        if(! file.getIsUpdate()) {
+            createdFile = metadataCrudService.addToSubmissionEnvelopeAndSave(file, submissionEnvelope);
+        } else {
+            createdFile = metadataUpdateService.acceptUpdate(file, submissionEnvelope);
+        }
+
         metadataDocumentEventHandler.handleMetadataDocumentCreate(createdFile);
         return createdFile;
     }
