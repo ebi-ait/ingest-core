@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.core.service.strategy.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
@@ -21,5 +22,10 @@ public class ProjectCrudStrategy implements MetadataCrudStrategy<Project> {
     @Override
     public Project findMetadataDocument(String id) {
         return projectService.getProjectRepository().findOne(id);
+    }
+
+    @Override
+    public Project findOriginalByUuid(String uuid) {
+        return projectService.getProjectRepository().findByUuidAndIsUpdateFalse(new Uuid(uuid));
     }
 }

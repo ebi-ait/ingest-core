@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.core.service.strategy.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessService;
@@ -21,5 +22,10 @@ public class ProcessCrudStrategy implements MetadataCrudStrategy<Process> {
     @Override
     public Process findMetadataDocument(String id) {
         return processService.getProcessRepository().findOne(id);
+    }
+
+    @Override
+    public Process findOriginalByUuid(String uuid) {
+        return processService.getProcessRepository().findByUuidAndIsUpdateFalse(new Uuid(uuid));
     }
 }

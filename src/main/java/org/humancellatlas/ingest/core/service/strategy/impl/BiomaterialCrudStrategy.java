@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialService;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.springframework.stereotype.Component;
 
@@ -21,5 +22,10 @@ public class BiomaterialCrudStrategy implements MetadataCrudStrategy<Biomaterial
     @Override
     public Biomaterial findMetadataDocument(String id) {
         return biomaterialService.getBiomaterialRepository().findOne(id);
+    }
+
+    @Override
+    public Biomaterial findOriginalByUuid(String uuid) {
+        return biomaterialService.getBiomaterialRepository().findByUuidAndIsUpdateFalse(new Uuid(uuid));
     }
 }
