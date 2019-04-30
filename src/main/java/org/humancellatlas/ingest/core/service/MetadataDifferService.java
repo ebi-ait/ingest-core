@@ -4,12 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flipkart.zjsonpatch.JsonDiff;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 @AllArgsConstructor
 public class MetadataDifferService {
 
