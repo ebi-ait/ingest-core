@@ -2,8 +2,10 @@ package org.humancellatlas.ingest.core.service;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.core.service.strategy.impl.*;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,7 +17,7 @@ public class MetadataCrudService {
     private final @NonNull ProjectCrudStrategy projectCrudStrategy;
     private final @NonNull FileCrudStrategy fileCrudStrategy;
 
-    private MetadataCrudStrategy crudStrategyForMetadataType(String metadataType) {
+    public MetadataCrudStrategy crudStrategyForMetadataType(String metadataType) {
         switch (metadataType) {
             case "biomaterials":
                 return biomaterialCrudStrategy;
@@ -32,4 +34,8 @@ public class MetadataCrudService {
         }
     }
 
+    public <T extends MetadataDocument> T addToSubmissionEnvelopeAndSave(T metadataDocument, SubmissionEnvelope submissionEnvelope) {
+        metadataDocument.addToSubmissionEnvelope(submissionEnvelope);
+        return (T) (crudStrategyForMetadataType(metadataDocument.getType().toString()).saveMetadataDocument(metadataDocument));
+    }
 }
