@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.core.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 
 import lombok.NonNull;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class MetadataUpdateService {
     private final @NonNull MetadataDifferService metadataDifferService;
     private final @NonNull MetadataCrudService metadataCrudService;
+    private final @NonNull PatchService patchService;
 
     public <T extends MetadataDocument> T acceptUpdate(T updateDocument, SubmissionEnvelope submissionEnvelope) {
         String documentType = updateDocument.getType().toString();
@@ -23,6 +23,7 @@ public class MetadataUpdateService {
         T originalDocument = (T) metadataCrudStrategy.findOriginalByUuid(updateDocument.getUuid().getUuid().toString());
 
         if(metadataDifferService.anyDifference(originalDocument, updateDocument)) {
+            patchService.storePatch(originalDocument, updateDocument, submissionEnvelope);
             return metadataCrudService.addToSubmissionEnvelopeAndSave(updateDocument, submissionEnvelope);
         } else {
             throw new RedundantUpdateException(String.format("Attempted to update %s document at %s with contents of %s but there is no diff",
