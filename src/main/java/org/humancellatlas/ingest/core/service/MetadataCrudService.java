@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.core.service;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.core.service.strategy.impl.*;
@@ -17,17 +18,17 @@ public class MetadataCrudService {
     private final @NonNull ProjectCrudStrategy projectCrudStrategy;
     private final @NonNull FileCrudStrategy fileCrudStrategy;
 
-    public MetadataCrudStrategy crudStrategyForMetadataType(String metadataType) {
+    public MetadataCrudStrategy crudStrategyForMetadataType(EntityType metadataType) {
         switch (metadataType) {
-            case "biomaterials":
+            case BIOMATERIAL:
                 return biomaterialCrudStrategy;
-            case "processes":
+            case PROCESS:
                 return processCrudStrategy;
-            case "protocols":
+            case PROTOCOL:
                 return protocolCrudStrategy;
-            case "projects":
+            case PROJECT:
                 return projectCrudStrategy;
-            case "files":
+            case FILE:
                 return fileCrudStrategy;
             default:
                 throw new RuntimeException(String.format("No such metadata type: %s", metadataType));
@@ -36,6 +37,6 @@ public class MetadataCrudService {
 
     public <T extends MetadataDocument> T addToSubmissionEnvelopeAndSave(T metadataDocument, SubmissionEnvelope submissionEnvelope) {
         metadataDocument.addToSubmissionEnvelope(submissionEnvelope);
-        return (T) (crudStrategyForMetadataType(metadataDocument.getType().toString()).saveMetadataDocument(metadataDocument));
+        return (T) (crudStrategyForMetadataType(metadataDocument.getType()).saveMetadataDocument(metadataDocument));
     }
 }

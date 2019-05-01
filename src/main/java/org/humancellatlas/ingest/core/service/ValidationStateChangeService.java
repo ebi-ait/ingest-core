@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.core.service;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.core.service.strategy.impl.*;
@@ -16,9 +17,9 @@ public class ValidationStateChangeService {
 
     private final @NonNull ValidationStateEventPublisher validationStateEventPublisher;
 
-    public MetadataDocument changeValidationState(String metadataType,
-                                                              String metadataId,
-                                                              ValidationState validationState) {
+    public MetadataDocument changeValidationState(EntityType metadataType,
+                                                  String metadataId,
+                                                  ValidationState validationState) {
         MetadataCrudStrategy crudStrategy = metadataCrudService.crudStrategyForMetadataType(metadataType);
         MetadataDocument metadataDocument = crudStrategy.findMetadataDocument(metadataId);
         metadataDocument.setValidationState(validationState);
