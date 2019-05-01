@@ -40,7 +40,6 @@ public class FileService {
         } else {
             file.setFileName(fileName);
             file.setUuid(Uuid.newUuid());
-            file.addToSubmissionEnvelope(submissionEnvelope);
             File createdFile = addFileToSubmissionEnvelope(submissionEnvelope, file);
             return createdFile;
         }
