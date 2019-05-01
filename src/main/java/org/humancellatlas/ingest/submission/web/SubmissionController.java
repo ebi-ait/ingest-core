@@ -73,6 +73,13 @@ public class SubmissionController {
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
     private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
 
+    @RequestMapping(path = "/submissionEnvelopes/updateSubmissions", method = RequestMethod.POST)
+    ResponseEntity<?> createUpdateSubmission(
+                               final PersistentEntityResourceAssembler resourceAssembler) {
+        SubmissionEnvelope updateSubmission = getSubmissionEnvelopeService().createUpdateSubmissionEnvelope();
+        return ResponseEntity.ok(resourceAssembler.toFullResource(updateSubmission));
+    }
+
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files", method = RequestMethod.GET)
     ResponseEntity<?> getFiles(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                Pageable pageable,

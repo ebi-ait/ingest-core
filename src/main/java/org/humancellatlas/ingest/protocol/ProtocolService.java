@@ -30,6 +30,7 @@ public class ProtocolService {
     }
 
     public Protocol addProtocolToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Protocol protocol) {
+        protocol.setIsUpdate(submissionEnvelope.getIsUpdate());
         protocol.addToSubmissionEnvelope(submissionEnvelope);
         protocol.setUuid(Uuid.newUuid());
         return getProtocolRepository().save(protocol);

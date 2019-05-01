@@ -26,6 +26,7 @@ public class SubmissionEnvelope extends AbstractEntity {
     private @Setter StagingDetails stagingDetails;
     private SubmissionState submissionState;
     private @Setter Boolean triggersAnalysis;
+    private @Setter Boolean isUpdate;
     private final List<SubmissionError> submissionErrors = new ArrayList<>();
 
     private static final Logger log = LoggerFactory.getLogger(SubmissionEnvelope.class);
@@ -38,6 +39,7 @@ public class SubmissionEnvelope extends AbstractEntity {
         super(EntityType.SUBMISSION);
         this.submissionState = SubmissionState.PENDING;
         this.triggersAnalysis = true;
+        this.isUpdate = false;
     }
 
     public SubmissionEnvelope(String id) {

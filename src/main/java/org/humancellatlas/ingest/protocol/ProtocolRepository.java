@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.protocol;
 
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -26,6 +27,9 @@ public interface ProtocolRepository extends MongoRepository<Protocol, String> {
                                                                                 @Param("state") ValidationState state,
                                                                                 Pageable pageable);
 
-    Protocol findByUuid(@Param("uuid") Uuid uuid);
+    @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
+    Page<Protocol> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
 
+    @RestResource(rel = "findByUuid", path = "findByUuid")
+    Protocol findByUuidAndIsUpdateFalse(@Param("uuid") Uuid uuid);
 }

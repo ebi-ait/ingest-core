@@ -39,15 +39,15 @@ public class FileService {
                                                  fileName);
         } else {
             file.setFileName(fileName);
-            file.addToSubmissionEnvelope(submissionEnvelope);
             file.setUuid(Uuid.newUuid());
-            File createdFile = fileRepository.save(file);
-            metadataDocumentEventHandler.handleMetadataDocumentCreate(createdFile);
+            file.addToSubmissionEnvelope(submissionEnvelope);
+            File createdFile = addFileToSubmissionEnvelope(submissionEnvelope, file);
             return createdFile;
         }
     }
 
     public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
+        file.setIsUpdate(submissionEnvelope.getIsUpdate());
         file.addToSubmissionEnvelope(submissionEnvelope);
         file.setUuid(Uuid.newUuid());
         File createdFile = getFileRepository().save(file);

@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialService;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -14,10 +15,10 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Created by rolando on 16/02/2018.
@@ -36,8 +37,10 @@ public class BiomaterialController {
 
   @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.POST)
   ResponseEntity<Resource<?>> addBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-      @RequestBody Biomaterial biomaterial,
-      PersistentEntityResourceAssembler assembler) {
+                                                       @RequestBody Biomaterial biomaterial,
+                                                       @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
+                                                       PersistentEntityResourceAssembler assembler) {
+    updatingUuid.ifPresent(uuid -> biomaterial.setUuid(new Uuid(uuid.toString())));
     Biomaterial entity = getBiomaterialService().addBiomaterialToSubmissionEnvelope(submissionEnvelope, biomaterial);
     PersistentEntityResource resource = assembler.toFullResource(entity);
     return ResponseEntity.accepted().body(resource);

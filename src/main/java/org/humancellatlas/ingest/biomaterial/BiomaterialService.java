@@ -27,6 +27,7 @@ public class BiomaterialService {
   }
 
   public Biomaterial addBiomaterialToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Biomaterial biomaterial) {
+    biomaterial.setIsUpdate(submissionEnvelope.getIsUpdate());
     biomaterial.addToSubmissionEnvelope(submissionEnvelope);
     biomaterial.setUuid(Uuid.newUuid());
     return getBiomaterialRepository().save(biomaterial);
