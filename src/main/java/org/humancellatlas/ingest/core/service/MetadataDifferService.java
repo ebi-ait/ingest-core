@@ -20,6 +20,15 @@ public class MetadataDifferService {
         return ! sourceContent.equals(targetContent);
     }
 
+    public <T extends MetadataDocument> JsonNode generatePatch(T originalDocument, T updateDocument) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        JsonNode sourceContent = objectMapper.valueToTree(originalDocument.getContent());
+        JsonNode targetContent = objectMapper.valueToTree(updateDocument.getContent());
+
+        return this.generatePatch(sourceContent, targetContent);
+    }
+
     public JsonNode generatePatch(JsonNode source, JsonNode target) {
         return JsonDiff.asJson(source, target);
     }
