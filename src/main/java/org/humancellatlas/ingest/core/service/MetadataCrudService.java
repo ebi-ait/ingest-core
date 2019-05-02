@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.core.service.strategy.impl.*;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -36,6 +37,7 @@ public class MetadataCrudService {
     }
 
     public <T extends MetadataDocument> T addToSubmissionEnvelopeAndSave(T metadataDocument, SubmissionEnvelope submissionEnvelope) {
+        metadataDocument.setUuid(Uuid.newUuid());
         metadataDocument.addToSubmissionEnvelope(submissionEnvelope);
         return (T) (crudStrategyForMetadataType(metadataDocument.getType()).saveMetadataDocument(metadataDocument));
     }

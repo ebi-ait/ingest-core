@@ -85,6 +85,7 @@ public class ProcessService {
         SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
         File targetFile = determineTargetFile(submissionEnvelope, file);
         targetFile.addToAnalysis(analysis);
+        targetFile.setUuid(Uuid.newUuid());
         getFileRepository().save(targetFile);
         metadataDocumentEventHandler.handleMetadataDocumentCreate(targetFile);
 
