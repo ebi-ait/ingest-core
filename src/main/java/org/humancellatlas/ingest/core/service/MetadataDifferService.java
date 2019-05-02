@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flipkart.zjsonpatch.JsonDiff;
 import lombok.AllArgsConstructor;
+import org.humancellatlas.ingest.core.JsonPatch;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,7 @@ public class MetadataDifferService {
         return ! sourceContent.equals(targetContent);
     }
 
-    public <T extends MetadataDocument> JsonNode generatePatch(T originalDocument, T updateDocument) {
+    public <T extends MetadataDocument> JsonPatch generatePatch(T originalDocument, T updateDocument) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         JsonNode sourceContent = objectMapper.valueToTree(originalDocument.getContent());
@@ -29,8 +30,8 @@ public class MetadataDifferService {
         return this.generatePatch(sourceContent, targetContent);
     }
 
-    public JsonNode generatePatch(JsonNode source, JsonNode target) {
-        return JsonDiff.asJson(source, target);
+    public JsonPatch generatePatch(JsonNode source, JsonNode target) {
+        return new JsonPatch(JsonDiff.asJson(source, target));
     }
 
 }

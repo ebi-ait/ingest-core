@@ -9,6 +9,8 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @Component
 public class BiomaterialCrudStrategy implements MetadataCrudStrategy<Biomaterial> {

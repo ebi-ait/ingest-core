@@ -1,20 +1,27 @@
 package org.humancellatlas.ingest.patch;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.rest.core.annotation.RestResource;
 
-@Getter
+import java.util.Map;
+
+@Data
 @AllArgsConstructor
 @Document
 public class Patch<T extends MetadataDocument> extends AbstractEntity {
-    private final JsonNode patch;
-    private @DBRef final SubmissionEnvelope submissionEnvelope;
-    private @DBRef final T originalDocument;
-    private @DBRef final T updateDocument;
+    private Map<String, Object> jsonPatch;
+    private @DBRef SubmissionEnvelope submissionEnvelope;
+    @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
+    private @DBRef T originalDocument;
+    @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
+    private @DBRef T updateDocument;
+
+    public Patch(){}
 }
