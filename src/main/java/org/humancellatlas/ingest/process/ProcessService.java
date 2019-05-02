@@ -66,6 +66,7 @@ public class ProcessService {
                                                   Process process) {
         process.setIsUpdate(submissionEnvelope.getIsUpdate());
         process.addToSubmissionEnvelope(submissionEnvelope);
+        process.setUuid(Uuid.newUuid());
         return getProcessRepository().save(process);
     }
 
@@ -75,6 +76,7 @@ public class ProcessService {
         SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
         File targetFile = determineTargetFile(submissionEnvelope, file);
         targetFile.addToAnalysis(analysis);
+        targetFile.setUuid(Uuid.newUuid());
         getFileRepository().save(targetFile);
         metadataDocumentEventHandler.handleMetadataDocumentCreate(targetFile);
 

@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.biomaterial;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class BiomaterialService {
   public Biomaterial addBiomaterialToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Biomaterial biomaterial) {
     biomaterial.setIsUpdate(submissionEnvelope.getIsUpdate());
     biomaterial.addToSubmissionEnvelope(submissionEnvelope);
+    biomaterial.setUuid(Uuid.newUuid());
     return getBiomaterialRepository().save(biomaterial);
   }
 

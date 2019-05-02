@@ -39,6 +39,7 @@ public class FileService {
                                                  fileName);
         } else {
             file.setFileName(fileName);
+            file.setUuid(Uuid.newUuid());
             File createdFile = addFileToSubmissionEnvelope(submissionEnvelope, file);
             return createdFile;
         }
@@ -47,6 +48,7 @@ public class FileService {
     public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
         file.setIsUpdate(submissionEnvelope.getIsUpdate());
         file.addToSubmissionEnvelope(submissionEnvelope);
+        file.setUuid(Uuid.newUuid());
         File createdFile = getFileRepository().save(file);
         metadataDocumentEventHandler.handleMetadataDocumentCreate(createdFile);
         return createdFile;

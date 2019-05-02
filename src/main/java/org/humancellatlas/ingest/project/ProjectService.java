@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.project;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
@@ -31,6 +32,7 @@ public class ProjectService {
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
         project.setIsUpdate(submissionEnvelope.getIsUpdate());
         project.addToSubmissionEnvelope(submissionEnvelope);
+        project.setUuid(Uuid.newUuid());
         return getProjectRepository().save(project);
     }
 }

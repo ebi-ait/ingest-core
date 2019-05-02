@@ -22,6 +22,5 @@ public class MetadataDocumentEventHandler {
     public void handleMetadataDocumentCreate(MetadataDocument document) {
         messageRouter.routeValidationMessageFor(document);
         messageRouter.routeStateTrackingUpdateMessageFor(document);
-        messageRouter.routeAccessionMessageFor(document);
     }
 }
