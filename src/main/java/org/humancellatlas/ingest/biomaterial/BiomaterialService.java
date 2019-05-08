@@ -3,7 +3,8 @@ package org.humancellatlas.ingest.biomaterial;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.MetadataCrudService;
+import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 public class BiomaterialService {
   private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
   private final @NonNull BiomaterialRepository biomaterialRepository;
+  private final @NonNull MetadataUpdateService metadataUpdateService;
+  private final @NonNull MetadataCrudService metadataCrudService;
 
   private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -28,9 +31,11 @@ public class BiomaterialService {
 
   public Biomaterial addBiomaterialToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Biomaterial biomaterial) {
     biomaterial.setIsUpdate(submissionEnvelope.getIsUpdate());
-    biomaterial.addToSubmissionEnvelope(submissionEnvelope);
-    biomaterial.setUuid(Uuid.newUuid());
-    return getBiomaterialRepository().save(biomaterial);
-  }
 
+    if(! biomaterial.getIsUpdate()) {
+      return metadataCrudService.addToSubmissionEnvelopeAndSave(biomaterial, submissionEnvelope);
+    } else {
+      return metadataUpdateService.acceptUpdate(biomaterial, submissionEnvelope);
+    }
+  }
 }

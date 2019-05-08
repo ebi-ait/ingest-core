@@ -2,11 +2,13 @@ package org.humancellatlas.ingest.core.web;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +28,7 @@ public class MetadataController {
     HttpEntity<?> draftBiomaterial(@PathVariable("metadataType") String metadataType,
                                    @PathVariable("id") String metadataId,
                                    PersistentEntityResourceAssembler assembler) {
-        MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(metadataType,
+        MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(entityTypeForCollection(metadataType),
                                                                                                metadataId,
                                                                                                ValidationState.DRAFT);
         return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
@@ -36,7 +38,7 @@ public class MetadataController {
     HttpEntity<?> validatingBiomaterial(@PathVariable("metadataType") String metadataType,
                                         @PathVariable("id") String metadataId,
                                         PersistentEntityResourceAssembler assembler) {
-        MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(metadataType,
+        MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(entityTypeForCollection(metadataType),
                                                                                                metadataId,
                                                                                                ValidationState.VALIDATING);
         return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
@@ -46,7 +48,7 @@ public class MetadataController {
     HttpEntity<?> validateBiomaterial(@PathVariable("metadataType") String metadataType,
                                       @PathVariable("id") String metadataId,
                                       PersistentEntityResourceAssembler assembler) {
-        MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(metadataType,
+        MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(entityTypeForCollection(metadataType),
                                                                                                metadataId,
                                                                                                ValidationState.VALID);
         return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
@@ -56,9 +58,26 @@ public class MetadataController {
     HttpEntity<?> invalidateBiomaterial(@PathVariable("metadataType") String metadataType,
                                         @PathVariable("id") String metadataId,
                                         PersistentEntityResourceAssembler assembler) {
-        MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(metadataType,
+        MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(entityTypeForCollection(metadataType),
                                                                                                metadataId,
                                                                                                ValidationState.INVALID);
         return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
+    }
+
+    private EntityType entityTypeForCollection(String collection) {
+        switch (collection) {
+            case "biomaterials":
+                return EntityType.BIOMATERIAL;
+            case "protocols":
+                return EntityType.PROTOCOL;
+            case "projects":
+                return EntityType.PROJECT;
+            case "processes":
+                return EntityType.PROCESS;
+            case "files":
+                return EntityType.FILE;
+            default:
+                throw new ResourceNotFoundException();
+        }
     }
 }

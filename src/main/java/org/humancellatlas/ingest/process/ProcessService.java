@@ -6,6 +6,8 @@ import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.MetadataCrudService;
+import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
@@ -36,6 +38,11 @@ public class ProcessService {
     private BiomaterialRepository biomaterialRepository;
     @Autowired
     private BundleManifestRepository bundleManifestRepository;
+    @Autowired
+    private MetadataCrudService metadataCrudService;
+    @Autowired
+    private MetadataUpdateService metadataUpdateService;
+
 
     @Autowired
     MetadataDocumentEventHandler metadataDocumentEventHandler;
@@ -65,9 +72,11 @@ public class ProcessService {
     public Process addProcessToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
                                                   Process process) {
         process.setIsUpdate(submissionEnvelope.getIsUpdate());
-        process.addToSubmissionEnvelope(submissionEnvelope);
-        process.setUuid(Uuid.newUuid());
-        return getProcessRepository().save(process);
+        if(! process.getIsUpdate()) {
+            return metadataCrudService.addToSubmissionEnvelopeAndSave(process, submissionEnvelope);
+        } else {
+            return metadataUpdateService.acceptUpdate(process, submissionEnvelope);
+        }
     }
 
     // TODO Refactor this to use FileService
