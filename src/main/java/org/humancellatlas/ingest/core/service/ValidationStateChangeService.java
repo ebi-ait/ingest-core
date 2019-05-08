@@ -17,18 +17,11 @@ public class ValidationStateChangeService {
 
     private final @NonNull ValidationStateEventPublisher validationStateEventPublisher;
 
-    public MetadataDocument changeValidationState(EntityType metadataType,
+    public <T extends MetadataDocument> T changeValidationState(EntityType metadataType,
                                                   String metadataId,
                                                   ValidationState validationState) {
-        MetadataCrudStrategy crudStrategy = metadataCrudService.crudStrategyForMetadataType(metadataType);
-        MetadataDocument metadataDocument = crudStrategy.findMetadataDocument(metadataId);
-        metadataDocument.setValidationState(validationState);
-        metadataDocument = crudStrategy.saveMetadataDocument(metadataDocument);
-
+        T metadataDocument = metadataCrudService.setValidationState(metadataType, metadataId, validationState);
         validationStateEventPublisher.publishValidationStateChangeEventFor(metadataDocument);
-
         return metadataDocument;
     }
-
-
 }

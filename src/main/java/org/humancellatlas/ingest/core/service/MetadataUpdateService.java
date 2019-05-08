@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.exception.RedundantUpdateException;
-import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.patch.PatchService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Service;
@@ -18,8 +17,7 @@ public class MetadataUpdateService {
     private final @NonNull PatchService patchService;
 
     public <T extends MetadataDocument> T acceptUpdate(T updateDocument, SubmissionEnvelope submissionEnvelope) {
-        MetadataCrudStrategy metadataCrudStrategy = metadataCrudService.crudStrategyForMetadataType(updateDocument.getType());
-        T originalDocument = (T) metadataCrudStrategy.findOriginalByUuid(updateDocument.getUuid().getUuid().toString());
+        T originalDocument = metadataCrudService.findOriginalByUuid(updateDocument.getUuid().getUuid().toString(), updateDocument.getType());
 
         if(metadataDifferService.anyDifference(originalDocument, updateDocument)) {
             T savedUpdateDocument = metadataCrudService.addToSubmissionEnvelopeAndSave(updateDocument, submissionEnvelope);
