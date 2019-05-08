@@ -45,8 +45,6 @@ public class MetadataCrudService {
 
     }
 
-
-
     public <T extends MetadataDocument> T addToSubmissionEnvelopeAndSave(T metadataDocument, SubmissionEnvelope submissionEnvelope) {
         metadataDocument.setUuid(Uuid.newUuid());
         metadataDocument.addToSubmissionEnvelope(submissionEnvelope);
