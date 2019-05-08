@@ -2,6 +2,8 @@ package org.humancellatlas.ingest.process;
 
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
+import org.humancellatlas.ingest.core.service.MetadataCrudService;
+import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
@@ -41,6 +43,10 @@ public class ProcessServiceTest {
     private BundleManifestRepository bundleManifestRepository;
     @MockBean
     private MetadataDocumentEventHandler metadataDocumentEventHandler;
+    @MockBean
+    private MetadataCrudService metadataCrudService;
+    @MockBean
+    private MetadataUpdateService metadataUpdateService;
 
     @Test
     public void testAddFileToAnalysisProcess() {
