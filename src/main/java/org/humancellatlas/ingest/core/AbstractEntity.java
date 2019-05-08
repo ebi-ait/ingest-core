@@ -40,8 +40,6 @@ public abstract class AbstractEntity implements Identifiable<String> {
 
     private @Setter List<Event> events = new ArrayList<>();
 
-    private @Setter DateTime dcpVersion;
-
     protected AbstractEntity(EntityType type) {
         this.type = type;
     }
