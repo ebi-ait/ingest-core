@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.submission;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
+import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.state.SubmissionState;
@@ -20,6 +21,9 @@ public class SubmissionEnvelopeService {
 
     @NonNull
     private final Exporter exporter;
+
+    @NonNull
+    private final MetadataUpdateService metadataUpdateService;
 
     @NonNull
     private final ExecutorService executorService = Executors.newFixedThreadPool(5);
@@ -42,7 +46,19 @@ public class SubmissionEnvelopeService {
     }
 
     public void handleSubmissionRequest(SubmissionEnvelope envelope) {
-        executorService.submit(() -> exporter.exportBundles(envelope));
+        if(! envelope.getIsUpdate()) {
+            handleSubmitOriginalSubmission(envelope);
+        } else {
+            handleSubmitUpdateSubmission(envelope);
+        }
+    }
+
+    private void handleSubmitOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
+        executorService.submit(() -> exporter.exportBundles(submissionEnvelope));
+    }
+
+    private void handleSubmitUpdateSubmission(SubmissionEnvelope submissionEnvelope) {
+        executorService.submit(() -> metadataUpdateService.upsertUpdates(submissionEnvelope));
     }
 
 
