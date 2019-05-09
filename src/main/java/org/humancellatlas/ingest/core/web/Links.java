@@ -10,6 +10,10 @@ package org.humancellatlas.ingest.core.web;
  */
 public class Links {
     // Links to request state changes for submission envelopes
+
+    public static final String UPDATE_SUBMISSION_URL = "/updateSubmissions";
+    public static final String UPDATE_SUBMISSION_REL = "updateSubmissions";
+
     public static final String SUBMIT_URL = "/submissionEvent";
     public static final String SUBMIT_REL = "submit";
 

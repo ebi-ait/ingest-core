@@ -73,7 +73,8 @@ public class SubmissionController {
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
     private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
 
-    @RequestMapping(path = "/submissionEnvelopes/updateSubmissions", method = RequestMethod.POST)
+
+    @RequestMapping(path = "/submissionEnvelopes" + Links.UPDATE_SUBMISSION_URL, method = RequestMethod.POST)
     ResponseEntity<?> createUpdateSubmission(
                                final PersistentEntityResourceAssembler resourceAssembler) {
         SubmissionEnvelope updateSubmission = getSubmissionEnvelopeService().createUpdateSubmissionEnvelope();
