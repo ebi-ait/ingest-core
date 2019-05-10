@@ -56,7 +56,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static List<AntPathRequestMatcher> defineAntPathMatchers(HttpMethod method,
             String...patterns) {
         return Stream.of(patterns)
-                .map(pattern -> new AntPathRequestMatcher(method.name(), pattern))
+                .map(pattern -> new AntPathRequestMatcher(pattern, method.name()))
                 .collect(toList());
     }
 
