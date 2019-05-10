@@ -13,12 +13,16 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    private static final String FORWARDED_FOR = "X-Forwarded-For";
 
     @Value(value = "${USR_AUTH_AUDIENCE:https://dev.data.humancellatlas.org/}")
     private String audience;
@@ -50,22 +54,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authenticationProvider(auth0Provider)
                 .authenticationProvider(googleServiceJwtAuthenticationProvider)
                 .authenticationProvider(auth0Provider2) // FIXME: Remove soon
-                .securityContext()
-                .securityContextRepository(new BearerSecurityContextRepository())
+                .securityContext().securityContextRepository(new BearerSecurityContextRepository())
                 .and()
-                .exceptionHandling()
-                .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                .exceptionHandling().authenticationEntryPoint(new JwtAuthenticationEntryPoint())
                 .and()
                 .httpBasic().disable()
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/user/**").authenticated()
-                .antMatchers(HttpMethod.POST, "/submissionEnvelopes").authenticated()
-                .antMatchers(HttpMethod.POST, "/messaging/**").authenticated()
-                .antMatchers(HttpMethod.POST, "/projects").authenticated()
-                .antMatchers(HttpMethod.POST, "/submissionEnvelopes/*/projects").authenticated()
+                .requestMatchers(this::isRequestFromProxy).authenticated()
                 .antMatchers(HttpMethod.GET, "/**").permitAll();
     }
+
+    private Boolean isRequestFromProxy(HttpServletRequest request) {
+        return Optional.ofNullable(request.getHeader(FORWARDED_FOR)).isPresent();
+    }
+
 }
