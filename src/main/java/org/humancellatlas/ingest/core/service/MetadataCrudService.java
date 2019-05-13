@@ -12,6 +12,7 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -53,7 +54,9 @@ public class MetadataCrudService {
     }
 
     public <T extends MetadataDocument> T addToSubmissionEnvelopeAndSave(T metadataDocument, SubmissionEnvelope submissionEnvelope) {
-        metadataDocument.setUuid(Uuid.newUuid());
+        if(! Optional.ofNullable(metadataDocument.getUuid()).isPresent()) {
+            metadataDocument.setUuid(Uuid.newUuid());
+        }
         metadataDocument.addToSubmissionEnvelope(submissionEnvelope);
         return (T) (crudStrategyForMetadataType(metadataDocument.getType()).saveMetadataDocument(metadataDocument));
     }
@@ -62,7 +65,7 @@ public class MetadataCrudService {
         return (T) crudStrategyForMetadataType(entityType).findOriginalByUuid(uuid);
     }
 
-    public <T extends MetadataDocument> T findBySubmission(SubmissionEnvelope submissionEnvelope, EntityType entityType) {
-        return (T) crudStrategyForMetadataType(entityType).findBySubmissionEnvelope(submissionEnvelope);
+    public <T extends MetadataDocument> Collection<T> findBySubmission(SubmissionEnvelope submissionEnvelope, EntityType entityType) {
+        return crudStrategyForMetadataType(entityType).findBySubmissionEnvelope(submissionEnvelope);
     }
 }

@@ -60,7 +60,7 @@ public class MetadataUpdateService {
     private <T extends MetadataDocument> T doUpsert(T canonicalDocument, T updateDocument) {
         canonicalDocument.setDcpVersion(updateDocument.getDcpVersion());
         canonicalDocument.setValidationState(updateDocument.getValidationState());
-        canonicalDocument.setContent(canonicalDocument.getContent());
+        canonicalDocument.setContent(updateDocument.getContent());
         return canonicalDocument;
     }
 }
