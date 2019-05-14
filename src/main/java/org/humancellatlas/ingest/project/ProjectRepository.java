@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.List;
+
 /**
  * Javadocs go here!
  *
@@ -30,6 +32,9 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
     Page<Project> findByUser(@Param(value = "user") String user, Pageable pageable);
 
     Page<Project> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+
+    @RestResource(exported = false)
+    List<Project> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(rel = "findBySubmissionAndValidationState")
     public Page<Project> findBySubmissionEnvelopesContainingAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,

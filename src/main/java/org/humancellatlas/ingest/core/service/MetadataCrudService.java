@@ -11,6 +11,9 @@ import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class MetadataCrudService {
@@ -37,6 +40,11 @@ public class MetadataCrudService {
         }
     }
 
+    public  <T extends MetadataDocument> T save(T metadataDocument) {
+        MetadataCrudStrategy crudStrategy = crudStrategyForMetadataType(metadataDocument.getType());
+        return (T) crudStrategy.saveMetadataDocument(metadataDocument);
+    }
+
     public <T extends MetadataDocument> T setValidationState(EntityType entityType, String entityId, ValidationState validationState) {
         MetadataCrudStrategy crudStrategy = crudStrategyForMetadataType(entityType);
         T document = (T) crudStrategy.findMetadataDocument(entityId);
@@ -46,12 +54,18 @@ public class MetadataCrudService {
     }
 
     public <T extends MetadataDocument> T addToSubmissionEnvelopeAndSave(T metadataDocument, SubmissionEnvelope submissionEnvelope) {
-        metadataDocument.setUuid(Uuid.newUuid());
+        if(! Optional.ofNullable(metadataDocument.getUuid()).isPresent()) {
+            metadataDocument.setUuid(Uuid.newUuid());
+        }
         metadataDocument.addToSubmissionEnvelope(submissionEnvelope);
         return (T) (crudStrategyForMetadataType(metadataDocument.getType()).saveMetadataDocument(metadataDocument));
     }
 
     public <T extends MetadataDocument> T findOriginalByUuid(String uuid, EntityType entityType) {
         return (T) crudStrategyForMetadataType(entityType).findOriginalByUuid(uuid);
+    }
+
+    public <T extends MetadataDocument> Collection<T> findBySubmission(SubmissionEnvelope submissionEnvelope, EntityType entityType) {
+        return crudStrategyForMetadataType(entityType).findBySubmissionEnvelope(submissionEnvelope);
     }
 }

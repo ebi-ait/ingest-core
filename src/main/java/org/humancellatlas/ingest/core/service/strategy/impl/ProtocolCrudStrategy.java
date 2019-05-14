@@ -7,7 +7,10 @@ import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.protocol.ProtocolService;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
 
 @Component
 @AllArgsConstructor
@@ -27,5 +30,10 @@ public class ProtocolCrudStrategy implements MetadataCrudStrategy<Protocol> {
     @Override
     public Protocol findOriginalByUuid(String uuid) {
         return protocolRepository.findByUuidAndIsUpdateFalse(new Uuid(uuid));
+    }
+
+    @Override
+    public Collection<Protocol> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        return protocolRepository.findBySubmissionEnvelopesContaining(submissionEnvelope);
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 
 @CrossOrigin
@@ -27,6 +28,8 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
     Page<Biomaterial> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope,
             Pageable pageable);
 
+    @RestResource(exported = false)
+    List<Biomaterial> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(rel = "findBySubmissionAndValidationState")
     public Page<Biomaterial> findBySubmissionEnvelopesContainingAndValidationState(@Param
