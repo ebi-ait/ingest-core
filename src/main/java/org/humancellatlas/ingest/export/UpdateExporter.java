@@ -1,23 +1,17 @@
 package org.humancellatlas.ingest.export;
 
-import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
-import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestService;
+import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
-import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.messaging.model.ExportMessage;
-import org.humancellatlas.ingest.process.ProcessRepository;
-import org.humancellatlas.ingest.project.ProjectRepository;
-import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -30,22 +24,7 @@ public class UpdateExporter implements Exporter {
     private BundleManifestService bundleManifestService;
 
     @Autowired
-    private BundleManifestRepository bundleManifestRepository;
-
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private BiomaterialRepository biomaterialRepository;
-
-    @Autowired
-    private ProtocolRepository protocolRepository;
-
-    @Autowired
-    private ProcessRepository processRepository;
-
-    @Autowired
-    private FileRepository fileRepository;
+    private MetadataCrudService metadataCrudService;
 
     @Autowired
     private MessageRouter messageRouter;
@@ -56,12 +35,11 @@ public class UpdateExporter implements Exporter {
     @Override
     public void exportBundles(SubmissionEnvelope submissionEnvelope) {
         Collection<MetadataDocument> documentsToUpdate = new ArrayList<>();
-        Pageable unpaged = new PageRequest(0, Integer.MAX_VALUE);
-        documentsToUpdate.addAll(projectRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, unpaged).getContent());
-        documentsToUpdate.addAll(biomaterialRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, unpaged).getContent());
-        documentsToUpdate.addAll(protocolRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, unpaged).getContent());
-        documentsToUpdate.addAll(processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope));
-        documentsToUpdate.addAll(fileRepository.findBySubmissionEnvelopesContaining(submissionEnvelope));
+        documentsToUpdate.addAll(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROJECT));
+        documentsToUpdate.addAll(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.BIOMATERIAL));
+        documentsToUpdate.addAll(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROTOCOL));
+        documentsToUpdate.addAll(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROCESS));
+        documentsToUpdate.addAll(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.FILE));
 
         Collection<BundleManifest> bundleManifestsToUpdate = bundleManifestService.bundleManifestsForDocuments(documentsToUpdate);
         int totalCount = bundleManifestsToUpdate.size();
@@ -80,8 +58,6 @@ public class UpdateExporter implements Exporter {
             return exportMessage;
         }).forEach(messageRouter::sendBundlesToUpdateForExport);
     }
-
-
 
     private static class IndexCounter {
 
