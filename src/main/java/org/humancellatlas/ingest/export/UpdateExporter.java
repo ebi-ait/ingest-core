@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.export;
 
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
+import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestService;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
@@ -9,6 +10,7 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.messaging.MessageRouter;
+import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
@@ -16,14 +18,19 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+@Component
 public class UpdateExporter implements Exporter {
 
     @Autowired
     private BundleManifestService bundleManifestService;
+
+    @Autowired
+    private BundleManifestRepository bundleManifestRepository;
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -43,9 +50,8 @@ public class UpdateExporter implements Exporter {
     @Autowired
     private MessageRouter messageRouter;
 
+    @Autowired
     private LinkGenerator linkGenerator;
-
-    private MetadataDocumentMessageBuilder metadataDocumentMessageBuilder;
 
     @Override
     public void exportBundles(SubmissionEnvelope submissionEnvelope) {
@@ -70,7 +76,8 @@ public class UpdateExporter implements Exporter {
             if(submissionUuid != null && submissionUuid.getUuid() != null){
                 builder.withEnvelopeUuid(submissionUuid.getUuid().toString());
             }
-            return metadataDocumentMessageBuilder.buildUpdateExportMessage(bundleManifest);
+            ExportMessage exportMessage = builder.buildUpdateExportMessage(bundleManifest);
+            return exportMessage;
         }).forEach(messageRouter::sendBundlesToUpdateForExport);
     }
 

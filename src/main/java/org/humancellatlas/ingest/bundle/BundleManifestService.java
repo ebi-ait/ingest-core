@@ -59,15 +59,14 @@ public class BundleManifestService {
 
     private Iterator<BundleManifest> allManifestsIterator() {
         Iterator<BundleManifest> manifestsIterator = new Iterator<BundleManifest>() {
-            Pageable pageable = new PageRequest(0, 1000);
+            Pageable pageable = new PageRequest(0, 5000);
             Page<BundleManifest> pagedBundleManifests = null;
-            List<BundleManifest> bundleManifests;
+            Queue<BundleManifest> bundleManifests;
 
             private void fetch(Pageable pageable){
                 pagedBundleManifests = bundleManifestRepository.findAll(pageable);
-                bundleManifests = new ArrayList<>(pagedBundleManifests.getContent());
+                bundleManifests = new LinkedList<>(pagedBundleManifests.getContent());
             }
-
 
             @Override
             public boolean hasNext() {
@@ -88,8 +87,7 @@ public class BundleManifestService {
                 }
 
                 if(bundleManifests.size() > 0) {
-                    bundleManifest = bundleManifests.get(0);
-                    bundleManifests.remove(0);
+                    bundleManifest = bundleManifests.remove();
                 }
 
                 return bundleManifest;
