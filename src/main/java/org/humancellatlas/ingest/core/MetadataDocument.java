@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.humancellatlas.ingest.core.exception.LinkToNewSubmissionNotAllowedException;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -22,6 +23,9 @@ import java.util.List;
  */
 @Getter
 public abstract class MetadataDocument extends AbstractEntity {
+
+    @Setter
+    private DateTime dcpVersion;
 
     @Setter
     private Object content;

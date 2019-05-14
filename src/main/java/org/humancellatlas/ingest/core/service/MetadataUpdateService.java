@@ -3,11 +3,15 @@ package org.humancellatlas.ingest.core.service;
 import lombok.AllArgsConstructor;
 
 import lombok.NonNull;
+import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.exception.RedundantUpdateException;
 import org.humancellatlas.ingest.patch.PatchService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -31,4 +35,31 @@ public class MetadataUpdateService {
         }
     }
 
+    public void applyUpdates(SubmissionEnvelope submissionEnvelope) {
+        applyUpdateDocuments(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.BIOMATERIAL));
+        applyUpdateDocuments(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.FILE));
+        applyUpdateDocuments(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROCESS));
+        applyUpdateDocuments(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROJECT));
+        applyUpdateDocuments(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROTOCOL));
+    }
+
+    private <T extends MetadataDocument> Collection<T> applyUpdateDocuments(Collection<T> updateDocuments) {
+        return updateDocuments
+                .stream()
+                .map(updateDocument -> {
+                    String documentUuid = updateDocument.getUuid().getUuid().toString();
+                    EntityType entityType = updateDocument.getType();
+                    T originalDocument = metadataCrudService.findOriginalByUuid(documentUuid, entityType);
+                    T upsertedDocument = applyUpdateDocument(originalDocument, updateDocument);
+                    return metadataCrudService.save(upsertedDocument);
+                })
+                .collect(Collectors.toList());
+    }
+
+    private <T extends MetadataDocument> T applyUpdateDocument(T canonicalDocument, T updateDocument) {
+        canonicalDocument.setDcpVersion(updateDocument.getDcpVersion());
+        canonicalDocument.setValidationState(updateDocument.getValidationState());
+        canonicalDocument.setContent(updateDocument.getContent());
+        return canonicalDocument;
+    }
 }
