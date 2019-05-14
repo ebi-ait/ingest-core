@@ -1,10 +1,12 @@
 package org.humancellatlas.ingest.core;
 
+import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.messaging.model.MessageProtocol;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.state.ValidationState;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,6 +124,12 @@ public class MetadataDocumentMessageBuilder {
         String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
         return new ExportMessage(UUID.randomUUID(), DateTime.now().toString(), messageProtocol, metadataDocId, metadataDocUuid, callbackLink,
                 documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
+    }
+
+    public ExportMessage buildUpdateExportMessage(BundleManifest bundleManifest) {
+        String callbackLink = linkGenerator.createCallback(bundleManifest.getClass(),bundleManifest.getId());
+        return new ExportMessage(UUID.fromString(bundleManifest.getBundleUuid()), DateTime.now().toString(), messageProtocol, metadataDocId, metadataDocUuid, callbackLink,
+                bundleManifest.getClass().getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
 
 }

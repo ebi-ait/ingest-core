@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.messaging;
 
 import lombok.NoArgsConstructor;
+import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.config.ConfigurationService;
 import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -8,6 +9,7 @@ import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportData;
+import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeStateUpdateMessage;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.ANALYSIS_SUBMITTED;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.ASSAY_SUBMITTED;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.UPDATE_SUBMITTED;
 
 /**
  * Created by rolando on 09/03/2018.
@@ -122,6 +125,14 @@ public class MessageRouter {
                                             exportData.toAssaySubmittedMessage(linkGenerator),
                                             System.currentTimeMillis());
     }
+
+    public void sendBundlesToUpdateForExport(ExportMessage exportMessage) {
+
+        messageSender.queueNewExportMessage(ASSAY_EXCHANGE, UPDATE_SUBMITTED,
+                exportMessage,
+                System.currentTimeMillis());
+    }
+
 
     /* messages to the upload/staging area manager */
 

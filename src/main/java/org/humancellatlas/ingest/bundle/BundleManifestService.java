@@ -1,0 +1,121 @@
+package org.humancellatlas.ingest.bundle;
+
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.EntityType;
+import org.humancellatlas.ingest.core.MetadataDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.text.DecimalFormat;
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+@Service
+@RequiredArgsConstructor
+public class BundleManifestService {
+    private final @NonNull
+    BundleManifestRepository bundleManifestRepository;
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
+    public List<BundleManifest> bundleManifestsForDocuments(Collection<MetadataDocument> documents) {
+        Map<String, Set<MetadataDocument>> hits = new HashMap<>();
+
+        List<BundleManifest> bundleManifests = new ArrayList<BundleManifest>();
+
+        long fileStartTime = System.currentTimeMillis();
+        Iterator<BundleManifest> iterator = allManifestsIterator();
+
+        while(iterator.hasNext()) {
+            BundleManifest bundleManifest = iterator.next();
+            documents.forEach(document -> {
+                String documentUuid = document.getUuid().getUuid().toString();
+                String bundleUuid = bundleManifest.getBundleUuid();
+                EntityType documentType = document.getType();
+                if(entityMapFromManifest(documentType, bundleManifest).containsKey(documentUuid)){
+                    if(hits.containsKey(bundleUuid)) {
+                        hits.get(bundleUuid).add(document);
+                    } else {
+                        hits.put(bundleUuid, new HashSet<>(Collections.singletonList(document)));
+                        bundleManifests.add(bundleManifest);
+                    }
+                }
+            });
+        }
+
+        long fileEndTime = System.currentTimeMillis();
+        float fileQueryTime = ((float)(fileEndTime - fileStartTime)) / 1000;
+        String fileQt = new DecimalFormat("#,###.##").format(fileQueryTime);
+        log.info("1000 docs: {} s", fileQt);
+        return bundleManifests;
+    }
+
+    private Iterator<BundleManifest> allManifestsIterator() {
+        Iterator<BundleManifest> manifestsIterator = new Iterator<BundleManifest>() {
+            Pageable pageable = new PageRequest(0, 1000);
+            Page<BundleManifest> pagedBundleManifests = null;
+            List<BundleManifest> bundleManifests;
+
+            private void fetch(Pageable pageable){
+                pagedBundleManifests = bundleManifestRepository.findAll(pageable);
+                bundleManifests = new ArrayList<>(pagedBundleManifests.getContent());
+            }
+
+
+            @Override
+            public boolean hasNext() {
+                return (pagedBundleManifests == null || bundleManifests.size() > 0 || pagedBundleManifests.hasNext());
+            }
+
+            @Override
+            public BundleManifest next() {
+                BundleManifest bundleManifest = null;
+
+                if (pagedBundleManifests == null){
+                    fetch(pageable);
+
+                }
+
+                if(bundleManifests.size() == 0 && pagedBundleManifests.hasNext()) {
+                    fetch(pagedBundleManifests.nextPageable());
+                }
+
+                if(bundleManifests.size() > 0) {
+                    bundleManifest = bundleManifests.get(0);
+                    bundleManifests.remove(0);
+                }
+
+                return bundleManifest;
+            }
+
+        };
+
+        return manifestsIterator;
+    }
+
+
+    private Map<String, Collection<String>> entityMapFromManifest(EntityType entityType, BundleManifest bundleManifest) {
+        if(entityType.equals(EntityType.BIOMATERIAL)) {
+            return bundleManifest.getFileBiomaterialMap();
+        } else if(entityType.equals(EntityType.FILE)) {
+            return bundleManifest.getFileFilesMap();
+        } else if(entityType.equals(EntityType.PROTOCOL)) {
+            return bundleManifest.getFileProtocolMap();
+        } else if(entityType.equals(EntityType.PROCESS)) {
+            return bundleManifest.getFileProcessMap();
+        } else if(entityType.equals(EntityType.PROJECT)) {
+            return bundleManifest.getFileProjectMap();
+        }
+
+        return null;
+    }
+
+
+}
