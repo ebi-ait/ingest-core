@@ -59,7 +59,7 @@ public class SubmissionEnvelopeService {
 
     private void handleSubmitUpdateSubmission(SubmissionEnvelope submissionEnvelope) {
         executorService.submit(() -> {
-            metadataUpdateService.upsertUpdates(submissionEnvelope);
+            metadataUpdateService.applyUpdates(submissionEnvelope);
             // TODO: exportUpdateBundles()
         });
     }
