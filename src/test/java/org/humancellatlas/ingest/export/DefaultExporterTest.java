@@ -1,5 +1,8 @@
 package org.humancellatlas.ingest.export;
 
+import org.humancellatlas.ingest.bundle.BundleManifestService;
+import org.humancellatlas.ingest.core.service.MetadataCrudService;
+import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessService;
@@ -36,6 +39,15 @@ public class DefaultExporterTest {
 
     @MockBean
     private MessageRouter messageRouter;
+
+    @MockBean
+    private MetadataCrudService metadataCrudService;
+
+    @MockBean
+    private BundleManifestService bundleManifestService;
+
+    @MockBean
+    private LinkGenerator linkGenerator;
 
     @Test
     public void testExportBundles() {
