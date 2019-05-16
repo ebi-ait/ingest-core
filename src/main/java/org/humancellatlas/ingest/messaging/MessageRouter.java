@@ -127,7 +127,6 @@ public class MessageRouter {
     }
 
     public void sendBundlesToUpdateForExport(ExportMessage exportMessage) {
-
         messageSender.queueNewExportMessage(ASSAY_EXCHANGE, UPDATE_SUBMITTED,
                 exportMessage,
                 System.currentTimeMillis());

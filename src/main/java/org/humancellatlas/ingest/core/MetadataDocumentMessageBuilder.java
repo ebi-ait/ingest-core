@@ -10,6 +10,7 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.Identifiable;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -54,13 +55,21 @@ public class MetadataDocumentMessageBuilder {
         return builder;
     }
 
+    public MetadataDocumentMessageBuilder messageFor(BundleManifest bundleManifest) {
+        MetadataDocumentMessageBuilder builder = withDocumentType(bundleManifest.getClass())
+                .withId(bundleManifest.getId())
+                .withUuid(bundleManifest.getBundleUuid().toString());
+
+        return builder;
+    }
+
     public MetadataDocumentMessageBuilder withMessageProtocol(MessageProtocol messageProtocol) {
         this.messageProtocol = messageProtocol;
 
         return this;
     }
 
-    private <T extends MetadataDocument> MetadataDocumentMessageBuilder withDocumentType(
+    private <T extends Identifiable> MetadataDocumentMessageBuilder withDocumentType(
             Class<T> documentClass) {
         this.documentType = documentClass;
         return this;

@@ -53,7 +53,7 @@ public class BundleManifestService {
         long fileEndTime = System.currentTimeMillis();
         float fileQueryTime = ((float)(fileEndTime - fileStartTime)) / 1000;
         String fileQt = new DecimalFormat("#,###.##").format(fileQueryTime);
-        log.info("1000 docs: {} s", fileQt);
+        log.info("Finding bundles to update: {}s, no. of documents to update: {}", fileQt, documents.size());
         return bundleManifests;
     }
 
