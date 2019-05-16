@@ -103,7 +103,10 @@ public class ProcessService {
     public Process resolveBundleReferencesForProcess(Process analysis, BundleReference bundleReference) {
         for (String bundleUuid : bundleReference.getBundleUuids()) {
             BundleManifest bundleManifest = getBundleManifestRepository().findByBundleUuid(bundleUuid);
-            if (bundleManifest != null) {
+            if (bundleManifest == null) {
+                throw new ResourceNotFoundException(String.format("Could not find bundle with UUID %s", bundleUuid));
+            }
+            else {
                 getLog().info(String.format("Adding bundle manifest link to process '%s'", analysis.getId()));
                 analysis.addInputBundleManifest(bundleManifest);
                 analysis = getProcessRepository().save(analysis);
@@ -114,11 +117,6 @@ public class ProcessService {
                     analysisInputFile.addAsInputToProcess(analysis);
                     fileRepository.save(analysisInputFile);
                 }
-            }
-            else {
-                getLog().warn(String.format(
-                        "No Bundle Manifest present with bundle UUID '%s' - in future this will cause a critical error",
-                        bundleUuid));
             }
         }
         return getProcessRepository().save(analysis);
