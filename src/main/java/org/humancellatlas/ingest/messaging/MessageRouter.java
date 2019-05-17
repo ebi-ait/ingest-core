@@ -9,10 +9,7 @@ import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportData;
-import org.humancellatlas.ingest.messaging.model.ExportMessage;
-import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
-import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
-import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeStateUpdateMessage;
+import org.humancellatlas.ingest.messaging.model.*;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -126,10 +123,11 @@ public class MessageRouter {
                                             System.currentTimeMillis());
     }
 
-    public void sendBundlesToUpdateForExport(ExportMessage exportMessage) {
-        messageSender.queueNewExportMessage(ASSAY_EXCHANGE, UPDATE_SUBMITTED,
-                exportMessage,
-                System.currentTimeMillis());
+    public void sendBundlesToUpdateForExport(BundleUpdateMessage bundleUpdateMessage) {
+        messageSender.queueNewExportMessage(ASSAY_EXCHANGE,
+                                            UPDATE_SUBMITTED,
+                                            bundleUpdateMessage,
+                                            System.currentTimeMillis());
     }
 
 

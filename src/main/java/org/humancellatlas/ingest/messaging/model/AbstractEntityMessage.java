@@ -5,9 +5,5 @@ package org.humancellatlas.ingest.messaging.model;
  */
 
 public interface AbstractEntityMessage {
-    String getDocumentUuid();
-    String getDocumentType();
-    String getDocumentId();
-    String getCallbackLink();
     MessageProtocol getMessageProtocol();
 }

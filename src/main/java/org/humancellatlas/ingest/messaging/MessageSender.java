@@ -54,6 +54,10 @@ public class MessageSender {
         MessageBuffer.EXPORT.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
 
+    public void queueNewExportMessage(String exchange, String routingKey, BundleUpdateMessage payload, long intendedSendTime){
+        MessageBuffer.EXPORT.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
+    }
+
     public void queueStateTrackingMessage(String exchange, String routingKey, AbstractEntityMessage payload, long intendedSendTime){
         MessageBuffer.STATE_TRACKING.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }

@@ -25,10 +25,10 @@ public class BundleManifestService {
     BundleManifestRepository bundleManifestRepository;
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    public List<BundleManifest> bundleManifestsForDocuments(Collection<MetadataDocument> documents) {
-        Map<String, Set<MetadataDocument>> hits = new HashMap<>();
+    public Map<String, Set<MetadataDocument>> bundleManifestsForDocuments(Collection<MetadataDocument> documents) {
 
-        List<BundleManifest> bundleManifests = new ArrayList<BundleManifest>();
+        Map<String, Set<MetadataDocument>> hits = new HashMap<>();
+        Map<String, Map<String, Object>> output = new HashMap<>();
 
         long fileStartTime = System.currentTimeMillis();
         Iterator<BundleManifest> iterator = allManifestsIterator();
@@ -44,7 +44,6 @@ public class BundleManifestService {
                         hits.get(bundleUuid).add(document);
                     } else {
                         hits.put(bundleUuid, new HashSet<>(Collections.singletonList(document)));
-                        bundleManifests.add(bundleManifest);
                     }
                 }
             });
@@ -54,7 +53,7 @@ public class BundleManifestService {
         float fileQueryTime = ((float)(fileEndTime - fileStartTime)) / 1000;
         String fileQt = new DecimalFormat("#,###.##").format(fileQueryTime);
         log.info("Finding bundles to update: {}s, no. of documents to update: {}", fileQt, documents.size());
-        return bundleManifests;
+        return hits;
     }
 
     private Iterator<BundleManifest> allManifestsIterator() {
