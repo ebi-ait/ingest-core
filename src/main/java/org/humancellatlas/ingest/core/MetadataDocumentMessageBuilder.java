@@ -139,12 +139,13 @@ public class MetadataDocumentMessageBuilder {
                 documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
 
-    public BundleUpdateMessage buildBundleUpdateMessage(String bundleUuid, Set<MetadataDocument> documentList) {
+    public BundleUpdateMessage buildBundleUpdateMessage(BundleManifest bundleManifest, Set<MetadataDocument> documentList) {
         List<String> callbackLinks = documentList
                                         .stream()
                                         .map(document -> linkGenerator.createCallback(document.getClass(),document.getId()))
                                         .collect(Collectors.toList());
-        return new BundleUpdateMessage(UUID.fromString(bundleUuid), DateTime.now().toString(),
+        return new BundleUpdateMessage(UUID.fromString(bundleManifest.getBundleUuid()), DateTime.now().toString(),
+                bundleManifest.getId(), bundleManifest.getBundleUuid(), BundleManifest.class.getSimpleName(),
                 callbackLinks, envelopeId, envelopeUuid, assayIndex, totalAssays, null);
     }
 
