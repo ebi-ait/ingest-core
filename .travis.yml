@@ -1,18 +1,19 @@
 language: java
-
 services:
-        - mongodb
-
+- mongodb
 before_cache:
-  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -rf $HOME/.gradle/caches/*/plugin-resolution/
+- rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -rf $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
 env:
   global:
   - GCP_PROJECT_WHITELIST="hca-dcp-production.iam.gserviceaccount.com,human-cell-atlas-travis-test.iam.gserviceaccount.com,broad-dsde-mint-dev.iam.gserviceaccount.com,broad-dsde-mint-test.iam.gserviceaccount.com,broad-dsde-mint-staging.iam.gserviceaccount.com"
   - USR_AUTH_AUDIENCE="https://dev.data.humancellatlas.org/"
   - SVC_AUTH_AUDIENCE="https://dev.data.humancellatlas.org/"
   - AUTH_ISSUER="https://humancellatlas.auth0.com/"
+notifications:
+  slack:
+    secure: QLWflHEElPWTuDGqtONkIsDe5x5Ds53MY2bN/trtx9hu89JY7jiNZxuSbd2ktqNR3lugEbmdnQbmBfCpeS4LBVVzLZU2KAzE/OCdeYp1g3FeOKSPlFZSurRHNT8vlw424oLRUMhjgw4u1rSMECoAYTakmju3C6pSREMrZq83tIhwHqQdKO5hYCboNFgdW3fZrVXc2M+G0t7AvNJjh32boAE0V6EA+1jjEanjSzqOWBS5vOf4pZgDKTYW1UZwXxdg47jYmgSAFmmr7tyW6OqncZF5yyYls5QlmRUjI8sKyuvpFIeDfkw13oPLxaV4Xpn4e3umNPrrUXt5UbLRKhMcacSDOOawRF/wedGTeGZtzmKfThOcumNfCfeiKPnlirAgjUkEQDLesHqfyOSVHYHiS+Pl4l+Sj0BPyF5kiX52mUL0Wx6a4fkqIqx04105Xx4FR+13fcX1wpzgNOCuJ0nElZh2DjiRWtajtYCKovgE0nG2Ac+RvE1STR4+S3tS1UaepbIquvGcHOsONB14RGJMth+mAgAwsJd0Hjmccs7nf/pbA8/dvUh3bV8TP81ScEb6El9UycZhTa9F7PCScfj810DvayrvL3Vv6g6fQfkLWFK4YLrslAxsKzV9vFSBhGBn5Hyo0wR/Y1pr/mdZp5hDx0MeCLvkM1DUruFM/SOjICI=
