@@ -28,7 +28,6 @@ public class BundleManifestService {
     public Map<String, Set<MetadataDocument>> bundleManifestsForDocuments(Collection<MetadataDocument> documents) {
 
         Map<String, Set<MetadataDocument>> hits = new HashMap<>();
-        Map<String, Map<String, Object>> output = new HashMap<>();
 
         long fileStartTime = System.currentTimeMillis();
         Iterator<BundleManifest> iterator = allManifestsIterator();
@@ -52,7 +51,8 @@ public class BundleManifestService {
         long fileEndTime = System.currentTimeMillis();
         float fileQueryTime = ((float)(fileEndTime - fileStartTime)) / 1000;
         String fileQt = new DecimalFormat("#,###.##").format(fileQueryTime);
-        log.info("Finding bundles to update: {}s, no. of documents to update: {}", fileQt, documents.size());
+        log.info("Finding bundles to update took {}s", fileQt);
+        log.info("documentsToUpdate: {}, bundlesToUpdate:{}", documents.size(), hits.keySet().size());
         return hits;
     }
 

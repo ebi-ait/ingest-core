@@ -12,6 +12,10 @@ public class BundleUpdateMessage implements AbstractEntityMessage{
     private final UUID bundleUuid;
     private final String versionTimestamp;
 
+    private final String documentId;
+    private final String documentUuid;
+    private final String documentType;
+
     private final List<String> callbackLinks;
     private final String envelopeId;
     private final String envelopeUuid;

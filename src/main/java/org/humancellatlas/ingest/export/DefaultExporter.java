@@ -1,5 +1,7 @@
 package org.humancellatlas.ingest.export;
 
+import org.humancellatlas.ingest.bundle.BundleManifest;
+import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestService;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -9,7 +11,6 @@ import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.messaging.model.BundleUpdateMessage;
-import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -34,6 +35,7 @@ public class DefaultExporter implements Exporter {
 
     @Autowired
     private BundleManifestService bundleManifestService;
+    private BundleManifestRepository bundleManifestRepository;
 
     @Autowired
     private MessageRouter messageRouter;
@@ -85,7 +87,8 @@ public class DefaultExporter implements Exporter {
             if(submissionUuid != null && submissionUuid.getUuid() != null){
                 builder.withEnvelopeUuid(submissionUuid.getUuid().toString());
             }
-            BundleUpdateMessage exportMessage = builder.buildBundleUpdateMessage(bundleManifestUuid, bundleManifestsToUpdate.get(bundleManifestUuid));
+            BundleManifest bundleManifest = bundleManifestRepository.findByBundleUuid(bundleManifestUuid);
+            BundleUpdateMessage exportMessage = builder.buildBundleUpdateMessage(bundleManifest, bundleManifestsToUpdate.get(bundleManifestUuid));
             return exportMessage;
         }).forEach(messageRouter::sendBundlesToUpdateForExport);
     }
