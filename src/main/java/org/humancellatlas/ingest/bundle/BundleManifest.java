@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.hateoas.Identifiable;
 
 import java.util.Collection;
@@ -15,11 +17,15 @@ import java.util.Map;
  */
 @AllArgsConstructor
 @Getter
+@Document
 public class BundleManifest implements Identifiable<String> {
     private @Id @JsonIgnore String id;
 
+    @Indexed
     private final String bundleUuid;
+    @Indexed
     private final String bundleVersion;
+
     private final String envelopeUuid;
 
     private final List<String> dataFiles;

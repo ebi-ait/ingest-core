@@ -35,6 +35,8 @@ public class DefaultExporter implements Exporter {
 
     @Autowired
     private BundleManifestService bundleManifestService;
+
+    @Autowired
     private BundleManifestRepository bundleManifestRepository;
 
     @Autowired
