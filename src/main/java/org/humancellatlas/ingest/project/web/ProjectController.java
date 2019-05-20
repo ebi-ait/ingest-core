@@ -3,21 +3,27 @@ package org.humancellatlas.ingest.project.web;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.bundle.BundleManifest;
+import org.humancellatlas.ingest.bundle.BundleManifestService;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.rest.webmvc.EmbeddedResourcesAssembler;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.swing.text.html.Option;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Javadocs go here!
@@ -31,6 +37,7 @@ import java.util.UUID;
 @Getter
 public class ProjectController {
     private final @NonNull ProjectService projectService;
+    private final @NonNull BundleManifestService bundleManifestService;
 
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -51,4 +58,5 @@ public class ProjectController {
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }
+
 }

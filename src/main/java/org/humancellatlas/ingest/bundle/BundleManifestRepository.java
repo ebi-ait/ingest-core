@@ -14,4 +14,8 @@ public interface BundleManifestRepository extends MongoRepository<BundleManifest
     BundleManifest findByBundleUuid(@Param("uuid") String uuid);
 
     Page<BundleManifest> findByEnvelopeUuid(String uuid, Pageable pageable);
+
+    Page<BundleManifest> findAll(Pageable pageable);
+
+
 }

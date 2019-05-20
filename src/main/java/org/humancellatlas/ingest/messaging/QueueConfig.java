@@ -22,6 +22,8 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 public class QueueConfig implements RabbitListenerConfigurer {
     @Bean Queue queueFileUpdate() { return new Queue(Constants.Queues.FILE_UPDATE, false); }
 
+    @Bean Queue queueBundleUpdate() { return new Queue(Constants.Routing.UPDATE_SUBMITTED, false); }
+
     @Bean FanoutExchange fileExchange() { return new FanoutExchange(Constants.Exchanges.FILE_FANOUT); }
 
     @Bean Queue queueFileStaged() { return new Queue(Constants.Queues.FILE_STAGED, false); }
@@ -72,6 +74,10 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean Binding bindingStateTracking(Queue queueStateTracking, TopicExchange stateTrackingExchange) {
         return BindingBuilder.bind(queueStateTracking).to(stateTrackingExchange).with(Constants.Queues.STATE_TRACKING);
+    }
+
+    @Bean Binding bindingUpdateQueue(Queue queueBundleUpdate, TopicExchange assayExchange) {
+        return BindingBuilder.bind(queueBundleUpdate).to(assayExchange).with(Constants.Routing.UPDATE_SUBMITTED);
     }
 
     /* rabbit config */

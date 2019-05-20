@@ -1,16 +1,23 @@
 package org.humancellatlas.ingest.core;
 
+import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
+import org.humancellatlas.ingest.messaging.model.BundleUpdateMessage;
 import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.messaging.model.MessageProtocol;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.state.ValidationState;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.Identifiable;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class MetadataDocumentMessageBuilder {
 
@@ -52,13 +59,21 @@ public class MetadataDocumentMessageBuilder {
         return builder;
     }
 
+    public MetadataDocumentMessageBuilder messageFor(BundleManifest bundleManifest) {
+        MetadataDocumentMessageBuilder builder = withDocumentType(bundleManifest.getClass())
+                .withId(bundleManifest.getId())
+                .withUuid(bundleManifest.getBundleUuid().toString());
+
+        return builder;
+    }
+
     public MetadataDocumentMessageBuilder withMessageProtocol(MessageProtocol messageProtocol) {
         this.messageProtocol = messageProtocol;
 
         return this;
     }
 
-    private <T extends MetadataDocument> MetadataDocumentMessageBuilder withDocumentType(
+    private <T extends Identifiable> MetadataDocumentMessageBuilder withDocumentType(
             Class<T> documentClass) {
         this.documentType = documentClass;
         return this;
@@ -122,6 +137,15 @@ public class MetadataDocumentMessageBuilder {
         String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
         return new ExportMessage(UUID.randomUUID(), DateTime.now().toString(), messageProtocol, metadataDocId, metadataDocUuid, callbackLink,
                 documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
+    }
+
+    public BundleUpdateMessage buildBundleUpdateMessage(String bundleUuid, Set<MetadataDocument> documentList) {
+        List<String> callbackLinks = documentList
+                                        .stream()
+                                        .map(document -> linkGenerator.createCallback(document.getClass(),document.getId()))
+                                        .collect(Collectors.toList());
+        return new BundleUpdateMessage(UUID.fromString(bundleUuid), DateTime.now().toString(),
+                callbackLinks, envelopeId, envelopeUuid, assayIndex, totalAssays, null);
     }
 
 }
