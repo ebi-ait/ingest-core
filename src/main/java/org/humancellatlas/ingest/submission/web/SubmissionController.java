@@ -274,4 +274,10 @@ public class SubmissionController {
         // TODO: if really needed, modify this method to ask the state tracker component for an update
         return ResponseEntity.noContent().build();
     }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}/triggerUpdate", method = RequestMethod.PUT)
+    HttpEntity<?> triggerUpdate(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
+        exporter.updateBundles(submissionEnvelope);
+        return ResponseEntity.noContent().build();
+    }
 }
