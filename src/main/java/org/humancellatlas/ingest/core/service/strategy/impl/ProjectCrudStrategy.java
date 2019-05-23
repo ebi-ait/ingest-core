@@ -4,10 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
-import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
-import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +29,7 @@ public class ProjectCrudStrategy implements MetadataCrudStrategy<Project> {
 
     @Override
     public Project findOriginalByUuid(String uuid) {
-        return projectRepository.findByUuidAndIsUpdateFalse(new Uuid(uuid));
+        return projectRepository.findByUuidAndIsUpdateFalseOrIsUpdateNull(new Uuid(uuid));
     }
 
     @Override

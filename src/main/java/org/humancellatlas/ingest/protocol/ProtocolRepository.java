@@ -37,5 +37,5 @@ public interface ProtocolRepository extends MongoRepository<Protocol, String> {
     Page<Protocol> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
 
     @RestResource(rel = "findByUuid", path = "findByUuid")
-    Protocol findByUuidAndIsUpdateFalse(@Param("uuid") Uuid uuid);
+    Protocol findByUuidAndIsUpdateFalseOrIsUpdateNull(@Param("uuid") Uuid uuid);
 }

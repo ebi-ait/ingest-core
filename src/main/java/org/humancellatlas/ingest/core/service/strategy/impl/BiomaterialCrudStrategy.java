@@ -10,7 +10,6 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-import java.util.stream.Stream;
 
 
 @AllArgsConstructor
@@ -30,7 +29,7 @@ public class BiomaterialCrudStrategy implements MetadataCrudStrategy<Biomaterial
 
     @Override
     public Biomaterial findOriginalByUuid(String uuid) {
-        return biomaterialRepository.findByUuidAndIsUpdateFalse(new Uuid(uuid));
+        return biomaterialRepository.findByUuidAndIsUpdateFalseOrIsUpdateNull(new Uuid(uuid));
     }
 
     @Override

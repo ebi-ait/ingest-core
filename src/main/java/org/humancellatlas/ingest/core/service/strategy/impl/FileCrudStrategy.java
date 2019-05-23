@@ -6,12 +6,10 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
-import org.humancellatlas.ingest.file.FileService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-import java.util.stream.Stream;
 
 @Component
 @AllArgsConstructor
@@ -30,7 +28,7 @@ public class FileCrudStrategy implements MetadataCrudStrategy<File> {
 
     @Override
     public File findOriginalByUuid(String uuid) {
-        return fileRepository.findByUuidAndIsUpdateFalse(new Uuid(uuid));
+        return fileRepository.findByUuidAndIsUpdateFalseOrIsUpdateNull(new Uuid(uuid));
     }
 
     @Override
