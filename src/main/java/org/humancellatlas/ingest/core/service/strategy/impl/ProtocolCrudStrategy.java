@@ -28,7 +28,7 @@ public class ProtocolCrudStrategy implements MetadataCrudStrategy<Protocol> {
 
     @Override
     public Protocol findOriginalByUuid(String uuid) {
-        return protocolRepository.findByUuidAndIsUpdateFalseOrIsUpdateNull(new Uuid(uuid));
+        return protocolRepository.findByUuidAndIsUpdateFalse(new Uuid(uuid));
     }
 
     @Override

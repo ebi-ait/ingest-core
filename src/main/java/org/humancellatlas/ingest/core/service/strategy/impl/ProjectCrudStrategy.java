@@ -29,7 +29,7 @@ public class ProjectCrudStrategy implements MetadataCrudStrategy<Project> {
 
     @Override
     public Project findOriginalByUuid(String uuid) {
-        return projectRepository.findByUuidAndIsUpdateFalseOrIsUpdateNull(new Uuid(uuid));
+        return projectRepository.findByUuidAndIsUpdateFalse(new Uuid(uuid));
     }
 
     @Override

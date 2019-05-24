@@ -28,7 +28,7 @@ public class ProcessCrudStrategy implements MetadataCrudStrategy<Process> {
 
     @Override
     public Process findOriginalByUuid(String uuid) {
-        return processRepository.findByUuidAndIsUpdateFalseOrIsUpdateNull(new Uuid(uuid));
+        return processRepository.findByUuidAndIsUpdateFalse(new Uuid(uuid));
     }
 
     @Override

@@ -26,7 +26,7 @@ public interface FileRepository extends MongoRepository<File, String> {
     Page<File> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
 
     @RestResource(rel = "findByUuid", path = "findByUuid")
-    File findByUuidAndIsUpdateFalseOrIsUpdateNull(@Param("uuid") Uuid uuid);
+    File findByUuidAndIsUpdateFalse(@Param("uuid") Uuid uuid);
 
     @RestResource(exported = false)
     File findByUuidUuid(UUID uuid);

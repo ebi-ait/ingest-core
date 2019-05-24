@@ -28,7 +28,7 @@ public class FileCrudStrategy implements MetadataCrudStrategy<File> {
 
     @Override
     public File findOriginalByUuid(String uuid) {
-        return fileRepository.findByUuidAndIsUpdateFalseOrIsUpdateNull(new Uuid(uuid));
+        return fileRepository.findByUuidAndIsUpdateFalse(new Uuid(uuid));
     }
 
     @Override
