@@ -10,7 +10,6 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-import java.util.stream.Stream;
 
 
 @AllArgsConstructor

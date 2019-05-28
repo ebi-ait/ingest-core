@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,9 @@ public abstract class MetadataDocument extends AbstractEntity {
     private @Setter Accession accession;
     private @Setter ValidationState validationState;
     private @Setter List<Object> validationErrors;
-    private @Setter Boolean isUpdate;
+
+    private @Setter @Field
+    Boolean isUpdate = false;
 
 
     private static final Logger log = LoggerFactory.getLogger(SubmissionEnvelope.class);

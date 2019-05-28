@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.core.web;
 
+import org.humancellatlas.ingest.core.exception.RedundantUpdateException;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ public class GlobalStateExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class})
+    @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class, RedundantUpdateException.class})
     public @ResponseBody
     ExceptionInfo handleIllegalArgument(HttpServletRequest request, Exception e) {
         getLog().warn(String.format("Caught an illegal argument at '%s'; " +
