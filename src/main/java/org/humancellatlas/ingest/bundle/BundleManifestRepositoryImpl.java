@@ -28,6 +28,7 @@ public class BundleManifestRepositoryImpl implements BundleManifestRepositoryCus
         if (isPrimary){
             query.addCriteria(Criteria.where("envelopeUuid").is(primarySubmissionUuid));
         } else{
+            // TODO This might not be the best criteria to query analysis bundles. Might need to remodel bundle manifest.
             query.addCriteria(Criteria.where("envelopeUuid").ne(primarySubmissionUuid));
         }
 
