@@ -25,26 +25,15 @@ public class BundleManifestRepositoryImpl implements BundleManifestRepositoryCus
 
         query.addCriteria(Criteria.where("fileProjectMap." + projectUuid).exists(true));
 
-        if (isPrimary){
+        if (isPrimary != null && isPrimary){
             query.addCriteria(Criteria.where("envelopeUuid").is(primarySubmissionUuid));
-        } else{
+        }
+
+        if(isPrimary !=null && !isPrimary){
             // TODO This might not be the best criteria to query analysis bundles. Might need to remodel bundle manifest.
             query.addCriteria(Criteria.where("envelopeUuid").ne(primarySubmissionUuid));
         }
 
-        query.with(pageable);
-
-        List<BundleManifest> result = mongoTemplate.find(query, BundleManifest.class);
-        long count = mongoTemplate.count(query, BundleManifest.class);
-        Page<BundleManifest> resultPage = new PageImpl<BundleManifest>(result , pageable, count);
-        return resultPage;
-    }
-
-    @Override
-    public Page<BundleManifest> findAllBundles(String projectUuid, String primarySubmissionUuid, Pageable pageable) {
-        Query query = new Query();
-
-        query.addCriteria(Criteria.where("fileProjectMap." + projectUuid).exists(true));
         query.with(pageable);
 
         List<BundleManifest> result = mongoTemplate.find(query, BundleManifest.class);

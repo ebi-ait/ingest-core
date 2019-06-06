@@ -72,7 +72,7 @@ public class ProjectController {
     ResponseEntity<?> findAllBundles( @PathVariable("id") Project project,
                                           Pageable pageable,
                                           final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<BundleManifest> bundleManifests = projectService.findAllBundlesByProject(project, pageable);
+        Page<BundleManifest> bundleManifests = projectService.findBundlesByProject(project, null, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
     }
 }

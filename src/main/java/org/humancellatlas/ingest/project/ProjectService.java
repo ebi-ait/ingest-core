@@ -44,12 +44,4 @@ public class ProjectService {
         String projectUuid = project.getUuid().getUuid().toString();
         return bundleManifestRepository.findBundles(projectUuid, submissionUuid, isPrimary, pageable);
     }
-
-    public Page<BundleManifest> findAllBundlesByProject(Project project, Pageable pageable){
-        SubmissionEnvelope submissionEnvelope = project.getSubmissionEnvelopes().get(0);
-        String submissionUuid = submissionEnvelope.getUuid().getUuid().toString();
-        String projectUuid = project.getUuid().getUuid().toString();
-        return bundleManifestRepository.findAllBundles(projectUuid, submissionUuid, pageable);
-    }
-
 }
