@@ -38,4 +38,17 @@ public class BundleManifestRepositoryImpl implements BundleManifestRepositoryCus
         Page<BundleManifest> resultPage = new PageImpl<BundleManifest>(result , pageable, count);
         return resultPage;
     }
+
+    @Override
+    public Page<BundleManifest> findAllBundles(String projectUuid, String primarySubmissionUuid, Pageable pageable) {
+        Query query = new Query();
+
+        query.addCriteria(Criteria.where("fileProjectMap." + projectUuid).exists(true));
+        query.with(pageable);
+
+        List<BundleManifest> result = mongoTemplate.find(query, BundleManifest.class);
+        long count = mongoTemplate.count(query, BundleManifest.class);
+        Page<BundleManifest> resultPage = new PageImpl<BundleManifest>(result , pageable, count);
+        return resultPage;
+    }
 }

@@ -5,8 +5,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.project.Project;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -23,20 +21,6 @@ public class BundleManifestService {
     private final @NonNull
     BundleManifestRepository bundleManifestRepository;
     private final Logger log = LoggerFactory.getLogger(getClass());
-
-    public Page<BundleManifest> findAnalysisBundles(Project project, Pageable pageable){
-        SubmissionEnvelope submissionEnvelope = project.getSubmissionEnvelopes().get(0);
-        String submissionUuid = submissionEnvelope.getUuid().getUuid().toString();
-        String projectUuid = project.getUuid().getUuid().toString();
-        return bundleManifestRepository.findBundles(projectUuid, submissionUuid, Boolean.FALSE, pageable);
-    }
-
-    public Page<BundleManifest> findPrimaryBundles(Project project, Pageable pageable){
-        SubmissionEnvelope submissionEnvelope = project.getSubmissionEnvelopes().get(0);
-        String submissionUuid = submissionEnvelope.getUuid().getUuid().toString();
-        String projectUuid = project.getUuid().getUuid().toString();
-        return bundleManifestRepository.findBundles(projectUuid, submissionUuid, Boolean.TRUE, pageable);
-    }
 
     public Map<String, Set<MetadataDocument>> bundleManifestsForDocuments(Collection<MetadataDocument> documents) {
 
