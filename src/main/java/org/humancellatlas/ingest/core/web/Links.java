@@ -105,6 +105,6 @@ public class Links {
     public  static final String PRIMARY_BUNDLES_REL = "primaryBundles";
     public  static final String ANALYSIS_BUNDLES_URL = "/analysisBundles";
     public  static final String ANALYSIS_BUNDLES_REL = "analysisBundles";
-    public  static final String PROJECT_BUNDLES_URL = "/bundles";
-    public  static final String PROJECT_BUNDLES_REL = "bundles";
+    public  static final String ALL_BUNDLES_URL = "/bundles";
+    public  static final String ALL_BUNDLES_REL = "bundles";
 }

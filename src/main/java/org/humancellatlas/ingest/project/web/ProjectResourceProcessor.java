@@ -24,8 +24,8 @@ public class ProjectResourceProcessor implements ResourceProcessor<Resource<Proj
                 .slash(Links.ANALYSIS_BUNDLES_URL)
                 .withRel(Links.ANALYSIS_BUNDLES_REL));
         resource.add(entityLinks.linkForSingleResource(project)
-                .slash(Links.PROJECT_BUNDLES_URL)
-                .withRel(Links.PROJECT_BUNDLES_REL));
+                .slash(Links.ALL_BUNDLES_URL)
+                .withRel(Links.ALL_BUNDLES_REL));
 
         return resource;
     }
