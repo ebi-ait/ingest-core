@@ -4,26 +4,24 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.bundle.BundleManifest;
-import org.humancellatlas.ingest.bundle.BundleManifestService;
-import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.rest.webmvc.EmbeddedResourcesAssembler;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.Option;
-import java.util.*;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Javadocs go here!
@@ -37,7 +35,7 @@ import java.util.*;
 @Getter
 public class ProjectController {
     private final @NonNull ProjectService projectService;
-    private final @NonNull BundleManifestService bundleManifestService;
+    private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -57,6 +55,31 @@ public class ProjectController {
         Project entity = getProjectService().addProjectToSubmissionEnvelope(submissionEnvelope, project);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
+    }
+
+
+    @RequestMapping(path = "/projects/{id}/analysisBundles", method = RequestMethod.GET)
+    ResponseEntity<?> findAnalysisBundles( @PathVariable("id") Project project,
+                                          Pageable pageable,
+                                          final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<BundleManifest> bundleManifests = projectService.findBundlesByProject(project, Boolean.FALSE, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
+    }
+
+    @RequestMapping(path = "/projects/{id}/primaryBundles", method = RequestMethod.GET)
+    ResponseEntity<?> findPrimaryBundles( @PathVariable("id") Project project,
+                                          Pageable pageable,
+                                          final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<BundleManifest> bundleManifests = projectService.findBundlesByProject(project, Boolean.TRUE, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
+    }
+
+    @RequestMapping(path = "/projects/{id}/bundles", method = RequestMethod.GET)
+    ResponseEntity<?> findAllBundles( @PathVariable("id") Project project,
+                                          Pageable pageable,
+                                          final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<BundleManifest> bundleManifests = projectService.findBundlesByProject(project, null, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
     }
 
 }
