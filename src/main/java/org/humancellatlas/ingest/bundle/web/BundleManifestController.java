@@ -55,7 +55,7 @@ public class BundleManifestController {
     }
 
     private Page<BundleManifest> findBundles(Uuid projectUuid, Boolean isPrimary, Pageable pageable) {
-        Project project = this.projectService.getProjectRepository().findByUuidAndIsUpdateFalse(projectUuid);
+        Project project = this.projectService.getProjectRepository().findByUuid(projectUuid);
         if (project == null) {
             throw new ResourceNotFoundException(String.format("Project with UUID %s not found", projectUuid.getUuid().toString()));
         }
