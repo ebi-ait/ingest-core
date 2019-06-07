@@ -50,7 +50,7 @@ public class BundleManifestController {
     public ResponseEntity<?> findAllByProjectUuid(@RequestParam("projectUuid") Uuid projectUuid,
                                                               Pageable pageable,
                                                               final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<BundleManifest> bundleManifests = this.findBundles(projectUuid, Boolean.FALSE, pageable);
+        Page<BundleManifest> bundleManifests = this.findBundles(projectUuid, null, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
     }
 
