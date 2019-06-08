@@ -38,7 +38,7 @@ public class BundleManifestRepositoryImpl implements BundleManifestRepositoryCus
 
         List<BundleManifest> result = mongoTemplate.find(query, BundleManifest.class);
         long count = mongoTemplate.count(query, BundleManifest.class);
-        Page<BundleManifest> resultPage = new PageImpl<BundleManifest>(result , pageable, count);
-        return resultPage;
+        Page<BundleManifest> bundleManifestPage = new PageImpl<>(result, pageable, count);
+        return bundleManifestPage;
     }
 }

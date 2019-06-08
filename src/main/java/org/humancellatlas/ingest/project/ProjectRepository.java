@@ -19,7 +19,7 @@ import java.util.List;
  * @date 31/08/17
  */
 @CrossOrigin
-public interface ProjectRepository extends MongoRepository<Project, String> {
+public interface ProjectRepository extends MongoRepository<Project, String> , ProjectRepositoryCustom{
 
     @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
     Page<Project> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);

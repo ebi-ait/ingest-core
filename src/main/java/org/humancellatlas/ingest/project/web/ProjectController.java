@@ -7,6 +7,7 @@ import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
+import org.humancellatlas.ingest.query.Criteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -82,4 +84,11 @@ public class ProjectController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
     }
 
+    @RequestMapping(path = "/projects/query", method = RequestMethod.POST)
+    ResponseEntity<?> queryProjects( @RequestBody List<Criteria> query,
+                                    Pageable pageable,
+                                    final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Project> projects = projectService.executeQuery(query, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
+    }
 }

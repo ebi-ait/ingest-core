@@ -7,6 +7,7 @@ import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.query.Criteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
@@ -14,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Javadocs go here!
@@ -51,5 +54,9 @@ public class ProjectService {
         String submissionUuid = submissionEnvelope.getUuid().getUuid().toString();
         String projectUuid = project.getUuid().getUuid().toString();
         return bundleManifestRepository.findBundles(projectUuid, submissionUuid, isPrimary, pageable);
+    }
+
+    public Page<Project> executeQuery(List<Criteria> query, Pageable pageable){
+        return this.projectRepository.queryProject(query, pageable);
     }
 }
