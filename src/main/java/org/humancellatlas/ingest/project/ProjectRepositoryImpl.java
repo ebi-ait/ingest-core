@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.project;
 
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.query.Criteria;
+import org.humancellatlas.ingest.query.Operator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -25,7 +26,15 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
         Query query = new Query();
 
         for(Criteria criteria: metadataQuery){
-            query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where(criteria.getField()).is(criteria.getValue()));
+            if(criteria.getOperator().equals(Operator.IS)){
+                query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where(criteria.getField()).is(criteria.getValue()));
+            } else if (criteria.getOperator().equals(Operator.REGEX)){
+                query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where(criteria.getField()).regex((String) criteria.getValue()));
+            } else if (criteria.getOperator().equals(Operator.NE)){
+                query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where(criteria.getField()).ne(criteria.getValue()));
+            } else {
+                throw new RuntimeException("Criteria not allowed!");
+            }
         }
 
         query.with(pageable);
