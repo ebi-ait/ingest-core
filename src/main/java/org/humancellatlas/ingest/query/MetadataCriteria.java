@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class Criteria {
-    String field;
+public class MetadataCriteria {
+    String contentField;
     Operator operator;
     Object value;
 }

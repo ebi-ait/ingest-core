@@ -1,13 +1,14 @@
 package org.humancellatlas.ingest.project;
 
 import org.humancellatlas.ingest.bundle.BundleManifest;
-import org.humancellatlas.ingest.query.Criteria;
+import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.query.Operator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
@@ -22,18 +23,19 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
     }
 
     @Override
-    public Page<Project> queryProject(List<Criteria> metadataQuery, Pageable pageable) {
+    public Page<Project> findByContent(List<MetadataCriteria> metadataQuery, Pageable pageable) {
         Query query = new Query();
 
-        for(Criteria criteria: metadataQuery){
-            if(criteria.getOperator().equals(Operator.IS)){
-                query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where(criteria.getField()).is(criteria.getValue()));
-            } else if (criteria.getOperator().equals(Operator.REGEX)){
-                query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where(criteria.getField()).regex((String) criteria.getValue()));
-            } else if (criteria.getOperator().equals(Operator.NE)){
-                query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where(criteria.getField()).ne(criteria.getValue()));
+        for(MetadataCriteria metadataCriteria : metadataQuery){
+            String contentField = "content." + metadataCriteria.getContentField();
+            if(metadataCriteria.getOperator().equals(Operator.IS)){
+                query.addCriteria(Criteria.where(contentField).is(metadataCriteria.getValue()));
+            } else if (metadataCriteria.getOperator().equals(Operator.REGEX)){
+                query.addCriteria(Criteria.where(contentField).regex((String) metadataCriteria.getValue()));
+            } else if (metadataCriteria.getOperator().equals(Operator.NE)){
+                query.addCriteria(Criteria.where(contentField).ne(metadataCriteria.getValue()));
             } else {
-                throw new RuntimeException("Criteria not allowed!");
+                throw new RuntimeException("MetadataCriteria not allowed!");
             }
         }
 

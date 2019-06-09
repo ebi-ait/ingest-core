@@ -7,7 +7,7 @@ import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
-import org.humancellatlas.ingest.query.Criteria;
+import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class ProjectService {
         return bundleManifestRepository.findBundles(projectUuid, submissionUuid, isPrimary, pageable);
     }
 
-    public Page<Project> executeQuery(List<Criteria> query, Pageable pageable){
-        return this.projectRepository.queryProject(query, pageable);
+    public Page<Project> queryByContent(List<MetadataCriteria> query, Pageable pageable){
+        return this.projectRepository.findByContent(query, pageable);
     }
 }
