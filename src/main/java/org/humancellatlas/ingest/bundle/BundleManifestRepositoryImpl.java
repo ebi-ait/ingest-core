@@ -1,5 +1,7 @@
 package org.humancellatlas.ingest.bundle;
 
+import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,18 +22,21 @@ public class BundleManifestRepositoryImpl implements BundleManifestRepositoryCus
     }
 
     @Override
-    public Page<BundleManifest> findBundles(String projectUuid, String primarySubmissionUuid, Boolean isPrimary, Pageable pageable) {
-        Query query = new Query();
+    public Page<BundleManifest> findBundleManifestsByProjectAndBundleType(Project project, BundleType bundleType, Pageable pageable) {
+        SubmissionEnvelope submissionEnvelope = project.getSubmissionEnvelopes().get(0);
+        String submissionUuid = submissionEnvelope.getUuid().getUuid().toString();
+        String projectUuid = project.getUuid().getUuid().toString();
 
+        Query query = new Query();
         query.addCriteria(Criteria.where("fileProjectMap." + projectUuid).exists(true));
 
-        if (isPrimary !=null){
-            if(isPrimary) {
-                query.addCriteria(Criteria.where("envelopeUuid").is(primarySubmissionUuid));
+        if (bundleType != null){
+            if(bundleType.equals(BundleType.PRIMARY)) {
+                query.addCriteria(Criteria.where("envelopeUuid").is(submissionUuid));
             }
-            else{
+            else if (bundleType.equals(BundleType.ANALYSIS)){
                 // TODO This might not be the best criteria to query analysis bundles. Might need to remodel bundle manifest.
-                query.addCriteria(Criteria.where("envelopeUuid").ne(primarySubmissionUuid));
+                query.addCriteria(Criteria.where("envelopeUuid").ne(submissionUuid));
             }
         }
 
