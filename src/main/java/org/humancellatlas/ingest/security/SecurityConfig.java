@@ -24,8 +24,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.*;
 
 @EnableWebSecurity
 @Configuration
@@ -48,8 +47,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     static {
         List<AntPathRequestMatcher> antPathMatchers = new ArrayList<>();
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/user/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(PATCH, "/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(PUT, "/**"));
         antPathMatchers.addAll(defineAntPathMatchers(POST, "/submissionEnvelopes",
-                "/messaging/**", "/projects", "/submissionEnvelopes/*/projects"));
+                "/messaging/**", "/projects**", "/submissionEnvelopes/*/projects", "/files**", "/biomaterials**", "/protocols**", "/processes**", "/files**", "/bundleManifests**"));
         SECURED_ANT_PATHS = Collections.unmodifiableList(antPathMatchers);
     }
 
