@@ -5,6 +5,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
+import org.humancellatlas.ingest.bundle.BundleType;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -13,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -46,10 +49,11 @@ public class ProjectService {
         }
     }
 
-    public Page<BundleManifest> findBundlesByProject(Project project, Boolean isPrimary, Pageable pageable){
-        SubmissionEnvelope submissionEnvelope = project.getSubmissionEnvelopes().get(0);
-        String submissionUuid = submissionEnvelope.getUuid().getUuid().toString();
-        String projectUuid = project.getUuid().getUuid().toString();
-        return bundleManifestRepository.findBundles(projectUuid, submissionUuid, isPrimary, pageable);
+    public Page<BundleManifest> findBundleManifestsByProjectUuidAndBundleType(Uuid projectUuid, BundleType bundleType, Pageable pageable){
+        Project project = this.projectRepository.findByUuidAndIsUpdateFalse(projectUuid);
+        if (project == null) {
+            throw new ResourceNotFoundException(String.format("Project with UUID %s not found", projectUuid.getUuid().toString()));
+        }
+        return bundleManifestRepository.findBundleManifestsByProjectAndBundleType(project, bundleType, pageable);
     }
 }

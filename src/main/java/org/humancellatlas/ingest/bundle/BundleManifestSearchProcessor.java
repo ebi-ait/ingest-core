@@ -13,9 +13,9 @@ public class BundleManifestSearchProcessor implements ResourceProcessor<Reposito
     @Override
     public RepositorySearchesResource process(RepositorySearchesResource resource) {
         if(resource.getDomainType().equals(BundleManifest.class)) {
-            resource.add(linkTo(methodOn(BundleManifestController.class).findPrimaryBundlesByProjectUuid(null, null, null)).withRel("findPrimaryBundlesByProjectUuid"));
-            resource.add(linkTo(methodOn(BundleManifestController.class).findAnalysisBundlesByProjectUuid(null, null, null)).withRel("findAnalysisBundlesByProjectUuid"));
-            resource.add(linkTo(methodOn(BundleManifestController.class).findAllByProjectUuid(null, null, null)).withRel("findAllBundlesByProjectUuid"));
+            resource.add(linkTo(methodOn(BundleManifestController.class)
+                    .findBundleManifestsByProjectUuidAndBundleType(null, null, null, null))
+                    .withRel("findBundleManifestsByProjectUuidAndBundleType"));
         }
 
         return resource;
