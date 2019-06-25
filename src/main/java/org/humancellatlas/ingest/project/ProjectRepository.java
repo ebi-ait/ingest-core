@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.project;
 
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -41,4 +42,7 @@ public interface ProjectRepository extends MongoRepository<Project, String> , Pr
                                                                                Pageable pageable);
 
     long countByUser(String user);
+    
+    
+    Page<Project> findByContent(List<MetadataCriteria> criteria, Pageable pageable);
 }

@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.project;
 
-import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.query.Operator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +14,8 @@ import java.util.List;
 
 public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
 
-    private  final MongoTemplate mongoTemplate;
-
     @Autowired
-    public ProjectRepositoryImpl(final MongoTemplate mongoTemplate) {
-        this.mongoTemplate = mongoTemplate;
-    }
+    private MongoTemplate mongoTemplate;
 
     @Override
     public Page<Project> findByContent(List<MetadataCriteria> metadataQuery, Pageable pageable) {
@@ -42,7 +37,7 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
         query.with(pageable);
 
         List<Project> result = mongoTemplate.find(query, Project.class);
-        long count = mongoTemplate.count(query, BundleManifest.class);
+        long count = mongoTemplate.count(query, Project.class);
         Page<Project> projectsPage = new PageImpl<>(result, pageable, count);
         return projectsPage;
     };
