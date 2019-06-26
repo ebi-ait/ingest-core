@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,7 @@ import java.util.List;
 @Getter
 @ToString
 @EqualsAndHashCode
+@JsonIgnoreProperties(value = {"type"}, allowGetters = true)
 public abstract class AbstractEntity implements Identifiable<String> {
     protected  @Id @JsonIgnore String id;
 
@@ -34,7 +36,7 @@ public abstract class AbstractEntity implements Identifiable<String> {
 
     private @LastModifiedBy String lastModifiedUser;
 
-    private @JsonIgnore EntityType type;
+    private EntityType type;
 
     private @Setter Uuid uuid;
 
