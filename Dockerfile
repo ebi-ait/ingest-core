@@ -1,11 +1,11 @@
-FROM java:8-alpine
+FROM openjdk:11
 
 # security-related updates (as reported by Quay)
-RUN apk update && \
-    apk upgrade freetype 2.6.3-r1 && \
-    apk upgrade zlib 1.2.11-r0 && \
-    apk upgrade musl 1.1.14-r16 && \
-    apk upgrade libtasn1 4.8-r2
+#RUN apk update && \
+#    apk upgrade freetype 2.6.3-r1 && \
+#    apk upgrade zlib 1.2.11-r0 && \
+#    apk upgrade musl 1.1.14-r16 && \
+#    apk upgrade libtasn1 4.8-r2
 
 
 WORKDIR /opt
@@ -25,7 +25,7 @@ ADD src ./src
 
 COPY gradlew build.gradle ./
 
-RUN ./gradlew assemble
+RUN ./gradlew --no-daemon  assemble
 
 CMD java \
     -XX:+UseG1GC \
