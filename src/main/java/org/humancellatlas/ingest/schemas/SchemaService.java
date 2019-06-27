@@ -79,7 +79,7 @@ public class SchemaService {
     private void deleteMatchingSchemas(UUID schemaUuid) {
         Collection<Schema> matchingSchemas = schemaRepository
                 .findByUuidEquals(new Uuid(schemaUuid.toString()));
-        schemaRepository.delete(matchingSchemas);
+        schemaRepository.deleteAll(matchingSchemas);
     }
 
     public Collection<Schema> schemaDescriptionFromSchemaUris(Collection<URI> schemaUris) {

@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.project;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
+import lombok.Setter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.file.File;
@@ -22,7 +23,7 @@ import java.util.List;
 public class Project extends MetadataDocument {
     @RestResource
     @DBRef
-    private final List<File> supplementaryFiles = new ArrayList<>();
+    private List<File> supplementaryFiles = new ArrayList<>();
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Project(Object content) {

@@ -7,6 +7,7 @@ import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.protocol.Protocol;
+import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 
@@ -21,15 +22,15 @@ public class Process extends MetadataDocument {
 
     @RestResource
     @DBRef
-    private final List<Project> projects = new ArrayList<>();
+    private List<Project> projects = new ArrayList<>();
     @RestResource
     @DBRef
-    private final List<Protocol> protocols = new ArrayList<>();
+    private List<Protocol> protocols = new ArrayList<>();
     @RestResource
     @DBRef
-    private final List<BundleManifest> inputBundleManifests = new ArrayList<>();
+    private List<BundleManifest> inputBundleManifests = new ArrayList<>();
 
-    private final @DBRef List<Process> chainedProcesses = new ArrayList<>();
+    private @DBRef List<Process> chainedProcesses = new ArrayList<>();
 
     public Process() {}
 

@@ -27,9 +27,6 @@ public interface SchemaRepository extends MongoRepository<Schema, String>{
     void delete(Schema schema);
 
     @RestResource(exported = false)
-    void delete(String schemaId);
-
-    @RestResource(exported = false)
     List<Schema> findByUuidEquals(Uuid uuid);
 
     @RestResource

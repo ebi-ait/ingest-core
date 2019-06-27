@@ -23,13 +23,13 @@ import java.util.List;
 @Document
 public class Biomaterial extends MetadataDocument {
 
-    @RestResource @DBRef private final List<Project> projects = new ArrayList<>();
+    @RestResource @DBRef private List<Project> projects = new ArrayList<>();
 
     @Indexed
-    @RestResource @DBRef(lazy = true) private final List<Process> inputToProcesses = new ArrayList<>();
+    @RestResource @DBRef(lazy = true) private List<Process> inputToProcesses = new ArrayList<>();
 
     @Indexed
-    @RestResource @DBRef(lazy = true) private final List<Process> derivedByProcesses = new ArrayList<>();
+    @RestResource @DBRef(lazy = true) private  List<Process> derivedByProcesses = new ArrayList<>();
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Biomaterial(Object content) {
