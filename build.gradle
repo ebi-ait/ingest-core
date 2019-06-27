@@ -27,6 +27,8 @@ repositories {
 }
 
 dependencies {
+    runtime("org.springframework.boot:spring-boot-properties-migrator")
+
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
     compile('org.springframework.boot:spring-boot-starter-data-rest')
