@@ -10,6 +10,7 @@ import org.joda.time.DateTime;
 import org.springframework.data.annotation.*;
 import org.springframework.hateoas.Identifiable;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,9 +29,9 @@ public abstract class AbstractEntity implements Identifiable<String> {
 
     private @Version Long version;
 
-    private @CreatedDate DateTime submissionDate;
+    private @CreatedDate Instant submissionDate;
 
-    private @LastModifiedDate DateTime updateDate;
+    private @LastModifiedDate Instant updateDate;
 
     private @CreatedBy String user;
 

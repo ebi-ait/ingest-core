@@ -52,7 +52,7 @@ public class MessageRouter {
             this.messageSender.queueValidationMessage(Constants.Exchanges.VALIDATION,
                                                       Constants.Queues.VALIDATION_REQUIRED,
                                                       messageFor(document),
-                                                      document.getUpdateDate().getMillis());
+                                                      document.getUpdateDate().toEpochMilli());
             return true;
         } else {
             return false;
@@ -71,7 +71,7 @@ public class MessageRouter {
             this.messageSender.queueAccessionMessage(Constants.Exchanges.ACCESSION,
                                                      Constants.Queues.ACCESSION_REQUIRED,
                                                      messageFor(document),
-                                                     document.getUpdateDate().getMillis());
+                                                     document.getUpdateDate().toEpochMilli());
             return true;
         } else {
             return false;
@@ -90,7 +90,7 @@ public class MessageRouter {
 
         this.messageSender.queueDocumentStateUpdateMessage(documentUpdateUri,
                                                            documentStateUpdateMessage(document),
-                                                           document.getUpdateDate().getMillis());
+                                                           document.getUpdateDate().toEpochMilli());
         return true;
     }
 
@@ -99,7 +99,7 @@ public class MessageRouter {
         this.messageSender.queueStateTrackingMessage(Constants.Exchanges.STATE_TRACKING,
                                                      Constants.Routing.ENVELOPE_STATE_UPDATE,
                                                      messageFor(envelope, state),
-                                                     envelope.getUpdateDate().getMillis());
+                                                     envelope.getUpdateDate().toEpochMilli());
         return true;
     }
 
@@ -107,7 +107,7 @@ public class MessageRouter {
         this.messageSender.queueStateTrackingMessage(Constants.Exchanges.STATE_TRACKING,
                                                      Constants.Routing.ENVELOPE_CREATE,
                                                      messageFor(envelope),
-                                                     envelope.getUpdateDate().getMillis());
+                                                     envelope.getUpdateDate().toEpochMilli());
         return true;
     }
 
@@ -137,7 +137,7 @@ public class MessageRouter {
         this.messageSender.queueUploadManagerMessage(Constants.Exchanges.UPLOAD_AREA_EXCHANGE,
                                                      Constants.Routing.UPLOAD_AREA_CREATE,
                                                      messageFor(envelope),
-                                                     envelope.getUpdateDate().getMillis());
+                                                     envelope.getUpdateDate().toEpochMilli());
         return true;
     }
 
@@ -145,7 +145,7 @@ public class MessageRouter {
         this.messageSender.queueUploadManagerMessage(Constants.Exchanges.UPLOAD_AREA_EXCHANGE,
                                                      Constants.Routing.UPLOAD_AREA_CLEANUP,
                                                      messageFor(envelope),
-                                                     envelope.getUpdateDate().getMillis());
+                                                     envelope.getUpdateDate().toEpochMilli());
         return true;
     }
 
