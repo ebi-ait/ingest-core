@@ -22,7 +22,7 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 public class QueueConfig implements RabbitListenerConfigurer {
     @Bean Queue queueFileUpdate() { return new Queue(Constants.Queues.FILE_UPDATE, false); }
 
-    @Bean Queue queueBundleUpdate() { return new Queue(Constants.Routing.UPDATE_SUBMITTED, false); }
+    @Bean Queue queueBundleUpdate() { return new Queue(Constants.Routing.UPDATE_SUBMITTED, true); }
 
     @Bean FanoutExchange fileExchange() { return new FanoutExchange(Constants.Exchanges.FILE_FANOUT); }
 

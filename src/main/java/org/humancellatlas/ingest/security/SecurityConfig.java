@@ -24,8 +24,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.*;
 
 @EnableWebSecurity
 @Configuration
@@ -48,8 +47,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     static {
         List<AntPathRequestMatcher> antPathMatchers = new ArrayList<>();
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/user/**"));
-        antPathMatchers.addAll(defineAntPathMatchers(POST, "/submissionEnvelopes",
-                "/messaging/**", "/projects", "/submissionEnvelopes/*/projects"));
+        antPathMatchers.addAll(defineAntPathMatchers(PATCH, "/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(PUT, "/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(POST,"/messaging/**", "/submissionEnvelopes/*/projects", "/files**", "/biomaterials**", "/protocols**", "/processes**", "/files**", "/bundleManifests**"));
         SECURED_ANT_PATHS = Collections.unmodifiableList(antPathMatchers);
     }
 
@@ -68,17 +68,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         JwkProvider jwkProvider = new JwkProviderBuilder(issuer).build();
         JwtAuthenticationProvider auth0Provider = new JwtAuthenticationProvider(jwkProvider, issuer, audience);
 
-        // FIXME: This is temporary workaround to be able to also verify tokens created from Dan Vaughan's Auth0 account
-        String issuer2 = "https://danielvaughan.eu.auth0.com/";
-        String audience2 = "http://localhost:8080";
-
-        JwkProvider jwkProvider2 = new JwkProviderBuilder(issuer2).build();
-        JwtAuthenticationProvider auth0Provider2 = new JwtAuthenticationProvider(jwkProvider2, issuer2, audience2);
-        // FIXME: Remove 'til here
-
         http.authenticationProvider(auth0Provider)
                 .authenticationProvider(googleServiceJwtAuthenticationProvider)
-                .authenticationProvider(auth0Provider2) // FIXME: Remove soon
                 .securityContext().securityContextRepository(new BearerSecurityContextRepository())
                 .and()
                 .exceptionHandling().authenticationEntryPoint(new JwtAuthenticationEntryPoint())
@@ -88,6 +79,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()
                 .authorizeRequests()
+                .antMatchers(HttpMethod.POST, "/submissionEnvelopes").authenticated()
+                .antMatchers(HttpMethod.POST, "/projects**").authenticated()
                 .requestMatchers(this::isRequestForSecuredResourceFromProxy).authenticated()
                 .antMatchers(GET, "/**").permitAll();
     }

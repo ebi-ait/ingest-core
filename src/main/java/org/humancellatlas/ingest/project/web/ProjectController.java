@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.bundle.BundleManifest;
+import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
@@ -58,28 +59,12 @@ public class ProjectController {
         return ResponseEntity.accepted().body(resource);
     }
 
-
-    @RequestMapping(path = "/projects/{id}/analysisBundles", method = RequestMethod.GET)
-    ResponseEntity<?> findAnalysisBundles( @PathVariable("id") Project project,
-                                          Pageable pageable,
-                                          final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<BundleManifest> bundleManifests = projectService.findBundlesByProject(project, Boolean.FALSE, pageable);
-        return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
-    }
-
-    @RequestMapping(path = "/projects/{id}/primaryBundles", method = RequestMethod.GET)
-    ResponseEntity<?> findPrimaryBundles( @PathVariable("id") Project project,
-                                          Pageable pageable,
-                                          final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<BundleManifest> bundleManifests = projectService.findBundlesByProject(project, Boolean.TRUE, pageable);
-        return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
-    }
-
-    @RequestMapping(path = "/projects/{id}/bundles", method = RequestMethod.GET)
-    ResponseEntity<?> findAllBundles( @PathVariable("id") Project project,
-                                          Pageable pageable,
-                                          final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<BundleManifest> bundleManifests = projectService.findBundlesByProject(project, null, pageable);
+    @RequestMapping(path = "/projects/{id}/bundleManifests", method = RequestMethod.GET)
+    ResponseEntity<?> getBundleManifests(@PathVariable("id") Project project,
+                                         @RequestParam("bundleType") Optional<BundleType> bundleType,
+                                         Pageable pageable,
+                                         final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<BundleManifest> bundleManifests = projectService.getBundleManifestRepository().findBundleManifestsByProjectAndBundleType(project, bundleType.orElse(null), pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
     }
 

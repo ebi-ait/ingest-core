@@ -18,15 +18,8 @@ public class ProjectResourceProcessor implements ResourceProcessor<Resource<Proj
     public Resource<Project> process(Resource<Project> resource) {
         Project project = resource.getContent();
         resource.add(entityLinks.linkForSingleResource(project)
-                .slash(Links.PRIMARY_BUNDLES_URL)
-                .withRel(Links.PRIMARY_BUNDLES_REL));
-        resource.add(entityLinks.linkForSingleResource(project)
-                .slash(Links.ANALYSIS_BUNDLES_URL)
-                .withRel(Links.ANALYSIS_BUNDLES_REL));
-        resource.add(entityLinks.linkForSingleResource(project)
-                .slash(Links.ALL_BUNDLES_URL)
-                .withRel(Links.ALL_BUNDLES_REL));
-
+                .slash("bundleManifests")
+                .withRel("bundleManifests"));
         return resource;
     }
 
