@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
@@ -20,20 +21,28 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
     @Override
     public Page<Project> findByContent(List<MetadataCriteria> metadataQuery, Pageable pageable) {
         Query query = new Query();
+        
+        List<Criteria> criterias = new ArrayList<>();
 
         for(MetadataCriteria metadataCriteria : metadataQuery){
             String contentField = "content." + metadataCriteria.getContentField();
             if(metadataCriteria.getOperator().equals(Operator.IS)){
-                query.addCriteria(Criteria.where(contentField).is(metadataCriteria.getValue()));
+                criterias.add(Criteria.where(contentField).is(metadataCriteria.getValue()));
             } else if (metadataCriteria.getOperator().equals(Operator.REGEX)){
-                query.addCriteria(Criteria.where(contentField).regex((String) metadataCriteria.getValue()));
+            	criterias.add(Criteria.where(contentField).regex((String) metadataCriteria.getValue()));
             } else if (metadataCriteria.getOperator().equals(Operator.NE)){
-                query.addCriteria(Criteria.where(contentField).ne(metadataCriteria.getValue()));
+            	criterias.add(Criteria.where(contentField).ne(metadataCriteria.getValue()));
             } else {
                 throw new RuntimeException("MetadataCriteria not allowed!");
             }
         }
-
+        
+        query.addCriteria(
+            new Criteria().orOperator(
+            		 (Criteria[]) criterias.toArray()
+            )
+        );
+        
         query.with(pageable);
 
         List<Project> result = mongoTemplate.find(query, Project.class);
