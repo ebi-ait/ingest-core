@@ -6,7 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.joda.time.DateTime;
 import org.springframework.data.annotation.*;
 import org.springframework.hateoas.Identifiable;
 
