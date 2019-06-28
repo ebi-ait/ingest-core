@@ -33,8 +33,6 @@ dependencies {
 	implementation 'org.springframework.data:spring-data-rest-hal-browser'
 	implementation 'org.apache.httpcomponents:httpcore'
 
-	implementation 'joda-time:joda-time'
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
 	implementation 'com.flipkart.zjsonpatch:zjsonpatch:0.4.8'
 	implementation 'org.apache.httpcomponents:httpmime'
