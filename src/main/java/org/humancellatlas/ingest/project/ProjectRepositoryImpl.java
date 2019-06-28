@@ -29,20 +29,20 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
             if(metadataCriteria.getOperator().equals(Operator.IS)){
                 criterias.add(Criteria.where(contentField).is(metadataCriteria.getValue()));
             } else if (metadataCriteria.getOperator().equals(Operator.REGEX)){
-            	criterias.add(Criteria.where(contentField).regex((String) metadataCriteria.getValue()));
+                criterias.add(Criteria.where(contentField).regex((String) metadataCriteria.getValue()));
             } else if (metadataCriteria.getOperator().equals(Operator.NE)){
-            	criterias.add(Criteria.where(contentField).ne(metadataCriteria.getValue()));
+                criterias.add(Criteria.where(contentField).ne(metadataCriteria.getValue()));
             } else {
                 throw new RuntimeException("MetadataCriteria not allowed!");
             }
         }
-        
+
         query.addCriteria(
-            new Criteria().orOperator(
-            		 (Criteria[]) criterias.toArray()
-            )
+            new Criteria().orOperator(criterias.toArray(
+                new Criteria[criterias.size()]
+            ))
         );
-        
+
         query.with(pageable);
 
         List<Project> result = mongoTemplate.find(query, Project.class);
