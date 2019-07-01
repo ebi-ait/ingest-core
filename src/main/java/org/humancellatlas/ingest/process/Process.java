@@ -12,7 +12,9 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by rolando on 16/02/2018.
@@ -22,15 +24,15 @@ public class Process extends MetadataDocument {
 
     @RestResource
     @DBRef
-    private List<Project> projects = new ArrayList<>();
+    private Set<Project> projects = new HashSet<>();
     @RestResource
     @DBRef
-    private List<Protocol> protocols = new ArrayList<>();
+    private Set<Protocol> protocols = new HashSet<>();
     @RestResource
     @DBRef
-    private List<BundleManifest> inputBundleManifests = new ArrayList<>();
+    private Set<BundleManifest> inputBundleManifests = new HashSet<>();
 
-    private @DBRef List<Process> chainedProcesses = new ArrayList<>();
+    private @DBRef Set<Process> chainedProcesses = new HashSet<>();
 
     public Process() {}
 

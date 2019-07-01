@@ -11,7 +11,9 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Javadocs go here!
@@ -23,7 +25,7 @@ import java.util.List;
 public class Project extends MetadataDocument {
     @RestResource
     @DBRef
-    private List<File> supplementaryFiles = new ArrayList<>();
+    private Set<File> supplementaryFiles = new HashSet<>();
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Project(Object content) {

@@ -13,7 +13,9 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by rolando on 16/02/2018.
@@ -23,13 +25,13 @@ import java.util.List;
 @Document
 public class Biomaterial extends MetadataDocument {
 
-    @RestResource @DBRef private List<Project> projects = new ArrayList<>();
+    @RestResource @DBRef private Set<Project> projects = new HashSet<>();
 
     @Indexed
-    @RestResource @DBRef(lazy = true) private List<Process> inputToProcesses = new ArrayList<>();
+    @RestResource @DBRef(lazy = true) private Set<Process> inputToProcesses = new HashSet<>();
 
     @Indexed
-    @RestResource @DBRef(lazy = true) private  List<Process> derivedByProcesses = new ArrayList<>();
+    @RestResource @DBRef(lazy = true) private  Set<Process> derivedByProcesses = new HashSet<>();
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Biomaterial(Object content) {

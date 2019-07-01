@@ -16,10 +16,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.rest.core.annotation.RestResource;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
@@ -30,10 +27,10 @@ import java.util.UUID;
 public class File extends MetadataDocument {
 
     @Indexed
-    @RestResource @DBRef private List<Process> inputToProcesses = new ArrayList<>();
+    @RestResource @DBRef private Set<Process> inputToProcesses = new HashSet<>();
 
     @Indexed
-    @RestResource @DBRef private List<Process> derivedByProcesses = new ArrayList<>();
+    @RestResource @DBRef private Set<Process> derivedByProcesses = new HashSet<>();
 
     @Indexed
     private String fileName;
