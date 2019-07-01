@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Javadocs go here!
@@ -33,7 +34,7 @@ public abstract class MetadataDocument extends AbstractEntity {
     private Object content;
 
     @Indexed
-    private @DBRef List<SubmissionEnvelope> submissionEnvelopes = new ArrayList<>();
+    private @DBRef Set<SubmissionEnvelope> submissionEnvelopes = new ArrayList<>();
 
     private @Setter Accession accession;
     private @Setter ValidationState validationState;
