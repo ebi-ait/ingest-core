@@ -29,10 +29,4 @@ public class Project extends MetadataDocument {
     public Project(Object content) {
         super(EntityType.PROJECT, content);
     }
-
-    public Project addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        super.addToSubmissionEnvelope(submissionEnvelope);
-
-        return this;
-    }
 }
