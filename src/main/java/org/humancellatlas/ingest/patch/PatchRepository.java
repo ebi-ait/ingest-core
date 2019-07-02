@@ -7,8 +7,6 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import java.util.List;
-
 @CrossOrigin
 public interface PatchRepository extends MongoRepository<Patch, String> {
 
