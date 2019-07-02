@@ -75,6 +75,7 @@ public class SubmissionEnvelopeService {
         submissionEnvelopeCreateHandler.setUuid(updateSubmissionEnvelope);
         updateSubmissionEnvelope.setIsUpdate(true);
         SubmissionEnvelope insertedUpdateSubmissionEnvelope = submissionEnvelopeRepository.insert(updateSubmissionEnvelope);
+        submissionEnvelopeCreateHandler.handleSubmissionEnvelopeCreation(updateSubmissionEnvelope);
         return insertedUpdateSubmissionEnvelope;
     }
 }
