@@ -11,6 +11,7 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
@@ -32,7 +33,7 @@ public class ProtocolCrudStrategy implements MetadataCrudStrategy<Protocol> {
 
     @Override
     public Protocol findOriginalByUuid(String uuid) {
-        return protocolRepository.findByUuidAndIsUpdateFalse(new Uuid(uuid));
+        return protocolRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid));
     }
 
     @Override

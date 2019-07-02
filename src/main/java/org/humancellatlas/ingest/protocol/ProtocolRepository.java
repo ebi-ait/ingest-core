@@ -12,6 +12,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Javadocs go here!
@@ -37,5 +38,5 @@ public interface ProtocolRepository extends MongoRepository<Protocol, String> {
     Page<Protocol> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
 
     @RestResource(rel = "findByUuid", path = "findByUuid")
-    Protocol findByUuidAndIsUpdateFalse(@Param("uuid") Uuid uuid);
+    Protocol findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 }

@@ -23,7 +23,7 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
     Page<Biomaterial> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
 
     @RestResource(rel = "findByUuid", path = "findByUuid")
-    Biomaterial findByUuidAndIsUpdateFalse(@Param("uuid") Uuid uuid);
+    Biomaterial findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
     Page<Biomaterial> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope,
             Pageable pageable);

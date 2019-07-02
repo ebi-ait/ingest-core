@@ -11,6 +11,7 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
@@ -33,7 +34,7 @@ public class ProjectCrudStrategy implements MetadataCrudStrategy<Project> {
 
     @Override
     public Project findOriginalByUuid(String uuid) {
-        return projectRepository.findByUuidAndIsUpdateFalse(new Uuid(uuid));
+        return projectRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid));
     }
 
     @Override

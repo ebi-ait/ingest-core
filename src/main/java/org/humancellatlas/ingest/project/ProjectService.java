@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 /**
  * Javadocs go here!
  *
@@ -50,7 +52,7 @@ public class ProjectService {
     }
 
     public Page<BundleManifest> findBundleManifestsByProjectUuidAndBundleType(Uuid projectUuid, BundleType bundleType, Pageable pageable){
-        Project project = this.projectRepository.findByUuidAndIsUpdateFalse(projectUuid);
+        Project project = this.projectRepository.findByUuidUuidAndIsUpdateFalse(projectUuid.getUuid());
         if (project == null) {
             throw new ResourceNotFoundException(String.format("Project with UUID %s not found", projectUuid.getUuid().toString()));
         }

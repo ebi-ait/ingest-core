@@ -11,6 +11,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Javadocs go here!
@@ -25,7 +26,7 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
     Page<Project> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
 
     @RestResource(rel = "findByUuid", path = "findByUuid")
-    Project findByUuidAndIsUpdateFalse(@Param("uuid") Uuid uuid);
+    Project findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
     @RestResource(path = "findByUser", rel = "findByUser")
     Page<Project> findByUser(@Param(value = "user") String user, Pageable pageable);
