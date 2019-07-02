@@ -17,5 +17,5 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class BundleReference {
-    private @NonNull List<String> bundleUuids;
+    private List<String> bundleUuids;
 }
