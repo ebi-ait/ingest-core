@@ -13,7 +13,6 @@ import java.util.List;
  * @author Tony Burdett
  * @date 06/09/17
  */
-@RequiredArgsConstructor
 @Getter
 @NoArgsConstructor
 public class BundleReference {
