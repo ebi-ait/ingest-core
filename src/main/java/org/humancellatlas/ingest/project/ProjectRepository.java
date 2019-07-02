@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.project;
 
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,7 @@ import java.util.UUID;
  * @date 31/08/17
  */
 @CrossOrigin
-public interface ProjectRepository extends MongoRepository<Project, String> {
+public interface ProjectRepository extends MongoRepository<Project, String> , ProjectRepositoryCustom{
 
     @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
     Page<Project> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
@@ -42,4 +43,7 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
                                                                                Pageable pageable);
 
     long countByUser(String user);
+    
+    
+    Page<Project> findByContent(List<MetadataCriteria> criteria, Pageable pageable);
 }

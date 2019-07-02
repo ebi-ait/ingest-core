@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
+import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Optional;
+
+import static org.humancellatlas.ingest.state.SubmissionState.SUBMITTED;
 
 /**
  * Javadocs go here!
@@ -24,6 +28,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Resource<SubmissionEnvelope>> {
     private final @NonNull EntityLinks entityLinks;
+    private final @NonNull SubmissionManifestRepository submissionManifestRepository;
 
     private Link getBiomaterialsLink(SubmissionEnvelope submissionEnvelope) {
         return entityLinks.linkForSingleResource(submissionEnvelope)
@@ -92,7 +97,7 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
     }
 
     private Optional<Link> getStateTransitionLink(SubmissionEnvelope submissionEnvelope, SubmissionState targetState) {
-        Optional<String> transitionResourceName = getSubresourceNameForRequestSubmissionState(targetState);
+        Optional<String> transitionResourceName = getSubresourceNameForRequestSubmissionState(submissionEnvelope, targetState);
         if (transitionResourceName.isPresent()) {
             Optional<String> rel = getRelNameForRequestSubmissionState(targetState);
             if (rel.isPresent()) {
@@ -141,10 +146,22 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         }
     }
 
-    private Optional<String> getSubresourceNameForRequestSubmissionState(SubmissionState submissionState) {
+    private Optional<String> getSubmitLink(SubmissionEnvelope submissionEnvelope){
+        SubmissionManifest submissionManifest = this.submissionManifestRepository.findBySubmissionEnvelopeId(submissionEnvelope.getId());
+
+        if(submissionManifest == null)
+            return Optional.of(Links.SUBMIT_URL);
+        else if(submissionManifest.getExpectedLinks() !=null && submissionManifest.getExpectedLinks().equals(submissionManifest.getActualLinks())){
+            return Optional.of(Links.SUBMIT_URL);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<String> getSubresourceNameForRequestSubmissionState(SubmissionEnvelope submissionEnvelope, SubmissionState submissionState) {
         switch (submissionState) {
             case SUBMITTED:
-                return Optional.of(Links.SUBMIT_URL);
+                return this.getSubmitLink(submissionEnvelope);
             case PROCESSING:
                 return Optional.of(Links.PROCESSING_URL);
             case CLEANUP:
