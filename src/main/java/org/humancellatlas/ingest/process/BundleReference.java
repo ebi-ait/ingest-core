@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.process;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -14,6 +15,7 @@ import java.util.List;
  */
 @RequiredArgsConstructor
 @Getter
+@NoArgsConstructor
 public class BundleReference {
     private @NonNull List<String> bundleUuids;
 }
