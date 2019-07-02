@@ -19,11 +19,6 @@ import java.util.UUID;
 public class BiomaterialCrudStrategy implements MetadataCrudStrategy<Biomaterial> {
     private final @NonNull BiomaterialRepository biomaterialRepository;
 
-
-    private static RuntimeException get() {
-        throw new ResourceNotFoundException();
-    }
-
     @Override
     public Biomaterial saveMetadataDocument(Biomaterial document) {
         return biomaterialRepository.save(document);
