@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.project;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
+import lombok.Setter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.file.File;
@@ -10,7 +11,9 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Javadocs go here!
@@ -22,16 +25,10 @@ import java.util.List;
 public class Project extends MetadataDocument {
     @RestResource
     @DBRef
-    private final List<File> supplementaryFiles = new ArrayList<>();
+    private Set<File> supplementaryFiles = new HashSet<>();
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Project(Object content) {
         super(EntityType.PROJECT, content);
-    }
-
-    public Project addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        super.addToSubmissionEnvelope(submissionEnvelope);
-
-        return this;
     }
 }

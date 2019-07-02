@@ -12,16 +12,16 @@ import static java.lang.String.format;
 @Getter
 public class Schema extends AbstractEntity implements Comparable<Schema> {
 
-    private final String highLevelEntity;
-    private final String schemaVersion;
-    private final String domainEntity;
-    private final String subDomainEntity;
-    private final String concreteEntity;
+    private String highLevelEntity;
+    private String schemaVersion;
+    private String domainEntity;
+    private String subDomainEntity;
+    private String concreteEntity;
 
-    private final String compoundKeys;
+    private String compoundKeys;
 
     @JsonIgnore
-    private final String schemaUri;
+    private String schemaUri;
 
     public Schema(String highLevelEntity, String schemaVersion, String domainEntity,
             String subDomainEntity, String concreteEntity, String schemaUri) {

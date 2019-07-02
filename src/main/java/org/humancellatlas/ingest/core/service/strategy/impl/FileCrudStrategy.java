@@ -7,9 +7,11 @@ import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
@@ -23,12 +25,15 @@ public class FileCrudStrategy implements MetadataCrudStrategy<File> {
 
     @Override
     public File findMetadataDocument(String id) {
-        return fileRepository.findOne(id);
+        return fileRepository.findById(id)
+                             .orElseThrow(() -> {
+                                 throw new ResourceNotFoundException();
+                             });
     }
 
     @Override
     public File findOriginalByUuid(String uuid) {
-        return fileRepository.findByUuidAndIsUpdateFalse(new Uuid(uuid));
+        return fileRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid));
     }
 
     @Override

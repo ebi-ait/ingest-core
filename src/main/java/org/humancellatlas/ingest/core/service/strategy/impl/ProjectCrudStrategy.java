@@ -7,9 +7,11 @@ import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
@@ -24,12 +26,15 @@ public class ProjectCrudStrategy implements MetadataCrudStrategy<Project> {
 
     @Override
     public Project findMetadataDocument(String id) {
-        return projectRepository.findOne(id);
+        return projectRepository.findById(id)
+                                .orElseThrow(() -> {
+                                    throw new ResourceNotFoundException();
+                                });
     }
 
     @Override
     public Project findOriginalByUuid(String uuid) {
-        return projectRepository.findByUuidAndIsUpdateFalse(new Uuid(uuid));
+        return projectRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid));
     }
 
     @Override

@@ -113,7 +113,7 @@ public class ProcessService {
 
                 // add the input files
                 for (String fileUuid : bundleManifest.getFileFilesMap().keySet()) {
-                    File analysisInputFile = fileRepository.findByUuidAndIsUpdateFalse(new Uuid(fileUuid));
+                    File analysisInputFile = fileRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(fileUuid));
                     analysisInputFile.addAsInputToProcess(analysis);
                     fileRepository.save(analysisInputFile);
                 }

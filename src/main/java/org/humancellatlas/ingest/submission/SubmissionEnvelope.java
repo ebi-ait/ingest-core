@@ -27,7 +27,7 @@ public class SubmissionEnvelope extends AbstractEntity {
     private SubmissionState submissionState;
     private @Setter Boolean triggersAnalysis;
     private @Setter Boolean isUpdate;
-    private final List<SubmissionError> submissionErrors = new ArrayList<>();
+    private @Setter List<SubmissionError> submissionErrors = new ArrayList<>();
 
     private static final Logger log = LoggerFactory.getLogger(SubmissionEnvelope.class);
 

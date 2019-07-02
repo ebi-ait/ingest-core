@@ -8,11 +8,12 @@ import org.humancellatlas.ingest.messaging.model.MessageProtocol;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.Identifiable;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -135,7 +136,7 @@ public class MetadataDocumentMessageBuilder {
 
     public ExportMessage buildAssaySubmittedMessage() {
         String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
-        return new ExportMessage(UUID.randomUUID(), DateTime.now().toString(), messageProtocol, metadataDocId, metadataDocUuid, callbackLink,
+        return new ExportMessage(UUID.randomUUID(), Instant.now().toString(), messageProtocol, metadataDocId, metadataDocUuid, callbackLink,
                 documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
 
@@ -144,9 +145,9 @@ public class MetadataDocumentMessageBuilder {
                                         .stream()
                                         .map(document -> linkGenerator.createCallback(document.getClass(),document.getId()))
                                         .collect(Collectors.toList());
-        return new BundleUpdateMessage(UUID.fromString(bundleManifest.getBundleUuid()), DateTime.now().toString(),
-                bundleManifest.getId(), bundleManifest.getBundleUuid(), BundleManifest.class.getSimpleName(),
-                callbackLinks, envelopeId, envelopeUuid, assayIndex, totalAssays, null);
+        return new BundleUpdateMessage(UUID.fromString(bundleManifest.getBundleUuid()), Instant.now().toString(),
+                                       bundleManifest.getId(), bundleManifest.getBundleUuid(), BundleManifest.class.getSimpleName(),
+                                       callbackLinks, envelopeId, envelopeUuid, assayIndex, totalAssays, null);
     }
 
 }

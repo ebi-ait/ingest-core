@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.apache.http.entity.ContentType;
 import org.humancellatlas.ingest.core.Checksums;
-
 import java.util.Optional;
 
 /**
@@ -14,17 +14,18 @@ import java.util.Optional;
  */
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class FileMessage {
     @JsonProperty("url")
-    private final String cloudUrl;
+    private String cloudUrl;
     @JsonProperty("name")
-    private final String fileName;
+    private String fileName;
     @JsonProperty("upload_area_id")
-    private final String stagingAreaId;
+    private String stagingAreaId;
     @JsonProperty("content_type")
-    private final String contentType;
-    private final Checksums checksums;
-    private final long size;
+    private String contentType;
+    private Checksums checksums;
+    private long size;
 
     /**
      * given existence of substring "dcp-type={type}" in this.contentType, extracts {type}

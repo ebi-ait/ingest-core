@@ -16,9 +16,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.rest.core.annotation.RestResource;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
@@ -29,10 +27,10 @@ import java.util.UUID;
 public class File extends MetadataDocument {
 
     @Indexed
-    @RestResource @DBRef private final List<Process> inputToProcesses = new ArrayList<>();
+    @RestResource @DBRef private Set<Process> inputToProcesses = new HashSet<>();
 
     @Indexed
-    @RestResource @DBRef private final List<Process> derivedByProcesses = new ArrayList<>();
+    @RestResource @DBRef private Set<Process> derivedByProcesses = new HashSet<>();
 
     @Indexed
     private String fileName;
@@ -89,7 +87,7 @@ public class File extends MetadataDocument {
 
     public void addToAnalysis(Process analysis) {
         //TODO check if this File and the Analysis belong to the same Submission?
-        List<SubmissionEnvelope> submissionEnvelopes = getSubmissionEnvelopes();
+        Set<SubmissionEnvelope> submissionEnvelopes = getSubmissionEnvelopes();
         if (submissionEnvelopes == null || submissionEnvelopes.isEmpty()) {
             SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
             addToSubmissionEnvelope(submissionEnvelope);

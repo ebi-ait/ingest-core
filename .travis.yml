@@ -1,4 +1,6 @@
 language: java
+jdk:
+- openjdk11
 services:
 - mongodb
 before_cache:

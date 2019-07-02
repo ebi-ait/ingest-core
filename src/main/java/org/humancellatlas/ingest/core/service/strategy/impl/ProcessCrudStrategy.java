@@ -7,9 +7,11 @@ import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
@@ -23,12 +25,15 @@ public class ProcessCrudStrategy implements MetadataCrudStrategy<Process> {
 
     @Override
     public Process findMetadataDocument(String id) {
-        return processRepository.findOne(id);
+        return processRepository.findById(id)
+                                .orElseThrow(() -> {
+                                    throw new ResourceNotFoundException();
+                                });
     }
 
     @Override
     public Process findOriginalByUuid(String uuid) {
-        return processRepository.findByUuidAndIsUpdateFalse(new Uuid(uuid));
+        return processRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid));
     }
 
     @Override
