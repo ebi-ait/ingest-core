@@ -148,11 +148,14 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
 
     private Optional<String> getSubmitLink(SubmissionEnvelope submissionEnvelope){
         SubmissionManifest submissionManifest = this.submissionManifestRepository.findBySubmissionEnvelopeId(submissionEnvelope.getId());
-        if((submissionManifest !=null) && (submissionManifest.getExpectedLinks() != null)
-                && (!submissionManifest.getExpectedLinks().equals(submissionManifest.getActualLinks()))){
+
+        if(submissionManifest == null)
+            return Optional.of(Links.SUBMIT_URL);
+        else if(submissionManifest.getExpectedLinks() !=null && submissionManifest.getExpectedLinks().equals(submissionManifest.getActualLinks())){
+            return Optional.of(Links.SUBMIT_URL);
+        } else {
             return Optional.empty();
         }
-        return Optional.of(Links.SUBMIT_URL);
     }
 
     private Optional<String> getSubresourceNameForRequestSubmissionState(SubmissionEnvelope submissionEnvelope, SubmissionState submissionState) {
