@@ -12,7 +12,7 @@ import java.util.List;
 @CrossOrigin
 public interface PatchRepository extends MongoRepository<Patch, String> {
 
-    @RestResource(path="updatedocument")
+    @RestResource(path="updatedocument", rel="WithUpdateDocument")
     @Query("{ 'updateDocument.$id': ?0 }")
     Patch<? extends MetadataDocument> findByUpdateDocumentId(ObjectId id);
 
