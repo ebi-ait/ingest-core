@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Javadocs go here!
@@ -55,5 +58,9 @@ public class ProjectService {
             throw new ResourceNotFoundException(String.format("Project with UUID %s not found", projectUuid.getUuid().toString()));
         }
         return bundleManifestRepository.findBundleManifestsByProjectAndBundleType(project, bundleType, pageable);
+    }
+
+    public Page<Project> queryByContent(List<MetadataCriteria> query, Pageable pageable){
+        return this.projectRepository.findByContent(query, pageable);
     }
 }
