@@ -3,7 +3,10 @@ package org.humancellatlas.ingest.core.web;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.patch.Patch;
+import org.humancellatlas.ingest.patch.PatchRepository;
 import org.humancellatlas.ingest.state.ValidationState;
+import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
@@ -12,34 +15,32 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-/**
- * Javadocs go here!
- *
- * @author Tony Burdett
- * @date 12/09/17
- */
 @Component
 @RequiredArgsConstructor
 public class MetadataDocumentResourceProcessor implements ResourceProcessor<Resource<MetadataDocument>> {
+
     private final @NonNull EntityLinks entityLinks;
 
-    private Optional<Link> getStateTransitionLink(MetadataDocument metadataDocument, ValidationState targetState) {
+    @NonNull
+    private final RepositoryEntityLinks repositoryEntityLinks;
+
+    private Optional<Link> getStateTransitionLink(MetadataDocument metadataDocument,
+            ValidationState targetState) {
         Optional<String> transitionResourceName = getSubresourceNameForValidationState(targetState);
         if (transitionResourceName.isPresent()) {
             Optional<String> rel = getRelNameForValidationState(targetState);
             if (rel.isPresent()) {
-                return Optional.of(entityLinks.linkForSingleResource(metadataDocument)
-                                           .slash(transitionResourceName.get())
-                                           .withRel(rel.get()));
+                return Optional.of(entityLinks
+                        .linkForSingleResource(metadataDocument)
+                        .slash(transitionResourceName.get())
+                        .withRel(rel.get()));
+            } else {
+                String messageTemplate = "Unexpected link/rel mismatch exception " +
+                        "(link = '%s', rel = '%s')";
+                throw new RuntimeException(String.format(messageTemplate,
+                        transitionResourceName.toString(), rel.toString()));
             }
-            else {
-                throw new RuntimeException(String.format("Unexpected link/rel mismatch exception (link = '%s', rel = " +
-                                                                 "'%s')",
-                                                         transitionResourceName.toString(),
-                                                         rel.toString()));
-            }
-        }
-        else {
+        } else {
             return Optional.empty();
         }
     }
@@ -93,6 +94,17 @@ public class MetadataDocumentResourceProcessor implements ResourceProcessor<Reso
                 .map(Optional::get)
                 .forEach(resource::add);
 
+        if (metadataDocument.getIsUpdate()) {
+            addPatchLink(resource, metadataDocument.getId());
+        }
         return resource;
+    }
+
+    private void addPatchLink(Resource<MetadataDocument> resource, String documentId) {
+        Link link = repositoryEntityLinks
+                .linkToSearchResource(Patch.class, "WithUpdateDocument")
+                .withRel("Patch")
+                .expand(documentId);
+        resource.add(link);
     }
 }
