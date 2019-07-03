@@ -106,7 +106,7 @@ public class MetadataDocumentResourceProcessor implements ResourceProcessor<Reso
     private void addPatchLink(Resource<MetadataDocument> resource, String documentId) {
         Link link = repositoryEntityLinks
                 .linkToSearchResource(Patch.class, "WithUpdateDocument")
-                .withRel("Patch")
+                .withRel("patch")
                 .expand(documentId);
         resource.add(link);
     }
