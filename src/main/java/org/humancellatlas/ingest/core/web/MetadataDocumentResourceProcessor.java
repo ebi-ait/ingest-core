@@ -87,17 +87,20 @@ public class MetadataDocumentResourceProcessor implements ResourceProcessor<Reso
 
     @Override public Resource<MetadataDocument> process(Resource<MetadataDocument> resource) {
         MetadataDocument metadataDocument = resource.getContent();
+        addStateLinks(resource, metadataDocument);
+        if (metadataDocument.getIsUpdate()) {
+            addPatchLink(resource, metadataDocument.getId());
+        }
+        return resource;
+    }
 
+    private void addStateLinks(Resource<MetadataDocument> resource,
+            MetadataDocument metadataDocument) {
         metadataDocument.allowedStateTransitions().stream()
                 .map(validationState -> getStateTransitionLink(metadataDocument, validationState))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(resource::add);
-
-        if (metadataDocument.getIsUpdate()) {
-            addPatchLink(resource, metadataDocument.getId());
-        }
-        return resource;
     }
 
     private void addPatchLink(Resource<MetadataDocument> resource, String documentId) {
