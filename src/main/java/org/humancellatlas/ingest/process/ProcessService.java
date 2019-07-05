@@ -71,7 +71,6 @@ public class ProcessService {
 
     public Process addProcessToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
                                                   Process process) {
-        process.setIsUpdate(submissionEnvelope.getIsUpdate());
         if(! process.getIsUpdate()) {
             return metadataCrudService.addToSubmissionEnvelopeAndSave(process, submissionEnvelope);
         } else {

@@ -45,7 +45,6 @@ public class ProjectService {
     }
 
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
-        project.setIsUpdate(submissionEnvelope.getIsUpdate());
         if(! project.getIsUpdate()) {
             return metadataCrudService.addToSubmissionEnvelopeAndSave(project, submissionEnvelope);
         } else {

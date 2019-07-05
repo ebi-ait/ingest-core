@@ -30,8 +30,6 @@ public class BiomaterialService {
   }
 
   public Biomaterial addBiomaterialToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Biomaterial biomaterial) {
-    biomaterial.setIsUpdate(submissionEnvelope.getIsUpdate());
-
     if(! biomaterial.getIsUpdate()) {
       return metadataCrudService.addToSubmissionEnvelopeAndSave(biomaterial, submissionEnvelope);
     } else {

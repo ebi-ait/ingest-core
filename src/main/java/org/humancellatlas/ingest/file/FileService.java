@@ -52,7 +52,6 @@ public class FileService {
     }
 
     public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
-        file.setIsUpdate(submissionEnvelope.getIsUpdate());
         File createdFile;
         if(! file.getIsUpdate()) {
             createdFile = metadataCrudService.addToSubmissionEnvelopeAndSave(file, submissionEnvelope);

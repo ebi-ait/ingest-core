@@ -34,7 +34,6 @@ public class ProtocolService {
     }
 
     public Protocol addProtocolToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Protocol protocol) {
-        protocol.setIsUpdate(submissionEnvelope.getIsUpdate());
         if(! protocol.getIsUpdate()) {
             return metadataCrudService.addToSubmissionEnvelopeAndSave(protocol, submissionEnvelope);
         } else {
