@@ -100,24 +100,28 @@ public class ProcessService {
         return targetFile;
     }
 
-    public Process resolveBundleReferencesForProcess(Process analysis, BundleReference bundleReference) {
+    public Process resolveBundleReferencesForProcess(final Process analysis, BundleReference bundleReference) {
         for (String bundleUuid : bundleReference.getBundleUuids()) {
-            BundleManifest bundleManifest = getBundleManifestRepository().findByBundleUuid(bundleUuid);
-            if (bundleManifest == null) {
-                throw new ResourceNotFoundException(String.format("Could not find bundle with UUID %s", bundleUuid));
-            }
-            else {
-                getLog().info(String.format("Adding bundle manifest link to process '%s'", analysis.getId()));
+            Optional<BundleManifest> maybeBundleManifest = getBundleManifestRepository().findTopByBundleUuidOrderByBundleVersionDesc(bundleUuid);
+
+            maybeBundleManifest.ifPresentOrElse(bundleManifest -> {
+                getLog().info("Adding bundle manifest link to process '" + analysis.getId() + "'");
                 analysis.addInputBundleManifest(bundleManifest);
-                analysis = getProcessRepository().save(analysis);
+                Process savedAnalysis = getProcessRepository().save(analysis);
 
                 // add the input files
                 for (String fileUuid : bundleManifest.getFileFilesMap().keySet()) {
                     File analysisInputFile = fileRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(fileUuid));
-                    analysisInputFile.addAsInputToProcess(analysis);
+                    analysisInputFile.addAsInputToProcess(savedAnalysis);
                     fileRepository.save(analysisInputFile);
                 }
-            }
+            }, () -> {
+                throw new ResourceNotFoundException(String.format("Could not find bundle with UUID %s", bundleUuid));
+            });
+
+
+
+
         }
         return getProcessRepository().save(analysis);
     }

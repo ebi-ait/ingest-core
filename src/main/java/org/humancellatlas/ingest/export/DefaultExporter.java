@@ -19,10 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import javax.swing.text.html.Option;
+import java.util.*;
 
 @Component
 public class DefaultExporter implements Exporter {
@@ -89,8 +87,12 @@ public class DefaultExporter implements Exporter {
             if(submissionUuid != null && submissionUuid.getUuid() != null){
                 builder.withEnvelopeUuid(submissionUuid.getUuid().toString());
             }
-            BundleManifest bundleManifest = bundleManifestRepository.findByBundleUuid(bundleManifestUuid);
-            BundleUpdateMessage exportMessage = builder.buildBundleUpdateMessage(bundleManifest, bundleManifestsToUpdate.get(bundleManifestUuid));
+            Optional<BundleManifest> maybeBundleManifest = bundleManifestRepository.findTopByBundleUuidOrderByBundleVersionDesc(bundleManifestUuid);
+            BundleUpdateMessage exportMessage = maybeBundleManifest.map(bundleManifest -> builder.buildBundleUpdateMessage(bundleManifest, bundleManifestsToUpdate.get(bundleManifestUuid)))
+                                                                   .orElseThrow(() -> {
+                                                                       throw new RuntimeException(String.format("Failed to find a bundle manifest for bundle UUID %s", bundleManifestUuid));
+                                                                   });
+
             return exportMessage;
         }).forEach(messageRouter::sendBundlesToUpdateForExport);
     }
