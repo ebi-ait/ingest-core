@@ -36,7 +36,10 @@ public class ProtocolController {
                                                       @RequestBody Protocol protocol,
                                                       @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
                                                       PersistentEntityResourceAssembler assembler) {
-        updatingUuid.ifPresent(uuid -> protocol.setUuid(new Uuid(uuid.toString())));
+        updatingUuid.ifPresent(uuid -> {
+            protocol.setUuid(new Uuid(uuid.toString()));
+            protocol.setIsUpdate(true);
+        });
         Protocol entity = getProtocolService().addProtocolToSubmissionEnvelope(submissionEnvelope, protocol);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);

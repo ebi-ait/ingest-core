@@ -44,7 +44,10 @@ public class ProjectController {
                                                      @RequestBody Project project,
                                                      @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
                                                      PersistentEntityResourceAssembler assembler) {
-        updatingUuid.ifPresent(uuid -> project.setUuid(new Uuid(uuid.toString())));
+        updatingUuid.ifPresent(uuid -> {
+            project.setUuid(new Uuid(uuid.toString()));
+            project.setIsUpdate(true);
+        });
         Project entity = getProjectService().addProjectToSubmissionEnvelope(submissionEnvelope, project);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);

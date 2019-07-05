@@ -40,7 +40,10 @@ public class BiomaterialController {
                                                        @RequestBody Biomaterial biomaterial,
                                                        @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
                                                        PersistentEntityResourceAssembler assembler) {
-    updatingUuid.ifPresent(uuid -> biomaterial.setUuid(new Uuid(uuid.toString())));
+    updatingUuid.ifPresent(uuid -> {
+      biomaterial.setUuid(new Uuid(uuid.toString()));
+      biomaterial.setIsUpdate(true);
+    });
     Biomaterial entity = getBiomaterialService().addBiomaterialToSubmissionEnvelope(submissionEnvelope, biomaterial);
     PersistentEntityResource resource = assembler.toFullResource(entity);
     return ResponseEntity.accepted().body(resource);

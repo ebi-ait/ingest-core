@@ -71,7 +71,10 @@ public class FileController {
                                                   @RequestBody File file,
                                                   @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
                                                   final PersistentEntityResourceAssembler assembler) {
-        updatingUuid.ifPresent(uuid -> file.setUuid(new Uuid(uuid.toString())));
+        updatingUuid.ifPresent(uuid -> {
+            file.setUuid(new Uuid(uuid.toString()));
+            file.setIsUpdate(true);
+        });
         File entity = getFileService().addFileToSubmissionEnvelope(submissionEnvelope, file);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);

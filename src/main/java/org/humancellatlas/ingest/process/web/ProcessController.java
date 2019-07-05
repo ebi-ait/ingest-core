@@ -75,7 +75,10 @@ public class ProcessController {
                                                      @RequestBody Process process,
                                                      @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
                                                      PersistentEntityResourceAssembler assembler) {
-        updatingUuid.ifPresent(uuid -> process.setUuid(new Uuid(uuid.toString())));
+        updatingUuid.ifPresent(uuid -> {
+            process.setUuid(new Uuid(uuid.toString()));
+            process.setIsUpdate(true);
+        });
         Process entity = getProcessService().addProcessToSubmissionEnvelope(submissionEnvelope, process);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
