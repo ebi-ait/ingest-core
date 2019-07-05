@@ -13,7 +13,7 @@ import java.util.Optional;
  */
 @CrossOrigin
 public interface BundleManifestRepository extends MongoRepository<BundleManifest, String>, BundleManifestRepositoryCustom {
-    Page<BundleManifest> findByBundleUuid(@Param("uuid") String uuid);
+    Page<BundleManifest> findByBundleUuid(@Param("uuid") String uuid, Pageable pageable);
 
     Optional<BundleManifest> findTopByBundleUuidOrderByBundleVersionDesc(String uuid);
 
