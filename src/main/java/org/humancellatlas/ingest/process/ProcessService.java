@@ -124,13 +124,13 @@ public class ProcessService {
 
 
     public Page<Process> findProcessesByInputBundleUuid(UUID bundleUuid, Pageable pageable) {
-        Optional<BundleManifest> maybeBundleManifest = Optional.ofNullable(bundleManifestRepository.findByBundleUuid(bundleUuid.toString()));
+        Optional<BundleManifest> maybeBundleManifest = bundleManifestRepository.findTopByBundleUuidOrderByBundleVersionDesc(bundleUuid.toString());
 
-        if(maybeBundleManifest.isPresent()){
-            return processRepository.findByInputBundleManifestsContaining(maybeBundleManifest.get(), pageable);
-        } else {
-            throw new ResourceNotFoundException(String.format("Bundle with UUID %s not found", bundleUuid.toString()));
-        }
+        return maybeBundleManifest.map(bundleManifest -> processRepository.findByInputBundleManifestsContaining(maybeBundleManifest.get(), pageable))
+                                  .orElseThrow(() -> {
+                                      throw new ResourceNotFoundException(String.format("Bundle with UUID %s not found", bundleUuid.toString()));
+                                  });
+
     }
 
     public Collection<Process> findAssays(SubmissionEnvelope submissionEnvelope) {
