@@ -80,15 +80,15 @@ From the previous expression, use `_links.add-file-reference.href`. This should 
 
 Repeat this step for all the files referenced by the Analysis
 
-## 6. Repeat for Additional analyses
+## 9. Repeat for Additional analyses
 
 It's possible to upload multiple analysis results in a single submission. The ingest API will figure out how to map them into bundles in the datastore.
 
-## 7. Upload Files to the Staging Area
+## 10. Upload Files to the Staging Area
 
 This functionality is not yet complete. It's fine to progress without this for now.
 
-## 8. Confirm your submission
+## 11. Confirm your submission
 
 In step 2. you will have received a 'submit' link (it's `_links.submit.href`). You can now use this to confirm your submission. It's also possible to reevaluate the submit link using a call to check on the submission envelope
 
