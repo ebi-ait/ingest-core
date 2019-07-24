@@ -80,7 +80,7 @@ public class ProcessService {
 
     // TODO Refactor this to use FileService
     // Implement logic to have the option to only create and createOrUpdate
-    public Process addFileToAnalysisProcess(final Process analysis, final File file) {
+    public Process addOutputFileToAnalysisProcess(final Process analysis, final File file) {
         SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
         File targetFile = determineTargetFile(submissionEnvelope, file);
         targetFile.addToAnalysis(analysis);
@@ -89,6 +89,19 @@ public class ProcessService {
         metadataDocumentEventHandler.handleMetadataDocumentCreate(targetFile);
 
         return analysis;
+    }
+
+    public Process addInputFileUuidToAnalysisProcess(final Process analysisProcess, final UUID inputFileUuid) {
+        return fileRepository.findByUuidUuidAndIsUpdateFalse(inputFileUuid)
+                             .map(inputFile -> addInputFileToAnalysisProcess(analysisProcess, inputFile))
+                             .orElseThrow(() -> {
+                                 throw new ResourceNotFoundException();
+                             });
+    }
+
+    public Process addInputFileToAnalysisProcess(final Process analysisProcess, final File inputFile) {
+        fileRepository.save(inputFile.addAsInputToProcess(analysisProcess));
+        return analysisProcess;
     }
 
     private File determineTargetFile(SubmissionEnvelope submissionEnvelope, File file) {

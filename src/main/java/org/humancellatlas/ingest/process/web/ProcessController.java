@@ -109,16 +109,16 @@ public class ProcessController {
     }
 
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL)
-    ResponseEntity<Resource<?>> addFileReference(){
+    ResponseEntity<Resource<?>> addOutputFileReference(){
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL,
                     method = RequestMethod.PUT)
-    ResponseEntity<Resource<?>> addFileReference(@PathVariable("analysis_id") Process analysis,
+    ResponseEntity<Resource<?>> addOutputFileReference(@PathVariable("analysis_id") Process analysis,
                                                  @RequestBody File file,
                                                  final PersistentEntityResourceAssembler assembler) {
-        Process result = processService.addFileToAnalysisProcess(analysis, file);
+        Process result = processService.addOutputFileToAnalysisProcess(analysis, file);
         PersistentEntityResource resource = assembler.toFullResource(result);
         return ResponseEntity.accepted().body(resource);
     }
