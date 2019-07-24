@@ -103,7 +103,7 @@ public class ProcessController {
     ResponseEntity<Resource<?>> addBundleReference(@PathVariable("analysis_id") Process analysis,
                                                    @RequestBody BundleReference bundleReference,
                                                    final PersistentEntityResourceAssembler assembler) {
-        Process entity = getProcessService().resolveBundleReferencesForProcess(analysis, bundleReference);
+        Process entity = getProcessService().addInputBundleManifest(analysis, bundleReference);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }

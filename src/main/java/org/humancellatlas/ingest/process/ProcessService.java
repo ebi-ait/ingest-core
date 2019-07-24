@@ -99,32 +99,16 @@ public class ProcessService {
         return targetFile;
     }
 
-    public Process resolveBundleReferencesForProcess(final Process analysis, BundleReference bundleReference) {
+    public Process addInputBundleManifest(final Process analysisProcess, BundleReference bundleReference) {
         for (String bundleUuid : bundleReference.getBundleUuids()) {
             Optional<BundleManifest> maybeBundleManifest = getBundleManifestRepository().findTopByBundleUuidOrderByBundleVersionDesc(bundleUuid);
-
-            maybeBundleManifest.ifPresentOrElse(bundleManifest -> {
-                getLog().info("Adding bundle manifest link to process '" + analysis.getId() + "'");
-                analysis.addInputBundleManifest(bundleManifest);
-                Process savedAnalysis = getProcessRepository().save(analysis);
-
-                // add the input files
-                for (String fileUuid : bundleManifest.getFileFilesMap().keySet()) {
-                    File analysisInputFile = fileRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(fileUuid));
-                    analysisInputFile.addAsInputToProcess(savedAnalysis);
-                    fileRepository.save(analysisInputFile);
-                }
-            }, () -> {
+            maybeBundleManifest.ifPresentOrElse(analysisProcess::addInputBundleManifest, () -> {
                 throw new ResourceNotFoundException(String.format("Could not find bundle with UUID %s", bundleUuid));
             });
-
-
-
-
         }
-        return getProcessRepository().save(analysis);
-    }
 
+        return getProcessRepository().save(analysisProcess);
+    }
 
     public Page<Process> findProcessesByInputBundleUuid(UUID bundleUuid, Pageable pageable) {
         Optional<BundleManifest> maybeBundleManifest = bundleManifestRepository.findTopByBundleUuidOrderByBundleVersionDesc(bundleUuid.toString());
