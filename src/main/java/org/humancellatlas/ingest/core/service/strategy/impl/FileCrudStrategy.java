@@ -33,7 +33,10 @@ public class FileCrudStrategy implements MetadataCrudStrategy<File> {
 
     @Override
     public File findOriginalByUuid(String uuid) {
-        return fileRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid));
+        return fileRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid))
+                             .orElseThrow(() -> {
+                                 throw new ResourceNotFoundException();
+                             });
     }
 
     @Override

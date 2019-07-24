@@ -12,6 +12,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -27,7 +28,7 @@ public interface ProjectRepository extends MongoRepository<Project, String> , Pr
     Page<Project> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
 
     @RestResource(rel = "findByUuid", path = "findByUuid")
-    Project findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
+    Optional<Project> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
     @RestResource(path = "findByUser", rel = "findByUser")
     Page<Project> findByUser(@Param(value = "user") String user, Pageable pageable);

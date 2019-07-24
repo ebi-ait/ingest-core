@@ -53,11 +53,11 @@ public class ProjectService {
     }
 
     public Page<BundleManifest> findBundleManifestsByProjectUuidAndBundleType(Uuid projectUuid, BundleType bundleType, Pageable pageable){
-        Project project = this.projectRepository.findByUuidUuidAndIsUpdateFalse(projectUuid.getUuid());
-        if (project == null) {
-            throw new ResourceNotFoundException(String.format("Project with UUID %s not found", projectUuid.getUuid().toString()));
-        }
-        return bundleManifestRepository.findBundleManifestsByProjectAndBundleType(project, bundleType, pageable);
+        return this.projectRepository.findByUuidUuidAndIsUpdateFalse(projectUuid.getUuid())
+                                     .map(project -> bundleManifestRepository.findBundleManifestsByProjectAndBundleType(project, bundleType, pageable))
+                                     .orElseThrow(() -> {
+                                         throw new ResourceNotFoundException(String.format("Project with UUID %s not found", projectUuid.getUuid().toString()));
+                                     });
     }
 
     public Page<Project> queryByContent(List<MetadataCriteria> query, Pageable pageable){
