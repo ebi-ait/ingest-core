@@ -123,6 +123,16 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @RequestMapping(path = "/processes/{analysis_id}/" + Links.INPUT_FILES_URL,
+            method = RequestMethod.POST)
+    ResponseEntity<Resource<?>> addInputFileReference(@PathVariable("analysis_id") Process analysis,
+                                                      @RequestBody UUID inputFileUuid,
+                                                      final PersistentEntityResourceAssembler assembler) {
+        Process result = processService.addInputFileUuidToAnalysisProcess(analysis, inputFileUuid);
+        PersistentEntityResource resource = assembler.toFullResource(result);
+        return ResponseEntity.accepted().body(resource);
+    }
+
     @RequestMapping(path = "/processes/search/findByInputBundleUuid", method = RequestMethod.GET)
     ResponseEntity<?> findProcesessByInputBundleUuid(@RequestParam String bundleUuid,
                                                      Pageable pageable,
