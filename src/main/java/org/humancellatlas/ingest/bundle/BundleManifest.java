@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * Created by rolando on 05/09/2017.
  */
@@ -36,5 +37,5 @@ public class BundleManifest implements Identifiable<String> {
     private final Map<String, Collection<String>> fileProtocolMap;
     private final Map<String, Collection<String>> fileFilesMap;
 
-    private final @Setter Object links;
+    private @Setter Object links;
 }
