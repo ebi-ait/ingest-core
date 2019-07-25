@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.bundle;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -35,4 +36,5 @@ public class BundleManifest implements Identifiable<String> {
     private final Map<String, Collection<String>> fileProtocolMap;
     private final Map<String, Collection<String>> fileFilesMap;
 
+    private final @Setter Object links;
 }
