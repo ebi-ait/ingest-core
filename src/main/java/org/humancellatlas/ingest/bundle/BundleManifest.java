@@ -37,5 +37,5 @@ public class BundleManifest implements Identifiable<String> {
     private final Map<String, Collection<String>> fileProtocolMap;
     private final Map<String, Collection<String>> fileFilesMap;
 
-    private @Setter Object links;
+    private @Setter List<EntityLink> links;
 }
