@@ -124,7 +124,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/processes/{analysis_id}/" + Links.INPUT_FILES_URL,
+    @RequestMapping(path = "/processes/{analysis_id}/" + Links.ADD_INPUT_FILE_URL,
             method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addInputFileReference(@PathVariable("analysis_id") Process analysis,
                                                       @RequestBody InputFileReference inputFileReference,

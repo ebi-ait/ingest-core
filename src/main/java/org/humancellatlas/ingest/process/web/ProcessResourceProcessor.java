@@ -49,6 +49,10 @@ public class ProcessResourceProcessor implements ResourceProcessor<Resource<Proc
         return entityLinks.linkForSingleResource(process).slash(Links.FILE_REF_URL).withRel(Links.FILE_REF_REL);
     }
 
+    private Link getAddInputFileLink(Process process) {
+        return entityLinks.linkForSingleResource(process).slash(Links.ADD_INPUT_FILE_REL).withRel(Links.ADD_INPUT_FILE_REL);
+    }
+
     @Deprecated
     private Link getOldEvilBundleReferencesLink(Process process) {
         return entityLinks.linkForSingleResource(process).slash(Links.BUNDLE_REF_URL).withRel(Links.BUNDLE_REF_OLD_EVIL_REL);
@@ -68,6 +72,7 @@ public class ProcessResourceProcessor implements ResourceProcessor<Resource<Proc
                      getDerivedFilesLink(process),
                      getBundleReferencesLink(process),
                      getFileReferencesLink(process),
+                     getAddInputFileLink(process),
                      getOldEvilBundleReferencesLink(process),
                      getOldEvilFileReferencesLink(process));
         return resource;
