@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.process.BundleReference;
+import org.humancellatlas.ingest.process.InputFileReference;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -126,9 +127,9 @@ public class ProcessController {
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.INPUT_FILES_URL,
             method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addInputFileReference(@PathVariable("analysis_id") Process analysis,
-                                                      @RequestBody UUID inputFileUuid,
+                                                      @RequestBody InputFileReference inputFileReference,
                                                       final PersistentEntityResourceAssembler assembler) {
-        Process result = processService.addInputFileUuidToAnalysisProcess(analysis, inputFileUuid);
+        Process result = processService.addInputFileUuidToAnalysisProcess(analysis, inputFileReference.getInputFileUuid());
         PersistentEntityResource resource = assembler.toFullResource(result);
         return ResponseEntity.accepted().body(resource);
     }
