@@ -1,12 +1,8 @@
 package org.humancellatlas.ingest.submission;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Data;
 
-@AllArgsConstructor
-@Getter
-@NoArgsConstructor
+@Data
 public class SubmissionError {
     private ErrorType errorType;
     private String errorCode;
