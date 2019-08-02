@@ -11,8 +11,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @CrossOrigin
 public interface ProcessRepository extends MongoRepository<Process, String> {
@@ -36,5 +38,8 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
     public Page<Process> findBySubmissionEnvelopesContainingAndValidationState(@Param
             ("envelopeUri") SubmissionEnvelope submissionEnvelope, @Param("state")
             ValidationState state, Pageable pageable);
+
+    @RestResource(exported = false)
+    public Stream<Process> findAllByIdIn(Collection<String> ids);
 
 }
