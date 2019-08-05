@@ -129,7 +129,7 @@ public class ProcessController {
     ResponseEntity<Resource<?>> addInputFileReference(@PathVariable("analysis_id") Process analysis,
                                                       @RequestBody InputFileReference inputFileReference,
                                                       final PersistentEntityResourceAssembler assembler) {
-        Process result = processService.addInputFileUuidToAnalysisProcess(analysis, inputFileReference.getInputFileUuid());
+        Process result = processService.addInputFileUuidToProcess(analysis, inputFileReference.getInputFileUuid());
         PersistentEntityResource resource = assembler.toFullResource(result);
         return ResponseEntity.accepted().body(resource);
     }

@@ -30,9 +30,6 @@ public interface FileRepository extends MongoRepository<File, String> {
     Optional<File> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
     @RestResource(exported = false)
-    File findByUuidUuid(UUID uuid);
-
-    @RestResource(exported = false)
     Stream<File> findBySubmissionEnvelopesContains(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(exported = false)

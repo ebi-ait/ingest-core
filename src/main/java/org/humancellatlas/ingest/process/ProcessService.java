@@ -91,17 +91,17 @@ public class ProcessService {
         return analysis;
     }
 
-    public Process addInputFileUuidToAnalysisProcess(final Process analysisProcess, final UUID inputFileUuid) {
+    public Process addInputFileUuidToProcess(final Process process, final UUID inputFileUuid) {
         return fileRepository.findByUuidUuidAndIsUpdateFalse(inputFileUuid)
-                             .map(inputFile -> addInputFileToAnalysisProcess(analysisProcess, inputFile))
+                             .map(inputFile -> addInputFileToProcess(process, inputFile))
                              .orElseThrow(() -> {
                                  throw new ResourceNotFoundException();
                              });
     }
 
-    public Process addInputFileToAnalysisProcess(final Process analysisProcess, final File inputFile) {
-        fileRepository.save(inputFile.addAsInputToProcess(analysisProcess));
-        return analysisProcess;
+    public Process addInputFileToProcess(final Process process, final File inputFile) {
+        fileRepository.save(inputFile.addAsInputToProcess(process));
+        return process;
     }
 
     private File determineTargetFile(SubmissionEnvelope submissionEnvelope, File file) {
