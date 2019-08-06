@@ -12,6 +12,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @CrossOrigin
@@ -21,7 +22,7 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
     Page<Process> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
 
     @RestResource(rel = "findByUuid", path = "findByUuid")
-    Process findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
+    Optional<Process> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
     @RestResource(exported = false)
     List<Process> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope);

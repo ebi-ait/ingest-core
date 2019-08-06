@@ -2,7 +2,6 @@ package org.humancellatlas.ingest.core.service.strategy.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -33,7 +32,10 @@ public class FileCrudStrategy implements MetadataCrudStrategy<File> {
 
     @Override
     public File findOriginalByUuid(String uuid) {
-        return fileRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid));
+        return fileRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid))
+                             .orElseThrow(() -> {
+                                 throw new ResourceNotFoundException();
+                             });
     }
 
     @Override

@@ -61,7 +61,15 @@ Evaluate the expression `_links.protocols.href` from the response to the previou
 >: curl -X PUT -H "Content-Type: text/uri-list" -d "http://api.ingest.integration.data.humancellatlas.org/protocols/5b769e991c022d00079f1d95" "http://api.ingest.integration.data.humancellatlas.org/processes/5b769e3d1c022d00079f1d92/protocols"
 ```
 
-## 7. Add a Bundle Reference to this Analysis
+## 7 Link input Files to the Analysis Process
+
+Any files in the DCP that were used as an analysis inputs should be linked to the analysis process. Given an input file UUID, this can be performed as follows:
+
+```bash
+>: curl -X POST -H "Content-Type: application/json" http://api.ingest.dev.data.humancellatlas.org/processes/{analysis_id}/inputFiles -d '{"inputFileUuid": "<input file UUID>"}'
+```
+
+## 8. Add a Bundle Reference to this Analysis
 
 From the previous expression, use `_links.add-input-bundles.href`. This should give you a URL like the one shown in the example below. Submit a JSON snippet that contains the UUIDs of the bundles used in this analysis.
 
@@ -70,25 +78,26 @@ From the previous expression, use `_links.add-input-bundles.href`. This should g
 >: curl -X PUT -H "Content-Type: application/json" http://api.ingest.integration.data.humancellatlas.org/processes/5b769e3d1c022d00079f1d92/bundleReferences -d '{ "bundleUuids" : ["e177fe37-1b35-4d52-9df3-e854c5d59306"]}'
 ```
 
-## 8. Add a File Reference to this Analysis
+## 9. Add a File Reference to this Analysis
 
 From the previous expression, use `_links.add-file-reference.href`. This should give you a URL like the one shown in the example below. Submit JSON that describes the file you want to reference.
 
 ```bash
->: curl -X PUT -H "Content-Type: application/json" http://api.ingest.dev.data.humancellatlas.org/analyses/{analysis_id}/fileReference -d '{"fileName": "ERR1630013.fastq.gz", "content": {"lane": 1, "type": "reads", "name": "ERR1630013.fastq.gz", "format": ".fastq.gz"}}'
+>: curl -X PUT -H "Content-Type: application/json" http://api.ingest.dev.data.humancellatlas.org/processes/{analysis_id}/fileReference -d '{"fileName": "ERR1630013.fastq.gz", "content": {"lane": 1, "type": "reads", "name": "ERR1630013.fastq.gz", "format": ".fastq.gz"}}'
+
 ```
 
 Repeat this step for all the files referenced by the Analysis
 
-## 6. Repeat for Additional analyses
+## 10. Repeat for Additional analyses
 
 It's possible to upload multiple analysis results in a single submission. The ingest API will figure out how to map them into bundles in the datastore.
 
-## 7. Upload Files to the Staging Area
+## 11. Upload Files to the Staging Area
 
-This functionality is not yet complete. It's fine to progress without this for now.
+See [https://github.com/HumanCellAtlas/dcp-cli/blob/master/docs/data_submission_guide.md](https://github.com/HumanCellAtlas/dcp-cli/blob/master/docs/data_submission_guide.md)
 
-## 8. Confirm your submission
+## 12. Confirm your submission
 
 In step 2. you will have received a 'submit' link (it's `_links.submit.href`). You can now use this to confirm your submission. It's also possible to reevaluate the submit link using a call to check on the submission envelope
 

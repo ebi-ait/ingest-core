@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.process.BundleReference;
+import org.humancellatlas.ingest.process.InputFileReference;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -103,22 +104,32 @@ public class ProcessController {
     ResponseEntity<Resource<?>> addBundleReference(@PathVariable("analysis_id") Process analysis,
                                                    @RequestBody BundleReference bundleReference,
                                                    final PersistentEntityResourceAssembler assembler) {
-        Process entity = getProcessService().resolveBundleReferencesForProcess(analysis, bundleReference);
+        Process entity = getProcessService().addInputBundleManifest(analysis, bundleReference);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }
 
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL)
-    ResponseEntity<Resource<?>> addFileReference(){
+    ResponseEntity<Resource<?>> addOutputFileReference(){
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL,
                     method = RequestMethod.PUT)
-    ResponseEntity<Resource<?>> addFileReference(@PathVariable("analysis_id") Process analysis,
-                                                 @RequestBody File file,
-                                                 final PersistentEntityResourceAssembler assembler) {
-        Process result = processService.addFileToAnalysisProcess(analysis, file);
+    ResponseEntity<Resource<?>> addOutputFileReference(@PathVariable("analysis_id") Process analysis,
+                                                       @RequestBody File file,
+                                                       final PersistentEntityResourceAssembler assembler) {
+        Process result = processService.addOutputFileToAnalysisProcess(analysis, file);
+        PersistentEntityResource resource = assembler.toFullResource(result);
+        return ResponseEntity.accepted().body(resource);
+    }
+
+    @RequestMapping(path = "/processes/{analysis_id}/" + Links.INPUT_FILES_URL,
+            method = RequestMethod.POST)
+    ResponseEntity<Resource<?>> addInputFileReference(@PathVariable("analysis_id") Process analysis,
+                                                      @RequestBody InputFileReference inputFileReference,
+                                                      final PersistentEntityResourceAssembler assembler) {
+        Process result = processService.addInputFileUuidToProcess(analysis, inputFileReference.getInputFileUuid());
         PersistentEntityResource resource = assembler.toFullResource(result);
         return ResponseEntity.accepted().body(resource);
     }

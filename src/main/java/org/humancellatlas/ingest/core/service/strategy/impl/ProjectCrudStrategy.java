@@ -34,7 +34,10 @@ public class ProjectCrudStrategy implements MetadataCrudStrategy<Project> {
 
     @Override
     public Project findOriginalByUuid(String uuid) {
-        return projectRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid));
+        return projectRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid))
+                                .orElseThrow(() -> {
+                                    throw new ResourceNotFoundException();
+                                });
     }
 
     @Override

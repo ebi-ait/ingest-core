@@ -80,7 +80,7 @@ public class ProcessService {
 
     // TODO Refactor this to use FileService
     // Implement logic to have the option to only create and createOrUpdate
-    public Process addFileToAnalysisProcess(final Process analysis, final File file) {
+    public Process addOutputFileToAnalysisProcess(final Process analysis, final File file) {
         SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
         File targetFile = determineTargetFile(submissionEnvelope, file);
         targetFile.addToAnalysis(analysis);
@@ -91,6 +91,19 @@ public class ProcessService {
         return analysis;
     }
 
+    public Process addInputFileUuidToProcess(final Process process, final UUID inputFileUuid) {
+        return fileRepository.findByUuidUuidAndIsUpdateFalse(inputFileUuid)
+                             .map(inputFile -> addInputFileToProcess(process, inputFile))
+                             .orElseThrow(() -> {
+                                 throw new ResourceNotFoundException();
+                             });
+    }
+
+    public Process addInputFileToProcess(final Process process, final File inputFile) {
+        fileRepository.save(inputFile.addAsInputToProcess(process));
+        return process;
+    }
+
     private File determineTargetFile(SubmissionEnvelope submissionEnvelope, File file) {
         List<File> persistentFiles = fileRepository
                 .findBySubmissionEnvelopesInAndFileName(submissionEnvelope, file.getFileName());
@@ -99,32 +112,16 @@ public class ProcessService {
         return targetFile;
     }
 
-    public Process resolveBundleReferencesForProcess(final Process analysis, BundleReference bundleReference) {
+    public Process addInputBundleManifest(final Process analysisProcess, BundleReference bundleReference) {
         for (String bundleUuid : bundleReference.getBundleUuids()) {
             Optional<BundleManifest> maybeBundleManifest = getBundleManifestRepository().findTopByBundleUuidOrderByBundleVersionDesc(bundleUuid);
-
-            maybeBundleManifest.ifPresentOrElse(bundleManifest -> {
-                getLog().info("Adding bundle manifest link to process '" + analysis.getId() + "'");
-                analysis.addInputBundleManifest(bundleManifest);
-                Process savedAnalysis = getProcessRepository().save(analysis);
-
-                // add the input files
-                for (String fileUuid : bundleManifest.getFileFilesMap().keySet()) {
-                    File analysisInputFile = fileRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(fileUuid));
-                    analysisInputFile.addAsInputToProcess(savedAnalysis);
-                    fileRepository.save(analysisInputFile);
-                }
-            }, () -> {
+            maybeBundleManifest.ifPresentOrElse(analysisProcess::addInputBundleManifest, () -> {
                 throw new ResourceNotFoundException(String.format("Could not find bundle with UUID %s", bundleUuid));
             });
-
-
-
-
         }
-        return getProcessRepository().save(analysis);
-    }
 
+        return getProcessRepository().save(analysisProcess);
+    }
 
     public Page<Process> findProcessesByInputBundleUuid(UUID bundleUuid, Pageable pageable) {
         Optional<BundleManifest> maybeBundleManifest = bundleManifestRepository.findTopByBundleUuidOrderByBundleVersionDesc(bundleUuid.toString());

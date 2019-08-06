@@ -33,7 +33,10 @@ public class ProtocolCrudStrategy implements MetadataCrudStrategy<Protocol> {
 
     @Override
     public Protocol findOriginalByUuid(String uuid) {
-        return protocolRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid));
+        return protocolRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid))
+                                 .orElseThrow(() -> {
+                                     throw new ResourceNotFoundException();
+                                 });
     }
 
     @Override

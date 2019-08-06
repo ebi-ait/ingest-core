@@ -34,7 +34,10 @@ public class BiomaterialCrudStrategy implements MetadataCrudStrategy<Biomaterial
 
     @Override
     public Biomaterial findOriginalByUuid(String uuid) {
-        return biomaterialRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid));
+        return biomaterialRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid))
+                                    .orElseThrow(() -> {
+                                        throw new ResourceNotFoundException();
+                                    });
     }
 
     @Override

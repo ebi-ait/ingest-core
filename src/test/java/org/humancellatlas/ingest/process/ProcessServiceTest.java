@@ -65,7 +65,7 @@ public class ProcessServiceTest {
                 .findBySubmissionEnvelopesInAndFileName(any(SubmissionEnvelope.class), anyString());
 
         //when:
-        Process result = service.addFileToAnalysisProcess(analysis, file);
+        Process result = service.addOutputFileToAnalysisProcess(analysis, file);
 
         //then:
         assertThat(result).isEqualTo(analysis);
@@ -92,7 +92,7 @@ public class ProcessServiceTest {
                 .findBySubmissionEnvelopesInAndFileName(submissionEnvelope, fileName);
 
         //when:
-        Process result = service.addFileToAnalysisProcess(analysis, file);
+        Process result = service.addOutputFileToAnalysisProcess(analysis, file);
 
         //then:
         assertThat(result).isEqualTo(analysis);

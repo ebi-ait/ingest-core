@@ -13,6 +13,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -26,10 +27,7 @@ public interface FileRepository extends MongoRepository<File, String> {
     Page<File> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
 
     @RestResource(rel = "findByUuid", path = "findByUuid")
-    File findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
-
-    @RestResource(exported = false)
-    File findByUuidUuid(UUID uuid);
+    Optional<File> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
     @RestResource(exported = false)
     Stream<File> findBySubmissionEnvelopesContains(SubmissionEnvelope submissionEnvelope);

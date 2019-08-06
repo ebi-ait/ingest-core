@@ -33,7 +33,10 @@ public class ProcessCrudStrategy implements MetadataCrudStrategy<Process> {
 
     @Override
     public Process findOriginalByUuid(String uuid) {
-        return processRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid));
+        return processRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid))
+                                .orElseThrow(() -> {
+                                    throw new ResourceNotFoundException();
+                                });
     }
 
     @Override
