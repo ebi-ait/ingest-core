@@ -117,14 +117,14 @@ public class ProcessController {
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL,
                     method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> addOutputFileReference(@PathVariable("analysis_id") Process analysis,
-                                                 @RequestBody File file,
-                                                 final PersistentEntityResourceAssembler assembler) {
+                                                       @RequestBody File file,
+                                                       final PersistentEntityResourceAssembler assembler) {
         Process result = processService.addOutputFileToAnalysisProcess(analysis, file);
         PersistentEntityResource resource = assembler.toFullResource(result);
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/processes/{analysis_id}/" + Links.ADD_INPUT_FILE_URL,
+    @RequestMapping(path = "/processes/{analysis_id}/" + Links.INPUT_FILES_URL,
             method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addInputFileReference(@PathVariable("analysis_id") Process analysis,
                                                       @RequestBody InputFileReference inputFileReference,

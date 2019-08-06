@@ -66,7 +66,7 @@ Evaluate the expression `_links.protocols.href` from the response to the previou
 Any files in the DCP that were used as an analysis inputs should be linked to the analysis process. Given an input file UUID, this can be performed as follows:
 
 ```bash
->: curl -X POST -H "Content-Type: application/json" http://api.ingest.dev.data.humancellatlas.org/processes/{analysis_id}/add-input-file -d '{"inputFileReference": "<input file UUID>"}'
+>: curl -X POST -H "Content-Type: application/json" http://api.ingest.dev.data.humancellatlas.org/processes/{analysis_id}/inputFiles -d '{"inputFileReference": "<input file UUID>"}'
 ```
 
 ## 8. Add a Bundle Reference to this Analysis

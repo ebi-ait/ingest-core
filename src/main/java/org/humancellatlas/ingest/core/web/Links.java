@@ -94,9 +94,7 @@ public class Links {
     public static final String INPUT_BIOMATERIALS_REL = "inputBiomaterials";
     public static final String INPUT_FILES_URL = "/inputFiles";
     public static final String INPUT_FILES_REL = "inputFiles";
-    public static final String ADD_INPUT_FILE_URL = "/add-input-file";
-    public static final String ADD_INPUT_FILE_REL = "add-input-file";
-    
+
     public static final String DERIVED_BY_BIOMATERIALS_URL = "/derivedBiomaterials";
     public static final String DERIVED_BY_BIOMATERIALS_REL = "derivedBiomaterials";
     public static final String DERIVED_BY_FILES_URL = "/derivedFiles";
