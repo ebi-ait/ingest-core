@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.*;
 public class SubmissionErrorController {
     private final @NonNull SubmissionErrorService submissionErrorService;
 
+    @GetMapping(path = "submissionEnvelopes/{sub_id}/submissionErrors")
+    ResponseEntity<?> GetSubmissionErrors(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope) {
+        return ResponseEntity.ok(getSubmissionErrorService().getErrorFromEnvelope(submissionEnvelope));
+    }
+
     @PostMapping(path = "submissionEnvelopes/{sub_id}/submissionErrors")
     ResponseEntity<Resource<?>> addErrorToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                    @RequestBody SubmissionError submissionError,
