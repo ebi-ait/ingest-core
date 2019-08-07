@@ -171,4 +171,33 @@ public class ProcessService {
                       });
         return results;
     }
+
+    public Process resolveBundleReferencesForProcess(Process analysis, BundleReference bundleReference) {
+        for (String bundleUuid : bundleReference.getBundleUuids()) {
+            Optional<BundleManifest> maybeBundleManifest = getBundleManifestRepository().findTopByBundleUuidOrderByBundleVersionDesc(bundleUuid);
+
+            maybeBundleManifest.ifPresentOrElse(bundleManifest -> {
+                getLog().info("Adding bundle manifest link to process '" + analysis.getId() + "'");
+                analysis.addInputBundleManifest(bundleManifest);
+                Process savedAnalysis = getProcessRepository().save(analysis);
+
+                // add the input files
+                for (String fileUuid : bundleManifest.getFileFilesMap().keySet()) {
+                    fileRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(fileUuid))
+                                  .ifPresentOrElse(analysisInputFile -> {
+                                      analysisInputFile.addAsInputToProcess(savedAnalysis);
+                                      fileRepository.save(analysisInputFile);
+                                  }, () -> {
+                                      throw new ResourceNotFoundException(String.format("Could not find file with UUID %s", fileUuid));
+                                  });
+
+
+                }
+            }, () -> {
+                    throw new ResourceNotFoundException(String.format("Could not find bundle with UUID %s", bundleUuid));
+            });
+        }
+
+        return getProcessRepository().save(analysis);
+    }
 }
