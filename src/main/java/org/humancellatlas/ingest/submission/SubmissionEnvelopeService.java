@@ -65,12 +65,6 @@ public class SubmissionEnvelopeService {
         });
     }
 
-
-    public SubmissionEnvelope addErrorToEnvelope(SubmissionError submissionError, SubmissionEnvelope submissionEnvelope) {
-        submissionEnvelope.addError(submissionError);
-        return submissionEnvelopeRepository.save(submissionEnvelope);
-    }
-
     public SubmissionEnvelope createUpdateSubmissionEnvelope() {
         SubmissionEnvelope updateSubmissionEnvelope = new SubmissionEnvelope();
         submissionEnvelopeCreateHandler.setUuid(updateSubmissionEnvelope);

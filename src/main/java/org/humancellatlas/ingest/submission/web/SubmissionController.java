@@ -133,16 +133,6 @@ public class SubmissionController {
         }
     }
 
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/submissionErrors", method = RequestMethod.POST)
-    ResponseEntity<Resource<?>> addErrorToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                   @RequestBody SubmissionError submissionError,
-                                                   PersistentEntityResourceAssembler assembler) {
-
-        SubmissionEnvelope envelope = submissionEnvelopeService.addErrorToEnvelope(submissionError, submissionEnvelope);
-        PersistentEntityResource resource = assembler.toFullResource(envelope);
-        return ResponseEntity.accepted().body(resource);
-    }
-
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/processes", method = RequestMethod.GET)
     ResponseEntity<?> getProcesses(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
         Pageable pageable,
