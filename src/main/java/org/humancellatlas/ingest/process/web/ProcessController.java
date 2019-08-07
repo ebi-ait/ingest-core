@@ -94,6 +94,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @Deprecated
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL)
     ResponseEntity<Resource<?>> addBundleReference(){
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
@@ -101,6 +102,16 @@ public class ProcessController {
 
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL,
                     method = RequestMethod.PUT)
+    ResponseEntity<Resource<?>> oldAddBundleReference(@PathVariable("analysis_id") Process analysis,
+                                                   @RequestBody BundleReference bundleReference,
+                                                   final PersistentEntityResourceAssembler assembler) {
+        Process entity = getProcessService().resolveBundleReferencesForProcess(analysis, bundleReference);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
+    @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL,
+            method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addBundleReference(@PathVariable("analysis_id") Process analysis,
                                                    @RequestBody BundleReference bundleReference,
                                                    final PersistentEntityResourceAssembler assembler) {

@@ -75,7 +75,7 @@ From the previous expression, use `_links.add-input-bundles.href`. This should g
 
 ```bash
 # point to the bundle UUID - for now, it doesn't matter if this doesn't exist (in future this will fail)
->: curl -X PUT -H "Content-Type: application/json" http://api.ingest.integration.data.humancellatlas.org/processes/5b769e3d1c022d00079f1d92/bundleReferences -d '{ "bundleUuids" : ["e177fe37-1b35-4d52-9df3-e854c5d59306"]}'
+>: curl -X POST -H "Content-Type: application/json" http://api.ingest.integration.data.humancellatlas.org/processes/5b769e3d1c022d00079f1d92/bundleReferences -d '{ "bundleUuids" : ["e177fe37-1b35-4d52-9df3-e854c5d59306"]}'
 ```
 
 ## 9. Add a File Reference to this Analysis
