@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.errors.SubmissionError;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
