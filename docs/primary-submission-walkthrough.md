@@ -8,6 +8,10 @@ The DCP uses Google service accounts for authenticating service-to-service reque
 
 Use [this](https://github.com/HumanCellAtlas/ingest-client/blob/master/ingest/utils/dcp_auth_client.py) library with your key file to sign a JWT token identifying your service.
 
+## Structure metadata
+
+Metadata submitted to the DCP must adhere to standards described in the [metadata-schema project](https://github.com/HumanCellAtlas/metadata-schema/tree/master/json_schema).
+
 ## Discover 
 * Query the collection managing submission envelopes, along with all other types of objects
 ```
