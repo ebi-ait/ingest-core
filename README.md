@@ -1,7 +1,17 @@
 # Ingest Core API
-Core Ingest Service for submitting and querying of data.
+Core Ingest Service for submitting experimental data to the DCP.
 
-An example of the process of making a submission is in [examples/v5/primary-submission.md](examples/v5/primary-submission.md).
+The API exposes a number of REST resources for representing experiment data:
+* `/projects`
+* `/biomaterials`
+* `/protocols`
+* `/processes`
+* `/files`
+
+See [this document](https://github.com/HumanCellAtlas/metadata-schema/blob/master/docs/structure.md) for an overview of how experimental data is structured together.
+
+
+An example of the process of making a submission is in [docs/primary-submission-walkthrough.md](docs/primary-submission-walkthrough.md).
 
 ## Tests
 `./gradlew test`
