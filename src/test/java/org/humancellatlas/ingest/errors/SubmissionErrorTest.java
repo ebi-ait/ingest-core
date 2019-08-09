@@ -35,7 +35,7 @@ public class SubmissionErrorTest {
         SubmissionError error = randErrorMessage();
 
         //when:
-        service.addErrorToEnvelope(error, submissionEnvelope);
+        service.addErrorToEnvelope(submissionEnvelope, error);
 
         //then:
         assertThat(service.getErrorFromEnvelope(submissionEnvelope)).containsOnlyOnce(error);
@@ -50,8 +50,8 @@ public class SubmissionErrorTest {
         SubmissionError error2 = randErrorMessage();
 
         //when:
-        service.addErrorToEnvelope(error1, submissionEnvelope);
-        service.addErrorToEnvelope(error2, submissionEnvelope);
+        service.addErrorToEnvelope(submissionEnvelope, error1);
+        service.addErrorToEnvelope(submissionEnvelope, error2);
 
         //then:
         assertThat(service.getErrorFromEnvelope(submissionEnvelope)).containsOnlyOnce(error1);

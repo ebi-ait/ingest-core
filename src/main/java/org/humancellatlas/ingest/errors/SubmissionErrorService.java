@@ -18,7 +18,7 @@ public class SubmissionErrorService {
         return submissionEnvelope.getSubmissionErrors();
     }
 
-    public SubmissionEnvelope addErrorToEnvelope(SubmissionError submissionError, SubmissionEnvelope submissionEnvelope) {
+    public SubmissionEnvelope addErrorToEnvelope(SubmissionEnvelope submissionEnvelope, SubmissionError submissionError) {
         submissionEnvelope.addError(submissionError);
         return submissionEnvelopeRepository.save(submissionEnvelope);
     }

@@ -29,7 +29,7 @@ public class SubmissionErrorController {
                                                    @RequestBody SubmissionError submissionError,
                                                    final PersistentEntityResourceAssembler resourceAssembler) {
 
-        SubmissionEnvelope envelope = getSubmissionErrorService().addErrorToEnvelope(submissionError, submissionEnvelope);
+        SubmissionEnvelope envelope = getSubmissionErrorService().addErrorToEnvelope(submissionEnvelope, submissionError);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(envelope));
     }
 }
