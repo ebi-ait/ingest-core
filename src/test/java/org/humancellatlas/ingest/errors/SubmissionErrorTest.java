@@ -1,74 +1,71 @@
 package org.humancellatlas.ingest.errors;
 
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Random;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {SubmissionErrorService.class})
 public class SubmissionErrorTest {
     @MockBean
-    private SubmissionEnvelopeRepository submissionEnvelopeRepository;
+    private Pageable pageable;
+    @MockBean
+    private SubmissionErrorRepository submissionErrorRepository;
+    @Autowired
+    SubmissionErrorService submissionErrorService;
 
     @Test
-    public void newEnvelopeHasNoErrors() {
+    public void serviceCallsRepository() {
         //given:
-        SubmissionErrorService service = new SubmissionErrorService(submissionEnvelopeRepository);
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        //and:
+        when(submissionErrorRepository.findBySubmissionEnvelope(any(SubmissionEnvelope.class), any(Pageable.class)))
+                .thenReturn(new PageImpl(Collections.emptyList()));
+
         //then:
-        assertThat(service.getErrorFromEnvelope(submissionEnvelope)).isEmpty();
+        assertThat(submissionErrorService.getErrorsFromEnvelope(submissionEnvelope,pageable)).isEmpty();
+
     }
 
     @Test
-    public void newErrorIsSaved() {
+    public void errorIsGivenEnvelope() {
         //given:
-        SubmissionErrorService service = new SubmissionErrorService(submissionEnvelopeRepository);
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         SubmissionError error = randErrorMessage();
+        ArgumentCaptor<SubmissionError> insertedError = ArgumentCaptor.forClass(SubmissionError.class);
 
         //when:
-        service.addErrorToEnvelope(submissionEnvelope, error);
+        submissionErrorService.addErrorToEnvelope(submissionEnvelope, error);
+        verify(submissionErrorRepository).insert(insertedError.capture());
 
         //then:
-        assertThat(service.getErrorFromEnvelope(submissionEnvelope)).containsOnlyOnce(error);
+        assertThat(error.getSubmissionEnvelope()).isEqualTo(submissionEnvelope);
+        assertThat(insertedError.getValue()).isEqualTo(error);
     }
 
-    @Test
-    public void newErrorsAreSavedInOrder() {
-        //given:
-        SubmissionErrorService service = new SubmissionErrorService(submissionEnvelopeRepository);
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        SubmissionError error1 = randErrorMessage();
-        SubmissionError error2 = randErrorMessage();
-
-        //when:
-        service.addErrorToEnvelope(submissionEnvelope, error1);
-        service.addErrorToEnvelope(submissionEnvelope, error2);
-
-        //then:
-        assertThat(service.getErrorFromEnvelope(submissionEnvelope)).containsOnlyOnce(error1);
-        assertThat(service.getErrorFromEnvelope(submissionEnvelope)).containsOnlyOnce(error2);
-        assertThat(service.getErrorFromEnvelope(submissionEnvelope)).containsSequence(error1, error2);
-    }
-
-    public SubmissionError randErrorMessage() {
-        SubmissionError err = new SubmissionError();
+    public static SubmissionError randErrorMessage() {
         Random random = new Random();
+        SubmissionError newError = new SubmissionError();
         if (random.nextBoolean()) {
-            err.setErrorType(ErrorType.ERROR);
+            newError.setErrorType(ErrorType.ERROR);
         } else {
-            err.setErrorType(ErrorType.WARNING);
+            newError.setErrorType(ErrorType.WARNING);
         }
-        err.setErrorCode(String.format("%1$04d", random.nextInt(10000)));
-        err.setMessage(Long.toString(random.nextLong()));
-        return err;
+        newError.setErrorCode(String.format("%1$04d", random.nextInt(10000)));
+        newError.setMessage(Long.toString(random.nextLong()));
+        return newError;
     }
 }

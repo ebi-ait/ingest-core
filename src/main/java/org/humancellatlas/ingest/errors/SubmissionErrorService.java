@@ -1,25 +1,23 @@
 package org.humancellatlas.ingest.errors;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
-@RequiredArgsConstructor
 public class SubmissionErrorService {
-    @NonNull
-    private final SubmissionEnvelopeRepository submissionEnvelopeRepository;
+    @Autowired
+    private SubmissionErrorRepository submissionErrorRepository;
 
-    public List<SubmissionError> getErrorFromEnvelope(SubmissionEnvelope submissionEnvelope) {
-        return submissionEnvelope.getSubmissionErrors();
+    public Page<SubmissionError> getErrorsFromEnvelope(SubmissionEnvelope submissionEnvelope,
+                                                       Pageable pageable) {
+        return submissionErrorRepository.findBySubmissionEnvelope(submissionEnvelope, pageable);
     }
 
-    public SubmissionEnvelope addErrorToEnvelope(SubmissionEnvelope submissionEnvelope, SubmissionError submissionError) {
-        submissionEnvelope.addError(submissionError);
-        return submissionEnvelopeRepository.save(submissionEnvelope);
+    public void addErrorToEnvelope(SubmissionEnvelope submissionEnvelope, SubmissionError submissionError) {
+        submissionError.setSubmissionEnvelope(submissionEnvelope);
+        submissionErrorRepository.insert(submissionError);
     }
 }
