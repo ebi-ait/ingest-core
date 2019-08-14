@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.export;
 
+import org.apache.commons.collections4.ListUtils;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestService;
@@ -17,10 +18,12 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 
 import javax.swing.text.html.Option;
 import java.util.*;
+import java.util.function.Function;
 
 @Component
 public class DefaultExporter implements Exporter {
@@ -47,21 +50,30 @@ public class DefaultExporter implements Exporter {
 
     @Override
     public void exportBundles(SubmissionEnvelope envelope) {
-        Collection<Process> assayingProcesses = processService.findAssays(envelope);
-        Collection<Process> analysisProcesses = processService.findAnalyses(envelope);
+        Collection<String> assayingProcessIds = processService.findAssays(envelope);
+        Collection<String> analysisProcessIds = processService.findAnalyses(envelope);
 
         log.info(String.format("Found %s assays and %s analysis processes for envelope with ID %s",
-                               assayingProcesses.size(),
-                               analysisProcesses.size(),
+                               assayingProcessIds.size(),
+                               analysisProcessIds.size(),
                                envelope.getId()));
 
         IndexCounter counter = new IndexCounter();
-        int totalCount = assayingProcesses.size() + analysisProcesses.size();
-        assayingProcesses.stream()
+        int totalCount = assayingProcessIds.size() + analysisProcessIds.size();
+
+        int partitionSize = 500;
+        partitionProcessIds(assayingProcessIds, partitionSize)
+                .stream()
+                .map(processIdBatch -> processService.getProcessRepository().findAllByIdIn(processIdBatch))
+                .flatMap(Function.identity())
                 .map(process -> new ExportData(counter.next(), totalCount, process,  envelope))
                 .forEach(messageRouter::sendAssayForExport);
-        analysisProcesses.stream()
-                .map(process -> new ExportData(counter.next(), totalCount, process, envelope))
+
+        partitionProcessIds(analysisProcessIds, partitionSize)
+                .stream()
+                .map(processIdBatch -> processService.getProcessRepository().findAllByIdIn(processIdBatch))
+                .flatMap(Function.identity())
+                .map(process -> new ExportData(counter.next(), totalCount, process,  envelope))
                 .forEach(messageRouter::sendAnalysisForExport);
     }
 
@@ -95,6 +107,18 @@ public class DefaultExporter implements Exporter {
 
             return exportMessage;
         }).forEach(messageRouter::sendBundlesToUpdateForExport);
+    }
+
+    /**
+     *
+     * Divides a set of process IDs into lists of size partitionSize
+     *
+     * @param processIds
+     * @param partitionSize
+     * @return A collection of partitionSize sized lists of processes
+     */
+    private static List<List<String>> partitionProcessIds(Collection<String> processIds, int partitionSize) {
+        return ListUtils.partition(new ArrayList<>(processIds), partitionSize);
     }
 
 

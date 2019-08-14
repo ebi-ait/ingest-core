@@ -133,8 +133,15 @@ public class ProcessService {
 
     }
 
-    public Collection<Process> findAssays(SubmissionEnvelope submissionEnvelope) {
-        Set<Process> results = new LinkedHashSet<>();
+    /**
+     *
+     * Find all assay process IDs in a submission
+     *
+     * @param submissionEnvelope
+     * @return A collection of IDs of every assay process in a submission
+     */
+    public Set<String> findAssays(SubmissionEnvelope submissionEnvelope) {
+        Set<String> results = new LinkedHashSet<>();
         long fileStartTime = System.currentTimeMillis();
 
         long fileEndTime = System.currentTimeMillis();
@@ -147,7 +154,7 @@ public class ProcessService {
                       .forEach(derivedFile -> {
                           for (Process derivedByProcess : derivedFile.getDerivedByProcesses()) {
                               if (!biomaterialRepository.findByInputToProcessesContains(derivedByProcess).isEmpty()) {
-                                  results.add(derivedByProcess);
+                                  results.add(derivedByProcess.getId());
                               }
                           }
                       });
@@ -159,13 +166,20 @@ public class ProcessService {
         return results;
     }
 
-    public Collection<Process> findAnalyses(SubmissionEnvelope submissionEnvelope) {
-        Set<Process> results = new LinkedHashSet<>();
+    /**
+     *
+     * Find all analysis process IDs in a submission
+     *
+     * @param submissionEnvelope
+     * @return A collection of IDs of every analysis process in a submission
+     */
+    public Set<String> findAnalyses(SubmissionEnvelope submissionEnvelope) {
+        Set<String> results = new LinkedHashSet<>();
         fileRepository.findBySubmissionEnvelopesContains(submissionEnvelope)
                       .forEach(derivedFile -> {
                           for (Process derivedByProcess : derivedFile.getDerivedByProcesses()) {
                               if (!fileRepository.findByInputToProcessesContains(derivedByProcess).isEmpty()) {
-                                  results.add(derivedByProcess);
+                                  results.add(derivedByProcess.getId());
                               }
                           }
                       });
