@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.zalando.problem.*;
 
 import java.util.*;
 
@@ -44,28 +45,29 @@ public class SubmissionErrorTest {
     public void errorIsGivenEnvelope() {
         //given:
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        SubmissionError error = randErrorMessage();
+        Problem problem = randomProblem();
         ArgumentCaptor<SubmissionError> insertedError = ArgumentCaptor.forClass(SubmissionError.class);
 
         //when:
-        submissionErrorService.addErrorToEnvelope(submissionEnvelope, error);
+        SubmissionError submissionError = submissionErrorService.addErrorToEnvelope(submissionEnvelope, problem);
         verify(submissionErrorRepository).insert(insertedError.capture());
 
         //then:
-        assertThat(error.getSubmissionEnvelope()).isEqualTo(submissionEnvelope);
-        assertThat(insertedError.getValue()).isEqualTo(error);
+        assertThat(insertedError.getValue().getSubmissionEnvelope()).isEqualTo(submissionEnvelope);
+        assertThat(insertedError.getValue()).isEqualTo(submissionError);
     }
 
-    public static SubmissionError randErrorMessage() {
+    public static Problem randomProblem() {
         Random random = new Random();
-        SubmissionError newError = new SubmissionError();
+        StatusType status = Status.valueOf(300);
         if (random.nextBoolean()) {
-            newError.setErrorType(ErrorType.ERROR);
-        } else {
-            newError.setErrorType(ErrorType.WARNING);
+            status = Status.valueOf(400);
         }
-        newError.setErrorCode(String.format("%1$04d", random.nextInt(10000)));
-        newError.setMessage(Long.toString(random.nextLong()));
-        return newError;
+
+        return Problem.builder()
+                .withStatus(status)
+                .withTitle(Long.toString(random.nextLong()))
+                .withDetail(Long.toString(random.nextLong()))
+                .build();
     }
 }

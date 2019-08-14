@@ -29,10 +29,9 @@ public class SubmissionErrorController {
 
     @PostMapping(path = "submissionEnvelopes/{sub_id}/submissionErrors")
     ResponseEntity<Resource<?>> addErrorToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                   @RequestBody SubmissionError submissionError,
+                                                   @RequestBody IngestError ingestError,
                                                    final PersistentEntityResourceAssembler resourceAssembler) {
-
-        submissionErrorService.addErrorToEnvelope(submissionEnvelope, submissionError);
+        SubmissionError submissionError = submissionErrorService.addErrorToEnvelope(submissionEnvelope, ingestError);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionError));
     }
 }
