@@ -1,9 +1,7 @@
 package org.humancellatlas.ingest.errors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -14,6 +12,7 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
+@Setter(AccessLevel.PACKAGE)
 @EqualsAndHashCode(callSuper = true)
 public class SubmissionError extends IngestError {
     @JsonIgnore @DBRef private SubmissionEnvelope submissionEnvelope;

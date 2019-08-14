@@ -1,14 +1,14 @@
 package org.humancellatlas.ingest.errors;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.zalando.problem.Problem;
 
 import java.net.URI;
 
 @Data
 @NoArgsConstructor
+@Setter(AccessLevel.PACKAGE)
 @JsonIgnoreProperties({"parameters","status"})
 public class IngestError implements Problem {
     private URI type;
