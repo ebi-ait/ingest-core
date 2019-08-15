@@ -26,7 +26,7 @@ public class SubmissionErrorTest {
     @MockBean
     private SubmissionErrorRepository submissionErrorRepository;
     @Autowired
-    SubmissionErrorService submissionErrorService;
+    private SubmissionErrorService submissionErrorService;
 
     @Test
     public void serviceCallsRepository() {
