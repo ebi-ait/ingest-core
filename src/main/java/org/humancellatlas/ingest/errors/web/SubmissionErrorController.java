@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @RepositoryRestController
@@ -33,7 +32,7 @@ public class SubmissionErrorController {
     private final @NonNull SubmissionErrorResourceAssembler submissionErrorResourceAssembler;
 
     @GetMapping(path = Links.SUBMISSION_ERRORS_URL)
-    ResponseEntity<PagedResources<Resource<SubmissionError>>> GetSubmissionErrors(Pageable pageable) {
+    public ResponseEntity<PagedResources<Resource<SubmissionError>>> getSubmissionErrors(Pageable pageable) {
         return ResponseEntity.ok(
                 pagedResourcesAssembler.toResource(
                         submissionErrorRepository.findAll(pageable),
@@ -43,7 +42,7 @@ public class SubmissionErrorController {
     }
 
     @GetMapping(path = Links.SUBMISSION_ERRORS_URL + "/{submissionError}")
-    ResponseEntity<Resource<SubmissionError>> GetSubmissionError(@PathVariable("submissionError") UUID uuid) {
+    public ResponseEntity<Resource<SubmissionError>> getSubmissionError(@PathVariable("submissionError") UUID uuid) {
         return submissionErrorRepository.findById(uuid.toString()).map(
                 error -> ResponseEntity.ok(submissionErrorResourceAssembler.toResource(error))
         ).orElse(
@@ -52,7 +51,7 @@ public class SubmissionErrorController {
     }
 
     @GetMapping(path = "submissionEnvelopes/{sub_id}" + Links.SUBMISSION_ERRORS_URL)
-    ResponseEntity<PagedResources<Resource<SubmissionError>>> GetSubmissionEnvelopeErrors(
+    public ResponseEntity<PagedResources<Resource<SubmissionError>>> getSubmissionEnvelopeErrors(
             @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
             Pageable pageable) {
         return ResponseEntity.ok(
@@ -64,7 +63,7 @@ public class SubmissionErrorController {
     }
 
     @PostMapping(path = "submissionEnvelopes/{sub_id}" + Links.SUBMISSION_ERRORS_URL)
-    ResponseEntity<Resource<SubmissionError>> addErrorToEnvelope(
+    public ResponseEntity<Resource<SubmissionError>> addErrorToEnvelope(
             @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
             @RequestBody IngestError ingestError) {
         SubmissionError submissionError = submissionErrorService.addErrorToEnvelope(submissionEnvelope, ingestError);
