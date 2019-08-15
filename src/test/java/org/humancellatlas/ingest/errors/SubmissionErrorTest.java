@@ -12,7 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.zalando.problem.*;
 
-import java.util.*;
+import java.net.URI;
+import java.util.Collections;
+import java.util.Random;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,29 +48,64 @@ public class SubmissionErrorTest {
     public void errorIsGivenEnvelope() {
         //given:
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        Problem problem = randomProblem();
         ArgumentCaptor<SubmissionError> insertedError = ArgumentCaptor.forClass(SubmissionError.class);
 
         //when:
-        SubmissionError submissionError = submissionErrorService.addErrorToEnvelope(submissionEnvelope, problem);
-        verify(submissionErrorRepository).insert(insertedError.capture());
+        SubmissionError submissionError = submissionErrorService.addErrorToEnvelope(submissionEnvelope, randomProblem());
 
         //then:
+        verify(submissionErrorRepository).insert(insertedError.capture());
         assertThat(insertedError.getValue().getSubmissionEnvelope()).isEqualTo(submissionEnvelope);
         assertThat(insertedError.getValue()).isEqualTo(submissionError);
     }
 
+    @Test
+    public void problemHasInstanceRemoved() {
+        //given:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        ArgumentCaptor<SubmissionError> insertedError = ArgumentCaptor.forClass(SubmissionError.class);
+
+        //when:
+        submissionErrorService.addErrorToEnvelope(submissionEnvelope, randomProblem());
+
+        //then:
+        verify(submissionErrorRepository).insert(insertedError.capture());
+        assertThat(insertedError.getValue().getInstance()).isNull();
+    }
+
+    @Test
+    public void problemHasStatusRemoved() {
+        //given:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        ArgumentCaptor<SubmissionError> insertedError = ArgumentCaptor.forClass(SubmissionError.class);
+
+        //when:
+        submissionErrorService.addErrorToEnvelope(submissionEnvelope, randomProblem());
+
+        //then:
+        verify(submissionErrorRepository).insert(insertedError.capture());
+        assertThat(insertedError.getValue().getStatus()).isNull();
+    }
+
     public static Problem randomProblem() {
         Random random = new Random();
-        StatusType status = Status.valueOf(300);
+        StatusType status;
+        URI baseType = URI.create("http://test.ingest.data.humancellatlas.org/");
+        String type;
         if (random.nextBoolean()) {
             status = Status.valueOf(400);
+            type = "Error";
+        } else {
+            status = Status.valueOf(300);
+            type = "Warning";
         }
 
         return Problem.builder()
                 .withStatus(status)
-                .withTitle(Long.toString(random.nextLong()))
-                .withDetail(Long.toString(random.nextLong()))
+                .withType(baseType.resolve(type))
+                .withTitle("Random " + type)
+                .withDetail(UUID.randomUUID().toString() + UUID.randomUUID().toString())
+                .withInstance(baseType.resolve(type + "/" + UUID.randomUUID()))
                 .build();
     }
 }
