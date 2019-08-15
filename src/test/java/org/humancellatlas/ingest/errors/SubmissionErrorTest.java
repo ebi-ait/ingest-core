@@ -34,7 +34,7 @@ public class SubmissionErrorTest {
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         //and:
         when(submissionErrorRepository.findBySubmissionEnvelope(any(SubmissionEnvelope.class), any(Pageable.class)))
-                .thenReturn(new PageImpl(Collections.emptyList()));
+                .thenReturn(new PageImpl<SubmissionError>(Collections.emptyList()));
 
         //then:
         assertThat(submissionErrorService.getErrorsFromEnvelope(submissionEnvelope,pageable)).isEmpty();
