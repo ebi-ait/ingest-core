@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class StagingJobCompleteRequest {
-    private final String stagingAreaFileUri;
+    private String stagingAreaFileUri;
 }
