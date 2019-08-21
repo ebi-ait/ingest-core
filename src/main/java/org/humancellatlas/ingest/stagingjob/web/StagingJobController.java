@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.stagingjob.web;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.stagingjob.StagingJob;
 import org.humancellatlas.ingest.stagingjob.StagingJobService;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -30,7 +31,7 @@ public class StagingJobController {
         return ResponseEntity.ok(resourceAssembler.toFullResource(stagingJob));
     }
 
-    @PatchMapping(path = "/stagingJobs/{stagingJob}/complete")
+    @PatchMapping(path = "/stagingJobs/{stagingJob}" + Links.COMPLETE_STAGING_JOB_URL)
     ResponseEntity<?> completeStagingJob(@PathVariable("stagingJob") StagingJob stagingJob,
                                          @RequestBody StagingJobCompleteRequest stagingJobCompleteRequest,
                                          final PersistentEntityResourceAssembler resourceAssembler) {

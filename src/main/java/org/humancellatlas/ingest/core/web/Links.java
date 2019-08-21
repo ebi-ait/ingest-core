@@ -103,4 +103,8 @@ public class Links {
     // Links from Files
     public static final String FILE_VALIDATION_JOB_URL = "/validationJob";
     public static final String FILE_VALIDATION_JOB_REL = "validationJob";
+
+    // Links from StagingJobs
+    public static final String COMPLETE_STAGING_JOB_URL = "/complete";
+    public static final String COMPLETE_STAGING_JOB_REL = "complete-staging-job";
 }
