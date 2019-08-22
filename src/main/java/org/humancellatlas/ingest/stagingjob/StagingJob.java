@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @Getter
 @CompoundIndexes({
-        @CompoundIndex(name = "stagingAreaUuidAndFileName", def = "{'stagingAreaId' : 1, 'stagingAreaFileName' : 1}", unique = true)
+        @CompoundIndex(name = "stagingAreaUuidAndFileName", def = "{'stagingAreaUuid' : 1, 'stagingAreaFileName' : 1}", unique = true)
 })
 @Document
 @RequiredArgsConstructor
