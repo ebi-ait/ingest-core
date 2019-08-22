@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.web.Links;
+import org.humancellatlas.ingest.errors.SubmissionError;
 import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -130,16 +131,6 @@ public class SubmissionController {
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/submissionErrors", method = RequestMethod.POST)
-    ResponseEntity<Resource<?>> addErrorToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                   @RequestBody SubmissionError submissionError,
-                                                   PersistentEntityResourceAssembler assembler) {
-
-        SubmissionEnvelope envelope = submissionEnvelopeService.addErrorToEnvelope(submissionError, submissionEnvelope);
-        PersistentEntityResource resource = assembler.toFullResource(envelope);
-        return ResponseEntity.accepted().body(resource);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/processes", method = RequestMethod.GET)

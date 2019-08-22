@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.errors.SubmissionError;
 import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.state.SubmissionState;
@@ -62,12 +63,6 @@ public class SubmissionEnvelopeService {
             metadataUpdateService.applyUpdates(submissionEnvelope);
             exporter.updateBundles(submissionEnvelope);
         });
-    }
-
-
-    public SubmissionEnvelope addErrorToEnvelope(SubmissionError submissionError, SubmissionEnvelope submissionEnvelope) {
-        submissionEnvelope.addError(submissionError);
-        return submissionEnvelopeRepository.save(submissionEnvelope);
     }
 
     public SubmissionEnvelope createUpdateSubmissionEnvelope() {

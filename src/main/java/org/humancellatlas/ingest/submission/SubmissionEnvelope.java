@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.EntityType;
-import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,6 @@ public class SubmissionEnvelope extends AbstractEntity {
     private SubmissionState submissionState;
     private @Setter Boolean triggersAnalysis;
     private @Setter Boolean isUpdate;
-    private @Setter List<SubmissionError> submissionErrors = new ArrayList<>();
 
     private static final Logger log = LoggerFactory.getLogger(SubmissionEnvelope.class);
 
@@ -100,9 +98,5 @@ public class SubmissionEnvelope extends AbstractEntity {
     public boolean isOpen() {
         List<SubmissionState> states = Arrays.asList(SubmissionState.values());
         return states.indexOf(this.getSubmissionState()) < states.indexOf(SubmissionState.SUBMITTED);
-    }
-
-    public boolean addError(SubmissionError error){
-        return this.submissionErrors.add(error);
     }
 }

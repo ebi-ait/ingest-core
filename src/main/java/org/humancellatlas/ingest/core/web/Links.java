@@ -71,7 +71,7 @@ public class Links {
     public static final String SUBMISSION_MANIFEST_URL = "/submissionManifest";
     public static final String SUBMISSION_MANIFEST_REL = "submissionManifest";
     public static final String SUBMISSION_ERRORS_URL = "/submissionErrors";
-    public static final String SUBMISSION_ERRORS_REL = "submissionErrors";
+    public static final String SUBMISSION_ERRORS_REL = "submissionEnvelopeErrors";
     public static final String SUBMISSION_DOCUMENTS_SM_URL = "/documentSmReport";
     public static final String SUBMISSION_DOCUMENTS_SM_REL = "documentSmReport";
 
