@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.stagingjob;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -19,6 +20,7 @@ import java.util.UUID;
 })
 @Document
 @RequiredArgsConstructor
+@EqualsAndHashCode
 public class StagingJob implements Identifiable<String> {
     private @Id String id;
     private @CreatedDate Instant createdDate;
