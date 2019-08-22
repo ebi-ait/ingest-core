@@ -8,6 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.hateoas.Identifiable;
 
@@ -25,7 +26,7 @@ public class StagingJob implements Identifiable<String> {
     private @Id String id;
     private @CreatedDate Instant createdDate;
 
-    private final UUID stagingAreaUuid;
+    private @Indexed final UUID stagingAreaUuid;
     private final String stagingAreaFileName;
 
     private @Setter String stagingAreaFileUri;
