@@ -2,20 +2,13 @@ package org.humancellatlas.ingest.stagingjobs;
 
 import org.humancellatlas.ingest.stagingjob.StagingJob;
 import org.humancellatlas.ingest.stagingjob.StagingJobRepository;
-import org.humancellatlas.ingest.stagingjob.StagingJobService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.domain.AuditorAware;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

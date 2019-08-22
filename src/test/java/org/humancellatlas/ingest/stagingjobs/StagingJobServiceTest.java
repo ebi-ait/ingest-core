@@ -3,13 +3,13 @@ package org.humancellatlas.ingest.stagingjobs;
 import org.humancellatlas.ingest.stagingjob.StagingJob;
 import org.humancellatlas.ingest.stagingjob.StagingJobRepository;
 import org.humancellatlas.ingest.stagingjob.StagingJobService;
+import org.junit.Before;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.dao.DuplicateKeyException;
 
 import java.util.HashSet;
@@ -21,32 +21,8 @@ public class StagingJobServiceTest {
     StagingJobRepository stagingJobRepository = mock(StagingJobRepository.class);
     StagingJobService stagingJobService = new StagingJobService(stagingJobRepository);
 
-    @Test
-    public void testIllegalStateExceptionOnConflictingJobs() {
-        UUID testStagingAreaUuid = UUID.randomUUID();
-        String testFileName = "test.fastq.gz";
-
-        when(stagingJobRepository.save(new StagingJob(testStagingAreaUuid, testFileName)))
-                .thenAnswer(new Answer<StagingJob>() {
-                    private int callCount = 0;
-                    @Override
-                    public StagingJob answer(InvocationOnMock invocation){
-                        if(callCount < 1) {
-                            callCount++;
-                            return null;
-                        } else {
-                            throw new DuplicateKeyException("");
-                        }
-                    }
-                });
-
-        stagingJobService.registerNewJob(testStagingAreaUuid, testFileName);
-        assertThatExceptionOfType(IllegalStateException.class)
-                .isThrownBy(() -> stagingJobService.registerNewJob(testStagingAreaUuid, testFileName));
-    }
-
-    @Test
-    public void testRegisteringJobs() {
+    @Before
+    public void mockStagingJobRepositorySave() {
         when(stagingJobRepository.save(any(StagingJob.class)))
                 .thenAnswer(new Answer<StagingJob>() {
                     private Set<StagingJob> savedJobs = new HashSet<>();
@@ -61,7 +37,21 @@ public class StagingJobServiceTest {
                         }
                     }
                 });
+    }
 
+    @Test
+    public void testIllegalStateExceptionOnConflictingJobs() {
+        UUID testStagingAreaUuid = UUID.randomUUID();
+        String testFileName = "test.fastq.gz";
+
+
+        stagingJobService.registerNewJob(testStagingAreaUuid, testFileName);
+        assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> stagingJobService.registerNewJob(testStagingAreaUuid, testFileName));
+    }
+
+    @Test
+    public void testRegisteringJobs() {
         UUID testStagingAreaUuid_1 = UUID.randomUUID();
         String testFileName_1 = "test_1.fastq.gz";
 
