@@ -106,5 +106,5 @@ public class Links {
 
     // Links from StagingJobs
     public static final String COMPLETE_STAGING_JOB_URL = "/complete";
-    public static final String COMPLETE_STAGING_JOB_REL = "complete-staging-job";
+    public static final String COMPLETE_STAGING_JOB_REL = "completeStagingJob";
 }
