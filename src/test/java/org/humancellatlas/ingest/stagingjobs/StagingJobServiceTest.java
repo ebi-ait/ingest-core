@@ -3,11 +3,11 @@ package org.humancellatlas.ingest.stagingjobs;
 import org.humancellatlas.ingest.stagingjob.StagingJob;
 import org.humancellatlas.ingest.stagingjob.StagingJobRepository;
 import org.humancellatlas.ingest.stagingjob.StagingJobService;
-import org.junit.Before;
-import org.junit.Test;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.dao.DuplicateKeyException;
@@ -21,7 +21,7 @@ public class StagingJobServiceTest {
     StagingJobRepository stagingJobRepository = mock(StagingJobRepository.class);
     StagingJobService stagingJobService = new StagingJobService(stagingJobRepository);
 
-    @Before
+    @BeforeEach
     public void mockStagingJobRepositorySave() {
         when(stagingJobRepository.save(any(StagingJob.class)))
                 .thenAnswer(new Answer<StagingJob>() {

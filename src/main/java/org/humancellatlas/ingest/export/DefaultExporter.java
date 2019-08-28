@@ -64,14 +64,14 @@ public class DefaultExporter implements Exporter {
         int partitionSize = 500;
         partitionProcessIds(assayingProcessIds, partitionSize)
                 .stream()
-                .map(processIdBatch -> processService.getProcessRepository().findAllByIdIn(processIdBatch))
+                .map(processIdBatch -> processService.getProcesses(processIdBatch))
                 .flatMap(Function.identity())
                 .map(process -> new ExportData(counter.next(), totalCount, process,  envelope))
                 .forEach(messageRouter::sendAssayForExport);
 
         partitionProcessIds(analysisProcessIds, partitionSize)
                 .stream()
-                .map(processIdBatch -> processService.getProcessRepository().findAllByIdIn(processIdBatch))
+                .map(processIdBatch -> processService.getProcesses(processIdBatch))
                 .flatMap(Function.identity())
                 .map(process -> new ExportData(counter.next(), totalCount, process,  envelope))
                 .forEach(messageRouter::sendAnalysisForExport);

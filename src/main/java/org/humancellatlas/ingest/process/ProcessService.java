@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 @Getter
@@ -213,5 +214,9 @@ public class ProcessService {
         }
 
         return getProcessRepository().save(analysis);
+    }
+
+    public Stream<Process> getProcesses(Collection<String> processIds) {
+        return processRepository.findAllByIdIn(processIds);
     }
 }

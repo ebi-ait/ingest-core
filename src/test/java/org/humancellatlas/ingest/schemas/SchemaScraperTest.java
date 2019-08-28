@@ -1,18 +1,18 @@
 package org.humancellatlas.ingest.schemas;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.WireMockServer;
 import org.humancellatlas.ingest.schemas.schemascraper.SchemaScraper;
 import org.humancellatlas.ingest.schemas.schemascraper.impl.S3BucketSchemaScraper;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.env.MockEnvironment;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.File;
 import java.net.URI;
@@ -28,15 +28,27 @@ import static org.mockito.Mockito.doReturn;
 /**
  * Created by rolando on 19/04/2018.
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 public class SchemaScraperTest {
     @Autowired SchemaService schemaService;
 
     @MockBean SchemaRepository schemaRepository;
 
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8089);
+    WireMockServer wireMockServer;
+
+    @BeforeEach
+    public void setupWireMockServer() {
+        wireMockServer = new WireMockServer(8089);
+        wireMockServer.start();
+    }
+
+    @AfterEach
+    public void teardownWireMockServer() {
+        wireMockServer.stop();
+        wireMockServer.resetAll();
+    }
+
 
     String mockSchemaUri = "http://localhost:8089";
 
@@ -47,7 +59,7 @@ public class SchemaScraperTest {
         SchemaScraper schemaScraper = new S3BucketSchemaScraper();
 
         // when
-        stubFor(
+        wireMockServer.stubFor(
                 get(urlEqualTo("/"))
                         .willReturn(aResponse()
                                             .withStatus(200)
@@ -56,7 +68,7 @@ public class SchemaScraperTest {
 
         Collection<URI> mockSchemaUris = schemaScraper.getAllSchemaURIs(URI.create(mockSchemaUri));
 
-        // we know there are 108 schemas in the test file
+        // we know there are 107 schemas in the test file
         assert mockSchemaUris.size() == 107;
     }
 
@@ -121,8 +133,7 @@ public class SchemaScraperTest {
         // pre-given
         SchemaScraper schemaScraper = new S3BucketSchemaScraper();
 
-        stubFor(
-                get(urlEqualTo("/"))
+        wireMockServer.stubFor(get(urlEqualTo("/"))
                         .willReturn(aResponse()
                                             .withStatus(200)
                                             .withHeader("Content-Type", "application/xml")

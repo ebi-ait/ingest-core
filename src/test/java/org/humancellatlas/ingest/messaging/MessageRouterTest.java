@@ -7,8 +7,8 @@ import org.humancellatlas.ingest.export.ExportData;
 import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +17,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.ResourceMappings;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.function.Consumer;
 
@@ -29,7 +28,8 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
-@RunWith(SpringRunner.class)
+
+
 @SpringBootTest
 public class MessageRouterTest {
 

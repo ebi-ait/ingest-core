@@ -1,10 +1,9 @@
 package org.humancellatlas.ingest.messaging;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.Mockito;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessagingException;
@@ -15,13 +14,12 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 
-@RunWith(MockitoJUnitRunner.class)
 public class MessageServiceTest {
-    @InjectMocks
-    private MessageService messageService;
 
-    @Mock
-    private RabbitMessagingTemplate rabbitMessagingTemplate;
+    private RabbitMessagingTemplate rabbitMessagingTemplate = Mockito.mock(RabbitMessagingTemplate.class);
+
+    private MessageService messageService = new MessageService(rabbitMessagingTemplate);
+
 
     @Test
     public void testPublish() {
