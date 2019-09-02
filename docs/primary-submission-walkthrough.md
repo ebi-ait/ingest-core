@@ -6,7 +6,7 @@ You must have a valid token identifying your service in order to use the Ingest 
 
 The DCP uses Google service accounts for authenticating service-to-service requests. To request a service account and associated RSA key-pair, create an issue in [Fusillade](https://github.com/HumanCellAtlas/fusillade), the DCP's auth service.
 
-Use [this](https://github.com/HumanCellAtlas/ingest-client/blob/master/ingest/utils/dcp_auth_client.py) library with your key file to sign a JWT token identifying your service.
+Use [this](https://github.com/HumanCellAtlas/dcplib/blob/master/dcplib/security/dcp_service_account.py) library with your key file to sign a JWT token identifying your service.
 
 ### Structure metadata
 
