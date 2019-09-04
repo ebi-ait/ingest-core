@@ -27,11 +27,6 @@ public class MessageSender {
         rabbitMessagingTemplate.convertAndSend(exchange, routingKey, payload);
     }
 
-    public void queueAccessionMessage(String exchange, String routingKey,
-            MetadataDocumentMessage payload, long intendedSendTime){
-        rabbitMessagingTemplate.convertAndSend(exchange, routingKey, payload);
-    }
-
     public void queueNewExportMessage(String exchange, String routingKey, ExportMessage payload, long intendedSendTime){
         rabbitMessagingTemplate.convertAndSend(exchange, routingKey, payload);
     }
