@@ -20,7 +20,7 @@ public class MessageSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageSender.class);
 
     private final @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
-    private final @NonNull RestTemplate restTemplate;
+    private final @NonNull RestTemplate restTemplate = new RestTemplate();
 
     public void queueValidationMessage(String exchange, String routingKey,
             MetadataDocumentMessage payload, long intendedSendTime){
