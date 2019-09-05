@@ -35,7 +35,8 @@ public class BundleManifestService {
                 String documentUuid = document.getUuid().getUuid().toString();
                 String bundleUuid = bundleManifest.getBundleUuid();
                 EntityType documentType = document.getType();
-                if(entityMapFromManifest(documentType, bundleManifest).containsKey(documentUuid)){
+                Map<String, Collection<String>> entityMap = entityMapFromManifest(documentType, bundleManifest);
+                if(entityMap != null && entityMap.containsKey(documentUuid)){
                     if(hits.containsKey(bundleUuid)) {
                         hits.get(bundleUuid).add(document);
                     } else {
