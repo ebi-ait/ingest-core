@@ -8,6 +8,8 @@ import org.humancellatlas.ingest.errors.SubmissionError;
 import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.state.SubmissionState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ExecutorService;
@@ -35,6 +37,8 @@ public class SubmissionEnvelopeService {
     @NonNull
     private final SubmissionEnvelopeCreateHandler submissionEnvelopeCreateHandler;
 
+    private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
+
     public void handleEnvelopeStateUpdateRequest(SubmissionEnvelope envelope,
             SubmissionState state) {
         if(! envelope.allowedStateTransitions().contains(state)) {
@@ -55,13 +59,25 @@ public class SubmissionEnvelopeService {
     }
 
     private void handleSubmitOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
-        executorService.submit(() -> exporter.exportBundles(submissionEnvelope));
+        executorService.submit(() -> {
+            try {
+                exporter.exportBundles(submissionEnvelope);
+            }
+            catch (Exception e) {
+                log.error("Uncaught Exception exporting Bundles", e);
+            }
+        });
     }
 
     private void handleSubmitUpdateSubmission(SubmissionEnvelope submissionEnvelope) {
         executorService.submit(() -> {
-            metadataUpdateService.applyUpdates(submissionEnvelope);
-            exporter.updateBundles(submissionEnvelope);
+            try {
+                metadataUpdateService.applyUpdates(submissionEnvelope);
+                exporter.updateBundles(submissionEnvelope);
+            }
+            catch (Exception e) {
+                log.error("Uncaught Exception Applying Updates or Exporting Bundles", e);
+            }
         });
     }
 
