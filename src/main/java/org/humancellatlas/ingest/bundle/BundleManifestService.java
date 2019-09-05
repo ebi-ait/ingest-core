@@ -35,14 +35,15 @@ public class BundleManifestService {
                 String documentUuid = document.getUuid().getUuid().toString();
                 String bundleUuid = bundleManifest.getBundleUuid();
                 EntityType documentType = document.getType();
-                Map<String, Collection<String>> entityMap = entityMapFromManifest(documentType, bundleManifest);
-                if(entityMap != null && entityMap.containsKey(documentUuid)){
-                    if(hits.containsKey(bundleUuid)) {
-                        hits.get(bundleUuid).add(document);
-                    } else {
-                        hits.put(bundleUuid, new HashSet<>(Collections.singletonList(document)));
+                entityMapFromManifest(documentType, bundleManifest).ifPresent(entityMap -> {
+                    if(entityMap.containsKey(documentUuid)){
+                        if(hits.containsKey(bundleUuid)) {
+                            hits.get(bundleUuid).add(document);
+                        } else {
+                            hits.put(bundleUuid, new HashSet<>(Collections.singletonList(document)));
+                        }
                     }
-                }
+                });
             });
         }
 
@@ -96,20 +97,22 @@ public class BundleManifestService {
     }
 
 
-    private Map<String, Collection<String>> entityMapFromManifest(EntityType entityType, BundleManifest bundleManifest) {
+    private Optional<Map<String, Collection<String>>> entityMapFromManifest(EntityType entityType, BundleManifest bundleManifest) {
         if(entityType.equals(EntityType.BIOMATERIAL)) {
-            return bundleManifest.getFileBiomaterialMap();
+            return Optional.ofNullable(bundleManifest.getFileBiomaterialMap());
         } else if(entityType.equals(EntityType.FILE)) {
-            return bundleManifest.getFileFilesMap();
+            return Optional.ofNullable(bundleManifest.getFileFilesMap());
         } else if(entityType.equals(EntityType.PROTOCOL)) {
-            return bundleManifest.getFileProtocolMap();
+            return Optional.ofNullable(bundleManifest.getFileProtocolMap());
         } else if(entityType.equals(EntityType.PROCESS)) {
-            return bundleManifest.getFileProcessMap();
+            return Optional.ofNullable(bundleManifest.getFileProcessMap());
         } else if(entityType.equals(EntityType.PROJECT)) {
-            return bundleManifest.getFileProjectMap();
+            return Optional.ofNullable(bundleManifest.getFileProjectMap());
+        } else {
+            throw new RuntimeException(String.format("Bundle manifest %s contains no entity map for entity type %s",
+                                                     bundleManifest.getId(),
+                                                     entityType.toString());
         }
-
-        return null;
     }
 
 
