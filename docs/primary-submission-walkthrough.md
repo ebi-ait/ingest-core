@@ -1,13 +1,24 @@
 ## Pre-requisites
 
-### Set-up a service account
+### Generate an Authenticating JWT
 
-You must have a valid token identifying your service in order to use the Ingest API.
+You must have a valid [JWT](https://jwt.io/introduction/) to identifying your service in order to use the Ingest API. A JWT can be created using the [HCA-CLI](https://github.com/HumanCellAtlas/dcp-cli). install with:
 
-The DCP uses Google service accounts for authenticating service-to-service requests. To request a service account and associated RSA key-pair, create an issue in [Fusillade](https://github.com/HumanCellAtlas/fusillade), the DCP's auth service.
+`$ pip install hca`
 
-Use [this](https://github.com/HumanCellAtlas/dcplib/blob/master/dcplib/security/dcp_service_account.py) library with your key file to sign a JWT token identifying your service.
+Once installed authenticate your service by running the command and following the instructions:
 
+`$ hca dss login`
+
+If you're authenticating on a remote machine use:
+
+`$ hca dss login --remote`
+
+Add the JWT to your environment:
+
+`$ export DCP_TOKEN=$(ython -c 'from hca.dss import DSSClient as c; print(c().get_authenticated_session().token["access_token"])')`
+
+The JWT will eventually expire, but a refreshed token can be retrieved using the above command again.
 ### Structure metadata
 
 Metadata submitted to the DCP must adhere to standards described in the [metadata-schema project](https://github.com/HumanCellAtlas/metadata-schema/tree/master/json_schema).
@@ -24,7 +35,7 @@ curl -X GET \
 ```
 curl -X POST \
   http://api.ingest.dev.data.humancellatlas.org/submissionEnvelopes \
-  -H 'Authorization: Bearer $token \
+  -H 'Authorization: Bearer $DCP_TOKEN \
   -H 'content-type: application/json' \
   -d '{}'
 ```
@@ -53,7 +64,7 @@ curl -X GET \
 ```
 curl -X POST \
   http://api.ingest.dev.data.humancellatlas.org/submissionEnvelopes/$sub_url/projects \
-  -H 'Authorization: Bearer $token' \
+  -H 'Authorization: Bearer $DCP_TOKEN' \
   -H 'content-type: application/json' \
   -d '{
     "describedBy" : "https://schema.humancellatlas.org/type/project/5.0.1/project",
@@ -74,6 +85,7 @@ curl -X POST \
 ```
 curl -X POST \
   http://api.ingest.dev.data.humancellatlas.org/submissionEnvelopes/5aa4ec8a1b41fe298594e531/biomaterials \
+  -H 'Authorization: Bearer $DCP_TOKEN \
   -H 'content-type: application/json' \
   -d '{
     "describedBy" : "https://schema.humancellatlas.org/type/biomaterial/5.0.0/donor_organism",
@@ -100,6 +112,7 @@ curl -X POST \
 ```
 curl -X POST \
   http://api.ingest.dev.data.humancellatlas.org/submissionEnvelopes/5aa4ec8a1b41fe298594e531/processes \
+  -H 'Authorization: Bearer $DCP_TOKEN \
   -H 'content-type: application/json' \
   -d '{
     "describedBy" : "https://schema.humancellatlas.org/type/process/sequencing/5.0.0/library_preparation_process",
@@ -129,6 +142,7 @@ curl -X POST \
 ```
 curl -X POST \
   http://api.ingest.dev.data.humancellatlas.org/submissionEnvelopes/5aa4ec8a1b41fe298594e531/processes \
+  -H 'Authorization: Bearer $DCP_TOKEN \
   -H 'content-type: application/json' \
   -d '{
     "describedBy" : "https://schema.humancellatlas.org/type/process/sequencing/5.0.0/library_preparation_process",
@@ -158,6 +172,7 @@ curl -X POST \
 ```
 curl -X POST \
   http://api.ingest.dev.data.humancellatlas.org/submissionEnvelopes/5aa4ec8a1b41fe298594e531/files/R1.fastq.gz \
+  -H 'Authorization: Bearer $DCP_TOKEN \
   -H 'content-type: application/json' \
   -d '{
     "describedBy" : "https://schema.humancellatlas.org/type/file/5.0.0/sequence_file",
@@ -180,6 +195,7 @@ curl -X POST \
 ```
 curl -X PUT \
   http://api.ingest.dev.data.humancellatlas.org/submissionEnvelopes/5aa4ec8a1b41fe298594e531/submit \
+  -H 'Authorization: Bearer $DCP_TOKEN \
   -H 'content-type: application/json'
 ```
 
