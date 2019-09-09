@@ -1,3 +1,5 @@
+# Primary Submission Walk-through
+
 ## Pre-requisites
 
 ### Generate an Authenticating JWT
@@ -10,13 +12,13 @@ Once installed authenticate your service by running the command and following th
 
 `$ hca dss login`
 
-If you're authenticating on a remote machine use:
+If you're authenticating a machine with only terminal access, use:
 
 `$ hca dss login --remote`
 
 Add the JWT to your environment:
 
-`$ export DCP_TOKEN=$(ython -c 'from hca.dss import DSSClient as c; print(c().get_authenticated_session().token["access_token"])')`
+`$ export DCP_TOKEN=$(python -c 'from hca.dss import DSSClient as c; print(c().get_authenticated_session().token["access_token"])')`
 
 The JWT will eventually expire, but a refreshed token can be retrieved using the above command again.
 ### Structure metadata
