@@ -17,12 +17,17 @@ import java.util.UUID;
 
 @Getter
 @CompoundIndexes({
-        @CompoundIndex(name = "stagingAreaUuidAndFileName", def = "{'stagingAreaUuid' : 1, 'stagingAreaFileName' : 1}", unique = true)
+        @CompoundIndex(
+                name = "stagingAreaUuidAndFileName",
+                def = "{'stagingAreaUuid' : 1, 'stagingAreaFileName' : 1}",
+                unique = true
+        )
 })
 @Document
 @RequiredArgsConstructor
 @EqualsAndHashCode
 public class StagingJob implements Identifiable<String> {
+
     private @Id String id;
     private @CreatedDate Instant createdDate;
 
@@ -30,4 +35,6 @@ public class StagingJob implements Identifiable<String> {
     private final String stagingAreaFileName;
 
     private @Setter String stagingAreaFileUri;
+    private String metadataUuid;
+
 }
