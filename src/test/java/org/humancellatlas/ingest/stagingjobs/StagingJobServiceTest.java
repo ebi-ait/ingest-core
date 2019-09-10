@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.stagingjobs;
 import org.humancellatlas.ingest.stagingjob.StagingJob;
 import org.humancellatlas.ingest.stagingjob.StagingJobRepository;
 import org.humancellatlas.ingest.stagingjob.StagingJobService;
+import org.humancellatlas.ingest.stagingjob.StagingJobService.JobAlreadyRegisteredException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -37,7 +38,7 @@ public class StagingJobServiceTest {
         doThrow(new DuplicateKeyException("duplicate key")).when(stagingJobRepository).save(any());
 
         // expect :
-        assertThatExceptionOfType(IllegalStateException.class)
+        assertThatExceptionOfType(JobAlreadyRegisteredException.class)
                 .isThrownBy(() -> stagingJobService.registerNewJob(testStagingAreaUuid, testFileName));
     }
 
