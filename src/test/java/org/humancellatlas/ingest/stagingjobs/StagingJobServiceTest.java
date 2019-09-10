@@ -23,34 +23,26 @@ public class StagingJobServiceTest {
     private StagingJobService stagingJobService = new StagingJobService(stagingJobRepository);
 
     @BeforeEach
-    public void mockStagingJobRepositorySave() {
+    public void setUp() {
         reset(stagingJobRepository);
-
-        Set<StagingJob> savedJobs = new HashSet<>();
-        when(stagingJobRepository.save(any(StagingJob.class))).thenAnswer(invocation -> {
-            StagingJob stagingJob = invocation.getArgument(0);
-            if (savedJobs.contains(stagingJob)) {
-                throw new DuplicateKeyException("");
-            } else {
-                savedJobs.add(stagingJob);
-                return stagingJob;
-            }
-        });
     }
 
     @Test
-    public void testIllegalStateExceptionOnConflictingJobs() {
+    public void registerDuplicateJob() {
+        // given:
         UUID testStagingAreaUuid = UUID.randomUUID();
         String testFileName = "test.fastq.gz";
 
+        // and:
+        doThrow(new DuplicateKeyException("duplicate key")).when(stagingJobRepository).save(any());
 
-        stagingJobService.registerNewJob(testStagingAreaUuid, testFileName);
+        // expect :
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(() -> stagingJobService.registerNewJob(testStagingAreaUuid, testFileName));
     }
 
     @Test
-    public void testRegisteringJobs() {
+    public void registerJob() {
         UUID testStagingAreaUuid_1 = UUID.randomUUID();
         String testFileName_1 = "test_1.fastq.gz";
 
