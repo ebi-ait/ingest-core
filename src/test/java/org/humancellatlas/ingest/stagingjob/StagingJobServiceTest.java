@@ -1,20 +1,11 @@
-package org.humancellatlas.ingest.stagingjobs;
+package org.humancellatlas.ingest.stagingjob;
 
-import org.humancellatlas.ingest.stagingjob.StagingJob;
-import org.humancellatlas.ingest.stagingjob.StagingJobRepository;
-import org.humancellatlas.ingest.stagingjob.StagingJobService;
 import org.humancellatlas.ingest.stagingjob.StagingJobService.JobAlreadyRegisteredException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.dao.DuplicateKeyException;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;

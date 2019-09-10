@@ -10,7 +10,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class StagingJobService {
-    private final @NonNull StagingJobRepository stagingJobRepository;
+
+    @NonNull
+    private final StagingJobRepository stagingJobRepository;
 
     public StagingJob register(StagingJob stagingJob) {
         try {
