@@ -3,11 +3,9 @@ package org.humancellatlas.ingest.stagingjobs;
 import org.humancellatlas.ingest.stagingjob.StagingJob;
 import org.humancellatlas.ingest.stagingjob.StagingJobRepository;
 import org.humancellatlas.ingest.stagingjob.StagingJobService;
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.dao.DuplicateKeyException;
@@ -16,27 +14,28 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.*;
+
 public class StagingJobServiceTest {
 
-    StagingJobRepository stagingJobRepository = mock(StagingJobRepository.class);
-    StagingJobService stagingJobService = new StagingJobService(stagingJobRepository);
+    private StagingJobRepository stagingJobRepository = mock(StagingJobRepository.class);
+    private StagingJobService stagingJobService = new StagingJobService(stagingJobRepository);
 
     @BeforeEach
     public void mockStagingJobRepositorySave() {
-        when(stagingJobRepository.save(any(StagingJob.class)))
-                .thenAnswer(new Answer<StagingJob>() {
-                    private Set<StagingJob> savedJobs = new HashSet<>();
-                    @Override
-                    public StagingJob answer(InvocationOnMock invocation){
-                        StagingJob stagingJob = invocation.getArgument(0);
-                        if(savedJobs.contains(stagingJob)) {
-                            throw new DuplicateKeyException("");
-                        } else {
-                            savedJobs.add(stagingJob);
-                            return stagingJob;
-                        }
-                    }
-                });
+        reset(stagingJobRepository);
+
+        Set<StagingJob> savedJobs = new HashSet<>();
+        when(stagingJobRepository.save(any(StagingJob.class))).thenAnswer(invocation -> {
+            StagingJob stagingJob = invocation.getArgument(0);
+            if (savedJobs.contains(stagingJob)) {
+                throw new DuplicateKeyException("");
+            } else {
+                savedJobs.add(stagingJob);
+                return stagingJob;
+            }
+        });
     }
 
     @Test
