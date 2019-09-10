@@ -5,6 +5,8 @@ import org.humancellatlas.ingest.stagingjob.StagingJobRepository;
 import org.humancellatlas.ingest.stagingjob.StagingJobService;
 import org.humancellatlas.ingest.stagingjob.StagingJobService.JobAlreadyRegisteredException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -15,6 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
@@ -28,32 +31,44 @@ public class StagingJobServiceTest {
         reset(stagingJobRepository);
     }
 
-    @Test
-    public void registerDuplicateJob() {
-        // given:
-        UUID testStagingAreaUuid = UUID.randomUUID();
-        String testFileName = "test.fastq.gz";
+    @Nested
+    class Registration {
 
-        // and:
-        doThrow(new DuplicateKeyException("duplicate key")).when(stagingJobRepository).save(any());
+        @Test
+        public void validJob() {
+            // given:
+            UUID stagingAreaUUid = UUID.randomUUID();
+            String fileName = "test_1.fastq.gz";
+            String metadataUuid = UUID.randomUUID().toString();
+            StagingJob stagingJob = new StagingJob(stagingAreaUUid, metadataUuid, fileName);
 
-        // expect :
-        assertThatExceptionOfType(JobAlreadyRegisteredException.class)
-                .isThrownBy(() -> stagingJobService.registerNewJob(testStagingAreaUuid, testFileName));
-    }
+            // and:
+            StagingJob persistentJob = spy(stagingJob);
+            doReturn("_generated_id_1").when(persistentJob).getId();
+            doReturn(persistentJob).when(stagingJobRepository).save(any());
 
-    @Test
-    public void registerJob() {
-        UUID testStagingAreaUuid_1 = UUID.randomUUID();
-        String testFileName_1 = "test_1.fastq.gz";
+            //when:
+            StagingJob resultingJob = stagingJobService.register(stagingJob);
 
-        UUID testStagingAreaUuid_2 = UUID.randomUUID();
-        String testFileName_2 = "test_2.fastq.gz";
+            //then:
+            verify(stagingJobRepository).save(stagingJob);
+            assertThat(resultingJob).isEqualTo(persistentJob);
+        }
 
-        stagingJobService.registerNewJob(testStagingAreaUuid_1, testFileName_1);
-        stagingJobService.registerNewJob(testStagingAreaUuid_1, testFileName_2);
+        @Test
+        public void duplicateJob() {
+            // given:
+            UUID stagingAreaUuid = UUID.randomUUID();
+            String metadataUuid = UUID.randomUUID().toString();
+            String fileName = "test.fastq.gz";
+            StagingJob stagingJob = new StagingJob(stagingAreaUuid, metadataUuid, fileName);
 
-        stagingJobService.registerNewJob(testStagingAreaUuid_2, testFileName_1);
-        stagingJobService.registerNewJob(testStagingAreaUuid_2, testFileName_2);
+            // and:
+            doThrow(new DuplicateKeyException("duplicate key")).when(stagingJobRepository).save(any());
+
+            // expect :
+            assertThatExceptionOfType(JobAlreadyRegisteredException.class)
+                    .isThrownBy(() -> stagingJobService.register(stagingJob));
+        }
     }
 }

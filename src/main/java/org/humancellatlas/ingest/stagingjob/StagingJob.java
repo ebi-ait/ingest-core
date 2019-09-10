@@ -28,13 +28,24 @@ import java.util.UUID;
 @EqualsAndHashCode
 public class StagingJob implements Identifiable<String> {
 
-    private @Id String id;
-    private @CreatedDate Instant createdDate;
+    @Id
+    private String id;
 
-    private @Indexed final UUID stagingAreaUuid;
+    @CreatedDate
+    private Instant createdDate;
+
+    @Indexed
+    private final UUID stagingAreaUuid;
+
     private final String stagingAreaFileName;
 
-    private @Setter String stagingAreaFileUri;
     private String metadataUuid;
+    private @Setter String stagingAreaFileUri;
+
+    public StagingJob(UUID stagingAreaUuid, String metadataUuid, String fileName) {
+        this.stagingAreaUuid = stagingAreaUuid;
+        this.metadataUuid = metadataUuid;
+        this.stagingAreaFileName = fileName;
+    }
 
 }

@@ -12,6 +12,16 @@ import java.util.UUID;
 public class StagingJobService {
     private final @NonNull StagingJobRepository stagingJobRepository;
 
+    public StagingJob register(StagingJob stagingJob) {
+        try {
+            return stagingJobRepository.save(stagingJob);
+        } catch (DuplicateKeyException e) {
+            throw new JobAlreadyRegisteredException(stagingJob.getStagingAreaUuid(),
+                    stagingJob.getStagingAreaFileName());
+        }
+    }
+
+    @Deprecated
     public StagingJob registerNewJob(UUID stagingAreaUuid, String stagingAreaFileName) {
         try {
             StagingJob stagingJob = new StagingJob(stagingAreaUuid, stagingAreaFileName);
