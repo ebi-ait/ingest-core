@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 @RequiredArgsConstructor
@@ -58,28 +59,40 @@ public class SubmissionEnvelopeService {
         }
     }
 
+    public void processOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
+        try {
+            exporter.exportBundles(submissionEnvelope);
+        }
+        catch (Exception e) {
+            log.error("Uncaught Exception exporting Bundles", e);
+        }
+    }
+
+    public void processUpdateSubmission(SubmissionEnvelope submissionEnvelope) {
+        try {
+            metadataUpdateService.applyUpdates(submissionEnvelope);
+            exporter.updateBundles(submissionEnvelope);
+        }
+        catch (Exception e) {
+            log.error("Uncaught Exception Applying Updates or Exporting Bundles", e);
+        }
+    }
+
+    public Future<?> processOriginalSubmissionAsync(SubmissionEnvelope submissionEnvelope) {
+        return executorService.submit(() -> processOriginalSubmission(submissionEnvelope));
+    }
+
+    public Future<?> processUpdateSubmissionAsync(SubmissionEnvelope submissionEnvelope) {
+        return executorService.submit(() -> processUpdateSubmission(submissionEnvelope));
+    }
+
     private void handleSubmitOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
         messageRouter.routeSubmissionRequiresProcessingMessage(submissionEnvelope);
-        executorService.submit(() -> {
-            try {
-                exporter.exportBundles(submissionEnvelope);
-            }
-            catch (Exception e) {
-                log.error("Uncaught Exception exporting Bundles", e);
-            }
-        });
+        processOriginalSubmissionAsync(submissionEnvelope);
     }
 
     private void handleSubmitUpdateSubmission(SubmissionEnvelope submissionEnvelope) {
-        executorService.submit(() -> {
-            try {
-                metadataUpdateService.applyUpdates(submissionEnvelope);
-                exporter.updateBundles(submissionEnvelope);
-            }
-            catch (Exception e) {
-                log.error("Uncaught Exception Applying Updates or Exporting Bundles", e);
-            }
-        });
+        processUpdateSubmissionAsync(submissionEnvelope);
     }
 
     public SubmissionEnvelope createUpdateSubmissionEnvelope() {

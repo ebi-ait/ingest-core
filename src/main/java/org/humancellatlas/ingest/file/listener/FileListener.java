@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.file.web;
+package org.humancellatlas.ingest.file.listener;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -6,6 +6,8 @@ import org.humancellatlas.ingest.core.exception.CoreEntityNotFoundException;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileAlreadyExistsException;
 import org.humancellatlas.ingest.file.FileService;
+import org.humancellatlas.ingest.file.web.FileMediaTypes;
+import org.humancellatlas.ingest.file.web.FileMessage;
 import org.humancellatlas.ingest.messaging.Constants;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
