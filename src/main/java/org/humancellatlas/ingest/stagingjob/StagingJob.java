@@ -1,11 +1,11 @@
 package org.humancellatlas.ingest.stagingjob;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -17,17 +17,41 @@ import java.util.UUID;
 
 @Getter
 @CompoundIndexes({
-        @CompoundIndex(name = "stagingAreaUuidAndFileName", def = "{'stagingAreaUuid' : 1, 'stagingAreaFileName' : 1}", unique = true)
+        @CompoundIndex(
+                name = "stagingAreaUuidAndFileName",
+                def = "{'stagingAreaUuid' : 1, 'stagingAreaFileName' : 1}",
+                unique = true
+        )
 })
 @Document
-@RequiredArgsConstructor
 @EqualsAndHashCode
+@RequiredArgsConstructor
 public class StagingJob implements Identifiable<String> {
-    private @Id String id;
-    private @CreatedDate Instant createdDate;
 
-    private @Indexed final UUID stagingAreaUuid;
+    @Id
+    private String id;
+
+    @CreatedDate
+    private Instant createdDate;
+
+    @Indexed
+    private final UUID stagingAreaUuid;
+
     private final String stagingAreaFileName;
 
-    private @Setter String stagingAreaFileUri;
+    private String metadataUuid;
+
+    @Setter
+    private String stagingAreaFileUri;
+
+    @JsonCreator
+    @PersistenceConstructor
+    public StagingJob(@JsonProperty(value = "stagingAreaUuid") UUID stagingAreaUuid,
+            @JsonProperty(value = "metadataUuid") String metadataUuid,
+            @JsonProperty(value = "stagingAreaFileName") String stagingAreaFileName) {
+        this.stagingAreaUuid = stagingAreaUuid;
+        this.metadataUuid = metadataUuid;
+        this.stagingAreaFileName = stagingAreaFileName;
+    }
+
 }

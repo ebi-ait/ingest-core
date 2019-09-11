@@ -9,6 +9,7 @@ import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,21 +18,19 @@ import java.util.UUID;
 @RepositoryRestController
 @ExposesResourceFor(StagingJob.class)
 @RequiredArgsConstructor
+@RequestMapping("/stagingJobs")
 public class StagingJobController {
+
     private final @NonNull StagingJobService stagingJobService;
 
-    @PostMapping(path = "/stagingJobs")
-    ResponseEntity<?> createStagingJob(@RequestBody StagingJobCreateRequest stagingJobCreateRequest,
-                                       final PersistentEntityResourceAssembler resourceAssembler) {
-        StagingJob stagingJob = stagingJobService.registerNewJob(
-                stagingJobCreateRequest.getStagingAreaUuid(),
-                stagingJobCreateRequest.getStagingAreaFileName()
-        );
-
-        return ResponseEntity.ok(resourceAssembler.toFullResource(stagingJob));
+    @PostMapping
+    public ResponseEntity<?> createStagingJob(@RequestBody StagingJob stagingJob,
+            PersistentEntityResourceAssembler resourceAssembler) {
+        StagingJob persistentJob = stagingJobService.register(stagingJob);
+        return ResponseEntity.ok(resourceAssembler.toFullResource(persistentJob));
     }
 
-    @PatchMapping(path = "/stagingJobs/{stagingJob}" + Links.COMPLETE_STAGING_JOB_URL)
+    @PatchMapping(path = "/{stagingJob}" + Links.COMPLETE_STAGING_JOB_URL)
     ResponseEntity<?> completeStagingJob(@PathVariable("stagingJob") StagingJob stagingJob,
                                          @RequestBody StagingJobCompleteRequest stagingJobCompleteRequest,
                                          final PersistentEntityResourceAssembler resourceAssembler) {
@@ -43,7 +42,7 @@ public class StagingJobController {
         return ResponseEntity.ok(resourceAssembler.toFullResource(completedStagingJob));
     }
 
-    @DeleteMapping(path = "/stagingJobs")
+    @DeleteMapping
     ResponseEntity<?> deleteStagingJobs(@RequestParam("stagingAreaUuid") UUID stagingAreaUuid) {
         stagingJobService.deleteJobsForStagingArea(stagingAreaUuid);
         return new ResponseEntity<StagingJob>(HttpStatus.NO_CONTENT);
