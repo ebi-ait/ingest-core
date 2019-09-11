@@ -12,6 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -78,12 +81,12 @@ public class SubmissionEnvelopeService {
         }
     }
 
-    public Future<?> processOriginalSubmissionAsync(SubmissionEnvelope submissionEnvelope) {
-        return executorService.submit(() -> processOriginalSubmission(submissionEnvelope));
+    public CompletableFuture<Void> processOriginalSubmissionAsync(SubmissionEnvelope submissionEnvelope) {
+        return CompletableFuture.runAsync(() -> processOriginalSubmission(submissionEnvelope), this.executorService);
     }
 
-    public Future<?> processUpdateSubmissionAsync(SubmissionEnvelope submissionEnvelope) {
-        return executorService.submit(() -> processUpdateSubmission(submissionEnvelope));
+    public CompletableFuture<Void> processUpdateSubmissionAsync(SubmissionEnvelope submissionEnvelope) {
+        return CompletableFuture.runAsync(() -> processUpdateSubmission(submissionEnvelope), this.executorService);
     }
 
     private void handleSubmitOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
@@ -102,5 +105,9 @@ public class SubmissionEnvelopeService {
         SubmissionEnvelope insertedUpdateSubmissionEnvelope = submissionEnvelopeRepository.insert(updateSubmissionEnvelope);
         submissionEnvelopeCreateHandler.handleSubmissionEnvelopeCreation(updateSubmissionEnvelope);
         return insertedUpdateSubmissionEnvelope;
+    }
+
+    public Optional<SubmissionEnvelope> getSubmissionById(String submissionId) {
+        return submissionEnvelopeRepository.findById(submissionId);
     }
 }
