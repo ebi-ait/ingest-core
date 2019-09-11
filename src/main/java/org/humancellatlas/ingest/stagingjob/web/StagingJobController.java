@@ -27,7 +27,7 @@ public class StagingJobController {
     public ResponseEntity<?> createStagingJob(@RequestBody StagingJob stagingJob,
             PersistentEntityResourceAssembler resourceAssembler) {
         StagingJob persistentJob = stagingJobService.register(stagingJob);
-        return ResponseEntity.ok(resourceAssembler.toFullResource(stagingJob));
+        return ResponseEntity.ok(resourceAssembler.toFullResource(persistentJob));
     }
 
     @PatchMapping(path = "/{stagingJob}" + Links.COMPLETE_STAGING_JOB_URL)

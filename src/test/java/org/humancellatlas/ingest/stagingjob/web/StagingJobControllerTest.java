@@ -18,8 +18,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class StagingJobControllerTest {
@@ -38,7 +37,8 @@ public class StagingJobControllerTest {
     public void createStagingJob() {
         //given:
         StagingJob stagingJob = new StagingJob(UUID.randomUUID(), "file_1.json");
-        given(stagingJobService.register(any(StagingJob.class))).willReturn(stagingJob);
+        StagingJob persistentJob = spy(stagingJob);
+        given(stagingJobService.register(any(StagingJob.class))).willReturn(persistentJob);
 
         //and:
         PersistentEntityResourceAssembler resourceAssembler = mock(PersistentEntityResourceAssembler.class);
@@ -58,7 +58,7 @@ public class StagingJobControllerTest {
                 .extracting("status").containsExactly(HttpStatus.OK);
         assertThat(response.getBody()).isInstanceOf(PersistentEntityResource.class);
         PersistentEntityResource responseBody = (PersistentEntityResource) response.getBody();
-        assertThat(responseBody.getContent()).isEqualTo(stagingJob);
+        assertThat(responseBody.getContent()).isEqualTo(persistentJob);
     }
 
 }
