@@ -15,6 +15,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 
 @Component
@@ -28,9 +29,16 @@ public class SubmissionListener {
         String submissionId = message.getDocumentId();
 
         submissionEnvelopeService.getSubmissionById(submissionId).ifPresentOrElse(submissionEnvelope -> {
-            submissionEnvelopeService.processOriginalSubmissionAsync(submissionEnvelope)
-                                     .thenRun(() -> basicAck(channel, tag, false, false))
-                                     .exceptionally(ex -> {
+            CompletableFuture<?> asyncProcessSubmissionTask;
+
+            if(submissionEnvelope.getIsUpdate()) {
+                asyncProcessSubmissionTask = submissionEnvelopeService.processUpdateSubmissionAsync(submissionEnvelope);
+            } else {
+                asyncProcessSubmissionTask = submissionEnvelopeService.processOriginalSubmissionAsync(submissionEnvelope);
+            }
+
+            asyncProcessSubmissionTask.thenRun(() -> basicAck(channel, tag, false, false))
+                                      .exceptionally(ex -> {
                                          basicAck(channel, tag, true, false);
                                          return null; // return Void
                                      });
