@@ -80,7 +80,7 @@ public class MessageRouter {
 
     /* messages to state tracker */
 
-    public boolean routeStateTrackingUpdateMessageFor(MetadataDocument document) {
+    public void routeStateTrackingUpdateMessageFor(MetadataDocument document) {
         URI documentUpdateUri = UriComponentsBuilder.newInstance()
                                                     .scheme(configurationService.getStateTrackerScheme())
                                                     .host(configurationService.getStateTrackerHost())
@@ -91,24 +91,27 @@ public class MessageRouter {
         this.messageSender.queueDocumentStateUpdateMessage(documentUpdateUri,
                                                            documentStateUpdateMessage(document),
                                                            document.getUpdateDate().toEpochMilli());
-        return true;
     }
 
-    public boolean routeStateTrackingUpdateMessageForEnvelopeEvent(SubmissionEnvelope envelope, SubmissionState state) {
+    public void routeStateTrackingUpdateMessageForEnvelopeEvent(SubmissionEnvelope envelope, SubmissionState state) {
         // TODO: call this when a user requests a state change on an envelope
         this.messageSender.queueStateTrackingMessage(Constants.Exchanges.STATE_TRACKING,
                                                      Constants.Routing.ENVELOPE_STATE_UPDATE,
                                                      messageFor(envelope, state),
                                                      envelope.getUpdateDate().toEpochMilli());
-        return true;
     }
 
-    public boolean routeStateTrackingNewSubmissionEnvelope(SubmissionEnvelope envelope) {
+    public void routeStateTrackingNewSubmissionEnvelope(SubmissionEnvelope envelope) {
         this.messageSender.queueStateTrackingMessage(Constants.Exchanges.STATE_TRACKING,
                                                      Constants.Routing.ENVELOPE_CREATE,
                                                      messageFor(envelope),
                                                      envelope.getUpdateDate().toEpochMilli());
-        return true;
+    }
+
+    public void routeSubmissionRequiresProcessingMessage(SubmissionEnvelope envelope) {
+        this.messageSender.queueSubmissionNeedsProcessingMessage(Constants.Exchanges.SUBMISSION_EXCHANGE,
+                                                                 Constants.Queues.SUBMISSION_PROCESSING,
+                                                                 messageFor(envelope));
     }
 
     public void sendAssayForExport(ExportData exportData) {

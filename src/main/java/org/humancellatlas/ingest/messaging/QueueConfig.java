@@ -46,6 +46,10 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean TopicExchange stateTrackingExchange() { return new TopicExchange(Constants.Exchanges.STATE_TRACKING); }
 
+    @Bean Queue queueSubmissionNeedsProcessing() { return new Queue(Constants.Queues.SUBMISSION_PROCESSING);}
+
+    @Bean DirectExchange submissionExchange() {return new DirectExchange(Constants.Exchanges.SUBMISSION_EXCHANGE);}
+
     @Bean TopicExchange assayExchange() { return new TopicExchange(Constants.Exchanges.ASSAY_EXCHANGE); }
 
     @Bean TopicExchange uploadAreaExchange() { return new TopicExchange(Constants.Exchanges.UPLOAD_AREA_EXCHANGE); }
@@ -78,6 +82,10 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean Binding bindingUpdateQueue(Queue queueBundleUpdate, TopicExchange assayExchange) {
         return BindingBuilder.bind(queueBundleUpdate).to(assayExchange).with(Constants.Routing.UPDATE_SUBMITTED);
+    }
+
+    @Bean Binding bindingSubmittedSubmissions(Queue queueSubmissionNeedsProcessing, DirectExchange submissionExchange) {
+        return BindingBuilder.bind(queueSubmissionNeedsProcessing).to(submissionExchange).withQueueName();
     }
 
     /* rabbit config */

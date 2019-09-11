@@ -59,6 +59,7 @@ public class SubmissionEnvelopeService {
     }
 
     private void handleSubmitOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
+        messageRouter.routeSubmissionRequiresProcessingMessage(submissionEnvelope);
         executorService.submit(() -> {
             try {
                 exporter.exportBundles(submissionEnvelope);

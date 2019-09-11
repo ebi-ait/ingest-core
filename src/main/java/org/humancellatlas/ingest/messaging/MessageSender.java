@@ -71,6 +71,10 @@ public class MessageSender {
         MessageBuffer.UPLOAD_MANAGER.queueAmqpMessage(exchange, routingKey, payload ,intendedSendTime);
     }
 
+    public void queueSubmissionNeedsProcessingMessage(String exchange, String routingKey, SubmissionEnvelopeMessage payload) {
+        rabbitMessagingTemplate.convertAndSend(exchange, routingKey, payload);
+    }
+
     @PostConstruct
     private void initiateSending(){
         List<MessageBuffer> amqpMessageBuffers = Arrays.asList(
