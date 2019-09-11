@@ -55,11 +55,19 @@ public class SubmissionEnvelopeService {
     }
 
     public void handleSubmissionRequest(SubmissionEnvelope envelope) {
-        if(! envelope.getIsUpdate()) {
-            handleSubmitOriginalSubmission(envelope);
+        messageRouter.routeSubmissionRequiresProcessingMessage(envelope);
+    }
+
+    public void processSubmission(SubmissionEnvelope submissionEnvelope) {
+        if(submissionEnvelope.getIsUpdate()) {
+            processUpdateSubmission(submissionEnvelope);
         } else {
-            handleSubmitUpdateSubmission(envelope);
+            processOriginalSubmission(submissionEnvelope);
         }
+    }
+
+    public CompletableFuture<?> processSubmissionAsync(SubmissionEnvelope submissionEnvelope) {
+        return CompletableFuture.runAsync(() -> processSubmission(submissionEnvelope), this.executorService);
     }
 
     public void processOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
@@ -79,23 +87,6 @@ public class SubmissionEnvelopeService {
         catch (Exception e) {
             log.error("Uncaught Exception Applying Updates or Exporting Bundles", e);
         }
-    }
-
-    public CompletableFuture<Void> processOriginalSubmissionAsync(SubmissionEnvelope submissionEnvelope) {
-        return CompletableFuture.runAsync(() -> processOriginalSubmission(submissionEnvelope), this.executorService);
-    }
-
-    public CompletableFuture<Void> processUpdateSubmissionAsync(SubmissionEnvelope submissionEnvelope) {
-        return CompletableFuture.runAsync(() -> processUpdateSubmission(submissionEnvelope), this.executorService);
-    }
-
-    private void handleSubmitOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
-        messageRouter.routeSubmissionRequiresProcessingMessage(submissionEnvelope);
-        processOriginalSubmissionAsync(submissionEnvelope);
-    }
-
-    private void handleSubmitUpdateSubmission(SubmissionEnvelope submissionEnvelope) {
-        processUpdateSubmissionAsync(submissionEnvelope);
     }
 
     public SubmissionEnvelope createUpdateSubmissionEnvelope() {
