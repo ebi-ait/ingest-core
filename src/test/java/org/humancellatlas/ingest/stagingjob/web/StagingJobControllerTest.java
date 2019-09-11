@@ -1,66 +1,64 @@
 package org.humancellatlas.ingest.stagingjob.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.humancellatlas.ingest.stagingjob.StagingJob;
 import org.humancellatlas.ingest.stagingjob.StagingJobService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.mapping.PersistentEntity;
+import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
-import org.springframework.data.rest.webmvc.config.PersistentEntityResourceAssemblerArgumentResolver;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {StagingJobController.class})
-@EnableWebMvc
-@AutoConfigureMockMvc
+@ExtendWith(MockitoExtension.class)
 public class StagingJobControllerTest {
 
-    @MockBean
     private StagingJobService stagingJobService;
 
-    @Autowired
-    private MockMvc webApp;
+    private StagingJobController controller;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    @BeforeEach
+    public void setUp(@Mock StagingJobService stagingJobService) {
+        this.stagingJobService = stagingJobService;
+        controller = new StagingJobController(stagingJobService);
+    }
 
     @Test
-    @WithMockUser("johndoe")
-    public void createStagingJob() throws Exception {
+    public void createStagingJob() {
         //given:
         StagingJob stagingJob = new StagingJob(UUID.randomUUID(), "file_1.json");
+        given(stagingJobService.register(any(StagingJob.class))).willReturn(stagingJob);
+
+        //and:
+        PersistentEntityResourceAssembler resourceAssembler = mock(PersistentEntityResourceAssembler.class);
+        given(resourceAssembler.toFullResource(any())).willAnswer(invocation -> {
+            Object entity = invocation.getArgument(0);
+            return PersistentEntityResource.build(entity, mock(PersistentEntity.class)).build();
+        });
 
         //when:
-        String jsonContent = objectMapper.writeValueAsString(stagingJob);
-        MvcResult result = webApp
-                .perform(post("/stagingJobs")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonContent))
-                .andReturn();
+        ResponseEntity<?> response = controller.createStagingJob(stagingJob, resourceAssembler);
 
         //then:
-        assertThat(result.getResponse().getStatus()).isEqualTo(OK.value());
         verify(stagingJobService).register(any(StagingJob.class));
+
+        //and:
+        assertThat(response).isNotNull()
+                .extracting("status").containsExactly(HttpStatus.OK);
+        assertThat(response.getBody()).isInstanceOf(PersistentEntityResource.class);
+        PersistentEntityResource responseBody = (PersistentEntityResource) response.getBody();
+        assertThat(responseBody.getContent()).isEqualTo(stagingJob);
     }
 
 }
