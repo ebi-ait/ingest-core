@@ -33,9 +33,6 @@ public class SubmissionEnvelopeService {
     private final MetadataUpdateService metadataUpdateService;
 
     @NonNull
-    private final ExecutorService executorService = Executors.newFixedThreadPool(20);
-
-    @NonNull
     private final SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
     @NonNull
@@ -67,10 +64,10 @@ public class SubmissionEnvelopeService {
     }
 
     public CompletableFuture<?> processSubmissionAsync(SubmissionEnvelope submissionEnvelope) {
-        return CompletableFuture.runAsync(() -> processSubmission(submissionEnvelope), this.executorService);
+        return CompletableFuture.runAsync(() -> processSubmission(submissionEnvelope));
     }
 
-    public void processOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
+    private void processOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
         try {
             exporter.exportBundles(submissionEnvelope);
         }
@@ -79,7 +76,7 @@ public class SubmissionEnvelopeService {
         }
     }
 
-    public void processUpdateSubmission(SubmissionEnvelope submissionEnvelope) {
+    private void processUpdateSubmission(SubmissionEnvelope submissionEnvelope) {
         try {
             metadataUpdateService.applyUpdates(submissionEnvelope);
             exporter.updateBundles(submissionEnvelope);
