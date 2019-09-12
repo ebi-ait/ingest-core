@@ -25,8 +25,12 @@ public class SubmissionListener {
     public void processSubmissions(SubmissionEnvelopeMessage message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) {
         String submissionId = message.getDocumentId();
         submissionHandler.handleProcessSubmission(submissionId)
-                         .thenRun(() -> basicAck(channel, tag, false, false))
+                         .thenRun(() -> {
+                             log.info(String.format("Completed submission-processing for submission with id %s", submissionId));
+                             basicAck(channel, tag, false, false);
+                         })
                          .exceptionally(ex -> {
+                             log.warn(String.format("Failed submission-processing for submission with id %s", submissionId), ex);
                              basicAck(channel, tag, true, false);
                              return null; // return Void
                          });
