@@ -36,9 +36,13 @@ public class StagingJobControllerTest {
     @Test
     public void createStagingJob() {
         //given:
-        StagingJob stagingJob = new StagingJob(UUID.randomUUID(), "file_1.json");
-        StagingJob persistentJob = spy(stagingJob);
-        given(stagingJobService.register(any(StagingJob.class))).willReturn(persistentJob);
+        UUID testStagingAreaUuid = UUID.randomUUID();
+        UUID mockMetadataUuid = UUID.randomUUID();
+        String testFileName = "test.fastq.gz";
+
+        StagingJobCreateRequest stagingJob = new StagingJobCreateRequest(testStagingAreaUuid, testFileName, mockMetadataUuid);
+        StagingJob persistentJob = new StagingJob(testStagingAreaUuid, testFileName, mockMetadataUuid.toString());
+        given(stagingJobService.registerNewJob(any(StagingJobCreateRequest.class))).willReturn(persistentJob);
 
         //and:
         PersistentEntityResourceAssembler resourceAssembler = mock(PersistentEntityResourceAssembler.class);
@@ -51,7 +55,7 @@ public class StagingJobControllerTest {
         ResponseEntity<?> response = controller.createStagingJob(stagingJob, resourceAssembler);
 
         //then:
-        verify(stagingJobService).register(any(StagingJob.class));
+        verify(stagingJobService).registerNewJob(any(StagingJobCreateRequest.class));
 
         //and:
         assertThat(response).isNotNull()

@@ -39,19 +39,8 @@ public class StagingJob implements Identifiable<String> {
 
     private final String stagingAreaFileName;
 
-    private String metadataUuid;
+    private final String metadataUuid;
 
     @Setter
     private String stagingAreaFileUri;
-
-    @JsonCreator
-    @PersistenceConstructor
-    public StagingJob(@JsonProperty(value = "stagingAreaUuid") UUID stagingAreaUuid,
-            @JsonProperty(value = "metadataUuid") String metadataUuid,
-            @JsonProperty(value = "stagingAreaFileName") String stagingAreaFileName) {
-        this.stagingAreaUuid = stagingAreaUuid;
-        this.metadataUuid = metadataUuid;
-        this.stagingAreaFileName = stagingAreaFileName;
-    }
-
 }

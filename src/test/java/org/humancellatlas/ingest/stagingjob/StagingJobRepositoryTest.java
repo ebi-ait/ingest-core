@@ -22,12 +22,13 @@ public class StagingJobRepositoryTest {
     @Test
     public void testJpaExceptionWhenInsertingMultipleCompoundKey() {
         UUID testStagingAreaUuid = UUID.randomUUID();
+        UUID mockMetadataUuid = UUID.randomUUID();
         String testFileName = "test.fastq.gz";
 
-        stagingJobRepository.save(new StagingJob(testStagingAreaUuid, testFileName));
+        stagingJobRepository.save(new StagingJob(testStagingAreaUuid, testFileName, mockMetadataUuid.toString()));
 
         assertThatExceptionOfType(DuplicateKeyException.class).isThrownBy(() -> {
-            stagingJobRepository.save(new StagingJob(testStagingAreaUuid, testFileName));
+            stagingJobRepository.save(new StagingJob(testStagingAreaUuid, testFileName, mockMetadataUuid.toString()));
         });
     }
 
@@ -39,10 +40,10 @@ public class StagingJobRepositoryTest {
         UUID testStagingAreaUuid_2 = UUID.randomUUID();
         String testFileName_2 = "test_2.fastq.gz";
 
-        stagingJobRepository.save(new StagingJob(testStagingAreaUuid_1, testFileName_1));
-        stagingJobRepository.save(new StagingJob(testStagingAreaUuid_1, testFileName_2));
+        stagingJobRepository.save(new StagingJob(testStagingAreaUuid_1, testFileName_1, UUID.randomUUID().toString()));
+        stagingJobRepository.save(new StagingJob(testStagingAreaUuid_1, testFileName_2, UUID.randomUUID().toString()));
 
-        stagingJobRepository.save(new StagingJob(testStagingAreaUuid_2, testFileName_1));
-        stagingJobRepository.save(new StagingJob(testStagingAreaUuid_2, testFileName_2));
+        stagingJobRepository.save(new StagingJob(testStagingAreaUuid_2, testFileName_1, UUID.randomUUID().toString()));
+        stagingJobRepository.save(new StagingJob(testStagingAreaUuid_2, testFileName_2, UUID.randomUUID().toString()));
     }
 }

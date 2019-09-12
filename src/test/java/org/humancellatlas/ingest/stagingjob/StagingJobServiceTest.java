@@ -1,11 +1,16 @@
 package org.humancellatlas.ingest.stagingjob;
 
 import org.humancellatlas.ingest.stagingjob.StagingJobService.JobAlreadyRegisteredException;
+import org.humancellatlas.ingest.stagingjob.web.StagingJobCreateRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.dao.DuplicateKeyException;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,44 +27,49 @@ public class StagingJobServiceTest {
         reset(stagingJobRepository);
     }
 
+    @BeforeEach
+    public void mockStagingJobRepositorySave() {
+        when(stagingJobRepository.save(any(StagingJob.class)))
+                .thenAnswer(new Answer<StagingJob>() {
+                    private Set<StagingJob> savedJobs = new HashSet<>();
+                    @Override
+                    public StagingJob answer(InvocationOnMock invocation){
+                        StagingJob stagingJob = invocation.getArgument(0);
+                        if(savedJobs.contains(stagingJob)) {
+                            throw new DuplicateKeyException("");
+                        } else {
+                            savedJobs.add(stagingJob);
+                            return stagingJob;
+                        }
+                    }
+                });
+    }
+
     @Nested
     class Registration {
 
         @Test
         public void validJob() {
-            // given:
-            UUID stagingAreaUUid = UUID.randomUUID();
-            String fileName = "test_1.fastq.gz";
-            String metadataUuid = UUID.randomUUID().toString();
-            StagingJob stagingJob = new StagingJob(stagingAreaUUid, metadataUuid, fileName);
+            UUID testStagingAreaUuid_1 = UUID.randomUUID();
+            String testFileName_1 = "test_1.fastq.gz";
 
-            // and:
-            StagingJob persistentJob = spy(stagingJob);
-            doReturn("_generated_id_1").when(persistentJob).getId();
-            doReturn(persistentJob).when(stagingJobRepository).save(any());
+            UUID testStagingAreaUuid_2 = UUID.randomUUID();
+            String testFileName_2 = "test_2.fastq.gz";
 
-            //when:
-            StagingJob resultingJob = stagingJobService.register(stagingJob);
+            stagingJobService.registerNewJob(new StagingJobCreateRequest(testStagingAreaUuid_1, testFileName_1, UUID.randomUUID()));
+            stagingJobService.registerNewJob(new StagingJobCreateRequest(testStagingAreaUuid_1, testFileName_2, UUID.randomUUID()));
 
-            //then:
-            verify(stagingJobRepository).save(stagingJob);
-            assertThat(resultingJob).isEqualTo(persistentJob);
+            stagingJobService.registerNewJob(new StagingJobCreateRequest(testStagingAreaUuid_2, testFileName_1, UUID.randomUUID()));
+            stagingJobService.registerNewJob(new StagingJobCreateRequest(testStagingAreaUuid_2, testFileName_2, UUID.randomUUID()));
         }
 
         @Test
         public void duplicateJob() {
-            // given:
-            UUID stagingAreaUuid = UUID.randomUUID();
-            String metadataUuid = UUID.randomUUID().toString();
-            String fileName = "test.fastq.gz";
-            StagingJob stagingJob = new StagingJob(stagingAreaUuid, metadataUuid, fileName);
+            StagingJobCreateRequest testStagingJobCreateRequest = new StagingJobCreateRequest(UUID.randomUUID(),"test.fastq.gz", UUID.randomUUID());
+            stagingJobService.registerNewJob(testStagingJobCreateRequest);
 
-            // and:
-            doThrow(new DuplicateKeyException("duplicate key")).when(stagingJobRepository).save(any());
-
-            // expect :
-            assertThatExceptionOfType(JobAlreadyRegisteredException.class)
-                    .isThrownBy(() -> stagingJobService.register(stagingJob));
+            assertThatExceptionOfType(IllegalStateException.class)
+                    .isThrownBy(() -> stagingJobService.registerNewJob(testStagingJobCreateRequest));
         }
     }
 }

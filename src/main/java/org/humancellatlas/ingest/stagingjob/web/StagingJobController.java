@@ -9,7 +9,6 @@ import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,9 +23,9 @@ public class StagingJobController {
     private final @NonNull StagingJobService stagingJobService;
 
     @PostMapping
-    public ResponseEntity<?> createStagingJob(@RequestBody StagingJob stagingJob,
+    public ResponseEntity<?> createStagingJob(@RequestBody StagingJobCreateRequest stagingJobCreateRequest,
             PersistentEntityResourceAssembler resourceAssembler) {
-        StagingJob persistentJob = stagingJobService.register(stagingJob);
+        StagingJob persistentJob = stagingJobService.registerNewJob(stagingJobCreateRequest);
         return ResponseEntity.ok(resourceAssembler.toFullResource(persistentJob));
     }
 

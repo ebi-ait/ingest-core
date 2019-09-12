@@ -2,6 +2,8 @@ package org.humancellatlas.ingest.stagingjob;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.stagingjob.web.StagingJobCreateRequest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -14,19 +16,13 @@ public class StagingJobService {
     @NonNull
     private final StagingJobRepository stagingJobRepository;
 
-    public StagingJob register(StagingJob stagingJob) {
-        try {
-            return stagingJobRepository.save(stagingJob);
-        } catch (DuplicateKeyException e) {
-            throw new JobAlreadyRegisteredException(stagingJob.getStagingAreaUuid(),
-                    stagingJob.getStagingAreaFileName());
-        }
-    }
+    public StagingJob registerNewJob(StagingJobCreateRequest stagingJobCreateRequest) {
+        UUID stagingAreaUuid = stagingJobCreateRequest.getStagingAreaUuid();
+        UUID metadataUuid = stagingJobCreateRequest.getMetadataUuid();
+        String stagingAreaFileName = stagingJobCreateRequest.getStagingAreaFileName();
 
-    @Deprecated
-    public StagingJob registerNewJob(UUID stagingAreaUuid, String stagingAreaFileName) {
         try {
-            StagingJob stagingJob = new StagingJob(stagingAreaUuid, stagingAreaFileName);
+            StagingJob stagingJob = new StagingJob(stagingAreaUuid, stagingAreaFileName, metadataUuid.toString());
             return stagingJobRepository.save(stagingJob);
         } catch (DuplicateKeyException e) {
             throw new JobAlreadyRegisteredException(stagingAreaUuid, stagingAreaFileName);
