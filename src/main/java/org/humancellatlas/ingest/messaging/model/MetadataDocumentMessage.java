@@ -15,7 +15,6 @@ import java.util.Collection;
 @Getter
 @AllArgsConstructor
 public class MetadataDocumentMessage implements AbstractEntityMessage {
-    private final MessageProtocol messageProtocol;
     private final String documentType;
     private final String documentId;
     private final String documentUuid;

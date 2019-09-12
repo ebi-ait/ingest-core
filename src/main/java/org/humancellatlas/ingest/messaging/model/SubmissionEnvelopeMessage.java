@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public class SubmissionEnvelopeMessage implements AbstractEntityMessage {
-    private final @NonNull MessageProtocol messageProtocol;
     private final @NonNull String documentType;
     private final @NonNull String documentId;
     private final @NonNull String documentUuid;

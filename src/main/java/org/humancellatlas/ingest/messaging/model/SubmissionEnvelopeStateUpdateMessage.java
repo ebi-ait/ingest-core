@@ -11,14 +11,13 @@ import org.humancellatlas.ingest.state.SubmissionState;
 public class SubmissionEnvelopeStateUpdateMessage extends SubmissionEnvelopeMessage {
     @Getter @Setter private SubmissionState requestedState;
 
-    public SubmissionEnvelopeStateUpdateMessage(MessageProtocol messageProtocol, String documentType, String documentId, String documentUuid, String callbackLink) {
-        super(messageProtocol, documentType, documentId, documentUuid, callbackLink);
+    public SubmissionEnvelopeStateUpdateMessage(String documentType, String documentId, String documentUuid, String callbackLink) {
+        super(documentType, documentId, documentUuid, callbackLink);
     }
 
     @JsonIgnore
     public static SubmissionEnvelopeStateUpdateMessage fromSubmissionEnvelopeMessage(SubmissionEnvelopeMessage message) {
         return new SubmissionEnvelopeStateUpdateMessage(
-                message.getMessageProtocol(),
                 message.getDocumentType(),
                 message.getDocumentId(),
                 message.getDocumentUuid(),

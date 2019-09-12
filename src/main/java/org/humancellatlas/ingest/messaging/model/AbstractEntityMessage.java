@@ -5,5 +5,4 @@ package org.humancellatlas.ingest.messaging.model;
  */
 
 public interface AbstractEntityMessage {
-    MessageProtocol getMessageProtocol();
 }
