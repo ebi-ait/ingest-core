@@ -1,7 +1,5 @@
-package org.humancellatlas.ingest.stagingjobs;
+package org.humancellatlas.ingest.stagingjob;
 
-import org.humancellatlas.ingest.stagingjob.StagingJob;
-import org.humancellatlas.ingest.stagingjob.StagingJobRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

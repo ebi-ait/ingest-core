@@ -20,5 +20,5 @@ public interface StagingJobRepository extends MongoRepository<StagingJob, String
 
     @RestResource(rel = "findByStagingAreaAndFileName")
     <T extends StagingJob> T findByStagingAreaUuidAndStagingAreaFileName(@Param("stagingAreaUuid") UUID stagingAreaUuid,
-                                                                         @Param("stagingAreaFileName") String stagingAreaFileName);
+            @Param("stagingAreaFileName") String stagingAreaFileName);
 }
