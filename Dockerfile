@@ -14,6 +14,7 @@ ENV RMI_HOSTNAME=localhost
 
 ADD gradle ./gradle
 ADD src ./src
+ADD lombok.config ./lombok.config
 
 COPY gradlew build.gradle ./
 
