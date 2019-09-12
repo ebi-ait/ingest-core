@@ -33,7 +33,7 @@ public class SubmissionEnvelopeService {
     private final MetadataUpdateService metadataUpdateService;
 
     @NonNull
-    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
+    private final ExecutorService executorService = Executors.newFixedThreadPool(20);
 
     @NonNull
     private final SubmissionEnvelopeRepository submissionEnvelopeRepository;
