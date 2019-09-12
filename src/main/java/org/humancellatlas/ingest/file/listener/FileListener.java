@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.file.listener;
 
+import com.rabbitmq.client.Channel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.exception.CoreEntityNotFoundException;
@@ -9,11 +10,14 @@ import org.humancellatlas.ingest.file.FileService;
 import org.humancellatlas.ingest.file.web.FileMediaTypes;
 import org.humancellatlas.ingest.file.web.FileMessage;
 import org.humancellatlas.ingest.messaging.Constants;
+import org.humancellatlas.ingest.messaging.MessagingUtils;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -31,7 +35,7 @@ public class FileListener {
 
 
     @RabbitListener(queues = Constants.Queues.FILE_STAGED)
-    public void handleFileStagedEvent(FileMessage fileMessage) {
+    public void handleFileStagedEvent(FileMessage fileMessage, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) {
         if(!StringUtils.isEmpty(fileMessage.getContentType())
                 && fileMessage.getMediaType().isPresent()
                 && fileMessage.getMediaType().get().equals(FileMediaTypes.HCA_DATA_FILE)){
@@ -41,12 +45,13 @@ public class FileListener {
                                              fileMessage.getFileName(),
                                              fileMessage.getCloudUrl(),
                                              fileMessage.getChecksums());
+                MessagingUtils.basicAck(channel, tag, false, false);
             } catch (CoreEntityNotFoundException e) {
                 log.warn(e.getMessage());
-                throw new AmqpRejectAndDontRequeueException(e.getMessage());
+                MessagingUtils.basicAck(channel, tag, true, false);
             } catch (RuntimeException e) {
                 log.error(e.getMessage());
-                throw new AmqpRejectAndDontRequeueException(e.getMessage());
+                MessagingUtils.basicAck(channel, tag, true, false);
             }
         }
     }
