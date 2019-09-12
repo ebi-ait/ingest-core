@@ -63,10 +63,6 @@ public class SubmissionEnvelopeService {
         }
     }
 
-    public CompletableFuture<?> processSubmissionAsync(SubmissionEnvelope submissionEnvelope) {
-        return CompletableFuture.runAsync(() -> processSubmission(submissionEnvelope));
-    }
-
     private void processOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
         try {
             exporter.exportBundles(submissionEnvelope);

@@ -21,7 +21,7 @@ public class SubmissionHandler {
                                 .thenApply(maybeSubmission -> maybeSubmission.orElseThrow(() -> {
                                     throw new ResourceNotFoundException(String.format("Attempted to process submission with ID %s but submission doesn't exist", submissionId));
                                 }))
-                                .thenComposeAsync(submissionEnvelopeService::processSubmissionAsync, executorService)
+                                .thenAcceptAsync(submissionEnvelopeService::processSubmission, executorService)
                                 .thenApply(__ -> submissionId)
                                 .exceptionally(ex -> {
                                     throw new RuntimeException(String.format("Failed to process submission with id %s", submissionId), ex);
