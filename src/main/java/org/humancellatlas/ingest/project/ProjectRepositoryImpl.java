@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
@@ -30,8 +31,10 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
                 criterias.add(Criteria.where(contentField).is(metadataCriteria.getValue()));
             } else if (metadataCriteria.getOperator().equals(Operator.REGEX)){
                 criterias.add(Criteria.where(contentField).regex((String) metadataCriteria.getValue()));
-            } else if (metadataCriteria.getOperator().equals(Operator.NE)){
+            } else if (metadataCriteria.getOperator().equals(Operator.NE)) {
                 criterias.add(Criteria.where(contentField).ne(metadataCriteria.getValue()));
+            } else if (metadataCriteria.getOperator().equals(Operator.NIN)) {
+                criterias.add(Criteria.where(contentField).nin((Collection<?>) metadataCriteria.getValue()));
             } else {
                 throw new RuntimeException("MetadataCriteria not allowed!");
             }
