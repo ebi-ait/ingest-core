@@ -27,17 +27,39 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
 
         for(MetadataCriteria metadataCriteria : metadataQuery){
             String contentField = "content." + metadataCriteria.getContentField();
-            if(metadataCriteria.getOperator().equals(Operator.IS)){
-                criterias.add(Criteria.where(contentField).is(metadataCriteria.getValue()));
-            } else if (metadataCriteria.getOperator().equals(Operator.REGEX)){
-                criterias.add(Criteria.where(contentField).regex((String) metadataCriteria.getValue()));
-            } else if (metadataCriteria.getOperator().equals(Operator.NE)) {
-                criterias.add(Criteria.where(contentField).ne(metadataCriteria.getValue()));
-            } else if (metadataCriteria.getOperator().equals(Operator.NIN)) {
-                criterias.add(Criteria.where(contentField).nin((Collection<?>) metadataCriteria.getValue()));
-            } else {
-                throw new RuntimeException("MetadataCriteria not allowed!");
+            Criteria criteria = Criteria.where(contentField);
+            switch (metadataCriteria.getOperator()) {
+                case IS:
+                    criteria = criteria.is(metadataCriteria.getValue());
+                    break;
+                case NE:
+                    criteria = criteria.ne(metadataCriteria.getValue());
+                    break;
+                case GT:
+                    criteria = criteria.gt(metadataCriteria.getValue());
+                    break;
+                case GTE:
+                    criteria = criteria.gte(metadataCriteria.getValue());
+                    break;
+                case LT:
+                    criteria = criteria.lt(metadataCriteria.getValue());
+                    break;
+                case LTE:
+                    criteria = criteria.lte(metadataCriteria.getValue());
+                    break;
+                case IN:
+                    criteria = criteria.in((Collection<?>) metadataCriteria.getValue());
+                    break;
+                case NIN:
+                    criteria = criteria.nin((Collection<?>) metadataCriteria.getValue());
+                    break;
+                case REGEX:
+                    criteria = criteria.regex((String) metadataCriteria.getValue());
+                    break;
+                default:
+                    throw new RuntimeException("MetadataCriteria not allowed!");
             }
+            criterias.add(criteria);
         }
 
         query.addCriteria(
