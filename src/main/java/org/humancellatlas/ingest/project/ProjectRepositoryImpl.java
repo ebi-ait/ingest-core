@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.InvalidMongoDbApiUsageException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -30,7 +31,12 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
             Criteria criteria = Criteria.where(contentField);
             switch (metadataCriteria.getOperator()) {
                 case IS:
-                    criteria = criteria.is(metadataCriteria.getValue());
+                    try {
+                        criteria = criteria.is(metadataCriteria.getValue());
+                    }
+                    catch (InvalidMongoDbApiUsageException e) {
+                      throw new IllegalArgumentException(e.getMessage(), e);
+                    }
                     break;
                 case NE:
                     criteria = criteria.ne(metadataCriteria.getValue());
@@ -57,7 +63,7 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
                     criteria = criteria.regex((String) metadataCriteria.getValue());
                     break;
                 default:
-                    throw new RuntimeException("MetadataCriteria not allowed!");
+                    throw new IllegalArgumentException(String.format("MetadataCriteria %s is not supported.", metadataCriteria.getOperator()));
             }
             criterias.add(criteria);
         }
