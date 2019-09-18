@@ -34,10 +34,15 @@ dependencies {
 	implementation 'org.springframework.data:spring-data-rest-hal-browser'
 	implementation 'org.apache.httpcomponents:httpcore'
 
+	implementation 'com.fasterxml.jackson.core:jackson-core:2.10.0.pr3'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.0.pr3'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0.pr3'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
 	implementation 'com.flipkart.zjsonpatch:zjsonpatch:0.4.8'
 	implementation 'org.apache.httpcomponents:httpmime'
-	implementation 'com.auth0:auth0-spring-security-api:1.1.0'
+	implementation 'com.auth0:auth0-spring-security-api:1.2.5'
+	implementation 'com.auth0:java-jwt:3.8.2'
+	implementation 'com.auth0:jwks-rsa:0.8.3'
 	implementation 'org.jolokia:jolokia-core'
 	implementation 'org.zalando:problem:0.23.0'
 
