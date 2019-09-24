@@ -1,3 +1,8 @@
+[![Build Status](https://travis-ci.org/HumanCellAtlas/ingest-core.svg?branch=master)](https://travis-ci.org/HumanCellAtlas/ingest-core)
+[![Maintainability](https://api.codeclimate.com/v1/badges/024864c09e56bd43a7e9/maintainability)](https://codeclimate.com/github/HumanCellAtlas/ingest-core/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/024864c09e56bd43a7e9/test_coverage)](https://codeclimate.com/github/HumanCellAtlas/ingest-core/test_coverage)
+[![Docker Repository on Quay](https://quay.io/repository/humancellatlas/ingest-core/status "Docker Repository on Quay")](https://quay.io/repository/humancellatlas/ingest-core)
+
 # Ingest Core API
 Core Ingest Service for submitting experimental data to the DCP.
 
