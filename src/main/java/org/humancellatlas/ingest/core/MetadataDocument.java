@@ -35,7 +35,7 @@ public abstract class MetadataDocument extends AbstractEntity {
     private Object content;
 
     @Indexed
-    private @DBRef Set<SubmissionEnvelope> submissionEnvelopes = new HashSet<>();
+    private @Setter @DBRef SubmissionEnvelope submissionEnvelope;
 
     private @Setter Accession accession;
     private @Setter ValidationState validationState;
