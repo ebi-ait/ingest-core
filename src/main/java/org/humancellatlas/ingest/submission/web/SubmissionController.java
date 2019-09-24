@@ -110,7 +110,7 @@ public class SubmissionController {
     ResponseEntity<?> getBiomaterials(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
         Pageable pageable,
         final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Biomaterial> biomaterials = getBiomaterialRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        Page<Biomaterial> biomaterials = getBiomaterialRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(biomaterials, resourceAssembler));
     }
 
@@ -145,7 +145,7 @@ public class SubmissionController {
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/biomaterials/{state}", method = RequestMethod.GET)
     ResponseEntity<?> getSamplesWithValidationState(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope, @PathVariable("state") String state,
                                                     Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Biomaterial> biomaterials = getBiomaterialRepository().findBySubmissionEnvelopesContainingAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
+        Page<Biomaterial> biomaterials = getBiomaterialRepository().findBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(biomaterials, resourceAssembler));
     }
 

@@ -42,6 +42,6 @@ public class BiomaterialCrudStrategy implements MetadataCrudStrategy<Biomaterial
 
     @Override
     public Collection<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        return biomaterialRepository.findBySubmissionEnvelopesContaining(submissionEnvelope);
+        return biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope);
     }
 }
