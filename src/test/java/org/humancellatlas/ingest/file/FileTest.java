@@ -43,7 +43,7 @@ public class FileTest {
         //given:
         Process analysis = createTestProcess();
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        analysis.addToSubmissionEnvelope(submissionEnvelope);
+        analysis.setSubmissionEnvelope(submissionEnvelope);
 
         //when:
         File file = new File();
@@ -51,7 +51,7 @@ public class FileTest {
 
         //then:
         assertThat(file.getDerivedByProcesses()).contains(analysis);
-        assertThat(file.getSubmissionEnvelopes()).contains(submissionEnvelope);
+        assertThat(file.getSubmissionEnvelope()).isEqualTo(submissionEnvelope);
     }
 
     @Test
@@ -59,18 +59,18 @@ public class FileTest {
         //given:
         Process analysis = createTestProcess();
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        analysis.addToSubmissionEnvelope(submissionEnvelope);
+        analysis.setSubmissionEnvelope(submissionEnvelope);
 
         //and:
         File file = new File();
-        file.addToSubmissionEnvelope(submissionEnvelope);
+        file.setSubmissionEnvelope(submissionEnvelope);
 
         //when:
         file.addToAnalysis(analysis);
 
         //then:
         assertThat(file.getDerivedByProcesses()).contains(analysis);
-        assertThat(file.getSubmissionEnvelopes()).contains(submissionEnvelope);
+        assertThat(file.getSubmissionEnvelope()).isEqualTo(submissionEnvelope);
     }
 
     private Process createTestProcess() {

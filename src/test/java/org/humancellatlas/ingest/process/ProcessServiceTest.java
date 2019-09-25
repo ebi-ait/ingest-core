@@ -54,7 +54,7 @@ public class ProcessServiceTest {
         //given:
         Process analysis = new Process();
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        analysis.addToSubmissionEnvelope(submissionEnvelope);
+        analysis.setSubmissionEnvelope(submissionEnvelope);
 
         //and:
         File file = new File();
@@ -63,7 +63,7 @@ public class ProcessServiceTest {
 
         //and:
         doReturn(Collections.emptyList()).when(fileRepository)
-                .findBySubmissionEnvelopesInAndFileName(any(SubmissionEnvelope.class), anyString());
+                .findBySubmissionEnvelopeAndFileName(any(SubmissionEnvelope.class), anyString());
 
         //when:
         Process result = service.addOutputFileToAnalysisProcess(analysis, file);
@@ -79,7 +79,7 @@ public class ProcessServiceTest {
         //given:
         Process analysis = new Process();
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        analysis.addToSubmissionEnvelope(submissionEnvelope);
+        analysis.setSubmissionEnvelope(submissionEnvelope);
 
         //and:
         File file = new File();
@@ -90,7 +90,7 @@ public class ProcessServiceTest {
         File persistentFile = spy(new File());
         List<File> persistentFiles = Arrays.asList(persistentFile);
         doReturn(persistentFiles).when(fileRepository)
-                .findBySubmissionEnvelopesInAndFileName(submissionEnvelope, fileName);
+                .findBySubmissionEnvelopeAndFileName(submissionEnvelope, fileName);
 
         //when:
         Process result = service.addOutputFileToAnalysisProcess(analysis, file);
