@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.humancellatlas.ingest.state.ValidationState;
 
-import java.util.Collection;
 
 /**
  * Javadocs go here!
@@ -21,5 +20,6 @@ public class MetadataDocumentMessage implements AbstractEntityMessage {
     private final String documentUuid;
     private final ValidationState validationState;
     private final String callbackLink;
-    private final Collection<String> envelopeIds;
+    //private final Collection<String> envelopeIds;
+    private final String envelopeId;
 }
