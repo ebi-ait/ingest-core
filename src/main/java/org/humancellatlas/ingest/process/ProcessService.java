@@ -107,7 +107,7 @@ public class ProcessService {
 
     private File determineTargetFile(SubmissionEnvelope submissionEnvelope, File file) {
         List<File> persistentFiles = fileRepository
-                .findBySubmissionEnvelopesInAndFileName(submissionEnvelope, file.getFileName());
+                .findBySubmissionEnvelopeAndFileName(submissionEnvelope, file.getFileName());
 
         File targetFile = persistentFiles.stream().findFirst().orElse(file);
         return targetFile;
@@ -151,7 +151,7 @@ public class ProcessService {
         getLog().info("Retrieving assays: file query time: {} s", fileQt);
         long allBioStartTime = System.currentTimeMillis();
 
-        fileRepository.findBySubmissionEnvelopesContains(submissionEnvelope)
+        fileRepository.findBySubmissionEnvelope(submissionEnvelope)
                       .forEach(derivedFile -> {
                           for (Process derivedByProcess : derivedFile.getDerivedByProcesses()) {
                               if (!biomaterialRepository.findByInputToProcessesContains(derivedByProcess).isEmpty()) {
@@ -176,7 +176,7 @@ public class ProcessService {
      */
     public Set<String> findAnalyses(SubmissionEnvelope submissionEnvelope) {
         Set<String> results = new LinkedHashSet<>();
-        fileRepository.findBySubmissionEnvelopesContains(submissionEnvelope)
+        fileRepository.findBySubmissionEnvelope(submissionEnvelope)
                       .forEach(derivedFile -> {
                           for (Process derivedByProcess : derivedFile.getDerivedByProcesses()) {
                               if (!fileRepository.findByInputToProcessesContains(derivedByProcess).isEmpty()) {
