@@ -69,6 +69,8 @@ public class File extends MetadataDocument {
      * @return a reference to this file
      */
     public File addAsDerivedByProcess(Process process) {
+
+    	// XXX why we implementing this check here but not above??
         String processId = process.getId();
         boolean processInList = derivedByProcesses.stream()
                 .map(Process::getId)
@@ -81,12 +83,10 @@ public class File extends MetadataDocument {
 
     public void addToAnalysis(Process analysis) {
         //TODO check if this File and the Analysis belong to the same Submission?
-        Set<SubmissionEnvelope> submissionEnvelopes = getSubmissionEnvelopes();
-        if (submissionEnvelopes == null || submissionEnvelopes.isEmpty()) {
-            SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
-            addToSubmissionEnvelope(submissionEnvelope);
-        }
+        SubmissionEnvelope submissionEnvelope = analysis.getSubmissionEnvelope();
+        super.setSubmissionEnvelope(submissionEnvelope);
         addAsDerivedByProcess(analysis);
     }
+    
 
 }

@@ -10,7 +10,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class BundleManifestRepositoryImpl implements BundleManifestRepositoryCustom {
@@ -24,7 +23,7 @@ public class BundleManifestRepositoryImpl implements BundleManifestRepositoryCus
 
     @Override
     public Page<BundleManifest> findBundleManifestsByProjectAndBundleType(Project project, BundleType bundleType, Pageable pageable) {
-        SubmissionEnvelope submissionEnvelope = new ArrayList<>(project.getSubmissionEnvelopes()).get(0);
+        SubmissionEnvelope submissionEnvelope = project.getSubmissionEnvelope();
         String submissionUuid = submissionEnvelope.getUuid().getUuid().toString();
         String projectUuid = project.getUuid().getUuid().toString();
 

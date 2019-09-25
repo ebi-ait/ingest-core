@@ -82,7 +82,7 @@ public class ProcessService {
     // TODO Refactor this to use FileService
     // Implement logic to have the option to only create and createOrUpdate
     public Process addOutputFileToAnalysisProcess(final Process analysis, final File file) {
-        SubmissionEnvelope submissionEnvelope = analysis.getOpenSubmissionEnvelope();
+        SubmissionEnvelope submissionEnvelope = analysis.getSubmissionEnvelope();
         File targetFile = determineTargetFile(submissionEnvelope, file);
         targetFile.addToAnalysis(analysis);
         targetFile.setUuid(Uuid.newUuid());

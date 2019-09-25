@@ -1,9 +1,7 @@
 package org.humancellatlas.ingest.core;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
-import org.humancellatlas.ingest.core.exception.LinkToNewSubmissionNotAllowedException;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
@@ -13,11 +11,8 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Javadocs go here!
@@ -60,24 +55,6 @@ public abstract class MetadataDocument extends AbstractEntity {
         this.validationState = ValidationState.DRAFT;
     }
 
-    public MetadataDocument addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        SubmissionEnvelope openSubmission = this.getOpenSubmissionEnvelope();
-        if( openSubmission == null ){
-            if(this.validationState != ValidationState.DRAFT){
-                this.enactStateTransition(ValidationState.DRAFT);
-            }
-            this.submissionEnvelopes.add(submissionEnvelope);
-        }
-        else if (!openSubmission.getId().equals(submissionEnvelope.getId())){
-            String errorMessage = String.format("The %s metadata %s is still linked to a %s submission envelope %s.",
-                    this.getType(), this.getId(), openSubmission.getSubmissionState(), openSubmission.getId());
-            getLog().error(errorMessage);
-
-            throw new LinkToNewSubmissionNotAllowedException(errorMessage);
-        }
-        return this;
-    }
-
     public static List<ValidationState> allowedStateTransitions(ValidationState fromState) {
         List<ValidationState> allowedStates = new ArrayList<>();
         switch (fromState) {
@@ -117,13 +94,4 @@ public abstract class MetadataDocument extends AbstractEntity {
         return this;
     }
 
-    @JsonIgnore
-    public SubmissionEnvelope getOpenSubmissionEnvelope(){
-        for (SubmissionEnvelope submissionEnvelope : this.submissionEnvelopes) {
-            if (submissionEnvelope.isOpen()){
-                return submissionEnvelope;
-            }
-        }
-        return null;
-    }
 }
