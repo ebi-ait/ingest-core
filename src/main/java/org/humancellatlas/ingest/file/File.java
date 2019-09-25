@@ -50,12 +50,6 @@ public class File extends MetadataDocument {
         super(EntityType.FILE, content);
     }
 
-    public File addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        super.addToSubmissionEnvelope(submissionEnvelope);
-
-        return this;
-    }
-
     /**
      * Adds to the collection of processes that this file serves as an input to
      *

@@ -57,7 +57,7 @@ public class MetadataCrudService {
         if(! Optional.ofNullable(metadataDocument.getUuid()).isPresent()) {
             metadataDocument.setUuid(Uuid.newUuid());
         }
-        metadataDocument.addToSubmissionEnvelope(submissionEnvelope);
+        metadataDocument.setSubmissionEnvelope(submissionEnvelope);
         return (T) (crudStrategyForMetadataType(metadataDocument.getType()).saveMetadataDocument(metadataDocument));
     }
 
