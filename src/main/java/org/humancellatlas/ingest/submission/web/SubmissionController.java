@@ -137,7 +137,7 @@ public class SubmissionController {
     ResponseEntity<?> getProcesses(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
         Pageable pageable,
         final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Process> processes = getProcessRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        Page<Process> processes = getProcessRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes
             , resourceAssembler));
     }
@@ -152,7 +152,7 @@ public class SubmissionController {
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/processes/{state}", method = RequestMethod.GET)
         ResponseEntity<?> getProcessesWithValidationState(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope, @PathVariable("state") String state,
                                                     Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Process> processes = getProcessRepository().findBySubmissionEnvelopesContainingAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
+        Page<Process> processes = getProcessRepository().findBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
     }
 
