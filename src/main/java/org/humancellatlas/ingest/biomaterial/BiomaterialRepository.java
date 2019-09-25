@@ -30,7 +30,7 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
             Pageable pageable);    
 
     @RestResource(exported = false)
-    List<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+    Stream<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(rel = "findBySubmissionAndValidationState")
     public Page<Biomaterial> findBySubmissionEnvelopeAndValidationState(@Param

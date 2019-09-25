@@ -11,8 +11,8 @@ import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -65,7 +65,7 @@ public class MetadataCrudService {
         return (T) crudStrategyForMetadataType(entityType).findOriginalByUuid(uuid);
     }
 
-    public <T extends MetadataDocument> Collection<T> findBySubmission(SubmissionEnvelope submissionEnvelope, EntityType entityType) {
+    public <T extends MetadataDocument> Stream<T> findBySubmission(SubmissionEnvelope submissionEnvelope, EntityType entityType) {
         return crudStrategyForMetadataType(entityType).findBySubmissionEnvelope(submissionEnvelope);
     }
 }
