@@ -102,7 +102,7 @@ public class SubmissionController {
     ResponseEntity<?> getProtocols(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Protocol> protocols = getProtocolRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        Page<Protocol> protocols = getProtocolRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
     }
 
@@ -159,7 +159,7 @@ public class SubmissionController {
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols/{state}", method = RequestMethod.GET)
     ResponseEntity<?> getProtocolsWithValidationState(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope, @PathVariable("state") String state,
                                                       Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Protocol> protocols = getProtocolRepository().findBySubmissionEnvelopesContainingAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
+        Page<Protocol> protocols = getProtocolRepository().findBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
     }
 
