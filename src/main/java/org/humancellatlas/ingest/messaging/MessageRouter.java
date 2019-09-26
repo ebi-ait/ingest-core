@@ -59,6 +59,25 @@ public class MessageRouter {
         }
     }
 
+    /* messages to accessioner */
+
+    public boolean routeAccessionMessageFor(MetadataDocument document) {
+        // queue an accession message if the document has no uuid
+        Optional<UUID> uuidOptional = Optional.of(document)
+                                              .map(AbstractEntity::getUuid)
+                                              .map(Uuid::getUuid);
+
+        if(! uuidOptional.isPresent()) {
+            this.messageSender.queueAccessionMessage(Constants.Exchanges.ACCESSION,
+                                                     Constants.Queues.ACCESSION_REQUIRED,
+                                                     messageFor(document),
+                                                     document.getUpdateDate().toEpochMilli());
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /* messages to state tracker */
 
     public boolean routeStateTrackingUpdateMessageFor(MetadataDocument document) {
@@ -70,7 +89,8 @@ public class MessageRouter {
                                                     .build().toUri();
 
         this.messageSender.queueDocumentStateUpdateMessage(documentUpdateUri,
-                                                           documentStateUpdateMessage(document));
+                                                           documentStateUpdateMessage(document),
+                                                           document.getUpdateDate().toEpochMilli());
         return true;
     }
 
