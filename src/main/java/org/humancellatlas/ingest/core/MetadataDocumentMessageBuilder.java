@@ -93,12 +93,6 @@ public class MetadataDocumentMessageBuilder {
 
         return this;
     }
-/*
-    public MetadataDocumentMessageBuilder withEnvelopeIds(Collection<String> envelopeIds) {
-        this.envelopeIds = envelopeIds;
-
-        return this;
-    }*/
 
     public MetadataDocumentMessageBuilder withEnvelopeId(String envelopeId) {
         this.envelopeId = envelopeId;
