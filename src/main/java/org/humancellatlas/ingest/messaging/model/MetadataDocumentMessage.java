@@ -20,6 +20,5 @@ public class MetadataDocumentMessage implements AbstractEntityMessage {
     private final String documentUuid;
     private final ValidationState validationState;
     private final String callbackLink;
-    //private final Collection<String> envelopeIds;
     private final String envelopeId;
 }

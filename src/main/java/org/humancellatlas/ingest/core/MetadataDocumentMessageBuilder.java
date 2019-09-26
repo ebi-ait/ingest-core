@@ -30,7 +30,6 @@ public class MetadataDocumentMessageBuilder {
     private ValidationState validationState;
     private int assayIndex;
     private int totalAssays;
-    //private Collection<String> envelopeIds;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
