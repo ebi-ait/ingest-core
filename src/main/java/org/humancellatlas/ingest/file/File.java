@@ -27,10 +27,10 @@ import java.util.*;
 public class File extends MetadataDocument {
 
     @Indexed
-    @RestResource @DBRef private Set<Process> inputToProcesses = new HashSet<>();
+    @RestResource @DBRef(lazy = true) private Set<Process> inputToProcesses = new HashSet<>();
 
     @Indexed
-    @RestResource @DBRef private Set<Process> derivedByProcesses = new HashSet<>();
+    @RestResource @DBRef(lazy = true) private Set<Process> derivedByProcesses = new HashSet<>();
 
     @Indexed
     private String fileName;
