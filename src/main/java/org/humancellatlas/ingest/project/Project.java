@@ -24,7 +24,7 @@ import java.util.Set;
 @Getter
 public class Project extends MetadataDocument {
     @RestResource
-    @DBRef
+    @DBRef(lazy = true)
     private Set<File> supplementaryFiles = new HashSet<>();
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

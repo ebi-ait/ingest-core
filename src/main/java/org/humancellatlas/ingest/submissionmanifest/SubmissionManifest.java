@@ -26,5 +26,5 @@ public class SubmissionManifest extends AbstractEntity {
     private final Integer totalCount;
 
 
-    @Setter private @DBRef SubmissionEnvelope submissionEnvelope;
+    @Setter private @DBRef(lazy = true) SubmissionEnvelope submissionEnvelope;
 }

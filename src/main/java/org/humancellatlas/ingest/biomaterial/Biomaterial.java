@@ -25,7 +25,7 @@ import java.util.Set;
 @Document
 public class Biomaterial extends MetadataDocument {
 
-    @RestResource @DBRef private Set<Project> projects = new HashSet<>();
+    @RestResource @DBRef(lazy = true) private Set<Project> projects = new HashSet<>();
 
     @Indexed
     @RestResource @DBRef(lazy = true) private Set<Process> inputToProcesses = new HashSet<>();
