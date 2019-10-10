@@ -16,11 +16,11 @@ import java.util.Map;
 @Document
 public class Patch<T extends MetadataDocument> extends AbstractEntity {
     private Map<String, Object> jsonPatch;
-    private @DBRef SubmissionEnvelope submissionEnvelope;
+    private @DBRef(lazy = true) SubmissionEnvelope submissionEnvelope;
     @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
-    private @DBRef T originalDocument;
+    private @DBRef(lazy = true) T originalDocument;
     @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
-    private @DBRef T updateDocument;
+    private @DBRef(lazy = true) T updateDocument;
 
     public Patch(){}
 }

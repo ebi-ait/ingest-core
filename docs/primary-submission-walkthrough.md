@@ -171,24 +171,28 @@ curl -X POST \
 * Returns protocol URL in `_links.self.href` -> `$protocol_url`
 
 ## Add File to Submission Envelope
+* N.B note here that adding a file to a submission envelope looks different to adding other entities. This is due to a uniqueness constraint on file-names within a submission.
 ```
 curl -X POST \
   http://api.ingest.dev.data.humancellatlas.org/submissionEnvelopes/5aa4ec8a1b41fe298594e531/files/R1.fastq.gz \
   -H 'Authorization: Bearer $DCP_TOKEN \
   -H 'content-type: application/json' \
   -d '{
-    "describedBy" : "https://schema.humancellatlas.org/type/file/5.0.0/sequence_file",
-    "schema_version" : "5.0.0",
-    "schema_type" : "file",
-    "file_core" : {
-      "file_name" : "R1.fastq.gz",
-      "file_format" : "fastq.gz",
-      "describedBy" : "https://schema.humancellatlas.org/core/file/5.0.0/file_core",
-      "schema_version" : "5.0.0"
-    },
-    "read_index" : "read1",
-    "lane_index" : 1,
-    "read_length" : 187
+    "fileName": "R1.fastq.gz",
+    "content": {
+      "describedBy" : "https://schema.humancellatlas.org/type/file/5.0.0/sequence_file",
+      "schema_version" : "5.0.0",
+      "schema_type" : "file",
+      "file_core" : {
+        "file_name" : "R1.fastq.gz",
+        "file_format" : "fastq.gz",
+        "describedBy" : "https://schema.humancellatlas.org/core/file/5.0.0/file_core",
+        "schema_version" : "5.0.0"
+      },
+      "read_index" : "read1",
+      "lane_index" : 1,
+      "read_length" : 187
+    }
   }'
 ```
 * Returns protocol URL in `_links.self.href` -> `$protocol_url`

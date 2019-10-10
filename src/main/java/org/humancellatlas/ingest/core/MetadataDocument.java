@@ -30,7 +30,7 @@ public abstract class MetadataDocument extends AbstractEntity {
     private Object content;
 
     @Indexed
-    private @Setter @DBRef SubmissionEnvelope submissionEnvelope;
+    private @Setter @DBRef(lazy = true) SubmissionEnvelope submissionEnvelope;
 
     private @Setter Accession accession;
     private @Setter ValidationState validationState;

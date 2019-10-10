@@ -20,7 +20,7 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 public class SubmissionError extends IngestError implements Identifiable {
 
-    @JsonIgnore @DBRef private SubmissionEnvelope submissionEnvelope;
+    @JsonIgnore @DBRef(lazy = true) private SubmissionEnvelope submissionEnvelope;
     @Id private String id;
 
     SubmissionError(SubmissionEnvelope submissionEnvelope, Problem submissionProblem) {

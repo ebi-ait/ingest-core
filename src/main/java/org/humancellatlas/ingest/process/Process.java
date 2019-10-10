@@ -23,13 +23,13 @@ import java.util.Set;
 public class Process extends MetadataDocument {
 
     @RestResource
-    @DBRef
+    @DBRef(lazy = true)
     private Set<Project> projects = new HashSet<>();
     @RestResource
-    @DBRef
+    @DBRef(lazy = true)
     private Set<Protocol> protocols = new HashSet<>();
     @RestResource
-    @DBRef
+    @DBRef(lazy = true)
     private Set<BundleManifest> inputBundleManifests = new HashSet<>();
 
     private @DBRef Set<Process> chainedProcesses = new HashSet<>();
