@@ -38,7 +38,7 @@ public class ProcessController {
     private final @NonNull ProcessService processService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
-    @RequestMapping(path = "processes/{proc_id}/inputBiomaterials", method = RequestMethod.GET)
+    @RequestMapping(path = "/processes/{proc_id}/inputBiomaterials", method = RequestMethod.GET)
     ResponseEntity<?> getProcessInputBiomaterials(@PathVariable("proc_id") Process process,
                                                   Pageable pageable,
                                                   PersistentEntityResourceAssembler assembler) {
@@ -46,7 +46,7 @@ public class ProcessController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(inputBiomaterials, assembler));
     }
 
-    @RequestMapping(path = "processes/{proc_id}/inputFiles", method = RequestMethod.GET)
+    @RequestMapping(path = "/processes/{proc_id}/inputFiles", method = RequestMethod.GET)
     ResponseEntity<?> getProcessInputFiles(@PathVariable("proc_id") Process process,
                                            Pageable pageable,
                                            PersistentEntityResourceAssembler assembler) {
@@ -54,7 +54,7 @@ public class ProcessController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(inputFiles, assembler));
     }
 
-    @RequestMapping(path = "processes/{proc_id}/derivedBiomaterials", method = RequestMethod.GET)
+    @RequestMapping(path = "/processes/{proc_id}/derivedBiomaterials", method = RequestMethod.GET)
     ResponseEntity<?> getProcessOutputBiomaterials(@PathVariable("proc_id") Process process,
                                                    Pageable pageable,
                                                    PersistentEntityResourceAssembler assembler) {
@@ -62,7 +62,7 @@ public class ProcessController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(outputBiomaterials, assembler));
     }
 
-    @RequestMapping(path = "processes/{proc_id}/derivedFiles", method = RequestMethod.GET)
+    @RequestMapping(path = "/processes/{proc_id}/derivedFiles", method = RequestMethod.GET)
     ResponseEntity<?> getProcessOutputFiles(@PathVariable("proc_id") Process process,
                                             Pageable pageable,
                                             PersistentEntityResourceAssembler assembler) {
@@ -71,7 +71,7 @@ public class ProcessController {
     }
 
 
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes", method = RequestMethod.POST)
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/processes", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                      @RequestBody Process process,
                                                      @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
@@ -85,7 +85,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes/{id}", method = RequestMethod.PUT)
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/processes/{id}", method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> linkProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                       @PathVariable("id") Process process,
                                                       PersistentEntityResourceAssembler assembler) {
@@ -100,7 +100,7 @@ public class ProcessController {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
-    @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL,
+    @RequestMapping(path = "/processes/{analysis_id}" + Links.BUNDLE_REF_URL,
                     method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> oldAddBundleReference(@PathVariable("analysis_id") Process analysis,
                                                    @RequestBody BundleReference bundleReference,
@@ -110,7 +110,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL,
+    @RequestMapping(path = "/processes/{analysis_id}" + Links.BUNDLE_REF_URL,
             method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addBundleReference(@PathVariable("analysis_id") Process analysis,
                                                    @RequestBody BundleReference bundleReference,
@@ -120,12 +120,12 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL)
+    @RequestMapping(path = "/processes/{analysis_id}" + Links.FILE_REF_URL)
     ResponseEntity<Resource<?>> addOutputFileReference(){
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
-    @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL,
+    @RequestMapping(path = "/processes/{analysis_id}" + Links.FILE_REF_URL,
                     method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> addOutputFileReference(@PathVariable("analysis_id") Process analysis,
                                                        @RequestBody File file,
@@ -135,7 +135,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/processes/{analysis_id}/" + Links.INPUT_FILES_URL,
+    @RequestMapping(path = "/processes/{analysis_id}" + Links.INPUT_FILES_URL,
             method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addInputFileReference(@PathVariable("analysis_id") Process analysis,
                                                       @RequestBody InputFileReference inputFileReference,

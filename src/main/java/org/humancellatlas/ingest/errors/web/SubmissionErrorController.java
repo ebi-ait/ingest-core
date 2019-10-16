@@ -50,7 +50,7 @@ public class SubmissionErrorController {
         );
     }
 
-    @GetMapping(path = "submissionEnvelopes/{sub_id}" + Links.SUBMISSION_ERRORS_URL)
+    @GetMapping(path = "/submissionEnvelopes/{sub_id}" + Links.SUBMISSION_ERRORS_URL)
     public ResponseEntity<PagedResources<Resource<SubmissionError>>> getSubmissionEnvelopeErrors(
             @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
             Pageable pageable) {
@@ -62,7 +62,7 @@ public class SubmissionErrorController {
         );
     }
 
-    @PostMapping(path = "submissionEnvelopes/{sub_id}" + Links.SUBMISSION_ERRORS_URL)
+    @PostMapping(path = "/submissionEnvelopes/{sub_id}" + Links.SUBMISSION_ERRORS_URL)
     public ResponseEntity<Resource<SubmissionError>> addErrorToEnvelope(
             @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
             @RequestBody IngestError ingestError) {

@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class SubmissionManifestController {
     private final @NonNull SubmissionManifestRepository submissionManifestRepository;
 
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/submissionManifest", method = RequestMethod.POST)
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/submissionManifest", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addManifestToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                       @RequestBody SubmissionManifest submissionManifest,
                                                       PersistentEntityResourceAssembler assembler) {
