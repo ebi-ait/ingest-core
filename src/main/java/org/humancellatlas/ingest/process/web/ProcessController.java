@@ -95,12 +95,6 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @Deprecated
-    @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL)
-    ResponseEntity<Resource<?>> addBundleReference(){
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
-    }
-
     @RequestMapping(path = "/processes/{analysis_id}" + Links.BUNDLE_REF_URL,
                     method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> oldAddBundleReference(@PathVariable("analysis_id") Process analysis,
