@@ -34,6 +34,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @ExposesResourceFor(Process.class)
 @Getter
+@RequestMapping
 public class ProcessController {
     private final @NonNull ProcessService processService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;

@@ -27,6 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @ExposesResourceFor(Biomaterial.class)
 @Getter
+@RequestMapping
 public class BiomaterialController {
 
   private final @NonNull ProcessRepository processRepository;

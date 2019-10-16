@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @ExposesResourceFor(SubmissionManifest.class)
 @RequiredArgsConstructor
 @Getter
+@RequestMapping
 public class SubmissionManifestController {
     private final @NonNull SubmissionManifestRepository submissionManifestRepository;
 

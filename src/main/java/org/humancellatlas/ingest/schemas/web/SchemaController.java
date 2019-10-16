@@ -25,6 +25,7 @@ import java.util.List;
 @RepositoryRestController
 @ExposesResourceFor(Schema.class)
 @RequiredArgsConstructor
+@RequestMapping
 public class SchemaController {
     private final @NonNull SchemaService schemaService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;

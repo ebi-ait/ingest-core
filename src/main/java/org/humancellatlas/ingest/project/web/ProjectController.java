@@ -35,6 +35,7 @@ import java.util.UUID;
 @ExposesResourceFor(Project.class)
 @RequiredArgsConstructor
 @Getter
+@RequestMapping
 public class ProjectController {
     private final @NonNull ProjectService projectService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;

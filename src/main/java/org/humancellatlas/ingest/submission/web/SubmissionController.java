@@ -53,6 +53,7 @@ import java.util.Optional;
 @ExposesResourceFor(SubmissionEnvelope.class)
 @RequiredArgsConstructor
 @Getter
+@RequestMapping
 public class SubmissionController {
 
     private final @NonNull Exporter exporter;

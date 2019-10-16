@@ -15,16 +15,14 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RepositoryRestController
 @ExposesResourceFor(SubmissionError.class)
 @RequiredArgsConstructor
+@RequestMapping
 public class SubmissionErrorController {
     private final @NonNull SubmissionErrorService submissionErrorService;
     private final @NonNull SubmissionErrorRepository submissionErrorRepository;
