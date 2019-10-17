@@ -29,6 +29,9 @@ public abstract class MetadataDocument extends AbstractEntity {
     @Setter
     private Object content;
 
+    // This property holds the reference to the submissionEnvelope this metadatadocument was part of.
+    // A metadatadocument is part of one submissionEnvelope.
+    // The other end of this relationship can be defined as a Set of metadataDocuments in SubmissionEnvelope.
     @Indexed
     private @Setter @DBRef(lazy = true) SubmissionEnvelope submissionEnvelope;
 
@@ -42,7 +45,7 @@ public abstract class MetadataDocument extends AbstractEntity {
 
     private static final Logger log = LoggerFactory.getLogger(SubmissionEnvelope.class);
 
-    private static Logger getLog() {
+    protected static Logger getLog() {
         return log;
     }
 
