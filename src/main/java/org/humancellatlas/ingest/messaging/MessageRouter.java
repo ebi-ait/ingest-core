@@ -1,9 +1,12 @@
 package org.humancellatlas.ingest.messaging;
 
 import lombok.NoArgsConstructor;
+import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.config.ConfigurationService;
+import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportData;
 import org.humancellatlas.ingest.messaging.model.*;
@@ -18,6 +21,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.ANALYSIS_SUBMITTED;
@@ -155,11 +162,13 @@ public class MessageRouter {
     }
 
     private MetadataDocumentMessage documentStateUpdateMessage(MetadataDocument document) {
-        String envelopeId = document.getSubmissionEnvelope().getId();
-        
+        Collection<String> envelopeIds = document.getSubmissionEnvelopes().stream()
+                                                 .map(AbstractEntity::getId)
+                                                 .collect(Collectors.toList());
+
         return MetadataDocumentMessageBuilder.using(linkGenerator)
                                              .messageFor(document)
-                                             .withEnvelopeId(envelopeId)
+                                             .withEnvelopeIds(envelopeIds)
                                              .withValidationState(document.getValidationState())
                                              .build();
     }
