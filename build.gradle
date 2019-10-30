@@ -45,6 +45,7 @@ dependencies {
 	implementation 'com.auth0:jwks-rsa:0.8.3'
 	implementation 'org.jolokia:jolokia-core'
 	implementation 'org.zalando:problem:0.23.0'
+	implementation 'com.github.mongobee:mongobee:0.13'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
