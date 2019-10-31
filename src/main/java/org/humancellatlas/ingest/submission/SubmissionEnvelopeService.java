@@ -126,9 +126,13 @@ public class SubmissionEnvelopeService {
         return insertedUpdateSubmissionEnvelope;
     }
 
+    public static boolean canDeleteSubmission(SubmissionState state) {
+        return !(state == SubmissionState.COMPLETE || state == SubmissionState.CLEANUP);
+    }
+
     public void deleteSubmission(SubmissionEnvelope submissionEnvelope){
         SubmissionState state = submissionEnvelope.getSubmissionState();
-        if(state == SubmissionState.COMPLETE || state == SubmissionState.CLEANUP)
+        if(!canDeleteSubmission(state))
             throw new UnsupportedOperationException("Cannot delete submission if it is Complete or in Cleanup.");
 
         if (!submissionEnvelope.getIsUpdate()) {

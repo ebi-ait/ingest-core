@@ -35,6 +35,7 @@ import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -265,7 +266,10 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{id}", method = RequestMethod.DELETE)
     HttpEntity<?> deleteSubmission(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
-        getSubmissionEnvelopeService().deleteSubmission(submissionEnvelope);
-        return ResponseEntity.noContent().build();
+        if(SubmissionEnvelopeService.canDeleteSubmission(submissionEnvelope.getSubmissionState())) {
+            getSubmissionEnvelopeService().deleteSubmission(submissionEnvelope);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 }
