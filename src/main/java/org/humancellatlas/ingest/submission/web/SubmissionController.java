@@ -20,7 +20,10 @@ import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
-import org.humancellatlas.ingest.submission.*;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
+import org.humancellatlas.ingest.submission.SubmissionStateMachineService;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.slf4j.Logger;
@@ -65,7 +68,6 @@ public class SubmissionController {
     private final @NonNull ProcessRepository processRepository;
     private final @NonNull BundleManifestRepository bundleManifestRepository;
     private final @NonNull SubmissionManifestRepository submissionManifestRepository;
-
 
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
     private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
@@ -255,10 +257,15 @@ public class SubmissionController {
         return ResponseEntity.ok(getSubmissionStateMachineService().documentStatesForEnvelope(submissionEnvelope));
     }
 
-
     @RequestMapping(path = "/submissionEnvelopes/{id}/sync", method = RequestMethod.GET)
     HttpEntity<?> forceStateCheck(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
         // TODO: if really needed, modify this method to ask the state tracker component for an update
+        return ResponseEntity.noContent().build();
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}", method = RequestMethod.DELETE)
+    HttpEntity<?> deleteSubmission(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
+        getSubmissionEnvelopeService().deleteSubmission(submissionEnvelope);
         return ResponseEntity.noContent().build();
     }
 }
