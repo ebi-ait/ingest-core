@@ -127,6 +127,10 @@ public class SubmissionEnvelopeService {
     }
 
     public void deleteSubmission(SubmissionEnvelope submissionEnvelope){
+        SubmissionState state = submissionEnvelope.getSubmissionState();
+        if(state == SubmissionState.COMPLETE || state == SubmissionState.CLEANUP)
+            throw new UnsupportedOperationException("Cannot delete submission if it is Complete or in Cleanup.");
+
         SubmissionManifest submissionManifest = submissionManifestRepository.findBySubmissionEnvelopeId(submissionEnvelope.getId());
         Page<Biomaterial> biomaterials = biomaterialRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
         Page<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
