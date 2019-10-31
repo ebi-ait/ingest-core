@@ -131,23 +131,26 @@ public class SubmissionEnvelopeService {
         if(state == SubmissionState.COMPLETE || state == SubmissionState.CLEANUP)
             throw new UnsupportedOperationException("Cannot delete submission if it is Complete or in Cleanup.");
 
-        SubmissionManifest submissionManifest = submissionManifestRepository.findBySubmissionEnvelopeId(submissionEnvelope.getId());
-        Page<Biomaterial> biomaterials = biomaterialRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
-        Page<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
-        Page<File> files = fileRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
-        Page<Protocol> protocols = protocolRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
-        Page<BundleManifest> bundleManifests = bundleManifestRepository.findByEnvelopeUuid(submissionEnvelope.getUuid().toString(), Pageable.unpaged());
+        if (!submissionEnvelope.getIsUpdate()) {
+            Page<Biomaterial> biomaterials = biomaterialRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
+            Page<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
+            Page<Protocol> protocols = protocolRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
+            Page<File> files = fileRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
+            Page<BundleManifest> bundleManifests = bundleManifestRepository.findByEnvelopeUuid(submissionEnvelope.getUuid().toString(), Pageable.unpaged());
 
-        if (!biomaterials.isEmpty())
-            biomaterialRepository.deleteAll(biomaterials);
-        if (!processes.isEmpty())
-            processRepository.deleteAll(processes);
-        if (!protocols.isEmpty())
-            protocolRepository.deleteAll(protocols);
-        if (!files.isEmpty())
-            fileRepository.deleteAll(files);
-        if (!bundleManifests.isEmpty())
-            bundleManifestRepository.deleteAll(bundleManifests);
+            if (!biomaterials.isEmpty())
+                biomaterialRepository.deleteAll(biomaterials);
+            if (!processes.isEmpty())
+                processRepository.deleteAll(processes);
+            if (!protocols.isEmpty())
+                protocolRepository.deleteAll(protocols);
+            if (!files.isEmpty())
+                fileRepository.deleteAll(files);
+            if (!bundleManifests.isEmpty())
+                bundleManifestRepository.deleteAll(bundleManifests);
+        }
+
+        SubmissionManifest submissionManifest = submissionManifestRepository.findBySubmissionEnvelopeId(submissionEnvelope.getId());
         if (submissionManifest != null)
             submissionManifestRepository.delete(submissionManifest);
 
