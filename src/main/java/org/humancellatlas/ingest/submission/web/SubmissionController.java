@@ -266,10 +266,7 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{id}", method = RequestMethod.DELETE)
     HttpEntity<?> deleteSubmission(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
-        if(SubmissionEnvelopeService.canDeleteSubmission(submissionEnvelope.getSubmissionState())) {
-            getSubmissionEnvelopeService().deleteSubmission(submissionEnvelope);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+        getSubmissionEnvelopeService().deleteSubmission(submissionEnvelope);
+        return ResponseEntity.noContent().build();
     }
 }
