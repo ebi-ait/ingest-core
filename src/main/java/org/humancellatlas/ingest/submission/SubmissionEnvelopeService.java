@@ -137,7 +137,7 @@ public class SubmissionEnvelopeService {
             throw new UnsupportedOperationException("Cannot delete submission if it is already submitted!");
 
         // TODO Fetch the documents in a submission by batch, do not use unpaged Pageable param.
-        // Keeping only the project in case it contains any references to other submissions
+        // Keeping only the project in case it contains any references to other submission. But the submission being deleted should be unlinked from it.
         // Project has dbref to list of supplementary files. If those files were deleted, the link from project would no longer work
         Page<Biomaterial> biomaterials = biomaterialRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
         Page<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
