@@ -8,7 +8,6 @@ import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.web.Links;
-import org.humancellatlas.ingest.errors.SubmissionError;
 import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -28,16 +27,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -87,7 +83,7 @@ public class SubmissionController {
     ResponseEntity<?> getFiles(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                Pageable pageable,
                                final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<File> files = getFileRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        Page<File> files = getFileRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
     }
 
@@ -95,7 +91,7 @@ public class SubmissionController {
     ResponseEntity<?> getProjects(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                   Pageable pageable,
                                   final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Project> projects = getProjectRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        Page<Project> projects = getProjectRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(projects, resourceAssembler));
     }
 
@@ -103,7 +99,7 @@ public class SubmissionController {
     ResponseEntity<?> getProtocols(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Protocol> protocols = getProtocolRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        Page<Protocol> protocols = getProtocolRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
     }
 
@@ -111,7 +107,7 @@ public class SubmissionController {
     ResponseEntity<?> getBiomaterials(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
         Pageable pageable,
         final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Biomaterial> biomaterials = getBiomaterialRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        Page<Biomaterial> biomaterials = getBiomaterialRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(biomaterials, resourceAssembler));
     }
 
@@ -138,7 +134,7 @@ public class SubmissionController {
     ResponseEntity<?> getProcesses(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
         Pageable pageable,
         final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Process> processes = getProcessRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        Page<Process> processes = getProcessRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes
             , resourceAssembler));
     }
@@ -146,28 +142,28 @@ public class SubmissionController {
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/biomaterials/{state}", method = RequestMethod.GET)
     ResponseEntity<?> getSamplesWithValidationState(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope, @PathVariable("state") String state,
                                                     Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Biomaterial> biomaterials = getBiomaterialRepository().findBySubmissionEnvelopesContainingAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
+        Page<Biomaterial> biomaterials = getBiomaterialRepository().findBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(biomaterials, resourceAssembler));
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/processes/{state}", method = RequestMethod.GET)
         ResponseEntity<?> getProcessesWithValidationState(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope, @PathVariable("state") String state,
                                                     Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Process> processes = getProcessRepository().findBySubmissionEnvelopesContainingAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
+        Page<Process> processes = getProcessRepository().findBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols/{state}", method = RequestMethod.GET)
     ResponseEntity<?> getProtocolsWithValidationState(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope, @PathVariable("state") String state,
                                                       Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Protocol> protocols = getProtocolRepository().findBySubmissionEnvelopesContainingAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
+        Page<Protocol> protocols = getProtocolRepository().findBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files/{state}", method = RequestMethod.GET)
     ResponseEntity<?> getFilesWithValidationState(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope, @PathVariable("state") String state,
                                                       Pageable pageable, final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<File> files = getFileRepository().findBySubmissionEnvelopesContainingAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
+        Page<File> files = getFileRepository().findBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
     }
 

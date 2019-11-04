@@ -12,18 +12,21 @@ import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.messaging.model.BundleUpdateMessage;
-import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 
-import javax.swing.text.html.Option;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 @Component
 public class DefaultExporter implements Exporter {
@@ -79,13 +82,16 @@ public class DefaultExporter implements Exporter {
 
     @Override
     public void updateBundles(SubmissionEnvelope submissionEnvelope) {
-        Collection<MetadataDocument> documentsToUpdate = new ArrayList<>();
-        documentsToUpdate.addAll(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROJECT));
-        documentsToUpdate.addAll(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.BIOMATERIAL));
-        documentsToUpdate.addAll(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROTOCOL));
-        documentsToUpdate.addAll(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROCESS));
-        documentsToUpdate.addAll(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.FILE));
-
+    	// FIXME why do we need a whole collection of metadocument here?
+    	
+        Stream projects = metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROJECT);
+        Stream biomaterials = metadataCrudService.findBySubmission(submissionEnvelope, EntityType.BIOMATERIAL);
+        Stream protocols = metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROTOCOL);
+        Stream processes = metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROCESS);
+        Stream files = metadataCrudService.findBySubmission(submissionEnvelope, EntityType.FILE);
+        
+		Stream<MetadataDocument> documentsToUpdate = Stream.of(projects, biomaterials, protocols, processes, files).flatMap(i->i);
+        
         Map<String, Set<MetadataDocument>> bundleManifestsToUpdate = bundleManifestService.bundleManifestsForDocuments(documentsToUpdate);
         int totalCount = bundleManifestsToUpdate.size();
 

@@ -40,7 +40,7 @@ public class FileService {
 
     // TODO Refactor!!!
     public File createFile(String fileName, File file, SubmissionEnvelope submissionEnvelope) {
-        if (!fileRepository.findBySubmissionEnvelopesInAndFileName(submissionEnvelope, fileName).isEmpty()) {
+        if (!fileRepository.findBySubmissionEnvelopeAndFileName(submissionEnvelope, fileName).isEmpty()) {
             throw new FileAlreadyExistsException(String.format("File with name %s already exists in envelope %s", fileName, submissionEnvelope.getId()),
                                                  fileName);
         } else {
@@ -75,7 +75,7 @@ public class FileService {
         Optional<SubmissionEnvelope> envelope = Optional.ofNullable(submissionEnvelopeRepository.findByUuid(new Uuid(envelopeUuid)));
 
         if (envelope.isPresent()) {
-            List<File> filesInEnvelope = fileRepository.findBySubmissionEnvelopesInAndFileName(envelope.get(), fileName);
+            List<File> filesInEnvelope = fileRepository.findBySubmissionEnvelopeAndFileName(envelope.get(), fileName);
 
             if (filesInEnvelope.size() != 1) {
                 throw new RuntimeException(String.format("Expected 1 file with name %s, but found %s", fileName, filesInEnvelope.size()));

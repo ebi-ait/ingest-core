@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 
 /**
  * Javadocs go here!
@@ -20,9 +19,4 @@ public class Protocol extends MetadataDocument {
         super(EntityType.PROTOCOL, content);
     }
 
-    public Protocol addToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        super.addToSubmissionEnvelope(submissionEnvelope);
-
-        return this;
-    }
 }
