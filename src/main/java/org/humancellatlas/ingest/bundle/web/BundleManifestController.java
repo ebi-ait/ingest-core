@@ -24,6 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @ExposesResourceFor(BundleManifest.class)
 @Getter
+@RequestMapping
 public class BundleManifestController {
     private final @NonNull
     ProjectService projectService;

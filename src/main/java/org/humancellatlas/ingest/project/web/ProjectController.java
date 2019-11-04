@@ -35,11 +35,12 @@ import java.util.UUID;
 @ExposesResourceFor(Project.class)
 @RequiredArgsConstructor
 @Getter
+@RequestMapping
 public class ProjectController {
     private final @NonNull ProjectService projectService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects", method = RequestMethod.POST)
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/projects", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                      @RequestBody Project project,
                                                      @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
@@ -53,7 +54,7 @@ public class ProjectController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects/{id}", method = RequestMethod.PUT)
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/projects/{id}", method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> linkProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                       @PathVariable("id") Project project,
                                                      PersistentEntityResourceAssembler assembler) {

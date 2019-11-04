@@ -28,6 +28,7 @@ import java.util.UUID;
 @ExposesResourceFor(Protocol.class)
 @RequiredArgsConstructor
 @Getter
+@RequestMapping
 public class ProtocolController {
     private final @NonNull ProtocolService protocolService;
 

@@ -27,6 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @ExposesResourceFor(Biomaterial.class)
 @Getter
+@RequestMapping
 public class BiomaterialController {
 
   private final @NonNull ProcessRepository processRepository;
@@ -35,7 +36,7 @@ public class BiomaterialController {
 
   private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
-  @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.POST)
+  @RequestMapping(path = "/submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.POST)
   ResponseEntity<Resource<?>> addBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                        @RequestBody Biomaterial biomaterial,
                                                        @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
@@ -49,7 +50,7 @@ public class BiomaterialController {
     return ResponseEntity.accepted().body(resource);
   }
 
-  @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials/{id}", method = RequestMethod.PUT)
+  @RequestMapping(path = "/submissionEnvelopes/{sub_id}/biomaterials/{id}", method = RequestMethod.PUT)
   ResponseEntity<Resource<?>> linkBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
       @PathVariable("id") Biomaterial biomaterial,
       PersistentEntityResourceAssembler assembler) {
