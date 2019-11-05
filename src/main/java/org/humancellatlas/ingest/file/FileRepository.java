@@ -30,11 +30,14 @@ public interface FileRepository extends MongoRepository<File, String> {
     @RestResource(rel = "findByUuid", path = "findByUuid")
     Optional<File> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
+    @RestResource(rel = "findBySubmissionEnvelope")
+    Page<File> findBySubmissionEnvelope(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope, Pageable pageable);
+
     @RestResource(exported = false)
     Stream<File> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
-    @RestResource(rel = "findBySubmissionEnvelope")
-    Page<File> findBySubmissionEnvelope(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope, Pageable pageable);
+    @RestResource(exported = false)
+    Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     List<File> findBySubmissionEnvelopeAndFileName(SubmissionEnvelope submissionEnvelope, String fileName);
 

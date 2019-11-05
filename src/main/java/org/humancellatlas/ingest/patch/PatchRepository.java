@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.patch;
 
 import org.bson.types.ObjectId;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -20,4 +21,6 @@ public interface PatchRepository extends MongoRepository<Patch, String> {
     @Query("{ 'submissionEnvelope.id': ?0 }")
     Page<Patch<? extends MetadataDocument>> findBySubmissionEnvelopeId(String id, Pageable pageable);
 
+    @RestResource(exported = false)
+    Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 }

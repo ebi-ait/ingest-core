@@ -21,4 +21,5 @@ public interface BundleManifestRepository extends MongoRepository<BundleManifest
 
     Page<BundleManifest> findAll(Pageable pageable);
 
+    Long deleteByEnvelopeUuid (String uuid);
 }

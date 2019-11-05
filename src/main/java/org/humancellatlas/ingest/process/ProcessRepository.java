@@ -25,11 +25,14 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
     @RestResource(rel = "findByUuid", path = "findByUuid")
     Optional<Process> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
+    Page<Process> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
+            Pageable pageable);
+
     @RestResource(exported = false)
     Stream<Process> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
-    Page<Process> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
-            Pageable pageable);
+    @RestResource(exported = false)
+    Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(exported = false)
     Page<Process> findByInputBundleManifestsContaining(BundleManifest bundleManifest, Pageable pageable);

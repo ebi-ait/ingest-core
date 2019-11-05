@@ -2,26 +2,18 @@ package org.humancellatlas.ingest.submission;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
-import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
-import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.export.Exporter;
-import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.messaging.MessageRouter;
-import org.humancellatlas.ingest.patch.Patch;
 import org.humancellatlas.ingest.patch.PatchRepository;
-import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.ProjectRepository;
-import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
-import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,32 +128,13 @@ public class SubmissionEnvelopeService {
         if(!submissionEnvelope.isOpen())
             throw new UnsupportedOperationException("Cannot delete submission if it is already submitted!");
 
-        // TODO Fetch the documents in a submission by batch, do not use unpaged Pageable param.
-        // Keeping only the project in case it contains any references to other submission. But the submission being deleted should be unlinked from it.
-        // Project has dbref to list of supplementary files. If those files were deleted, the link from project would no longer work
-        Page<Biomaterial> biomaterials = biomaterialRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
-        Page<Process> processes = processRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
-        Page<Protocol> protocols = protocolRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
-        Page<File> files = fileRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, Pageable.unpaged());
-        Page<BundleManifest> bundleManifests = bundleManifestRepository.findByEnvelopeUuid(submissionEnvelope.getUuid().toString(), Pageable.unpaged());
-        Page<Patch<? extends MetadataDocument>> patches = patchRepository.findBySubmissionEnvelopeId(submissionEnvelope.getId(), Pageable.unpaged());
-
-        if (!biomaterials.isEmpty())
-            biomaterialRepository.deleteAll(biomaterials);
-        if (!processes.isEmpty())
-            processRepository.deleteAll(processes);
-        if (!protocols.isEmpty())
-            protocolRepository.deleteAll(protocols);
-        if (!files.isEmpty())
-            fileRepository.deleteAll(files);
-        if (!bundleManifests.isEmpty())
-            bundleManifestRepository.deleteAll(bundleManifests);
-        if (!patches.isEmpty())
-            patchRepository.deleteAll(patches);
-
-        SubmissionManifest submissionManifest = submissionManifestRepository.findBySubmissionEnvelopeId(submissionEnvelope.getId());
-        if (submissionManifest != null)
-            submissionManifestRepository.delete(submissionManifest);
+        biomaterialRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+        processRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+        protocolRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+        fileRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+        bundleManifestRepository.deleteByEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString());
+        patchRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+        submissionManifestRepository.deleteBySubmissionEnvelope(submissionEnvelope);
 
         submissionEnvelopeRepository.delete(submissionEnvelope);
     }
