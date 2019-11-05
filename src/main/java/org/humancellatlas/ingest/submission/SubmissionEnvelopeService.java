@@ -11,6 +11,7 @@ import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.patch.PatchRepository;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
@@ -135,6 +136,14 @@ public class SubmissionEnvelopeService {
         bundleManifestRepository.deleteByEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString());
         patchRepository.deleteBySubmissionEnvelope(submissionEnvelope);
         submissionManifestRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+
+        //When a submission envelope can only have one project this for loop can be removed.
+        Page<Project> projects = projectRepository.findBySubmissionEnvelope(submissionEnvelope, Pageable.unpaged());
+        for (Project project : projects) {
+            if (project.removeSubmissionEnvelope(submissionEnvelope)) {
+                projectRepository.save(project);
+            }
+        }
 
         submissionEnvelopeRepository.delete(submissionEnvelope);
     }
