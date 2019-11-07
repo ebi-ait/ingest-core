@@ -22,4 +22,9 @@ public class MongoChangeLog {
         db.runCommand( new Document("setFeatureCompatibilityVersion", "4.0") );
         db.runCommand( new Document("setFreeMonitoring", 1).append("action", "disable") );
     }
+
+    @ChangeSet(order = "2019-11-02", id="featureCompatibilityVersion 4.2", author = "alexie.staffer@ebi.ac.uk")
+    public void featureCompatibilityFourTwo(MongoDatabase db) {
+        db.runCommand( new Document("setFeatureCompatibilityVersion", "4.2") );
+    }
 }
