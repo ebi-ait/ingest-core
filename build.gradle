@@ -45,7 +45,10 @@ dependencies {
 	implementation 'com.auth0:jwks-rsa:0.8.3'
 	implementation 'org.jolokia:jolokia-core'
 	implementation 'org.zalando:problem:0.23.0'
-	implementation 'com.github.mongobee:mongobee:0.13'
+	implementation 'org.mongodb:mongo-java-driver:3.11.2'
+	implementation ('com.github.mongobee:mongobee:0.13') {
+		exclude group: 'org.mongodb', module: 'mongo-java-driver'
+	}
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
