@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -24,18 +22,16 @@ public class BundleManifestService {
     BundleManifestRepository bundleManifestRepository;
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    public Map<String, Set<MetadataDocument>> bundleManifestsForDocuments(Stream<MetadataDocument> documents) {
+    public Map<String, Set<MetadataDocument>> bundleManifestsForDocuments(Collection<MetadataDocument> documents) {
 
         Map<String, Set<MetadataDocument>> hits = new HashMap<>();
 
         long fileStartTime = System.currentTimeMillis();
         Iterator<BundleManifest> iterator = allManifestsIterator();
-        final AtomicInteger count = new AtomicInteger();
 
         while(iterator.hasNext()) {
             BundleManifest bundleManifest = iterator.next();
             documents.forEach(document -> {
-            	count.incrementAndGet();
                 String documentUuid = document.getUuid().getUuid().toString();
                 String bundleUuid = bundleManifest.getBundleUuid();
                 EntityType documentType = document.getType();
@@ -55,7 +51,7 @@ public class BundleManifestService {
         float fileQueryTime = ((float)(fileEndTime - fileStartTime)) / 1000;
         String fileQt = new DecimalFormat("#,###.##").format(fileQueryTime);
         log.info("Finding bundles to update took {}s", fileQt);
-        log.info("documentsToUpdate: {}, bundlesToUpdate:{}", count.doubleValue(), hits.keySet().size());
+        log.info("documentsToUpdate: {}, bundlesToUpdate:{}", documents.size(), hits.keySet().size());
         return hits;
     }
 
@@ -114,8 +110,8 @@ public class BundleManifestService {
             return Optional.ofNullable(bundleManifest.getFileProjectMap());
         } else {
             throw new RuntimeException(String.format("Bundle manifest %s contains no entity map for entity type %s",
-                                                     bundleManifest.getId(),
-                                                     entityType.toString()));
+                    bundleManifest.getId(),
+                    entityType.toString()));
         }
     }
 

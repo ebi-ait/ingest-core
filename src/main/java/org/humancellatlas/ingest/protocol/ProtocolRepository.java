@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -39,4 +40,7 @@ public interface ProtocolRepository extends MongoRepository<Protocol, String> {
 
     @RestResource(rel = "findByUuid", path = "findByUuid")
     Optional<Protocol> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
+
+    @RestResource(exported = false)
+    Collection<Protocol> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 }

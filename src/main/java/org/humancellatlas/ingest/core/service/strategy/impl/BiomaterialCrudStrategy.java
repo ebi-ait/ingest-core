@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -42,5 +43,10 @@ public class BiomaterialCrudStrategy implements MetadataCrudStrategy<Biomaterial
     @Override
     public Stream<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
         return biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope);
+    }
+
+    @Override
+    public Collection<Biomaterial> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        return biomaterialRepository.findAllBySubmissionEnvelope(submissionEnvelope);
     }
 }

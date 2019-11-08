@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -41,5 +42,10 @@ public class ProcessCrudStrategy implements MetadataCrudStrategy<Process> {
     @Override
     public Stream<Process> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
         return processRepository.findBySubmissionEnvelope(submissionEnvelope);
+    }
+
+    @Override
+    public Collection<Process> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        return processRepository.findAllBySubmissionEnvelope(submissionEnvelope);
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,4 +55,6 @@ public interface FileRepository extends MongoRepository<File, String> {
     public Page<File> findBySubmissionEnvelopeAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
                                                                             @Param("state") ValidationState state,
                                                                             Pageable pageable);
+    @RestResource(exported = false)
+    Collection<File> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 }

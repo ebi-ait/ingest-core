@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,6 +32,9 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
 
     @RestResource(exported = false)
     Stream<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+
+    @RestResource(exported = false)
+    Collection<Biomaterial> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(rel = "findBySubmissionAndValidationState")
     public Page<Biomaterial> findBySubmissionEnvelopeAndValidationState(@Param

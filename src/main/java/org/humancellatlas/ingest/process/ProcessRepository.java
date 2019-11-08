@@ -42,4 +42,6 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
     @RestResource(exported = false)
     public Stream<Process> findAllByIdIn(Collection<String> ids);
 
+    @RestResource(exported = false)
+    Collection<Process> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 }
