@@ -77,6 +77,6 @@ public class MongoChangeLog {
         List<Document> update = new ArrayList<>();
         update.add(new Document("$set", Document.parse("{ submissionEnvelope: { $arrayElemAt: [ \"$submissionEnvelopes\", 0 ] } }")));
 
-        db.getCollection("file").updateMany(filter, update);
+        db.getCollection("project").updateMany(filter, update);
     }
 }
