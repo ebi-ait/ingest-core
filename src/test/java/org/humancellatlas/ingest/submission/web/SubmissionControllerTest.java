@@ -86,6 +86,19 @@ public class SubmissionControllerTest {
         verify(submissionEnvelopeService).handleSubmissionRequest(submissionEnvelope);
     }
 
+    @Test
+    public void testDeleteSubmissionEnvelope() {
+        //given:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+
+        //when:
+        HttpEntity<?> response = controller.deleteSubmission(submissionEnvelope);
+
+        //then:
+        assertThat(response).isNotNull();
+        verify(submissionEnvelopeService).deleteSubmission(submissionEnvelope);
+    }
+
     @Configuration
     static class TestConfiguration {}
 
