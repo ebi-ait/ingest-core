@@ -23,8 +23,6 @@ public class BundleManifestRepositoryImpl implements BundleManifestRepositoryCus
 
     @Override
     public Page<BundleManifest> findBundleManifestsByProjectAndBundleType(Project project, BundleType bundleType, Pageable pageable) {
-        // XXX: we need to be sure if we want the submissionEnvelope this project metadocument was part of, or
-        // (as it was before) the first submission in the set of the submissionEnvelopes within this project?
         SubmissionEnvelope submissionEnvelope = project.getSubmissionEnvelope();
         String submissionUuid = submissionEnvelope.getUuid().getUuid().toString();
         String projectUuid = project.getUuid().getUuid().toString();
