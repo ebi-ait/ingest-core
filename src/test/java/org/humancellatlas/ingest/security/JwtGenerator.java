@@ -44,6 +44,10 @@ class JwtGenerator {
         return (RSAPublicKey) keyPair.getPublic();
     }
 
+    String generate() {
+        return generate(null, null);
+    }
+
     String generate(Map<String, String> claims) {
         return generate(null, claims);
     }
