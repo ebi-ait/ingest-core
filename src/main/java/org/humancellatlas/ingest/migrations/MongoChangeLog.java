@@ -33,7 +33,7 @@ public class MongoChangeLog {
 
     @ChangeSet(order = "2019-11-03", id = "singletonSubmissionEnvelope Biomaterial", author = "alexie.staffer@ebi.ac.uk")
     public void singletonSubmissionEnvelopeBiomaterial(MongoDatabase db) {
-        Document filter = new Document();
+        Document filter = Document.parse("{submissionEnvelopes: {$exists: 1}}");
         List<Document> update = new ArrayList<>();
         update.add(new Document("$set", Document.parse("{ submissionEnvelope: { $arrayElemAt: [ \"$submissionEnvelopes\", 0 ] } }")));
         update.add(new Document("$unset", "submissionEnvelopes"));
@@ -43,7 +43,7 @@ public class MongoChangeLog {
 
     @ChangeSet(order = "2019-11-04", id = "singletonSubmissionEnvelope Process", author = "alexie.staffer@ebi.ac.uk")
     public void singletonSubmissionEnvelopeProcess(MongoDatabase db) {
-        Document filter = new Document();
+        Document filter = Document.parse("{submissionEnvelopes: {$exists: 1}}");
         List<Document> update = new ArrayList<>();
         update.add(new Document("$set", Document.parse("{ submissionEnvelope: { $arrayElemAt: [ \"$submissionEnvelopes\", 0 ] } }")));
         update.add(new Document("$unset", "submissionEnvelopes"));
@@ -53,7 +53,7 @@ public class MongoChangeLog {
 
     @ChangeSet(order = "2019-11-05", id = "singletonSubmissionEnvelope Protocol", author = "alexie.staffer@ebi.ac.uk")
     public void singletonSubmissionEnvelopeProtocol(MongoDatabase db) {
-        Document filter = new Document();
+        Document filter = Document.parse("{submissionEnvelopes: {$exists: 1}}");
         List<Document> update = new ArrayList<>();
         update.add(new Document("$set", Document.parse("{ submissionEnvelope: { $arrayElemAt: [ \"$submissionEnvelopes\", 0 ] } }")));
         update.add(new Document("$unset", "submissionEnvelopes"));
@@ -63,7 +63,7 @@ public class MongoChangeLog {
 
     @ChangeSet(order = "2019-11-06", id = "singletonSubmissionEnvelope File", author = "alexie.staffer@ebi.ac.uk")
     public void singletonSubmissionEnvelopeFile(MongoDatabase db) {
-        Document filter = new Document();
+        Document filter = Document.parse("{submissionEnvelopes: {$exists: 1}}");
         List<Document> update = new ArrayList<>();
         update.add(new Document("$set", Document.parse("{ submissionEnvelope: { $arrayElemAt: [ \"$submissionEnvelopes\", 0 ] } }")));
         update.add(new Document("$unset", "submissionEnvelopes"));
@@ -73,7 +73,7 @@ public class MongoChangeLog {
 
     @ChangeSet(order = "2019-11-07", id = "singletonSubmissionEnvelope Project", author = "alexie.staffer@ebi.ac.uk")
     public void singletonSubmissionEnvelopeProject(MongoDatabase db) {
-        Document filter = new Document();
+        Document filter = Document.parse("{submissionEnvelopes: {$exists: 1}}");
         List<Document> update = new ArrayList<>();
         update.add(new Document("$set", Document.parse("{ submissionEnvelope: { $arrayElemAt: [ \"$submissionEnvelopes\", 0 ] } }")));
 
