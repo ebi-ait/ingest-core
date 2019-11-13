@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @AllArgsConstructor
 @Service
@@ -43,17 +44,15 @@ public class MetadataUpdateService {
         applyUpdateDocuments(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROTOCOL));
     }
 
-    private <T extends MetadataDocument> Collection<T> applyUpdateDocuments(Collection<T> updateDocuments) {
+    private <T extends MetadataDocument> Stream<T> applyUpdateDocuments(Stream<T> updateDocuments) {
         return updateDocuments
-                .stream()
                 .map(updateDocument -> {
                     String documentUuid = updateDocument.getUuid().getUuid().toString();
                     EntityType entityType = updateDocument.getType();
                     T originalDocument = metadataCrudService.findOriginalByUuid(documentUuid, entityType);
                     T upsertedDocument = applyUpdateDocument(originalDocument, updateDocument);
                     return metadataCrudService.save(upsertedDocument);
-                })
-                .collect(Collectors.toList());
+                });
     }
 
     private <T extends MetadataDocument> T applyUpdateDocument(T canonicalDocument, T updateDocument) {

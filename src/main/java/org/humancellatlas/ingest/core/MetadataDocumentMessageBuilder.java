@@ -7,14 +7,11 @@ import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.messaging.model.MessageProtocol;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.state.ValidationState;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.Identifiable;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -33,7 +30,6 @@ public class MetadataDocumentMessageBuilder {
     private ValidationState validationState;
     private int assayIndex;
     private int totalAssays;
-    private Collection<String> envelopeIds;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -98,12 +94,6 @@ public class MetadataDocumentMessageBuilder {
         return this;
     }
 
-    public MetadataDocumentMessageBuilder withEnvelopeIds(Collection<String> envelopeIds) {
-        this.envelopeIds = envelopeIds;
-
-        return this;
-    }
-
     public MetadataDocumentMessageBuilder withEnvelopeId(String envelopeId) {
         this.envelopeId = envelopeId;
 
@@ -131,7 +121,7 @@ public class MetadataDocumentMessageBuilder {
     public MetadataDocumentMessage build() {
         String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
         return new MetadataDocumentMessage(messageProtocol, documentType.getSimpleName().toLowerCase(),
-                metadataDocId, metadataDocUuid, validationState, callbackLink, envelopeIds);
+                metadataDocId, metadataDocUuid, validationState, callbackLink, envelopeId);
     }
 
     public ExportMessage buildAssaySubmittedMessage() {

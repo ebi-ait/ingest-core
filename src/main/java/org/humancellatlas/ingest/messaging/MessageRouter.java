@@ -162,13 +162,11 @@ public class MessageRouter {
     }
 
     private MetadataDocumentMessage documentStateUpdateMessage(MetadataDocument document) {
-        Collection<String> envelopeIds = document.getSubmissionEnvelopes().stream()
-                                                 .map(AbstractEntity::getId)
-                                                 .collect(Collectors.toList());
+        String envelopeId = document.getSubmissionEnvelope().getId();
 
         return MetadataDocumentMessageBuilder.using(linkGenerator)
                                              .messageFor(document)
-                                             .withEnvelopeIds(envelopeIds)
+                                             .withEnvelopeId(envelopeId)
                                              .withValidationState(document.getValidationState())
                                              .build();
     }

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
-import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 
 @AllArgsConstructor
@@ -41,7 +41,12 @@ public class BiomaterialCrudStrategy implements MetadataCrudStrategy<Biomaterial
     }
 
     @Override
-    public Collection<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        return biomaterialRepository.findBySubmissionEnvelopesContaining(submissionEnvelope);
+    public Stream<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        return biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope);
+    }
+
+    @Override
+    public Collection<Biomaterial> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        return biomaterialRepository.findAllBySubmissionEnvelope(submissionEnvelope);
     }
 }

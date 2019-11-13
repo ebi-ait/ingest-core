@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -57,7 +58,7 @@ public class MetadataCrudService {
         if(! Optional.ofNullable(metadataDocument.getUuid()).isPresent()) {
             metadataDocument.setUuid(Uuid.newUuid());
         }
-        metadataDocument.addToSubmissionEnvelope(submissionEnvelope);
+        metadataDocument.setSubmissionEnvelope(submissionEnvelope);
         return (T) (crudStrategyForMetadataType(metadataDocument.getType()).saveMetadataDocument(metadataDocument));
     }
 
@@ -65,7 +66,11 @@ public class MetadataCrudService {
         return (T) crudStrategyForMetadataType(entityType).findOriginalByUuid(uuid);
     }
 
-    public <T extends MetadataDocument> Collection<T> findBySubmission(SubmissionEnvelope submissionEnvelope, EntityType entityType) {
+    public <T extends MetadataDocument> Stream<T> findBySubmission(SubmissionEnvelope submissionEnvelope, EntityType entityType) {
         return crudStrategyForMetadataType(entityType).findBySubmissionEnvelope(submissionEnvelope);
+    }
+
+    public <T extends MetadataDocument> Collection<T> findAllBySubmission(SubmissionEnvelope submissionEnvelope, EntityType entityType) {
+        return crudStrategyForMetadataType(entityType).findAllBySubmissionEnvelope(submissionEnvelope);
     }
 }

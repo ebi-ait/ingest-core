@@ -11,9 +11,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * Javadocs go here!
@@ -33,13 +35,13 @@ public interface ProjectRepository extends MongoRepository<Project, String> , Pr
     @RestResource(path = "findByUser", rel = "findByUser")
     Page<Project> findByUser(@Param(value = "user") String user, Pageable pageable);
 
-    Page<Project> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+    Page<Project> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
     @RestResource(exported = false)
-    List<Project> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope);
+    Stream<Project> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(rel = "findBySubmissionAndValidationState")
-    public Page<Project> findBySubmissionEnvelopesContainingAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
+    public Page<Project> findBySubmissionEnvelopeAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
                                                                                @Param("state") ValidationState state,
                                                                                Pageable pageable);
 
@@ -47,4 +49,7 @@ public interface ProjectRepository extends MongoRepository<Project, String> , Pr
     
     
     Page<Project> findByContent(List<MetadataCriteria> criteria, Pageable pageable);
+
+    @RestResource(exported = false)
+    Collection<Project> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 }

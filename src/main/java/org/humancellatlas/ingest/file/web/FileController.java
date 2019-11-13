@@ -8,9 +8,6 @@ import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileAlreadyExistsException;
 import org.humancellatlas.ingest.file.FileService;
 import org.humancellatlas.ingest.file.ValidationJob;
-import org.humancellatlas.ingest.messaging.Constants;
-import org.humancellatlas.ingest.messaging.Message;
-import org.humancellatlas.ingest.messaging.MessageService;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -20,7 +17,6 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

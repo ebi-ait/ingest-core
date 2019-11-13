@@ -10,5 +10,6 @@ public interface MetadataCrudStrategy <T extends MetadataDocument> {
     T saveMetadataDocument(T document);
     T findMetadataDocument(String id);
     T findOriginalByUuid(String uuid);
-    Collection<T> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+    Stream<T> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+    Collection<T> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 }

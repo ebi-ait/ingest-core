@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.protocol;
 
-import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -11,9 +10,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * Javadocs go here!
@@ -24,14 +24,14 @@ import java.util.UUID;
 @CrossOrigin
 public interface ProtocolRepository extends MongoRepository<Protocol, String> {
 
-    public Page<Protocol> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+    public Page<Protocol> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
     @RestResource(exported = false)
-    public List<Protocol> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope);
+    public Stream<Protocol> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
 
     @RestResource(rel = "findBySubmissionAndValidationState")
-    public Page<Protocol> findBySubmissionEnvelopesContainingAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
+    public Page<Protocol> findBySubmissionEnvelopeAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
                                                                                 @Param("state") ValidationState state,
                                                                                 Pageable pageable);
 
@@ -40,4 +40,7 @@ public interface ProtocolRepository extends MongoRepository<Protocol, String> {
 
     @RestResource(rel = "findByUuid", path = "findByUuid")
     Optional<Protocol> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
+
+    @RestResource(exported = false)
+    Collection<Protocol> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 }

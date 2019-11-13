@@ -2,7 +2,6 @@ package org.humancellatlas.ingest.core.service.strategy.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Component
 @AllArgsConstructor
@@ -40,7 +40,12 @@ public class ProtocolCrudStrategy implements MetadataCrudStrategy<Protocol> {
     }
 
     @Override
-    public Collection<Protocol> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        return protocolRepository.findBySubmissionEnvelopesContaining(submissionEnvelope);
+    public Stream<Protocol> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        return protocolRepository.findBySubmissionEnvelope(submissionEnvelope);
+    }
+
+    @Override
+    public Collection<Protocol> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        return protocolRepository.findAllBySubmissionEnvelope(submissionEnvelope);
     }
 }

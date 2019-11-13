@@ -110,8 +110,8 @@ public class BundleManifestService {
             return Optional.ofNullable(bundleManifest.getFileProjectMap());
         } else {
             throw new RuntimeException(String.format("Bundle manifest %s contains no entity map for entity type %s",
-                                                     bundleManifest.getId(),
-                                                     entityType.toString()));
+                    bundleManifest.getId(),
+                    entityType.toString()));
         }
     }
 

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Component
 @AllArgsConstructor
@@ -39,7 +40,12 @@ public class FileCrudStrategy implements MetadataCrudStrategy<File> {
     }
 
     @Override
-    public Collection<File> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        return fileRepository.findBySubmissionEnvelopesContaining(submissionEnvelope);
+    public Stream<File> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        return fileRepository.findBySubmissionEnvelope(submissionEnvelope);
+    }
+
+    @Override
+    public Collection<File> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        return fileRepository.findAllBySubmissionEnvelope(submissionEnvelope);
     }
 }
