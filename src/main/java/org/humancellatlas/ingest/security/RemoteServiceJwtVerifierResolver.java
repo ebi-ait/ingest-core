@@ -25,6 +25,7 @@ public class RemoteServiceJwtVerifierResolver {
         return DelegatingJwtVerifier
                 .require(Algorithm.RSA256(publicKey, null))
                 .withAudience(audience)
+                .withIssuer(token.getIssuer())
                 .build();
     }
 }

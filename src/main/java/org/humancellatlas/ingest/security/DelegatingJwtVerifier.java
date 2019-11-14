@@ -16,7 +16,6 @@ public class DelegatingJwtVerifier implements JWTVerifier {
         private Algorithm algorithm;
 
         private String audience;
-
         private String issuer;
 
         private Builder(Verification verification) {
@@ -44,6 +43,7 @@ public class DelegatingJwtVerifier implements JWTVerifier {
         public JWTVerifier build() {
             DelegatingJwtVerifier verifier = new DelegatingJwtVerifier(verification.build());
             verifier.audience = audience;
+            verifier.issuer = issuer;
             return verifier;
         }
 
@@ -52,6 +52,7 @@ public class DelegatingJwtVerifier implements JWTVerifier {
     private final JWTVerifier delegate;
 
     private String audience;
+    private String issuer;
 
     /**
      * Effectively an alias for {@link Builder#require(Algorithm)}.
@@ -66,6 +67,10 @@ public class DelegatingJwtVerifier implements JWTVerifier {
 
     public String getAudience() {
         return audience;
+    }
+
+    public String getIssuer() {
+        return issuer;
     }
 
     @Override
