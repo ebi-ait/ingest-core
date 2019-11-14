@@ -103,7 +103,7 @@ public class SubmissionServiceTest {
                 .thenReturn(new PageImpl<>(projectList, Pageable.unpaged(), 1));
 
         //when
-        service.deleteSubmission(submissionEnvelope);
+        service.deleteSubmission(submissionEnvelope, false);
 
         //then:
         verify(biomaterialRepository).deleteBySubmissionEnvelope(submissionEnvelope);

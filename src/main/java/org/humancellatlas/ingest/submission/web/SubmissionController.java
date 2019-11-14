@@ -40,6 +40,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Optional;
 
@@ -265,8 +266,9 @@ public class SubmissionController {
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}", method = RequestMethod.DELETE)
-    HttpEntity<?> deleteSubmission(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
-        getSubmissionEnvelopeService().deleteSubmission(submissionEnvelope);
+    HttpEntity<?> forceDeleteSubmission(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
+                                        @RequestParam(name = "force", required = false, defaultValue = "false") boolean forceDelete) {
+        getSubmissionEnvelopeService().deleteSubmission(submissionEnvelope, forceDelete);
         return ResponseEntity.noContent().build();
     }
 }

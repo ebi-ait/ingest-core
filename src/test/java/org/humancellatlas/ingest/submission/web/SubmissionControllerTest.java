@@ -87,18 +87,30 @@ public class SubmissionControllerTest {
     }
 
     @Test
-    public void testDeleteSubmissionEnvelope() {
+    public void testDeleteSubmissionEnvelopeWithoutForce() {
         //given:
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
 
         //when:
-        HttpEntity<?> response = controller.deleteSubmission(submissionEnvelope);
+        HttpEntity<?> response = controller.forceDeleteSubmission(submissionEnvelope, false);
 
         //then:
         assertThat(response).isNotNull();
-        verify(submissionEnvelopeService).deleteSubmission(submissionEnvelope);
+        verify(submissionEnvelopeService).deleteSubmission(submissionEnvelope, false);
     }
 
+    @Test
+    public void testDeleteSubmissionEnvelopeWithForce() {
+        //given:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+
+        //when:
+        HttpEntity<?> response = controller.forceDeleteSubmission(submissionEnvelope, true);
+
+        //then:
+        assertThat(response).isNotNull();
+        verify(submissionEnvelopeService).deleteSubmission(submissionEnvelope, true);
+    }
     @Configuration
     static class TestConfiguration {}
 

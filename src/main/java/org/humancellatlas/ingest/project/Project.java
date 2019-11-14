@@ -66,9 +66,9 @@ public class Project extends MetadataDocument {
     }
 
     @JsonIgnore
-    public boolean removeSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        if(!submissionEnvelope.isOpen())
-            throw new UnsupportedOperationException("Cannot delete submission if it is already submitted!");
+    public boolean removeSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, boolean forceRemoval) {
+        if(!(submissionEnvelope.isOpen() || forceRemoval))
+            throw new UnsupportedOperationException("Cannot remove submission from Project if it is already submitted!");
         boolean success = true;
         for (File supplementaryFile: supplementaryFiles) {
             if ( supplementaryFile.getSubmissionEnvelope().equals(submissionEnvelope)) {

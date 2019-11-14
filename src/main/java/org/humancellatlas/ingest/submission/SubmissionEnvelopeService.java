@@ -125,8 +125,8 @@ public class SubmissionEnvelopeService {
         return insertedUpdateSubmissionEnvelope;
     }
 
-    public void deleteSubmission(SubmissionEnvelope submissionEnvelope){
-        if(!submissionEnvelope.isOpen())
+    public void deleteSubmission(SubmissionEnvelope submissionEnvelope, boolean forceDelete){
+        if(!(submissionEnvelope.isOpen() || forceDelete))
             throw new UnsupportedOperationException("Cannot delete submission if it is already submitted!");
 
         biomaterialRepository.deleteBySubmissionEnvelope(submissionEnvelope);
@@ -140,7 +140,7 @@ public class SubmissionEnvelopeService {
         //When a submission envelope can only have one project this for loop can be removed.
         Page<Project> projects = projectRepository.findBySubmissionEnvelope(submissionEnvelope, Pageable.unpaged());
         for (Project project : projects) {
-            if (project.removeSubmissionEnvelope(submissionEnvelope)) {
+            if (project.removeSubmissionEnvelope(submissionEnvelope, forceDelete)) {
                 projectRepository.save(project);
             }
         }
