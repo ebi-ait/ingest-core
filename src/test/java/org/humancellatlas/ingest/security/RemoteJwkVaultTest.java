@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-public class GoogleServiceJwkVaultTest {
+public class RemoteJwkVaultTest {
 
     @Test
     public void testGetPublicKeyForJwt() throws Exception {
@@ -36,7 +36,7 @@ public class GoogleServiceJwkVaultTest {
         doReturn(urlJwkProvider).when(urlJwkProviderResolver).resolve(issuer);
 
         //and: GoogleServiceJwkVault
-        JwkVault jwkVault = new GoogleServiceJwkVault(urlJwkProviderResolver);
+        JwkVault jwkVault = new RemoteJwkVault(urlJwkProviderResolver);
 
         //when:
         var publicKey = jwkVault.getPublicKey(jwt);

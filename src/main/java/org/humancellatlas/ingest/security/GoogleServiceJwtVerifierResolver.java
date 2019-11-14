@@ -4,16 +4,15 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 
-import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 
 public class GoogleServiceJwtVerifierResolver {
 
-    private final GoogleServiceJwkVault jwkVault;
+    private final RemoteJwkVault jwkVault;
 
     private final String audience;
 
-    public GoogleServiceJwtVerifierResolver(GoogleServiceJwkVault jwkVault, String audience) {
+    public GoogleServiceJwtVerifierResolver(RemoteJwkVault jwkVault, String audience) {
         this.jwkVault = jwkVault;
         this.audience = audience;
     }

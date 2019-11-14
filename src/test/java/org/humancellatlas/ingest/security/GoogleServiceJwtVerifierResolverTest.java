@@ -20,7 +20,7 @@ public class GoogleServiceJwtVerifierResolverTest {
 
         //and:
         String audience = "https://dev.data.humancellatlas.org/";
-        GoogleServiceJwkVault jwkVault = mock(GoogleServiceJwkVault.class);
+        RemoteJwkVault jwkVault = mock(RemoteJwkVault.class);
         doReturn(publicKey).when(jwkVault).getPublicKey(anyString());
 
         //and:

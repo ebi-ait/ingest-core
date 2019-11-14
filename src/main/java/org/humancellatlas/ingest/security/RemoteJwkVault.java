@@ -6,11 +6,11 @@ import com.auth0.jwt.JWT;
 
 import java.security.PublicKey;
 
-public class GoogleServiceJwkVault implements JwkVault {
+public class RemoteJwkVault implements JwkVault {
 
     private final UrlJwkProviderResolver urlJwkProviderResolver;
 
-    public GoogleServiceJwkVault(UrlJwkProviderResolver urlJwkProviderResolver) {
+    public RemoteJwkVault(UrlJwkProviderResolver urlJwkProviderResolver) {
         this.urlJwkProviderResolver = urlJwkProviderResolver;
     }
 
