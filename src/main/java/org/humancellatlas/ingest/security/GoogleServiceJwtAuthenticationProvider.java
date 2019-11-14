@@ -5,11 +5,12 @@ import com.auth0.jwk.JwkException;
 import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
+import org.humancellatlas.ingest.security.spring.DelegatingJwtAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -26,12 +27,18 @@ import java.util.List;
 public class GoogleServiceJwtAuthenticationProvider implements AuthenticationProvider {
 
     private static Logger logger = LoggerFactory.getLogger(GoogleServiceJwtAuthenticationProvider.class);
-    private final String audience;
+
+    private final RemoteServiceJwtVerifierResolver jwtVerifierResolver;
+
     private final List<String> projects;
 
-    public GoogleServiceJwtAuthenticationProvider(String audience, List<String> projects) {
+    private final String audience;
+
+    public GoogleServiceJwtAuthenticationProvider(String audience, List<String> projects,
+            RemoteServiceJwtVerifierResolver jwtVerifierResolver) {
         this.audience = audience;
         this.projects = projects;
+        this.jwtVerifierResolver = jwtVerifierResolver;
     }
 
     @Override
@@ -47,7 +54,8 @@ public class GoogleServiceJwtAuthenticationProvider implements AuthenticationPro
 
         JwtAuthentication jwt = (JwtAuthentication) authentication;
         try {
-            final Authentication jwtAuth = jwt.verify(jwtVerifier(jwt));
+            JWTVerifier jwtVerifier = jwtVerifierResolver.resolve(jwt.getToken());
+            final Authentication jwtAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
             logger.info("Authenticated with jwt with scopes {}", jwtAuth.getAuthorities());
             return jwtAuth;
         } catch (JWTVerificationException e) {
@@ -77,14 +85,14 @@ public class GoogleServiceJwtAuthenticationProvider implements AuthenticationPro
 
         RSAPublicKey publicKey;
         try{
-            Jwk jwk = urlJwkProvider.get(authentication.getKeyId());
+            String keyId = authentication.getKeyId();
+            Jwk jwk = urlJwkProvider.get(keyId);
             publicKey = (RSAPublicKey) jwk.getPublicKey();
         } catch (JwkException e) {
             throw new AuthenticationServiceException("Cannot authenticate with jwt", e);
         }
 
-
-        return JWT.require(Algorithm.RSA256(publicKey))
+        return JWT.require(Algorithm.RSA256(publicKey, null))
                 .withIssuer(issuer)
                 .withAudience(this.audience)
                 .build();
