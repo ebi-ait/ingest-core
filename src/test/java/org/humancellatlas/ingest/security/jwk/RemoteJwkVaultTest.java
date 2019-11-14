@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.security.jwk;
 
 import com.auth0.jwk.Jwk;
 import com.auth0.jwk.UrlJwkProvider;
+import com.auth0.jwt.JWT;
 import org.humancellatlas.ingest.security.JwtGenerator;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +41,8 @@ public class RemoteJwkVaultTest {
         JwkVault jwkVault = new RemoteJwkVault(urlJwkProviderResolver);
 
         //when:
-        var publicKey = jwkVault.getPublicKey(jwt);
+        var token = JWT.decode(jwt);
+        var publicKey = jwkVault.getPublicKey(token);
 
         //then:
         assertThat(publicKey).isNotNull();
