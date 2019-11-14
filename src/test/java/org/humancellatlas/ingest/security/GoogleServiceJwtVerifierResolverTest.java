@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.security;
 
 import com.auth0.jwt.JWTVerifier;
+import org.humancellatlas.ingest.security.jwk.RemoteJwkVault;
 import org.junit.jupiter.api.Test;
 
 import java.security.interfaces.RSAPublicKey;

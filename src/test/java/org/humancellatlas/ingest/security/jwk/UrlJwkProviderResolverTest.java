@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.security;
+package org.humancellatlas.ingest.security.jwk;
 
 import com.auth0.jwk.UrlJwkProvider;
 import org.junit.jupiter.api.Test;

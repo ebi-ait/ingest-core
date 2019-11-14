@@ -16,20 +16,20 @@ import java.util.Optional;
 
 import static java.util.Map.entry;
 
-class JwtGenerator {
+public class JwtGenerator {
 
-    static final String DEFAULT_ISSUER = "https://humancellatlas.auth0.com";
-    static final String DEFAULT_KEY_ID = "MDc2OTM3ODI4ODY2NUU5REVGRDVEM0MyOEYwQTkzNDZDRDlEQzNBRQ";
+    public static final String DEFAULT_ISSUER = "https://humancellatlas.auth0.com";
+    public static final String DEFAULT_KEY_ID = "MDc2OTM3ODI4ODY2NUU5REVGRDVEM0MyOEYwQTkzNDZDRDlEQzNBRQ";
 
     private final KeyPair keyPair;
 
     private final String issuer;
 
-    JwtGenerator() {
+    public JwtGenerator() {
         this(DEFAULT_ISSUER);
     }
 
-    JwtGenerator(@Nonnull String issuer) {
+    public JwtGenerator(@Nonnull String issuer) {
         this.issuer = issuer;
         try {
             KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
@@ -44,15 +44,15 @@ class JwtGenerator {
         return (RSAPublicKey) keyPair.getPublic();
     }
 
-    String generate() {
+    public String generate() {
         return generate(null, null);
     }
 
-    String generate(Map<String, String> claims) {
+    public String generate(Map<String, String> claims) {
         return generate(null, claims);
     }
 
-    String generate(@Nullable String keyId, @Nullable Map<String, String> claims) {
+    public String generate(@Nullable String keyId, @Nullable Map<String, String> claims) {
         var kid = Optional.ofNullable(keyId);
         Map<String, Object> header = Map.ofEntries(entry("kid", kid.orElse(DEFAULT_KEY_ID)));
 

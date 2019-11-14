@@ -1,7 +1,8 @@
-package org.humancellatlas.ingest.security;
+package org.humancellatlas.ingest.security.jwk;
 
 import com.auth0.jwk.Jwk;
 import com.auth0.jwk.UrlJwkProvider;
+import org.humancellatlas.ingest.security.JwtGenerator;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;

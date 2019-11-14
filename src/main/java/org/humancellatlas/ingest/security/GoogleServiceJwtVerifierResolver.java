@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import org.humancellatlas.ingest.security.jwk.RemoteJwkVault;
 
 import java.security.interfaces.RSAPublicKey;
 
