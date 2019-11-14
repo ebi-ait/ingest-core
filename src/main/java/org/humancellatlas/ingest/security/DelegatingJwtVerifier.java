@@ -13,8 +13,6 @@ public class DelegatingJwtVerifier implements JWTVerifier {
 
         private Verification verification;
 
-        private Algorithm algorithm;
-
         private String audience;
         private String issuer;
 
@@ -23,9 +21,7 @@ public class DelegatingJwtVerifier implements JWTVerifier {
         }
 
         public static Builder require(Algorithm algorithm) {
-            Builder builder = new Builder(JWT.require(algorithm));
-            builder.algorithm = algorithm;
-            return builder;
+            return new Builder(JWT.require(algorithm));
         }
 
         public Builder withAudience(String audience) {
