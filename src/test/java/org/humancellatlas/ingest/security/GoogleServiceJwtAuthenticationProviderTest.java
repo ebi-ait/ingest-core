@@ -1,7 +1,9 @@
 package org.humancellatlas.ingest.security;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.PreAuthenticatedAuthenticationJsonWebToken;
+import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
 import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,8 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 public class GoogleServiceJwtAuthenticationProviderTest {
 
@@ -73,8 +74,8 @@ public class GoogleServiceJwtAuthenticationProviderTest {
         }
 
         @Test
-        @DisplayName("Unlisted issuer")
-        public void testAuthenticateForUnlistedIssuer() {
+        @DisplayName("unlisted issuer")
+        public void testForUnlistedIssuer() {
             //given:
             AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
                     "https://dev.data.humancellatlas.org/", asList("differentissuer.com"), jwtVerifierResolver);
@@ -87,6 +88,27 @@ public class GoogleServiceJwtAuthenticationProviderTest {
             assertThatThrownBy(() -> {
                 authenticationProvider.authenticate(jwtAuthentication);
             }).isInstanceOf(UnlistedJwtIssuer.class).hasMessageContaining(ISSUER);
+        }
+
+        @Test
+        @DisplayName("verification failed")
+        public void testForFailedVerification() {
+            //given:
+            AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
+                    "https://dev.data.humancellatlas.org/", asList("auth0.com"), jwtVerifierResolver);
+
+            //and:
+            Exception verificationFailed = new JWTVerificationException("verification failed");
+            doThrow(verificationFailed).when(jwtVerifier).verify(anyString());
+
+            //and:
+            String jwt = jwtGenerator.generate();
+            Authentication jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
+
+            //expect:
+            assertThatThrownBy(() -> {
+                authenticationProvider.authenticate(jwtAuthentication);
+            }).isInstanceOf(JwtVerificationFailed.class);
         }
 
     }
