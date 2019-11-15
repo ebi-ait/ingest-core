@@ -10,6 +10,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
+import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.humancellatlas.ingest.security.spring.DelegatingJwtAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,9 +52,10 @@ public class GoogleServiceJwtAuthenticationProvider implements AuthenticationPro
         if (!supports(authentication.getClass())) {
             return null;
         }
-
-        JwtAuthentication jwt = (JwtAuthentication) authentication;
         try {
+            JwtAuthentication jwt = (JwtAuthentication) authentication;
+            verifyIssuer(jwt);
+
             JWTVerifier jwtVerifier = jwtVerifierResolver.resolve(jwt.getToken());
             final Authentication jwtAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
             logger.info("Authenticated with jwt with scopes {}", jwtAuth.getAuthorities());
@@ -61,6 +63,15 @@ public class GoogleServiceJwtAuthenticationProvider implements AuthenticationPro
         } catch (JWTVerificationException e) {
             logger.error("BadCredentialsException: {}", e.getMessage());
             throw new BadCredentialsException("Not a valid token", e);
+        }
+    }
+
+    private void verifyIssuer(JwtAuthentication jwt) {
+        DecodedJWT token = JWT.decode(jwt.getToken());
+        String issuer = token.getIssuer();
+        boolean match = projects.stream().anyMatch(issuer::endsWith);
+        if (!match) {
+            throw new UnlistedJwtIssuer(issuer);
         }
     }
 
