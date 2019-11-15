@@ -2,6 +2,8 @@ package org.humancellatlas.ingest.security;
 
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.PreAuthenticatedAuthenticationJsonWebToken;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -21,41 +23,46 @@ public class GoogleServiceJwtAuthenticationProviderTest {
 
     private static final Path RESOURCE_PATH = Path.of("src/test/resources");
 
-    @Test
-    public void testAuthenticate() {
-        //given: JWT
-        String issuer = "https://humancellatlas.auth0.com";
-        JwtGenerator jwtGenerator = new JwtGenerator(issuer);
-        Map<String, String> claims = Map.ofEntries(
-                entry("https://auth.data.humancellatlas.org/email", "sample@domain.tld")
-        );
-        String keyId = "MDc2OTM3ODI4ODY2NUU5REVGRDVEM0MyOEYwQTkzNDZDRDlEQzNBRQ";
-        String subject = "johndoe@somedomain.tld";
-        String jwt = jwtGenerator.generate(keyId, subject, claims);
+    @Nested
+    @DisplayName("Authenticate")
+    class AuthenticationTests {
 
-        //and: given a JWT Authentication
-        Authentication jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
-        assumeThat(jwtAuthentication).isNotNull();
+        @Test
+        @DisplayName("Authentication succeeds")
+        public void testAuthenticate() {
+            //given: JWT
+            String issuer = "https://humancellatlas.auth0.com";
+            JwtGenerator jwtGenerator = new JwtGenerator(issuer);
+            Map<String, String> claims = Map.ofEntries(
+                    entry("https://auth.data.humancellatlas.org/email", "sample@domain.tld")
+            );
+            String keyId = "MDc2OTM3ODI4ODY2NUU5REVGRDVEM0MyOEYwQTkzNDZDRDlEQzNBRQ";
+            String subject = "johndoe@somedomain.tld";
+            String jwt = jwtGenerator.generate(keyId, subject, claims);
 
-        //and:
-        JWTVerifier jwtVerifier = mock(JWTVerifier.class);
-        RemoteServiceJwtVerifierResolver jwtVerifierResolver = mock(RemoteServiceJwtVerifierResolver.class);
-        doReturn(jwtVerifier).when(jwtVerifierResolver).resolve(anyString());
+            //and: given a JWT Authentication
+            Authentication jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
+            assumeThat(jwtAuthentication).isNotNull();
 
-        //and:
-        AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
-                "https://dev.data.humancellatlas.org/", asList("auth0.com"), jwtVerifierResolver);
+            //and:
+            JWTVerifier jwtVerifier = mock(JWTVerifier.class);
+            RemoteServiceJwtVerifierResolver jwtVerifierResolver = mock(RemoteServiceJwtVerifierResolver.class);
+            doReturn(jwtVerifier).when(jwtVerifierResolver).resolve(anyString());
 
-        //when:
-        Authentication authentication = authenticationProvider.authenticate(jwtAuthentication);
+            //and:
+            AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
+                    "https://dev.data.humancellatlas.org/", asList("auth0.com"), jwtVerifierResolver);
 
-        //then:
-        assertThat(authentication).isNotNull()
-                .extracting("principal")
-                .containsExactly(subject);
+            //when:
+            Authentication authentication = authenticationProvider.authenticate(jwtAuthentication);
+
+            //then:
+            assertThat(authentication).isNotNull()
+                    .extracting("principal")
+                    .containsExactly(subject);
+
+        }
 
     }
-
-    //TODO add checks for whitelisted issuers
 
 }
