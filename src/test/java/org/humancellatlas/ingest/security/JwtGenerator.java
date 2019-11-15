@@ -70,4 +70,8 @@ public class JwtGenerator {
         return builder.sign(rsa256);
     }
 
+    public String generateWithSubject(String subject) {
+        return generate(null, subject, null);
+    }
+
 }

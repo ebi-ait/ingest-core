@@ -4,6 +4,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.PreAuthenticatedAuthenticationJsonWebToken;
 import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
+import org.humancellatlas.ingest.security.exception.UnlistedEmail;
 import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,12 +37,16 @@ public class GoogleServiceJwtAuthenticationProviderTest {
 
         private RemoteServiceJwtVerifierResolver jwtVerifierResolver;
 
+        private UserWhiteList userWhiteList;
 
         @BeforeEach
         public void setUp() {
             jwtVerifier = mock(JWTVerifier.class);
             jwtVerifierResolver = mock(RemoteServiceJwtVerifierResolver.class);
             doReturn(jwtVerifier).when(jwtVerifierResolver).resolve(anyString());
+
+            userWhiteList = mock(UserWhiteList.class);
+            doReturn(true).when(userWhiteList).lists(anyString());
         }
 
         @Test
@@ -61,7 +66,7 @@ public class GoogleServiceJwtAuthenticationProviderTest {
 
             //and:
             AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
-                    "https://dev.data.humancellatlas.org/", asList("auth0.com"), jwtVerifierResolver);
+                    "https://dev.data.humancellatlas.org/", asList("auth0.com"), jwtVerifierResolver, userWhiteList);
 
             //when:
             Authentication authentication = authenticationProvider.authenticate(jwtAuthentication);
@@ -78,7 +83,8 @@ public class GoogleServiceJwtAuthenticationProviderTest {
         public void testForUnlistedIssuer() {
             //given:
             AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
-                    "https://dev.data.humancellatlas.org/", asList("differentissuer.com"), jwtVerifierResolver);
+                    "https://dev.data.humancellatlas.org/", asList("differentissuer.com"), jwtVerifierResolver,
+                    userWhiteList);
 
             //and:
             String jwt = jwtGenerator.generate();
@@ -95,7 +101,7 @@ public class GoogleServiceJwtAuthenticationProviderTest {
         public void testForFailedVerification() {
             //given:
             AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
-                    "https://dev.data.humancellatlas.org/", asList("auth0.com"), jwtVerifierResolver);
+                    "https://dev.data.humancellatlas.org/", asList("auth0.com"), jwtVerifierResolver, userWhiteList);
 
             //and:
             Exception verificationFailed = new JWTVerificationException("verification failed");
@@ -109,6 +115,27 @@ public class GoogleServiceJwtAuthenticationProviderTest {
             assertThatThrownBy(() -> {
                 authenticationProvider.authenticate(jwtAuthentication);
             }).isInstanceOf(JwtVerificationFailed.class);
+        }
+
+        @Test
+        @DisplayName("unlisted user")
+        public void testForUnlistedUser() {
+            //given:
+            String userEmail = "someone@unverifiable.net";
+            doReturn(false).when(userWhiteList).lists(userEmail);
+
+            //and:
+            AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
+                    "https://dev.data.humancellatlas.org/", asList("auth0.com"), jwtVerifierResolver, userWhiteList);
+
+            //and:
+            String jwt = jwtGenerator.generateWithSubject(userEmail);
+            Authentication jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
+
+            //expect:
+            assertThatThrownBy(() -> {
+                authenticationProvider.authenticate(jwtAuthentication);
+            }).isInstanceOf(UnlistedEmail.class).hasMessageContaining(userEmail);
         }
 
     }
