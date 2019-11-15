@@ -50,7 +50,8 @@ public class GoogleServiceJwtAuthenticationProviderTest {
                 entry("https://auth.data.humancellatlas.org/email", "sample@domain.tld")
         );
         String keyId = "MDc2OTM3ODI4ODY2NUU5REVGRDVEM0MyOEYwQTkzNDZDRDlEQzNBRQ";
-        String jwt = jwtGenerator.generate(keyId, claims);
+        String subject = "johndoe@somedomain.tld";
+        String jwt = jwtGenerator.generate(keyId, subject, claims);
 
         //and: given a JWT Authentication
         Authentication jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
@@ -69,7 +70,10 @@ public class GoogleServiceJwtAuthenticationProviderTest {
         Authentication authentication = authenticationProvider.authenticate(jwtAuthentication);
 
         //then:
-        assertThat(authentication).isNotNull();
+        assertThat(authentication).isNotNull()
+                .extracting("principal")
+                .containsExactly(subject);
+
     }
 
     //TODO add checks for whitelisted issuers

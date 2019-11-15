@@ -13,6 +13,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.Map.entry;
 
@@ -45,18 +46,23 @@ public class JwtGenerator {
     }
 
     public String generate() {
-        return generate(null, null);
+        return generate(null, null, null);
     }
 
     public String generate(Map<String, String> claims) {
-        return generate(null, claims);
+        return generate(null, null, claims);
     }
 
-    public String generate(@Nullable String keyId, @Nullable Map<String, String> claims) {
+    public String generate(@Nullable String keyId, @Nullable String subject, @Nullable Map<String, String> claims) {
         var kid = Optional.ofNullable(keyId);
         Map<String, Object> header = Map.ofEntries(entry("kid", kid.orElse(DEFAULT_KEY_ID)));
 
-        JWTCreator.Builder builder = JWT.create().withHeader(header).withIssuer(issuer);
+        JWTCreator.Builder builder = JWT.create()
+                .withHeader(header)
+                .withIssuer(issuer)
+                //using consumer so that random UUID is optionally generated
+                .withSubject(Optional.ofNullable(subject).orElseGet(() -> UUID.randomUUID().toString()));
+
         Optional.ofNullable(claims)
                 .ifPresent(existentClaims -> existentClaims.forEach(builder::withClaim));
 
