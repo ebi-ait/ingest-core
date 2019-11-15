@@ -1,20 +1,12 @@
 package org.humancellatlas.ingest.security;
 
-import com.auth0.jwk.JwkProvider;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.PreAuthenticatedAuthenticationJsonWebToken;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.KeyPairGenerator;
-import java.security.interfaces.RSAPrivateKey;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
@@ -28,18 +20,6 @@ import static org.mockito.Mockito.mock;
 public class GoogleServiceJwtAuthenticationProviderTest {
 
     private static final Path RESOURCE_PATH = Path.of("src/test/resources");
-
-    @Test
-    public void testDecode() throws Exception {
-        //given:
-        var tokenFilePath = RESOURCE_PATH.resolve("jwt/access-token.jwt");
-        assumeThat(tokenFilePath.toFile().exists()).isTrue();
-        var jwtToken = Files.readString(tokenFilePath);
-
-        //and:
-        var decodedToken = JWT.decode(jwtToken);
-        System.out.println(decodedToken.getToken());
-    }
 
     @Test
     public void testAuthenticate() {
