@@ -5,6 +5,7 @@ import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.export.Exporter;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.patch.PatchRepository;
@@ -25,6 +26,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,18 +85,46 @@ public class SubmissionServiceTest {
     @Configuration
     static class TestConfiguration {}
 
+    static class TestProject extends Project {
+        Set<File> supplementaryFiles;
+
+        TestProject(Object content) {
+            super(content);
+            supplementaryFiles = super.getSupplementaryFiles();
+        }
+
+        @Override
+        public Set<File> getSupplementaryFiles() {
+            return supplementaryFiles;
+        }
+
+        public void addToSupplementaryFiles(File file) {
+            supplementaryFiles.add(file);
+        }
+    }
+
     @Test
     public void testDeleteSubmission() {
-        //given SubmissionEnvelope:
+        //given SubmissionEnvelope
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         submissionEnvelope.setUuid(Uuid.newUuid());
 
+        //given File
+        File file = new File();
+        file.setFileName("testFile.txt");
+        file.setSubmissionEnvelope(submissionEnvelope);
+
         //given Project
-        Project project = new Project(new Object());
+        TestProject project = new TestProject(new Object());
         project.setUuid(Uuid.newUuid());
         project.setSubmissionEnvelope(submissionEnvelope);
         project.addToSubmissionEnvelope(submissionEnvelope);
-        assertThat(project.getSubmissionEnvelopes()).isNotEmpty();
+        assertThat(project.getSubmissionEnvelopes()).contains(submissionEnvelope);
+        assertThat(project.getSubmissionEnvelope()).isEqualTo(submissionEnvelope);
+
+        //given SupplementaryFile
+        project.addToSupplementaryFiles(file);
+        assertThat(project.getSupplementaryFiles()).contains(file);
 
         //given ProjectRepository
         List<Project> projectList = new ArrayList<>();
@@ -116,6 +146,7 @@ public class SubmissionServiceTest {
 
         verify(projectRepository).findBySubmissionEnvelope(submissionEnvelope, Pageable.unpaged());
         assertThat(project.getSubmissionEnvelopes()).isEmpty();
+        assertThat(project.getSupplementaryFiles()).isEmpty();
         verify(projectRepository).save(project);
         verify(submissionEnvelopeRepository).delete(submissionEnvelope);
     }
