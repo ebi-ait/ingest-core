@@ -12,6 +12,14 @@ ENV SCHEMA_BASE_URI=https://schema.humancellatlas.org
 ENV JMX_PORT=9091
 ENV RMI_HOSTNAME=localhost
 
+#Security variables
+ENV AUTH_ISSUER=https://humancellatlas.auth0.com/
+ENV SVC_AUTH_AUDIENCE=https://dev.data.humancellatlas.org/
+ENV USR_AUTH_AUDIENCE=https://dev.data.humancellatlas.org/
+ENV GCP_JWK_PROVIDER_BASE_URL=http://url.tld
+ENV SECURITY_WHITELIST_DOMAINS=comma,seperated,values
+ENV GCP_PROJECT_WHITELIST=comma,separated,values
+
 ADD gradle ./gradle
 ADD src ./src
 
