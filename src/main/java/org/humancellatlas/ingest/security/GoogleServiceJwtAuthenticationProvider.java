@@ -27,11 +27,8 @@ public class GoogleServiceJwtAuthenticationProvider implements AuthenticationPro
 
     private final List<String> projects;
 
-    private final String audience;
-
-    public GoogleServiceJwtAuthenticationProvider(String audience, List<String> projects,
+    public GoogleServiceJwtAuthenticationProvider(List<String> projects,
             RemoteServiceJwtVerifierResolver jwtVerifierResolver, UserWhiteList userWhiteList) {
-        this.audience = audience;
         this.projects = projects;
         this.jwtVerifierResolver = jwtVerifierResolver;
         this.userWhiteList = userWhiteList;

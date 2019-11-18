@@ -66,7 +66,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         //TODO update this configuration
         GoogleServiceJwtAuthenticationProvider googleServiceJwtAuthenticationProvider =
-                new GoogleServiceJwtAuthenticationProvider(serviceAudience, projectWhitelist, null, null);
+                new GoogleServiceJwtAuthenticationProvider(projectWhitelist, null, null);
 
         JwkProvider jwkProvider = new JwkProviderBuilder(issuer).build();
         JwtAuthenticationProvider auth0Provider = new JwtAuthenticationProvider(jwkProvider, issuer, audience);

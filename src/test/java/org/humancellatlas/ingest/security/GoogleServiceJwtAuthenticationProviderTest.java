@@ -50,7 +50,7 @@ public class GoogleServiceJwtAuthenticationProviderTest {
         }
 
         @Test
-        @DisplayName("Success")
+        @DisplayName("success")
         public void testAuthenticate() {
             //given: JWT
             Map<String, String> claims = Map.ofEntries(
@@ -66,7 +66,7 @@ public class GoogleServiceJwtAuthenticationProviderTest {
 
             //and:
             AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
-                    "https://dev.data.humancellatlas.org/", asList("auth0.com"), jwtVerifierResolver, userWhiteList);
+                    asList("auth0.com"), jwtVerifierResolver, userWhiteList);
 
             //when:
             Authentication authentication = authenticationProvider.authenticate(jwtAuthentication);
@@ -83,8 +83,7 @@ public class GoogleServiceJwtAuthenticationProviderTest {
         public void testForUnlistedIssuer() {
             //given:
             AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
-                    "https://dev.data.humancellatlas.org/", asList("differentissuer.com"), jwtVerifierResolver,
-                    userWhiteList);
+                    asList("differentissuer.com"), jwtVerifierResolver, userWhiteList);
 
             //and:
             String jwt = jwtGenerator.generate();
@@ -101,7 +100,7 @@ public class GoogleServiceJwtAuthenticationProviderTest {
         public void testForFailedVerification() {
             //given:
             AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
-                    "https://dev.data.humancellatlas.org/", asList("auth0.com"), jwtVerifierResolver, userWhiteList);
+                    asList("auth0.com"), jwtVerifierResolver, userWhiteList);
 
             //and:
             Exception verificationFailed = new JWTVerificationException("verification failed");
@@ -126,7 +125,7 @@ public class GoogleServiceJwtAuthenticationProviderTest {
 
             //and:
             AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
-                    "https://dev.data.humancellatlas.org/", asList("auth0.com"), jwtVerifierResolver, userWhiteList);
+                    asList("auth0.com"), jwtVerifierResolver, userWhiteList);
 
             //and:
             String jwt = jwtGenerator.generateWithSubject(userEmail);
