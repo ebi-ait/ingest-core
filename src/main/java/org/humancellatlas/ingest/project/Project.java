@@ -3,7 +3,6 @@ package org.humancellatlas.ingest.project;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
-import lombok.Setter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.exception.LinkToNewSubmissionNotAllowedException;
@@ -13,9 +12,7 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -66,5 +63,20 @@ public class Project extends MetadataDocument {
             }
         }
         return null;
+    }
+
+    @JsonIgnore
+    public void removeSubmissionEnvelopeData(SubmissionEnvelope submissionEnvelope, boolean forceRemoval) {
+        if(!submissionEnvelopes.contains(submissionEnvelope))
+            throw new UnsupportedOperationException(
+                    String.format("Submission Envelope (%s) is not part of Project (%s), so it cannot be removed.",
+                            submissionEnvelope.getUuid().getUuid().toString(),
+                            this.getUuid().getUuid().toString()
+                    ));
+        if(!(submissionEnvelope.isOpen() || forceRemoval))
+            throw new UnsupportedOperationException("Cannot remove submission from Project since it is already submitted!");
+
+        this.supplementaryFiles.removeIf(file -> file.getSubmissionEnvelope().equals(submissionEnvelope));
+        submissionEnvelopes.remove(submissionEnvelope);
     }
 }

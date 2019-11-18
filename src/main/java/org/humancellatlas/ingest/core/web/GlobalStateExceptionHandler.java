@@ -91,4 +91,14 @@ public class GlobalStateExceptionHandler {
         getLog().debug("Handling RuntimeException and returning INTERNAL_SERVER_ERROR response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), "Unexpected server error");
     }
+
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    @ExceptionHandler(UnsupportedOperationException.class)
+    public @ResponseBody ExceptionInfo handleUnsupportedOperationException(HttpServletRequest request, Exception e) {
+        getLog().error(String.format("UnsupportedOperationException encountered on %s request to resource %s ", request.getMethod(),
+                request.getRequestURL().toString()), e);
+        getLog().debug("Handling UnsupportedOperationException and returning METHOD_NOT_ALLOWED response", e);
+        return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
+    }
+
 }

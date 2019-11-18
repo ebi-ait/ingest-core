@@ -2,14 +2,24 @@ package org.humancellatlas.ingest.submission;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
+import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
-import org.humancellatlas.ingest.errors.SubmissionError;
 import org.humancellatlas.ingest.export.Exporter;
+import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.messaging.MessageRouter;
+import org.humancellatlas.ingest.patch.PatchRepository;
+import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
+import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ExecutorService;
@@ -36,6 +46,31 @@ public class SubmissionEnvelopeService {
 
     @NonNull
     private final SubmissionEnvelopeCreateHandler submissionEnvelopeCreateHandler;
+
+    @NonNull
+    private final SubmissionManifestRepository submissionManifestRepository;
+
+    @NonNull
+    private BundleManifestRepository bundleManifestRepository;
+
+    @NonNull
+    private ProjectRepository projectRepository;
+
+    @NonNull
+    private ProcessRepository processRepository;
+
+    @NonNull
+    private ProtocolRepository protocolRepository;
+
+    @NonNull
+    private FileRepository fileRepository;
+
+    @NonNull
+    private BiomaterialRepository biomaterialRepository;
+
+    @NonNull
+    private PatchRepository patchRepository;
+
 
     private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
 
@@ -88,5 +123,26 @@ public class SubmissionEnvelopeService {
         SubmissionEnvelope insertedUpdateSubmissionEnvelope = submissionEnvelopeRepository.insert(updateSubmissionEnvelope);
         submissionEnvelopeCreateHandler.handleSubmissionEnvelopeCreation(updateSubmissionEnvelope);
         return insertedUpdateSubmissionEnvelope;
+    }
+
+    public void deleteSubmission(SubmissionEnvelope submissionEnvelope, boolean forceDelete){
+        if(!(submissionEnvelope.isOpen() || forceDelete))
+            throw new UnsupportedOperationException("Cannot delete submission if it is already submitted!");
+
+        biomaterialRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+        processRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+        protocolRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+        fileRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+        bundleManifestRepository.deleteByEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString());
+        patchRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+        submissionManifestRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+
+        //When a submission envelope can only have one project this for loop can be removed.
+        Page<Project> projects = projectRepository.findBySubmissionEnvelope(submissionEnvelope, Pageable.unpaged());
+        for (Project project : projects) {
+            project.removeSubmissionEnvelopeData(submissionEnvelope, forceDelete);
+            projectRepository.save(project);
+        }
+        submissionEnvelopeRepository.delete(submissionEnvelope);
     }
 }

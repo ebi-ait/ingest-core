@@ -28,13 +28,16 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
     Optional<Biomaterial> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
     Page<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
-            Pageable pageable);    
+            Pageable pageable);
 
     @RestResource(exported = false)
     Stream<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(exported = false)
     Collection<Biomaterial> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+
+    @RestResource(exported = false)
+    Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(rel = "findBySubmissionAndValidationState")
     public Page<Biomaterial> findBySubmissionEnvelopeAndValidationState(@Param
@@ -52,4 +55,3 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
     Page<Biomaterial> findByDerivedByProcessesContaining(Process process, Pageable pageable);
 
 }
-

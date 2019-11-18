@@ -20,7 +20,10 @@ import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
-import org.humancellatlas.ingest.submission.*;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
+import org.humancellatlas.ingest.submission.SubmissionStateMachineService;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.slf4j.Logger;
@@ -32,10 +35,12 @@ import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Optional;
 
@@ -65,7 +70,6 @@ public class SubmissionController {
     private final @NonNull ProcessRepository processRepository;
     private final @NonNull BundleManifestRepository bundleManifestRepository;
     private final @NonNull SubmissionManifestRepository submissionManifestRepository;
-
 
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
     private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
@@ -255,10 +259,16 @@ public class SubmissionController {
         return ResponseEntity.ok(getSubmissionStateMachineService().documentStatesForEnvelope(submissionEnvelope));
     }
 
-
     @RequestMapping(path = "/submissionEnvelopes/{id}/sync", method = RequestMethod.GET)
     HttpEntity<?> forceStateCheck(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
         // TODO: if really needed, modify this method to ask the state tracker component for an update
+        return ResponseEntity.noContent().build();
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}", method = RequestMethod.DELETE)
+    HttpEntity<?> forceDeleteSubmission(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
+                                        @RequestParam(name = "force", required = false, defaultValue = "false") boolean forceDelete) {
+        getSubmissionEnvelopeService().deleteSubmission(submissionEnvelope, forceDelete);
         return ResponseEntity.noContent().build();
     }
 }

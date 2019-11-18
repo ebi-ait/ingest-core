@@ -29,6 +29,8 @@ public interface ProtocolRepository extends MongoRepository<Protocol, String> {
     @RestResource(exported = false)
     public Stream<Protocol> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
+    @RestResource(exported = false)
+    Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(rel = "findBySubmissionAndValidationState")
     public Page<Protocol> findBySubmissionEnvelopeAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
