@@ -5,9 +5,14 @@ import com.auth0.jwk.JwkProviderBuilder;
 import com.auth0.spring.security.api.BearerSecurityContextRepository;
 import com.auth0.spring.security.api.JwtAuthenticationEntryPoint;
 import com.auth0.spring.security.api.JwtAuthenticationProvider;
+import org.humancellatlas.ingest.security.jwk.RemoteJwkVault;
+import org.humancellatlas.ingest.security.jwk.UrlJwkProviderResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration
@@ -22,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpMethod.*;
 
@@ -32,16 +36,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final String FORWARDED_FOR = "X-Forwarded-For";
 
-    @Value(value = "${USR_AUTH_AUDIENCE:https://dev.data.humancellatlas.org/}")
-    private String audience;
-    @Value(value = "${AUTH_ISSUER:https://humancellatlas.auth0.com/}")
+    @Value(value= "#{'${GCP_PROJECT_WHITELIST}'.split(',')}")
+    private List<String> projectWhitelist;
+
+    @Value("${GCP_JWK_PROVIDER_BASE_URL}")
+    private String googleJwkProviderbaseUrl;
+
+    @Value(value = "${AUTH_ISSUER}")
     private String issuer;
 
-    @Value(value = "${SVC_AUTH_AUDIENCE:https://dev.data.humancellatlas.org/}")
+    @Value(value = "${SVC_AUTH_AUDIENCE}")
     private String serviceAudience;
 
-    @Value(value= "${GCP_PROJECT_WHITELIST:hca-dcp-production.iam.gserviceaccount.com,human-cell-atlas-travis-test.iam.gserviceaccount.com,broad-dsde-mint-dev.iam.gserviceaccount.com,broad-dsde-mint-test.iam.gserviceaccount.com,broad-dsde-mint-staging.iam.gserviceaccount.com}")
-    private String projectWhitelist;
+    @Value("${USR_AUTH_AUDIENCE}")
+    private String audience;
+
+    @Autowired
+    private UserWhiteList userWhiteList;
 
     private static final List<AntPathRequestMatcher> SECURED_ANT_PATHS;
     static {
@@ -49,7 +60,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/user/**"));
         antPathMatchers.addAll(defineAntPathMatchers(PATCH, "/**"));
         antPathMatchers.addAll(defineAntPathMatchers(PUT, "/**"));
-        antPathMatchers.addAll(defineAntPathMatchers(POST,"/messaging/**", "/submissionEnvelopes/*/projects", "/files**", "/biomaterials**", "/protocols**", "/processes**", "/files**", "/bundleManifests**"));
+        antPathMatchers.addAll(defineAntPathMatchers(POST,"/messaging/**", "/submissionEnvelopes/*/projects",
+                "/files**", "/biomaterials**", "/protocols**", "/processes**", "/files**", "/bundleManifests**"));
         SECURED_ANT_PATHS = Collections.unmodifiableList(antPathMatchers);
     }
 
@@ -60,17 +72,27 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .collect(toList());
     }
 
+    @Bean
+    public AuthenticationProvider googleServiceAuthenticationProvider() {
+        UrlJwkProviderResolver urlJwkProviderResolver = new UrlJwkProviderResolver(googleJwkProviderbaseUrl);
+        RemoteJwkVault googleJwkVault = new RemoteJwkVault(urlJwkProviderResolver);
+        RemoteServiceJwtVerifierResolver googleJwtVerifierResolver =
+                new RemoteServiceJwtVerifierResolver(googleJwkVault, audience);
+        return new GoogleServiceJwtAuthenticationProvider(projectWhitelist, googleJwtVerifierResolver,
+                userWhiteList);
+    }
+
+    @Bean
+    public AuthenticationProvider auth0AuthenticationProvider() {
+        JwkProvider jwkProvider = new JwkProviderBuilder(issuer).build();
+        JwtAuthenticationProvider delegate = new JwtAuthenticationProvider(jwkProvider, issuer, audience);
+        return new WhitelistJwtAuthenticationProvider(delegate, userWhiteList);
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        List<String> projectWhitelist = asList(this.projectWhitelist.split(","));
-        GoogleServiceJwtAuthenticationProvider googleServiceJwtAuthenticationProvider =
-                new GoogleServiceJwtAuthenticationProvider(serviceAudience, projectWhitelist);
-
-        JwkProvider jwkProvider = new JwkProviderBuilder(issuer).build();
-        JwtAuthenticationProvider auth0Provider = new JwtAuthenticationProvider(jwkProvider, issuer, audience);
-
-        http.authenticationProvider(auth0Provider)
-                .authenticationProvider(googleServiceJwtAuthenticationProvider)
+        http.authenticationProvider(auth0AuthenticationProvider())
+                .authenticationProvider(googleServiceAuthenticationProvider())
                 .securityContext().securityContextRepository(new BearerSecurityContextRepository())
                 .and()
                 .exceptionHandling().authenticationEntryPoint(new JwtAuthenticationEntryPoint())
