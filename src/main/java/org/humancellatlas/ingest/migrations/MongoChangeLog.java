@@ -10,25 +10,30 @@ import java.util.List;
 
 @ChangeLog
 public class MongoChangeLog {
-    @ChangeSet(order = "2019-10-30", id = "featureCompatibilityVersion 3.4", author = "alexie.staffer@ebi.ac.uk")
+    @ChangeSet(order = "2019-10-30", id = "featureCompatibilityVersion 3.4", author = "alexie.staffer@ebi.ac.uk", runAlways = true)
     public void featureCompatibilityThreeFour(MongoDatabase db) {
-        db.runCommand(new Document("setFeatureCompatibilityVersion", "3.4"));
+        if (MongoVersionHelper.canSetFeatureCompatibility(db, "3.4"))
+            db.runCommand(new Document("setFeatureCompatibilityVersion", "3.4"));
     }
 
     @ChangeSet(order = "2019-10-31", id = "featureCompatibilityVersion 3.6", author = "alexie.staffer@ebi.ac.uk")
     public void featureCompatibilityThreeSix(MongoDatabase db) {
-        db.runCommand(new Document("setFeatureCompatibilityVersion", "3.6"));
+        if (MongoVersionHelper.canSetFeatureCompatibility(db, "3.6"))
+            db.runCommand(new Document("setFeatureCompatibilityVersion", "3.6"));
     }
 
     @ChangeSet(order = "2019-11-01", id = "featureCompatibilityVersion 4.0", author = "alexie.staffer@ebi.ac.uk")
     public void featureCompatibilityFourZero(MongoDatabase db) {
-        db.runCommand(new Document("setFeatureCompatibilityVersion", "4.0"));
-        db.runCommand(new Document("setFreeMonitoring", 1).append("action", "disable"));
+        if (MongoVersionHelper.canSetFeatureCompatibility(db, "4.0")) {
+            db.runCommand(new Document("setFeatureCompatibilityVersion", "4.0"));
+            db.runCommand(new Document("setFreeMonitoring", 1).append("action", "disable"));
+        }
     }
 
     @ChangeSet(order = "2019-11-02", id = "featureCompatibilityVersion 4.2", author = "alexie.staffer@ebi.ac.uk")
     public void featureCompatibilityFourTwo(MongoDatabase db) {
-        db.runCommand(new Document("setFeatureCompatibilityVersion", "4.2"));
+        if (MongoVersionHelper.canSetFeatureCompatibility(db, "4.2"))
+            db.runCommand(new Document("setFeatureCompatibilityVersion", "4.2"));
     }
 
     @ChangeSet(order = "2019-11-03", id = "singletonSubmissionEnvelope Biomaterial", author = "alexie.staffer@ebi.ac.uk")
