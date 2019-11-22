@@ -10,7 +10,7 @@ public class TestUserWhitelist {
     @Test
     public void testLists() {
         //given:
-        UserWhiteList userWhiteList = new UserWhiteList("trusteddomain.com", "friendlypeople.net");
+        DomainWhiteList userWhiteList = new DomainWhiteList("trusteddomain.com", "friendlypeople.net");
 
         //expect:
         asList("goodguy@trusteddomain.com", "upstandinglass@friendlypeople.net", "cooldude@friendlypeople.net")

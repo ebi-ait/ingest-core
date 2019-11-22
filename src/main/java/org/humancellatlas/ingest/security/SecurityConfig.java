@@ -7,7 +7,6 @@ import com.auth0.spring.security.api.JwtAuthenticationEntryPoint;
 import com.auth0.spring.security.api.JwtAuthenticationProvider;
 import org.humancellatlas.ingest.security.jwk.RemoteJwkVault;
 import org.humancellatlas.ingest.security.jwk.UrlJwkProviderResolver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,8 +35,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final String FORWARDED_FOR = "X-Forwarded-For";
 
-    @Value(value= "#{'${GCP_PROJECT_WHITELIST}'.split(',')}")
-    private List<String> projectWhitelist;
+    @Value(value = "${USR_AUTH_GROUP}")
+    private String userGroup;
 
     @Value("${GCP_JWK_PROVIDER_BASE_URL}")
     private String googleJwkProviderbaseUrl;
@@ -51,8 +50,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${USR_AUTH_AUDIENCE}")
     private String audience;
 
-    @Autowired
-    private UserWhiteList userWhiteList;
+    @Value(value= "#{('${GCP_PROJECT_WHITELIST}').split(',')}")
+    private String[] projectWhitelist;
 
     private static final List<AntPathRequestMatcher> SECURED_ANT_PATHS;
     static {
@@ -78,20 +77,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         RemoteJwkVault googleJwkVault = new RemoteJwkVault(urlJwkProviderResolver);
         RemoteServiceJwtVerifierResolver googleJwtVerifierResolver =
                 new RemoteServiceJwtVerifierResolver(googleJwkVault, audience);
-        return new GoogleServiceJwtAuthenticationProvider(projectWhitelist, googleJwtVerifierResolver,
-                userWhiteList);
+        return new GoogleServiceJwtAuthenticationProvider(new DomainWhiteList(projectWhitelist), googleJwtVerifierResolver);
     }
 
     @Bean
-    public AuthenticationProvider auth0AuthenticationProvider() {
+    public AuthenticationProvider userAuthenticationProvider() {
         JwkProvider jwkProvider = new JwkProviderBuilder(issuer).build();
         JwtAuthenticationProvider delegate = new JwtAuthenticationProvider(jwkProvider, issuer, audience);
-        return new WhitelistJwtAuthenticationProvider(delegate, userWhiteList);
+        return new UserJwtAuthenticationProvider(delegate);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authenticationProvider(auth0AuthenticationProvider())
+        http.authenticationProvider(userAuthenticationProvider())
                 .authenticationProvider(googleServiceAuthenticationProvider())
                 .securityContext().securityContextRepository(new BearerSecurityContextRepository())
                 .and()
