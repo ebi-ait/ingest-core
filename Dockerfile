@@ -25,7 +25,7 @@ ADD src ./src
 
 COPY gradlew build.gradle ./
 
-RUN ./gradlew --no-daemon clean check assemble
+RUN ./gradlew --no-daemon assemble
 
 CMD java \
     -Djava.security.egd=file:/dev/./urandom \
