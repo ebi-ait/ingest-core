@@ -1,6 +1,6 @@
 plugins {
-	id 'org.springframework.boot' version '2.1.6.RELEASE'
-	id 'java'
+    id 'org.springframework.boot' version '2.1.6.RELEASE'
+    id 'java'
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -10,65 +10,72 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
+
 test {
-	useJUnitPlatform()
+    environment "SCHEMA_BASE_URI",  System.getenv('SCHEMA_BASE_URI')
+    environment "GCP_PROJECT_WHITELIST",  System.getenv('GCP_PROJECT_WHITELIST')
+    environment "AUTH_ISSUER",  System.getenv('AUTH_ISSUER')
+    environment "SVC_AUTH_AUDIENCE",  System.getenv('SVC_AUTH_AUDIENCE')
+    environment "USR_AUTH_AUDIENCE",  System.getenv('USR_AUTH_AUDIENCE')
+    environment "GCP_JWK_PROVIDER_BASE_URL",  System.getenv('GCP_JWK_PROVIDER_BASE_URL')
+    useJUnitPlatform()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-amqp'
-	implementation('org.springframework.boot:spring-boot-starter-data-mongodb') {
-		exclude group: 'org.mongodb', module: 'mongodb-driver'
-	}
-	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
-	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.data:spring-data-rest-hal-browser'
-	implementation 'org.apache.httpcomponents:httpcore'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation('org.springframework.boot:spring-boot-starter-data-mongodb') {
+        exclude group: 'org.mongodb', module: 'mongodb-driver'
+    }
+    implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+    implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.data:spring-data-rest-hal-browser'
+    implementation 'org.apache.httpcomponents:httpcore'
 
-	implementation 'com.fasterxml.jackson.core:jackson-core:2.10.0.pr3'
-	implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.0.pr3'
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0.pr3'
-	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
-	implementation 'com.flipkart.zjsonpatch:zjsonpatch:0.4.8'
-	implementation 'org.apache.httpcomponents:httpmime'
-	implementation 'com.auth0:auth0-spring-security-api:1.2.5'
-	implementation 'com.auth0:java-jwt:3.8.2'
-	implementation 'com.auth0:jwks-rsa:0.8.3'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.10.0.pr3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.0.pr3'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0.pr3'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+    implementation 'com.flipkart.zjsonpatch:zjsonpatch:0.4.8'
+    implementation 'org.apache.httpcomponents:httpmime'
+    implementation 'com.auth0:auth0-spring-security-api:1.2.5'
+    implementation 'com.auth0:java-jwt:3.8.2'
+    implementation 'com.auth0:jwks-rsa:0.8.3'
 
-	implementation 'org.jolokia:jolokia-core'
-	implementation 'org.zalando:problem:0.23.0'
-	implementation 'org.mongodb:mongo-java-driver:3.11.2'
-	implementation ('com.github.mongobee:mongobee:0.13') {
-		exclude group: 'org.mongodb', module: 'mongo-java-driver'
-	}
+    implementation 'org.jolokia:jolokia-core'
+    implementation 'org.zalando:problem:0.23.0'
+    implementation 'org.mongodb:mongo-java-driver:3.11.2'
+    implementation('com.github.mongobee:mongobee:0.13') {
+        exclude group: 'org.mongodb', module: 'mongo-java-driver'
+    }
 
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.security:spring-security-test'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.security:spring-security-test'
 
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.assertj', module: 'assertj-core'
-		exclude group: 'junit', module: 'junit'
-		exclude group: 'org.mockito', module: 'mockito-core'
-	}
-	testImplementation 'org.assertj:assertj-core:3.10.0'
-	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
-	testImplementation 'com.github.tomakehurst:wiremock-standalone:2.14.0'
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
-	testImplementation('org.mockito:mockito-junit-jupiter:3.0.0') {
-		exclude group: 'org.mockito', module: 'mockito-core'
-	}
-	testImplementation 'org.mockito:mockito-core:3.0.0'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.assertj', module: 'assertj-core'
+        exclude group: 'junit', module: 'junit'
+        exclude group: 'org.mockito', module: 'mockito-core'
+    }
+    testImplementation 'org.assertj:assertj-core:3.10.0'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    testImplementation 'com.github.tomakehurst:wiremock-standalone:2.14.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testImplementation('org.mockito:mockito-junit-jupiter:3.0.0') {
+        exclude group: 'org.mockito', module: 'mockito-core'
+    }
+    testImplementation 'org.mockito:mockito-core:3.0.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
