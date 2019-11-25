@@ -65,6 +65,15 @@ public class Project extends MetadataDocument {
         return null;
     }
 
+    public Boolean getHasOpenSubmission(){
+        for (SubmissionEnvelope submissionEnvelope : this.submissionEnvelopes) {
+            if (submissionEnvelope.isOpen()){
+                return true;
+            }
+        }
+        return false;
+    }
+
     @JsonIgnore
     public void removeSubmissionEnvelopeData(SubmissionEnvelope submissionEnvelope, boolean forceRemoval) {
         if(!submissionEnvelopes.contains(submissionEnvelope))
