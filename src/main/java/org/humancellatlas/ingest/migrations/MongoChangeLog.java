@@ -10,7 +10,7 @@ import java.util.List;
 
 @ChangeLog
 public class MongoChangeLog {
-    @ChangeSet(order = "2019-10-30", id = "featureCompatibilityVersion 3.4", author = "alexie.staffer@ebi.ac.uk", runAlways = true)
+    @ChangeSet(order = "2019-10-30", id = "featureCompatibilityVersion 3.4", author = "alexie.staffer@ebi.ac.uk")
     public void featureCompatibilityThreeFour(MongoDatabase db) {
         if (MongoVersionHelper.canSetFeatureCompatibility(db, "3.4"))
             db.runCommand(new Document("setFeatureCompatibilityVersion", "3.4"));
