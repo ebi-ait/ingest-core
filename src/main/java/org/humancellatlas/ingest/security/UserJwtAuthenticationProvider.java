@@ -23,13 +23,13 @@ public class UserJwtAuthenticationProvider implements AuthenticationProvider {
         Authentication jwtAuthentication = delegate.authenticate(authentication);
         ofNullable(jwtAuthentication).ifPresent(auth -> {
             JwtAuthentication jwt = (JwtAuthentication) authentication;
-            User user = new User(jwt);
+            UserJwt user = new UserJwt(jwt);
             verifyUser(user);
         });
         return jwtAuthentication;
     }
 
-    private void verifyUser(User user) {
+    private void verifyUser(UserJwt user) {
         String group = user.getGroup();
         if (group == null || !group.toLowerCase().equals("hca")) {
             throw new InvalidUserGroup(group);
