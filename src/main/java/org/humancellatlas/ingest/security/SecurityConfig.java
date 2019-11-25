@@ -35,9 +35,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final String FORWARDED_FOR = "X-Forwarded-For";
 
-    @Value(value = "${USR_AUTH_GROUP}")
-    private String userGroup;
-
     @Value("${GCP_JWK_PROVIDER_BASE_URL}")
     private String googleJwkProviderbaseUrl;
 
