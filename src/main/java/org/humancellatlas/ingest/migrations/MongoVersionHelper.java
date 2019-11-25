@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 class MongoVersionHelper {
-    private static ServerVersion getServerVersionFromString(String version) {
+    private static ServerVersion getVersionFromString(String version) {
         List<Integer> numberList = new ArrayList<>();
         for(String number : version.split("\\.")) {
             numberList.add(Integer.parseInt(number));
@@ -33,13 +33,15 @@ class MongoVersionHelper {
     }
 
     static ServerVersion getFeatureCompatibilityVersion(MongoDatabase db) {
-        String key = "featureCompatibilityVersion";
-        String versionKey = "version";
-        Document compatibility_doc = db.runCommand(new Document("getParameter", 1).append(key, 1));
-        if (compatibility_doc.containsKey("ok") && compatibility_doc.containsKey(key)) {
-            Document featureCompatibility = compatibility_doc.get(key, Document.class);
-            if (featureCompatibility.containsKey(versionKey))
-                return getServerVersionFromString(featureCompatibility.getString("version"));
+        Document response = db.runCommand(new Document("getParameter", 1).append("featureCompatibilityVersion", 1));
+        if (response.containsKey("ok") && response.containsKey("featureCompatibilityVersion")) {
+            if (getServerVersion(db).compareTo(getVersionFromString("3.6")) < 0)
+                return  getVersionFromString(response.getString("featureCompatibilityVersion"));
+            else {
+                Document featureCompatibilityVersion = response.get("featureCompatibilityVersion", Document.class);
+                if (featureCompatibilityVersion.containsKey("version"))
+                    return getVersionFromString(featureCompatibilityVersion.getString("version"));
+            }
         }
         throw new UnsupportedOperationException("Could not retrieve featureCompatibilityVersion.");
     }
@@ -47,12 +49,12 @@ class MongoVersionHelper {
     static ServerVersion getServerVersion(MongoDatabase db) {
         Document server_doc = db.runCommand(new Document("buildinfo", 1));
         if (server_doc.containsKey("ok") && server_doc.containsKey("version")) {
-            return getServerVersionFromString(server_doc.getString("version"));
+            return getVersionFromString(server_doc.getString("version"));
         }
         throw new UnsupportedOperationException("Could not retrieve server version.");
     }
 
-    static Boolean canSetFeatureCompatibility(MongoDatabase db, String version) {
-        return (getFeatureCompatibilityVersion(db).compareTo(getServerVersionFromString(version)) < 0);
+    static Boolean featureCompatibilityLessThan(MongoDatabase db, String version) {
+        return (getFeatureCompatibilityVersion(db).compareTo(getVersionFromString(version)) < 0);
     }
 }
