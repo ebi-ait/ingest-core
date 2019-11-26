@@ -48,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private String audience;
 
     @Value(value= "#{('${GCP_PROJECT_WHITELIST}').split(',')}")
-    private String[] projectWhitelist;
+    private List<String> projectWhitelist;
 
     private static final List<AntPathRequestMatcher> SECURED_ANT_PATHS;
     static {
