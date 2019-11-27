@@ -10,6 +10,7 @@ import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -37,6 +38,7 @@ import java.util.UUID;
 @Getter
 public class ProjectController {
     private final @NonNull ProjectService projectService;
+    private final @NonNull SubmissionEnvelopeService submissionEnvelopeService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects", method = RequestMethod.POST)
@@ -53,12 +55,13 @@ public class ProjectController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects/{id}", method = RequestMethod.PUT)
-    ResponseEntity<Resource<?>> linkProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                      @PathVariable("id") Project project,
-                                                     PersistentEntityResourceAssembler assembler) {
-        Project entity = getProjectService().addProjectToSubmissionEnvelope(submissionEnvelope, project);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
+    @RequestMapping(path = "project/{id}/relatedSubmissionEnvelopes", method = RequestMethod.POST)
+    ResponseEntity<Resource<?>> createSubmissionAndLinkToProject(@PathVariable("id") Project project,
+                                                                 @RequestBody SubmissionEnvelope envelope,
+                                                                 PersistentEntityResourceAssembler assembler) {
+
+        SubmissionEnvelope submissionEnvelope = submissionEnvelopeService.createSubmissionEnvelopeAndLinkToProject(envelope, project);
+        PersistentEntityResource resource = assembler.toFullResource(submissionEnvelope);
         return ResponseEntity.accepted().body(resource);
     }
 
@@ -72,7 +75,7 @@ public class ProjectController {
     }
 
     @RequestMapping(path = "/projects/query", method = RequestMethod.POST)
-    ResponseEntity<?> queryProjects( @RequestBody List<MetadataCriteria> query,
+    ResponseEntity<?> queryProjects(@RequestBody List<MetadataCriteria> query,
                                     Pageable pageable,
                                     final PersistentEntityResourceAssembler resourceAssembler) {
         Page<Project> projects = projectService.queryByContent(query, pageable);

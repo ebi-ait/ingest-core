@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
+import org.humancellatlas.ingest.core.exception.LinkToNewSubmissionNotAllowedException;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.export.Exporter;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -120,9 +122,24 @@ public class SubmissionEnvelopeService {
         SubmissionEnvelope updateSubmissionEnvelope = new SubmissionEnvelope();
         submissionEnvelopeCreateHandler.setUuid(updateSubmissionEnvelope);
         updateSubmissionEnvelope.setIsUpdate(true);
-        SubmissionEnvelope insertedUpdateSubmissionEnvelope = submissionEnvelopeRepository.insert(updateSubmissionEnvelope);
-        submissionEnvelopeCreateHandler.handleSubmissionEnvelopeCreation(updateSubmissionEnvelope);
+        SubmissionEnvelope insertedUpdateSubmissionEnvelope = createSubmissionEnvelope(updateSubmissionEnvelope);
         return insertedUpdateSubmissionEnvelope;
+    }
+
+    public SubmissionEnvelope createSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        SubmissionEnvelope insertedUpdateSubmissionEnvelope = submissionEnvelopeRepository.insert(submissionEnvelope);
+        submissionEnvelopeCreateHandler.handleSubmissionEnvelopeCreation(submissionEnvelope);
+        return insertedUpdateSubmissionEnvelope;
+    }
+
+    public SubmissionEnvelope createSubmissionEnvelopeAndLinkToProject(SubmissionEnvelope envelope, Project project){
+        Optional<SubmissionEnvelope> openSubmission = Optional.ofNullable(project.getOpenSubmissionEnvelope());
+        if (openSubmission.isPresent()) {
+            throw new LinkToNewSubmissionNotAllowedException(String.format("The project is still linked to an open submission envelope %s", openSubmission.get().getUuid().toString()));
+        }
+
+        SubmissionEnvelope submissionEnvelope = createSubmissionEnvelope(envelope);
+        return submissionEnvelope;
     }
 
     public void deleteSubmission(SubmissionEnvelope submissionEnvelope, boolean forceDelete){
