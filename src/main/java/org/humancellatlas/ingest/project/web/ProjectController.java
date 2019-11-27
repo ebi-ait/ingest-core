@@ -55,12 +55,22 @@ public class ProjectController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @RequestMapping(path = "project/{id}/relatedSubmissionEnvelopes/{sub_id}", method = RequestMethod.PUT)
+    ResponseEntity<Resource<?>> linkToProject(@PathVariable("id") Project project,
+                                              @PathVariable("sub_id") SubmissionEnvelope envelope,
+                                              PersistentEntityResourceAssembler assembler) {
+
+        SubmissionEnvelope submissionEnvelope = submissionEnvelopeService.linkSubmissionToProject(envelope, project);
+        PersistentEntityResource resource = assembler.toFullResource(submissionEnvelope);
+        return ResponseEntity.accepted().body(resource);
+    }
+
     @RequestMapping(path = "project/{id}/relatedSubmissionEnvelopes", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> createSubmissionAndLinkToProject(@PathVariable("id") Project project,
                                                                  @RequestBody SubmissionEnvelope envelope,
                                                                  PersistentEntityResourceAssembler assembler) {
 
-        SubmissionEnvelope submissionEnvelope = submissionEnvelopeService.createSubmissionEnvelopeAndLinkToProject(envelope, project);
+        SubmissionEnvelope submissionEnvelope = submissionEnvelopeService.createSubmissionAndLinkToProject(envelope, project);
         PersistentEntityResource resource = assembler.toFullResource(submissionEnvelope);
         return ResponseEntity.accepted().body(resource);
     }

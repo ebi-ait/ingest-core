@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.project;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -33,6 +34,7 @@ public class Project extends MetadataDocument {
     }
 
     // A project may have 1 or more submissions related to it.
+    @RestResource(rel = "relatedSubmissionEnvelopes", path = "relatedSubmissionEnvelopes")
     private @DBRef(lazy = true) Set<SubmissionEnvelope> submissionEnvelopes = new HashSet<>();
 
     public MetadataDocument addToSubmissionEnvelopes(SubmissionEnvelope submissionEnvelope) {

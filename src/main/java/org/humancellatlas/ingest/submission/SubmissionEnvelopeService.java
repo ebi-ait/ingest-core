@@ -132,15 +132,28 @@ public class SubmissionEnvelopeService {
         return insertedUpdateSubmissionEnvelope;
     }
 
-    public SubmissionEnvelope createSubmissionEnvelopeAndLinkToProject(SubmissionEnvelope envelope, Project project){
+    public SubmissionEnvelope createSubmissionAndLinkToProject(SubmissionEnvelope envelope, Project project){
+        assertProjectIsNotOpen(project);
+        SubmissionEnvelope submissionEnvelope = createSubmissionEnvelope(envelope);
+        project.addToSubmissionEnvelopes(submissionEnvelope);
+        projectRepository.save(project);
+        return submissionEnvelope;
+    }
+
+    private void assertProjectIsNotOpen(Project project){
         Optional<SubmissionEnvelope> openSubmission = Optional.ofNullable(project.getOpenSubmissionEnvelope());
         if (openSubmission.isPresent()) {
             throw new LinkToNewSubmissionNotAllowedException(String.format("The project is still linked to an open submission envelope %s", openSubmission.get().getUuid().toString()));
         }
-
-        SubmissionEnvelope submissionEnvelope = createSubmissionEnvelope(envelope);
-        return submissionEnvelope;
     }
+
+    public SubmissionEnvelope linkSubmissionToProject(SubmissionEnvelope envelope, Project project){
+        assertProjectIsNotOpen(project);
+        project.addToSubmissionEnvelopes(envelope);
+        projectRepository.save(project);
+        return envelope;
+    }
+
 
     public void deleteSubmission(SubmissionEnvelope submissionEnvelope, boolean forceDelete){
         if(!(submissionEnvelope.isOpen() || forceDelete))
