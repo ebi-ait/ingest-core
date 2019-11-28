@@ -158,8 +158,8 @@ public class SubmissionServiceTest {
         when(biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope)).thenReturn(Stream.of(testBiomaterial));
         when(protocolRepository.findBySubmissionEnvelope(submissionEnvelope)).thenReturn(Stream.of(testProtocol));
 
-        when(biomaterialRepository.findByInputToProcessesContains(testProcess)).thenReturn(List.of(testOutsideBiomaterial));
-        when(fileRepository.findByDerivedByProcessesContains(testProcess)).thenReturn(List.of(testOutsideFile));
+        when(biomaterialRepository.findByInputToProcessesContains(testProcess)).thenReturn(Stream.of(testOutsideBiomaterial));
+        when(fileRepository.findByDerivedByProcessesContains(testProcess)).thenReturn(Stream.of(testOutsideFile));
         when(processRepository.findByProtocolsContains(testProtocol)).thenReturn(Stream.of(testOutsideProcess));
 
         service.deleteSubmission(submissionEnvelope, false);

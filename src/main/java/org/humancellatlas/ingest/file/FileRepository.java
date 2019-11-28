@@ -45,12 +45,12 @@ public interface FileRepository extends MongoRepository<File, String> {
     File findByValidationJobValidationId(@Param("validationId") UUID id);
 
     @RestResource(exported = false)
-    List<File> findByInputToProcessesContains(Process process);
+    Stream<File> findByInputToProcessesContains(Process process);
 
     Page<File> findByInputToProcessesContaining(Process process, Pageable pageable);
 
     @RestResource(exported = false)
-    List<File> findByDerivedByProcessesContains(Process process);
+    Stream<File> findByDerivedByProcessesContains(Process process);
 
     Page<File> findByDerivedByProcessesContaining(Process process, Pageable pageable);
 
