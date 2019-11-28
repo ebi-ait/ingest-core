@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 
@@ -30,6 +31,7 @@ public class Process extends MetadataDocument {
     private Set<Protocol> protocols = new HashSet<>();
     @RestResource
     @DBRef(lazy = true)
+    @Indexed
     private Set<BundleManifest> inputBundleManifests = new HashSet<>();
 
     private @DBRef Set<Process> chainedProcesses = new HashSet<>();

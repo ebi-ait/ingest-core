@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.submission;
 
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.Uuid;
@@ -9,9 +10,11 @@ import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.patch.PatchRepository;
+import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.junit.jupiter.api.Test;
@@ -24,10 +27,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -109,6 +111,25 @@ public class SubmissionServiceTest {
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         submissionEnvelope.setUuid(Uuid.newUuid());
 
+        //given metadata within the SubmissionEnvelope
+        Biomaterial testBiomaterial = new Biomaterial(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
+        Protocol testProtocol = new Protocol(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
+        Process testProcess = new Process(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
+
+        testProcess.setSubmissionEnvelope(submissionEnvelope);
+        testProtocol.setSubmissionEnvelope(submissionEnvelope);
+        testBiomaterial.setSubmissionEnvelope(submissionEnvelope);
+
+        //given metadata outside the SubmissionEnvelope
+        Biomaterial testOutsideBiomaterial = new Biomaterial(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
+        File testOutsideFile = new File(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
+        Process testOutsideProcess = new Process(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
+
+        //given links to metadata outside of the SubmissionEnvelope
+        testOutsideBiomaterial.getInputToProcesses().add(testProcess);
+        testOutsideFile.getDerivedByProcesses().add(testProcess);
+        testOutsideProcess.getProtocols().add(testProtocol);
+
         //given File
         File file = new File();
         file.setFileName("testFile.txt");
@@ -133,9 +154,21 @@ public class SubmissionServiceTest {
                 .thenReturn(new PageImpl<>(projectList, Pageable.unpaged(), 1));
 
         //when
+        when(processRepository.findBySubmissionEnvelope(submissionEnvelope)).thenReturn(Stream.of(testProcess));
+        when(biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope)).thenReturn(Stream.of(testBiomaterial));
+        when(protocolRepository.findBySubmissionEnvelope(submissionEnvelope)).thenReturn(Stream.of(testProtocol));
+
+        when(biomaterialRepository.findByInputToProcessesContains(testProcess)).thenReturn(List.of(testOutsideBiomaterial));
+        when(fileRepository.findByDerivedByProcessesContains(testProcess)).thenReturn(List.of(testOutsideFile));
+        when(processRepository.findByProtocolsContains(testProtocol)).thenReturn(Stream.of(testOutsideProcess));
+
         service.deleteSubmission(submissionEnvelope, false);
 
         //then:
+        assertThat(testOutsideBiomaterial.getInputToProcesses()).doesNotContain(testProcess);
+        assertThat(testOutsideFile.getDerivedByProcesses()).doesNotContain(testProcess);
+        assertThat(testOutsideProcess.getProtocols()).doesNotContain(testProtocol);
+
         verify(biomaterialRepository).deleteBySubmissionEnvelope(submissionEnvelope);
         verify(processRepository).deleteBySubmissionEnvelope(submissionEnvelope);
         verify(protocolRepository).deleteBySubmissionEnvelope(submissionEnvelope);

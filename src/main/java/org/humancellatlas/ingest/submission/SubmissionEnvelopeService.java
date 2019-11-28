@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -129,6 +130,8 @@ public class SubmissionEnvelopeService {
         if(!(submissionEnvelope.isOpen() || forceDelete))
             throw new UnsupportedOperationException("Cannot delete submission if it is already submitted!");
 
+        this.cleanupLinksToSubmissionMetadata(submissionEnvelope);
+
         biomaterialRepository.deleteBySubmissionEnvelope(submissionEnvelope);
         processRepository.deleteBySubmissionEnvelope(submissionEnvelope);
         protocolRepository.deleteBySubmissionEnvelope(submissionEnvelope);
@@ -144,5 +147,63 @@ public class SubmissionEnvelopeService {
             projectRepository.save(project);
         }
         submissionEnvelopeRepository.delete(submissionEnvelope);
+    }
+
+
+    /**
+     *
+     * Ensures that any links to metadata in the submission are removed.
+     *
+     * @param submissionEnvelope
+     */
+    private void cleanupLinksToSubmissionMetadata(SubmissionEnvelope submissionEnvelope) {
+        long allBioStartTime = System.currentTimeMillis();
+
+
+        processRepository.findBySubmissionEnvelope(submissionEnvelope)
+                         .forEach(p -> {
+                             fileRepository.findByInputToProcessesContains(p)
+                                           .forEach(file -> {
+                                               file.getInputToProcesses().remove(p);
+                                               fileRepository.save(file);
+                                           });
+
+                             fileRepository.findByDerivedByProcessesContains(p)
+                                           .forEach(file -> {
+                                               file.getDerivedByProcesses().remove(p);
+                                               fileRepository.save(file);
+                                           });
+
+                             biomaterialRepository.findByInputToProcessesContains(p)
+                                                  .forEach(biomaterial -> {
+                                                      biomaterial.getInputToProcesses().remove(p);
+                                                      biomaterialRepository.save(biomaterial);
+                                                  });
+
+                             biomaterialRepository.findByDerivedByProcessesContains(p)
+                                                  .forEach(biomaterial -> {
+                                                      biomaterial.getDerivedByProcesses().remove(p);
+                                                      biomaterialRepository.save(biomaterial);
+                                                  });
+                         });
+
+        protocolRepository.findBySubmissionEnvelope(submissionEnvelope)
+                          .forEach(protocol -> processRepository.findByProtocolsContains(protocol)
+                                                                .forEach(process -> {
+                                                                    process.getProtocols().remove(protocol);
+                                                                    processRepository.save(process);
+                                                                }));
+
+        bundleManifestRepository.findByEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString())
+                                .forEach(bundleManifest -> processRepository.findByInputBundleManifestsContains(bundleManifest)
+                                                                            .forEach(process -> {
+                                                                                process.getInputBundleManifests().remove(bundleManifest);
+                                                                                processRepository.save(process);
+                                                                            }));
+
+        long allBioEndTime = System.currentTimeMillis();
+        float allBioQueryTime = ((float)(allBioEndTime - allBioStartTime)) / 1000;
+        String allBioQt = new DecimalFormat("#,###.##").format(allBioQueryTime);
+        log.info("cleanup link time: {} s", allBioQt);
     }
 }
