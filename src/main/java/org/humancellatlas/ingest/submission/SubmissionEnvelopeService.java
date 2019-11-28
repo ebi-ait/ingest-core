@@ -157,8 +157,7 @@ public class SubmissionEnvelopeService {
      * @param submissionEnvelope
      */
     private void cleanupLinksToSubmissionMetadata(SubmissionEnvelope submissionEnvelope) {
-        long allBioStartTime = System.currentTimeMillis();
-
+        long startTime = System.currentTimeMillis();
 
         processRepository.findBySubmissionEnvelope(submissionEnvelope)
                          .forEach(p -> {
@@ -201,9 +200,9 @@ public class SubmissionEnvelopeService {
                                                                                 processRepository.save(process);
                                                                             }));
 
-        long allBioEndTime = System.currentTimeMillis();
-        float allBioQueryTime = ((float)(allBioEndTime - allBioStartTime)) / 1000;
-        String allBioQt = new DecimalFormat("#,###.##").format(allBioQueryTime);
-        log.info("cleanup link time: {} s", allBioQt);
+        long endTime = System.currentTimeMillis();
+        float duration = ((float)(endTime - startTime)) / 1000;
+        String durationStr = new DecimalFormat("#,###.##").format(duration);
+        log.info("cleanup link time: {} s", durationStr);
     }
 }
