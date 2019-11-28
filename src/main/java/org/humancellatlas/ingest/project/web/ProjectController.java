@@ -17,6 +17,7 @@ import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +39,7 @@ import java.util.UUID;
 public class ProjectController {
     private final @NonNull ProjectService projectService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
+    private final @NonNull PagedResourcesAssembler<SubmissionEnvelope> submissionResourcesAssembler;
 
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -69,6 +71,14 @@ public class ProjectController {
                                          final PersistentEntityResourceAssembler resourceAssembler) {
         Page<BundleManifest> bundleManifests = projectService.getBundleManifestRepository().findBundleManifestsByProjectAndBundleType(project, bundleType.orElse(null), pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
+    }
+
+    @GetMapping(path = "/projects/{id}/submissionEnvelopes")
+    ResponseEntity<PagedResources<Resource<SubmissionEnvelope>>> getProjectSubmissionEnvelopes(
+            @PathVariable("id") Project project,
+            Pageable pageable) {
+        Page<SubmissionEnvelope> envelopes = projectService.getProjectSubmissionEnvelopes(project, pageable);
+        return ResponseEntity.ok(submissionResourcesAssembler.toResource(envelopes));
     }
 
     @RequestMapping(path = "/projects/query", method = RequestMethod.POST)
