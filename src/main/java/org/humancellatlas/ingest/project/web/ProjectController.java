@@ -40,8 +40,10 @@ public class ProjectController {
     private final @NonNull ProjectService projectService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
     private final @NonNull PagedResourcesAssembler<SubmissionEnvelope> submissionResourcesAssembler;
+    private final @NonNull PagedResourcesAssembler<Project> projectResourcesAssembler;
+    private final @NonNull PagedResourcesAssembler<BundleManifest> manifestResourcesAssembler;
 
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects", method = RequestMethod.POST)
+    @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
     ResponseEntity<Resource<?>> addProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                      @RequestBody Project project,
                                                      @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
@@ -55,7 +57,7 @@ public class ProjectController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects/{id}", method = RequestMethod.PUT)
+    @PutMapping(path = "submissionEnvelopes/{sub_id}/projects/{id}")
     ResponseEntity<Resource<?>> linkProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                       @PathVariable("id") Project project,
                                                      PersistentEntityResourceAssembler assembler) {
@@ -64,13 +66,12 @@ public class ProjectController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/projects/{id}/bundleManifests", method = RequestMethod.GET)
-    ResponseEntity<?> getBundleManifests(@PathVariable("id") Project project,
+    @GetMapping(path = "/projects/{id}/bundleManifests")
+    ResponseEntity<PagedResources<Resource<BundleManifest>>> getBundleManifests(@PathVariable("id") Project project,
                                          @RequestParam("bundleType") Optional<BundleType> bundleType,
-                                         Pageable pageable,
-                                         final PersistentEntityResourceAssembler resourceAssembler) {
+                                         Pageable pageable) {
         Page<BundleManifest> bundleManifests = projectService.getBundleManifestRepository().findBundleManifestsByProjectAndBundleType(project, bundleType.orElse(null), pageable);
-        return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
+        return ResponseEntity.ok(manifestResourcesAssembler.toResource(bundleManifests));
     }
 
     @GetMapping(path = "/projects/{id}/submissionEnvelopes")
@@ -81,11 +82,10 @@ public class ProjectController {
         return ResponseEntity.ok(submissionResourcesAssembler.toResource(envelopes));
     }
 
-    @RequestMapping(path = "/projects/query", method = RequestMethod.POST)
-    ResponseEntity<?> queryProjects( @RequestBody List<MetadataCriteria> query,
-                                    Pageable pageable,
-                                    final PersistentEntityResourceAssembler resourceAssembler) {
+    @PostMapping(path = "/projects/query")
+    ResponseEntity<PagedResources<Resource<Project>>> queryProjects( @RequestBody List<MetadataCriteria> query,
+                                    Pageable pageable) {
         Page<Project> projects = projectService.queryByContent(query, pageable);
-        return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
+        return ResponseEntity.ok(projectResourcesAssembler.toResource(projects));
     }
 }
