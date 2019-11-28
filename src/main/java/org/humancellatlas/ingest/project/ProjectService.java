@@ -77,4 +77,35 @@ public class ProjectService {
         }
         return new PageImpl<>(envelopes, pageable, envelopes.size());
     }
+
+    public Page<ProjectSubmissions> getMissingSubmissionEnvelopes(Pageable pageable) {
+        List<ProjectSubmissions> missingProjectSubmissions = new ArrayList<>();
+        List<String> bannedTitles = new ArrayList<>();
+        bannedTitles.add("SS2 1 Cell Integration Test");
+        bannedTitles.add( "10x 1 Run Integration Test");
+        bannedTitles.add("");
+
+        MetadataCriteria criteria = new MetadataCriteria();
+        criteria.setContentField("project_core.project_title");
+        criteria.setOperator(Operator.NIN);
+        criteria.setValue(bannedTitles);
+
+        List<MetadataCriteria> criteriaList = new ArrayList<>();
+        criteriaList.add(criteria);
+        Optional<Boolean> isUpdate = Optional.of(false);
+
+        for (Project project : this.projectRepository.findByContent(criteriaList, isUpdate, Pageable.unpaged())) {
+            ProjectSubmissions projectSubmissions = new ProjectSubmissions(project);
+            Page<Project> projects = this.projectRepository.findByUuid(project.getUuid(), Pageable.unpaged());
+            for (Project otherProject : projects)
+            {
+                projectSubmissions.addSubmissions(otherProject.getSubmissionEnvelopes());
+            }
+
+            if (projectSubmissions.HasMissingSubmissions()) {
+                missingProjectSubmissions.add(projectSubmissions);
+            }
+        }
+        return new PageImpl<>(missingProjectSubmissions, pageable, missingProjectSubmissions.size());
+    }
 }

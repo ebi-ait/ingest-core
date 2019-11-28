@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
+import org.humancellatlas.ingest.project.ProjectSubmissions;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -42,6 +43,7 @@ public class ProjectController {
     private final @NonNull PagedResourcesAssembler<SubmissionEnvelope> submissionResourcesAssembler;
     private final @NonNull PagedResourcesAssembler<Project> projectResourcesAssembler;
     private final @NonNull PagedResourcesAssembler<BundleManifest> manifestResourcesAssembler;
+    private final @NonNull PagedResourcesAssembler<ProjectSubmissions> missingSubmissionsResourcesAssembler;
 
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
     ResponseEntity<Resource<?>> addProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -81,6 +83,14 @@ public class ProjectController {
         Page<SubmissionEnvelope> envelopes = projectService.getProjectSubmissionEnvelopes(project, pageable);
         return ResponseEntity.ok(submissionResourcesAssembler.toResource(envelopes));
     }
+
+    @GetMapping(path = "/projects/missingSubmissionEnvelopes")
+    ResponseEntity<PagedResources<Resource<ProjectSubmissions>>> getMissingSubmissionEnvelopes(Pageable pageable) {
+
+        Page<ProjectSubmissions> missingLinks = projectService.getMissingSubmissionEnvelopes(pageable);
+        return ResponseEntity.ok(missingSubmissionsResourcesAssembler.toResource(missingLinks));
+    }
+
 
     @PostMapping(path = "/projects/query")
     ResponseEntity<PagedResources<Resource<Project>>> queryProjects(
