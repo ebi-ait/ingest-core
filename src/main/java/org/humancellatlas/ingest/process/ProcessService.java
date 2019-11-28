@@ -154,9 +154,8 @@ public class ProcessService {
         fileRepository.findBySubmissionEnvelope(submissionEnvelope)
                       .forEach(derivedFile -> {
                           for (Process derivedByProcess : derivedFile.getDerivedByProcesses()) {
-                              if (!biomaterialRepository.findByInputToProcessesContains(derivedByProcess).isEmpty()) {
-                                  results.add(derivedByProcess.getId());
-                              }
+                              biomaterialRepository.findByInputToProcessesContains(derivedByProcess).findAny()
+                                                   .ifPresent(__ -> results.add(derivedByProcess.getId()));
                           }
                       });
 
@@ -179,9 +178,8 @@ public class ProcessService {
         fileRepository.findBySubmissionEnvelope(submissionEnvelope)
                       .forEach(derivedFile -> {
                           for (Process derivedByProcess : derivedFile.getDerivedByProcesses()) {
-                              if (!fileRepository.findByInputToProcessesContains(derivedByProcess).isEmpty()) {
-                                  results.add(derivedByProcess.getId());
-                              }
+                              fileRepository.findByInputToProcessesContains(derivedByProcess).findAny()
+                                            .ifPresent(__ -> results.add(derivedByProcess.getId()));
                           }
                       });
         return results;
