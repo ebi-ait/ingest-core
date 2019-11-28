@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -63,8 +64,8 @@ public class ProjectService {
                                      });
     }
 
-    public Page<Project> queryByContent(List<MetadataCriteria> query, Pageable pageable){
-        return this.projectRepository.findByContent(query, pageable);
+    public Page<Project> queryByContent(List<MetadataCriteria> query, Optional<Boolean> isUpdate, Pageable pageable){
+        return this.projectRepository.findByContent(query, isUpdate, pageable);
     }
 
     public Page<SubmissionEnvelope> getProjectSubmissionEnvelopes(Project project, Pageable pageable) {

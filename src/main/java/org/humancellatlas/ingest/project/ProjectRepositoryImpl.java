@@ -1,7 +1,6 @@
 package org.humancellatlas.ingest.project;
 
 import org.humancellatlas.ingest.query.MetadataCriteria;
-import org.humancellatlas.ingest.query.Operator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -14,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
 
@@ -21,7 +21,7 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
     private MongoTemplate mongoTemplate;
 
     @Override
-    public Page<Project> findByContent(List<MetadataCriteria> metadataQuery, Pageable pageable) {
+    public Page<Project> findByContent(List<MetadataCriteria> metadataQuery, Optional<Boolean> isUpdate, Pageable pageable) {
         Query query = new Query();
         
         List<Criteria> criterias = new ArrayList<>();
@@ -68,17 +68,20 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
             criterias.add(criteria);
         }
 
-        query.addCriteria(
-            new Criteria().orOperator(criterias.toArray(
-                new Criteria[criterias.size()]
-            ))
-        );
+        new Criteria();
+        if (isUpdate.isPresent()) {
+            query.addCriteria(new Criteria().andOperator(
+                    Criteria.where("isUpdate").is(isUpdate.get()),
+                    new Criteria().orOperator(criterias.toArray(new Criteria[criterias.size()]))
+            ));
+        } else {
+            query.addCriteria(new Criteria().orOperator(criterias.toArray(new Criteria[criterias.size()])));
+        }
 
-        query.with(pageable);
-
-        List<Project> result = mongoTemplate.find(query, Project.class);
         long count = mongoTemplate.count(query, Project.class);
-        Page<Project> projectsPage = new PageImpl<>(result, pageable, count);
-        return projectsPage;
+        query.with(pageable);
+        List<Project> result = mongoTemplate.find(query, Project.class);
+
+        return new PageImpl<>(result, pageable, count);
     };
 }

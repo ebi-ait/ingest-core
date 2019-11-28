@@ -83,9 +83,11 @@ public class ProjectController {
     }
 
     @PostMapping(path = "/projects/query")
-    ResponseEntity<PagedResources<Resource<Project>>> queryProjects( @RequestBody List<MetadataCriteria> query,
-                                    Pageable pageable) {
-        Page<Project> projects = projectService.queryByContent(query, pageable);
+    ResponseEntity<PagedResources<Resource<Project>>> queryProjects(
+            @RequestBody List<MetadataCriteria> query,
+            @RequestParam("isUpdate") Optional<Boolean> isUpdate,
+            Pageable pageable) {
+        Page<Project> projects = projectService.queryByContent(query, isUpdate, pageable);
         return ResponseEntity.ok(projectResourcesAssembler.toResource(projects));
     }
 }
