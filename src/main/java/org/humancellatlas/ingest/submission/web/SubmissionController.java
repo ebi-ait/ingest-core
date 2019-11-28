@@ -269,6 +269,6 @@ public class SubmissionController {
     HttpEntity<?> forceDeleteSubmission(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                         @RequestParam(name = "force", required = false, defaultValue = "false") boolean forceDelete) {
         getSubmissionEnvelopeService().deleteSubmission(submissionEnvelope, forceDelete);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.accepted().build();
     }
 }
