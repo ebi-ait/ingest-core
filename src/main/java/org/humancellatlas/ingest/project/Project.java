@@ -24,8 +24,8 @@ public class Project extends MetadataDocument {
     @RestResource
     @DBRef(lazy = true)
     private Set<File> supplementaryFiles = new HashSet<>();
+
     // A project may have 1 or more submissions related to it.
-    @RestResource(rel = "relatedSubmissionEnvelopes", path = "relatedSubmissionEnvelopes")
     private @DBRef(lazy = true)
     Set<SubmissionEnvelope> submissionEnvelopes = new HashSet<>();
 
