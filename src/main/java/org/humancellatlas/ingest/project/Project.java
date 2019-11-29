@@ -40,16 +40,6 @@ public class Project extends MetadataDocument {
     }
 
     @JsonIgnore
-    public SubmissionEnvelope getOpenSubmissionEnvelope() {
-        for (SubmissionEnvelope submissionEnvelope : this.submissionEnvelopes) {
-            if (submissionEnvelope.isOpen()) {
-                return submissionEnvelope;
-            }
-        }
-        return null;
-    }
-
-    @JsonIgnore
     public void removeSubmissionEnvelopeData(SubmissionEnvelope submissionEnvelope, boolean forceRemoval) {
         if (!submissionEnvelopes.contains(submissionEnvelope))
             throw new UnsupportedOperationException(

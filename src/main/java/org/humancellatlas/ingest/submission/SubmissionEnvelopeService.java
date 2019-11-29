@@ -4,7 +4,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
-import org.humancellatlas.ingest.core.exception.LinkToNewSubmissionNotAllowedException;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.export.Exporter;
@@ -23,7 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -51,34 +49,25 @@ public class SubmissionEnvelopeService {
 
     @NonNull
     private final SubmissionManifestRepository submissionManifestRepository;
-
+    private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
     @NonNull
     private BundleManifestRepository bundleManifestRepository;
-
     @NonNull
     private ProjectRepository projectRepository;
-
     @NonNull
     private ProcessRepository processRepository;
-
     @NonNull
     private ProtocolRepository protocolRepository;
-
     @NonNull
     private FileRepository fileRepository;
-
     @NonNull
     private BiomaterialRepository biomaterialRepository;
-
     @NonNull
     private PatchRepository patchRepository;
 
-
-    private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
-
     public void handleEnvelopeStateUpdateRequest(SubmissionEnvelope envelope,
-            SubmissionState state) {
-        if(! envelope.allowedStateTransitions().contains(state)) {
+                                                 SubmissionState state) {
+        if (!envelope.allowedStateTransitions().contains(state)) {
             throw new StateTransitionNotAllowed(String.format(
                     "Envelope with id %s cannot be transitioned from state %s to state %s",
                     envelope.getId(), envelope.getSubmissionState(), state));
@@ -88,7 +77,7 @@ public class SubmissionEnvelopeService {
     }
 
     public void handleSubmissionRequest(SubmissionEnvelope envelope) {
-        if(! envelope.getIsUpdate()) {
+        if (!envelope.getIsUpdate()) {
             handleSubmitOriginalSubmission(envelope);
         } else {
             handleSubmitUpdateSubmission(envelope);
@@ -99,8 +88,7 @@ public class SubmissionEnvelopeService {
         executorService.submit(() -> {
             try {
                 exporter.exportBundles(submissionEnvelope);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 log.error("Uncaught Exception exporting Bundles", e);
             }
         });
@@ -111,8 +99,7 @@ public class SubmissionEnvelopeService {
             try {
                 metadataUpdateService.applyUpdates(submissionEnvelope);
                 exporter.updateBundles(submissionEnvelope);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 log.error("Uncaught Exception Applying Updates or Exporting Bundles", e);
             }
         });
@@ -132,31 +119,8 @@ public class SubmissionEnvelopeService {
         return insertedUpdateSubmissionEnvelope;
     }
 
-    public SubmissionEnvelope createSubmissionAndLinkToProject(SubmissionEnvelope envelope, Project project){
-        assertProjectIsNotOpen(project);
-        SubmissionEnvelope submissionEnvelope = createSubmissionEnvelope(envelope);
-        project.addToSubmissionEnvelopes(submissionEnvelope);
-        projectRepository.save(project);
-        return submissionEnvelope;
-    }
-
-    private void assertProjectIsNotOpen(Project project){
-        Optional<SubmissionEnvelope> openSubmission = Optional.ofNullable(project.getOpenSubmissionEnvelope());
-        if (openSubmission.isPresent()) {
-            throw new LinkToNewSubmissionNotAllowedException(String.format("The project is still linked to an open submission envelope %s", openSubmission.get().getUuid().toString()));
-        }
-    }
-
-    public SubmissionEnvelope linkSubmissionToProject(SubmissionEnvelope envelope, Project project){
-        assertProjectIsNotOpen(project);
-        project.addToSubmissionEnvelopes(envelope);
-        projectRepository.save(project);
-        return envelope;
-    }
-
-
-    public void deleteSubmission(SubmissionEnvelope submissionEnvelope, boolean forceDelete){
-        if(!(submissionEnvelope.isOpen() || forceDelete))
+    public void deleteSubmission(SubmissionEnvelope submissionEnvelope, boolean forceDelete) {
+        if (!(submissionEnvelope.isOpen() || forceDelete))
             throw new UnsupportedOperationException("Cannot delete submission if it is already submitted!");
 
         biomaterialRepository.deleteBySubmissionEnvelope(submissionEnvelope);
