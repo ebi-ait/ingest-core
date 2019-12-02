@@ -34,12 +34,7 @@ public class ProjectChangeListener extends AbstractMongoEventListener<Project> {
     @Override
     public void onBeforeSave(BeforeSaveEvent<Project> event) {
         Project project = event.getSource();
-
-        List<SubmissionEnvelope> openSubmissions = project.getSubmissionEnvelopes().stream()
-                .filter(env -> env.isOpen())
-                .collect(Collectors.toList());
-
-        if (openSubmissions.size() > 1)
+        if (project.getOpenSubmissionEnvelopes().size() > 1)
             throw new MultipleOpenSubmissions("A project can't have multiple open submissions.");
     }
 }

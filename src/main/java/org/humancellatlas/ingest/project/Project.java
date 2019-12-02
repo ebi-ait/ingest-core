@@ -11,7 +11,9 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Javadocs go here!
@@ -37,6 +39,13 @@ public class Project extends MetadataDocument {
     public MetadataDocument addToSubmissionEnvelopes(SubmissionEnvelope submissionEnvelope) {
         this.submissionEnvelopes.add(submissionEnvelope);
         return this;
+    }
+
+    @JsonIgnore
+    public List<SubmissionEnvelope> getOpenSubmissionEnvelopes(){
+        return this.submissionEnvelopes.stream()
+                .filter(env -> env.isOpen())
+                .collect(Collectors.toList());
     }
 
     @JsonIgnore
