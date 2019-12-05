@@ -50,34 +50,25 @@ public class SubmissionEnvelopeService {
 
     @NonNull
     private final SubmissionManifestRepository submissionManifestRepository;
-
+    private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
     @NonNull
     private BundleManifestRepository bundleManifestRepository;
-
     @NonNull
     private ProjectRepository projectRepository;
-
     @NonNull
     private ProcessRepository processRepository;
-
     @NonNull
     private ProtocolRepository protocolRepository;
-
     @NonNull
     private FileRepository fileRepository;
-
     @NonNull
     private BiomaterialRepository biomaterialRepository;
-
     @NonNull
     private PatchRepository patchRepository;
 
-
-    private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
-
     public void handleEnvelopeStateUpdateRequest(SubmissionEnvelope envelope,
-            SubmissionState state) {
-        if(! envelope.allowedStateTransitions().contains(state)) {
+                                                 SubmissionState state) {
+        if (!envelope.allowedStateTransitions().contains(state)) {
             throw new StateTransitionNotAllowed(String.format(
                     "Envelope with id %s cannot be transitioned from state %s to state %s",
                     envelope.getId(), envelope.getSubmissionState(), state));
@@ -87,7 +78,7 @@ public class SubmissionEnvelopeService {
     }
 
     public void handleSubmissionRequest(SubmissionEnvelope envelope) {
-        if(! envelope.getIsUpdate()) {
+        if (!envelope.getIsUpdate()) {
             handleSubmitOriginalSubmission(envelope);
         } else {
             handleSubmitUpdateSubmission(envelope);
@@ -98,8 +89,7 @@ public class SubmissionEnvelopeService {
         executorService.submit(() -> {
             try {
                 exporter.exportBundles(submissionEnvelope);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 log.error("Uncaught Exception exporting Bundles", e);
             }
         });
@@ -110,8 +100,7 @@ public class SubmissionEnvelopeService {
             try {
                 metadataUpdateService.applyUpdates(submissionEnvelope);
                 exporter.updateBundles(submissionEnvelope);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 log.error("Uncaught Exception Applying Updates or Exporting Bundles", e);
             }
         });
@@ -121,13 +110,18 @@ public class SubmissionEnvelopeService {
         SubmissionEnvelope updateSubmissionEnvelope = new SubmissionEnvelope();
         submissionEnvelopeCreateHandler.setUuid(updateSubmissionEnvelope);
         updateSubmissionEnvelope.setIsUpdate(true);
-        SubmissionEnvelope insertedUpdateSubmissionEnvelope = submissionEnvelopeRepository.insert(updateSubmissionEnvelope);
-        submissionEnvelopeCreateHandler.handleSubmissionEnvelopeCreation(updateSubmissionEnvelope);
+        SubmissionEnvelope insertedUpdateSubmissionEnvelope = createSubmissionEnvelope(updateSubmissionEnvelope);
         return insertedUpdateSubmissionEnvelope;
     }
 
-    public void deleteSubmission(SubmissionEnvelope submissionEnvelope, boolean forceDelete){
-        if(!(submissionEnvelope.isOpen() || forceDelete))
+    public SubmissionEnvelope createSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        SubmissionEnvelope insertedSubmissionEnvelope = submissionEnvelopeRepository.insert(submissionEnvelope);
+        submissionEnvelopeCreateHandler.handleSubmissionEnvelopeCreation(submissionEnvelope);
+        return insertedSubmissionEnvelope;
+    }
+
+    public void deleteSubmission(SubmissionEnvelope submissionEnvelope, boolean forceDelete) {
+        if (!(submissionEnvelope.isOpen() || forceDelete))
             throw new UnsupportedOperationException("Cannot delete submission if it is already submitted!");
 
         this.cleanupLinksToSubmissionMetadata(submissionEnvelope);

@@ -139,7 +139,7 @@ public class SubmissionServiceTest {
         TestProject project = new TestProject(new Object());
         project.setUuid(Uuid.newUuid());
         project.setSubmissionEnvelope(submissionEnvelope);
-        project.addToSubmissionEnvelope(submissionEnvelope);
+        project.addToSubmissionEnvelopes(submissionEnvelope);
         assertThat(project.getSubmissionEnvelopes()).contains(submissionEnvelope);
         assertThat(project.getSubmissionEnvelope()).isEqualTo(submissionEnvelope);
 
