@@ -114,9 +114,9 @@ public class SubmissionEnvelopeService {
     }
 
     public SubmissionEnvelope createSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        SubmissionEnvelope insertedUpdateSubmissionEnvelope = submissionEnvelopeRepository.insert(submissionEnvelope);
+        SubmissionEnvelope insertedSubmissionEnvelope = submissionEnvelopeRepository.insert(submissionEnvelope);
         submissionEnvelopeCreateHandler.handleSubmissionEnvelopeCreation(submissionEnvelope);
-        return insertedUpdateSubmissionEnvelope;
+        return insertedSubmissionEnvelope;
     }
 
     public void deleteSubmission(SubmissionEnvelope submissionEnvelope, boolean forceDelete) {
