@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Created by rolando on 05/09/2017.
@@ -22,4 +23,6 @@ public interface BundleManifestRepository extends MongoRepository<BundleManifest
     Page<BundleManifest> findAll(Pageable pageable);
 
     Long deleteByEnvelopeUuid (String uuid);
+
+    Stream<BundleManifest> findByEnvelopeUuid(String envelopeUuid);
 }

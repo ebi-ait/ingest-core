@@ -4,7 +4,6 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.PreAuthenticatedAuthenticationJsonWebToken;
 import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
-import org.humancellatlas.ingest.security.exception.UnlistedEmail;
 import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,7 +14,6 @@ import org.springframework.security.core.Authentication;
 
 import java.util.Map;
 
-import static java.util.Arrays.asList;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -28,16 +26,11 @@ public class GoogleServiceJwtAuthenticationProviderTest {
     @Nested
     @DisplayName("Authenticate")
     class AuthenticationTests {
-
-        private static final String ISSUER = "https://humancellatlas.auth0.com";
-
-        private JwtGenerator jwtGenerator = new JwtGenerator(ISSUER);
-
         private JWTVerifier jwtVerifier;
 
         private RemoteServiceJwtVerifierResolver jwtVerifierResolver;
 
-        private UserWhiteList userWhiteList;
+        private DomainWhiteList projectWhitelist;
 
         @BeforeEach
         public void setUp() {
@@ -45,8 +38,8 @@ public class GoogleServiceJwtAuthenticationProviderTest {
             jwtVerifierResolver = mock(RemoteServiceJwtVerifierResolver.class);
             doReturn(jwtVerifier).when(jwtVerifierResolver).resolve(anyString());
 
-            userWhiteList = mock(UserWhiteList.class);
-            doReturn(true).when(userWhiteList).lists(anyString());
+            projectWhitelist = mock(DomainWhiteList.class);
+            doReturn(true).when(projectWhitelist).lists("sample@domain.tld");
         }
 
         @Test
@@ -54,10 +47,12 @@ public class GoogleServiceJwtAuthenticationProviderTest {
         public void testAuthenticate() {
             //given: JWT
             Map<String, String> claims = Map.ofEntries(
-                    entry("https://auth.data.humancellatlas.org/email", "sample@domain.tld")
+                    entry("https://auth.data.humancellatlas.org/group", "public")
             );
             String keyId = "MDc2OTM3ODI4ODY2NUU5REVGRDVEM0MyOEYwQTkzNDZDRDlEQzNBRQ";
             String subject = "johndoe@somedomain.tld";
+
+            JwtGenerator jwtGenerator = new JwtGenerator("sample@domain.tld");
             String jwt = jwtGenerator.generate(keyId, subject, claims);
 
             //and: given a JWT Authentication
@@ -66,16 +61,13 @@ public class GoogleServiceJwtAuthenticationProviderTest {
 
             //and:
             AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
-                    asList("auth0.com"), jwtVerifierResolver, userWhiteList);
+                    projectWhitelist, jwtVerifierResolver);
 
             //when:
             Authentication authentication = authenticationProvider.authenticate(jwtAuthentication);
 
             //then:
-            assertThat(authentication).isNotNull()
-                    .extracting("principal")
-                    .containsExactly(subject);
-
+            assertThat(authentication).isNotNull();
         }
 
         @Test
@@ -83,16 +75,17 @@ public class GoogleServiceJwtAuthenticationProviderTest {
         public void testForUnlistedIssuer() {
             //given:
             AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
-                    asList("differentissuer.com"), jwtVerifierResolver, userWhiteList);
+                    projectWhitelist, jwtVerifierResolver);
 
             //and:
+            JwtGenerator jwtGenerator = new JwtGenerator("sample@otherdomain.tld");
             String jwt = jwtGenerator.generate();
             Authentication jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
 
             //expect:
             assertThatThrownBy(() -> {
                 authenticationProvider.authenticate(jwtAuthentication);
-            }).isInstanceOf(UnlistedJwtIssuer.class).hasMessageContaining(ISSUER);
+            }).isInstanceOf(UnlistedJwtIssuer.class).hasMessageContaining("sample@otherdomain.tld");
         }
 
         @Test
@@ -100,13 +93,14 @@ public class GoogleServiceJwtAuthenticationProviderTest {
         public void testForFailedVerification() {
             //given:
             AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
-                    asList("auth0.com"), jwtVerifierResolver, userWhiteList);
+                    projectWhitelist, jwtVerifierResolver);
 
             //and:
             Exception verificationFailed = new JWTVerificationException("verification failed");
             doThrow(verificationFailed).when(jwtVerifier).verify(anyString());
 
             //and:
+            JwtGenerator jwtGenerator = new JwtGenerator("sample@domain.tld");
             String jwt = jwtGenerator.generate();
             Authentication jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
 
@@ -114,27 +108,6 @@ public class GoogleServiceJwtAuthenticationProviderTest {
             assertThatThrownBy(() -> {
                 authenticationProvider.authenticate(jwtAuthentication);
             }).isInstanceOf(JwtVerificationFailed.class);
-        }
-
-        @Test
-        @DisplayName("unlisted user")
-        public void testForUnlistedUser() {
-            //given:
-            String userEmail = "someone@unverifiable.net";
-            doReturn(false).when(userWhiteList).lists(userEmail);
-
-            //and:
-            AuthenticationProvider authenticationProvider = new GoogleServiceJwtAuthenticationProvider(
-                    asList("auth0.com"), jwtVerifierResolver, userWhiteList);
-
-            //and:
-            String jwt = jwtGenerator.generateWithSubject(userEmail);
-            Authentication jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
-
-            //expect:
-            assertThatThrownBy(() -> {
-                authenticationProvider.authenticate(jwtAuthentication);
-            }).isInstanceOf(UnlistedEmail.class).hasMessageContaining(userEmail);
         }
 
     }

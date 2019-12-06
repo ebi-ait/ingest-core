@@ -12,19 +12,19 @@ import java.util.List;
 public class MongoChangeLog {
     @ChangeSet(order = "2019-10-30", id = "featureCompatibilityVersion 3.4", author = "alexie.staffer@ebi.ac.uk")
     public void featureCompatibilityThreeFour(MongoDatabase db) {
-        if (MongoVersionHelper.canSetFeatureCompatibility(db, "3.4"))
+        if (MongoVersionHelper.featureCompatibilityLessThan(db, "3.4"))
             db.runCommand(new Document("setFeatureCompatibilityVersion", "3.4"));
     }
 
     @ChangeSet(order = "2019-10-31", id = "featureCompatibilityVersion 3.6", author = "alexie.staffer@ebi.ac.uk")
     public void featureCompatibilityThreeSix(MongoDatabase db) {
-        if (MongoVersionHelper.canSetFeatureCompatibility(db, "3.6"))
+        if (MongoVersionHelper.featureCompatibilityLessThan(db, "3.6"))
             db.runCommand(new Document("setFeatureCompatibilityVersion", "3.6"));
     }
 
     @ChangeSet(order = "2019-11-01", id = "featureCompatibilityVersion 4.0", author = "alexie.staffer@ebi.ac.uk")
     public void featureCompatibilityFourZero(MongoDatabase db) {
-        if (MongoVersionHelper.canSetFeatureCompatibility(db, "4.0")) {
+        if (MongoVersionHelper.featureCompatibilityLessThan(db, "4.0")) {
             db.runCommand(new Document("setFeatureCompatibilityVersion", "4.0"));
             db.runCommand(new Document("setFreeMonitoring", 1).append("action", "disable"));
         }
@@ -32,7 +32,7 @@ public class MongoChangeLog {
 
     @ChangeSet(order = "2019-11-02", id = "featureCompatibilityVersion 4.2", author = "alexie.staffer@ebi.ac.uk")
     public void featureCompatibilityFourTwo(MongoDatabase db) {
-        if (MongoVersionHelper.canSetFeatureCompatibility(db, "4.2"))
+        if (MongoVersionHelper.featureCompatibilityLessThan(db, "4.2"))
             db.runCommand(new Document("setFeatureCompatibilityVersion", "4.2"));
     }
 

@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -49,34 +50,25 @@ public class SubmissionEnvelopeService {
 
     @NonNull
     private final SubmissionManifestRepository submissionManifestRepository;
-
+    private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
     @NonNull
     private BundleManifestRepository bundleManifestRepository;
-
     @NonNull
     private ProjectRepository projectRepository;
-
     @NonNull
     private ProcessRepository processRepository;
-
     @NonNull
     private ProtocolRepository protocolRepository;
-
     @NonNull
     private FileRepository fileRepository;
-
     @NonNull
     private BiomaterialRepository biomaterialRepository;
-
     @NonNull
     private PatchRepository patchRepository;
 
-
-    private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
-
     public void handleEnvelopeStateUpdateRequest(SubmissionEnvelope envelope,
-            SubmissionState state) {
-        if(! envelope.allowedStateTransitions().contains(state)) {
+                                                 SubmissionState state) {
+        if (!envelope.allowedStateTransitions().contains(state)) {
             throw new StateTransitionNotAllowed(String.format(
                     "Envelope with id %s cannot be transitioned from state %s to state %s",
                     envelope.getId(), envelope.getSubmissionState(), state));
@@ -86,7 +78,7 @@ public class SubmissionEnvelopeService {
     }
 
     public void handleSubmissionRequest(SubmissionEnvelope envelope) {
-        if(! envelope.getIsUpdate()) {
+        if (!envelope.getIsUpdate()) {
             handleSubmitOriginalSubmission(envelope);
         } else {
             handleSubmitUpdateSubmission(envelope);
@@ -97,8 +89,7 @@ public class SubmissionEnvelopeService {
         executorService.submit(() -> {
             try {
                 exporter.exportBundles(submissionEnvelope);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 log.error("Uncaught Exception exporting Bundles", e);
             }
         });
@@ -109,8 +100,7 @@ public class SubmissionEnvelopeService {
             try {
                 metadataUpdateService.applyUpdates(submissionEnvelope);
                 exporter.updateBundles(submissionEnvelope);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 log.error("Uncaught Exception Applying Updates or Exporting Bundles", e);
             }
         });
@@ -120,14 +110,21 @@ public class SubmissionEnvelopeService {
         SubmissionEnvelope updateSubmissionEnvelope = new SubmissionEnvelope();
         submissionEnvelopeCreateHandler.setUuid(updateSubmissionEnvelope);
         updateSubmissionEnvelope.setIsUpdate(true);
-        SubmissionEnvelope insertedUpdateSubmissionEnvelope = submissionEnvelopeRepository.insert(updateSubmissionEnvelope);
-        submissionEnvelopeCreateHandler.handleSubmissionEnvelopeCreation(updateSubmissionEnvelope);
+        SubmissionEnvelope insertedUpdateSubmissionEnvelope = createSubmissionEnvelope(updateSubmissionEnvelope);
         return insertedUpdateSubmissionEnvelope;
     }
 
-    public void deleteSubmission(SubmissionEnvelope submissionEnvelope, boolean forceDelete){
-        if(!(submissionEnvelope.isOpen() || forceDelete))
+    public SubmissionEnvelope createSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
+        SubmissionEnvelope insertedSubmissionEnvelope = submissionEnvelopeRepository.insert(submissionEnvelope);
+        submissionEnvelopeCreateHandler.handleSubmissionEnvelopeCreation(submissionEnvelope);
+        return insertedSubmissionEnvelope;
+    }
+
+    public void deleteSubmission(SubmissionEnvelope submissionEnvelope, boolean forceDelete) {
+        if (!(submissionEnvelope.isOpen() || forceDelete))
             throw new UnsupportedOperationException("Cannot delete submission if it is already submitted!");
+
+        this.cleanupLinksToSubmissionMetadata(submissionEnvelope);
 
         biomaterialRepository.deleteBySubmissionEnvelope(submissionEnvelope);
         processRepository.deleteBySubmissionEnvelope(submissionEnvelope);
@@ -144,5 +141,62 @@ public class SubmissionEnvelopeService {
             projectRepository.save(project);
         }
         submissionEnvelopeRepository.delete(submissionEnvelope);
+    }
+
+
+    /**
+     *
+     * Ensures that any links to metadata in the submission are removed.
+     *
+     * @param submissionEnvelope
+     */
+    private void cleanupLinksToSubmissionMetadata(SubmissionEnvelope submissionEnvelope) {
+        long startTime = System.currentTimeMillis();
+
+        processRepository.findBySubmissionEnvelope(submissionEnvelope)
+                         .forEach(p -> {
+                             fileRepository.findByInputToProcessesContains(p)
+                                           .forEach(file -> {
+                                               file.getInputToProcesses().remove(p);
+                                               fileRepository.save(file);
+                                           });
+
+                             fileRepository.findByDerivedByProcessesContains(p)
+                                           .forEach(file -> {
+                                               file.getDerivedByProcesses().remove(p);
+                                               fileRepository.save(file);
+                                           });
+
+                             biomaterialRepository.findByInputToProcessesContains(p)
+                                                  .forEach(biomaterial -> {
+                                                      biomaterial.getInputToProcesses().remove(p);
+                                                      biomaterialRepository.save(biomaterial);
+                                                  });
+
+                             biomaterialRepository.findByDerivedByProcessesContains(p)
+                                                  .forEach(biomaterial -> {
+                                                      biomaterial.getDerivedByProcesses().remove(p);
+                                                      biomaterialRepository.save(biomaterial);
+                                                  });
+                         });
+
+        protocolRepository.findBySubmissionEnvelope(submissionEnvelope)
+                          .forEach(protocol -> processRepository.findByProtocolsContains(protocol)
+                                                                .forEach(process -> {
+                                                                    process.getProtocols().remove(protocol);
+                                                                    processRepository.save(process);
+                                                                }));
+
+        bundleManifestRepository.findByEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString())
+                                .forEach(bundleManifest -> processRepository.findByInputBundleManifestsContains(bundleManifest)
+                                                                            .forEach(process -> {
+                                                                                process.getInputBundleManifests().remove(bundleManifest);
+                                                                                processRepository.save(process);
+                                                                            }));
+
+        long endTime = System.currentTimeMillis();
+        float duration = ((float)(endTime - startTime)) / 1000;
+        String durationStr = new DecimalFormat("#,###.##").format(duration);
+        log.info("cleanup link time: {} s", durationStr);
     }
 }

@@ -6,7 +6,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
 import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
-import org.humancellatlas.ingest.security.exception.UnlistedEmail;
 import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.humancellatlas.ingest.security.spring.DelegatingJwtAuthentication;
 import org.slf4j.Logger;
@@ -15,23 +14,18 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
-import java.util.List;
-
 public class GoogleServiceJwtAuthenticationProvider implements AuthenticationProvider {
 
     private static Logger logger = LoggerFactory.getLogger(GoogleServiceJwtAuthenticationProvider.class);
 
     private final RemoteServiceJwtVerifierResolver jwtVerifierResolver;
 
-    private final UserWhiteList userWhiteList;
+    private final DomainWhiteList projectWhitelist;
 
-    private final List<String> projects;
-
-    public GoogleServiceJwtAuthenticationProvider(List<String> projects,
-            RemoteServiceJwtVerifierResolver jwtVerifierResolver, UserWhiteList userWhiteList) {
-        this.projects = projects;
+    public GoogleServiceJwtAuthenticationProvider(DomainWhiteList projectWhitelist,
+                                                  RemoteServiceJwtVerifierResolver jwtVerifierResolver) {
         this.jwtVerifierResolver = jwtVerifierResolver;
-        this.userWhiteList = userWhiteList;
+        this.projectWhitelist = projectWhitelist;
     }
 
     @Override
@@ -52,7 +46,6 @@ public class GoogleServiceJwtAuthenticationProvider implements AuthenticationPro
             Authentication jwtAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
             logger.info("Authenticated with jwt with scopes {}", jwtAuth.getAuthorities());
 
-            verifyPrincipal(jwtAuth);
             return jwtAuth;
         } catch (JWTVerificationException e) {
             logger.error("JWT verification failed: {}", e.getMessage());
@@ -63,16 +56,9 @@ public class GoogleServiceJwtAuthenticationProvider implements AuthenticationPro
     private void verifyIssuer(JwtAuthentication jwt) {
         DecodedJWT token = JWT.decode(jwt.getToken());
         String issuer = token.getIssuer();
-        boolean match = projects.stream().anyMatch(issuer::endsWith);
-        if (!match) {
-            throw new UnlistedJwtIssuer(issuer);
-        }
-    }
 
-    private void verifyPrincipal(Authentication jwtAuth) {
-        String principal = jwtAuth.getPrincipal().toString();
-        if (!userWhiteList.lists(principal)) {
-            throw new UnlistedEmail(principal);
+        if (!projectWhitelist.lists(issuer)) {
+            throw new UnlistedJwtIssuer(issuer);
         }
     }
 

@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.core.web;
 
+import org.humancellatlas.ingest.core.exception.MultipleOpenSubmissionsException;
 import org.humancellatlas.ingest.core.exception.RedundantUpdateException;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class GlobalStateExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class, RedundantUpdateException.class})
+    @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class, RedundantUpdateException.class, MultipleOpenSubmissionsException.class})
     public @ResponseBody
     ExceptionInfo handleIllegalArgument(HttpServletRequest request, Exception e) {
         getLog().warn(String.format("Caught an illegal argument at '%s'; " +
@@ -64,20 +65,22 @@ public class GlobalStateExceptionHandler {
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(ResourceNotFoundException.class)
-    public @ResponseBody ExceptionInfo handleResourceNotFound(HttpServletRequest request, Exception e) {
+    public @ResponseBody
+    ExceptionInfo handleResourceNotFound(HttpServletRequest request, Exception e) {
         getLog().warn(String.format("Caught a resource not found exception argument at '%s'; " +
-                "this will generate a NOT_FOUND RESPONSE",
-            request.getRequestURL().toString()));
+                        "this will generate a NOT_FOUND RESPONSE",
+                request.getRequestURL().toString()));
         getLog().debug("Handling ResourceNotFoundException and returning NOT_FOUND response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(StateTransitionNotAllowed.class)
-    public @ResponseBody ExceptionInfo handleStateTransitionNotAllowed(HttpServletRequest request, Exception e) {
+    public @ResponseBody
+    ExceptionInfo handleStateTransitionNotAllowed(HttpServletRequest request, Exception e) {
         getLog().warn(String.format("Caught a state transition not allowed exception at '%s'; " +
-                                            "this will generate a BAD_REQUEST RESPONSE",
-                                    request.getRequestURL().toString()));
+                        "this will generate a BAD_REQUEST RESPONSE",
+                request.getRequestURL().toString()));
         getLog().debug("Handling StateTransitionNotAllowed and returning BAD_REQUEST response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
@@ -85,7 +88,8 @@ public class GlobalStateExceptionHandler {
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(RuntimeException.class)
-    public @ResponseBody ExceptionInfo handleRuntimeException(HttpServletRequest request, Exception e) {
+    public @ResponseBody
+    ExceptionInfo handleRuntimeException(HttpServletRequest request, Exception e) {
         getLog().error(String.format("Runtime exception encountered on %s request to resource %s ", request.getMethod(),
                 request.getRequestURL().toString()), e);
         getLog().debug("Handling RuntimeException and returning INTERNAL_SERVER_ERROR response", e);
@@ -94,7 +98,8 @@ public class GlobalStateExceptionHandler {
 
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler(UnsupportedOperationException.class)
-    public @ResponseBody ExceptionInfo handleUnsupportedOperationException(HttpServletRequest request, Exception e) {
+    public @ResponseBody
+    ExceptionInfo handleUnsupportedOperationException(HttpServletRequest request, Exception e) {
         getLog().error(String.format("UnsupportedOperationException encountered on %s request to resource %s ", request.getMethod(),
                 request.getRequestURL().toString()), e);
         getLog().debug("Handling UnsupportedOperationException and returning METHOD_NOT_ALLOWED response", e);

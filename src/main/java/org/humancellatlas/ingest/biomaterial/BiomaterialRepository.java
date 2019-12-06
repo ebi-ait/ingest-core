@@ -45,12 +45,12 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
             ValidationState state, Pageable pageable);
 
     @RestResource(exported = false)
-    List<Biomaterial> findByInputToProcessesContains(Process process);
+    Stream<Biomaterial> findByInputToProcessesContains(Process process);
 
     Page<Biomaterial> findByInputToProcessesContaining(Process process, Pageable pageable);
 
     @RestResource(exported = false)
-    List<Biomaterial> findByDerivedByProcessesContains(Process process);
+    Stream<Biomaterial> findByDerivedByProcessesContains(Process process);
 
     Page<Biomaterial> findByDerivedByProcessesContaining(Process process, Pageable pageable);
 
