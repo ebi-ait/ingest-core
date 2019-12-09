@@ -15,10 +15,12 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -62,5 +64,15 @@ public class ProjectService {
 
     public Page<Project> queryByContent(List<MetadataCriteria> query, Pageable pageable){
         return this.projectRepository.findByContent(query, pageable);
+    }
+
+    public Page<SubmissionEnvelope> getProjectSubmissionEnvelopes(Project project, Pageable pageable) {
+        Page<Project> projects = this.projectRepository.findByUuid(project.getUuid(), Pageable.unpaged());
+        List<SubmissionEnvelope> envelopes = new ArrayList<>();
+        for (Project projectDocument : projects)
+        {
+            envelopes.addAll(projectDocument.getSubmissionEnvelopes());
+        }
+        return new PageImpl<>(envelopes, pageable, envelopes.size());
     }
 }
