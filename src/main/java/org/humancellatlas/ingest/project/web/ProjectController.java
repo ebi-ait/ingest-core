@@ -10,7 +10,6 @@ import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -39,14 +38,14 @@ import java.util.UUID;
 @Getter
 public class ProjectController {
     private final @NonNull ProjectService projectService;
-    private final @NonNull SubmissionEnvelopeService submissionEnvelopeService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects", method = RequestMethod.POST)
-    ResponseEntity<Resource<?>> addProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                     @RequestBody Project project,
-                                                     @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
-                                                     PersistentEntityResourceAssembler assembler) {
+    @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
+    ResponseEntity<Resource<?>> addProjectToEnvelope(
+            @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+            @RequestBody Project project,
+            @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
+            PersistentEntityResourceAssembler assembler) {
         updatingUuid.ifPresent(uuid -> {
             project.setUuid(new Uuid(uuid.toString()));
             project.setIsUpdate(true);
@@ -56,11 +55,12 @@ public class ProjectController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/projects/{id}/bundleManifests", method = RequestMethod.GET)
-    ResponseEntity<?> getBundleManifests(@PathVariable("id") Project project,
-                                         @RequestParam("bundleType") Optional<BundleType> bundleType,
-                                         Pageable pageable,
-                                         final PersistentEntityResourceAssembler resourceAssembler) {
+    @GetMapping(path = "/projects/{id}/bundleManifests")
+    ResponseEntity<PagedResources<Resource<BundleManifest>>> getBundleManifests(
+            @PathVariable("id") Project project,
+            @RequestParam("bundleType") Optional<BundleType> bundleType,
+            Pageable pageable,
+            final PersistentEntityResourceAssembler resourceAssembler) {
         Page<BundleManifest> bundleManifests = projectService.getBundleManifestRepository().findBundleManifestsByProjectAndBundleType(project, bundleType.orElse(null), pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
     }
@@ -74,10 +74,11 @@ public class ProjectController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(envelopes, resourceAssembler));
     }
 
-    @RequestMapping(path = "/projects/query", method = RequestMethod.POST)
-    ResponseEntity<?> queryProjects(@RequestBody List<MetadataCriteria> query,
-                                    Pageable pageable,
-                                    final PersistentEntityResourceAssembler resourceAssembler) {
+    @PostMapping(path = "/projects/query")
+    ResponseEntity<PagedResources<Resource<Project>>> queryProjects(
+            @RequestBody List<MetadataCriteria> query,
+            Pageable pageable,
+            final PersistentEntityResourceAssembler resourceAssembler) {
         Page<Project> projects = projectService.queryByContent(query, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
     }
