@@ -7,5 +7,5 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface ProjectRepositoryCustom {
-    Page<Project> findByContent(List<MetadataCriteria> criteria, Pageable pageable);
+    Page<Project> findByCriteria(List<MetadataCriteria> criteriaList, Pageable pageable);
 }

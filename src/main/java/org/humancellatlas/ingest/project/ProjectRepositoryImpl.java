@@ -1,7 +1,6 @@
 package org.humancellatlas.ingest.project;
 
 import org.humancellatlas.ingest.query.MetadataCriteria;
-import org.humancellatlas.ingest.query.Operator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,13 +20,13 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
     private MongoTemplate mongoTemplate;
 
     @Override
-    public Page<Project> findByContent(List<MetadataCriteria> metadataQuery, Pageable pageable) {
+    public Page<Project> findByCriteria(List<MetadataCriteria> criteriaList, Pageable pageable) {
         Query query = new Query();
         
         List<Criteria> criterias = new ArrayList<>();
 
-        for(MetadataCriteria metadataCriteria : metadataQuery){
-            String contentField = "content." + metadataCriteria.getContentField();
+        for(MetadataCriteria metadataCriteria : criteriaList){
+            String contentField = metadataCriteria.getContentField();
             Criteria criteria = Criteria.where(contentField);
             switch (metadataCriteria.getOperator()) {
                 case IS:
@@ -68,17 +67,12 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
             criterias.add(criteria);
         }
 
-        query.addCriteria(
-            new Criteria().orOperator(criterias.toArray(
-                new Criteria[criterias.size()]
-            ))
-        );
+        query.addCriteria(new Criteria().orOperator(criterias.toArray(new Criteria[criterias.size()])));
 
-        query.with(pageable);
-
-        List<Project> result = mongoTemplate.find(query, Project.class);
         long count = mongoTemplate.count(query, Project.class);
-        Page<Project> projectsPage = new PageImpl<>(result, pageable, count);
-        return projectsPage;
+        query.with(pageable);
+        List<Project> result = mongoTemplate.find(query, Project.class);
+
+        return new PageImpl<>(result, pageable, count);
     };
 }
