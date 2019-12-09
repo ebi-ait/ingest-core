@@ -48,7 +48,7 @@ public interface ProjectRepository extends MongoRepository<Project, String> , Pr
     long countByUser(String user);
     
     
-    Page<Project> findByCriteria(List<MetadataCriteria> criteriaList, Pageable pageable);
+    Page<Project> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable);
 
     @RestResource(exported = false)
     Collection<Project> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);

@@ -77,9 +77,13 @@ public class ProjectController {
     @PostMapping(path = "/projects/query")
     ResponseEntity<PagedResources<Resource<Project>>> queryProjects(
             @RequestBody List<MetadataCriteria> criteriaList,
+            @RequestParam("operator") Optional<String> operator,
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Project> projects = projectService.findByCriteria(criteriaList, pageable);
+        Boolean andCriteria = false;
+        if (operator.isPresent() && operator.get().toLowerCase().equals("and"))
+            andCriteria = true; //otherwise "or" will be used.
+        Page<Project> projects = projectService.findByCriteria(criteriaList, andCriteria, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
     }
 }

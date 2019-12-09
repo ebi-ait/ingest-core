@@ -20,7 +20,7 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
     private MongoTemplate mongoTemplate;
 
     @Override
-    public Page<Project> findByCriteria(List<MetadataCriteria> criteriaList, Pageable pageable) {
+    public Page<Project> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable) {
         Query query = new Query();
         
         List<Criteria> criterias = new ArrayList<>();
@@ -67,7 +67,11 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
             criterias.add(criteria);
         }
 
-        query.addCriteria(new Criteria().orOperator(criterias.toArray(new Criteria[criterias.size()])));
+        if (andCriteria) {
+            query.addCriteria(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
+        } else {
+            query.addCriteria(new Criteria().orOperator(criterias.toArray(new Criteria[criterias.size()])));
+        }
 
         long count = mongoTemplate.count(query, Project.class);
         query.with(pageable);
