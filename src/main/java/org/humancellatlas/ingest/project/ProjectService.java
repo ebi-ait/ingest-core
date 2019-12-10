@@ -57,6 +57,20 @@ public class ProjectService {
         }
     }
 
+    public Project linkProjectSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
+        final String projectId = project.getId();
+        project.addToSubmissionEnvelopes(submissionEnvelope);
+        projectRepository.save(project);
+
+        projectRepository.findByUuidUuidAndIsUpdateFalse(project.getUuid().getUuid()).ifPresent(projectByUuid -> {
+            if (!projectByUuid.getId().equals(projectId)) {
+                projectByUuid.addToSubmissionEnvelopes(submissionEnvelope);
+                projectRepository.save(projectByUuid);
+            }
+        });
+        return project;
+    }
+
     public Page<BundleManifest> findBundleManifestsByProjectUuidAndBundleType(Uuid projectUuid, BundleType bundleType, Pageable pageable){
         return this.projectRepository.findByUuidUuidAndIsUpdateFalse(projectUuid.getUuid())
                                      .map(project -> bundleManifestRepository.findBundleManifestsByProjectAndBundleType(project, bundleType, pageable))

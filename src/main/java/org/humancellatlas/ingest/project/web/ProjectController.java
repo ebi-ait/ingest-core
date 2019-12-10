@@ -86,4 +86,14 @@ public class ProjectController {
         Page<Project> projects = projectService.findByCriteria(criteriaList, andCriteria, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
     }
+
+    @PutMapping(path = "projects/{proj_id}/submissionEnvelopes/{sub_id}")
+    ResponseEntity<Resource<?>> linkSubmissionToProject (
+            @PathVariable("proj_id") Project project,
+            @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+            PersistentEntityResourceAssembler assembler) {
+        Project savedProject = getProjectService().linkProjectSubmissionEnvelope(submissionEnvelope, project);
+        PersistentEntityResource projectResource = assembler.toFullResource(savedProject);
+        return ResponseEntity.accepted().body(projectResource);
+    }
 }
