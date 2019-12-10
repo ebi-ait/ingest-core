@@ -10,8 +10,10 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 
+import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,7 +38,7 @@ public class Project extends MetadataDocument {
         super(EntityType.PROJECT, content);
     }
 
-    public MetadataDocument addToSubmissionEnvelopes(SubmissionEnvelope submissionEnvelope) {
+    public MetadataDocument addToSubmissionEnvelopes(@NotNull SubmissionEnvelope submissionEnvelope) {
         this.submissionEnvelopes.add(submissionEnvelope);
         return this;
     }
@@ -44,21 +46,17 @@ public class Project extends MetadataDocument {
     @JsonIgnore
     public List<SubmissionEnvelope> getOpenSubmissionEnvelopes(){
         return this.submissionEnvelopes.stream()
-                .filter(env -> env.isOpen())
+                .filter(Objects::nonNull)
+                .filter(SubmissionEnvelope::isOpen)
                 .collect(Collectors.toList());
     }
 
     public Boolean getHasOpenSubmission(){
-        for (SubmissionEnvelope submissionEnvelope : this.submissionEnvelopes) {
-            if (submissionEnvelope.isOpen()){
-                return true;
-            }
-        }
-        return false;
+        return !getOpenSubmissionEnvelopes().isEmpty();
     }
 
     @JsonIgnore
-    public void removeSubmissionEnvelopeData(SubmissionEnvelope submissionEnvelope, boolean forceRemoval) {
+    public void removeSubmissionEnvelopeData(@NotNull SubmissionEnvelope submissionEnvelope, boolean forceRemoval) {
         if (!submissionEnvelopes.contains(submissionEnvelope))
             throw new UnsupportedOperationException(
                     String.format("Submission Envelope (%s) is not part of Project (%s), so it cannot be removed.",

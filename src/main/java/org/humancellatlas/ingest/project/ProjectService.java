@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -73,6 +74,7 @@ public class ProjectService {
         {
             envelopes.addAll(projectDocument.getSubmissionEnvelopes());
         }
+        envelopes.removeIf(Objects::isNull);
         return new PageImpl<>(envelopes, pageable, envelopes.size());
     }
 }
