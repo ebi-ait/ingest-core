@@ -59,7 +59,7 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
                     criteria = criteria.nin((Collection<?>) metadataCriteria.getValue());
                     break;
                 case REGEX:
-                    criteria = criteria.regex((String) metadataCriteria.getValue());
+                    criteria = criteria.regex((String) metadataCriteria.getValue(), "i");
                     break;
                 default:
                     throw new IllegalArgumentException(String.format("MetadataCriteria %s is not supported.", metadataCriteria.getOperator()));
