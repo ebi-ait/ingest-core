@@ -21,8 +21,10 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 
 /**
@@ -68,13 +70,15 @@ public class ProjectService {
     }
 
     public Page<SubmissionEnvelope> getProjectSubmissionEnvelopes(Project project, Pageable pageable) {
+        Set<SubmissionEnvelope> envelopes = new HashSet<>();
+        envelopes.add(project.getSubmissionEnvelope());
         Page<Project> projects = this.projectRepository.findByUuid(project.getUuid(), Pageable.unpaged());
-        List<SubmissionEnvelope> envelopes = new ArrayList<>();
         for (Project projectDocument : projects)
         {
             envelopes.addAll(projectDocument.getSubmissionEnvelopes());
+            envelopes.add(projectDocument.getSubmissionEnvelope());
         }
         envelopes.removeIf(Objects::isNull);
-        return new PageImpl<>(envelopes, pageable, envelopes.size());
+        return new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
     }
 }
