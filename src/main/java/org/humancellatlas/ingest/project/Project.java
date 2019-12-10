@@ -38,9 +38,8 @@ public class Project extends MetadataDocument {
         super(EntityType.PROJECT, content);
     }
 
-    public MetadataDocument addToSubmissionEnvelopes(@NotNull SubmissionEnvelope submissionEnvelope) {
+    public void addToSubmissionEnvelopes(@NotNull SubmissionEnvelope submissionEnvelope) {
         this.submissionEnvelopes.add(submissionEnvelope);
-        return this;
     }
 
     @JsonIgnore
