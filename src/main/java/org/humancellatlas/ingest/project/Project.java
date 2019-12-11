@@ -10,8 +10,10 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 
+import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,39 +38,22 @@ public class Project extends MetadataDocument {
         super(EntityType.PROJECT, content);
     }
 
-    public MetadataDocument addToSubmissionEnvelopes(SubmissionEnvelope submissionEnvelope) {
+    public void addToSubmissionEnvelopes(@NotNull SubmissionEnvelope submissionEnvelope) {
         this.submissionEnvelopes.add(submissionEnvelope);
-        return this;
     }
 
+    //ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
     @JsonIgnore
     public List<SubmissionEnvelope> getOpenSubmissionEnvelopes(){
         return this.submissionEnvelopes.stream()
-                .filter(env -> env.isOpen())
-                .collect(Collectors.toList());
+            .filter(Objects::nonNull)
+            .filter(env -> env.getSubmissionState() != null)
+            .filter(SubmissionEnvelope::isOpen)
+            .collect(Collectors.toList());
     }
 
     public Boolean getHasOpenSubmission(){
-        for (SubmissionEnvelope submissionEnvelope : this.submissionEnvelopes) {
-            if (submissionEnvelope.isOpen()){
-                return true;
-            }
-        }
-        return false;
+        return !getOpenSubmissionEnvelopes().isEmpty();
     }
 
-    @JsonIgnore
-    public void removeSubmissionEnvelopeData(SubmissionEnvelope submissionEnvelope, boolean forceRemoval) {
-        if (!submissionEnvelopes.contains(submissionEnvelope))
-            throw new UnsupportedOperationException(
-                    String.format("Submission Envelope (%s) is not part of Project (%s), so it cannot be removed.",
-                            submissionEnvelope.getUuid().getUuid().toString(),
-                            this.getUuid().getUuid().toString()
-                    ));
-        if (!(submissionEnvelope.isOpen() || forceRemoval))
-            throw new UnsupportedOperationException("Cannot remove submission from Project since it is already submitted!");
-
-        this.supplementaryFiles.removeIf(file -> file.getSubmissionEnvelope().equals(submissionEnvelope));
-        submissionEnvelopes.remove(submissionEnvelope);
-    }
 }

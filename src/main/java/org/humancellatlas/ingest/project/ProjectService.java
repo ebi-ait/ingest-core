@@ -15,11 +15,16 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 
 /**
@@ -52,6 +57,20 @@ public class ProjectService {
         }
     }
 
+    public Project linkProjectSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
+        final String projectId = project.getId();
+        project.addToSubmissionEnvelopes(submissionEnvelope);
+        projectRepository.save(project);
+
+        projectRepository.findByUuidUuidAndIsUpdateFalse(project.getUuid().getUuid()).ifPresent(projectByUuid -> {
+            if (!projectByUuid.getId().equals(projectId)) {
+                projectByUuid.addToSubmissionEnvelopes(submissionEnvelope);
+                projectRepository.save(projectByUuid);
+            }
+        });
+        return project;
+    }
+
     public Page<BundleManifest> findBundleManifestsByProjectUuidAndBundleType(Uuid projectUuid, BundleType bundleType, Pageable pageable){
         return this.projectRepository.findByUuidUuidAndIsUpdateFalse(projectUuid.getUuid())
                                      .map(project -> bundleManifestRepository.findBundleManifestsByProjectAndBundleType(project, bundleType, pageable))
@@ -60,7 +79,19 @@ public class ProjectService {
                                      });
     }
 
-    public Page<Project> queryByContent(List<MetadataCriteria> query, Pageable pageable){
-        return this.projectRepository.findByContent(query, pageable);
+    public Page<Project> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable){
+        return this.projectRepository.findByCriteria(criteriaList, andCriteria, pageable);
+    }
+
+    public Page<SubmissionEnvelope> getProjectSubmissionEnvelopes(Project project, Pageable pageable) {
+        Set<SubmissionEnvelope> envelopes = new HashSet<>();
+        this.projectRepository.findByUuid(project.getUuid()).forEach(p -> {
+            envelopes.addAll(p.getSubmissionEnvelopes());
+            envelopes.add(p.getSubmissionEnvelope());
+        });
+
+        //ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
+        envelopes.removeIf(env -> env == null || env.getSubmissionState() == null);
+        return new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
     }
 }

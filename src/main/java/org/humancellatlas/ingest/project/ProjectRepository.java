@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.project;
 
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -48,8 +49,17 @@ public interface ProjectRepository extends MongoRepository<Project, String> , Pr
     long countByUser(String user);
     
     
-    Page<Project> findByContent(List<MetadataCriteria> criteria, Pageable pageable);
+    Page<Project> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable);
 
     @RestResource(exported = false)
     Collection<Project> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+
+    @RestResource(exported = false)
+    Stream<Project> findBySupplementaryFilesContains(File file);
+
+    @RestResource(exported = false)
+    Stream<Project> findBySubmissionEnvelopesContains(SubmissionEnvelope submissionEnvelope);
+
+    @RestResource(exported = false)
+    Stream<Project> findByUuid(Uuid uuid);
 }

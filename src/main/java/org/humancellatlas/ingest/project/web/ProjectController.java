@@ -10,7 +10,6 @@ import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -18,6 +17,7 @@ import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,14 +38,14 @@ import java.util.UUID;
 @Getter
 public class ProjectController {
     private final @NonNull ProjectService projectService;
-    private final @NonNull SubmissionEnvelopeService submissionEnvelopeService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/projects", method = RequestMethod.POST)
-    ResponseEntity<Resource<?>> addProjectToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                     @RequestBody Project project,
-                                                     @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
-                                                     PersistentEntityResourceAssembler assembler) {
+    @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
+    ResponseEntity<Resource<?>> addProjectToEnvelope(
+            @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+            @RequestBody Project project,
+            @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
+            PersistentEntityResourceAssembler assembler) {
         updatingUuid.ifPresent(uuid -> {
             project.setUuid(new Uuid(uuid.toString()));
             project.setIsUpdate(true);
@@ -55,20 +55,45 @@ public class ProjectController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/projects/{id}/bundleManifests", method = RequestMethod.GET)
-    ResponseEntity<?> getBundleManifests(@PathVariable("id") Project project,
-                                         @RequestParam("bundleType") Optional<BundleType> bundleType,
-                                         Pageable pageable,
-                                         final PersistentEntityResourceAssembler resourceAssembler) {
+    @GetMapping(path = "/projects/{id}/bundleManifests")
+    ResponseEntity<PagedResources<Resource<BundleManifest>>> getBundleManifests(
+            @PathVariable("id") Project project,
+            @RequestParam("bundleType") Optional<BundleType> bundleType,
+            Pageable pageable,
+            final PersistentEntityResourceAssembler resourceAssembler) {
         Page<BundleManifest> bundleManifests = projectService.getBundleManifestRepository().findBundleManifestsByProjectAndBundleType(project, bundleType.orElse(null), pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
     }
 
-    @RequestMapping(path = "/projects/query", method = RequestMethod.POST)
-    ResponseEntity<?> queryProjects(@RequestBody List<MetadataCriteria> query,
-                                    Pageable pageable,
-                                    final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Project> projects = projectService.queryByContent(query, pageable);
+    @GetMapping(path = "/projects/{id}/submissionEnvelopes")
+    ResponseEntity<PagedResources<Resource<SubmissionEnvelope>>> getProjectSubmissionEnvelopes(
+            @PathVariable("id") Project project,
+            Pageable pageable,
+            final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<SubmissionEnvelope> envelopes = projectService.getProjectSubmissionEnvelopes(project, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(envelopes, resourceAssembler));
+    }
+
+    @PostMapping(path = "/projects/query")
+    ResponseEntity<PagedResources<Resource<Project>>> queryProjects(
+            @RequestBody List<MetadataCriteria> criteriaList,
+            @RequestParam("operator") Optional<String> operator,
+            Pageable pageable,
+            final PersistentEntityResourceAssembler resourceAssembler) {
+        Boolean andCriteria = false;
+        if (operator.isPresent() && operator.get().toLowerCase().equals("and"))
+            andCriteria = true; //otherwise "or" will be used.
+        Page<Project> projects = projectService.findByCriteria(criteriaList, andCriteria, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
+    }
+
+    @PutMapping(path = "projects/{proj_id}/submissionEnvelopes/{sub_id}")
+    ResponseEntity<Resource<?>> linkSubmissionToProject (
+            @PathVariable("proj_id") Project project,
+            @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+            PersistentEntityResourceAssembler assembler) {
+        Project savedProject = getProjectService().linkProjectSubmissionEnvelope(submissionEnvelope, project);
+        PersistentEntityResource projectResource = assembler.toFullResource(savedProject);
+        return ResponseEntity.accepted().body(projectResource);
     }
 }
