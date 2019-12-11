@@ -85,13 +85,12 @@ public class ProjectService {
 
     public Page<SubmissionEnvelope> getProjectSubmissionEnvelopes(Project project, Pageable pageable) {
         Set<SubmissionEnvelope> envelopes = new HashSet<>();
-        envelopes.add(project.getSubmissionEnvelope());
-        Page<Project> projects = this.projectRepository.findByUuid(project.getUuid(), Pageable.unpaged());
-        for (Project projectDocument : projects)
-        {
-            envelopes.addAll(projectDocument.getSubmissionEnvelopes());
-            envelopes.add(projectDocument.getSubmissionEnvelope());
-        }
+        this.projectRepository.findByUuid(project.getUuid()).forEach(p -> {
+            envelopes.addAll(p.getSubmissionEnvelopes());
+            envelopes.add(p.getSubmissionEnvelope());
+        });
+
+        //ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
         envelopes.removeIf(env -> env == null || env.getSubmissionState() == null);
         return new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
     }
