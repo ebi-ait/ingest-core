@@ -54,17 +54,4 @@ public class Project extends MetadataDocument {
         return !getOpenSubmissionEnvelopes().isEmpty();
     }
 
-    @JsonIgnore
-    public void removeSubmissionEnvelopeData(@NotNull SubmissionEnvelope submissionEnvelope, boolean forceRemoval) {
-        if (!submissionEnvelopes.contains(submissionEnvelope))
-            throw new UnsupportedOperationException(
-                    String.format("Submission Envelope (%s) is not part of Project (%s), so it cannot be removed.",
-                            submissionEnvelope.getUuid().getUuid().toString(),
-                            this.getUuid().getUuid().toString()
-                    ));
-        if (!(submissionEnvelope.isOpen() || forceRemoval))
-            throw new UnsupportedOperationException("Cannot remove submission from Project since it is already submitted!");
-
-        submissionEnvelopes.remove(submissionEnvelope);
-    }
 }

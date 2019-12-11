@@ -138,12 +138,6 @@ public class SubmissionEnvelopeService {
         submissionManifestRepository.deleteBySubmissionEnvelope(submissionEnvelope);
         submissionErrorRepository.deleteBySubmissionEnvelope(submissionEnvelope);
 
-        //When a submission envelope can only have one project this for loop can be removed.
-        Page<Project> projects = projectRepository.findBySubmissionEnvelope(submissionEnvelope, Pageable.unpaged());
-        for (Project project : projects) {
-            project.removeSubmissionEnvelopeData(submissionEnvelope, forceDelete);
-            projectRepository.save(project);
-        }
         submissionEnvelopeRepository.delete(submissionEnvelope);
     }
 
@@ -205,7 +199,7 @@ public class SubmissionEnvelopeService {
                                                             projectRepository.save(project);
                                                         }));
 
-
+        // project cleanup
 
         projectRepository.findBySubmissionEnvelope(submissionEnvelope)
                          .forEach(project -> {
