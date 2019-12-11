@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.errors.SubmissionErrorRepository;
 import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.messaging.MessageRouter;
@@ -65,6 +66,8 @@ public class SubmissionEnvelopeService {
     private BiomaterialRepository biomaterialRepository;
     @NonNull
     private PatchRepository patchRepository;
+    @NonNull
+    private SubmissionErrorRepository submissionErrorRepository;
 
     public void handleEnvelopeStateUpdateRequest(SubmissionEnvelope envelope,
                                                  SubmissionState state) {
@@ -133,6 +136,7 @@ public class SubmissionEnvelopeService {
         bundleManifestRepository.deleteByEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString());
         patchRepository.deleteBySubmissionEnvelope(submissionEnvelope);
         submissionManifestRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+        submissionErrorRepository.deleteBySubmissionEnvelope(submissionEnvelope);
 
         //When a submission envelope can only have one project this for loop can be removed.
         Page<Project> projects = projectRepository.findBySubmissionEnvelope(submissionEnvelope, Pageable.unpaged());
