@@ -60,6 +60,6 @@ public interface ProjectRepository extends MongoRepository<Project, String> , Pr
     @RestResource(exported = false)
     Stream<Project> findBySubmissionEnvelopesContains(SubmissionEnvelope submissionEnvelope);
 
-    @RestResource
+    @RestResource(exported = false)
     Stream<Project> findByUuid(Uuid uuid);
 }
