@@ -52,4 +52,7 @@ public interface ProjectRepository extends MongoRepository<Project, String> , Pr
 
     @RestResource(exported = false)
     Collection<Project> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+
+    @RestResource(exported = false)
+    List<Project> findByUuid(Uuid uuid);
 }

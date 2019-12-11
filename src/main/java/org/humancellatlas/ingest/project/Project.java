@@ -42,12 +42,14 @@ public class Project extends MetadataDocument {
         this.submissionEnvelopes.add(submissionEnvelope);
     }
 
+    //ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
     @JsonIgnore
     public List<SubmissionEnvelope> getOpenSubmissionEnvelopes(){
         return this.submissionEnvelopes.stream()
-                .filter(Objects::nonNull)
-                .filter(SubmissionEnvelope::isOpen)
-                .collect(Collectors.toList());
+            .filter(Objects::nonNull)
+            .filter(env -> env.getSubmissionState() != null)
+            .filter(SubmissionEnvelope::isOpen)
+            .collect(Collectors.toList());
     }
 
     public Boolean getHasOpenSubmission(){
