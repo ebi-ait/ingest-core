@@ -5,6 +5,7 @@ import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.errors.SubmissionErrorRepository;
 import org.humancellatlas.ingest.export.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -83,6 +84,9 @@ public class SubmissionServiceTest {
 
     @MockBean
     private PatchRepository patchRepository;
+
+    @MockBean
+    private SubmissionErrorRepository submissionErrorRepository;
 
     @Configuration
     static class TestConfiguration {}
@@ -176,6 +180,7 @@ public class SubmissionServiceTest {
         verify(bundleManifestRepository).deleteByEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString());
         verify(patchRepository).deleteBySubmissionEnvelope(submissionEnvelope);
         verify(submissionManifestRepository).deleteBySubmissionEnvelope(submissionEnvelope);
+        verify(submissionErrorRepository).deleteBySubmissionEnvelope(submissionEnvelope);
 
         verify(projectRepository).findBySubmissionEnvelope(submissionEnvelope, Pageable.unpaged());
         assertThat(project.getSubmissionEnvelopes()).isEmpty();
