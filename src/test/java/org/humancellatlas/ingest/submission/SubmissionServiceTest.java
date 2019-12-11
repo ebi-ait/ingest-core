@@ -34,8 +34,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes={ SubmissionEnvelopeService.class })
@@ -157,10 +156,17 @@ public class SubmissionServiceTest {
         when(projectRepository.findBySubmissionEnvelope(any(), any()))
                 .thenReturn(new PageImpl<>(projectList, Pageable.unpaged(), 1));
 
+        when(projectRepository.findBySubmissionEnvelopesContains(any()))
+                .thenReturn(Stream.of(project));
+
+        when(projectRepository.findBySupplementaryFilesContains(any()))
+                .thenReturn(Stream.of(project));
+
         //when
         when(processRepository.findBySubmissionEnvelope(submissionEnvelope)).thenReturn(Stream.of(testProcess));
         when(biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope)).thenReturn(Stream.of(testBiomaterial));
         when(protocolRepository.findBySubmissionEnvelope(submissionEnvelope)).thenReturn(Stream.of(testProtocol));
+        when(fileRepository.findBySubmissionEnvelope(submissionEnvelope)).thenReturn(Stream.of(file));
 
         when(biomaterialRepository.findByInputToProcessesContains(testProcess)).thenReturn(Stream.of(testOutsideBiomaterial));
         when(fileRepository.findByDerivedByProcessesContains(testProcess)).thenReturn(Stream.of(testOutsideFile));
@@ -182,10 +188,10 @@ public class SubmissionServiceTest {
         verify(submissionManifestRepository).deleteBySubmissionEnvelope(submissionEnvelope);
         verify(submissionErrorRepository).deleteBySubmissionEnvelope(submissionEnvelope);
 
-        verify(projectRepository).findBySubmissionEnvelope(submissionEnvelope, Pageable.unpaged());
+        verify(projectRepository).findBySubmissionEnvelope(submissionEnvelope);
         assertThat(project.getSubmissionEnvelopes()).isEmpty();
         assertThat(project.getSupplementaryFiles()).isEmpty();
-        verify(projectRepository).save(project);
+        verify(projectRepository, atLeastOnce()).save(project);
         verify(submissionEnvelopeRepository).delete(submissionEnvelope);
     }
 }
