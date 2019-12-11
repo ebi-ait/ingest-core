@@ -92,7 +92,7 @@ public class ProjectService {
             envelopes.addAll(projectDocument.getSubmissionEnvelopes());
             envelopes.add(projectDocument.getSubmissionEnvelope());
         }
-        envelopes.removeIf(Objects::isNull);
+        envelopes.removeIf(env -> env == null || env.getSubmissionState() == null);
         return new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
     }
 }
