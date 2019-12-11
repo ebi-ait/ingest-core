@@ -198,6 +198,27 @@ public class SubmissionEnvelopeService {
                                                                                 processRepository.save(process);
                                                                             }));
 
+        fileRepository.findBySubmissionEnvelope(submissionEnvelope)
+                      .forEach(file -> projectRepository.findBySupplementaryFilesContains(file)
+                                                        .forEach(project -> {
+                                                            project.getSupplementaryFiles().remove(file);
+                                                            projectRepository.save(project);
+                                                        }));
+
+
+
+        projectRepository.findBySubmissionEnvelope(submissionEnvelope)
+                         .forEach(project -> {
+                             project.setSubmissionEnvelope(null); // TODO: address this; we should implement project containers that aren't deleted as part of deleteSubmission()
+                             projectRepository.save(project);
+                         });
+
+        projectRepository.findBySubmissionEnvelopesContains(submissionEnvelope)
+                         .forEach(project -> {
+                             project.getSubmissionEnvelopes().remove(submissionEnvelope);
+                             projectRepository.save(project);
+                         });
+
         long endTime = System.currentTimeMillis();
         float duration = ((float)(endTime - startTime)) / 1000;
         String durationStr = new DecimalFormat("#,###.##").format(duration);

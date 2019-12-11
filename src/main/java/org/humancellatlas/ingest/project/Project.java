@@ -65,7 +65,6 @@ public class Project extends MetadataDocument {
         if (!(submissionEnvelope.isOpen() || forceRemoval))
             throw new UnsupportedOperationException("Cannot remove submission from Project since it is already submitted!");
 
-        this.supplementaryFiles.removeIf(file -> file.getSubmissionEnvelope().equals(submissionEnvelope));
         submissionEnvelopes.remove(submissionEnvelope);
     }
 }

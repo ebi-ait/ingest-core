@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.project;
 
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -52,4 +53,10 @@ public interface ProjectRepository extends MongoRepository<Project, String> , Pr
 
     @RestResource(exported = false)
     Collection<Project> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+
+    @RestResource(exported = false)
+    Stream<Project> findBySupplementaryFilesContains(File file);
+
+    @RestResource(exported = false)
+    Stream<Project> findBySubmissionEnvelopesContains(SubmissionEnvelope submissionEnvelope);
 }
