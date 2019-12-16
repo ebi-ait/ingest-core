@@ -19,9 +19,13 @@ public class UrlJwkProviderResolver {
 
     //TODO cache providers based on relative path
     public UrlJwkProvider resolve(String relativePath) {
+        var providerUrl = resolveUrl(relativePath);
+        return new RemoteJwkProvider(providerUrl);
+    }
+
+    public URL resolveUrl(String relativePath) {
         try {
-            var providerUrl = new URL(baseUrl, relativePath);
-            return new RemoteJwkProvider(providerUrl);
+            return new URL(baseUrl, relativePath);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
