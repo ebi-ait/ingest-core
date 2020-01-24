@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.project.exception.NonEmptyProject;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
@@ -20,11 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -95,8 +92,18 @@ public class ProjectService {
         return new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
     }
 
-    public void delete(Project project) {
-        projectRepository.delete(project);
+    public void delete(Project project) throws NonEmptyProject {
+        Uuid uuid = project.getUuid();
+        Optional<Project> optionalProject = projectRepository.findByUuid(uuid).findFirst();
+        // Can't use .ifPresent because of checked exception
+        if (optionalProject.isPresent()) {
+            Project persistentProject = optionalProject.get();
+            if (persistentProject.getSubmissionEnvelopes().isEmpty()) {
+                projectRepository.delete(persistentProject);
+            } else {
+                throw new NonEmptyProject();
+            }
+        }
     }
 
 }
