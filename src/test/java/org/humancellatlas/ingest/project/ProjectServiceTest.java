@@ -69,11 +69,17 @@ public class ProjectServiceTest {
             //given:
             var project = new Project("{\"name\": \"test\"}");
 
+            //and:
+            var persistentProject = new Project(null);
+            BeanUtils.copyProperties(project, persistentProject);
+            doReturn(Stream.of(persistentProject))
+                    .when(projectRepository).findByUuid(project.getUuid());
+
             //when:
             projectService.delete(project);
 
             //then:
-            verify(projectRepository).delete(project);
+            verify(projectRepository).delete(persistentProject);
         }
 
         @Test
