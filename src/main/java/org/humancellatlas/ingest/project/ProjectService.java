@@ -94,4 +94,9 @@ public class ProjectService {
         envelopes.removeIf(env -> env == null || env.getSubmissionState() == null);
         return new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
     }
+
+    public void delete(Project project) {
+        projectRepository.delete(project);
+    }
+
 }
