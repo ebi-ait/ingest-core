@@ -20,11 +20,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -60,6 +61,44 @@ public class ProjectServiceTest {
     @BeforeEach
     void setUp() {
         applicationContext.getBeansWithAnnotation(MockBean.class).forEach(Mockito::reset);
+    }
+
+    @Nested
+    class SubmissionEnvelopes {
+
+        @Test
+        @DisplayName("get all")
+        void getFromAllCopiesOfProjects() {
+            //given:
+            var project1 = new Project("project");
+            var submissionSet1 = IntStream.range(0, 3)
+                    .mapToObj(Integer::toString)
+                    .map(SubmissionEnvelope::new)
+                    .collect(toSet());
+            submissionSet1.forEach(submission ->  project1.addToSubmissionEnvelopes(submission));
+
+            //and:
+            var project2 = new Project(null);
+            BeanUtils.copyProperties(project1, project2);
+            var submissionSet2 = IntStream.range(10, 15)
+                    .mapToObj(Integer::toString)
+                    .map(SubmissionEnvelope::new)
+                    .collect(toSet());
+            submissionSet2.forEach(submission -> project2.addToSubmissionEnvelopes(submission));
+
+            //and:
+            doReturn(Stream.of(project1, project2))
+                    .when(projectRepository).findByUuid(project1.getUuid());
+
+            //when:
+            var submissionEnvelopes = projectService.getSubmissionEnvelopes(project1);
+
+            //then:
+            assertThat(submissionEnvelopes)
+                    .containsAll(submissionSet1)
+                    .containsAll(submissionSet2);
+        }
+
     }
 
     @Nested

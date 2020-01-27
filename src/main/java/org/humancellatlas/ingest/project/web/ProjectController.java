@@ -78,7 +78,7 @@ public class ProjectController {
             @PathVariable("id") Project project,
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<SubmissionEnvelope> envelopes = projectService.getProjectSubmissionEnvelopes(project, pageable);
+        Page<SubmissionEnvelope> envelopes = projectService.getSubmissionEnvelopes(project, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(envelopes, resourceAssembler));
     }
 

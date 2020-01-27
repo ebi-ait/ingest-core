@@ -102,9 +102,13 @@ public class ProjectService {
         return this.projectRepository.findByCriteria(criteriaList, andCriteria, pageable);
     }
 
-    public Page<SubmissionEnvelope> getProjectSubmissionEnvelopes(Project project, Pageable pageable) {
+    public Page<SubmissionEnvelope> getSubmissionEnvelopes(Project project, Pageable pageable) {
         Set<SubmissionEnvelope> envelopes = gather(project).submissionEnvelopes;
         return new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
+    }
+
+    public Set<SubmissionEnvelope> getSubmissionEnvelopes(Project project) {
+        return gather(project).submissionEnvelopes;
     }
 
     public void delete(Project project) throws NonEmptyProject {
@@ -119,9 +123,9 @@ public class ProjectService {
     private ProjectBag gather(Project project) {
         Set<SubmissionEnvelope> envelopes = new HashSet<>();
         Set<Project> projects = this.projectRepository.findByUuid(project.getUuid()).collect(toSet());
-        projects.forEach(p -> {
-            envelopes.addAll(p.getSubmissionEnvelopes());
-            envelopes.add(p.getSubmissionEnvelope());
+        projects.forEach(copy -> {
+            envelopes.addAll(copy.getSubmissionEnvelopes());
+            envelopes.add(copy.getSubmissionEnvelope());
         });
 
         //ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
