@@ -20,9 +20,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -70,16 +72,22 @@ public class ProjectServiceTest {
             var project = new Project("{\"name\": \"test\"}");
 
             //and:
-            var persistentProject = new Project(null);
-            BeanUtils.copyProperties(project, persistentProject);
-            doReturn(Stream.of(persistentProject))
+            var persistentProjects = IntStream.range(0, 3)
+                    .mapToObj(number -> new Project(null))
+                    .collect(toList());
+            persistentProjects.forEach(persistentProject -> {
+                BeanUtils.copyProperties(project, persistentProject);
+            });
+            doReturn(persistentProjects.stream())
                     .when(projectRepository).findByUuid(project.getUuid());
 
             //when:
             projectService.delete(project);
 
             //then:
-            verify(projectRepository).delete(persistentProject);
+            persistentProjects.forEach(persistentProject -> {
+                verify(projectRepository).delete(persistentProject);
+            });
         }
 
         @Test
@@ -88,13 +96,19 @@ public class ProjectServiceTest {
             //given:
             var project = new Project("test project");
 
-            //and:
-            var persistentProject = new Project(null);
-            BeanUtils.copyProperties(project, persistentProject);
+            //and: copy of project with no submissions
+            var persistentEmptyProject = new Project(null);
+            BeanUtils.copyProperties(project, persistentEmptyProject);
+
+            //and: copy of project with submissions
+            var persistentNonEmptyProject = new Project(null);
+            BeanUtils.copyProperties(project, persistentNonEmptyProject);
             IntStream.range(0, 3)
                     .mapToObj(Integer::toString).map(SubmissionEnvelope::new)
-                    .forEach(persistentProject::addToSubmissionEnvelopes);
-            doReturn(Stream.of(persistentProject))
+                    .forEach(persistentNonEmptyProject::addToSubmissionEnvelopes);
+
+            //and:
+            doReturn(Stream.of(persistentEmptyProject, persistentNonEmptyProject))
                     .when(projectRepository).findByUuid(project.getUuid());
 
             //expect:

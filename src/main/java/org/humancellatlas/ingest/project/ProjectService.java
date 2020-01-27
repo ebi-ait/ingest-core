@@ -22,6 +22,10 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -34,6 +38,20 @@ import java.util.*;
 @RequiredArgsConstructor
 @Getter
 public class ProjectService {
+
+    //Helper class for capturing copies of a Project and all Submission Envelopes related to them.
+    private static class ProjectBag {
+
+        private final Set<Project> projects;
+        private final Set<SubmissionEnvelope> submissionEnvelopes;
+
+        public ProjectBag(Set<Project> projects, Set<SubmissionEnvelope> submissionEnvelopes) {
+            this.projects = projects;
+            this.submissionEnvelopes = submissionEnvelopes;
+        }
+
+    }
+
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull ProjectRepository projectRepository;
     private final @NonNull MetadataCrudService metadataCrudService;
@@ -81,29 +99,30 @@ public class ProjectService {
     }
 
     public Page<SubmissionEnvelope> getProjectSubmissionEnvelopes(Project project, Pageable pageable) {
+        Set<SubmissionEnvelope> envelopes = gather(project).submissionEnvelopes;
+        return new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
+    }
+
+    public void delete(Project project) throws NonEmptyProject {
+        ProjectBag projectBag = gather(project);
+        if (projectBag.submissionEnvelopes.isEmpty()) {
+            projectBag.projects.forEach(projectRepository::delete);
+        } else {
+            throw new NonEmptyProject();
+        }
+    }
+
+    private ProjectBag gather(Project project) {
         Set<SubmissionEnvelope> envelopes = new HashSet<>();
-        this.projectRepository.findByUuid(project.getUuid()).forEach(p -> {
+        Set<Project> projects = this.projectRepository.findByUuid(project.getUuid()).collect(toSet());
+        projects.forEach(p -> {
             envelopes.addAll(p.getSubmissionEnvelopes());
             envelopes.add(p.getSubmissionEnvelope());
         });
 
         //ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
         envelopes.removeIf(env -> env == null || env.getSubmissionState() == null);
-        return new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
-    }
-
-    public void delete(Project project) throws NonEmptyProject {
-        Uuid uuid = project.getUuid();
-        Optional<Project> optionalProject = projectRepository.findByUuid(uuid).findFirst();
-        // Can't use .ifPresent because of checked exception
-        if (optionalProject.isPresent()) {
-            Project persistentProject = optionalProject.get();
-            if (persistentProject.getSubmissionEnvelopes().isEmpty()) {
-                projectRepository.delete(persistentProject);
-            } else {
-                throw new NonEmptyProject();
-            }
-        }
+        return new ProjectBag(projects, envelopes);
     }
 
 }
