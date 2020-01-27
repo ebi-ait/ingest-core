@@ -16,24 +16,18 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 
 
-/**
- * Javadocs go here!
- *
- * @author Tony Burdett
- * @date 05/09/17
- */
 @Service
 @RequiredArgsConstructor
 @Getter
@@ -93,18 +87,13 @@ public class ProjectService {
                 .map(project -> bundleManifestRepository.findBundleManifestsByProjectAndBundleType(project,
                         bundleType, pageable))
                 .orElseThrow(() -> {
-                    throw new ResourceNotFoundException(String.format("Project with UUID %s not found",
+                    throw new ResourceNotFoundException(format("Project with UUID %s not found",
                             projectUuid.getUuid().toString()));
                 });
     }
 
     public Page<Project> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable){
         return this.projectRepository.findByCriteria(criteriaList, andCriteria, pageable);
-    }
-
-    public Page<SubmissionEnvelope> getSubmissionEnvelopes(Project project, Pageable pageable) {
-        Set<SubmissionEnvelope> envelopes = gather(project).submissionEnvelopes;
-        return new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
     }
 
     public Set<SubmissionEnvelope> getSubmissionEnvelopes(Project project) {
