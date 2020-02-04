@@ -50,7 +50,8 @@ public class Links {
     public static final String COMMIT_CLEANUP_URL = "/commitCleanupEvent";
     public static final String COMMIT_COMPLETE_REL = "commitComplete";
     public static final String COMMIT_COMPLETE_URL = "/commitCompleteEvent";
-    
+    public static final String COMMIT_ARCHIVING_URL = "/commitArchivingEvent";
+
     // Links to entities for submission envelopes
     public static final String BIOMATERIALS_URL = "/biomaterials";
     public static final String BIOMATERIALS_REL = "biomaterials";
