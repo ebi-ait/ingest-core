@@ -136,6 +136,8 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 return Optional.of(Links.SUBMIT_REL);
             case PROCESSING:
                 return Optional.of(Links.PROCESSING_REL);
+            case ARCHIVING:
+                return Optional.of(Links.ARCHIVING_REL);
             case CLEANUP:
                 return Optional.of(Links.CLEANUP_REL);
             case COMPLETE:
@@ -164,6 +166,8 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 return this.getSubmitLink(submissionEnvelope);
             case PROCESSING:
                 return Optional.of(Links.PROCESSING_URL);
+            case ARCHIVING:
+                return Optional.of(Links.ARCHIVING_URL);
             case CLEANUP:
                 return Optional.of(Links.CLEANUP_URL);
             case COMPLETE:
@@ -188,6 +192,8 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 return Optional.of(Links.COMMIT_SUBMIT_REL);
             case PROCESSING:
                 return Optional.of(Links.COMMIT_PROCESSING_REL);
+            case ARCHIVING:
+                return Optional.of(Links.COMMIT_ARCHIVING_REL);
             case CLEANUP:
                 return Optional.of(Links.COMMIT_CLEANUP_REL);
             case COMPLETE:
@@ -212,6 +218,8 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 return Optional.of(Links.COMMIT_SUBMIT_URL);
             case PROCESSING:
                 return Optional.of(Links.COMMIT_PROCESSING_URL);
+            case ARCHIVING:
+                return Optional.of(Links.COMMIT_ARCHIVING_URL);
             case CLEANUP:
                 return Optional.of(Links.COMMIT_CLEANUP_URL);
             case COMPLETE:
