@@ -182,6 +182,12 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.ARCHIVING_URL, method = RequestMethod.PUT)
+    HttpEntity<?> archiveEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.ARCHIVING);
+        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+    }
+
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.CLEANUP_URL, method = RequestMethod.PUT)
     HttpEntity<?> cleanupEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.CLEANUP);
@@ -236,6 +242,13 @@ public class SubmissionController {
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_PROCESSING_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactProcessEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelope.enactStateTransition(SubmissionState.PROCESSING);
+        getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_ARCHIVING_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactArchivingEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        submissionEnvelope.enactStateTransition(SubmissionState.ARCHIVING);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }

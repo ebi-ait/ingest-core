@@ -71,6 +71,9 @@ public class SubmissionEnvelope extends AbstractEntity {
                 allowedStates.add(SubmissionState.PROCESSING);
                 break;
             case PROCESSING:
+                allowedStates.add(SubmissionState.ARCHIVING);
+                break;
+            case ARCHIVING:
                 allowedStates.add(SubmissionState.CLEANUP);
                 break;
             case CLEANUP:

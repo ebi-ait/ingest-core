@@ -27,6 +27,8 @@ public class Links {
     public static final String INVALID_URL = "/invalidEvent";
     public static final String PROCESSING_REL ="processing";
     public static final String PROCESSING_URL ="/processingEvent";
+    public static final String ARCHIVING_REL = "archiving";
+    public static final String ARCHIVING_URL = "/archivingEvent";
     public static final String CLEANUP_REL = "cleaning";
     public static final String CLEANUP_URL = "/cleanupEvent";
     public static final String COMPLETE_REL = "complete";
@@ -46,11 +48,14 @@ public class Links {
     public static final String COMMIT_INVALID_URL = "/commitInvalidEvent";
     public static final String COMMIT_PROCESSING_REL ="commitProcessing";
     public static final String COMMIT_PROCESSING_URL ="/commitProcessingEvent";
+    public static final String COMMIT_ARCHIVING_REL = "commitArchiving";
+    public static final String COMMIT_ARCHIVING_URL = "/commitArchivingEvent";
     public static final String COMMIT_CLEANUP_REL = "commitCleanup";
     public static final String COMMIT_CLEANUP_URL = "/commitCleanupEvent";
     public static final String COMMIT_COMPLETE_REL = "commitComplete";
     public static final String COMMIT_COMPLETE_URL = "/commitCompleteEvent";
-    
+
+
     // Links to entities for submission envelopes
     public static final String BIOMATERIALS_URL = "/biomaterials";
     public static final String BIOMATERIALS_REL = "biomaterials";
@@ -107,4 +112,5 @@ public class Links {
     // Links from StagingJobs
     public static final String COMPLETE_STAGING_JOB_URL = "/complete";
     public static final String COMPLETE_STAGING_JOB_REL = "completeStagingJob";
+
 }
