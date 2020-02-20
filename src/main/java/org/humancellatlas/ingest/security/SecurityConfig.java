@@ -5,6 +5,7 @@ import com.auth0.jwk.JwkProviderBuilder;
 import com.auth0.spring.security.api.BearerSecurityContextRepository;
 import com.auth0.spring.security.api.JwtAuthenticationEntryPoint;
 import com.auth0.spring.security.api.JwtAuthenticationProvider;
+import org.humancellatlas.ingest.security.jwk.GcpJwkVault;
 import org.humancellatlas.ingest.security.jwk.RemoteJwkVault;
 import org.humancellatlas.ingest.security.jwk.UrlJwkProviderResolver;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,23 +72,32 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public AuthenticationProvider googleServiceAuthenticationProvider() {
         UrlJwkProviderResolver urlJwkProviderResolver = new UrlJwkProviderResolver(googleJwkProviderbaseUrl);
-        RemoteJwkVault googleJwkVault = new RemoteJwkVault(urlJwkProviderResolver);
+        GcpJwkVault googleJwkVault = new GcpJwkVault(urlJwkProviderResolver);
         RemoteServiceJwtVerifierResolver googleJwtVerifierResolver =
                 new RemoteServiceJwtVerifierResolver(googleJwkVault, audience);
         return new GoogleServiceJwtAuthenticationProvider(new DomainWhiteList(projectWhitelist), googleJwtVerifierResolver);
     }
 
     @Bean
-    public AuthenticationProvider userAuthenticationProvider() {
-        JwkProvider jwkProvider = new JwkProviderBuilder(issuer).build();
-        JwtAuthenticationProvider delegate = new JwtAuthenticationProvider(jwkProvider, issuer, audience);
-        return new UserJwtAuthenticationProvider(delegate);
+    public AuthenticationProvider elixirServiceAuthenticationProvider() {
+        UrlJwkProviderResolver urlJwkProviderResolver = new UrlJwkProviderResolver("https://login.elixir-czech.org/oidc/jwk");
+        RemoteJwkVault elixirJwkVault = new RemoteJwkVault(urlJwkProviderResolver);
+        RemoteServiceJwtVerifierResolver elixirJwtVerifierResolver =
+                new RemoteServiceJwtVerifierResolver(elixirJwkVault, null);
+        return new ElixirAaiAuthenticationProvider(elixirJwtVerifierResolver);
     }
+
+//    @Bean
+//    public AuthenticationProvider userAuthenticationProvider() {
+//        JwkProvider jwkProvider = new JwkProviderBuilder(issuer).build();
+//        JwtAuthenticationProvider delegate = new JwtAuthenticationProvider(jwkProvider, issuer, "");
+//        return new UserJwtAuthenticationProvider(delegate);
+//    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authenticationProvider(userAuthenticationProvider())
-                .authenticationProvider(googleServiceAuthenticationProvider())
+        http.authenticationProvider(elixirServiceAuthenticationProvider())
+//                .authenticationProvider(googleServiceAuthenticationProvider())
                 .securityContext().securityContextRepository(new BearerSecurityContextRepository())
                 .and()
                 .exceptionHandling().authenticationEntryPoint(new JwtAuthenticationEntryPoint())
@@ -98,6 +108,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/submissionEnvelopes").authenticated()
+                .antMatchers(HttpMethod.POST, "/updateSubmissionEnvelopes").authenticated()
                 .antMatchers(HttpMethod.POST, "/projects**").authenticated()
                 .requestMatchers(this::isRequestForSecuredResourceFromProxy).authenticated()
                 .antMatchers(GET, "/**").permitAll();

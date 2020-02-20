@@ -27,4 +27,7 @@ public class UrlJwkProviderResolver {
         }
     }
 
+    public UrlJwkProvider resolve() {
+        return new RemoteJwkProvider(this.baseUrl);
+    }
 }
