@@ -23,6 +23,7 @@ public class QueryBuilderTest {
 
         //when:
         Query actualQuery = queryBuilder.build(metadataCriteriaList, false);
+
         //then:
         assertThat(actualQuery).isEqualTo(expectedQuery);
 
@@ -41,6 +42,7 @@ public class QueryBuilderTest {
 
         //when:
         Query actualQuery = queryBuilder.build(metadataCriteriaList, true);
+
         //then:
         assertThat(actualQuery).isEqualTo(expectedQuery);
 

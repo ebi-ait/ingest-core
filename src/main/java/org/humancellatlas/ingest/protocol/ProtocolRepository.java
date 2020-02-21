@@ -11,6 +11,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -45,4 +46,7 @@ public interface ProtocolRepository extends MongoRepository<Protocol, String> {
 
     @RestResource(exported = false)
     Collection<Protocol> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+
+    @RestResource(exported = false)
+    Page<Protocol> findBySubmissionEnvelopeInAndIsUpdateFalse(List<SubmissionEnvelope> submissionEnvelopes, Pageable pageable);
 }

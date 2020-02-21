@@ -56,8 +56,12 @@ public interface FileRepository extends MongoRepository<File, String> {
 
     @RestResource(rel = "findBySubmissionAndValidationState")
     public Page<File> findBySubmissionEnvelopeAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
-                                                                            @Param("state") ValidationState state,
-                                                                            Pageable pageable);
+                                                                 @Param("state") ValidationState state,
+                                                                 Pageable pageable);
+
     @RestResource(exported = false)
     Collection<File> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+
+    @RestResource(exported = false)
+    Page<File> findBySubmissionEnvelopeInAndIsUpdateFalse(List<SubmissionEnvelope> submissionEnvelopes, Pageable pageable);
 }

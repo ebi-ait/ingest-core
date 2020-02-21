@@ -13,6 +13,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -27,7 +28,7 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
     Optional<Process> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
     Page<Process> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
-            Pageable pageable);
+                                           Pageable pageable);
 
     @RestResource(exported = false)
     Stream<Process> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
@@ -40,8 +41,8 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
 
     @RestResource(rel = "findBySubmissionAndValidationState")
     public Page<Process> findBySubmissionEnvelopeAndValidationState(@Param
-            ("envelopeUri") SubmissionEnvelope submissionEnvelope, @Param("state")
-            ValidationState state, Pageable pageable);
+                                                                            ("envelopeUri") SubmissionEnvelope submissionEnvelope, @Param("state")
+                                                                            ValidationState state, Pageable pageable);
 
     @RestResource(exported = false)
     public Stream<Process> findAllByIdIn(Collection<String> ids);
@@ -53,4 +54,7 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
     Stream<Process> findByProtocolsContains(Protocol protocol);
 
     Stream<Process> findByInputBundleManifestsContains(BundleManifest bundleManifest);
+
+    @RestResource(exported = false)
+    Page<Process> findBySubmissionEnvelopeInAndIsUpdateFalse(List<SubmissionEnvelope> submissionEnvelopes, Pageable pageable);
 }

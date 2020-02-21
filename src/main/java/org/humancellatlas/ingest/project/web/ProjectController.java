@@ -3,11 +3,19 @@ package org.humancellatlas.ingest.project.web;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
+import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
+import org.humancellatlas.ingest.protocol.Protocol;
+import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -22,6 +30,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,6 +47,10 @@ import java.util.UUID;
 @Getter
 public class ProjectController {
     private final @NonNull ProjectService projectService;
+    private final @NonNull BiomaterialRepository biomaterialRepository;
+    private final @NonNull FileRepository fileRepository;
+    private final @NonNull ProtocolRepository protocolRepository;
+    private final @NonNull ProcessRepository processRepository;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
@@ -74,6 +87,7 @@ public class ProjectController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(envelopes, resourceAssembler));
     }
 
+
     @PostMapping(path = "/projects/query")
     ResponseEntity<PagedResources<Resource<Project>>> queryProjects(
             @RequestBody List<MetadataCriteria> criteriaList,
@@ -88,12 +102,52 @@ public class ProjectController {
     }
 
     @PutMapping(path = "projects/{proj_id}/submissionEnvelopes/{sub_id}")
-    ResponseEntity<Resource<?>> linkSubmissionToProject (
+    ResponseEntity<Resource<?>> linkSubmissionToProject(
             @PathVariable("proj_id") Project project,
             @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
             PersistentEntityResourceAssembler assembler) {
         Project savedProject = getProjectService().linkProjectSubmissionEnvelope(submissionEnvelope, project);
         PersistentEntityResource projectResource = assembler.toFullResource(savedProject);
         return ResponseEntity.accepted().body(projectResource);
+    }
+
+    @GetMapping(path = "/projects/{id}/biomaterials")
+    ResponseEntity<PagedResources<Resource<Biomaterial>>> getProjectBiomaterials(
+            @PathVariable("id") Project project,
+            Pageable pageable,
+            final PersistentEntityResourceAssembler resourceAssembler) {
+        List<SubmissionEnvelope> projectSubmissions = new ArrayList<>(project.getSubmissionEnvelopes());
+        Page<Biomaterial> biomaterials = biomaterialRepository.findBySubmissionEnvelopeInAndIsUpdateFalse(projectSubmissions, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(biomaterials, resourceAssembler));
+    }
+
+    @GetMapping(path = "/projects/{id}/files")
+    ResponseEntity<PagedResources<Resource<File>>> getProjectFiles(
+            @PathVariable("id") Project project,
+            Pageable pageable,
+            final PersistentEntityResourceAssembler resourceAssembler) {
+        List<SubmissionEnvelope> projectSubmissions = new ArrayList<>(project.getSubmissionEnvelopes());
+        Page<File> files = fileRepository.findBySubmissionEnvelopeInAndIsUpdateFalse(projectSubmissions, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(files, resourceAssembler));
+    }
+
+    @GetMapping(path = "/projects/{id}/protocols")
+    ResponseEntity<PagedResources<Resource<File>>> getProjectProtocols(
+            @PathVariable("id") Project project,
+            Pageable pageable,
+            final PersistentEntityResourceAssembler resourceAssembler) {
+        List<SubmissionEnvelope> projectSubmissions = new ArrayList<>(project.getSubmissionEnvelopes());
+        Page<Protocol> protocols = protocolRepository.findBySubmissionEnvelopeInAndIsUpdateFalse(projectSubmissions, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(protocols, resourceAssembler));
+    }
+
+    @GetMapping(path = "/projects/{id}/processes")
+    ResponseEntity<PagedResources<Resource<File>>> getProjectProcesses(
+            @PathVariable("id") Project project,
+            Pageable pageable,
+            final PersistentEntityResourceAssembler resourceAssembler) {
+        List<SubmissionEnvelope> projectSubmissions = new ArrayList<>(project.getSubmissionEnvelopes());
+        Page<Process> processes = processRepository.findBySubmissionEnvelopeInAndIsUpdateFalse(projectSubmissions, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
     }
 }
