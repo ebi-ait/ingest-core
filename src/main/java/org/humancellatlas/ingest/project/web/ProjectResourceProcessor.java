@@ -20,6 +20,18 @@ public class ProjectResourceProcessor implements ResourceProcessor<Resource<Proj
         resource.add(entityLinks.linkForSingleResource(project)
                 .slash("bundleManifests")
                 .withRel("bundleManifests"));
+        resource.add(entityLinks.linkForSingleResource(project)
+                .slash("biomaterials")
+                .withRel("biomaterials"));
+        resource.add(entityLinks.linkForSingleResource(project)
+                .slash("processes")
+                .withRel("processes"));
+        resource.add(entityLinks.linkForSingleResource(project)
+                .slash("files")
+                .withRel("files"));
+        resource.add(entityLinks.linkForSingleResource(project)
+                .slash("protocols")
+                .withRel("protocols"));
         return resource;
     }
 
