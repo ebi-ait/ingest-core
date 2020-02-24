@@ -116,7 +116,7 @@ public class ProjectController {
             @PathVariable("id") Project project,
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
-        List<SubmissionEnvelope> projectSubmissions = new ArrayList<>(project.getSubmissionEnvelopes());
+        List<SubmissionEnvelope> projectSubmissions = new ArrayList<>(project.getCompletedSubmissionEnvelopes());
         Page<Biomaterial> biomaterials = biomaterialRepository.findBySubmissionEnvelopeInAndIsUpdateFalse(projectSubmissions, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(biomaterials, resourceAssembler));
     }
@@ -126,7 +126,7 @@ public class ProjectController {
             @PathVariable("id") Project project,
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
-        List<SubmissionEnvelope> projectSubmissions = new ArrayList<>(project.getSubmissionEnvelopes());
+        List<SubmissionEnvelope> projectSubmissions = new ArrayList<>(project.getCompletedSubmissionEnvelopes());
         Page<File> files = fileRepository.findBySubmissionEnvelopeInAndIsUpdateFalse(projectSubmissions, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(files, resourceAssembler));
     }
@@ -136,7 +136,7 @@ public class ProjectController {
             @PathVariable("id") Project project,
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
-        List<SubmissionEnvelope> projectSubmissions = new ArrayList<>(project.getSubmissionEnvelopes());
+        List<SubmissionEnvelope> projectSubmissions = new ArrayList<>(project.getCompletedSubmissionEnvelopes());
         Page<Protocol> protocols = protocolRepository.findBySubmissionEnvelopeInAndIsUpdateFalse(projectSubmissions, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(protocols, resourceAssembler));
     }
@@ -146,7 +146,7 @@ public class ProjectController {
             @PathVariable("id") Project project,
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
-        List<SubmissionEnvelope> projectSubmissions = new ArrayList<>(project.getSubmissionEnvelopes());
+        List<SubmissionEnvelope> projectSubmissions = new ArrayList<>(project.getCompletedSubmissionEnvelopes());
         Page<Process> processes = processRepository.findBySubmissionEnvelopeInAndIsUpdateFalse(projectSubmissions, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
     }

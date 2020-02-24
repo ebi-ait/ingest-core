@@ -6,6 +6,7 @@ import lombok.Getter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
@@ -50,6 +51,15 @@ public class Project extends MetadataDocument {
             .filter(env -> env.getSubmissionState() != null)
             .filter(SubmissionEnvelope::isOpen)
             .collect(Collectors.toList());
+    }
+
+    @JsonIgnore
+    public List<SubmissionEnvelope> getCompletedSubmissionEnvelopes(){
+        return this.submissionEnvelopes.stream()
+                .filter(Objects::nonNull)
+                .filter(env -> env.getSubmissionState() != null)
+                .filter(env -> env.getSubmissionState() == SubmissionState.COMPLETE)
+                .collect(Collectors.toList());
     }
 
     public Boolean getHasOpenSubmission(){
