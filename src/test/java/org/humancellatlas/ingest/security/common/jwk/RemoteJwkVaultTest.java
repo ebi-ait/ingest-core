@@ -5,6 +5,7 @@ import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.JWT;
 import org.humancellatlas.ingest.security.JwtGenerator;
 import org.humancellatlas.ingest.security.authn.provider.elixir.ElixirJwkVault;
+import org.humancellatlas.ingest.security.authn.provider.gcp.GcpJwkVault;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -39,7 +40,7 @@ public class RemoteJwkVaultTest {
         doReturn(urlJwkProvider).when(urlJwkProviderResolver).resolve(issuer);
 
         //and: GoogleServiceJwkVault
-        JwkVault jwkVault = new ElixirJwkVault(urlJwkProviderResolver);
+        JwkVault jwkVault = new GcpJwkVault(urlJwkProviderResolver);
 
         //when:
         var token = JWT.decode(jwt);
