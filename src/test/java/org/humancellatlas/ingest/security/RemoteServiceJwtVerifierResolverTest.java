@@ -3,7 +3,9 @@ package org.humancellatlas.ingest.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
-import org.humancellatlas.ingest.security.jwk.RemoteJwkVault;
+import org.humancellatlas.ingest.security.authn.provider.gcp.GcpJwkVault;
+import org.humancellatlas.ingest.security.common.jwk.DelegatingJwtVerifier;
+import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
 import org.junit.jupiter.api.Test;
 
 import java.security.interfaces.RSAPublicKey;
@@ -23,7 +25,7 @@ public class RemoteServiceJwtVerifierResolverTest {
 
         //and:
         String audience = "https://dev.data.humancellatlas.org/";
-        RemoteJwkVault jwkVault = mock(RemoteJwkVault.class);
+        GcpJwkVault jwkVault = mock(GcpJwkVault.class);
         doReturn(publicKey).when(jwkVault).getPublicKey(any(DecodedJWT.class));
 
         //and:

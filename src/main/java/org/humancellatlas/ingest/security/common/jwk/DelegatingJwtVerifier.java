@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.security;
+package org.humancellatlas.ingest.security.common.jwk;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;

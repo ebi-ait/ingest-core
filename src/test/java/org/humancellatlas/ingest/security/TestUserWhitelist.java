@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.security;
 
+import org.humancellatlas.ingest.security.authn.provider.gcp.GcpDomainWhiteList;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Arrays.asList;
@@ -10,7 +11,7 @@ public class TestUserWhitelist {
     @Test
     public void testLists() {
         //given:
-        DomainWhiteList userWhiteList = new DomainWhiteList("trusteddomain.com", "friendlypeople.net");
+        GcpDomainWhiteList userWhiteList = new GcpDomainWhiteList("trusteddomain.com", "friendlypeople.net");
 
         //expect:
         asList("goodguy@trusteddomain.com", "upstandinglass@friendlypeople.net", "cooldude@friendlypeople.net")

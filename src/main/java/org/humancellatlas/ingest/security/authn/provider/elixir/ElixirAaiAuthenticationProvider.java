@@ -1,36 +1,27 @@
-package org.humancellatlas.ingest.security;
+package org.humancellatlas.ingest.security.authn.provider.elixir;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
-import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
-import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
-import org.humancellatlas.ingest.security.spring.DelegatingJwtAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
+import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
+import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
+import org.humancellatlas.ingest.security.common.jwk.DelegatingJwtAuthentication;
 
-public class GoogleServiceJwtAuthenticationProvider implements AuthenticationProvider {
-
-    private static Logger logger = LoggerFactory.getLogger(GoogleServiceJwtAuthenticationProvider.class);
+public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
+    private static Logger logger = LoggerFactory.getLogger(ElixirAaiAuthenticationProvider.class);
 
     private final RemoteServiceJwtVerifierResolver jwtVerifierResolver;
 
-    private final DomainWhiteList projectWhitelist;
-
-    public GoogleServiceJwtAuthenticationProvider(DomainWhiteList projectWhitelist,
-                                                  RemoteServiceJwtVerifierResolver jwtVerifierResolver) {
+    public ElixirAaiAuthenticationProvider(RemoteServiceJwtVerifierResolver jwtVerifierResolver) {
         this.jwtVerifierResolver = jwtVerifierResolver;
-        this.projectWhitelist = projectWhitelist;
-    }
-
-    @Override
-    public boolean supports(Class<?> authentication) {
-        return JwtAuthentication.class.isAssignableFrom(authentication);
     }
 
     @Override
@@ -57,9 +48,13 @@ public class GoogleServiceJwtAuthenticationProvider implements AuthenticationPro
         DecodedJWT token = JWT.decode(jwt.getToken());
         String issuer = token.getIssuer();
 
-        if (!projectWhitelist.lists(issuer)) {
+        if (!issuer.equals("https://login.elixir-czech.org/oidc/")) {
             throw new UnlistedJwtIssuer(issuer);
         }
     }
 
+    @Override
+    public boolean supports(Class<?> authentication) {
+        return JwtAuthentication.class.isAssignableFrom(authentication);
+    }
 }

@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.security;
+package org.humancellatlas.ingest.security.authn.provider.gcp;
 
 import java.util.Collections;
 import java.util.List;
@@ -7,15 +7,15 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
 
-public class DomainWhiteList {
+public class GcpDomainWhiteList {
 
     private final List<String> domains;
 
-    public DomainWhiteList(List<String> domains) {
+    public GcpDomainWhiteList(List<String> domains) {
         this.domains = Collections.unmodifiableList(domains);
     }
 
-    public DomainWhiteList(String... domains) {
+    public GcpDomainWhiteList(String... domains) {
         this(asList(domains));
     }
 
