@@ -75,32 +75,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         UrlJwkProviderResolver urlJwkProviderResolver = new UrlJwkProviderResolver(googleJwkProviderbaseUrl);
         GcpJwkVault googleJwkVault = new GcpJwkVault(urlJwkProviderResolver);
         RemoteServiceJwtVerifierResolver googleJwtVerifierResolver =
-                new RemoteServiceJwtVerifierResolver(googleJwkVault, audience);
+                new RemoteServiceJwtVerifierResolver(googleJwkVault, serviceAudience);
         return new GoogleServiceJwtAuthenticationProvider(new GcpDomainWhiteList(projectWhitelist), googleJwtVerifierResolver);
     }
 
     @Bean
     public AuthenticationProvider elixirServiceAuthenticationProvider() {
-        // TODO get url from env var - set in Dockerfile and ingest-kube-deploy yamls
-        UrlJwkProviderResolver urlJwkProviderResolver = new UrlJwkProviderResolver("https://login.elixir-czech.org/oidc/jwk");
+        UrlJwkProviderResolver urlJwkProviderResolver = new UrlJwkProviderResolver(issuer + "/jwk");
         ElixirJwkVault elixirJwkVault = new ElixirJwkVault(urlJwkProviderResolver);
         RemoteServiceJwtVerifierResolver elixirJwtVerifierResolver =
                 new RemoteServiceJwtVerifierResolver(elixirJwkVault, null);
         return new ElixirAaiAuthenticationProvider(elixirJwtVerifierResolver);
     }
 
-    /**
-    @Bean
-    public AuthenticationProvider userAuthenticationProvider() {
-        JwkProvider jwkProvider = new JwkProviderBuilder(issuer).build();
-        JwtAuthenticationProvider delegate = new JwtAuthenticationProvider(jwkProvider, issuer, audience);
-        return new UserJwtAuthenticationProvider(delegate);
-    }*/
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // TODO the auth providers below under configure(AuthenticationManagerBuilder auth)
-        //http.authenticationProvider(userAuthenticationProvider())
         http.authenticationProvider(elixirServiceAuthenticationProvider())
                 .authenticationProvider(googleServiceAuthenticationProvider())
                 .securityContext().securityContextRepository(new BearerSecurityContextRepository())
