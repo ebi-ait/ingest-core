@@ -75,7 +75,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         UrlJwkProviderResolver urlJwkProviderResolver = new UrlJwkProviderResolver(googleJwkProviderbaseUrl);
         GcpJwkVault googleJwkVault = new GcpJwkVault(urlJwkProviderResolver);
         RemoteServiceJwtVerifierResolver googleJwtVerifierResolver =
-                new RemoteServiceJwtVerifierResolver(googleJwkVault, serviceAudience);
+                new RemoteServiceJwtVerifierResolver(googleJwkVault, serviceAudience, null);
         return new GoogleServiceJwtAuthenticationProvider(new GcpDomainWhiteList(projectWhitelist), googleJwtVerifierResolver);
     }
 
@@ -84,7 +84,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         UrlJwkProviderResolver urlJwkProviderResolver = new UrlJwkProviderResolver(issuer + "/jwk");
         ElixirJwkVault elixirJwkVault = new ElixirJwkVault(urlJwkProviderResolver);
         RemoteServiceJwtVerifierResolver elixirJwtVerifierResolver =
-                new RemoteServiceJwtVerifierResolver(elixirJwkVault, null);
+                new RemoteServiceJwtVerifierResolver(elixirJwkVault, null, issuer);
         return new ElixirAaiAuthenticationProvider(elixirJwtVerifierResolver);
     }
 

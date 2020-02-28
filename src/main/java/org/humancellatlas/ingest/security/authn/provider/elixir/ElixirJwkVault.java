@@ -18,8 +18,7 @@ public class ElixirJwkVault implements JwkVault {
 
     @Override
     public PublicKey getPublicKey(DecodedJWT jwt) {
-        var issuer = jwt.getIssuer();
-        UrlJwkProvider jwkProvider = urlJwkProviderResolver.resolve(/*issuer*/);
+        UrlJwkProvider jwkProvider = urlJwkProviderResolver.resolve();
         try {
             var jwk = jwkProvider.get(jwt.getKeyId());
             return jwk.getPublicKey();

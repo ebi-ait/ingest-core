@@ -20,7 +20,7 @@ public class RemoteServiceJwtVerifierResolverTest {
     @Test
     public void testResolveForJwt() {
         //given:
-        JwtGenerator jwtGenerator = new JwtGenerator();
+        JwtGenerator jwtGenerator = new JwtGenerator("issuerFromToken");
         RSAPublicKey publicKey = jwtGenerator.getPublicKey();
 
         //and:
@@ -29,7 +29,137 @@ public class RemoteServiceJwtVerifierResolverTest {
         doReturn(publicKey).when(jwkVault).getPublicKey(any(DecodedJWT.class));
 
         //and:
-        RemoteServiceJwtVerifierResolver jwtVerifierResolver = new RemoteServiceJwtVerifierResolver(jwkVault, audience);
+        RemoteServiceJwtVerifierResolver jwtVerifierResolver = new RemoteServiceJwtVerifierResolver(jwkVault, audience, null);
+
+        //and: given the token
+        String jwt = jwtGenerator.generate();
+        DecodedJWT token = JWT.decode(jwt);
+
+        //when:
+        JWTVerifier verifier = jwtVerifierResolver.resolve(jwt);
+
+        //then:
+        assertThat(verifier).isNotNull();
+
+        //and: inspect using verifier with extended interface as a work around
+        assertThat(verifier).isInstanceOf(DelegatingJwtVerifier.class);
+        DelegatingJwtVerifier delegatingVerifier = (DelegatingJwtVerifier) verifier;
+        assertThat(delegatingVerifier)
+                .extracting("audience", "issuer")
+                .containsExactly(audience, token.getIssuer());
+    }
+
+    @Test
+    public void testResolveForJwtWithIssuer() {
+        //given:
+        String issuerFromToken = "issuerFromToken";
+        JwtGenerator jwtGenerator = new JwtGenerator(issuerFromToken);
+        RSAPublicKey publicKey = jwtGenerator.getPublicKey();
+
+        //and:
+        String audience = "https://dev.data.humancellatlas.org/";
+        String issuer = "auth0";
+        GcpJwkVault jwkVault = mock(GcpJwkVault.class);
+        doReturn(publicKey).when(jwkVault).getPublicKey(any(DecodedJWT.class));
+
+        //and:
+        RemoteServiceJwtVerifierResolver jwtVerifierResolver = new RemoteServiceJwtVerifierResolver(jwkVault, audience, issuer);
+
+        //and: given the token
+        String jwt = jwtGenerator.generate();
+
+        //when:
+        JWTVerifier verifier = jwtVerifierResolver.resolve(jwt);
+
+        //then:
+        assertThat(verifier).isNotNull();
+
+        //and: inspect using verifier with extended interface as a work around
+        assertThat(verifier).isInstanceOf(DelegatingJwtVerifier.class);
+        DelegatingJwtVerifier delegatingVerifier = (DelegatingJwtVerifier) verifier;
+        assertThat(delegatingVerifier)
+                .extracting("audience", "issuer")
+                .containsExactly(audience, issuer);
+    }
+
+    @Test
+    public void testResolveForJwtWithNoAudience() {
+        //given:
+        JwtGenerator jwtGenerator = new JwtGenerator();
+        RSAPublicKey publicKey = jwtGenerator.getPublicKey();
+
+        //and:
+        String issuer = "auth0";
+        GcpJwkVault jwkVault = mock(GcpJwkVault.class);
+        doReturn(publicKey).when(jwkVault).getPublicKey(any(DecodedJWT.class));
+
+        //and:
+        RemoteServiceJwtVerifierResolver jwtVerifierResolver = new RemoteServiceJwtVerifierResolver(jwkVault, null, issuer);
+
+        //and: given the token
+        String jwt = jwtGenerator.generate();
+
+        //when:
+        JWTVerifier verifier = jwtVerifierResolver.resolve(jwt);
+
+        //then:
+        assertThat(verifier).isNotNull();
+
+        //and: inspect using verifier with extended interface as a work around
+        assertThat(verifier).isInstanceOf(DelegatingJwtVerifier.class);
+        DelegatingJwtVerifier delegatingVerifier = (DelegatingJwtVerifier) verifier;
+        assertThat(delegatingVerifier)
+                .extracting("audience", "issuer")
+                .containsExactly(null, issuer);
+    }
+
+
+    @Test
+    public void testResolveForJwtWithNoAudienceAndNoIssuer() {
+        //given:
+        String issuerFromToken = "issuerFromToken";
+        JwtGenerator jwtGenerator = new JwtGenerator(issuerFromToken);
+        RSAPublicKey publicKey = jwtGenerator.getPublicKey();
+
+        //and:
+        String issuer = "auth0";
+        GcpJwkVault jwkVault = mock(GcpJwkVault.class);
+        doReturn(publicKey).when(jwkVault).getPublicKey(any(DecodedJWT.class));
+
+        //and:
+        RemoteServiceJwtVerifierResolver jwtVerifierResolver = new RemoteServiceJwtVerifierResolver(jwkVault, null, null);
+
+        //and: given the token
+        String jwt = jwtGenerator.generate();
+        DecodedJWT token = JWT.decode(jwt);
+
+        //when:
+        JWTVerifier verifier = jwtVerifierResolver.resolve(jwt);
+
+        //then:
+        assertThat(verifier).isNotNull();
+
+        //and: inspect using verifier with extended interface as a work around
+        assertThat(verifier).isInstanceOf(DelegatingJwtVerifier.class);
+        DelegatingJwtVerifier delegatingVerifier = (DelegatingJwtVerifier) verifier;
+        assertThat(delegatingVerifier)
+                .extracting("audience", "issuer")
+                .containsExactly(null, token.getIssuer());
+    }
+
+    @Test
+    public void testResolveForJwtWithAudienceAndNoIssuer() {
+        //given:
+        JwtGenerator jwtGenerator = new JwtGenerator("issuerFromToken");
+        RSAPublicKey publicKey = jwtGenerator.getPublicKey();
+
+        //and:
+        String audience = "https://dev.data.humancellatlas.org/";
+        GcpJwkVault jwkVault = mock(GcpJwkVault.class);
+        doReturn(publicKey).when(jwkVault).getPublicKey(any(DecodedJWT.class));
+
+        //and:
+        RemoteServiceJwtVerifierResolver jwtVerifierResolver = new RemoteServiceJwtVerifierResolver(jwkVault, audience, null);
 
         //and: given the token
         String jwt = jwtGenerator.generate();

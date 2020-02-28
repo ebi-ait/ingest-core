@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.security;
+package org.humancellatlas.ingest.security.authn.provider.auth0;
 
 import org.humancellatlas.ingest.security.authn.provider.gcp.GcpDomainWhiteList;
 import org.junit.jupiter.api.Test;

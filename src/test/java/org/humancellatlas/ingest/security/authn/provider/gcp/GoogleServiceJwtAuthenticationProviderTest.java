@@ -1,8 +1,9 @@
-package org.humancellatlas.ingest.security;
+package org.humancellatlas.ingest.security.authn.provider.gcp;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.PreAuthenticatedAuthenticationJsonWebToken;
+import org.humancellatlas.ingest.security.JwtGenerator;
 import org.humancellatlas.ingest.security.authn.provider.gcp.GcpDomainWhiteList;
 import org.humancellatlas.ingest.security.authn.provider.gcp.GoogleServiceJwtAuthenticationProvider;
 import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;

@@ -5,20 +5,28 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
+import org.humancellatlas.ingest.security.common.jwk.DelegatingJwtAuthentication;
+import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
+import org.humancellatlas.ingest.security.exception.InvalidUserEmail;
+import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
+import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
-import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
-import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
-import org.humancellatlas.ingest.security.common.jwk.DelegatingJwtAuthentication;
+import org.springframework.web.reactive.function.client.WebClient;
 
 public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
     private static Logger logger = LoggerFactory.getLogger(ElixirAaiAuthenticationProvider.class);
 
     private final RemoteServiceJwtVerifierResolver jwtVerifierResolver;
+
+    @Value(value = "${AUTH_ISSUER}")
+    private String issuer;
 
     public ElixirAaiAuthenticationProvider(RemoteServiceJwtVerifierResolver jwtVerifierResolver) {
         this.jwtVerifierResolver = jwtVerifierResolver;
@@ -31,7 +39,7 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         }
         try {
             JwtAuthentication jwt = (JwtAuthentication) authentication;
-            verifyIssuer(jwt);
+            verifyUserEmail(jwt);
 
             JWTVerifier jwtVerifier = jwtVerifierResolver.resolve(jwt.getToken());
             Authentication jwtAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
@@ -44,12 +52,20 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         }
     }
 
-    private void verifyIssuer(JwtAuthentication jwt) {
-        DecodedJWT token = JWT.decode(jwt.getToken());
-        String issuer = token.getIssuer();
+    private void verifyUserEmail(JwtAuthentication jwt) {
+        String token = jwt.getToken();
+        WebClient elixirClient = WebClient
+                .builder()
+                .baseUrl(jwtVerifierResolver.getIssuer())
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .build();
+        WebClient.RequestBodySpec userInfoRequest = elixirClient
+                .method(HttpMethod.GET)
+                .uri("/userinfo");
+        ElixirUserInfo userInfo = userInfoRequest.retrieve().bodyToMono(ElixirUserInfo.class).block();
 
-        if (!issuer.equals("https://login.elixir-czech.org/oidc/")) {
-            throw new UnlistedJwtIssuer(issuer);
+        if (userInfo.getEmail().indexOf("@ebi.ac.uk") < 0) {
+            throw new InvalidUserEmail(userInfo.getEmail());
         }
     }
 
