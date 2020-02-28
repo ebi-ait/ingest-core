@@ -11,14 +11,10 @@ import org.humancellatlas.ingest.security.JwtGenerator;
 import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
 import org.humancellatlas.ingest.security.exception.InvalidUserEmail;
 import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
-import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.junit.jupiter.api.*;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 
@@ -54,7 +50,6 @@ public class ElixirAaiAuthenticationProviderTest {
 
         @BeforeEach
         public void setUp() {
-            String issuer = "https://elixir.issuer.org";
             jwtVerifier = mock(JWTVerifier.class);
             jwtVerifierResolver = mock(RemoteServiceJwtVerifierResolver.class);
             doReturn(jwtVerifier).when(jwtVerifierResolver).resolve(anyString());
