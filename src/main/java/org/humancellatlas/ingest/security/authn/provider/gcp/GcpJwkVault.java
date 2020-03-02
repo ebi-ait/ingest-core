@@ -1,16 +1,18 @@
-package org.humancellatlas.ingest.security.jwk;
+package org.humancellatlas.ingest.security.authn.provider.gcp;
 
 import com.auth0.jwk.JwkException;
 import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.humancellatlas.ingest.security.common.jwk.JwkVault;
+import org.humancellatlas.ingest.security.common.jwk.UrlJwkProviderResolver;
 
 import java.security.PublicKey;
 
-public class RemoteJwkVault implements JwkVault {
+public class GcpJwkVault implements JwkVault {
 
     private final UrlJwkProviderResolver urlJwkProviderResolver;
 
-    public RemoteJwkVault(UrlJwkProviderResolver urlJwkProviderResolver) {
+    public GcpJwkVault(UrlJwkProviderResolver urlJwkProviderResolver) {
         this.urlJwkProviderResolver = urlJwkProviderResolver;
     }
 

@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.security.jwk;
+package org.humancellatlas.ingest.security.common.jwk;
 
 import com.auth0.jwk.UrlJwkProvider;
 
@@ -25,6 +25,10 @@ public class UrlJwkProviderResolver {
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public UrlJwkProvider resolve() {
+        return new RemoteJwkProvider(this.baseUrl);
     }
 
 }

@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.security.spring;
+package org.humancellatlas.ingest.security.common.jwk;
 
 import org.springframework.security.core.Authentication;
 

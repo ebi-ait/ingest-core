@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.security;
+package org.humancellatlas.ingest.security.authn.provider.auth0;
 
 import com.auth0.spring.security.api.JwtAuthenticationProvider;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;

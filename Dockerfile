@@ -13,7 +13,7 @@ ENV JMX_PORT=9091
 ENV RMI_HOSTNAME=localhost
 
 #Security variables
-ENV AUTH_ISSUER=https://humancellatlas.auth0.com/
+ENV AUTH_ISSUER=https://login.elixir-czech.org/oidc
 ENV SVC_AUTH_AUDIENCE=https://dev.data.humancellatlas.org/
 ENV USR_AUTH_AUDIENCE=https://dev.data.humancellatlas.org/
 ENV GCP_JWK_PROVIDER_BASE_URL=https://www.googleapis.com/service_accounts/v1/jwk/
