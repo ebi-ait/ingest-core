@@ -1,12 +1,14 @@
 package org.humancellatlas.ingest.security;
 
-import com.auth0.jwk.JwkProvider;
-import com.auth0.jwk.JwkProviderBuilder;
 import com.auth0.spring.security.api.BearerSecurityContextRepository;
 import com.auth0.spring.security.api.JwtAuthenticationEntryPoint;
-import com.auth0.spring.security.api.JwtAuthenticationProvider;
-import org.humancellatlas.ingest.security.jwk.RemoteJwkVault;
-import org.humancellatlas.ingest.security.jwk.UrlJwkProviderResolver;
+import org.humancellatlas.ingest.security.authn.provider.elixir.ElixirAaiAuthenticationProvider;
+import org.humancellatlas.ingest.security.authn.provider.gcp.GcpDomainWhiteList;
+import org.humancellatlas.ingest.security.authn.provider.gcp.GcpJwkVault;
+import org.humancellatlas.ingest.security.authn.provider.gcp.GoogleServiceJwtAuthenticationProvider;
+import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
+import org.humancellatlas.ingest.security.authn.provider.elixir.ElixirJwkVault;
+import org.humancellatlas.ingest.security.common.jwk.UrlJwkProviderResolver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,7 +58,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/user/**"));
         antPathMatchers.addAll(defineAntPathMatchers(PATCH, "/**"));
         antPathMatchers.addAll(defineAntPathMatchers(PUT, "/**"));
-        antPathMatchers.addAll(defineAntPathMatchers(POST,"/messaging/**", "/submissionEnvelopes/*/projects",
+        antPathMatchers.addAll(defineAntPathMatchers(POST, "/messaging/**", "/projects**", "/submissionEnvelopes", "/submissionEnvelopes/*/projects",
                 "/files**", "/biomaterials**", "/protocols**", "/processes**", "/files**", "/bundleManifests**"));
         SECURED_ANT_PATHS = Collections.unmodifiableList(antPathMatchers);
     }
@@ -71,22 +73,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public AuthenticationProvider googleServiceAuthenticationProvider() {
         UrlJwkProviderResolver urlJwkProviderResolver = new UrlJwkProviderResolver(googleJwkProviderbaseUrl);
-        RemoteJwkVault googleJwkVault = new RemoteJwkVault(urlJwkProviderResolver);
+        GcpJwkVault googleJwkVault = new GcpJwkVault(urlJwkProviderResolver);
         RemoteServiceJwtVerifierResolver googleJwtVerifierResolver =
-                new RemoteServiceJwtVerifierResolver(googleJwkVault, audience);
-        return new GoogleServiceJwtAuthenticationProvider(new DomainWhiteList(projectWhitelist), googleJwtVerifierResolver);
+                new RemoteServiceJwtVerifierResolver(googleJwkVault, serviceAudience, null);
+        return new GoogleServiceJwtAuthenticationProvider(new GcpDomainWhiteList(projectWhitelist), googleJwtVerifierResolver);
     }
 
     @Bean
-    public AuthenticationProvider userAuthenticationProvider() {
-        JwkProvider jwkProvider = new JwkProviderBuilder(issuer).build();
-        JwtAuthenticationProvider delegate = new JwtAuthenticationProvider(jwkProvider, issuer, audience);
-        return new UserJwtAuthenticationProvider(delegate);
+    public AuthenticationProvider elixirServiceAuthenticationProvider() {
+        UrlJwkProviderResolver urlJwkProviderResolver = new UrlJwkProviderResolver(issuer + "/jwk");
+        ElixirJwkVault elixirJwkVault = new ElixirJwkVault(urlJwkProviderResolver);
+        RemoteServiceJwtVerifierResolver elixirJwtVerifierResolver =
+                new RemoteServiceJwtVerifierResolver(elixirJwkVault, null, issuer);
+        return new ElixirAaiAuthenticationProvider(elixirJwtVerifierResolver);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authenticationProvider(userAuthenticationProvider())
+        // TODO the auth providers below under configure(AuthenticationManagerBuilder auth)
+        http.authenticationProvider(elixirServiceAuthenticationProvider())
                 .authenticationProvider(googleServiceAuthenticationProvider())
                 .securityContext().securityContextRepository(new BearerSecurityContextRepository())
                 .and()

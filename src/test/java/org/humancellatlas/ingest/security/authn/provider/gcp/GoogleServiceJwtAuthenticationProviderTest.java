@@ -1,8 +1,12 @@
-package org.humancellatlas.ingest.security;
+package org.humancellatlas.ingest.security.authn.provider.gcp;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.PreAuthenticatedAuthenticationJsonWebToken;
+import org.humancellatlas.ingest.security.JwtGenerator;
+import org.humancellatlas.ingest.security.authn.provider.gcp.GcpDomainWhiteList;
+import org.humancellatlas.ingest.security.authn.provider.gcp.GoogleServiceJwtAuthenticationProvider;
+import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
 import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
 import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +34,7 @@ public class GoogleServiceJwtAuthenticationProviderTest {
 
         private RemoteServiceJwtVerifierResolver jwtVerifierResolver;
 
-        private DomainWhiteList projectWhitelist;
+        private GcpDomainWhiteList projectWhitelist;
 
         @BeforeEach
         public void setUp() {
@@ -38,7 +42,7 @@ public class GoogleServiceJwtAuthenticationProviderTest {
             jwtVerifierResolver = mock(RemoteServiceJwtVerifierResolver.class);
             doReturn(jwtVerifier).when(jwtVerifierResolver).resolve(anyString());
 
-            projectWhitelist = mock(DomainWhiteList.class);
+            projectWhitelist = mock(GcpDomainWhiteList.class);
             doReturn(true).when(projectWhitelist).lists("sample@domain.tld");
         }
 

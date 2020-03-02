@@ -1,13 +1,14 @@
-package org.humancellatlas.ingest.security;
+package org.humancellatlas.ingest.security.authn.provider.gcp;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
+import org.humancellatlas.ingest.security.common.jwk.DelegatingJwtAuthentication;
+import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
 import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
 import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
-import org.humancellatlas.ingest.security.spring.DelegatingJwtAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -20,9 +21,9 @@ public class GoogleServiceJwtAuthenticationProvider implements AuthenticationPro
 
     private final RemoteServiceJwtVerifierResolver jwtVerifierResolver;
 
-    private final DomainWhiteList projectWhitelist;
+    private final GcpDomainWhiteList projectWhitelist;
 
-    public GoogleServiceJwtAuthenticationProvider(DomainWhiteList projectWhitelist,
+    public GoogleServiceJwtAuthenticationProvider(GcpDomainWhiteList projectWhitelist,
                                                   RemoteServiceJwtVerifierResolver jwtVerifierResolver) {
         this.jwtVerifierResolver = jwtVerifierResolver;
         this.projectWhitelist = projectWhitelist;
