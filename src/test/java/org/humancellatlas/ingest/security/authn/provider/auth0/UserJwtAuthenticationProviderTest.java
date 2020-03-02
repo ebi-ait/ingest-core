@@ -1,7 +1,10 @@
-package org.humancellatlas.ingest.security;
+package org.humancellatlas.ingest.security.authn.provider.auth0;
 
 import com.auth0.spring.security.api.JwtAuthenticationProvider;
 import com.auth0.spring.security.api.authentication.PreAuthenticatedAuthenticationJsonWebToken;
+import org.humancellatlas.ingest.security.JwtGenerator;
+import org.humancellatlas.ingest.security.authn.provider.auth0.UserJwtAuthenticationProvider;
+import org.humancellatlas.ingest.security.authn.provider.gcp.GcpDomainWhiteList;
 import org.humancellatlas.ingest.security.exception.InvalidUserGroup;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -43,7 +46,7 @@ public class UserJwtAuthenticationProviderTest {
             doReturn(jwtAuthentication).when(delegate).authenticate(any(Authentication.class));
 
             //and:
-            DomainWhiteList userWhitelist = mock(DomainWhiteList.class);
+            GcpDomainWhiteList userWhitelist = mock(GcpDomainWhiteList.class);
             doReturn(true).when(userWhitelist).lists(anyString());
 
             //and:
@@ -69,7 +72,7 @@ public class UserJwtAuthenticationProviderTest {
             doReturn(authentication).when(delegate).authenticate(any(Authentication.class));
 
             //and:
-            DomainWhiteList userWhitelist = mock(DomainWhiteList.class);
+            GcpDomainWhiteList userWhitelist = mock(GcpDomainWhiteList.class);
             doReturn(false).when(userWhitelist).lists(anyString());
 
             //and:
@@ -97,7 +100,7 @@ public class UserJwtAuthenticationProviderTest {
             doReturn(authentication).when(delegate).authenticate(any(Authentication.class));
 
             //and:
-            DomainWhiteList userWhitelist = mock(DomainWhiteList.class);
+            GcpDomainWhiteList userWhitelist = mock(GcpDomainWhiteList.class);
             doReturn(false).when(userWhitelist).lists(anyString());
 
             //and:

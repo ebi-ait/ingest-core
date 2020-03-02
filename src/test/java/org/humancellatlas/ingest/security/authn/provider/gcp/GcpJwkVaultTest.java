@@ -1,9 +1,13 @@
-package org.humancellatlas.ingest.security.jwk;
+package org.humancellatlas.ingest.security.authn.provider.gcp;
 
 import com.auth0.jwk.Jwk;
 import com.auth0.jwk.UrlJwkProvider;
 import com.auth0.jwt.JWT;
 import org.humancellatlas.ingest.security.JwtGenerator;
+import org.humancellatlas.ingest.security.authn.provider.elixir.ElixirJwkVault;
+import org.humancellatlas.ingest.security.authn.provider.gcp.GcpJwkVault;
+import org.humancellatlas.ingest.security.common.jwk.JwkVault;
+import org.humancellatlas.ingest.security.common.jwk.UrlJwkProviderResolver;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -13,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-public class RemoteJwkVaultTest {
+public class GcpJwkVaultTest {
 
     @Test
     public void testGetPublicKeyForJwt() throws Exception {
@@ -38,7 +42,7 @@ public class RemoteJwkVaultTest {
         doReturn(urlJwkProvider).when(urlJwkProviderResolver).resolve(issuer);
 
         //and: GoogleServiceJwkVault
-        JwkVault jwkVault = new RemoteJwkVault(urlJwkProviderResolver);
+        JwkVault jwkVault = new GcpJwkVault(urlJwkProviderResolver);
 
         //when:
         var token = JWT.decode(jwt);

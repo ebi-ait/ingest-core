@@ -13,6 +13,7 @@ public enum SubmissionState {
     INVALID,
     SUBMITTED,
     PROCESSING,
+    ARCHIVING,
     CLEANUP,
     COMPLETE
 }
