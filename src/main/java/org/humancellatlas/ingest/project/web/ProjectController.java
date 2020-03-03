@@ -8,9 +8,13 @@ import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
+import org.humancellatlas.ingest.project.exception.NonEmptyProject;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -19,12 +23,11 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Javadocs go here!
@@ -37,6 +40,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Getter
 public class ProjectController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProjectController.class);
+
     private final @NonNull ProjectService projectService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
@@ -67,11 +73,11 @@ public class ProjectController {
 
     @GetMapping(path = "/projects/{id}/submissionEnvelopes")
     ResponseEntity<PagedResources<Resource<SubmissionEnvelope>>> getProjectSubmissionEnvelopes(
-            @PathVariable("id") Project project,
-            Pageable pageable,
+            @PathVariable("id") Project project, Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<SubmissionEnvelope> envelopes = projectService.getProjectSubmissionEnvelopes(project, pageable);
-        return ResponseEntity.ok(pagedResourcesAssembler.toResource(envelopes, resourceAssembler));
+        var envelopes = projectService.getSubmissionEnvelopes(project);
+        var resultPage = new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(resultPage, resourceAssembler));
     }
 
     @PostMapping(path = "/projects/query")
@@ -96,4 +102,18 @@ public class ProjectController {
         PersistentEntityResource projectResource = assembler.toFullResource(savedProject);
         return ResponseEntity.accepted().body(projectResource);
     }
+
+    @DeleteMapping(path = "projects/{id}")
+    public ResponseEntity<?> delete(@PathVariable("id") Project project) {
+        try {
+            projectService.delete(project);
+            return ResponseEntity.noContent().build();
+        } catch (NonEmptyProject nonEmptyProject) {
+            String message = nonEmptyProject.getMessage();
+            LOGGER.debug(message);
+            Map<String, String> errorResponse = Map.of("message", message);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        }
+    }
+
 }

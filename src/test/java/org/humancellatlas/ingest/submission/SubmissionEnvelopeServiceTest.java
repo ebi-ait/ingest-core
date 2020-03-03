@@ -38,7 +38,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes={ SubmissionEnvelopeService.class })
-public class SubmissionServiceTest {
+public class SubmissionEnvelopeServiceTest {
     @Autowired
     private SubmissionEnvelopeService service;
 

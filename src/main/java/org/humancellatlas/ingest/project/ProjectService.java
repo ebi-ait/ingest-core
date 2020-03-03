@@ -9,34 +9,43 @@ import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.project.exception.NonEmptyProject;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
+import static java.lang.String.format;
+import static java.util.stream.Collectors.toSet;
 
-/**
- * Javadocs go here!
- *
- * @author Tony Burdett
- * @date 05/09/17
- */
+
 @Service
 @RequiredArgsConstructor
 @Getter
 public class ProjectService {
+
+    //Helper class for capturing copies of a Project and all Submission Envelopes related to them.
+    private static class ProjectBag {
+
+        private final Set<Project> projects;
+        private final Set<SubmissionEnvelope> submissionEnvelopes;
+
+        public ProjectBag(Set<Project> projects, Set<SubmissionEnvelope> submissionEnvelopes) {
+            this.projects = projects;
+            this.submissionEnvelopes = submissionEnvelopes;
+        }
+
+    }
+
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull ProjectRepository projectRepository;
     private final @NonNull MetadataCrudService metadataCrudService;
@@ -71,27 +80,46 @@ public class ProjectService {
         return project;
     }
 
-    public Page<BundleManifest> findBundleManifestsByProjectUuidAndBundleType(Uuid projectUuid, BundleType bundleType, Pageable pageable){
-        return this.projectRepository.findByUuidUuidAndIsUpdateFalse(projectUuid.getUuid())
-                                     .map(project -> bundleManifestRepository.findBundleManifestsByProjectAndBundleType(project, bundleType, pageable))
-                                     .orElseThrow(() -> {
-                                         throw new ResourceNotFoundException(String.format("Project with UUID %s not found", projectUuid.getUuid().toString()));
-                                     });
+    public Page<BundleManifest> findBundleManifestsByProjectUuidAndBundleType(Uuid projectUuid, BundleType bundleType,
+            Pageable pageable) {
+        return this.projectRepository
+                .findByUuidUuidAndIsUpdateFalse(projectUuid.getUuid())
+                .map(project -> bundleManifestRepository.findBundleManifestsByProjectAndBundleType(project,
+                        bundleType, pageable))
+                .orElseThrow(() -> {
+                    throw new ResourceNotFoundException(format("Project with UUID %s not found",
+                            projectUuid.getUuid().toString()));
+                });
     }
 
     public Page<Project> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable){
         return this.projectRepository.findByCriteria(criteriaList, andCriteria, pageable);
     }
 
-    public Page<SubmissionEnvelope> getProjectSubmissionEnvelopes(Project project, Pageable pageable) {
+    public Set<SubmissionEnvelope> getSubmissionEnvelopes(Project project) {
+        return gather(project).submissionEnvelopes;
+    }
+
+    public void delete(Project project) throws NonEmptyProject {
+        ProjectBag projectBag = gather(project);
+        if (projectBag.submissionEnvelopes.isEmpty()) {
+            projectBag.projects.forEach(projectRepository::delete);
+        } else {
+            throw new NonEmptyProject();
+        }
+    }
+
+    private ProjectBag gather(Project project) {
         Set<SubmissionEnvelope> envelopes = new HashSet<>();
-        this.projectRepository.findByUuid(project.getUuid()).forEach(p -> {
-            envelopes.addAll(p.getSubmissionEnvelopes());
-            envelopes.add(p.getSubmissionEnvelope());
+        Set<Project> projects = this.projectRepository.findByUuid(project.getUuid()).collect(toSet());
+        projects.forEach(copy -> {
+            envelopes.addAll(copy.getSubmissionEnvelopes());
+            envelopes.add(copy.getSubmissionEnvelope());
         });
 
         //ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
         envelopes.removeIf(env -> env == null || env.getSubmissionState() == null);
-        return new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
+        return new ProjectBag(projects, envelopes);
     }
+
 }
