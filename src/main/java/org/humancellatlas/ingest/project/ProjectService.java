@@ -20,9 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
@@ -110,16 +108,26 @@ public class ProjectService {
     }
 
     private ProjectBag gather(Project project) {
-        Set<SubmissionEnvelope> envelopes = new HashSet<>();
+        Map<String, SubmissionEnvelope> submissions = new HashMap<>();
         Set<Project> projects = this.projectRepository.findByUuid(project.getUuid()).collect(toSet());
-        projects.forEach(copy -> {
-            envelopes.addAll(copy.getSubmissionEnvelopes());
-            envelopes.add(copy.getSubmissionEnvelope());
+        projects.forEach(matching_project -> {
+            addUniqueSubmission(submissions, matching_project.getSubmissionEnvelope());
+            addUniqueSubmissions(submissions, matching_project.getSubmissionEnvelopes());
         });
 
-        //ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
-        envelopes.removeIf(env -> env == null || env.getSubmissionState() == null);
-        return new ProjectBag(projects, envelopes);
+        return new ProjectBag(projects, new HashSet<>(submissions.values()));
+    }
+
+    private void addUniqueSubmissions(Map<String, SubmissionEnvelope> submissionMap, Set<SubmissionEnvelope> submissions) {
+        submissions.forEach(submission -> addUniqueSubmission(submissionMap, submission));
+    }
+
+    private void addUniqueSubmission(Map<String, SubmissionEnvelope> submissionMap, SubmissionEnvelope submission) {
+        // Detect DBRefs to deleted objects
+        if (submission != null && submission.getSubmissionState() != null) {
+            // Only return each submission document once
+            submissionMap.putIfAbsent(submission.getId(), submission);
+        }
     }
 
 }
