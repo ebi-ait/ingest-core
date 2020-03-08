@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.process;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.EntityType;
@@ -21,6 +22,7 @@ import java.util.Set;
  * Created by rolando on 16/02/2018.
  */
 @Getter
+@EqualsAndHashCode(callSuper = true)ta
 public class Process extends MetadataDocument {
 
     @RestResource

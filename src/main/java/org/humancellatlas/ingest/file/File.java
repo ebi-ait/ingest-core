@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.file;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.humancellatlas.ingest.core.Checksums;
@@ -24,6 +25,7 @@ import java.util.*;
 @CompoundIndexes({
         @CompoundIndex(name = "validationId", def = "{ 'validationJob.validationId': 1 }")
 })
+@EqualsAndHashCode(callSuper = true)
 public class File extends MetadataDocument {
 
     @Indexed

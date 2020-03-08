@@ -76,6 +76,7 @@ public class ProjectServiceTest {
                     .mapToObj(Integer::toString)
                     .map(SubmissionEnvelope::new)
                     .collect(toSet());
+
             submissionSet1.forEach(submission ->  project1.addToSubmissionEnvelopes(submission));
 
             //and:
