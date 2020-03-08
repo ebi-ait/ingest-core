@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.protocol;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -12,6 +13,7 @@ import org.humancellatlas.ingest.core.MetadataDocument;
  * @date 30/08/17
  */
 @Getter
+@EqualsAndHashCode(callSuper = true)
 public class Protocol extends MetadataDocument {
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

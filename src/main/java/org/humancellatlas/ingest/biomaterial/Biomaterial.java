@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.biomaterial;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -23,6 +24,7 @@ import java.util.Set;
 @CrossOrigin
 @Getter
 @Document
+@EqualsAndHashCode(callSuper = true)
 public class Biomaterial extends MetadataDocument {
 
     @RestResource @DBRef(lazy = true) private Set<Project> projects = new HashSet<>();
