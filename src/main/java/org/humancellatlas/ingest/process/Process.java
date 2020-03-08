@@ -22,7 +22,7 @@ import java.util.Set;
  * Created by rolando on 16/02/2018.
  */
 @Getter
-@EqualsAndHashCode(callSuper = true)ta
+@EqualsAndHashCode(callSuper = true)
 public class Process extends MetadataDocument {
 
     @RestResource
