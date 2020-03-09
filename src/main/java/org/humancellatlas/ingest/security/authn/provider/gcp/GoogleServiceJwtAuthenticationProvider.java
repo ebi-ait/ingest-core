@@ -59,7 +59,7 @@ public class GoogleServiceJwtAuthenticationProvider implements AuthenticationPro
         String issuer = token.getIssuer();
 
         if (!projectWhitelist.lists(issuer)) {
-            throw new UnlistedJwtIssuer(issuer);
+            throw UnlistedJwtIssuer.notWhitelisted(issuer);
         }
     }
 
