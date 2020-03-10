@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.security.authn.provider.elixir;
 
+import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
@@ -7,6 +8,7 @@ import org.humancellatlas.ingest.security.common.jwk.DelegatingJwtAuthentication
 import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
 import org.humancellatlas.ingest.security.exception.InvalidUserEmail;
 import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
+import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -47,6 +49,12 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
 
     private void verifyUserEmail(JwtAuthentication jwt) {
         String token = jwt.getToken();
+        String issuer = JWT.decode(token).getIssuer();
+
+        if(! issuer.contains("elixir")) {
+            throw new UnlistedJwtIssuer(String.format("Not an Elxir AAI issued token: %s", issuer), issuer);
+        }
+
         WebClient elixirClient = WebClient
                 .builder()
                 .baseUrl(jwtVerifierResolver.getIssuer())
