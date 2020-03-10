@@ -51,10 +51,9 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         String token = jwt.getToken();
         String issuer = JWT.decode(token).getIssuer();
 
-        if(! JWT.decode(jwt.getToken()).getIssuer().contains("elixir")) {
-            throw new UnlistedJwtIssuer(String.format("Not an Elxir AAI issue: %s", issuer), issuer);
+        if(! issuer.contains("elixir")) {
+            throw new UnlistedJwtIssuer(String.format("Not an Elxir AAI issued token: %s", issuer), issuer);
         }
-
 
         WebClient elixirClient = WebClient
                 .builder()
