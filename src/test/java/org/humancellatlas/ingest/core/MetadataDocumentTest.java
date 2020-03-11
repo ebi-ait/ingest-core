@@ -8,6 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
@@ -16,32 +18,54 @@ import static org.assertj.core.api.Assertions.assertThat;
 })
 public class MetadataDocumentTest {
     @Test
-    @DisplayName("Is Not Equal with same UUID and different content")
-    public void testSameUUID(){
-        //given
-        MetadataDocument doc1 = new DocumentTest(EntityType.PROJECT, "Identifier1", "Content1");
-        MetadataDocument doc2 = new DocumentTest(EntityType.PROJECT, "Identifier2", "Content2");
-        doc2.setIsUpdate(true);
-        doc2.setUuid(doc1.getUuid());
-        assertThat(doc1).isNotEqualTo(doc2);
-    }
-
-    @Test
     @DisplayName("Is Equal with matching Static Members")
     public void testSameStatics(){
         //given
-        MetadataDocument doc1 = new DocumentTest(EntityType.PROJECT, "Identifier1", "Content1");
-        MetadataDocument doc2 = new DocumentTest(EntityType.PROJECT, "Identifier1", "Content1");
+        var map1 = Map.of("Key1","Value1", "Key2", "Value2");
+        var map2 = Map.of("Key1","Value1", "Key2", "Value2");
+
+        MetadataDocument doc1 = new DocumentTest(EntityType.PROJECT, "Identifier1", map1);
+        doc1.setUuid(Uuid.newUuid());
+        MetadataDocument doc2 = new DocumentTest(EntityType.PROJECT, "Identifier1", map2);
+        doc2.setUuid(doc1.getUuid());
 
         assertThat(doc1).isEqualTo(doc2);
     }
 
     @Test
-    @DisplayName("Is Not Equal with same Id and different content")
-    public void testSameId(){
+    @DisplayName("Is Equal with similar content")
+    public void testSimilarContent(){
         //given
-        MetadataDocument doc1 = new DocumentTest(EntityType.PROJECT, "Identifier1", "Content1");
-        MetadataDocument doc2 = new DocumentTest(EntityType.PROJECT, "Identifier1", "Content2");
+        var map1 = Map.of("Key1","Value1", "Key2", "Value2");
+        var map2 = Map.of("Key2", "Value2", "Key1","Value1");
+        MetadataDocument doc1 = new DocumentTest(EntityType.PROJECT, "Identifier1", map1);
+        MetadataDocument doc2 = new DocumentTest(EntityType.PROJECT, "Identifier1", map2);
+
+        assertThat(doc1).isEqualTo(doc2);
+    }
+
+    @Test
+    @DisplayName("Is Not Equal with different content")
+    public void testDifferentContent(){
+        //given
+        var map1 = Map.of("Key1","Value1", "Key2", "Value2");
+        var map2 = Map.of("Key1","Value1", "Key3", "Value3");
+        MetadataDocument doc1 = new DocumentTest(EntityType.PROJECT, "Identifier1", map1);
+        MetadataDocument doc2 = new DocumentTest(EntityType.PROJECT, "Identifier1", map2);
+
+        assertThat(doc1).isNotEqualTo(doc2);
+    }
+
+    @Test
+    @DisplayName("Is Not Equal with different content")
+    public void testDifferentUUIDs(){
+        //given
+        var map1 = Map.of("Key1","Value1", "Key2", "Value2");
+        var map2 = Map.of("Key1","Value1", "Key2", "Value2");
+        MetadataDocument doc1 = new DocumentTest(EntityType.PROJECT, "Identifier1", map1);
+        doc1.setUuid(Uuid.newUuid());
+        MetadataDocument doc2 = new DocumentTest(EntityType.PROJECT, "Identifier1", map2);
+        doc2.setUuid(Uuid.newUuid());
 
         assertThat(doc1).isNotEqualTo(doc2);
     }
