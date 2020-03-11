@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.submission;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.humancellatlas.ingest.core.AbstractEntity;
@@ -21,6 +22,7 @@ Used as a workaround to inheritance issue.
 Not proper to annotate uuid in parent class as we don't want uuid index for all subtypes.
 */
 @CompoundIndex(def="{ 'uuid': 1 }", unique=true)
+@EqualsAndHashCode(callSuper = true)
 public class SubmissionEnvelope extends AbstractEntity {
     private @Setter StagingDetails stagingDetails;
     private SubmissionState submissionState;

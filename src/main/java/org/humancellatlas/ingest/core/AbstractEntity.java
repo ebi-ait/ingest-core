@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -21,6 +22,7 @@ import java.util.List;
 @Getter
 @ToString
 @JsonIgnoreProperties(value = {"type"}, allowGetters = true)
+@EqualsAndHashCode
 public abstract class AbstractEntity implements Identifiable<String> {
     protected  @Id @JsonIgnore String id;
 

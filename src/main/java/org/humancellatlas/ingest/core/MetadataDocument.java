@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.core;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.humancellatlas.ingest.state.ValidationState;
@@ -21,6 +22,7 @@ import java.util.List;
  * @date 31/08/17
  */
 @Getter
+@EqualsAndHashCode(callSuper = true)
 public abstract class MetadataDocument extends AbstractEntity {
 
     @Setter

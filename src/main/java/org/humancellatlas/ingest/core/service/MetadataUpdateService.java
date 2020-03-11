@@ -1,7 +1,6 @@
 package org.humancellatlas.ingest.core.service;
 
 import lombok.AllArgsConstructor;
-
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -10,7 +9,7 @@ import org.humancellatlas.ingest.patch.PatchService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Service;
 
-import java.util.stream.Stream;
+import java.util.Collection;
 
 @AllArgsConstructor
 @Service
@@ -35,22 +34,21 @@ public class MetadataUpdateService {
     }
 
     public void applyUpdates(SubmissionEnvelope submissionEnvelope) {
-        applyUpdateDocuments(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.BIOMATERIAL));
-        applyUpdateDocuments(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.FILE));
-        applyUpdateDocuments(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROCESS));
-        applyUpdateDocuments(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROJECT));
-        applyUpdateDocuments(metadataCrudService.findBySubmission(submissionEnvelope, EntityType.PROTOCOL));
+        applyUpdateDocuments(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.BIOMATERIAL));
+        applyUpdateDocuments(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.FILE));
+        applyUpdateDocuments(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.PROCESS));
+        applyUpdateDocuments(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.PROJECT));
+        applyUpdateDocuments(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.PROTOCOL));
     }
 
-    private <T extends MetadataDocument> Stream<T> applyUpdateDocuments(Stream<T> updateDocuments) {
-        return updateDocuments
-                .map(updateDocument -> {
-                    String documentUuid = updateDocument.getUuid().getUuid().toString();
-                    EntityType entityType = updateDocument.getType();
-                    T originalDocument = metadataCrudService.findOriginalByUuid(documentUuid, entityType);
-                    T upsertedDocument = applyUpdateDocument(originalDocument, updateDocument);
-                    return metadataCrudService.save(upsertedDocument);
-                });
+    private <T extends MetadataDocument> void applyUpdateDocuments(Collection<T> documents) {
+        for (T updateDocument : documents) {
+            String documentUuid = updateDocument.getUuid().getUuid().toString();
+            EntityType entityType = updateDocument.getType();
+            T originalDocument = metadataCrudService.findOriginalByUuid(documentUuid, entityType);
+            T upsertedDocument = applyUpdateDocument(originalDocument, updateDocument);
+            metadataCrudService.save(upsertedDocument);
+        }
     }
 
     private <T extends MetadataDocument> T applyUpdateDocument(T canonicalDocument, T updateDocument) {
