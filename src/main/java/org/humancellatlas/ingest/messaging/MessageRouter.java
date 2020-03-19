@@ -142,7 +142,6 @@ public class MessageRouter {
                 envelope.getUpdateDate().toEpochMilli());
         return true;
     }
-d
 
     public boolean routeRequestUploadAreaCleanup(SubmissionEnvelope envelope) {
         this.messageSender.queueUploadManagerMessage(Constants.Exchanges.UPLOAD_AREA_EXCHANGE,
