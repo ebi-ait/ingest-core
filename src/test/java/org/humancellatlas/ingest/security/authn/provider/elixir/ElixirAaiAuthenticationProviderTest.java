@@ -101,7 +101,7 @@ public class ElixirAaiAuthenticationProviderTest {
                     .addHeader("Content-Type", "application/json"));
 
             //and:
-            JwtGenerator jwtGenerator = new JwtGenerator("elixir");
+            JwtGenerator jwtGenerator = new JwtGenerator("issuer@elixir");
             String jwt = jwtGenerator.generate();
             Authentication jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
 
@@ -150,7 +150,7 @@ public class ElixirAaiAuthenticationProviderTest {
             doThrow(verificationFailed).when(jwtVerifier).verify(anyString());
 
             //and:
-            JwtGenerator jwtGenerator = new JwtGenerator("sample@domain.tld");
+            JwtGenerator jwtGenerator = new JwtGenerator("sample@elixir.tld");
             String jwt = jwtGenerator.generate();
             Authentication jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
 
