@@ -55,9 +55,6 @@ public class MetadataCrudService {
     }
 
     public <T extends MetadataDocument> T addToSubmissionEnvelopeAndSave(T metadataDocument, SubmissionEnvelope submissionEnvelope) {
-        if(! Optional.ofNullable(metadataDocument.getUuid()).isPresent()) {
-            metadataDocument.setUuid(Uuid.newUuid());
-        }
         metadataDocument.setSubmissionEnvelope(submissionEnvelope);
         return (T) (crudStrategyForMetadataType(metadataDocument.getType()).saveMetadataDocument(metadataDocument));
     }

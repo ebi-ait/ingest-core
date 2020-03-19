@@ -3,10 +3,14 @@ package org.humancellatlas.ingest.state;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
+import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @RepositoryEventHandler
 @Component
@@ -19,9 +23,16 @@ public class MetadataDocumentEventHandler {
         this.handleMetadataDocumentCreate(document);
     }
 
+    @HandleBeforeCreate
+    public void metadataDocumentBeforeCreate(MetadataDocument document) {
+        if(! Optional.ofNullable(document.getUuid()).isPresent()) {
+            document.setUuid(Uuid.newUuid());
+        }
+    }
+
+
     public void handleMetadataDocumentCreate(MetadataDocument document) {
         messageRouter.routeValidationMessageFor(document);
-
         if (document.getSubmissionEnvelope() != null) {
             messageRouter.routeStateTrackingUpdateMessageFor(document);
         }
