@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.project;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
  * @date 30/08/17
  */
 @Getter
+@EqualsAndHashCode(callSuper = true)
 public class Project extends MetadataDocument {
     @RestResource
     @DBRef(lazy = true)

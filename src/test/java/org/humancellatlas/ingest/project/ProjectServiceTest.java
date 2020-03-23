@@ -20,6 +20,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.ArrayList;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -67,7 +68,7 @@ public class ProjectServiceTest {
     class SubmissionEnvelopes {
 
         @Test
-        @DisplayName("get all")
+        @DisplayName("get all submissions")
         void getFromAllCopiesOfProjects() {
             //given:
             var project1 = new Project("project");
@@ -75,6 +76,7 @@ public class ProjectServiceTest {
                     .mapToObj(Integer::toString)
                     .map(SubmissionEnvelope::new)
                     .collect(toSet());
+
             submissionSet1.forEach(submission ->  project1.addToSubmissionEnvelopes(submission));
 
             //and:
@@ -97,6 +99,50 @@ public class ProjectServiceTest {
             assertThat(submissionEnvelopes)
                     .containsAll(submissionSet1)
                     .containsAll(submissionSet2);
+        }
+
+        @Test
+        @DisplayName("no duplicate submissions")
+        void getFromAllCopiesOfProjectsNoDuplicates() {
+            //given:
+            var project1 = new Project("project1");
+            var submissionSet1 = IntStream.range(0, 3)
+                .mapToObj(Integer::toString)
+                .map(SubmissionEnvelope::new)
+                .collect(toSet());
+            submissionSet1.forEach(project1::addToSubmissionEnvelopes);
+
+            //and:
+            var project2 = new Project("Project2");
+            BeanUtils.copyProperties(project1, project2);
+            var submissionSet2 = IntStream.range(10, 15)
+                .mapToObj(Integer::toString)
+                .map(SubmissionEnvelope::new)
+                .collect(toSet());
+            submissionSet2.forEach(project2::addToSubmissionEnvelopes);
+
+            var project3 = new Project(null);
+            BeanUtils.copyProperties(project1, project3);
+            submissionSet1.forEach(submission -> {
+                project3.addToSubmissionEnvelopes(new SubmissionEnvelope(submission.getId()));
+            });
+
+            var documentIds = new ArrayList<String>();
+            submissionSet1.forEach(submission -> documentIds.add(submission.getId()));
+            submissionSet2.forEach(submission -> documentIds.add(submission.getId()));
+
+            //and:
+            doReturn(Stream.of(project1, project2, project3))
+                .when(projectRepository).findByUuid(project1.getUuid());
+
+            //when:
+            var submissionEnvelopes = projectService.getSubmissionEnvelopes(project1);
+            var returnDocumentIds = new ArrayList<String>();
+            submissionEnvelopes.forEach(submission -> returnDocumentIds.add(submission.getId()));
+
+            //then:
+            assertThat(returnDocumentIds)
+                .containsExactlyInAnyOrderElementsOf(documentIds);
         }
 
     }

@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.bundle;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -18,6 +19,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Getter
 @Document
+@EqualsAndHashCode
 public class BundleManifest implements Identifiable<String> {
     private @Id @JsonIgnore String id;
 

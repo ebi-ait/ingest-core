@@ -63,10 +63,6 @@ public class MetadataCrudService {
         return (T) crudStrategyForMetadataType(entityType).findOriginalByUuid(uuid);
     }
 
-    public <T extends MetadataDocument> Stream<T> findBySubmission(SubmissionEnvelope submissionEnvelope, EntityType entityType) {
-        return crudStrategyForMetadataType(entityType).findBySubmissionEnvelope(submissionEnvelope);
-    }
-
     public <T extends MetadataDocument> Collection<T> findAllBySubmission(SubmissionEnvelope submissionEnvelope, EntityType entityType) {
         return crudStrategyForMetadataType(entityType).findAllBySubmissionEnvelope(submissionEnvelope);
     }
