@@ -23,14 +23,6 @@ public class MetadataDocumentEventHandler {
         this.handleMetadataDocumentCreate(document);
     }
 
-    @HandleBeforeCreate
-    public void metadataDocumentBeforeCreate(MetadataDocument document) {
-        if(! Optional.ofNullable(document.getUuid()).isPresent()) {
-            document.setUuid(Uuid.newUuid());
-        }
-    }
-
-
     public void handleMetadataDocumentCreate(MetadataDocument document) {
         messageRouter.routeValidationMessageFor(document);
         if (document.getSubmissionEnvelope() != null) {
