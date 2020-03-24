@@ -31,6 +31,4 @@ public class MetadataStateChangeListenerTest {
         metadataDocumentMongoEventListener.onAfterSave(afterSaveEvent);
         Mockito.verify(messageRouter, times(1)).routeValidationMessageFor(project);
     }
-
-
 }

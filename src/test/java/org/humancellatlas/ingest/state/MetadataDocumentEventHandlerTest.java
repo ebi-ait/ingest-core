@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.state;
 
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -16,10 +17,10 @@ public class MetadataDocumentEventHandlerTest {
 
     @Test
     public void testHandleCreateDocumentsWithoutSubmissionEnvelope() {
-        Project project = new Project(null);
-        handler.handleMetadataDocumentCreate(project);
-        Mockito.verify(messageRouter, times(1)).routeValidationMessageFor(project);
-        Mockito.verify(messageRouter, never()).routeStateTrackingUpdateMessageFor(project);
+        Biomaterial biomaterial = new Biomaterial(null);
+        handler.handleMetadataDocumentCreate(biomaterial);
+        Mockito.verify(messageRouter, times(1)).routeValidationMessageFor(biomaterial);
+        Mockito.verify(messageRouter, times(1)).routeStateTrackingUpdateMessageFor(biomaterial);
     }
 
     @Test
@@ -32,5 +33,12 @@ public class MetadataDocumentEventHandlerTest {
         Mockito.verify(messageRouter, times(1)).routeStateTrackingUpdateMessageFor(project);
     }
 
+    @Test
+    public void testHandleCreateDocumentsProjectWithoutSubmissionEnvelope() {
+        Project project = new Project(null);
+        handler.handleMetadataDocumentCreate(project);
+        Mockito.verify(messageRouter, times(1)).routeValidationMessageFor(project);
+        Mockito.verify(messageRouter, never()).routeStateTrackingUpdateMessageFor(project);
+    }
 
 }

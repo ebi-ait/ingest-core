@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.state;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
@@ -22,7 +23,7 @@ public class MetadataDocumentEventHandler {
 
     public void handleMetadataDocumentCreate(MetadataDocument document) {
         messageRouter.routeValidationMessageFor(document);
-        if (document.getSubmissionEnvelope() != null) {
+        if (document.getSubmissionEnvelope() != null  || document.getType() != EntityType.PROJECT) {
             messageRouter.routeStateTrackingUpdateMessageFor(document);
         }
     }
