@@ -2,10 +2,7 @@ package org.humancellatlas.ingest.messaging;
 
 import lombok.NoArgsConstructor;
 import org.humancellatlas.ingest.config.ConfigurationService;
-import org.humancellatlas.ingest.core.AbstractEntity;
-import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
-import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportData;
 import org.humancellatlas.ingest.messaging.model.BundleUpdateMessage;
@@ -83,16 +80,19 @@ public class MessageRouter {
     /* messages to state tracker */
 
     public boolean routeStateTrackingUpdateMessageFor(MetadataDocument document) {
-        URI documentUpdateUri = UriComponentsBuilder.newInstance()
-                .scheme(configurationService.getStateTrackerScheme())
-                .host(configurationService.getStateTrackerHost())
-                .port(configurationService.getStateTrackerPort())
-                .pathSegment(configurationService.getDocumentStatesUpdatePath())
-                .build().toUri();
+        // allow projects to be created first before submission envelope
+        if(document.getSubmissionEnvelope() != null  || document.getType() != EntityType.PROJECT){
+            URI documentUpdateUri = UriComponentsBuilder.newInstance()
+                    .scheme(configurationService.getStateTrackerScheme())
+                    .host(configurationService.getStateTrackerHost())
+                    .port(configurationService.getStateTrackerPort())
+                    .pathSegment(configurationService.getDocumentStatesUpdatePath())
+                    .build().toUri();
 
-        this.messageSender.queueDocumentStateUpdateMessage(documentUpdateUri,
-                documentStateUpdateMessage(document),
-                document.getUpdateDate().toEpochMilli());
+            this.messageSender.queueDocumentStateUpdateMessage(documentUpdateUri,
+                    documentStateUpdateMessage(document),
+                    document.getUpdateDate().toEpochMilli());
+        }
         return true;
     }
 
@@ -164,6 +164,10 @@ public class MessageRouter {
     }
 
     private MetadataDocumentMessage documentStateUpdateMessage(MetadataDocument document) {
+        if(document.getSubmissionEnvelope() == null){
+            throw new RuntimeException("The metadata document should have a link to a submission envelope.");
+        }
+
         String envelopeId = document.getSubmissionEnvelope().getId();
 
         return MetadataDocumentMessageBuilder.using(linkGenerator)

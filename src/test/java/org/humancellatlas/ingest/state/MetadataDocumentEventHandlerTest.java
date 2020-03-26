@@ -33,12 +33,4 @@ public class MetadataDocumentEventHandlerTest {
         Mockito.verify(messageRouter, times(1)).routeStateTrackingUpdateMessageFor(project);
     }
 
-    @Test
-    public void testHandleCreateDocumentsProjectWithoutSubmissionEnvelope() {
-        Project project = new Project(null);
-        handler.handleMetadataDocumentCreate(project);
-        Mockito.verify(messageRouter, times(1)).routeValidationMessageFor(project);
-        Mockito.verify(messageRouter, never()).routeStateTrackingUpdateMessageFor(project);
-    }
-
 }
