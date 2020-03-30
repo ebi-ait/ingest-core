@@ -1,13 +1,15 @@
 package org.humancellatlas.ingest.messaging;
 
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.config.ConfigurationService;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportData;
+import org.humancellatlas.ingest.messaging.model.AbstractEntityMessage;
 import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +20,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.ResourceMappings;
 
+import java.net.URI;
+import java.time.Instant;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.ANALYSIS_SUBMITTED;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.ASSAY_SUBMITTED;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 
 @SpringBootTest
@@ -63,6 +69,56 @@ public class MessageRouterTest {
         doTestSendForExport(ANALYSIS_SUBMITTED, messageRouter::sendAnalysisForExport);
     }
 
+    @Test
+    public void testRouteStateTrackingUpdateMessageFor() {
+        // given:
+        Project project = mock(Project.class);
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope("sub-1");
+        doReturn(Instant.now()).when(project).getUpdateDate();
+        doReturn(submissionEnvelope).when(project).getSubmissionEnvelope();
+
+        // when:
+        messageRouter.routeStateTrackingUpdateMessageFor(project);
+
+        verify(messageSender, times(1)).queueDocumentStateUpdateMessage(any(URI.class), any(AbstractEntityMessage.class), anyLong());
+    }
+
+    @Test
+    public void testRouteStateTrackingUpdateMessageForBiomaterial() {
+        // given:
+        Biomaterial project = mock(Biomaterial.class);
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope("sub-1");
+        doReturn(Instant.now()).when(project).getUpdateDate();
+        doReturn(submissionEnvelope).when(project).getSubmissionEnvelope();
+
+        // when:
+        messageRouter.routeStateTrackingUpdateMessageFor(project);
+
+        verify(messageSender, times(1)).queueDocumentStateUpdateMessage(any(URI.class), any(AbstractEntityMessage.class), anyLong());
+    }
+
+    @Test
+    public void testRouteStateTrackingUpdateMessageForProject() {
+        // given:
+        Project project = new Project(null);
+        // when:
+        messageRouter.routeStateTrackingUpdateMessageFor(project);
+
+        verify(messageSender, never()).queueDocumentStateUpdateMessage(any(URI.class), any(AbstractEntityMessage.class), anyLong());
+    }
+
+    @Test
+    public void testRouteStateTrackingUpdateMessageForBiomaterialWithoutSubmission() {
+        // given:
+        Biomaterial project = mock(Biomaterial.class);
+
+        // when:
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            messageRouter.routeStateTrackingUpdateMessageFor(project);
+        });
+
+        verify(messageSender, never()).queueDocumentStateUpdateMessage(any(URI.class), any(AbstractEntityMessage.class), anyLong());
+    }
     private void doTestSendForExport(String routingKey, Consumer<ExportData> testMethod) {
         //given:
         String processId = "78bbd9";
