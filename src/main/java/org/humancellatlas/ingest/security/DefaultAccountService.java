@@ -13,6 +13,7 @@ public class DefaultAccountService implements AccountService {
 
     @Override
     public void register(Account account) {
+        account.addRole(Role.CONTRIBUTOR);
         this.accountRepository.save(account);
     }
 
