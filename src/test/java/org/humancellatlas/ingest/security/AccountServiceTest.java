@@ -1,8 +1,6 @@
 package org.humancellatlas.ingest.security;
 
 
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -34,7 +32,8 @@ public class AccountServiceTest {
         @Test
         void success() {
             //given:
-            Account account = new Account();
+            String providerReference = "67fe90";
+            Account account = new Account(providerReference);
             assumeThat(account.getRoles()).isEmpty();
 
             //when:
@@ -46,6 +45,7 @@ public class AccountServiceTest {
 
             //and:
             var savedAccount = accountCaptor.getValue();
+            assertThat(savedAccount.getProviderReference()).isEqualTo(providerReference);
             assertThat(savedAccount.getRoles()).contains(Role.CONTRIBUTOR);
         }
 
