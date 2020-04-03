@@ -1,10 +1,15 @@
 package org.humancellatlas.ingest.security;
 
+import org.springframework.data.annotation.Id;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 public class Account {
+
+    @Id
+    private String id;
 
     private final String providerReference;
 
@@ -12,6 +17,10 @@ public class Account {
 
     public Account(String providerReference) {
         this.providerReference = providerReference;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getProviderReference() {
