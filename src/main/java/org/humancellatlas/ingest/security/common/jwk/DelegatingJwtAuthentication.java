@@ -58,7 +58,7 @@ public class DelegatingJwtAuthentication implements Auth0JwtAuthentication {
     @Override
     public boolean isAuthenticated() {
         //The construction of this object would only succeed if the token has first
-        // been successfully verified.
+        //been successfully verified.
         return true;
     }
 
