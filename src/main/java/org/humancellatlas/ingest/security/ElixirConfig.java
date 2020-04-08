@@ -14,12 +14,12 @@ public class ElixirConfig {
 
     public static final String ELIXIR = "elixir";
 
-    @Value("${AUTH_ISSUER}/jwk")
+    @Value("${AUTH_ISSUER}")
     private String issuer;
 
     @Bean(name=ELIXIR)
     public AuthenticationProvider elixirAuthenticationProvider() {
-        var urlJwkProviderResolver = new UrlJwkProviderResolver(issuer);
+        var urlJwkProviderResolver = new UrlJwkProviderResolver(issuer + "/jwk");
         var elixirJwkVault = new ElixirJwkVault(urlJwkProviderResolver);
         var elixirJwtVerifierResolver = new RemoteServiceJwtVerifierResolver(elixirJwkVault, null, issuer);
         return new ElixirAaiAuthenticationProvider(elixirJwtVerifierResolver);
