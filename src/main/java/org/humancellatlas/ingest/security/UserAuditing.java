@@ -20,7 +20,8 @@ public class UserAuditing implements AuditorAware<String> {
         if (authentication == null || !authentication.isAuthenticated()) {
             return Optional.empty();
         }
-        return Optional.of(authentication.getPrincipal().toString());
+        Account account = (Account) authentication.getPrincipal();
+        return Optional.of(account.getId());
     }
 
 }
