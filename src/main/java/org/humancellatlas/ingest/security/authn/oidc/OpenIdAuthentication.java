@@ -14,12 +14,7 @@ public class OpenIdAuthentication implements Authentication {
     private boolean authenticated = false;
 
     public OpenIdAuthentication(Account principal) {
-        this(principal, null);
-    }
-
-    public OpenIdAuthentication(Account principal, UserInfo credentials) {
         this.account = principal;
-        this.userInfo = credentials;
     }
 
     @Override

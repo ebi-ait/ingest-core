@@ -26,7 +26,8 @@ public class OpenIdAuthenticationTest {
     @BeforeEach
     void setUp() {
         account = new Account(subjectId);
-        authentication = new OpenIdAuthentication(account, userInfo);
+        authentication = new OpenIdAuthentication(account);
+        ((OpenIdAuthentication) authentication).authenticateWith(userInfo);
     }
 
     @Nested
