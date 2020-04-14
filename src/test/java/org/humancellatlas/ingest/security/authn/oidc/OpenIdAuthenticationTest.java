@@ -18,4 +18,16 @@ public class OpenIdAuthenticationTest {
         assertThat(authentication.getPrincipal()).isEqualTo(account);
     }
 
+    @Test
+    public void testGetCredentials() {
+        //given:
+        String subject = "73985cc";
+        Account account = new Account(subject);
+        UserInfo userInfo = new UserInfo(subject);
+        Authentication authentication = new OpenIdAuthentication(account, userInfo);
+
+        //expect:
+        assertThat(authentication.getCredentials()).isEqualTo(userInfo);
+    }
+
 }

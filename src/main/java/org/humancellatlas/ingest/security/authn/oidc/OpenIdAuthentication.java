@@ -9,18 +9,24 @@ import java.util.Collection;
 public class OpenIdAuthentication implements Authentication {
 
     private final Account principal;
+    private final UserInfo credentials;
 
-    public OpenIdAuthentication(Account account) {
-        this.principal = account;
+    public OpenIdAuthentication(Account principal) {
+        this(principal, null);
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+    public OpenIdAuthentication(Account principal, UserInfo credentials) {
+        this.principal = principal;
+        this.credentials = credentials;
     }
 
     @Override
     public Object getCredentials() {
+        return credentials;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
     }
 
