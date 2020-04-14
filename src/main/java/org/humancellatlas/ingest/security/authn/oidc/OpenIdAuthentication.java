@@ -49,7 +49,7 @@ public class OpenIdAuthentication implements Authentication {
 
     @Override
     public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-
+        throw new IllegalArgumentException("Operation not supported. Use authenticateWith to set status.");
     }
 
     public void authenticateWith(UserInfo credentials) {
