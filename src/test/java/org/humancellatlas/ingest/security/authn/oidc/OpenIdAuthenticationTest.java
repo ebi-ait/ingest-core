@@ -47,4 +47,16 @@ public class OpenIdAuthenticationTest {
         assertThat(authorities).containsExactly(Role.CONTRIBUTOR);
     }
 
+    @Test
+    public void testGetDetails() {
+        //given:
+        String subject = "89b4b40";
+        Account account = new Account(subject);
+        UserInfo userInfo = new UserInfo(subject);
+        Authentication authentication = new OpenIdAuthentication(account, userInfo);
+
+        //expect:
+        assertThat(authentication.getDetails()).isEqualTo(userInfo);
+    }
+
 }

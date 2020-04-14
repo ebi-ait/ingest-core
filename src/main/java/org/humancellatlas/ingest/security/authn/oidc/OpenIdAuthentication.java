@@ -8,36 +8,36 @@ import java.util.Collection;
 
 public class OpenIdAuthentication implements Authentication {
 
-    private final Account principal;
-    private final UserInfo credentials;
+    private final Account account;
+    private final UserInfo userInfo;
 
     public OpenIdAuthentication(Account principal) {
         this(principal, null);
     }
 
     public OpenIdAuthentication(Account principal, UserInfo credentials) {
-        this.principal = principal;
-        this.credentials = credentials;
-    }
-
-    @Override
-    public Object getCredentials() {
-        return credentials;
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return principal.getRoles();
-    }
-
-    @Override
-    public Object getDetails() {
-        return null;
+        this.account = principal;
+        this.userInfo = credentials;
     }
 
     @Override
     public Object getPrincipal() {
-        return principal;
+        return account;
+    }
+
+    @Override
+    public Object getCredentials() {
+        return userInfo;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return account.getRoles();
+    }
+
+    @Override
+    public Object getDetails() {
+        return userInfo;
     }
 
     @Override
@@ -54,4 +54,5 @@ public class OpenIdAuthentication implements Authentication {
     public String getName() {
         return null;
     }
+
 }
