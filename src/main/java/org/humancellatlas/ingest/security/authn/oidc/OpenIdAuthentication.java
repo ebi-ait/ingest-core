@@ -36,6 +36,11 @@ public class OpenIdAuthentication implements Authentication {
     }
 
     @Override
+    public String getName() {
+        return account.getProviderReference();
+    }
+
+    @Override
     public Object getDetails() {
         return userInfo;
     }
@@ -48,11 +53,6 @@ public class OpenIdAuthentication implements Authentication {
     @Override
     public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
 
-    }
-
-    @Override
-    public String getName() {
-        return null;
     }
 
 }

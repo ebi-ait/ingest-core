@@ -48,6 +48,17 @@ public class OpenIdAuthenticationTest {
     }
 
     @Test
+    public void testGetName() {
+        //given:
+        String subject = "67e0f01";
+        Account account = new Account(subject);
+        Authentication authentication = new OpenIdAuthentication(account);
+
+        //expect:
+        assertThat(authentication.getName()).isEqualTo(subject);
+    }
+
+    @Test
     public void testGetDetails() {
         //given:
         String subject = "89b4b40";
