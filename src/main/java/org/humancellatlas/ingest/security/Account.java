@@ -19,6 +19,11 @@ public class Account {
         this.providerReference = providerReference;
     }
 
+    public Account(String id, String providerReference) {
+        this.id = id;
+        this.providerReference = providerReference;
+    }
+
     public String getId() {
         return id;
     }
