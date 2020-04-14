@@ -11,6 +11,8 @@ public class OpenIdAuthentication implements Authentication {
     private final Account account;
     private final UserInfo userInfo;
 
+    private boolean authenticated = false;
+
     public OpenIdAuthentication(Account principal) {
         this(principal, null);
     }
@@ -47,12 +49,20 @@ public class OpenIdAuthentication implements Authentication {
 
     @Override
     public boolean isAuthenticated() {
-        return false;
+        return authenticated;
     }
 
     @Override
     public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
 
+    }
+
+    public void authenticateWith(UserInfo credentials) {
+        if (credentials == null) {
+            authenticated = false;
+            return;
+        }
+        authenticated = credentials.getSubjectId().equalsIgnoreCase(account.getProviderReference());
     }
 
 }

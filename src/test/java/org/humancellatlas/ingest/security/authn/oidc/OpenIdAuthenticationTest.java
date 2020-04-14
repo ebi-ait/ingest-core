@@ -3,6 +3,8 @@ package org.humancellatlas.ingest.security.authn.oidc;
 import org.humancellatlas.ingest.security.Account;
 import org.humancellatlas.ingest.security.Role;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 public class OpenIdAuthenticationTest {
 
@@ -23,6 +26,42 @@ public class OpenIdAuthenticationTest {
     void setUp() {
         account = new Account(subject);
         authentication = new OpenIdAuthentication(account, userInfo);
+    }
+
+    @Nested
+    @DisplayName("Authentication")
+    class AuthenticationTest {
+
+        private OpenIdAuthentication authentication;
+
+        @BeforeEach
+        void setUp() {
+            authentication = new OpenIdAuthentication(account);
+        }
+
+        @Test
+        public void successful() {
+            //when:
+            authentication.authenticateWith(userInfo);
+
+            //expect:
+            assertThat(authentication.isAuthenticated()).isTrue();
+        }
+
+        @Test
+        public void nonMatchingSubject() {
+            //given:
+            String anotherSubject = "82909a1";
+            UserInfo anotherUserInfo = new UserInfo(anotherSubject);
+            assumeThat(anotherSubject).isNotEqualTo(subject);
+
+            //when:
+            authentication.authenticateWith(anotherUserInfo);
+
+            //then:
+            assertThat(authentication.isAuthenticated()).isFalse();
+        }
+
     }
 
     @Test

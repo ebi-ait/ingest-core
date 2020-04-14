@@ -2,7 +2,14 @@ package org.humancellatlas.ingest.security.authn.oidc;
 
 public class UserInfo {
 
-    public UserInfo(String subject) {
+    private final String subjectId;
+
+    public UserInfo(String subjectId) {
+        this.subjectId = subjectId;
+    }
+
+    public String getSubjectId() {
+        return subjectId;
     }
 
 }
