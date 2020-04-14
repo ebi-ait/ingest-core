@@ -1,8 +1,12 @@
 package org.humancellatlas.ingest.security.authn.oidc;
 
 import org.humancellatlas.ingest.security.Account;
+import org.humancellatlas.ingest.security.Role;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+
+import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,6 +32,19 @@ public class OpenIdAuthenticationTest {
 
         //expect:
         assertThat(authentication.getCredentials()).isEqualTo(userInfo);
+    }
+
+    @Test
+    public void testGetAuthorities() {
+        //given:
+        Account account = new Account("b94033d");
+        account.addRole(Role.CONTRIBUTOR);
+        Authentication authentication = new OpenIdAuthentication(account);
+
+        //expect:
+        //this assignment is to work around the weirdness with generic type that I couldn't figure out
+        Collection<GrantedAuthority> authorities = (Collection<GrantedAuthority>) authentication.getAuthorities();
+        assertThat(authorities).containsExactly(Role.CONTRIBUTOR);
     }
 
 }

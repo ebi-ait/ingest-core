@@ -27,6 +27,9 @@ public class Account {
         return providerReference;
     }
 
+    /**
+     * @return an unmodifiable Set of Roles.
+     */
     public Set<Role> getRoles() {
         return Collections.unmodifiableSet(roles);
     }

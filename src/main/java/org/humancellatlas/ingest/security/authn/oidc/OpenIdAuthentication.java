@@ -27,7 +27,7 @@ public class OpenIdAuthentication implements Authentication {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return principal.getRoles();
     }
 
     @Override
