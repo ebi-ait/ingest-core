@@ -8,8 +8,8 @@ import java.util.Collection;
 
 public class OpenIdAuthentication implements Authentication {
 
-    private final Account account;
-    private final UserInfo userInfo;
+    private Account account;
+    private UserInfo userInfo;
 
     private boolean authenticated = false;
 
@@ -58,7 +58,8 @@ public class OpenIdAuthentication implements Authentication {
     }
 
     public void authenticateWith(UserInfo credentials) {
-        if (credentials == null) {
+        this.userInfo = credentials;
+        if (account == null || credentials == null) {
             authenticated = false;
             return;
         }

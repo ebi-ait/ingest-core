@@ -46,6 +46,20 @@ public class OpenIdAuthenticationTest {
 
             //expect:
             assertThat(authentication.isAuthenticated()).isTrue();
+            assertThat(authentication.getCredentials()).isEqualTo(userInfo);
+        }
+
+        @Test
+        public void noPrincipal() {
+            //given:
+            authentication = new OpenIdAuthentication(null);
+
+            //when:
+            authentication.authenticateWith(userInfo);
+
+            //expect:
+            assertThat(authentication.isAuthenticated()).isFalse();
+            assertThat(authentication.getCredentials()).isEqualTo(userInfo);
         }
 
         @Test
@@ -60,6 +74,7 @@ public class OpenIdAuthenticationTest {
 
             //then:
             assertThat(authentication.isAuthenticated()).isFalse();
+            assertThat(authentication.getCredentials()).isEqualTo(anotherUserInfo);
         }
 
     }
