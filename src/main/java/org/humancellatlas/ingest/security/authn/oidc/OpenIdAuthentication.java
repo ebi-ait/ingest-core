@@ -63,7 +63,8 @@ public class OpenIdAuthentication implements Authentication {
             authenticated = false;
             return;
         }
-        authenticated = credentials.getSubjectId().equalsIgnoreCase(account.getProviderReference());
+        authenticated = credentials.hasIssuer() &&
+                credentials.getSubjectId().equalsIgnoreCase(account.getProviderReference());
     }
 
 }
