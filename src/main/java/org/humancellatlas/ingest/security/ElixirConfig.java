@@ -4,6 +4,7 @@ import org.humancellatlas.ingest.security.authn.provider.elixir.ElixirAaiAuthent
 import org.humancellatlas.ingest.security.authn.provider.elixir.ElixirJwkVault;
 import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
 import org.humancellatlas.ingest.security.common.jwk.UrlJwkProviderResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,12 +18,15 @@ public class ElixirConfig {
     @Value("${AUTH_ISSUER}")
     private String issuer;
 
+    @Autowired
+    private AccountRepository accountRepository;
+
     @Bean(name=ELIXIR)
     public AuthenticationProvider elixirAuthenticationProvider() {
         var urlJwkProviderResolver = new UrlJwkProviderResolver(issuer + "/jwk");
         var elixirJwkVault = new ElixirJwkVault(urlJwkProviderResolver);
         var elixirJwtVerifierResolver = new RemoteServiceJwtVerifierResolver(elixirJwkVault, null, issuer);
-        return new ElixirAaiAuthenticationProvider(elixirJwtVerifierResolver);
+        return new ElixirAaiAuthenticationProvider(elixirJwtVerifierResolver, accountRepository);
     }
 
 }

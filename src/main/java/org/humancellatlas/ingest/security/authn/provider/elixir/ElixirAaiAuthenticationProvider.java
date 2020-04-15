@@ -4,6 +4,10 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
+import org.humancellatlas.ingest.security.Account;
+import org.humancellatlas.ingest.security.AccountRepository;
+import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
+import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
 import org.humancellatlas.ingest.security.common.jwk.DelegatingJwtAuthentication;
 import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
 import org.humancellatlas.ingest.security.exception.InvalidUserEmail;
@@ -23,8 +27,11 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
 
     private final RemoteServiceJwtVerifierResolver jwtVerifierResolver;
 
-    public ElixirAaiAuthenticationProvider(RemoteServiceJwtVerifierResolver jwtVerifierResolver) {
+    private AccountRepository accountRepository;
+
+    public ElixirAaiAuthenticationProvider(RemoteServiceJwtVerifierResolver jwtVerifierResolver, AccountRepository accountRepository) {
         this.jwtVerifierResolver = jwtVerifierResolver;
+        this.accountRepository = accountRepository;
     }
 
     @Override
@@ -37,10 +44,16 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
             verifyUserEmail(jwt);
 
             JWTVerifier jwtVerifier = jwtVerifierResolver.resolve(jwt.getToken());
-            Authentication jwtAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
-            logger.info("Authenticated with jwt with scopes {}", jwtAuth.getAuthorities());
+            DelegatingJwtAuthentication jwtAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
 
-            return jwtAuth;
+            UserInfo userInfo = new UserInfo(JWT.decode(jwtAuth.getToken()));
+            Account account = accountRepository.findByProviderReference(userInfo.getSubjectId());
+            OpenIdAuthentication openIdAuth = new OpenIdAuthentication(account);
+
+            openIdAuth.authenticateWith(userInfo);
+
+            return openIdAuth;
+
         } catch (JWTVerificationException e) {
             logger.error("JWT verification failed: {}", e.getMessage());
             throw new JwtVerificationFailed(e);
@@ -51,7 +64,7 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         String token = jwt.getToken();
         String issuer = JWT.decode(token).getIssuer();
 
-        if(! issuer.contains("elixir")) {
+        if (!issuer.contains("elixir")) {
             throw new UnlistedJwtIssuer(String.format("Not an Elxir AAI issued token: %s", issuer), issuer);
         }
 
