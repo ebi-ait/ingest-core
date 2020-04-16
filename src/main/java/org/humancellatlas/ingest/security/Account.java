@@ -8,6 +8,22 @@ import java.util.Set;
 
 public class Account {
 
+    public static final Account GUEST = new GuestAccount();
+
+    /**
+     * A Null Object subclass of Account that represents an unregistered Guest.
+     */
+    private static class GuestAccount extends Account {
+
+        private static final String EMPTY = "";
+
+        private GuestAccount() {
+            super(EMPTY, EMPTY);
+            addRole(Role.GUEST);
+        }
+
+    }
+
     @Id
     private String id;
 
