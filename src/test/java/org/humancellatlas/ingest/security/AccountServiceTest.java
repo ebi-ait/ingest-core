@@ -13,6 +13,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
@@ -36,10 +38,15 @@ public class AccountServiceTest {
             Account account = new Account(providerReference);
             assumeThat(account.getRoles()).isEmpty();
 
+            //and:
+            Account persistentAccount = new Account("773b471", providerReference);
+            doReturn(persistentAccount).when(accountRepository).save(any(Account.class));
+
             //when:
-            accountService.register(account);
+            Account result = accountService.register(account);
 
             //then:
+            assertThat(result).isEqualTo(persistentAccount);
             var accountCaptor = ArgumentCaptor.forClass(Account.class);
             verify(accountRepository).save(accountCaptor.capture());
 

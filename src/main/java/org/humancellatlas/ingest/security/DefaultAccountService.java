@@ -12,9 +12,9 @@ public class DefaultAccountService implements AccountService {
     }
 
     @Override
-    public void register(Account account) {
+    public Account register(Account account) {
         account.addRole(Role.CONTRIBUTOR);
-        this.accountRepository.save(account);
+        return this.accountRepository.save(account);
     }
 
 }
