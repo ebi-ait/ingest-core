@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -52,15 +53,16 @@ public class AuthenticationControllerTest {
     @DisplayName("Registration")
     class Registration {
 
+        public static final String PATH = "/auth/registration";
+
         @Test
         void fromUserInfo() throws Exception {
             //given:
-            String subjectId = "cf12881b";
-            UserInfo userInfo = new UserInfo(subjectId, "https://oidc.domain.tld/auth");
+            UserInfo userInfo = new UserInfo("cf12881b", "https://oidc.domain.tld/auth");
             Authentication authentication = new OpenIdAuthentication(null, userInfo);
 
             // expect:
-            webApp.perform(post("/auth/registration")
+            webApp.perform(post(PATH)
                     .with(authentication(authentication))
                     .with(csrf()))
                     .andExpect(status().isOk());
@@ -74,6 +76,13 @@ public class AuthenticationControllerTest {
             assertThat(registeredAccount)
                     .extracting("providerReference")
                     .containsExactly(userInfo.getSubjectId());
+        }
+
+        @Test
+        @WithMockUser(roles={ "CONTRIBUTOR" })
+        void byRegisteredUser() throws Exception {
+            // expect:
+            webApp.perform(post(PATH)).andExpect(status().isForbidden());
         }
 
     }
