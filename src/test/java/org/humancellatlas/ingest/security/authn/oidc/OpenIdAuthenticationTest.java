@@ -92,6 +92,19 @@ public class OpenIdAuthenticationTest {
             assertThat(authentication.getCredentials()).isEqualTo(anotherUserInfo);
         }
 
+        @Test
+        public void authenticatedGuest() {
+            //given:
+            var authentication = new OpenIdAuthentication(null);
+
+            //when:
+            authentication.authenticateWith(userInfo);
+
+            //then:
+            assertThat(authentication.isAuthenticated()).isTrue();
+            assertThat(authentication.getCredentials()).isEqualTo(userInfo);
+        }
+
     }
 
     @Test

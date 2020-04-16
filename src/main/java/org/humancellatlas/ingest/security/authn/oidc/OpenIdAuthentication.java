@@ -60,19 +60,15 @@ public class OpenIdAuthentication implements Authentication {
         throw new IllegalArgumentException("Operation not supported. Use authenticateWith to set status.");
     }
 
-    /*
-    OpenIdAuthentication is essentially a pre-authenticated Authentication Token, which means that even a Guest
-    with a valid JWT credentials (implied by UserInfo) is *technically* authenticated. For now we are setting this
-    to be *not* authenticated, but might need to be revisited.
-    */
     public void authenticateWith(UserInfo credentials) {
         this.userInfo = credentials;
-        if (account == Account.GUEST || credentials == null) {
+        if (credentials == null) {
             authenticated = false;
             return;
         }
-        authenticated = credentials.hasIssuer() &&
+        boolean accountMatches = account == Account.GUEST ||
                 credentials.getSubjectId().equalsIgnoreCase(account.getProviderReference());
+        authenticated = credentials.hasIssuer() && accountMatches;
     }
 
 }
