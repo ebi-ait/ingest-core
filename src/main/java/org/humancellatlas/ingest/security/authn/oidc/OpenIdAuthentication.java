@@ -25,6 +25,10 @@ public class OpenIdAuthentication implements Authentication {
         authenticateWith(credentials);
     }
 
+    public OpenIdAuthentication(UserInfo credentials) {
+        this(null, credentials);
+    }
+
     @Override
     public Object getPrincipal() {
         return account;

@@ -5,6 +5,7 @@ import org.humancellatlas.ingest.security.AccountService;
 import org.humancellatlas.ingest.security.SecurityConfig;
 import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
 import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
+import org.humancellatlas.ingest.security.exception.DuplicateAccount;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,8 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.security.ElixirConfig.ELIXIR;
 import static org.humancellatlas.ingest.security.GcpConfig.GCP;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -83,6 +86,28 @@ public class AuthenticationControllerTest {
         void byRegisteredUser() throws Exception {
             // expect:
             webApp.perform(post(PATH)).andExpect(status().isForbidden());
+        }
+
+        /*
+        Similar scenario to byRegisteredUser but somehow the Account was either,
+        1) unrecognised and so was treated as an authenticated Guest, or
+        2) Account was erroneously assigned the Guest role.
+        Essentially, we want to handle duplicated subject id in our system.
+         */
+        @Test
+        void byUnrecognisedRegisteredUser() throws Exception {
+            //given:
+            UserInfo userInfo = new UserInfo("cc9a9a1", "https://secure.tld/auth");
+            Authentication authentication = new OpenIdAuthentication(userInfo);
+
+            //and:
+            doThrow(new DuplicateAccount()).when(accountService).register(any(Account.class));
+
+            //expect:
+            webApp.perform(post(PATH)
+                    .with(authentication(authentication))
+                    .with(csrf()))
+                    .andExpect(status().isConflict());
         }
 
         @Test

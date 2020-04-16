@@ -54,7 +54,7 @@ public class OpenIdAuthenticationTest {
         @Test
         public void noPrincipal() {
             //given:
-            authentication = new OpenIdAuthentication(null);
+            authentication = new OpenIdAuthentication((Account) null);
 
             //when:
             authentication.authenticateWith(userInfo);
@@ -95,7 +95,7 @@ public class OpenIdAuthenticationTest {
         @Test
         public void authenticatedGuest() {
             //given:
-            var authentication = new OpenIdAuthentication(null);
+            var authentication = new OpenIdAuthentication((Account) null);
 
             //when:
             authentication.authenticateWith(userInfo);
@@ -145,7 +145,7 @@ public class OpenIdAuthenticationTest {
     @Test
     public void ensureNonNullPrincipal() {
         //expect:
-        Authentication authentication  = new OpenIdAuthentication(null);
+        Authentication authentication  = new OpenIdAuthentication((Account) null);
         assertThat(authentication.getPrincipal()).isSameAs(Account.GUEST);
     }
 
