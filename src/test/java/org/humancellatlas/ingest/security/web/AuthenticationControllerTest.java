@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.security.web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.humancellatlas.ingest.security.Account;
 import org.humancellatlas.ingest.security.AccountService;
 import org.humancellatlas.ingest.security.SecurityConfig;
@@ -14,19 +15,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.security.ElixirConfig.ELIXIR;
 import static org.humancellatlas.ingest.security.GcpConfig.GCP;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -56,19 +59,35 @@ public class AuthenticationControllerTest {
     @DisplayName("Registration")
     class Registration {
 
-        public static final String PATH = "/auth/registration";
+        private static final String PATH = "/auth/registration";
 
         @Test
         void byAuthenticatedGuest() throws Exception {
             //given:
-            UserInfo userInfo = new UserInfo("cf12881b", "https://oidc.domain.tld/auth");
+            String subjectId = "cf12881b";
+            UserInfo userInfo = new UserInfo(subjectId, "https://oidc.domain.tld/auth");
             Authentication authentication = new OpenIdAuthentication(null, userInfo);
 
-            // expect:
-            webApp.perform(post(PATH)
-                    .with(authentication(authentication))
-                    .with(csrf()))
-                    .andExpect(status().isOk());
+            //and:
+            String accountId = "b4912b3";
+            Account persistentAccount = new Account(accountId, subjectId);
+            doReturn(persistentAccount).when(accountService).register(any(Account.class));
+
+            //when:
+            MvcResult result = webApp
+                    .perform(post(PATH)
+                            .with(authentication(authentication))
+                            .with(csrf()))
+                    .andReturn();
+
+            //then:
+            MockHttpServletResponse response = result.getResponse();
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+
+            //and:
+            ObjectMapper objectMapper = new ObjectMapper();
+            var resultingAccount = objectMapper.readValue(response.getContentAsString(), Account.class);
+            assertThat(resultingAccount.getId()).isEqualTo(accountId);
 
             //and:
             var accountCaptor = ArgumentCaptor.forClass(Account.class);

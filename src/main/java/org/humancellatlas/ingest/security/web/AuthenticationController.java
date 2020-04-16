@@ -13,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+
 @RequestMapping("/auth")
 public class AuthenticationController {
 
@@ -24,17 +26,18 @@ public class AuthenticationController {
         this.accountService = accountService;
     }
 
-    @PostMapping("/registration")
+    @PostMapping(path="/registration", produces=APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<?> register(Authentication authentication) {
         var openIdAuthentication = (OpenIdAuthentication) authentication;
         var userInfo = (UserInfo) openIdAuthentication.getCredentials();
+        Account persistentAccount = null;
         try {
-            accountService.register(new Account(userInfo.getSubjectId()));
+            persistentAccount = accountService.register(new Account(userInfo.getSubjectId()));
         } catch (DuplicateAccount duplicateAccount) {
             LOGGER.error(duplicateAccount.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(persistentAccount);
     }
 
 }

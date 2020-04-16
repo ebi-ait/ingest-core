@@ -29,9 +29,12 @@ public class Account {
     private String id;
 
     @Indexed(unique=true)
-    private final String providerReference;
+    private String providerReference;
 
-    private final Set<Role> roles = new HashSet<>();
+    private Set<Role> roles = new HashSet<>();
+
+    //needed for reflection used by frameworks
+    private Account() {}
 
     public Account(String providerReference) {
         this.providerReference = providerReference;
