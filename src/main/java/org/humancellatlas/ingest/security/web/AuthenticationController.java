@@ -2,6 +2,8 @@ package org.humancellatlas.ingest.security.web;
 
 import org.humancellatlas.ingest.security.Account;
 import org.humancellatlas.ingest.security.AccountService;
+import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
+import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,8 +19,9 @@ public class AuthenticationController {
 
     @PostMapping("/registration")
     public void register(Authentication authentication) {
-        String subject = authentication.getPrincipal().toString();
-        accountService.register(new Account(subject));
+        var openIdAuthentication = (OpenIdAuthentication) authentication;
+        var userInfo = (UserInfo) openIdAuthentication.getCredentials();
+        accountService.register(new Account(userInfo.getSubjectId()));
     }
 
 }

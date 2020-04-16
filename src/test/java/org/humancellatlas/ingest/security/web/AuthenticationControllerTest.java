@@ -1,11 +1,10 @@
 package org.humancellatlas.ingest.security.web;
 
-import org.assertj.core.api.Assertions;
 import org.humancellatlas.ingest.security.Account;
 import org.humancellatlas.ingest.security.AccountService;
 import org.humancellatlas.ingest.security.SecurityConfig;
-import org.humancellatlas.ingest.security.web.test.IdToken;
-import org.humancellatlas.ingest.security.web.test.IdTokenAuthentication;
+import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
+import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -53,13 +53,15 @@ public class AuthenticationControllerTest {
     class Registration {
 
         @Test
-        void newUserWithValidJwt() throws Exception {
+        void fromUserInfo() throws Exception {
             //given:
-            IdToken idToken = new IdToken("cf12881b", "Juan dela Cruz");
+            String subjectId = "cf12881b";
+            UserInfo userInfo = new UserInfo(subjectId, "https://oidc.domain.tld/auth");
+            Authentication authentication = new OpenIdAuthentication(null, userInfo);
 
             // expect:
             webApp.perform(post("/auth/registration")
-                    .with(authentication(new IdTokenAuthentication(idToken)))
+                    .with(authentication(authentication))
                     .with(csrf()))
                     .andExpect(status().isOk());
 
@@ -71,7 +73,7 @@ public class AuthenticationControllerTest {
             var registeredAccount = accountCaptor.getValue();
             assertThat(registeredAccount)
                     .extracting("providerReference")
-                    .containsExactly(idToken.getSubject());
+                    .containsExactly(userInfo.getSubjectId());
         }
 
     }
