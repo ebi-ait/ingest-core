@@ -13,8 +13,11 @@ public class OpenIdAuthentication implements Authentication {
 
     private boolean authenticated = false;
 
-    public OpenIdAuthentication(Account principal) {
-        this.account = principal;
+    public OpenIdAuthentication(final Account principal) {
+        account = Account.GUEST;
+        if (principal != null) {
+            account = principal;
+        }
     }
 
     @Override
@@ -52,9 +55,14 @@ public class OpenIdAuthentication implements Authentication {
         throw new IllegalArgumentException("Operation not supported. Use authenticateWith to set status.");
     }
 
+    /*
+    OpenIdAuthentication is essentially a pre-authenticated Authentication Token, which means that even a Guest
+    with a valid JWT credentials (implied by UserInfo) is *technically* authenticated. For now we are setting this
+    to be *not* authenticated, but might need to be revisited.
+    */
     public void authenticateWith(UserInfo credentials) {
         this.userInfo = credentials;
-        if (account == null || credentials == null) {
+        if (account == Account.GUEST || credentials == null) {
             authenticated = false;
             return;
         }

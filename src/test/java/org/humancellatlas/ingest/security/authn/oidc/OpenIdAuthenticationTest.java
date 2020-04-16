@@ -129,4 +129,11 @@ public class OpenIdAuthenticationTest {
         assertThat(authentication.getDetails()).isEqualTo(userInfo);
     }
 
+    @Test
+    public void ensureNonNullPrincipal() {
+        //expect:
+        Authentication authentication  = new OpenIdAuthentication(null);
+        assertThat(authentication.getPrincipal()).isSameAs(Account.GUEST);
+    }
+
 }
