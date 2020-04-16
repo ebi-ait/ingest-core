@@ -56,7 +56,7 @@ public class AuthenticationControllerTest {
         public static final String PATH = "/auth/registration";
 
         @Test
-        void fromUserInfo() throws Exception {
+        void byAuthenticatedGuest() throws Exception {
             //given:
             UserInfo userInfo = new UserInfo("cf12881b", "https://oidc.domain.tld/auth");
             Authentication authentication = new OpenIdAuthentication(null, userInfo);
@@ -83,6 +83,12 @@ public class AuthenticationControllerTest {
         void byRegisteredUser() throws Exception {
             // expect:
             webApp.perform(post(PATH)).andExpect(status().isForbidden());
+        }
+
+        @Test
+        void byAnonymousUser() throws Exception {
+            // expect:
+            webApp.perform(post(PATH)).andExpect(status().isUnauthorized());
         }
 
     }
