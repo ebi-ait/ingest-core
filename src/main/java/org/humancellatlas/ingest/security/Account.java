@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.security;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ public class Account {
     @Id
     private String id;
 
+    @Indexed(unique=true)
     private final String providerReference;
 
     private final Set<Role> roles = new HashSet<>();
