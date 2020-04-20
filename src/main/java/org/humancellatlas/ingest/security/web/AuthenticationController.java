@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -38,6 +39,12 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
         return ResponseEntity.ok().body(persistentAccount);
+    }
+
+    @GetMapping(path="/account", produces=APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Account> getAccount(Authentication authentication) {
+        Account account = (Account) authentication.getPrincipal();
+        return ResponseEntity.ok().body(account);
     }
 
 }

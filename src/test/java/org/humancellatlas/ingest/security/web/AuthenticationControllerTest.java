@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.security.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.humancellatlas.ingest.security.Account;
 import org.humancellatlas.ingest.security.AccountService;
+import org.humancellatlas.ingest.security.Role;
 import org.humancellatlas.ingest.security.SecurityConfig;
 import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
 import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
@@ -32,6 +33,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,6 +41,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringJUnitWebConfig({ AuthenticationController.class, SecurityConfig.class })
 @AutoConfigureMockMvc(printOnlyOnFailure=false)
 public class AuthenticationControllerTest {
+
+    private static final String BASE_PATH = "/auth";
 
     @Autowired
     private WebApplicationContext applicationContext;
@@ -133,6 +137,47 @@ public class AuthenticationControllerTest {
         void byAnonymousUser() throws Exception {
             // expect:
             webApp.perform(post(PATH)).andExpect(status().isUnauthorized());
+        }
+
+    }
+
+    @Nested
+    @DisplayName("Account")
+    class AccountRetrieval {
+
+        private final String PATH = String.format("%s/account", BASE_PATH);
+
+        @Test
+        void registeredUser() throws Exception {
+            //given:
+            String accountId = "bcdde10";
+            String subjectId = "67135cc";
+
+            //and:
+            Account account = new Account(accountId, subjectId);
+            account.addRole(Role.CONTRIBUTOR);
+
+            //and:
+            UserInfo credentials = new UserInfo(subjectId, "https://issuer.tld");
+            Authentication authentication = new OpenIdAuthentication(account, credentials);
+
+            //when:
+            MvcResult result = webApp
+                    .perform(get(PATH)
+                            .with(authentication(authentication)))
+                    .andReturn();
+
+            //then:
+            MockHttpServletResponse response = result.getResponse();
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+
+            //and:
+            ObjectMapper objectMapper = new ObjectMapper();
+            Account retrievedAccount = objectMapper.readValue(response.getContentAsString(), Account.class);
+            assertThat(retrievedAccount)
+                    .extracting("id", "providerReference")
+                    .containsExactly(accountId, subjectId);
+            assertThat(retrievedAccount.getRoles()).containsExactly(Role.CONTRIBUTOR);
         }
 
     }
