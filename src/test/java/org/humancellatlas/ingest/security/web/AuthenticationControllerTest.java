@@ -38,8 +38,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
-@SpringJUnitWebConfig({ AuthenticationController.class, SecurityConfig.class })
-@AutoConfigureMockMvc(printOnlyOnFailure=false)
+@SpringJUnitWebConfig({AuthenticationController.class, SecurityConfig.class})
+@AutoConfigureMockMvc(printOnlyOnFailure = false)
 public class AuthenticationControllerTest {
 
     private static final String BASE_PATH = "/auth";
@@ -50,10 +50,10 @@ public class AuthenticationControllerTest {
     @Autowired
     private MockMvc webApp;
 
-    @MockBean(name=GCP)
+    @MockBean(name = GCP)
     private AuthenticationProvider gcp;
 
-    @MockBean(name=ELIXIR)
+    @MockBean(name = ELIXIR)
     private AuthenticationProvider elixir;
 
     @MockBean
@@ -75,7 +75,9 @@ public class AuthenticationControllerTest {
             //and:
             String accountId = "b4912b3";
             Account persistentAccount = new Account(accountId, subjectId);
-            doReturn(persistentAccount).when(accountService).register(any(Account.class));
+            doReturn(persistentAccount)
+                    .when(accountService)
+                    .register(any(Account.class));
 
             //when:
             MvcResult result = webApp
@@ -92,12 +94,14 @@ public class AuthenticationControllerTest {
             ObjectMapper objectMapper = new ObjectMapper();
             var resultingAccount = objectMapper.readValue(response.getContentAsString(), Account.class);
             assertThat(resultingAccount.getId()).isEqualTo(accountId);
+            assertCorrectRegisteredAccount(userInfo);
 
-            //and:
+        }
+
+        private void assertCorrectRegisteredAccount(UserInfo userInfo) {
             var accountCaptor = ArgumentCaptor.forClass(Account.class);
             verify(accountService).register(accountCaptor.capture());
 
-            //and:
             var registeredAccount = accountCaptor.getValue();
             assertThat(registeredAccount)
                     .extracting("providerReference")
@@ -105,10 +109,12 @@ public class AuthenticationControllerTest {
         }
 
         @Test
-        @WithMockUser(roles={ "CONTRIBUTOR" })
+        @WithMockUser(roles = {"CONTRIBUTOR"})
         void byRegisteredUser() throws Exception {
             // expect:
-            webApp.perform(post(PATH)).andExpect(status().isForbidden());
+            webApp
+                    .perform(post(PATH))
+                    .andExpect(status().isForbidden());
         }
 
         /*
@@ -124,19 +130,24 @@ public class AuthenticationControllerTest {
             Authentication authentication = new OpenIdAuthentication(userInfo);
 
             //and:
-            doThrow(new DuplicateAccount()).when(accountService).register(any(Account.class));
+            doThrow(new DuplicateAccount())
+                    .when(accountService)
+                    .register(any(Account.class));
 
             //expect:
-            webApp.perform(post(PATH)
-                    .with(authentication(authentication))
-                    .with(csrf()))
+            webApp
+                    .perform(post(PATH)
+                            .with(authentication(authentication))
+                            .with(csrf()))
                     .andExpect(status().isConflict());
         }
 
         @Test
         void byAnonymousUser() throws Exception {
             // expect:
-            webApp.perform(post(PATH)).andExpect(status().isUnauthorized());
+            webApp
+                    .perform(post(PATH))
+                    .andExpect(status().isUnauthorized());
         }
 
     }
@@ -163,15 +174,17 @@ public class AuthenticationControllerTest {
 
             //when:
             MvcResult result = webApp
-                    .perform(get(PATH)
-                            .with(authentication(authentication)))
+                    .perform(get(PATH).with(authentication(authentication)))
                     .andReturn();
 
             //then:
             MockHttpServletResponse response = result.getResponse();
             assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+            assertCorrectAccountDetails(response, accountId, subjectId);
+        }
 
-            //and:
+        private void assertCorrectAccountDetails(MockHttpServletResponse response, String accountId,
+                String subjectId) throws Exception {
             ObjectMapper objectMapper = new ObjectMapper();
             Account retrievedAccount = objectMapper.readValue(response.getContentAsString(), Account.class);
             assertThat(retrievedAccount)
@@ -187,15 +200,17 @@ public class AuthenticationControllerTest {
             Authentication authentication = new OpenIdAuthentication(userInfo);
 
             //expect:
-            webApp.perform(get(PATH)
-                    .with(authentication(authentication)))
+            webApp
+                    .perform(get(PATH).with(authentication(authentication)))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         void unknownGuest() throws Exception {
             //expect:
-            webApp.perform(get(PATH)).andExpect(status().isUnauthorized());
+            webApp
+                    .perform(get(PATH))
+                    .andExpect(status().isUnauthorized());
         }
 
     }
