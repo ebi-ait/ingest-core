@@ -142,7 +142,7 @@ public class AuthenticationControllerTest {
     }
 
     @Nested
-    @DisplayName("Account")
+    @DisplayName("Account Retrieval")
     class AccountRetrieval {
 
         private final String PATH = String.format("%s/account", BASE_PATH);
@@ -178,6 +178,18 @@ public class AuthenticationControllerTest {
                     .extracting("id", "providerReference")
                     .containsExactly(accountId, subjectId);
             assertThat(retrievedAccount.getRoles()).containsExactly(Role.CONTRIBUTOR);
+        }
+
+        @Test
+        void authenticatedGuest() throws Exception {
+            //given:
+            UserInfo userInfo = new UserInfo("82ffab9", "https://domain.tld/issuer");
+            Authentication authentication = new OpenIdAuthentication(userInfo);
+
+            //expect:
+            webApp.perform(get(PATH)
+                    .with(authentication(authentication)))
+                    .andExpect(status().isNotFound());
         }
 
     }

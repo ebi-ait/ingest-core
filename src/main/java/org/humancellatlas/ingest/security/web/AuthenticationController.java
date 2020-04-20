@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.security.web;
 
 import org.humancellatlas.ingest.security.Account;
 import org.humancellatlas.ingest.security.AccountService;
+import org.humancellatlas.ingest.security.Role;
 import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
 import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
 import org.humancellatlas.ingest.security.exception.DuplicateAccount;
@@ -43,6 +44,9 @@ public class AuthenticationController {
 
     @GetMapping(path="/account", produces=APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Account> getAccount(Authentication authentication) {
+        if (authentication.getAuthorities().contains(Role.GUEST)) {
+            return ResponseEntity.notFound().build();
+        }
         Account account = (Account) authentication.getPrincipal();
         return ResponseEntity.ok().body(account);
     }
