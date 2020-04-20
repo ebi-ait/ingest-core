@@ -192,6 +192,12 @@ public class AuthenticationControllerTest {
                     .andExpect(status().isNotFound());
         }
 
+        @Test
+        void unknownGuest() throws Exception {
+            //expect:
+            webApp.perform(get(PATH)).andExpect(status().isUnauthorized());
+        }
+
     }
 
 }
