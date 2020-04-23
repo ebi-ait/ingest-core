@@ -14,6 +14,7 @@ public class Constants {
         public static final String ACCESSION_REQUIRED = "ingest.metadata.accession.queue";
         public static final String SUBMISSION_ARCHIVAL = "ingest.archival.queue";
         public static final String STATE_TRACKING = "ingest.state-tracking.queue";
+        public static final String NOTIFICATIONS_QUEUE = "ingest.notifications.queue";
     }
 
     public class Exchanges {
@@ -26,6 +27,7 @@ public class Constants {
         public static final String ASSAY_EXCHANGE = "ingest.bundle.exchange";
 
         public static final String UPLOAD_AREA_EXCHANGE = "ingest.upload.area.exchange";
+        public static final String NOTIFICATIONS_EXCHANGE = "ingest.notifications.exchange";
     }
 
     public class Routing {
@@ -39,6 +41,7 @@ public class Constants {
         public static final String UPLOAD_AREA_CREATE = "ingest.upload.area.create";
         public static final String UPLOAD_AREA_CLEANUP = "ingest.upload.area.cleanup";
 
+        public static final String ADD_NOTIFICATION = "ingest.notification.add";
     }
 
 }
