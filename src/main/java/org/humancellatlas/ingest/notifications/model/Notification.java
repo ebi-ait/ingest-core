@@ -1,15 +1,19 @@
-package org.humancellatlas.ingest.notifications;
+package org.humancellatlas.ingest.notifications.model;
 
 import java.time.Instant;
 import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
+import org.humancellatlas.ingest.notifications.NotificationState;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.hateoas.Identifiable;
 
 @Data
 @Builder
+@Document
 public class Notification implements Identifiable<String> {
 
   @Id
@@ -20,6 +24,8 @@ public class Notification implements Identifiable<String> {
   private final Map metadata;
   @NonNull
   private final Instant notifyAt;
-  @NonNull
+  @NonNull @Indexed
   private final NotificationState state;
+  @NonNull @Indexed
+  private final Checksum checksum;
 }

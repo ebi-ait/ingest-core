@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.notifications;
 import java.time.Instant;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
+import org.humancellatlas.ingest.notifications.model.Notification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,7 @@ public class NotificationService {
                                             .content(notificationRequest.getContent())
                                             .metadata(notificationRequest.getMetadata())
                                             .state(NotificationState.REGISTERED)
+                                            .checksum(notificationRequest.getChecksum())
                                             .notifyAt(Instant.now())
                                             .build();
 

@@ -1,6 +1,6 @@
 package org.humancellatlas.ingest.notifications.processors;
 
-import org.humancellatlas.ingest.notifications.Notification;
+import org.humancellatlas.ingest.notifications.model.Notification;
 
 public interface NotificationProcessor {
 

@@ -5,15 +5,17 @@ import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.messaging.Constants.Queues;
-import org.humancellatlas.ingest.notifications.Notification;
+import org.humancellatlas.ingest.notifications.model.Notification;
 import org.humancellatlas.ingest.notifications.sources.NotificationSource;
-import org.humancellatlas.ingest.notifications.sources.impl.inmemory.InmemoryNotificationQueue;
+import org.humancellatlas.ingest.notifications.sources.impl.inmemory.InmemoryNotificationSource;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
+import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
-public class RabbitNotificationQueue implements NotificationSource {
-  private final InmemoryNotificationQueue inmemoryNotificationQueue = new InmemoryNotificationQueue();
+@Component(value = "rabbitNotificationSource")
+public class RabbitNotificationSource implements NotificationSource {
+  private final InmemoryNotificationSource inmemoryNotificationSource = new InmemoryNotificationSource();
   private final RabbitMessagingTemplate rabbitMessagingTemplate;
   private final AmqpConfig amqpConfig;
 
@@ -24,7 +26,7 @@ public class RabbitNotificationQueue implements NotificationSource {
 
   @Override
   public Stream<Notification> stream() {
-    return this.inmemoryNotificationQueue.stream();
+    return this.inmemoryNotificationSource.stream();
   }
 
   @Override

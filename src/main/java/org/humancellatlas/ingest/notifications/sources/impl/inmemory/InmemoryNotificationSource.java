@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
-import org.humancellatlas.ingest.notifications.Notification;
+import org.humancellatlas.ingest.notifications.model.Notification;
 import org.humancellatlas.ingest.notifications.sources.NotificationSource;
 
-public class InmemoryNotificationQueue implements NotificationSource {
+public class InmemoryNotificationSource implements NotificationSource {
   private final Queue<Notification> queue = new ConcurrentLinkedQueue<>();
 
   @Override
