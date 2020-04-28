@@ -50,19 +50,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .collect(toList());
     }
 
-    private final AuthenticationProvider gcpleAuthenticationProvider;
+    private final AuthenticationProvider gcpAuthenticationProvider;
     private final AuthenticationProvider elixirAuthenticationPovider;
 
     public SecurityConfig(@Qualifier(GCP) AuthenticationProvider gcp,
             @Qualifier(ELIXIR) AuthenticationProvider elixir) {
-        this.gcpleAuthenticationProvider = gcp;
+        this.gcpAuthenticationProvider = gcp;
         this.elixirAuthenticationPovider = elixir;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authenticationProvider(elixirAuthenticationPovider)
-                .authenticationProvider(gcpleAuthenticationProvider)
+                .authenticationProvider(gcpAuthenticationProvider)
                 .securityContext().securityContextRepository(new BearerSecurityContextRepository())
                 .and()
                 .exceptionHandling().authenticationEntryPoint(new JwtAuthenticationEntryPoint())

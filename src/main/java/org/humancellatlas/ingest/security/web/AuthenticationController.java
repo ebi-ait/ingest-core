@@ -20,8 +20,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 @RequestMapping("/auth")
 public class AuthenticationController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationController.class);
-
     private final AccountService accountService;
 
     public AuthenticationController(AccountService accountService) {
@@ -32,14 +30,12 @@ public class AuthenticationController {
     public ResponseEntity<?> register(Authentication authentication) {
         var openIdAuthentication = (OpenIdAuthentication) authentication;
         var userInfo = (UserInfo) openIdAuthentication.getCredentials();
-        Account persistentAccount = null;
         try {
-            persistentAccount = accountService.register(new Account(userInfo.getSubjectId()));
+            Account persistentAccount = accountService.register(new Account(userInfo.getSubjectId()));
+            return ResponseEntity.ok().body(persistentAccount);
         } catch (DuplicateAccount duplicateAccount) {
-            LOGGER.error(duplicateAccount.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        return ResponseEntity.ok().body(persistentAccount);
     }
 
     @GetMapping(path="/account", produces=APPLICATION_JSON_UTF8_VALUE)
