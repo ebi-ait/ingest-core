@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.security;
 
 
+import org.humancellatlas.ingest.security.exception.DuplicateAccount;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -56,6 +58,21 @@ public class AccountServiceTest {
             assertThat(savedAccount.getRoles()).contains(Role.CONTRIBUTOR);
         }
 
+        @Test
+        void duplicateAccount() {
+            //given:
+            String providerReference = "84cd01b";
+            Account account = new Account(providerReference);
+
+            //and:
+            Account persistentAccount = new Account("72b1c9e", providerReference);
+            doReturn(persistentAccount).when(accountRepository).findByProviderReference(providerReference);
+
+            //expect:
+            assertThatThrownBy(() -> {
+                accountService.register(account);
+            }).isInstanceOf(DuplicateAccount.class);
+        }
     }
 
 }
