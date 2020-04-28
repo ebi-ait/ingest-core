@@ -31,7 +31,8 @@ public class AuthenticationController {
         var openIdAuthentication = (OpenIdAuthentication) authentication;
         var userInfo = (UserInfo) openIdAuthentication.getCredentials();
         try {
-            Account persistentAccount = accountService.register(new Account(userInfo.getSubjectId()));
+            Account account = new Account(userInfo.getSubjectId());
+            Account persistentAccount = accountService.register(account);
             return ResponseEntity.ok().body(persistentAccount);
         } catch (DuplicateAccount duplicateAccount) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
