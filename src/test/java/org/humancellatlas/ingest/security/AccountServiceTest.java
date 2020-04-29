@@ -55,7 +55,7 @@ public class AccountServiceTest {
             //and:
             var savedAccount = accountCaptor.getValue();
             assertThat(savedAccount.getProviderReference()).isEqualTo(providerReference);
-            assertThat(savedAccount.getRoles()).contains(Role.CONTRIBUTOR);
+            assertThat(savedAccount.getRoles()).containsOnly(Role.CONTRIBUTOR);
         }
 
         @Test

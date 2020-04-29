@@ -106,6 +106,7 @@ public class AuthenticationControllerTest {
             assertThat(registeredAccount)
                     .extracting("providerReference")
                     .containsExactly(userInfo.getSubjectId());
+            assertThat(registeredAccount.getRoles()).isEmpty();
         }
 
         @Test
