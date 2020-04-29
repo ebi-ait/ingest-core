@@ -2,11 +2,13 @@ package org.humancellatlas.ingest.security;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+@Document
 public class Account {
 
     public static final Account GUEST = new GuestAccount();
