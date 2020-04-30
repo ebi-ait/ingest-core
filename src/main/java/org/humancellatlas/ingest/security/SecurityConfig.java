@@ -37,8 +37,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/user/**"));
         antPathMatchers.addAll(defineAntPathMatchers(PATCH, "/**"));
         antPathMatchers.addAll(defineAntPathMatchers(PUT, "/**"));
-        antPathMatchers.addAll(defineAntPathMatchers(POST, "/messaging/**", "/projects**", "/submissionEnvelopes",
-                "/submissionEnvelopes/*/projects", "/files**", "/biomaterials**", "/protocols**", "/processes**",
+        antPathMatchers.addAll(defineAntPathMatchers(POST, "/messaging/**", "/files**", "/biomaterials**", "/protocols**", "/processes**",
                 "/files**", "/bundleManifests**"));
         SECURED_ANT_PATHS = Collections.unmodifiableList(antPathMatchers);
     }
@@ -73,6 +72,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/submissionEnvelopes").authenticated()
+                .antMatchers(HttpMethod.POST, "/submissionEnvelopes/*/projects").authenticated()
                 .antMatchers(HttpMethod.POST, "/projects**").authenticated()
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
                 .antMatchers(GET, "/auth/account").authenticated()
