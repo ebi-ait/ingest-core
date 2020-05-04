@@ -21,6 +21,7 @@ public class Account {
 
         private GuestAccount() {
             super(EMPTY, EMPTY);
+            setName(EMPTY);
             addRole(Role.GUEST);
         }
 
