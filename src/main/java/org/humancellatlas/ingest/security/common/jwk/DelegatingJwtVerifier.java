@@ -7,6 +7,12 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.jwt.interfaces.Verification;
 
+/**
+ * A {@link JWTVerifier} that delegates to Auth0's {@link com.auth0.jwt.JWTVerifier} (which is another implementation
+ * of the interface). Yes, the interface and the default implementing class are named the same, which illustrates how
+ * confusing Auth0's library for processing JWTs can be. Hence, we have all these wrapper classes to hopefully help
+ * us deal with that.
+ */
 public class DelegatingJwtVerifier implements JWTVerifier {
 
     public static class Builder {
