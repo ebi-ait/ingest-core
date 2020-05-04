@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.security.authn.oidc;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.humancellatlas.ingest.security.Account;
 
 public class UserInfo {
 
@@ -31,6 +32,12 @@ public class UserInfo {
 
     public boolean hasIssuer() {
         return issuer != null && !issuer.isEmpty();
+    }
+
+    public Account toAccount() {
+        Account account = new Account(subjectId);
+        account.setName(name);
+        return account;
     }
 
 }
