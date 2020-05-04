@@ -52,7 +52,7 @@ public class OpenIdAuthenticationTest {
         }
 
         @Test
-        public void noPrincipal() {
+        public void noPrincipalAsGuest() {
             //given:
             authentication = new OpenIdAuthentication((Account) null);
 
@@ -60,7 +60,8 @@ public class OpenIdAuthenticationTest {
             authentication.authenticateWith(userInfo);
 
             //expect:
-            assertThat(authentication.isAuthenticated()).isFalse();
+            assertThat(authentication.isAuthenticated()).isTrue();
+            assertThat(authentication.getPrincipal()).isEqualTo(Account.GUEST);
             assertThat(authentication.getCredentials()).isEqualTo(userInfo);
         }
 
