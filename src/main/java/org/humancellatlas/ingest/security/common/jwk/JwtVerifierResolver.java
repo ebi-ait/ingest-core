@@ -8,7 +8,7 @@ import lombok.Getter;
 
 import java.security.interfaces.RSAPublicKey;
 
-public class RemoteServiceJwtVerifierResolver {
+public class JwtVerifierResolver {
 
     private final JwkVault jwkVault;
 
@@ -17,14 +17,13 @@ public class RemoteServiceJwtVerifierResolver {
     @Getter
     private final String issuer;
 
-    public RemoteServiceJwtVerifierResolver(JwkVault jwkVault, String audience, String issuer) {
+    public JwtVerifierResolver(JwkVault jwkVault, String audience, String issuer) {
         this.jwkVault = jwkVault;
         this.audience = audience;
         this.issuer = issuer;
     }
 
     public JWTVerifier resolve(String jwt) {
-
         DecodedJWT token = JWT.decode(jwt);
         RSAPublicKey publicKey = (RSAPublicKey) jwkVault.getPublicKey(token);
         DelegatingJwtVerifier.Builder builder = DelegatingJwtVerifier.require(Algorithm.RSA256(publicKey, null));

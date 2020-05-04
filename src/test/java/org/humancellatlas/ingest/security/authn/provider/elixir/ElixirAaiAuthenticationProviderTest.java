@@ -11,7 +11,7 @@ import okhttp3.mockwebserver.MockWebServer;
 import org.humancellatlas.ingest.security.Account;
 import org.humancellatlas.ingest.security.AccountRepository;
 import org.humancellatlas.ingest.security.JwtGenerator;
-import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
+import org.humancellatlas.ingest.security.common.jwk.JwtVerifierResolver;
 import org.humancellatlas.ingest.security.exception.InvalidUserEmail;
 import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
 import org.junit.jupiter.api.*;
@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class ElixirAaiAuthenticationProviderTest {
+
     private static MockWebServer mockBackEnd;
 
     @BeforeAll
@@ -46,13 +47,13 @@ public class ElixirAaiAuthenticationProviderTest {
     class AuthenticationTests {
         private WebTestClient webTestClient;
         private JWTVerifier jwtVerifier;
-        private RemoteServiceJwtVerifierResolver jwtVerifierResolver;
+        private JwtVerifierResolver jwtVerifierResolver;
         private AccountRepository accountRepository;
 
         @BeforeEach
         public void setUp() {
             jwtVerifier = mock(JWTVerifier.class);
-            jwtVerifierResolver = mock(RemoteServiceJwtVerifierResolver.class);
+            jwtVerifierResolver = mock(JwtVerifierResolver.class);
             doReturn(jwtVerifier).when(jwtVerifierResolver).resolve(anyString());
             String baseUrl = String.format("http://localhost:%s",
                     mockBackEnd.getPort());
@@ -64,7 +65,8 @@ public class ElixirAaiAuthenticationProviderTest {
         @DisplayName("success")
         public void testAuthenticate() throws JsonProcessingException {
             //given
-            AuthenticationProvider authenticationProvider = new ElixirAaiAuthenticationProvider(jwtVerifierResolver, accountRepository);
+            AuthenticationProvider authenticationProvider = new ElixirAaiAuthenticationProvider(jwtVerifierResolver,
+                    accountRepository);
 
             //given: JWT
             String keyId = "MDc2OTM3ODI4ODY2NUU5REVGRDVEM0MyOEYwQTkzNDZDRDlEQzNBRQ";

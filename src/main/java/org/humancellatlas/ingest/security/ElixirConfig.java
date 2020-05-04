@@ -2,7 +2,7 @@ package org.humancellatlas.ingest.security;
 
 import org.humancellatlas.ingest.security.authn.provider.elixir.ElixirAaiAuthenticationProvider;
 import org.humancellatlas.ingest.security.authn.provider.elixir.ElixirJwkVault;
-import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
+import org.humancellatlas.ingest.security.common.jwk.JwtVerifierResolver;
 import org.humancellatlas.ingest.security.common.jwk.UrlJwkProviderResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +25,7 @@ public class ElixirConfig {
     public AuthenticationProvider elixirAuthenticationProvider() {
         var urlJwkProviderResolver = new UrlJwkProviderResolver(issuer + "/jwk");
         var elixirJwkVault = new ElixirJwkVault(urlJwkProviderResolver);
-        var elixirJwtVerifierResolver = new RemoteServiceJwtVerifierResolver(elixirJwkVault, null, issuer);
+        var elixirJwtVerifierResolver = new JwtVerifierResolver(elixirJwkVault, null, issuer);
         return new ElixirAaiAuthenticationProvider(elixirJwtVerifierResolver, accountRepository);
     }
 

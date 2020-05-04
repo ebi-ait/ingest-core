@@ -3,7 +3,7 @@ package org.humancellatlas.ingest.security;
 import org.humancellatlas.ingest.security.authn.provider.gcp.GcpDomainWhiteList;
 import org.humancellatlas.ingest.security.authn.provider.gcp.GcpJwkVault;
 import org.humancellatlas.ingest.security.authn.provider.gcp.GoogleServiceJwtAuthenticationProvider;
-import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
+import org.humancellatlas.ingest.security.common.jwk.JwtVerifierResolver;
 import org.humancellatlas.ingest.security.common.jwk.UrlJwkProviderResolver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +30,7 @@ public class GcpConfig {
     public AuthenticationProvider gcpAuthenticationProvider() {
         var urlJwkProviderResolver = new UrlJwkProviderResolver(googleJwkProviderBaseUrl);
         var googleJwkVault = new GcpJwkVault(urlJwkProviderResolver);
-        var googleJwtVerifierResolver = new RemoteServiceJwtVerifierResolver(googleJwkVault, serviceAudience, null);
+        var googleJwtVerifierResolver = new JwtVerifierResolver(googleJwkVault, serviceAudience, null);
         return new GoogleServiceJwtAuthenticationProvider(new GcpDomainWhiteList(projectWhitelist),
                 googleJwtVerifierResolver);
     }

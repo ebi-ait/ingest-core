@@ -9,7 +9,7 @@ import org.humancellatlas.ingest.security.AccountRepository;
 import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
 import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
 import org.humancellatlas.ingest.security.common.jwk.DelegatingJwtAuthentication;
-import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
+import org.humancellatlas.ingest.security.common.jwk.JwtVerifierResolver;
 import org.humancellatlas.ingest.security.exception.InvalidUserEmail;
 import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
 import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
@@ -25,11 +25,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
     private static Logger logger = LoggerFactory.getLogger(ElixirAaiAuthenticationProvider.class);
 
-    private final RemoteServiceJwtVerifierResolver jwtVerifierResolver;
+    private final JwtVerifierResolver jwtVerifierResolver;
 
     private AccountRepository accountRepository;
 
-    public ElixirAaiAuthenticationProvider(RemoteServiceJwtVerifierResolver jwtVerifierResolver,
+    public ElixirAaiAuthenticationProvider(JwtVerifierResolver jwtVerifierResolver,
             AccountRepository accountRepository) {
         this.jwtVerifierResolver = jwtVerifierResolver;
         this.accountRepository = accountRepository;
