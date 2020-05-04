@@ -29,7 +29,8 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
 
     private AccountRepository accountRepository;
 
-    public ElixirAaiAuthenticationProvider(RemoteServiceJwtVerifierResolver jwtVerifierResolver, AccountRepository accountRepository) {
+    public ElixirAaiAuthenticationProvider(RemoteServiceJwtVerifierResolver jwtVerifierResolver,
+            AccountRepository accountRepository) {
         this.jwtVerifierResolver = jwtVerifierResolver;
         this.accountRepository = accountRepository;
     }

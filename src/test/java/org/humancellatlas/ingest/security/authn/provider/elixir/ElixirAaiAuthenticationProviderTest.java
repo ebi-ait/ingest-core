@@ -107,7 +107,7 @@ public class ElixirAaiAuthenticationProviderTest {
         @DisplayName("no account")
         public void testForNoAccount() throws JsonProcessingException {
             //given
-            AuthenticationProvider authenticationProvider = new ElixirAaiAuthenticationProvider(jwtVerifierResolver, accountRepository);
+            var authenticationProvider = new ElixirAaiAuthenticationProvider(jwtVerifierResolver, accountRepository);
 
             //given: JWT
             String keyId = "MDc2OTM3ODI4ODY2NUU5REVGRDVEM0MyOEYwQTkzNDZDRDlEQzNBRQ";
@@ -117,7 +117,7 @@ public class ElixirAaiAuthenticationProviderTest {
             String jwt = jwtGenerator.generate(keyId, subject, null);
 
             //and: given a JWT Authentication
-            PreAuthenticatedAuthenticationJsonWebToken jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
+            var jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
             assumeThat(jwtAuthentication).isNotNull();
 
             //and: given JWT Verifier will verify token successfully
@@ -131,13 +131,15 @@ public class ElixirAaiAuthenticationProviderTest {
                     .setBody(new ObjectMapper().writeValueAsString(mockUserInfo))
                     .addHeader("Content-Type", "application/json"));
 
+            //and: no matching records in the database
+            doReturn(null).when(accountRepository).findByProviderReference(anyString());
+
             //when:
             Authentication authentication = authenticationProvider.authenticate(jwtAuthentication);
 
             //then:
             assertThat(authentication).isNotNull();
-            assertThat(authentication.isAuthenticated()).isFalse();
-            assertThat(authentication.getPrincipal()).isNull();
+            assertThat(authentication.getPrincipal()).isEqualTo(Account.GUEST);
         }
 
         @Test
