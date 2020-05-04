@@ -7,36 +7,37 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 import lombok.Getter;
 
 import java.security.interfaces.RSAPublicKey;
+import java.util.Optional;
 
+/**
+ * Helper class whose main purpose is to create a {@link JWTVerifier} instance given a JWT string.
+ *
+ * This is part of the wrapper subsystem to help compartmentalise the area of the application that relies on Auth0's
+ * library for processing JWTs.
+ */
 public class JwtVerifierResolver {
 
     private final JwkVault jwkVault;
 
-    private final String audience;
-
-    @Getter
-    private final String issuer;
+    private final Optional<String> audience;
+    private final Optional<String> issuer;
 
     public JwtVerifierResolver(JwkVault jwkVault, String audience, String issuer) {
         this.jwkVault = jwkVault;
-        this.audience = audience;
-        this.issuer = issuer;
+        this.audience = Optional.ofNullable(audience);
+        this.issuer = Optional.ofNullable(issuer);
+    }
+
+    public String getIssuer() {
+        return issuer.get();
     }
 
     public JWTVerifier resolve(String jwt) {
         DecodedJWT token = JWT.decode(jwt);
         RSAPublicKey publicKey = (RSAPublicKey) jwkVault.getPublicKey(token);
         DelegatingJwtVerifier.Builder builder = DelegatingJwtVerifier.require(Algorithm.RSA256(publicKey, null));
-        if (audience != null) {
-            builder = builder.withAudience(audience);
-        }
-
-        if (issuer != null) {
-            builder.withIssuer(issuer);
-        } else {
-            // for GCP JWTs
-            builder.withIssuer(token.getIssuer());
-        }
+        audience.ifPresent(builder::withAudience);
+        builder.withIssuer(issuer.orElse(token.getIssuer()));
         return builder.build();
     }
 
