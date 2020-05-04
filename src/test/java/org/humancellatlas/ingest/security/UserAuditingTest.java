@@ -1,38 +1,70 @@
 package org.humancellatlas.ingest.security;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 
-import java.util.Optional;
-
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class UserAuditingTest {
-    @Test
-    public void testGetCurrentAuditor() {
-        // given
-        Account userAccount = new Account("1", "elixir-1");
 
-        Authentication authentication = mock(Authentication.class);
-        when(authentication.isAuthenticated()).thenReturn(true);
+    private UserAuditing userAuditing;
 
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
+    @BeforeEach
+    void setUp() {
+        userAuditing = new UserAuditing();
+    }
 
-        SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(userAccount);
+    @Nested
+    @DisplayName("getCurrentAuditor")
+    class GetCurrentAuditor {
 
-        UserAuditing userAuditing = new UserAuditing();
+        @Test
+        void accountTypePrincipal() {
+            //given:
+            String providerReference = "6700ed52";
+            Account userAccount = new Account(providerReference, "elixir-1");
 
-        // when
-        Optional<String> userId = userAuditing.getCurrentAuditor();
+            //and:
+            Authentication authentication = mock(Authentication.class);
+            doReturn(userAccount).when(authentication).getPrincipal();
+            when(authentication.isAuthenticated()).thenReturn(true);
 
-        // then
-        assertThat(userId.get()).isEqualTo("1");
+            //and:
+            SecurityContext securityContext = new SecurityContextImpl(authentication);
+            SecurityContextHolder.setContext(securityContext);
+
+            //when:
+            String auditor = userAuditing.getCurrentAuditor().orElseThrow();
+
+            //then:
+            assertThat(auditor).isEqualTo(providerReference);
+        }
+
+        @Test
+        void nonAccountTypePrincipal() {
+            //given:
+            String principal = "jdelacruz";
+            Authentication authentication = new UsernamePasswordAuthenticationToken(principal, "pas$w0rd",
+                    asList(Role.CONTRIBUTOR));
+            SecurityContextImpl securityContext = new SecurityContextImpl(authentication);
+            SecurityContextHolder.setContext(securityContext);
+
+            //when:
+            String auditor = userAuditing.getCurrentAuditor().orElseThrow();
+
+            //then:
+            assertThat(auditor).isEqualTo(principal);
+        }
+
     }
 
 }
