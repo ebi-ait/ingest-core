@@ -12,7 +12,6 @@ import java.util.Set;
 public class Account {
 
     public static final Account GUEST = new GuestAccount();
-
     /**
      * A Null Object subclass of Account that represents an unregistered Guest.
      */
@@ -32,6 +31,8 @@ public class Account {
 
     @Indexed(unique=true)
     private String providerReference;
+
+    private String name;
 
     private Set<Role> roles = new HashSet<>();
 
@@ -53,6 +54,14 @@ public class Account {
 
     public String getProviderReference() {
         return providerReference;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
