@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.security;
 
+import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,8 +21,13 @@ public class UserAuditing implements AuditorAware<String> {
         if (authentication == null || !authentication.isAuthenticated()) {
             return Optional.empty();
         }
-        Account account = (Account) authentication.getPrincipal();
-        return Optional.of(account.getId());
+
+        if (OpenIdAuthentication.class.isAssignableFrom(authentication.getClass())) {
+            Account account = (Account) authentication.getPrincipal();
+            return Optional.of(account.getId());
+        } else {
+            return Optional.ofNullable(authentication.getPrincipal().toString());
+        }
     }
 
 }
