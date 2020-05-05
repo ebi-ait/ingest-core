@@ -11,6 +11,7 @@ import okhttp3.mockwebserver.MockWebServer;
 import org.humancellatlas.ingest.security.Account;
 import org.humancellatlas.ingest.security.AccountRepository;
 import org.humancellatlas.ingest.security.JwtGenerator;
+import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
 import org.humancellatlas.ingest.security.common.jwk.JwtVerifierResolver;
 import org.humancellatlas.ingest.security.exception.InvalidUserEmail;
 import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
@@ -70,11 +71,16 @@ public class ElixirAaiAuthenticationProviderTest {
     @DisplayName("Authenticate")
     class AuthenticationTests {
 
+        private UserInfo testUserInfo;
+
+        private ObjectMapper objectMapper = new ObjectMapper();
+
         @BeforeEach
         public void setUp() {
             doReturn(jwtVerifier).when(jwtVerifierResolver).resolve(anyString());
             String baseUrl = String.format("http://localhost:%s", mockBackEnd.getPort());
             doReturn(baseUrl).when(jwtVerifierResolver).getIssuer();
+            testUserInfo = new UserInfo("sub", "name", "pref", "giv", "fam", "email@ebi.ac.uk", "issuer");
         }
 
         @Test
@@ -100,9 +106,8 @@ public class ElixirAaiAuthenticationProviderTest {
             doReturn(account).when(accountRepository).findByProviderReference(subject);
 
             //and: Elixir user info will be returned
-            ElixirUserInfo mockUserInfo = new ElixirUserInfo("sub", "name", "pref", "giv", "fam", "email@ebi.ac.uk");
             mockBackEnd.enqueue(new MockResponse()
-                    .setBody(new ObjectMapper().writeValueAsString(mockUserInfo))
+                    .setBody(objectMapper.writeValueAsString(testUserInfo))
                     .addHeader("Content-Type", "application/json"));
 
             //when:
@@ -134,9 +139,8 @@ public class ElixirAaiAuthenticationProviderTest {
             doReturn(token).when(jwtVerifier).verify(jwtAuthentication.getToken());
 
             //and: Elixir user info will be returned
-            ElixirUserInfo mockUserInfo = new ElixirUserInfo("sub", "name", "pref", "giv", "fam", "email@ebi.ac.uk");
             mockBackEnd.enqueue(new MockResponse()
-                    .setBody(new ObjectMapper().writeValueAsString(mockUserInfo))
+                    .setBody(objectMapper.writeValueAsString(testUserInfo))
                     .addHeader("Content-Type", "application/json"));
 
             //and: no matching records in the database
@@ -154,9 +158,10 @@ public class ElixirAaiAuthenticationProviderTest {
         @DisplayName("invalid user email")
         public void testForInvalidUserEmail() throws JsonProcessingException {
             //given:
-            ElixirUserInfo mockUserInfo = new ElixirUserInfo("sub", "name", "pref", "giv", "fam", "email@embl.ac.uk");
+            String invalidEmail = "email@embl.ac.uk";
+            testUserInfo = new UserInfo("sub", "name", "pref", "giv", "fam", invalidEmail, "issuer");
             mockBackEnd.enqueue(new MockResponse()
-                    .setBody(new ObjectMapper().writeValueAsString(mockUserInfo))
+                    .setBody(objectMapper.writeValueAsString(testUserInfo))
                     .addHeader("Content-Type", "application/json"));
 
             //and:
@@ -167,16 +172,15 @@ public class ElixirAaiAuthenticationProviderTest {
             //expect:
             assertThatThrownBy(() -> {
                 authenticationProvider.authenticate(jwtAuthentication);
-            }).isInstanceOf(InvalidUserEmail.class).hasMessageContaining("email@embl.ac.uk");
+            }).isInstanceOf(InvalidUserEmail.class).hasMessageContaining(invalidEmail);
         }
 
         @Test
         @DisplayName("valid user email")
         public void testForValidUserEmail() throws JsonProcessingException {
             //given:
-            ElixirUserInfo mockUserInfo = new ElixirUserInfo("sub", "name", "pref", "giv", "fam", "email@ebi.ac.uk");
             mockBackEnd.enqueue(new MockResponse()
-                    .setBody(new ObjectMapper().writeValueAsString(mockUserInfo))
+                    .setBody(objectMapper.writeValueAsString(testUserInfo))
                     .addHeader("Content-Type", "application/json"));
 
             //and:
@@ -201,9 +205,8 @@ public class ElixirAaiAuthenticationProviderTest {
         @DisplayName("verification failed")
         public void testForFailedVerification() throws JsonProcessingException {
             //given:
-            ElixirUserInfo mockUserInfo = new ElixirUserInfo("sub", "name", "pref", "giv", "fam", "email@ebi.ac.uk");
             mockBackEnd.enqueue(new MockResponse()
-                    .setBody(new ObjectMapper().writeValueAsString(mockUserInfo))
+                    .setBody(objectMapper.writeValueAsString(testUserInfo))
                     .addHeader("Content-Type", "application/json"));
 
             //and: given a JWT Authentication

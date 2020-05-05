@@ -1,13 +1,33 @@
 package org.humancellatlas.ingest.security.authn.oidc;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.humancellatlas.ingest.security.Account;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
 public class UserInfo {
 
-    private final String subjectId;
-    private final String issuer;
-    private final String name;
+    @JsonProperty("sub")
+    private String subjectId;
+
+    private String name;
+
+    @JsonProperty("preferred_username")
+    private String preferredUsername;
+
+    @JsonProperty("given_name")
+    private String givenName;
+
+    @JsonProperty("family_name")
+    private String familyName;
+
+    private String email;
+    private String issuer;
 
     public UserInfo(String subjectId, String issuer, String name) {
         this.subjectId = subjectId;
@@ -16,18 +36,11 @@ public class UserInfo {
     }
 
     //TODO remove this
+    //UserInfo should be independent of Auth0's classes
     public UserInfo(DecodedJWT decodedJWT) {
         this.subjectId = decodedJWT.getSubject();
         this.issuer = decodedJWT.getIssuer();
         this.name = "";
-    }
-
-    public String getSubjectId() {
-        return subjectId;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public boolean hasIssuer() {

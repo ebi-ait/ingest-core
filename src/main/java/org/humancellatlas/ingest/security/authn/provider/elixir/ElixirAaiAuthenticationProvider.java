@@ -6,7 +6,6 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
 import org.humancellatlas.ingest.security.Account;
 import org.humancellatlas.ingest.security.AccountRepository;
-import org.humancellatlas.ingest.security.ElixirConfig;
 import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
 import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
 import org.humancellatlas.ingest.security.common.jwk.DelegatingJwtAuthentication;
@@ -74,20 +73,20 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
             throw new UnlistedJwtIssuer(String.format("Not an Elxir AAI issued token: %s", issuer), issuer);
         }
 
-        ElixirUserInfo userInfo = retrieveUserInfo(token);
+        UserInfo userInfo = retrieveUserInfo(token);
 
         if (userInfo.getEmail().indexOf("@ebi.ac.uk") < 0) {
             throw new InvalidUserEmail(userInfo.getEmail());
         }
     }
 
-    private ElixirUserInfo retrieveUserInfo(String token) {
+    private UserInfo retrieveUserInfo(String token) {
         WebClient elixirClient = WebClient.builder()
                 .baseUrl(jwtVerifierResolver.getIssuer())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .build();
         WebClient.RequestBodySpec userInfoRequest = elixirClient.method(HttpMethod.GET).uri("/userinfo");
-        return userInfoRequest.retrieve().bodyToMono(ElixirUserInfo.class).block();
+        return userInfoRequest.retrieve().bodyToMono(UserInfo.class).block();
     }
 
     @Override
