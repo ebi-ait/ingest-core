@@ -5,7 +5,6 @@ import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
-import org.humancellatlas.ingest.notifications.NotificationState;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -21,11 +20,17 @@ public class Notification implements Identifiable<String> {
   @NonNull
   private final String content;
   @NonNull
-  private final Map metadata;
+  private final Map<String, ?> metadata;
   @NonNull
   private final Instant notifyAt;
   @NonNull @Indexed
   private final NotificationState state;
   @NonNull @Indexed
   private final Checksum checksum;
+
+  public static NotificationBuilder buildNew() {
+    return Notification.builder()
+                       .state(NotificationState.PENDING)
+                       .notifyAt(Instant.now());
+  }
 }

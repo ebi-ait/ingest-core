@@ -1,6 +1,8 @@
 package org.humancellatlas.ingest.notifications.sources.impl.inmemory;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
@@ -12,7 +14,13 @@ public class InmemoryNotificationSource implements NotificationSource {
 
   @Override
   public Stream<Notification> stream() {
-    return this.queue.stream();
+    return Stream.generate(() -> {
+      try{
+        return queue.remove();
+      } catch(NoSuchElementException e) {
+        return null;
+      }
+    }).takeWhile(Objects::nonNull);
   }
 
   @Override

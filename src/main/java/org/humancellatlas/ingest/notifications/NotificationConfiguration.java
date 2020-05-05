@@ -3,13 +3,15 @@ package org.humancellatlas.ingest.notifications;
 import java.util.Collection;
 import java.util.Collections;
 import lombok.Getter;
+import org.humancellatlas.ingest.messaging.Constants.Exchanges;
+import org.humancellatlas.ingest.messaging.Constants.Routing;
 import org.humancellatlas.ingest.notifications.processors.NotificationProcessor;
 import org.humancellatlas.ingest.notifications.processors.impl.email.EmailNotificationProcessor;
 import org.humancellatlas.ingest.notifications.processors.impl.email.SMTPConfig;
 import org.humancellatlas.ingest.notifications.sources.NotificationSource;
+import org.humancellatlas.ingest.notifications.sources.impl.inmemory.InmemoryNotificationSource;
 import org.humancellatlas.ingest.notifications.sources.impl.rabbit.AmqpConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -26,13 +28,12 @@ public class NotificationConfiguration {
     private final String username;
     private final String password;
 
-
     @Autowired
     public SmtpEnvVars(Environment environment) {
-      this.smtpHost = environment.getProperty("NOTIFICATIONS_SMTP_HOST");
-      this.smtpPort = Integer.parseInt(environment.getProperty("NOTIFICATIONS_SMTP_PORT"));
-      this.username = environment.getProperty("NOTIFICATIONS_SMTP_USERNAME");
-      this.password = environment.getProperty("NOTIFICATIONS_SMTP_PASSWORD");
+      this.smtpHost = environment.getProperty("NOTIFICATIONS_SMTP_HOST", "localhost");
+      this.smtpPort = Integer.parseInt(environment.getProperty("NOTIFICATIONS_SMTP_PORT", "587"));
+      this.username = environment.getProperty("NOTIFICATIONS_SMTP_USERNAME", "admin");
+      this.password = environment.getProperty("NOTIFICATIONS_SMTP_PASSWORD", "password");
     }
   }
 
@@ -44,8 +45,10 @@ public class NotificationConfiguration {
 
     @Autowired
     public AmqpEnvVars(Environment environment) {
-      this.sendExchange = environment.getProperty("NOTIFICATIONS_AMQP_SEND_EXCHANGE");
-      this.sendRoutingKey = environment.getProperty("NOTIFICATIONS_AMQP_SEND_ROUTING_KEY");
+      this.sendExchange = environment.getProperty("NOTIFICATIONS_AMQP_SEND_EXCHANGE",
+                                                  Exchanges.NOTIFICATIONS_EXCHANGE);
+      this.sendRoutingKey = environment.getProperty("NOTIFICATIONS_AMQP_SEND_ROUTING_KEY",
+                                                    Routing.ADD_NOTIFICATION);
     }
   }
 
@@ -74,13 +77,7 @@ public class NotificationConfiguration {
   }
 
   @Bean
-  public NotificationSource notificationSource(@Qualifier("rabbitNotificationSource") NotificationSource rabbitNotificationSource) {
-    return rabbitNotificationSource;
+  public NotificationSource notificationSource() {
+    return new InmemoryNotificationSource();
   }
-
-  @Bean
-  public NotificationQueuer notificationQueuer(NotificationSource notificationSource, NotificationService notificationService) {
-    return new NotificationQueuer(notificationService, notificationSource);
-  }
-
 }

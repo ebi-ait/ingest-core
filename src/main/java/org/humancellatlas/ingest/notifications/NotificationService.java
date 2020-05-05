@@ -1,11 +1,18 @@
 package org.humancellatlas.ingest.notifications;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
+import org.humancellatlas.ingest.notifications.exception.DuplicateNotification;
+import org.humancellatlas.ingest.notifications.model.Checksum;
 import org.humancellatlas.ingest.notifications.model.Notification;
+import org.humancellatlas.ingest.notifications.model.NotificationRequest;
+import org.humancellatlas.ingest.notifications.model.NotificationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 
 
@@ -14,19 +21,36 @@ import org.springframework.stereotype.Component;
 public class NotificationService {
 
   private final NotificationRepository notificationRepository;
-
   private final Logger log = LoggerFactory.getLogger(getClass());
 
   public Notification createNotification(NotificationRequest notificationRequest) {
-    Notification notification = Notification.builder()
-                                            .content(notificationRequest.getContent())
-                                            .metadata(notificationRequest.getMetadata())
-                                            .state(NotificationState.REGISTERED)
-                                            .checksum(notificationRequest.getChecksum())
-                                            .notifyAt(Instant.now())
-                                            .build();
+    try {
+      Notification notification = Notification.builder()
+                                              .content(notificationRequest.getContent())
+                                              .metadata(notificationRequest.getMetadata())
+                                              .state(NotificationState.PENDING)
+                                              .checksum(notificationRequest.getChecksum())
+                                              .notifyAt(Instant.now())
+                                              .build();
 
-    return this.notificationRepository.save(notification);
+      return this.notificationRepository.save(notification);
+    } catch (DuplicateKeyException e) {
+      String checksumValue = notificationRequest.getChecksum().getValue();
+      String id = this.notificationRepository.findByChecksum_Value(checksumValue)
+                                             .orElseThrow(() -> {
+                                               throw new RuntimeException(e);
+                                             })
+                                             .getId();
+
+      throw new DuplicateNotification(String.format("Notification checksum value already exists in notification %s", id));
+    }
+  }
+
+  public Notification retrieveForChecksum(Checksum checksum) {
+    Optional<Notification> maybeNotification = this.notificationRepository.findByChecksum(checksum);
+    return maybeNotification.orElseThrow(() -> {
+      throw new ResourceNotFoundException(String.format("Couldn't find checksum %s", checksum.toString()));
+    });
   }
 
   public Notification changeState(Notification notification, NotificationState toState) {
@@ -37,6 +61,7 @@ public class NotificationService {
                                          .metadata(notification.getMetadata())
                                          .state(toState)
                                          .notifyAt(notification.getNotifyAt())
+                                         .checksum(notification.getChecksum())
                                          .build();
 
       return this.notificationRepository.save(changed);
@@ -50,7 +75,6 @@ public class NotificationService {
   }
 
   public Stream<Notification> getUnhandledNotifications() {
-    return notificationRepository.findByStateOrderByNotifyAtDesc(NotificationState.REGISTERED);
+    return notificationRepository.findByStateOrderByNotifyAtDesc(NotificationState.PENDING);
   }
-
 }
