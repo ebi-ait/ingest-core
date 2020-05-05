@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.humancellatlas.ingest.security.Account;
 import org.humancellatlas.ingest.security.AccountRepository;
 import org.humancellatlas.ingest.security.JwtGenerator;
@@ -18,6 +19,7 @@ import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +37,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes={ ElixirAaiAuthenticationProviderTest.Config.class })
+@AutoConfigureWebClient
 public class ElixirAaiAuthenticationProviderTest {
 
     @Configuration
@@ -85,7 +88,7 @@ public class ElixirAaiAuthenticationProviderTest {
 
         @Test
         @DisplayName("success")
-        public void testAuthenticate() throws JsonProcessingException {
+        public void testAuthenticate() throws Exception {
             //given: JWT
             String keyId = "MDc2OTM3ODI4ODY2NUU5REVGRDVEM0MyOEYwQTkzNDZDRDlEQzNBRQ";
             String subject = "johndoe@elixirdomain.tld";
@@ -117,6 +120,12 @@ public class ElixirAaiAuthenticationProviderTest {
             assertThat(authentication).extracting("authenticated", "principal");
             assertThat(authentication.isAuthenticated()).isTrue();
             assertThat(authentication.getPrincipal()).isEqualTo(account);
+
+            //and:
+            RecordedRequest request = mockBackEnd.takeRequest();
+            assertThat(request.getMethod()).isEqualToIgnoringCase("GET");
+            String bearerToken = String.format("Bearer %s", jwtAuthentication.getToken());
+            assertThat(request.getHeaders().get("Authorization")).isEqualTo(bearerToken);
         }
 
         @Test

@@ -16,28 +16,30 @@ import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.humancellatlas.ingest.security.ElixirConfig.ELIXIR;
 
 @Component(ELIXIR)
 public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
-    private static Logger logger = LoggerFactory.getLogger(ElixirAaiAuthenticationProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElixirAaiAuthenticationProvider.class);
 
     private final JwtVerifierResolver jwtVerifierResolver;
 
-    private AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
+
+    private final WebClient webClient;
 
     public ElixirAaiAuthenticationProvider(@Qualifier(ELIXIR) JwtVerifierResolver jwtVerifierResolver,
-            AccountRepository accountRepository) {
+            AccountRepository accountRepository, WebClient.Builder webCliBuilder) {
         this.jwtVerifierResolver = jwtVerifierResolver;
         this.accountRepository = accountRepository;
+        webClient = webCliBuilder.build();
     }
 
     @Override
@@ -60,7 +62,7 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
             return openIdAuth;
 
         } catch (JWTVerificationException e) {
-            logger.error("JWT verification failed: {}", e.getMessage());
+            LOGGER.error("JWT verification failed: {}", e.getMessage());
             throw new JwtVerificationFailed(e);
         }
     }
@@ -81,12 +83,11 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
     }
 
     private UserInfo retrieveUserInfo(String token) {
-        WebClient elixirClient = WebClient.builder()
-                .baseUrl(jwtVerifierResolver.getIssuer())
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                .build();
-        WebClient.RequestBodySpec userInfoRequest = elixirClient.method(HttpMethod.GET).uri("/userinfo");
-        return userInfoRequest.retrieve().bodyToMono(UserInfo.class).block();
+        return webClient.get()
+                .uri(String.format("%s/userinfo", jwtVerifierResolver.getIssuer()))
+                .header(AUTHORIZATION, String.format("Bearer %s", token))
+                .retrieve()
+                .bodyToMono(UserInfo.class).block();
     }
 
     @Override
