@@ -2,7 +2,9 @@ package org.humancellatlas.ingest.state;
 
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.messaging.MessageRouter;
+import org.humancellatlas.ingest.notifications.NotificationService;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.data.mongodb.core.mapping.event.AfterSaveEvent;
@@ -13,7 +15,10 @@ import static org.mockito.Mockito.*;
 
 public class MetadataStateChangeListenerTest {
     private MessageRouter messageRouter = mock(MessageRouter.class);
-    MetadataStateChangeListener metadataDocumentMongoEventListener = new MetadataStateChangeListener(messageRouter);
+    private NotificationService notificationService = mock(NotificationService.class);
+    private ProjectService projectService = mock(ProjectService.class);
+
+    MetadataStateChangeListener metadataDocumentMongoEventListener = new MetadataStateChangeListener(messageRouter, notificationService, projectService);
 
     @Test
     public void testOnBeforeConvert() {
