@@ -76,7 +76,8 @@ public class JwtGenerator {
         var kid = Optional.ofNullable(keyId);
         Map<String, Object> header = Map.ofEntries(entry("kid", kid.orElse(DEFAULT_KEY_ID)));
 
-        Map<String, String> allClaims = Optional.ofNullable(claims).orElse(new HashMap<>());
+        Map<String, String> allClaims = new HashMap<>();
+        Optional.ofNullable(claims).ifPresent(allClaims::putAll);
         JWTCreator.Builder builder = JWT.create()
                 .withHeader(header)
                 .withIssuer(Optional.ofNullable(allClaims.get(OIDC_ISS))
