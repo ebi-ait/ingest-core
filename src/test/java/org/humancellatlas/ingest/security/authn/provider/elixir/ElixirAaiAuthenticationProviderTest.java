@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.security.authn.provider.elixir;
 
+import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
@@ -27,8 +28,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 
-import java.io.IOException;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assumptions.assumeThat;
@@ -36,7 +35,7 @@ import static org.humancellatlas.ingest.security.ElixirConfig.ELIXIR;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes={ ElixirAaiAuthenticationProviderTest.Config.class })
+@SpringBootTest(classes={ElixirAaiAuthenticationProviderTest.Config.class})
 @AutoConfigureWebClient
 public class ElixirAaiAuthenticationProviderTest {
 
@@ -44,7 +43,7 @@ public class ElixirAaiAuthenticationProviderTest {
     @Import(ElixirAaiAuthenticationProvider.class)
     static class Config {}
 
-    private static MockWebServer mockBackEnd;
+    private MockWebServer mockBackEnd;
 
     @MockBean
     private JWTVerifier jwtVerifier;
@@ -59,41 +58,35 @@ public class ElixirAaiAuthenticationProviderTest {
     @Autowired
     private AuthenticationProvider authenticationProvider;
 
-    @BeforeAll
-    public static void setUp() throws IOException {
-        mockBackEnd = new MockWebServer();
-        mockBackEnd.start();
-    }
-
-    @AfterAll
-    public static void tearDown() throws IOException {
-        mockBackEnd.shutdown();
-    }
-
     @Nested
     @DisplayName("Authenticate")
     class AuthenticationTests {
 
-        private UserInfo testUserInfo;
-
         private ObjectMapper objectMapper = new ObjectMapper();
 
         @BeforeEach
-        public void setUp() {
+        public void setUp() throws Exception {
+            mockBackEnd = new MockWebServer();
+            mockBackEnd.start();
+
             doReturn(jwtVerifier).when(jwtVerifierResolver).resolve(anyString());
             String baseUrl = String.format("http://localhost:%s", mockBackEnd.getPort());
             doReturn(baseUrl).when(jwtVerifierResolver).getIssuer();
-            testUserInfo = new UserInfo("sub", "name", "pref", "giv", "fam", "email@ebi.ac.uk", "issuer");
+        }
+
+        @AfterEach
+        public void tearDown() throws Exception {
+            mockBackEnd.shutdown();
         }
 
         @Test
         @DisplayName("success")
         public void testAuthenticate() throws Exception {
             //given: JWT
-            String keyId = "MDc2OTM3ODI4ODY2NUU5REVGRDVEM0MyOEYwQTkzNDZDRDlEQzNBRQ";
             String subject = "johndoe@elixirdomain.tld";
-            JwtGenerator jwtGenerator = new JwtGenerator("elixir");
-            String jwt = jwtGenerator.generate(keyId, subject, null);
+            UserInfo userInfo = new UserInfo(subject, "name", "pref", "giv", "fam", "email@ebi.ac.uk", "elixir");
+            JwtGenerator jwtGenerator = new JwtGenerator();
+            String jwt = jwtGenerator.encode(userInfo);
 
             //and: given a JWT Authentication
             var jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
@@ -110,7 +103,7 @@ public class ElixirAaiAuthenticationProviderTest {
 
             //and: Elixir user info will be returned
             mockBackEnd.enqueue(new MockResponse()
-                    .setBody(objectMapper.writeValueAsString(testUserInfo))
+                    .setBody(objectMapper.writeValueAsString(userInfo))
                     .addHeader("Content-Type", "application/json"));
 
             //when:
@@ -120,23 +113,16 @@ public class ElixirAaiAuthenticationProviderTest {
             assertThat(authentication).extracting("authenticated", "principal");
             assertThat(authentication.isAuthenticated()).isTrue();
             assertThat(authentication.getPrincipal()).isEqualTo(account);
-
-            //and:
-            RecordedRequest request = mockBackEnd.takeRequest();
-            assertThat(request.getMethod()).isEqualToIgnoringCase("GET");
-            String bearerToken = String.format("Bearer %s", jwtAuthentication.getToken());
-            assertThat(request.getHeaders().get("Authorization")).isEqualTo(bearerToken);
+            assertCorrectRequest(jwtAuthentication.getToken());
         }
 
         @Test
         @DisplayName("no account")
-        public void testForNoAccount() throws JsonProcessingException {
+        public void testForNoAccount() throws Exception {
             //given: JWT
-            String keyId = "MDc2OTM3ODI4ODY2NUU5REVGRDVEM0MyOEYwQTkzNDZDRDlEQzNBRQ";
             String subject = "johndoe@elixirdomain.tld";
-
-            JwtGenerator jwtGenerator = new JwtGenerator("elixir");
-            String jwt = jwtGenerator.generate(keyId, subject, null);
+            UserInfo userInfo = new UserInfo(subject, "name", "pref", "giv", "fam", "email@ebi.ac.uk", "elixir");
+            String jwt = new JwtGenerator().encode(userInfo);
 
             //and: given a JWT Authentication
             var jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
@@ -149,7 +135,7 @@ public class ElixirAaiAuthenticationProviderTest {
 
             //and: Elixir user info will be returned
             mockBackEnd.enqueue(new MockResponse()
-                    .setBody(objectMapper.writeValueAsString(testUserInfo))
+                    .setBody(objectMapper.writeValueAsString(userInfo))
                     .addHeader("Content-Type", "application/json"));
 
             //and: no matching records in the database
@@ -161,6 +147,19 @@ public class ElixirAaiAuthenticationProviderTest {
             //then:
             assertThat(authentication).isNotNull();
             assertThat(authentication.getPrincipal()).isEqualTo(Account.GUEST);
+            assertCorrectRequest(jwtAuthentication.getToken());
+
+            //and:
+            assertThat(authentication.getCredentials()).isInstanceOf(UserInfo.class);
+            UserInfo credentials = (UserInfo) authentication.getCredentials();
+            assertThat(credentials).isEqualToComparingFieldByField(userInfo);
+        }
+
+        private void assertCorrectRequest(String token) throws InterruptedException {
+            RecordedRequest request = mockBackEnd.takeRequest();
+            assertThat(request.getMethod()).isEqualToIgnoringCase("GET");
+            String bearerToken = String.format("Bearer %s", token);
+            assertThat(request.getHeaders().get("Authorization")).isEqualTo(bearerToken);
         }
 
         @Test
@@ -168,14 +167,14 @@ public class ElixirAaiAuthenticationProviderTest {
         public void testForInvalidUserEmail() throws JsonProcessingException {
             //given:
             String invalidEmail = "email@embl.ac.uk";
-            testUserInfo = new UserInfo("sub", "name", "pref", "giv", "fam", invalidEmail, "issuer");
+            UserInfo userInfo = new UserInfo("sub", "name", "pref", "giv", "fam", invalidEmail, "issuer");
             mockBackEnd.enqueue(new MockResponse()
-                    .setBody(objectMapper.writeValueAsString(testUserInfo))
+                    .setBody(objectMapper.writeValueAsString(userInfo))
                     .addHeader("Content-Type", "application/json"));
 
             //and:
-            JwtGenerator jwtGenerator = new JwtGenerator("issuer@elixir");
-            String jwt = jwtGenerator.generate();
+            String jwt = new JwtGenerator("elixir").generate();
+            doReturn(JWT.decode(jwt)).when(jwtVerifier).verify(anyString());
             Authentication jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
 
             //expect:
@@ -188,8 +187,9 @@ public class ElixirAaiAuthenticationProviderTest {
         @DisplayName("valid user email")
         public void testForValidUserEmail() throws JsonProcessingException {
             //given:
+            UserInfo userInfo = new UserInfo("subject", "name", "pref", "giv", "fam", "email@ebi.ac.uk", "elixir");
             mockBackEnd.enqueue(new MockResponse()
-                    .setBody(objectMapper.writeValueAsString(testUserInfo))
+                    .setBody(objectMapper.writeValueAsString(userInfo))
                     .addHeader("Content-Type", "application/json"));
 
             //and:
@@ -214,14 +214,14 @@ public class ElixirAaiAuthenticationProviderTest {
         @DisplayName("verification failed")
         public void testForFailedVerification() throws JsonProcessingException {
             //given:
+            UserInfo userInfo = new UserInfo("subject", "name", "pref", "giv", "fam", "email@ebi.ac.uk", "elixir");
             mockBackEnd.enqueue(new MockResponse()
-                    .setBody(objectMapper.writeValueAsString(testUserInfo))
+                    .setBody(objectMapper.writeValueAsString(userInfo))
                     .addHeader("Content-Type", "application/json"));
 
             //and: given a JWT Authentication
-            JwtGenerator jwtGenerator = new JwtGenerator("sample@elixir.tld");
+            JwtGenerator jwtGenerator = new JwtGenerator("elixir");
             String jwt = jwtGenerator.generateWithSubject("sub");
-
             var jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
 
             //and: JWT verifier will fail

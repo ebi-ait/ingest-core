@@ -49,36 +49,22 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         }
         try {
             JwtAuthentication jwt = (JwtAuthentication) authentication;
-            verifyUserEmail(jwt);
-
             JWTVerifier jwtVerifier = jwtVerifierResolver.resolve(jwt.getToken());
-            DelegatingJwtAuthentication jwtAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
+            DelegatingJwtAuthentication signedAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
 
-            UserInfo userInfo = new UserInfo(JWT.decode(jwtAuth.getToken()));
+            String token = signedAuth.getToken();
+            String issuer = JWT.decode(token).getIssuer();
+            verifyIssuer(issuer);
+            UserInfo userInfo = retrieveUserInfo(token);
+            validateEmail(userInfo);
+
             Account account = accountRepository.findByProviderReference(userInfo.getSubjectId());
             OpenIdAuthentication openIdAuth = new OpenIdAuthentication(account);
             openIdAuth.authenticateWith(userInfo);
-
             return openIdAuth;
-
         } catch (JWTVerificationException e) {
             LOGGER.error("JWT verification failed: {}", e.getMessage());
             throw new JwtVerificationFailed(e);
-        }
-    }
-
-    private void verifyUserEmail(JwtAuthentication jwt) {
-        String token = jwt.getToken();
-        String issuer = JWT.decode(token).getIssuer();
-
-        if (!issuer.contains("elixir")) {
-            throw new UnlistedJwtIssuer(String.format("Not an Elxir AAI issued token: %s", issuer), issuer);
-        }
-
-        UserInfo userInfo = retrieveUserInfo(token);
-
-        if (userInfo.getEmail().indexOf("@ebi.ac.uk") < 0) {
-            throw new InvalidUserEmail(userInfo.getEmail());
         }
     }
 
@@ -88,6 +74,18 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
                 .header(AUTHORIZATION, String.format("Bearer %s", token))
                 .retrieve()
                 .bodyToMono(UserInfo.class).block();
+    }
+
+    private void verifyIssuer(String issuer) {
+        if (!issuer.contains("elixir")) {
+            throw new UnlistedJwtIssuer(String.format("Not an Elxir AAI issued token: %s", issuer), issuer);
+        }
+    }
+
+    private void validateEmail(UserInfo userInfo) {
+        if (userInfo.getEmail().indexOf("@ebi.ac.uk") < 0) {
+            throw new InvalidUserEmail(userInfo.getEmail());
+        }
     }
 
     @Override

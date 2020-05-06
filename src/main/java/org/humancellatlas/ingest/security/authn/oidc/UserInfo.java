@@ -27,6 +27,8 @@ public class UserInfo {
     private String familyName;
 
     private String email;
+
+    @JsonProperty("iss")
     private String issuer;
 
     public UserInfo(String subjectId, String issuer, String name) {
