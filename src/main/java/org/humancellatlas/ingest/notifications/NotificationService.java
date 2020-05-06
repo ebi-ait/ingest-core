@@ -77,4 +77,12 @@ public class NotificationService {
   public Stream<Notification> getUnhandledNotifications() {
     return notificationRepository.findByStateOrderByNotifyAtDesc(NotificationState.PENDING);
   }
+
+  public Stream<Notification> getHandledNotifications() {
+    return notificationRepository.findByStateOrderByNotifyAtDesc(NotificationState.PROCESSED);
+  }
+
+  public void deleteNotification(Notification notification) {
+    notificationRepository.delete(notification);
+  }
 }

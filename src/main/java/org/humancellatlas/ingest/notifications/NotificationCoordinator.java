@@ -48,6 +48,11 @@ public class NotificationCoordinator {
         });
   }
 
+  public void cleanup() {
+    this.notificationService.getHandledNotifications()
+                            .forEach(notificationService::deleteNotification);
+  }
+
   private Stream<NotificationProcessReport> processNotification(Notification notification) {
     return this.notificationProcessors.stream()
                                       .filter(notificationProcessor -> notificationProcessor.isEligible(notification))
@@ -73,6 +78,11 @@ public class NotificationCoordinator {
   @Scheduled(fixedDelay = 60000)
   private void scheduledProcess() {
     this.process();
+  }
+
+  @Scheduled(fixedDelay = 10000)
+  private void scheduledCleanup() {
+    this.cleanup();
   }
 
   @Getter
