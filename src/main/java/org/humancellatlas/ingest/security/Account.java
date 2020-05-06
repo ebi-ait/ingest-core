@@ -1,5 +1,7 @@
 package org.humancellatlas.ingest.security;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -28,11 +30,15 @@ public class Account {
     }
 
     @Id
+    @Getter
     private String id;
 
     @Indexed(unique=true)
+    @Getter
     private String providerReference;
 
+    @Getter
+    @Setter
     private String name;
 
     private Set<Role> roles = new HashSet<>();
@@ -47,22 +53,6 @@ public class Account {
     public Account(String id, String providerReference) {
         this.id = id;
         this.providerReference = providerReference;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getProviderReference() {
-        return providerReference;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     /**
