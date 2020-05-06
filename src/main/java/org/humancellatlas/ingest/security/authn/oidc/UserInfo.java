@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.security.authn.oidc;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,14 +34,6 @@ public class UserInfo {
         this.subjectId = subjectId;
         this.issuer = issuer;
         this.name = name;
-    }
-
-    //TODO remove this
-    //UserInfo should be independent of Auth0's classes
-    public UserInfo(DecodedJWT decodedJWT) {
-        this.subjectId = decodedJWT.getSubject();
-        this.issuer = decodedJWT.getIssuer();
-        this.name = "";
     }
 
     public boolean hasIssuer() {
