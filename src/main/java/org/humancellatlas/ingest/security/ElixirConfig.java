@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.security.common.jwk.JwkVault;
 import org.humancellatlas.ingest.security.common.jwk.JwtVerifierResolver;
 import org.humancellatlas.ingest.security.common.jwk.UrlJwkProviderResolver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +20,8 @@ public class ElixirConfig {
     @Value("${AUTH_ISSUER}")
     private String issuer;
 
-    @Bean(name=ELIXIR)
+    @Bean
+    @Qualifier(ELIXIR)
     public JwtVerifierResolver elixirJwtVerifierResolver() {
         var urlJwkProviderResolver = new UrlJwkProviderResolver(issuer + "/jwk");
         ElixirJwkVault jwkVault = new ElixirJwkVault(urlJwkProviderResolver);

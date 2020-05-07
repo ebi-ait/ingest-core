@@ -25,7 +25,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.humancellatlas.ingest.security.ElixirConfig.ELIXIR;
 
-@Component(ELIXIR)
+@Component
+@Qualifier(ELIXIR)
 public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(ElixirAaiAuthenticationProvider.class);
 
@@ -50,9 +51,9 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         try {
             JwtAuthentication jwt = (JwtAuthentication) authentication;
             JWTVerifier jwtVerifier = jwtVerifierResolver.resolve(jwt.getToken());
-            DelegatingJwtAuthentication signedAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
+            DelegatingJwtAuthentication verifiedAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
 
-            String token = signedAuth.getToken();
+            String token = verifiedAuth.getToken();
             String issuer = JWT.decode(token).getIssuer();
             verifyIssuer(issuer);
             UserInfo userInfo = retrieveUserInfo(token);
