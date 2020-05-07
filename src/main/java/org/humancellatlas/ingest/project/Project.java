@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.file.File;
@@ -12,6 +13,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 import javax.validation.constraints.NotNull;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -35,6 +37,12 @@ public class Project extends MetadataDocument {
     private @DBRef(lazy = true)
     Set<SubmissionEnvelope> submissionEnvelopes = new HashSet<>();
 
+    @Setter
+    private Instant releaseDate;
+
+    @Setter
+    private Instant accessionDate;
+
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Project(Object content) {
         super(EntityType.PROJECT, content);
@@ -46,15 +54,15 @@ public class Project extends MetadataDocument {
 
     //ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
     @JsonIgnore
-    public List<SubmissionEnvelope> getOpenSubmissionEnvelopes(){
+    public List<SubmissionEnvelope> getOpenSubmissionEnvelopes() {
         return this.submissionEnvelopes.stream()
-            .filter(Objects::nonNull)
-            .filter(env -> env.getSubmissionState() != null)
-            .filter(SubmissionEnvelope::isOpen)
-            .collect(Collectors.toList());
+                .filter(Objects::nonNull)
+                .filter(env -> env.getSubmissionState() != null)
+                .filter(SubmissionEnvelope::isOpen)
+                .collect(Collectors.toList());
     }
 
-    public Boolean getHasOpenSubmission(){
+    public Boolean getHasOpenSubmission() {
         return !getOpenSubmissionEnvelopes().isEmpty();
     }
 
