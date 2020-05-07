@@ -60,7 +60,7 @@ public class AccountServiceTest {
             //and:
             var savedAccount = accountCaptor.getValue();
             assertThat(savedAccount)
-                    .extracting("providerReference", "name")
+                    .extracting(Account::getProviderReference, Account::getName)
                     .containsExactly(providerReference, name);
             assertThat(savedAccount.getRoles()).containsOnly(Role.CONTRIBUTOR);
         }
