@@ -28,7 +28,7 @@ public class JwtVerifierResolver {
     }
 
     public String getIssuer() {
-        return issuer.get();
+        return issuer.orElse(null);
     }
 
     public JWTVerifier resolve(String jwt) {
