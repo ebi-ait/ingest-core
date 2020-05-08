@@ -1,14 +1,13 @@
 package org.humancellatlas.ingest.security.authn.oidc;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.humancellatlas.ingest.security.Account;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter(AccessLevel.PROTECTED)
 public class UserInfo {
 
     @JsonProperty("sub")
