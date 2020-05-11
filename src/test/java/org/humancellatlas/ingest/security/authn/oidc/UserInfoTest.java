@@ -12,7 +12,7 @@ public class UserInfoTest {
         //given:
         String subjectId = "723b4001";
         String name = "Jean Valjean";
-        UserInfo userInfo = new UserInfo(subjectId, "https://domain.tld/issuer", name);
+        UserInfo userInfo = new UserInfo(subjectId, name);
 
         //when:
         Account account = userInfo.toAccount();

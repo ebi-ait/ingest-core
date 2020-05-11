@@ -84,8 +84,8 @@ public class ElixirAaiAuthenticationProviderTest {
         public void testAuthenticate() throws Exception {
             //given: JWT
             String subject = "johndoe@elixirdomain.tld";
-            UserInfo userInfo = new UserInfo(subject, "name", "pref", "giv", "fam", "email@ebi.ac.uk", "elixir");
-            JwtGenerator jwtGenerator = new JwtGenerator();
+            UserInfo userInfo = new UserInfo(subject, "name", "pref", "giv", "fam", "email@ebi.ac.uk");
+            JwtGenerator jwtGenerator = new JwtGenerator("elixir");
             String jwt = jwtGenerator.encode(userInfo);
 
             //and: given a JWT Authentication
@@ -121,8 +121,8 @@ public class ElixirAaiAuthenticationProviderTest {
         public void testForNoAccount() throws Exception {
             //given: JWT
             String subject = "johndoe@elixirdomain.tld";
-            UserInfo userInfo = new UserInfo(subject, "name", "pref", "giv", "fam", "email@ebi.ac.uk", "elixir");
-            String jwt = new JwtGenerator().encode(userInfo);
+            UserInfo userInfo = new UserInfo(subject, "name", "pref", "giv", "fam", "email@ebi.ac.uk");
+            String jwt = new JwtGenerator("elixir").encode(userInfo);
 
             //and: given a JWT Authentication
             var jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
@@ -167,7 +167,7 @@ public class ElixirAaiAuthenticationProviderTest {
         public void testForInvalidUserEmail() throws JsonProcessingException {
             //given:
             String invalidEmail = "email@embl.ac.uk";
-            UserInfo userInfo = new UserInfo("sub", "name", "pref", "giv", "fam", invalidEmail, "issuer");
+            UserInfo userInfo = new UserInfo("sub", "name", "pref", "giv", "fam", invalidEmail);
             mockBackEnd.enqueue(new MockResponse()
                     .setBody(objectMapper.writeValueAsString(userInfo))
                     .addHeader("Content-Type", "application/json"));
@@ -187,7 +187,7 @@ public class ElixirAaiAuthenticationProviderTest {
         @DisplayName("valid user email")
         public void testForValidUserEmail() throws JsonProcessingException {
             //given:
-            UserInfo userInfo = new UserInfo("subject", "name", "pref", "giv", "fam", "email@ebi.ac.uk", "elixir");
+            UserInfo userInfo = new UserInfo("subject", "name", "pref", "giv", "fam", "email@ebi.ac.uk");
             mockBackEnd.enqueue(new MockResponse()
                     .setBody(objectMapper.writeValueAsString(userInfo))
                     .addHeader("Content-Type", "application/json"));
@@ -214,7 +214,7 @@ public class ElixirAaiAuthenticationProviderTest {
         @DisplayName("verification failed")
         public void testForFailedVerification() throws JsonProcessingException {
             //given:
-            UserInfo userInfo = new UserInfo("subject", "name", "pref", "giv", "fam", "email@ebi.ac.uk", "elixir");
+            UserInfo userInfo = new UserInfo("subject", "name", "pref", "giv", "fam", "email@ebi.ac.uk");
             mockBackEnd.enqueue(new MockResponse()
                     .setBody(objectMapper.writeValueAsString(userInfo))
                     .addHeader("Content-Type", "application/json"));

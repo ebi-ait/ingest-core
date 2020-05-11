@@ -69,7 +69,7 @@ public class AuthenticationControllerTest {
         void byAuthenticatedGuest() throws Exception {
             //given:
             String subjectId = "cf12881b";
-            UserInfo userInfo = new UserInfo(subjectId, "https://oidc.domain.tld/auth", "Jane Doe");
+            UserInfo userInfo = new UserInfo(subjectId, "Jane Doe");
             Authentication authentication = new OpenIdAuthentication(null, userInfo);
 
             //and:
@@ -127,7 +127,7 @@ public class AuthenticationControllerTest {
         @Test
         void byUnrecognisedRegisteredUser() throws Exception {
             //given:
-            UserInfo userInfo = new UserInfo("cc9a9a1", "https://secure.tld/auth", "");
+            UserInfo userInfo = new UserInfo("cc9a9a1", "");
             Authentication authentication = new OpenIdAuthentication(userInfo);
 
             //and:
@@ -170,7 +170,7 @@ public class AuthenticationControllerTest {
             account.addRole(Role.CONTRIBUTOR);
 
             //and:
-            UserInfo credentials = new UserInfo(subjectId, "https://issuer.tld", "");
+            UserInfo credentials = new UserInfo(subjectId, "");
             Authentication authentication = new OpenIdAuthentication(account, credentials);
 
             //when:
@@ -197,7 +197,7 @@ public class AuthenticationControllerTest {
         @Test
         void authenticatedGuest() throws Exception {
             //given:
-            UserInfo userInfo = new UserInfo("82ffab9", "https://domain.tld/issuer", "");
+            UserInfo userInfo = new UserInfo("82ffab9", "");
             Authentication authentication = new OpenIdAuthentication(userInfo);
 
             //expect:
