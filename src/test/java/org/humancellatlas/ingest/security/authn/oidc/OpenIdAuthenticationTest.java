@@ -17,7 +17,6 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 public class OpenIdAuthenticationTest {
 
     private final String subjectId = "73985cc";
-    private final String issuer = "https://iss.domain.tld/oidc";
     private final UserInfo userInfo = new UserInfo(subjectId, "");
 
     private Account account;
