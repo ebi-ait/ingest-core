@@ -1,28 +1,48 @@
 package org.humancellatlas.ingest.security.authn.oidc;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
+import org.humancellatlas.ingest.security.Account;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter(AccessLevel.PROTECTED)
 public class UserInfo {
 
-    private final String subjectId;
-    private final String issuer;
+    @JsonProperty("sub")
+    private String subjectId;
 
-    public UserInfo(String subjectId, String issuer) {
+    private String name;
+
+    @JsonProperty("preferred_username")
+    private String preferredUsername;
+
+    @JsonProperty("given_name")
+    private String givenName;
+
+    @JsonProperty("family_name")
+    private String familyName;
+
+    private String email;
+
+    @JsonProperty("iss")
+    private String issuer;
+
+    public UserInfo(String subjectId, String issuer, String name) {
         this.subjectId = subjectId;
         this.issuer = issuer;
-    }
-
-    public UserInfo(DecodedJWT decodedJWT) {
-        this.subjectId = decodedJWT.getSubject();
-        this.issuer = decodedJWT.getIssuer();
-    }
-
-    public String getSubjectId() {
-        return subjectId;
+        this.name = name;
     }
 
     public boolean hasIssuer() {
         return issuer != null && !issuer.isEmpty();
+    }
+
+    public Account toAccount() {
+        Account account = new Account(subjectId);
+        account.setName(name);
+        return account;
     }
 
 }

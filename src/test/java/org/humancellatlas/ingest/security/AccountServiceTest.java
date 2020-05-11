@@ -41,7 +41,12 @@ public class AccountServiceTest {
             assumeThat(account.getRoles()).isEmpty();
 
             //and:
+            String name = "Juan dela Cruz";
+            account.setName(name);
+
+            //and:
             Account persistentAccount = new Account("773b471", providerReference);
+            persistentAccount.setName(name);
             doReturn(persistentAccount).when(accountRepository).save(any(Account.class));
 
             //when:
@@ -54,7 +59,9 @@ public class AccountServiceTest {
 
             //and:
             var savedAccount = accountCaptor.getValue();
-            assertThat(savedAccount.getProviderReference()).isEqualTo(providerReference);
+            assertThat(savedAccount)
+                    .extracting(Account::getProviderReference, Account::getName)
+                    .containsExactly(providerReference, name);
             assertThat(savedAccount.getRoles()).containsOnly(Role.CONTRIBUTOR);
         }
 
