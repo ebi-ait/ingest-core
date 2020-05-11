@@ -23,6 +23,7 @@ import static java.util.stream.Collectors.toList;
 import static org.humancellatlas.ingest.security.ElixirConfig.ELIXIR;
 import static org.humancellatlas.ingest.security.GcpConfig.GCP;
 import static org.humancellatlas.ingest.security.Role.GUEST;
+import static org.humancellatlas.ingest.security.Role.WRANGLER;
 import static org.springframework.http.HttpMethod.*;
 
 @EnableWebSecurity
@@ -74,6 +75,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/submissionEnvelopes").authenticated()
                 .antMatchers(HttpMethod.POST, "/submissionEnvelopes/*/projects").authenticated()
                 .antMatchers(HttpMethod.POST, "/projects**").authenticated()
+                .antMatchers(GET, "/projects").hasAuthority(WRANGLER.name())
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
                 .antMatchers(GET, "/auth/account").authenticated()
                 .requestMatchers(this::isRequestForSecuredResourceFromProxy).authenticated()
