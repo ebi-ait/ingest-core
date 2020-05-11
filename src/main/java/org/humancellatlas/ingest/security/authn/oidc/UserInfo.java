@@ -26,17 +26,9 @@ public class UserInfo {
 
     private String email;
 
-    @JsonProperty("iss")
-    private String issuer;
-
-    public UserInfo(String subjectId, String issuer, String name) {
+    public UserInfo(String subjectId, String name) {
         this.subjectId = subjectId;
-        this.issuer = issuer;
         this.name = name;
-    }
-
-    public boolean hasIssuer() {
-        return issuer != null && !issuer.isEmpty();
     }
 
     public Account toAccount() {
