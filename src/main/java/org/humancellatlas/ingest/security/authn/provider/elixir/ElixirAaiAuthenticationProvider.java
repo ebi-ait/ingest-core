@@ -50,12 +50,14 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         }
         try {
             JwtAuthentication jwt = (JwtAuthentication) authentication;
+            String token = jwt.getToken();
+            String issuer = JWT.decode(token).getIssuer();
+            verifyIssuer(issuer);
+
             JWTVerifier jwtVerifier = jwtVerifierResolver.resolve(jwt.getToken());
             DelegatingJwtAuthentication verifiedAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
 
-            String token = verifiedAuth.getToken();
-            String issuer = JWT.decode(token).getIssuer();
-            verifyIssuer(issuer);
+            token = verifiedAuth.getToken();
             UserInfo userInfo = retrieveUserInfo(token);
             validateEmail(userInfo);
 
