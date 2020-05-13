@@ -36,12 +36,6 @@ task integrationTest(type: Test) {
 }
 
 test {
-    environment "SCHEMA_BASE_URI", System.getenv('SCHEMA_BASE_URI')
-    environment "GCP_PROJECT_WHITELIST", System.getenv('GCP_PROJECT_WHITELIST')
-    environment "AUTH_ISSUER", System.getenv('AUTH_ISSUER')
-    environment "SVC_AUTH_AUDIENCE", System.getenv('SVC_AUTH_AUDIENCE')
-    environment "USR_AUTH_AUDIENCE", System.getenv('USR_AUTH_AUDIENCE')
-    environment "GCP_JWK_PROVIDER_BASE_URL", System.getenv('GCP_JWK_PROVIDER_BASE_URL')
     useJUnitPlatform()
 }
 
