@@ -70,7 +70,6 @@ public class EmailNotificationProcessor implements NotificationProcessor {
     props.setProperty("mail.host", "outgoing.ebi.ac.uk");
     props.put("mail.smtp.auth", "true");
     props.put("mail.smtp.port", "587");
-    props.put("mail.debug", "true");
     props.put("mail.smtp.starttls.enable", "true"); //TLS
 
     mailSender.setJavaMailProperties(props);

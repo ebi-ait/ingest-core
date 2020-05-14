@@ -12,7 +12,7 @@ public class PrototypeIdentityService implements IdentityService {
   @Override
   public String wranglerEmail() {
     return environment.getProperty("WRANGLER_EMAILS",
-                                   "hca-notifications@ebi.ac.uk");
+                                   "hca-notifications-test@ebi.ac.uk");
 
   }
 }

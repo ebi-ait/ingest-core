@@ -54,17 +54,9 @@ public class NotificationService {
   }
 
   public Notification changeState(Notification notification, NotificationState toState) {
-    if (notification.getState().legalTransitions().contains(toState)) {
-      Notification changed = Notification.builder()
-                                         .id(notification.getId())
-                                         .content(notification.getContent())
-                                         .metadata(notification.getMetadata())
-                                         .state(toState)
-                                         .notifyAt(notification.getNotifyAt())
-                                         .checksum(notification.getChecksum())
-                                         .build();
-
-      return this.notificationRepository.save(changed);
+    if (notification.getState().isLegalTransition(toState)) {
+      notification.setState(toState);
+      return this.notificationRepository.save(notification);
     } else {
       throw new IllegalStateException(
           String.format("Cannot transition notification with ID %s from state %s to %s",

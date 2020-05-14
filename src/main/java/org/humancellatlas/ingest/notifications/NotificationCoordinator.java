@@ -29,8 +29,8 @@ public class NotificationCoordinator {
   public void queue() {
     this.notificationService.getUnhandledNotifications()
                             .forEach(notification -> {
-                              Notification queued = this.notificationService.changeState(notification, NotificationState.QUEUED);
-                              this.notificationSource.supply(Collections.singletonList(queued));
+                              this.notificationService.changeState(notification, NotificationState.QUEUED);
+                              this.notificationSource.supply(Collections.singletonList(notification));
                             });
   }
 

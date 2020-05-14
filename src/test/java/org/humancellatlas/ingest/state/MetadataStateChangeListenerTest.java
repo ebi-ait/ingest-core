@@ -15,10 +15,8 @@ import static org.mockito.Mockito.*;
 
 public class MetadataStateChangeListenerTest {
     private MessageRouter messageRouter = mock(MessageRouter.class);
-    private NotificationService notificationService = mock(NotificationService.class);
-    private ProjectService projectService = mock(ProjectService.class);
 
-    MetadataStateChangeListener metadataDocumentMongoEventListener = new MetadataStateChangeListener(messageRouter, notificationService, projectService);
+    MetadataStateChangeListener metadataDocumentMongoEventListener = new MetadataStateChangeListener(messageRouter);
 
     @Test
     public void testOnBeforeConvert() {

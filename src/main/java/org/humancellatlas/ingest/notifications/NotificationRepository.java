@@ -12,6 +12,9 @@ public interface NotificationRepository extends MongoRepository<Notification, St
   @RestResource(exported = false)
   <S extends Notification> S save(S notification);
   @RestResource(exported = false)
+  void delete(Notification notification);
+
+  @RestResource(exported = false)
   Stream<Notification> findByStateOrderByNotifyAtDesc(NotificationState state);
 
   @RestResource(rel = "findByChecksumValue")

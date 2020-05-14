@@ -10,11 +10,15 @@ import org.humancellatlas.ingest.notifications.model.Checksum;
 import org.humancellatlas.ingest.notifications.model.Notification;
 import org.humancellatlas.ingest.notifications.model.NotificationRequest;
 import org.humancellatlas.ingest.user.IdentityService;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
+@Component
 @RequiredArgsConstructor
 public class ProjectNotifications {
   private final NotificationService notificationService;
+  private final Environment environment;
   private final IdentityService identityService;
 
   public Notification editedProjectMetadata(Project project) {
@@ -28,8 +32,8 @@ public class ProjectNotifications {
 
     var notificationMetadata = new HashMap<String, Object>();
     var emailMetadata = new HashMap<String, String>();
-    emailMetadata.put("to", identityService.wranglerEmail());
-    emailMetadata.put("from", "");
+    emailMetadata.put("to", this.emailNotificationsFromAddress());
+    emailMetadata.put("from", identityService.wranglerEmail());
     emailMetadata.put("subject", "HCA DCP project update");
     emailMetadata.put("body", notificationContent);
     notificationMetadata.put("email", emailMetadata);
@@ -53,9 +57,14 @@ public class ProjectNotifications {
 
   private static String objectToString(Object object) {
     try {
-      return new ObjectMapper().writeValueAsString(object);
+      return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(object);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private String emailNotificationsFromAddress () {
+    return environment.getProperty("PROJECT_NOTIFICATIONS_FROM_ADDRESS",
+                                   "hca-notifications-test@ebi.ac.uk");
   }
 }

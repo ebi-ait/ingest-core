@@ -25,4 +25,8 @@ public enum NotificationState {
             String.format("Unknown state transitions from notification state %s", this));
     }
   }
+
+  public boolean isLegalTransition(NotificationState toState) {
+    return this.legalTransitions().contains(toState);
+  }
 }

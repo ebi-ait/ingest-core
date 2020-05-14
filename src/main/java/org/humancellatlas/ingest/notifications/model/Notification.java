@@ -24,7 +24,7 @@ public class Notification implements Identifiable<String> {
   @NonNull
   private final Instant notifyAt;
   @NonNull @Indexed
-  private final NotificationState state;
+  private NotificationState state;
   @NonNull @Indexed
   private final Checksum checksum;
 
