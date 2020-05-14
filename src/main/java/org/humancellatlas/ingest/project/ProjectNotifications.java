@@ -22,14 +22,25 @@ public class ProjectNotifications {
   private final IdentityService identityService;
 
   public Notification editedProjectMetadata(Project project) {
-      return notifyWranglersByEmail(project);
-  }
-
-  private Notification notifyWranglersByEmail(Project project) {
     String notificationContent = String.format("Project %s was updated:\n\nNew content:\n\n%s",
                                                project.getUuid().getUuid().toString(),
                                                objectToString(project.getContent()));
+    Checksum checksum = editedProjectChecksum(project);
 
+    return notifyWranglersByEmail(notificationContent, checksum);
+  }
+
+  public Notification deletedProject(Project project) {
+    String notificationContent = String.format("Project %s was deleted:\n\n%s",
+                                               project.getUuid().getUuid().toString(),
+                                               objectToString(project.getContent()));
+
+    Checksum checksum = deletedProjectChecksum(project);
+
+    return notifyWranglersByEmail(notificationContent, checksum);
+  }
+
+  private Notification notifyWranglersByEmail(String notificationContent, Checksum notificationChecksum) {
     var notificationMetadata = new HashMap<String, Object>();
     var emailMetadata = new HashMap<String, String>();
     emailMetadata.put("to", this.emailNotificationsFromAddress());
@@ -38,20 +49,25 @@ public class ProjectNotifications {
     emailMetadata.put("body", notificationContent);
     notificationMetadata.put("email", emailMetadata);
 
-    Checksum checksum = editedProjectChecksum(project);
     NotificationRequest notificationRequest = new NotificationRequest(notificationContent,
                                                                       notificationMetadata,
-                                                                      checksum);
+                                                                      notificationChecksum);
     try {
       return this.notificationService.createNotification(notificationRequest);
     } catch (DuplicateNotification e) {
-      return this.notificationService.retrieveForChecksum(checksum);
+      return this.notificationService.retrieveForChecksum(notificationChecksum);
     }
   }
 
   private Checksum editedProjectChecksum(Project project) {
-    String checksumInput = String.format("%s:%s", "projectEdited", project.getUuid().getUuid());
-    return new Checksum("projectEdited",
+    String checksumInput = String.format("%s:%s", "project-edited", project.getUuid().getUuid());
+    return new Checksum("project-edited",
+                        DigestUtils.md5DigestAsHex(checksumInput.getBytes()));
+  }
+
+  private Checksum deletedProjectChecksum(Project project) {
+    String checksumInput = String.format("%s:%s", "project-deleted", project.getUuid().getUuid());
+    return new Checksum("project-deleted",
                         DigestUtils.md5DigestAsHex(checksumInput.getBytes()));
   }
 

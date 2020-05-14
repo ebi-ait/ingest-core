@@ -80,7 +80,7 @@ public class NotificationCoordinator {
     this.process();
   }
 
-  @Scheduled(fixedDelay = 10000)
+  @Scheduled(fixedDelay = 300000)
   private void scheduledCleanup() {
     this.cleanup();
   }
