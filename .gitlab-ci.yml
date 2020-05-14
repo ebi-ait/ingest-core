@@ -1,5 +1,9 @@
 image: openjdk:11
 
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'task/integration-tests'
+
 stages:
   - test
 
