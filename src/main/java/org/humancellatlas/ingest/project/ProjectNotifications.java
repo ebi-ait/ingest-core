@@ -3,12 +3,14 @@ package org.humancellatlas.ingest.project;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.notifications.NotificationService;
 import org.humancellatlas.ingest.notifications.exception.DuplicateNotification;
 import org.humancellatlas.ingest.notifications.model.Checksum;
 import org.humancellatlas.ingest.notifications.model.Notification;
 import org.humancellatlas.ingest.notifications.model.NotificationRequest;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.user.IdentityService;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -24,7 +26,7 @@ public class ProjectNotifications {
   public Notification editedProjectMetadata(Project project) {
     String notificationContent = String.format("Project %s was updated:\n\nNew content:\n\n%s",
                                                project.getUuid().getUuid().toString(),
-                                               objectToString(project.getContent()));
+                                               objectToPrettyString(project.getContent()));
     Checksum checksum = editedProjectChecksum(project);
 
     return notifyWranglersByEmail(notificationContent, checksum);
@@ -33,11 +35,25 @@ public class ProjectNotifications {
   public Notification deletedProject(Project project) {
     String notificationContent = String.format("Project %s was deleted:\n\n%s",
                                                project.getUuid().getUuid().toString(),
-                                               objectToString(project.getContent()));
+                                               objectToPrettyString(project.getContent()));
 
     Checksum checksum = deletedProjectChecksum(project);
 
     return notifyWranglersByEmail(notificationContent, checksum);
+  }
+
+  public Optional<Notification> validatedProject(Project project) {
+    if (project.getValidationState().equals(ValidationState.VALID)) {
+      String notificationContent = String.format("Project %s has been validated:\n\n%s",
+                                                 project.getUuid().getUuid().toString(),
+                                                 objectToPrettyString(project.getContent()));
+
+      Checksum checksum = validProjectChecksum(project);
+
+      return Optional.of(notifyWranglersByEmail(notificationContent, checksum));
+    } else {
+      return Optional.empty();
+    }
   }
 
   private Notification notifyWranglersByEmail(String notificationContent, Checksum notificationChecksum) {
@@ -71,7 +87,24 @@ public class ProjectNotifications {
                         DigestUtils.md5DigestAsHex(checksumInput.getBytes()));
   }
 
+  private Checksum validProjectChecksum(Project project) {
+    String checksumInput = String.format("%s:%s:%s",
+                                         "project-validated",
+                                         project.getUuid().getUuid(),
+                                         objectToString(project.getContent()));
+    return new Checksum("project-validated",
+                        DigestUtils.md5DigestAsHex(checksumInput.getBytes()));
+  }
+
   private static String objectToString(Object object) {
+    try {
+      return new ObjectMapper().writeValueAsString(object);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static String objectToPrettyString(Object object) {
     try {
       return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(object);
     } catch (IOException e) {
