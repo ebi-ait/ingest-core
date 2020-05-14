@@ -16,3 +16,7 @@ test:
   stage: test
   script:
     - ./gradlew verify
+  artifacts:
+    reports:
+      junit:
+        - build/test-results/**/TEST-*.xml
