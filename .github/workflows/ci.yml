@@ -15,4 +15,4 @@ jobs:
         with:
           java-version: 1.11
       - name: Gradle verification
-        run: ./gradlew vefify
+        run: ./gradlew verify
