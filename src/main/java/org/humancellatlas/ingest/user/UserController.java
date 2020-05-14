@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.security.Account;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
@@ -17,6 +18,7 @@ import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.*;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,7 +54,7 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
     @RequestMapping(value = "/summary")
     @ResponseBody
     public Summary summary() {
-        String user = getPrincipal();
+        String user = getCurrentUserAccountId();
         long pendingSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.PENDING, user);
         long draftSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.DRAFT, user);
         long validatingubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.VALIDATING, user);
@@ -68,7 +70,7 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
 
     @RequestMapping(value = "/submissionEnvelopes")
     public PagedResources<Resource<SubmissionEnvelope>> getUserSubmissionEnvelopes(Pageable pageable) {
-        Page<SubmissionEnvelope> submissionEnvelopes = submissionEnvelopeRepository.findByUser(getPrincipal(), pageable);
+        Page<SubmissionEnvelope> submissionEnvelopes = submissionEnvelopeRepository.findByUser(getCurrentUserAccountId(), pageable);
         PagedResources<Resource<SubmissionEnvelope>> pagedResources =  submissionEnvelopePagedResourcesAssembler.toResource(submissionEnvelopes);
         for (Resource<SubmissionEnvelope> resource : pagedResources)
         {
@@ -80,7 +82,7 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
 
     @RequestMapping(value = "/projects")
     public PagedResources<Resource<Project>> getUserProjects(Pageable pageable) {
-        Page<Project> projects = projectRepository.findByUser(getPrincipal(), pageable);
+        Page<Project> projects = projectRepository.findByUser(getCurrentUserAccountId(), pageable);
         PagedResources<Resource<Project>> pagedResources = projectPagedResourcesAssembler.toResource(projects);
         for (Resource<Project> resource : pagedResources)
         {
@@ -89,9 +91,10 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
         return pagedResources;
     }
 
-    private String getPrincipal() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return principal.toString();
+    private String getCurrentUserAccountId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Account account = (Account) authentication.getPrincipal();
+        return account.getId();
     }
 
     @Override

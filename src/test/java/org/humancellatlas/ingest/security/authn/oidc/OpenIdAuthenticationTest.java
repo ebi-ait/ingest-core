@@ -17,8 +17,7 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 public class OpenIdAuthenticationTest {
 
     private final String subjectId = "73985cc";
-    private final String issuer = "https://iss.domain.tld/oidc";
-    private final UserInfo userInfo = new UserInfo(subjectId, issuer);
+    private final UserInfo userInfo = new UserInfo(subjectId, "");
 
     private Account account;
     private Authentication authentication;
@@ -52,7 +51,7 @@ public class OpenIdAuthenticationTest {
         }
 
         @Test
-        public void noPrincipal() {
+        public void noPrincipalAsGuest() {
             //given:
             authentication = new OpenIdAuthentication((Account) null);
 
@@ -60,7 +59,8 @@ public class OpenIdAuthenticationTest {
             authentication.authenticateWith(userInfo);
 
             //expect:
-            assertThat(authentication.isAuthenticated()).isFalse();
+            assertThat(authentication.isAuthenticated()).isTrue();
+            assertThat(authentication.getPrincipal()).isEqualTo(Account.GUEST);
             assertThat(authentication.getCredentials()).isEqualTo(userInfo);
         }
 
@@ -68,21 +68,8 @@ public class OpenIdAuthenticationTest {
         public void nonMatchingSubjectId() {
             //given:
             String anotherSubjectId = "82909a1";
-            UserInfo anotherUserInfo = new UserInfo(anotherSubjectId, issuer);
+            UserInfo anotherUserInfo = new UserInfo(anotherSubjectId, "");
             assumeThat(anotherSubjectId).isNotEqualTo(subjectId);
-
-            //when:
-            authentication.authenticateWith(anotherUserInfo);
-
-            //then:
-            assertThat(authentication.isAuthenticated()).isFalse();
-            assertThat(authentication.getCredentials()).isEqualTo(anotherUserInfo);
-        }
-
-        @Test
-        public void noIssuer() {
-            //given:
-            UserInfo anotherUserInfo = new UserInfo(subjectId, "");
 
             //when:
             authentication.authenticateWith(anotherUserInfo);

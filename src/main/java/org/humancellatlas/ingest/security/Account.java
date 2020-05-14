@@ -1,5 +1,7 @@
 package org.humancellatlas.ingest.security;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,7 +14,6 @@ import java.util.Set;
 public class Account {
 
     public static final Account GUEST = new GuestAccount();
-
     /**
      * A Null Object subclass of Account that represents an unregistered Guest.
      */
@@ -22,16 +23,23 @@ public class Account {
 
         private GuestAccount() {
             super(EMPTY, EMPTY);
+            setName(EMPTY);
             addRole(Role.GUEST);
         }
 
     }
 
     @Id
+    @Getter
     private String id;
 
     @Indexed(unique=true)
+    @Getter
     private String providerReference;
+
+    @Getter
+    @Setter
+    private String name;
 
     private Set<Role> roles = new HashSet<>();
 
@@ -45,14 +53,6 @@ public class Account {
     public Account(String id, String providerReference) {
         this.id = id;
         this.providerReference = providerReference;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getProviderReference() {
-        return providerReference;
     }
 
     /**

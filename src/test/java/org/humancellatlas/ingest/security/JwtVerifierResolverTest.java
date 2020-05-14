@@ -5,7 +5,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import org.humancellatlas.ingest.security.authn.provider.gcp.GcpJwkVault;
 import org.humancellatlas.ingest.security.common.jwk.DelegatingJwtVerifier;
-import org.humancellatlas.ingest.security.common.jwk.RemoteServiceJwtVerifierResolver;
+import org.humancellatlas.ingest.security.common.jwk.JwtVerifierResolver;
 import org.junit.jupiter.api.Test;
 
 import java.security.interfaces.RSAPublicKey;
@@ -15,7 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-public class RemoteServiceJwtVerifierResolverTest {
+public class JwtVerifierResolverTest {
 
     @Test
     public void testResolveForJwt() {
@@ -29,7 +29,7 @@ public class RemoteServiceJwtVerifierResolverTest {
         doReturn(publicKey).when(jwkVault).getPublicKey(any(DecodedJWT.class));
 
         //and:
-        RemoteServiceJwtVerifierResolver jwtVerifierResolver = new RemoteServiceJwtVerifierResolver(jwkVault, audience, null);
+        JwtVerifierResolver jwtVerifierResolver = new JwtVerifierResolver(jwkVault, audience, null);
 
         //and: given the token
         String jwt = jwtGenerator.generate();
@@ -63,7 +63,7 @@ public class RemoteServiceJwtVerifierResolverTest {
         doReturn(publicKey).when(jwkVault).getPublicKey(any(DecodedJWT.class));
 
         //and:
-        RemoteServiceJwtVerifierResolver jwtVerifierResolver = new RemoteServiceJwtVerifierResolver(jwkVault, audience, issuer);
+        JwtVerifierResolver jwtVerifierResolver = new JwtVerifierResolver(jwkVault, audience, issuer);
 
         //and: given the token
         String jwt = jwtGenerator.generate();
@@ -94,7 +94,7 @@ public class RemoteServiceJwtVerifierResolverTest {
         doReturn(publicKey).when(jwkVault).getPublicKey(any(DecodedJWT.class));
 
         //and:
-        RemoteServiceJwtVerifierResolver jwtVerifierResolver = new RemoteServiceJwtVerifierResolver(jwkVault, null, issuer);
+        JwtVerifierResolver jwtVerifierResolver = new JwtVerifierResolver(jwkVault, null, issuer);
 
         //and: given the token
         String jwt = jwtGenerator.generate();
@@ -127,7 +127,7 @@ public class RemoteServiceJwtVerifierResolverTest {
         doReturn(publicKey).when(jwkVault).getPublicKey(any(DecodedJWT.class));
 
         //and:
-        RemoteServiceJwtVerifierResolver jwtVerifierResolver = new RemoteServiceJwtVerifierResolver(jwkVault, null, null);
+        JwtVerifierResolver jwtVerifierResolver = new JwtVerifierResolver(jwkVault, null, null);
 
         //and: given the token
         String jwt = jwtGenerator.generate();
@@ -159,7 +159,7 @@ public class RemoteServiceJwtVerifierResolverTest {
         doReturn(publicKey).when(jwkVault).getPublicKey(any(DecodedJWT.class));
 
         //and:
-        RemoteServiceJwtVerifierResolver jwtVerifierResolver = new RemoteServiceJwtVerifierResolver(jwkVault, audience, null);
+        JwtVerifierResolver jwtVerifierResolver = new JwtVerifierResolver(jwkVault, audience, null);
 
         //and: given the token
         String jwt = jwtGenerator.generate();
