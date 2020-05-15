@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - '.travis.yml'
+      - '.gitlab-ci.yml'
   pull_request:
     branches:
       - master
