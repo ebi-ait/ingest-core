@@ -25,12 +25,10 @@ public class NotificationService {
 
   public Notification createNotification(NotificationRequest notificationRequest) {
     try {
-      Notification notification = Notification.builder()
+      Notification notification = Notification.buildNew()
                                               .content(notificationRequest.getContent())
                                               .metadata(notificationRequest.getMetadata())
-                                              .state(NotificationState.PENDING)
                                               .checksum(notificationRequest.getChecksum())
-                                              .notifyAt(Instant.now())
                                               .build();
 
       return this.notificationRepository.save(notification);

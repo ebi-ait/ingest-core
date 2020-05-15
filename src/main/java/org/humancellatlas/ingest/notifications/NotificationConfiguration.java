@@ -11,6 +11,8 @@ import org.humancellatlas.ingest.notifications.processors.impl.email.SMTPConfig;
 import org.humancellatlas.ingest.notifications.sources.NotificationSource;
 import org.humancellatlas.ingest.notifications.sources.impl.inmemory.InmemoryNotificationSource;
 import org.humancellatlas.ingest.notifications.sources.impl.rabbit.AmqpConfig;
+import org.humancellatlas.ingest.notifications.sources.impl.rabbit.RabbitNotificationSource;
+import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -77,7 +79,8 @@ public class NotificationConfiguration {
   }
 
   @Bean
-  public NotificationSource notificationSource() {
-    return new InmemoryNotificationSource();
+  public NotificationSource notificationSource(RabbitMessagingTemplate rabbitMessagingTemplate,
+                                               AmqpConfig amqpConfig) {
+    return new RabbitNotificationSource(rabbitMessagingTemplate, amqpConfig);
   }
 }
