@@ -95,7 +95,6 @@ public class AuthenticationControllerTest {
             var resultingAccount = objectMapper.readValue(response.getContentAsString(), Account.class);
             assertThat(resultingAccount.getId()).isEqualTo(accountId);
             assertCorrectRegisteredAccount(userInfo);
-
         }
 
         private void assertCorrectRegisteredAccount(UserInfo userInfo) {

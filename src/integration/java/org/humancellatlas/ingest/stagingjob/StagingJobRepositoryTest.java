@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.stagingjob;
 
+import org.assertj.core.api.Assertions;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,8 +11,6 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 
 @ExtendWith(SpringExtension.class)
@@ -30,7 +29,7 @@ public class StagingJobRepositoryTest {
 
         stagingJobRepository.save(new StagingJob(testStagingAreaUuid, testFileName));
 
-        assertThatExceptionOfType(DuplicateKeyException.class).isThrownBy(() -> {
+        Assertions.assertThatExceptionOfType(DuplicateKeyException.class).isThrownBy(() -> {
             stagingJobRepository.save(new StagingJob(testStagingAreaUuid, testFileName));
         });
     }

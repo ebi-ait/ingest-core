@@ -1,0 +1,22 @@
+image: openjdk:11
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'master'
+
+stages:
+  - test
+
+cache:
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+
+test:
+  stage: test
+  script:
+    - ./gradlew verify
+  artifacts:
+    reports:
+      junit:
+        - build/test-results/**/TEST-*.xml
