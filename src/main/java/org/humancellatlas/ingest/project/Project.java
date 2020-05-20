@@ -43,6 +43,16 @@ public class Project extends MetadataDocument {
     @Setter
     private Instant accessionDate;
 
+    @Setter
+    private Object technology;
+
+    @Setter
+    private Object dataAccess;
+
+    @Setter
+    private Object identifyingOrganisms;
+
+
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Project(Object content) {
         super(EntityType.PROJECT, content);
