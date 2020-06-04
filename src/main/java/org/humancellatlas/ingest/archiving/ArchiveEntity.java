@@ -19,7 +19,7 @@ public class ArchiveEntity implements Identifiable<String> {
     private String id;
 
     @CreatedDate
-    private Instant createdDate;
+    private Instant created;
 
     @Setter
     private ArchiveEntityType type;
@@ -34,7 +34,10 @@ public class ArchiveEntity implements Identifiable<String> {
     private String accession;
 
     @Setter
-    private Object convertedData;
+    private Object conversion;
+
+    @Setter
+    private String[] metadataUuids;
 
     private @Setter
     @DBRef(lazy = true)

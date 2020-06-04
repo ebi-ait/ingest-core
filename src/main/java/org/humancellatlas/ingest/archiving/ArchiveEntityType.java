@@ -4,6 +4,6 @@ public enum ArchiveEntityType {
     SAMPLE,
     PROJECT,
     STUDY,
-    ASSAY,
-    ASSAYDATA
+    SEQUENCING_EXPERIMENT,
+    SEQUENCING_RUN
 }

@@ -21,7 +21,7 @@ public class ArchiveSubmission implements Identifiable<String> {
     private String id;
 
     @CreatedDate
-    private Instant createdDate;
+    private Instant created;
 
     @Setter
     private String dspUuid;
@@ -30,8 +30,5 @@ public class ArchiveSubmission implements Identifiable<String> {
     private String dspUrl;
 
     @Setter
-    private Object fileArchiverMessage;
-
-    @Setter
-    private String projectUuid;
+    private String submissionUuid;
 }
