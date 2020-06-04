@@ -1,12 +1,12 @@
-package org.humancellatlas.ingest.archiving.web;
+package org.humancellatlas.ingest.archiving.submission.web;
 
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.archiving.ArchiveEntity;
-import org.humancellatlas.ingest.archiving.ArchiveEntityRepository;
-import org.humancellatlas.ingest.archiving.ArchiveSubmission;
-import org.humancellatlas.ingest.archiving.ArchiveSubmissionRepository;
+import org.humancellatlas.ingest.archiving.entity.ArchiveEntity;
+import org.humancellatlas.ingest.archiving.entity.ArchiveEntityRepository;
+import org.humancellatlas.ingest.archiving.submission.ArchiveSubmission;
+import org.humancellatlas.ingest.archiving.submission.ArchiveSubmissionRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;

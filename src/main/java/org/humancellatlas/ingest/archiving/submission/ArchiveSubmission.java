@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.archiving;
+package org.humancellatlas.ingest.archiving.submission;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;

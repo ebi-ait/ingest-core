@@ -1,8 +1,8 @@
-package org.humancellatlas.ingest.archiving.web;
+package org.humancellatlas.ingest.archiving.submission.web;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.archiving.ArchiveSubmission;
+import org.humancellatlas.ingest.archiving.submission.ArchiveSubmission;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;

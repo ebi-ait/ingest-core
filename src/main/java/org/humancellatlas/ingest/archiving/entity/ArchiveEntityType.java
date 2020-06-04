@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.archiving;
+package org.humancellatlas.ingest.archiving.entity;
 
 public enum ArchiveEntityType {
     SAMPLE,

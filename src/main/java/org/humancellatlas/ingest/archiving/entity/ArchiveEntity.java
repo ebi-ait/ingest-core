@@ -1,8 +1,9 @@
-package org.humancellatlas.ingest.archiving;
+package org.humancellatlas.ingest.archiving.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.humancellatlas.ingest.archiving.submission.ArchiveSubmission;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;

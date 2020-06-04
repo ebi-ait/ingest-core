@@ -1,5 +1,6 @@
-package org.humancellatlas.ingest.archiving;
+package org.humancellatlas.ingest.archiving.entity;
 
+import org.humancellatlas.ingest.archiving.submission.ArchiveSubmission;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
