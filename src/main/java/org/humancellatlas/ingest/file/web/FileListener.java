@@ -38,7 +38,9 @@ public class FileListener {
                 fileService.updateStagedFile(fileMessage.getStagingAreaId(),
                                              fileMessage.getFileName(),
                                              fileMessage.getCloudUrl(),
-                                             fileMessage.getChecksums());
+                                             fileMessage.getChecksums(),
+                                             fileMessage.getSize(),
+                                             fileMessage.getContentType());
             } catch (CoreEntityNotFoundException e) {
                 log.warn(e.getMessage());
                 throw new AmqpRejectAndDontRequeueException(e.getMessage());

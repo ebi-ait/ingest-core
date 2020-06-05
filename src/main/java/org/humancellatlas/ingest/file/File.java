@@ -41,6 +41,8 @@ public class File extends MetadataDocument {
     private ValidationJob validationJob;
     private UUID validationId;
     private UUID dataFileUuid;
+    private Long size;
+    private String fileContentType;
 
     public File(){
         super(EntityType.FILE, null);

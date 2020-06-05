@@ -71,7 +71,7 @@ public class FileService {
         }
     }
 
-    public File updateStagedFile(String envelopeUuid, String fileName, String newFileUrl, Checksums checksums) throws CoreEntityNotFoundException {
+    public File updateStagedFile(String envelopeUuid, String fileName, String newFileUrl, Checksums checksums, Long size, String contentType) throws CoreEntityNotFoundException {
         Optional<SubmissionEnvelope> envelope = Optional.ofNullable(submissionEnvelopeRepository.findByUuid(new Uuid(envelopeUuid)));
 
         if (envelope.isPresent()) {
@@ -83,6 +83,8 @@ public class FileService {
                 File file = filesInEnvelope.get(0);
                 file.setCloudUrl(newFileUrl);
                 file.setChecksums(checksums);
+                file.setSize(size);
+                file.setFileContentType(contentType);
                 file.enactStateTransition(ValidationState.DRAFT);
                 File updatedFile = fileRepository.save(file);
                 return updatedFile;
