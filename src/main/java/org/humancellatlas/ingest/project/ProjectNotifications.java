@@ -12,6 +12,8 @@ import org.humancellatlas.ingest.notifications.model.Notification;
 import org.humancellatlas.ingest.notifications.model.NotificationRequest;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.user.IdentityService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
@@ -22,6 +24,8 @@ public class ProjectNotifications {
   private final NotificationService notificationService;
   private final Environment environment;
   private final IdentityService identityService;
+
+  private final Logger log = LoggerFactory.getLogger(getClass());
 
   public Notification editedProjectMetadata(Project project) {
     String notificationContent = String.format("Project %s was updated:\n\nNew content:\n\n%s",
@@ -71,7 +75,11 @@ public class ProjectNotifications {
     try {
       return this.notificationService.createNotification(notificationRequest);
     } catch (DuplicateNotification e) {
-      return this.notificationService.retrieveForChecksum(notificationChecksum);
+      return this.notificationService.retrieveForChecksum(notificationChecksum)
+                                     .orElseThrow(() -> {
+                                       log.error("Duplicate notification for non-existent checksum");
+                                       throw new RuntimeException(e);
+                                     });
     }
   }
 

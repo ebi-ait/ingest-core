@@ -25,6 +25,6 @@ public class InmemoryNotificationSource implements NotificationSource {
 
   @Override
   public void supply(List<Notification> notifications) {
-    this.queue.addAll(notifications);
+    notifications.forEach(this.queue::add);
   }
 }

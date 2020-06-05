@@ -9,7 +9,6 @@ import org.humancellatlas.ingest.notifications.processors.NotificationProcessor;
 import org.humancellatlas.ingest.notifications.processors.impl.email.EmailNotificationProcessor;
 import org.humancellatlas.ingest.notifications.processors.impl.email.SMTPConfig;
 import org.humancellatlas.ingest.notifications.sources.NotificationSource;
-import org.humancellatlas.ingest.notifications.sources.impl.inmemory.InmemoryNotificationSource;
 import org.humancellatlas.ingest.notifications.sources.impl.rabbit.AmqpConfig;
 import org.humancellatlas.ingest.notifications.sources.impl.rabbit.RabbitNotificationSource;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;

@@ -44,11 +44,8 @@ public class NotificationService {
     }
   }
 
-  public Notification retrieveForChecksum(Checksum checksum) {
-    Optional<Notification> maybeNotification = this.notificationRepository.findByChecksum(checksum);
-    return maybeNotification.orElseThrow(() -> {
-      throw new ResourceNotFoundException(String.format("Couldn't find checksum %s", checksum.toString()));
-    });
+  public Optional<Notification> retrieveForChecksum(Checksum checksum) {
+    return this.notificationRepository.findByChecksum(checksum);
   }
 
   public Notification changeState(Notification notification, NotificationState toState) {
