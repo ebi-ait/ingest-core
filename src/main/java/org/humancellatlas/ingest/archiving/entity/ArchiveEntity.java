@@ -39,7 +39,7 @@ public class ArchiveEntity implements Identifiable<String> {
 
     @Setter
     private String[] metadataUuids;
-
+    
     private @Setter
     @DBRef(lazy = true)
     ArchiveSubmission archiveSubmission;

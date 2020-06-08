@@ -31,4 +31,7 @@ public class ArchiveSubmission implements Identifiable<String> {
 
     @Setter
     private String submissionUuid;
+
+    @Setter
+    private Object fileUploadPlan;
 }
