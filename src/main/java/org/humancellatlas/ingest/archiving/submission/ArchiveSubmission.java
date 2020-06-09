@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.hateoas.Identifiable;
 
+import java.net.URI;
 import java.time.Instant;
 
 @Getter
@@ -27,7 +28,7 @@ public class ArchiveSubmission implements Identifiable<String> {
     private String dspUuid;
 
     @Setter
-    private String dspUrl;
+    private URI dspUrl;
 
     @Setter
     private String submissionUuid;

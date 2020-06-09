@@ -7,4 +7,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 public interface ArchiveSubmissionRepository extends MongoRepository<ArchiveSubmission, String> {
     ArchiveSubmission findByDspUuid(String dspUuid);
 
+    ArchiveSubmission findBySubmissionUuid(String submissionUuid);
+
 }

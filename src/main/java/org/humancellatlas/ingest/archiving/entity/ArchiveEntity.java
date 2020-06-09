@@ -10,7 +10,9 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.hateoas.Identifiable;
 
+import java.net.URI;
 import java.time.Instant;
+import java.util.List;
 
 @Getter
 @Document
@@ -29,7 +31,7 @@ public class ArchiveEntity implements Identifiable<String> {
     private String dspUuid;
 
     @Setter
-    private String dspUrl;
+    private URI dspUrl;
 
     @Setter
     private String accession;
@@ -38,7 +40,7 @@ public class ArchiveEntity implements Identifiable<String> {
     private Object conversion;
 
     @Setter
-    private String[] metadataUuids;
+    private List<String> metadataUuids;
     
     private @Setter
     @DBRef(lazy = true)
