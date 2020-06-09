@@ -26,4 +26,4 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
       - name: Gradle verification
-        run: ./gradlew verify
+        run: ./gradlew clean verify
