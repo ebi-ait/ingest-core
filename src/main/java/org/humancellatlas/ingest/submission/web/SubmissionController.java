@@ -35,7 +35,6 @@ import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -188,6 +187,12 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.ARCHIVED_URL, method = RequestMethod.PUT)
+    HttpEntity<?> completeArchivingEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.ARCHIVING);
+        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+    }
+
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.CLEANUP_URL, method = RequestMethod.PUT)
     HttpEntity<?> cleanupEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.CLEANUP);
@@ -250,6 +255,31 @@ public class SubmissionController {
     HttpEntity<?> enactArchivingEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelope.enactStateTransition(SubmissionState.ARCHIVING);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_ARCHIVED_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactArchivedEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        submissionEnvelope.enactStateTransition(SubmissionState.ARCHIVED);
+        getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        log.info(String.format("Submission envelope with ID %s was archived.", submissionEnvelope.getId()));
+        submissionEnvelopeService.handleArchivalCompletionRequest(submissionEnvelope);
+        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_EXPORTING_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactExportingEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        submissionEnvelope.enactStateTransition(SubmissionState.EXPORTING);
+        getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_EXPORTED_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactExportedEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        submissionEnvelope.enactStateTransition(SubmissionState.EXPORTED);
+        getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        log.info(String.format("Submission envelope with ID %s was exported.", submissionEnvelope.getId()));
+        submissionEnvelopeService.handleExportCompletionRequest(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 

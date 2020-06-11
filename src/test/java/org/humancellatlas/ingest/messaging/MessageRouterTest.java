@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.ANALYSIS_SUBMITTED;
-import static org.humancellatlas.ingest.messaging.Constants.Routing.ASSAY_SUBMITTED;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.EXPERIMENT_SUBMITTED;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
@@ -60,7 +60,7 @@ public class MessageRouterTest {
     @Test
     public void testSendAssayForExport() {
         //expect:
-        doTestSendForExport(ASSAY_SUBMITTED, messageRouter::sendAssayForExport);
+        doTestSendForExport(EXPERIMENT_SUBMITTED, messageRouter::sendExperiment);
     }
 
     @Test
@@ -119,6 +119,7 @@ public class MessageRouterTest {
 
         verify(messageSender, never()).queueDocumentStateUpdateMessage(any(URI.class), any(AbstractEntityMessage.class), anyLong());
     }
+
     private void doTestSendForExport(String routingKey, Consumer<ExportData> testMethod) {
         //given:
         String processId = "78bbd9";

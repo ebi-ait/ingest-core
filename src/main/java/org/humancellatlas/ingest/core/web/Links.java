@@ -29,6 +29,12 @@ public class Links {
     public static final String PROCESSING_URL ="/processingEvent";
     public static final String ARCHIVING_REL = "archiving";
     public static final String ARCHIVING_URL = "/archivingEvent";
+    public static final String ARCHIVED_REL = "archived";
+    public static final String ARCHIVED_URL = "/archivedEvent";
+    public static final String EXPORTING_REL = "archived";
+    public static final String EXPORTING_URL = "/archivedEvent";
+    public static final String EXPORTED_REL = "exported";
+    public static final String EXPORTED_URL = "/exportedEvent";
     public static final String CLEANUP_REL = "cleaning";
     public static final String CLEANUP_URL = "/cleanupEvent";
     public static final String COMPLETE_REL = "complete";
@@ -50,6 +56,12 @@ public class Links {
     public static final String COMMIT_PROCESSING_URL ="/commitProcessingEvent";
     public static final String COMMIT_ARCHIVING_REL = "commitArchiving";
     public static final String COMMIT_ARCHIVING_URL = "/commitArchivingEvent";
+    public static final String COMMIT_ARCHIVED_REL = "commitArchived";
+    public static final String COMMIT_ARCHIVED_URL = "/commitArchivedEvent";
+    public static final String COMMIT_EXPORTING_REL = "commitExporting";
+    public static final String COMMIT_EXPORTING_URL = "/commitExportingEvent";
+    public static final String COMMIT_EXPORTED_REL = "commitExported";
+    public static final String COMMIT_EXPORTED_URL = "/commitExportedEvent";
     public static final String COMMIT_CLEANUP_REL = "commitCleanup";
     public static final String COMMIT_CLEANUP_URL = "/commitCleanupEvent";
     public static final String COMMIT_COMPLETE_REL = "commitComplete";

@@ -33,6 +33,7 @@ public class Constants {
         public static final String ENVELOPE_CREATE = "ingest.state-tracking.envelope.create";
         public static final String METADATA_UPDATE = "ingest.state-tracking.document.update";
         public static final String ASSAY_SUBMITTED = "ingest.bundle.assay.submitted";
+        public static final String EXPERIMENT_SUBMITTED = "ingest.terra.experiments.submitted";
         public static final String ANALYSIS_SUBMITTED = "ingest.bundle.analysis.submitted";
         public static final String UPDATE_SUBMITTED = "ingest.bundle.update.submitted";
 

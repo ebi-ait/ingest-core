@@ -134,10 +134,13 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         switch (submissionState) {
             case SUBMITTED:
                 return Optional.of(Links.SUBMIT_REL);
-            case PROCESSING:
-                return Optional.of(Links.PROCESSING_REL);
-            case ARCHIVING:
-                return Optional.of(Links.ARCHIVING_REL);
+            case ARCHIVED:
+                return Optional.of(Links.ARCHIVED_REL);
+            case EXPORTING:
+                return Optional.of(Links.EXPORTING_REL);
+            case EXPORTED:
+                return Optional.of(Links.EXPORTING_REL);
+
             case CLEANUP:
                 return Optional.of(Links.CLEANUP_REL);
             case COMPLETE:
