@@ -15,7 +15,6 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    container: ubuntu:latest
 
     steps:
       - uses: actions/checkout@v2
