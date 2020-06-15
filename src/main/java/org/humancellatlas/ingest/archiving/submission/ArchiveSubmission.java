@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.humancellatlas.ingest.archiving.Error;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,6 +12,8 @@ import org.springframework.hateoas.Identifiable;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Document
@@ -35,4 +38,7 @@ public class ArchiveSubmission implements Identifiable<String> {
 
     @Setter
     private Object fileUploadPlan;
+
+    private @Setter
+    List<Error> errors = new ArrayList<>();
 }

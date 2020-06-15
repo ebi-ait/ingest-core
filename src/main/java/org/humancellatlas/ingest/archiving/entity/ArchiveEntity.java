@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.archiving.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.humancellatlas.ingest.archiving.Error;
 import org.humancellatlas.ingest.archiving.submission.ArchiveSubmission;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -12,6 +13,7 @@ import org.springframework.hateoas.Identifiable;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -45,4 +47,7 @@ public class ArchiveEntity implements Identifiable<String> {
     private @Setter
     @DBRef(lazy = true)
     ArchiveSubmission archiveSubmission;
+
+    private @Setter
+    List<Error> errors = new ArrayList<>();
 }
