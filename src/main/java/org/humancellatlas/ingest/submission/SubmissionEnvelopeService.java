@@ -78,34 +78,45 @@ public class SubmissionEnvelopeService {
         }
     }
 
-    public void handleSubmissionRequest(SubmissionEnvelope envelope) {
-        if (!envelope.getIsUpdate()) {
-            handleSubmitOriginalSubmission(envelope);
+    public void handleCommitSubmit(SubmissionEnvelope envelope) {
+        if (envelope.getSubmitActions().indexOf(SubmitAction.ARCHIVE) >= 0) {
+            archiveSubmission(envelope);
+        } else if (envelope.getSubmitActions().indexOf(SubmitAction.EXPORT) >= 0) {
+            exportSubmission(envelope);
         } else {
-            handleSubmitUpdateSubmission(envelope);
+            throw new RuntimeException((String.format(
+                    "Envelope with id %s is submitted without the required submit actions",
+                    envelope.getId(), envelope.getSubmissionState())));
         }
     }
 
-    private void handleSubmitOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
+    private void archiveSubmission(SubmissionEnvelope envelope) {
+        if (!envelope.getIsUpdate()) {
+            exporter.exportManifests(envelope);
+        } else {
+            // do nothing for now
+        }
+    }
+
+    private void exportSubmission(SubmissionEnvelope envelope) {
+        if (!envelope.getIsUpdate()) {
+            exportOriginalSubmission(envelope);
+        } else {
+            exportUpdateSubmission(envelope);
+        }
+    }
+
+    private void exportOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
         executorService.submit(() -> {
             try {
-                if (submissionEnvelope.getSubmitActions().indexOf(SubmitAction.ARCHIVE) >= 0) {
-                    exporter.exportManifests(submissionEnvelope);
-                } else if (submissionEnvelope.getSubmitActions().indexOf(SubmitAction.EXPORT) >= 0) {
-                    exporter.exportBundles(submissionEnvelope);
-                } else {
-                    throw new RuntimeException((String.format(
-                        "Envelope with id %s is submitted without the required submit actions",
-                        submissionEnvelope.getId(), submissionEnvelope.getSubmissionState())));
-                }
-
+                exporter.exportBundles(submissionEnvelope);
             } catch (Exception e) {
                 log.error("Uncaught Exception exporting Bundles", e);
             }
         });
     }
 
-    private void handleSubmitUpdateSubmission(SubmissionEnvelope submissionEnvelope) {
+    private void exportUpdateSubmission(SubmissionEnvelope submissionEnvelope) {
         executorService.submit(() -> {
             try {
                 metadataUpdateService.applyUpdates(submissionEnvelope);
@@ -116,23 +127,21 @@ public class SubmissionEnvelopeService {
         });
     }
 
-    public void handleArchivalCompletionRequest(SubmissionEnvelope submissionEnvelope) {
-        executorService.submit(() -> {
-            try {
-                if (submissionEnvelope.getSubmitActions().indexOf(SubmitAction.EXPORT) >= 0) {
-                    exporter.exportBundles(submissionEnvelope);
-                }
-            } catch (Exception e) {
-                log.error("Uncaught Exception exporting Bundles", e);
-            }
-        });
+    public void handleCommitArchived(SubmissionEnvelope envelope) {
+        if (envelope.getSubmitActions().indexOf(SubmitAction.EXPORT) >= 0) {
+            exportSubmission(envelope);
+        }
     }
 
-    public void handleExportCompletionRequest(SubmissionEnvelope submissionEnvelope) {
+    public void handleCommitExporting(SubmissionEnvelope envelope) {
+        exportSubmission(envelope);
+    }
+
+    public void handleCommitExported(SubmissionEnvelope submissionEnvelope) {
         executorService.submit(() -> {
             try {
                 if (submissionEnvelope.getSubmitActions().indexOf(SubmitAction.CLEANUP) >= 0) {
-                    // send event to state tracker
+                    handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.CLEANUP);
                 }
             } catch (Exception e) {
                 log.error("Uncaught Exception exporting Bundles", e);

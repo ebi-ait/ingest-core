@@ -31,8 +31,8 @@ public class Links {
     public static final String ARCHIVING_URL = "/archivingEvent";
     public static final String ARCHIVED_REL = "archived";
     public static final String ARCHIVED_URL = "/archivedEvent";
-    public static final String EXPORTING_REL = "exporting";
-    public static final String EXPORTING_URL = "/exportingEvent";
+    public static final String EXPORT_REL = "export";
+    public static final String EXPORT_URL = "/exportEvent";
     public static final String EXPORTED_REL = "exported";
     public static final String EXPORTED_URL = "/exportedEvent";
     public static final String CLEANUP_REL = "cleaning";

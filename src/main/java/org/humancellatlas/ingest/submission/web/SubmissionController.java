@@ -175,21 +175,15 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.PROCESSING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> processEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.PROCESSING);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
-    }
-
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.ARCHIVING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> archiveEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.ARCHIVING);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
-    }
-
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.ARCHIVED_URL, method = RequestMethod.PUT)
     HttpEntity<?> completeArchivingEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.ARCHIVING);
+        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.EXPORT_URL, method = RequestMethod.PUT)
+    HttpEntity<?> processEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.EXPORTING);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
@@ -240,7 +234,7 @@ public class SubmissionController {
         submissionEnvelope.enactStateTransition(SubmissionState.SUBMITTED);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         log.info(String.format("Submission envelope with ID %s was submitted.", submissionEnvelope.getId()));
-        submissionEnvelopeService.handleSubmissionRequest(submissionEnvelope);
+        submissionEnvelopeService.handleCommitSubmit(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
@@ -263,7 +257,7 @@ public class SubmissionController {
         submissionEnvelope.enactStateTransition(SubmissionState.ARCHIVED);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         log.info(String.format("Submission envelope with ID %s was archived.", submissionEnvelope.getId()));
-        submissionEnvelopeService.handleArchivalCompletionRequest(submissionEnvelope);
+        submissionEnvelopeService.handleCommitArchived(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
@@ -271,6 +265,7 @@ public class SubmissionController {
     HttpEntity<?> enactExportingEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelope.enactStateTransition(SubmissionState.EXPORTING);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        submissionEnvelopeService.handleCommitExporting(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
@@ -279,7 +274,7 @@ public class SubmissionController {
         submissionEnvelope.enactStateTransition(SubmissionState.EXPORTED);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         log.info(String.format("Submission envelope with ID %s was exported.", submissionEnvelope.getId()));
-        submissionEnvelopeService.handleExportCompletionRequest(submissionEnvelope);
+        submissionEnvelopeService.handleCommitExported(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
