@@ -25,5 +25,7 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
+      - name: Display Gradle environment
+        run: ./gradlew -v
       - name: Gradle verification
         run: ./gradlew verify
