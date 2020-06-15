@@ -120,7 +120,7 @@ public class MessageRouter {
     }
 
     public void sendExperimentForExport(ExportData exportData) {
-        messageSender.queueNewExportMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED,
+        messageSender.queueNewExportMessage(ASSAY_EXCHANGE, EXPERIMENT_SUBMITTED,
                 exportData.toAssaySubmittedMessage(linkGenerator),
                 System.currentTimeMillis());
     }
