@@ -22,5 +22,11 @@ An example of the process of making a submission is in [docs/primary-submission-
 `./gradlew test`
 
 You will need a mongo database running on localhost with default ports to run the tests
+
+## Running locally
+You can run ingest-core on your local system with the script
+
+`./run_local.sh`
+
 ## Privacy
 Usage of the Ingest Core API require limited processing of personal data. For more information, please read our [Privacy Policy](http://www.ebi.ac.uk/data-protection/privacy-notice/human-cell-atlas-ingest-submission).

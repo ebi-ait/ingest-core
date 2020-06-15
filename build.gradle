@@ -9,25 +9,40 @@ group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
-
 repositories {
     mavenCentral()
 }
 
+sourceSets {
+    integration {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+
+    integrationImplementation.extendsFrom testImplementation
+    integrationRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+task integrationTest(type: Test) {
+    useJUnitPlatform()
+    testClassesDirs = sourceSets.integration.output.classesDirs
+    classpath = sourceSets.integration.runtimeClasspath
+}
 
 test {
-    environment "SCHEMA_BASE_URI", System.getenv('SCHEMA_BASE_URI')
-    environment "GCP_PROJECT_WHITELIST", System.getenv('GCP_PROJECT_WHITELIST')
-    environment "AUTH_ISSUER", System.getenv('AUTH_ISSUER')
-    environment "SVC_AUTH_AUDIENCE", System.getenv('SVC_AUTH_AUDIENCE')
-    environment "USR_AUTH_AUDIENCE", System.getenv('USR_AUTH_AUDIENCE')
-    environment "GCP_JWK_PROVIDER_BASE_URL", System.getenv('GCP_JWK_PROVIDER_BASE_URL')
     useJUnitPlatform()
+}
+
+task verify {
+    dependsOn test
+    dependsOn integrationTest
+    integrationTest.mustRunAfter test
 }
 
 dependencies {
@@ -85,4 +100,6 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-stdlib:1.3.61")
 
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+
+    integrationRuntimeOnly 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:2.2.0'
 }
