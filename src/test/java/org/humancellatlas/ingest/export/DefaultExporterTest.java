@@ -83,7 +83,7 @@ public class DefaultExporterTest {
 
         //and:
         verify(messageRouter, times(assayIds.size()))
-                .sendManifest(any(ExportData.class));
+                .sendManifestForExport(any(ExportData.class));
     }
 
     private Set<String> mockProcessIds(int max) {
@@ -98,7 +98,7 @@ public class DefaultExporterTest {
             exportData.add(invocation.getArgument(0));
             return null;
         };
-        doAnswer(addToSet).when(messageRouter).sendManifest(any(ExportData.class));
+        doAnswer(addToSet).when(messageRouter).sendManifestForExport(any(ExportData.class));
         return exportData;
     }
 

@@ -60,7 +60,7 @@ public class MessageRouterTest {
     @Test
     public void testSendAssayForExport() {
         //expect:
-        doTestSendForExport(EXPERIMENT_SUBMITTED, messageRouter::sendExperiment);
+        doTestSendForExport(EXPERIMENT_SUBMITTED, messageRouter::sendExperimentForExport);
     }
 
     @Test

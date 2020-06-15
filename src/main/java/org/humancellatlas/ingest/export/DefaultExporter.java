@@ -67,7 +67,7 @@ public class DefaultExporter implements Exporter {
                 .map(processIdBatch -> processService.getProcesses(processIdBatch))
                 .flatMap(Function.identity())
                 .map(process -> new ExportData(counter.next(), totalCount, process, envelope))
-                .forEach(messageRouter::sendManifest);
+                .forEach(messageRouter::sendManifestForExport);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class DefaultExporter implements Exporter {
                 .map(processIdBatch -> processService.getProcesses(processIdBatch))
                 .flatMap(Function.identity())
                 .map(process -> new ExportData(counter.next(), totalCount, process, envelope))
-                .forEach(messageRouter::sendExperiment);
+                .forEach(messageRouter::sendExperimentForExport);
     }
 
     @Override
