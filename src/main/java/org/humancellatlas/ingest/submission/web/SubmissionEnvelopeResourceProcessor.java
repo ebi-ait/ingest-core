@@ -140,7 +140,6 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 return Optional.of(Links.EXPORTING_REL);
             case EXPORTED:
                 return Optional.of(Links.EXPORTING_REL);
-
             case CLEANUP:
                 return Optional.of(Links.CLEANUP_REL);
             case COMPLETE:
@@ -167,8 +166,6 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         switch (submissionState) {
             case SUBMITTED:
                 return this.getSubmitLink(submissionEnvelope);
-            case PROCESSING:
-                return Optional.of(Links.PROCESSING_URL);
             case ARCHIVING:
                 return Optional.of(Links.ARCHIVING_URL);
             case CLEANUP:
