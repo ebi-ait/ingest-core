@@ -194,6 +194,8 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 return Optional.of(Links.COMMIT_PROCESSING_REL);
             case ARCHIVING:
                 return Optional.of(Links.COMMIT_ARCHIVING_REL);
+            case ARCHIVED:
+                return Optional.of(Links.COMMIT_ARCHIVED_REL);
             case EXPORTING:
                 return Optional.of(Links.COMMIT_EXPORTING_REL);
             case EXPORTED:
