@@ -16,6 +16,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -23,23 +24,32 @@ import java.util.List;
 public class ArchiveEntity implements Identifiable<String> {
     @DBRef(lazy = true)
     ArchiveSubmission archiveSubmission;
+
     @Id
     @JsonIgnore
     private String id;
+
     @CreatedDate
     private Instant created;
+
     private ArchiveEntityType type;
+
     @Indexed(unique = true)
     private String alias;
+
     @Indexed(unique = true)
     private String dspUuid;
+
     private URI dspUrl;
+
     private String accession;
+
     private Object conversion;
-    private List<String> metadataUuids;
+
+    private Set<String> metadataUuids;
+
+    private Set<String> accessionedMetadataUuids;
+
     private List<Error> errors = new ArrayList<>();
 
-    ArchiveEntity() {
-
-    }
 }
