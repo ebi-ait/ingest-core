@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Document
@@ -34,14 +35,13 @@ public class SubmissionEnvelope extends AbstractEntity {
     private @Setter
     Boolean isUpdate;
     private @Setter
-    List<SubmitAction> submitActions;
+    Set<SubmitAction> submitActions;
 
     public SubmissionEnvelope() {
         super(EntityType.SUBMISSION);
         this.submissionState = SubmissionState.PENDING;
         this.triggersAnalysis = true;
         this.isUpdate = false;
-        this.submitActions = new ArrayList<>(Arrays.asList(SubmitAction.ARCHIVE, SubmitAction.EXPORT, SubmitAction.CLEANUP));
     }
 
     public SubmissionEnvelope(String id) {

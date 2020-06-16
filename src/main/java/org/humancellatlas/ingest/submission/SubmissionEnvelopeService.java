@@ -22,8 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
-import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -51,23 +50,45 @@ public class SubmissionEnvelopeService {
 
     @NonNull
     private final SubmissionManifestRepository submissionManifestRepository;
-    private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
+
+    @NonNull
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
     @NonNull
     private BundleManifestRepository bundleManifestRepository;
+
     @NonNull
     private ProjectRepository projectRepository;
+
     @NonNull
     private ProcessRepository processRepository;
+
     @NonNull
     private ProtocolRepository protocolRepository;
+
     @NonNull
     private FileRepository fileRepository;
+
     @NonNull
     private BiomaterialRepository biomaterialRepository;
+
     @NonNull
     private PatchRepository patchRepository;
+
     @NonNull
     private SubmissionErrorRepository submissionErrorRepository;
+
+    public void handleSubmitRequest(SubmissionEnvelope envelope, Set<SubmitAction> submitActions) {
+        if (submitActions.contains(SubmitAction.ARCHIVE) || submitActions.contains(SubmitAction.EXPORT)) {
+            envelope.setSubmitActions(submitActions);
+            submissionEnvelopeRepository.save(envelope);
+        } else {
+            throw new RuntimeException((String.format(
+                    "Envelope with id %s is submitted without the required submit actions",
+                    envelope.getId(), envelope.getSubmissionState())));
+        }
+        handleEnvelopeStateUpdateRequest(envelope, SubmissionState.SUBMITTED);
+    }
 
     public void handleEnvelopeStateUpdateRequest(SubmissionEnvelope envelope,
                                                  SubmissionState state) {
@@ -80,24 +101,10 @@ public class SubmissionEnvelopeService {
         }
     }
 
-    public void handleSubmitRequest(SubmissionEnvelope envelope, Optional<List<SubmitAction>> optionalSubmitActions) {
-        optionalSubmitActions.ifPresent(submitActions -> {
-            if (submitActions.indexOf(SubmitAction.ARCHIVE) >= 0 || submitActions.indexOf(SubmitAction.EXPORT) >= 0) {
-                envelope.setSubmitActions(submitActions);
-                submissionEnvelopeRepository.save(envelope);
-            } else {
-                throw new RuntimeException((String.format(
-                        "Envelope with id %s is submitted without the required submit actions",
-                        envelope.getId(), envelope.getSubmissionState())));
-            }
-        });
-        handleEnvelopeStateUpdateRequest(envelope, SubmissionState.SUBMITTED);
-    }
-
     public void handleCommitSubmit(SubmissionEnvelope envelope) {
-        if (envelope.getSubmitActions().indexOf(SubmitAction.ARCHIVE) >= 0) {
+        if (envelope.getSubmitActions().contains(SubmitAction.ARCHIVE)) {
             archiveSubmission(envelope);
-        } else if (envelope.getSubmitActions().indexOf(SubmitAction.EXPORT) >= 0) {
+        } else if (envelope.getSubmitActions().contains(SubmitAction.EXPORT)) {
             exportSubmission(envelope);
         } else {
             throw new RuntimeException((String.format(
@@ -144,7 +151,7 @@ public class SubmissionEnvelopeService {
     }
 
     public void handleCommitArchived(SubmissionEnvelope envelope) {
-        if (envelope.getSubmitActions().indexOf(SubmitAction.EXPORT) >= 0) {
+        if (envelope.getSubmitActions().contains(SubmitAction.EXPORT)) {
             exportSubmission(envelope);
         }
     }
@@ -152,7 +159,7 @@ public class SubmissionEnvelopeService {
     public void handleCommitExported(SubmissionEnvelope submissionEnvelope) {
         executorService.submit(() -> {
             try {
-                if (submissionEnvelope.getSubmitActions().indexOf(SubmitAction.CLEANUP) >= 0) {
+                if (submissionEnvelope.getSubmitActions().contains(SubmitAction.CLEANUP)) {
                     handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.CLEANUP);
                 }
             } catch (Exception e) {

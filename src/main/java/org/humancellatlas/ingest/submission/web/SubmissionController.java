@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Spring controller that will handle submission events on a {@link SubmissionEnvelope}
@@ -170,10 +171,11 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMIT_URL, method = RequestMethod.PUT)
     HttpEntity<?> submitEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
-                                        @RequestBody  Optional<List<SubmitAction>> optionalSubmitActions,
+                                        @RequestBody(required = false) Set<SubmitAction> submitActionParam,
                                         final PersistentEntityResourceAssembler resourceAssembler) {
 
-        submissionEnvelopeService.handleSubmitRequest(submissionEnvelope, optionalSubmitActions);
+        Set<SubmitAction> submitActions = Optional.ofNullable(submitActionParam).orElse(Set.of(SubmitAction.ARCHIVE, SubmitAction.EXPORT, SubmitAction.CLEANUP));
+        submissionEnvelopeService.handleSubmitRequest(submissionEnvelope, submitActions);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
