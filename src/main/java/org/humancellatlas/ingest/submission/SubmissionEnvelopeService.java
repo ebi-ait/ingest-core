@@ -98,7 +98,7 @@ public class SubmissionEnvelopeService {
         }
     }
 
-    private void exportSubmission(SubmissionEnvelope envelope) {
+    public void exportSubmission(SubmissionEnvelope envelope) {
         if (!envelope.getIsUpdate()) {
             exportOriginalSubmission(envelope);
         } else {
@@ -131,10 +131,6 @@ public class SubmissionEnvelopeService {
         if (envelope.getSubmitActions().indexOf(SubmitAction.EXPORT) >= 0) {
             exportSubmission(envelope);
         }
-    }
-
-    public void handleCommitExporting(SubmissionEnvelope envelope) {
-        exportSubmission(envelope);
     }
 
     public void handleCommitExported(SubmissionEnvelope submissionEnvelope) {
