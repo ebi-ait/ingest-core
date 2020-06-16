@@ -170,10 +170,10 @@ public class SubmissionController {
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMIT_URL, method = RequestMethod.PUT)
     HttpEntity<?> submitEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
-                                        @RequestBody List<SubmitAction> submitActions,
+                                        @RequestBody  Optional<List<SubmitAction>> optionalSubmitActions,
                                         final PersistentEntityResourceAssembler resourceAssembler) {
 
-        submissionEnvelopeService.handleSubmitRequest(submissionEnvelope, submitActions);
+        submissionEnvelopeService.handleSubmitRequest(submissionEnvelope, optionalSubmitActions);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 

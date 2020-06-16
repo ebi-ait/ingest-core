@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -79,8 +80,8 @@ public class SubmissionEnvelopeService {
         }
     }
 
-    public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
-        if (submitActions != null) {
+    public void handleSubmitRequest(SubmissionEnvelope envelope, Optional<List<SubmitAction>> optionalSubmitActions) {
+        optionalSubmitActions.ifPresent(submitActions -> {
             if (submitActions.indexOf(SubmitAction.ARCHIVE) >= 0 || submitActions.indexOf(SubmitAction.EXPORT) >= 0) {
                 envelope.setSubmitActions(submitActions);
                 submissionEnvelopeRepository.save(envelope);
@@ -89,7 +90,7 @@ public class SubmissionEnvelopeService {
                         "Envelope with id %s is submitted without the required submit actions",
                         envelope.getId(), envelope.getSubmissionState())));
             }
-        }
+        });
         handleEnvelopeStateUpdateRequest(envelope, SubmissionState.SUBMITTED);
     }
 
