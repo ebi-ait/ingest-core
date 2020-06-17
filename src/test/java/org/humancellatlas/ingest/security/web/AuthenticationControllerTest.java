@@ -38,8 +38,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest
-@SpringJUnitWebConfig({AuthenticationController.class, SecurityConfig.class})
+@WebMvcTest(AuthenticationController.class)
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
 public class AuthenticationControllerTest {
 
@@ -207,7 +206,6 @@ public class AuthenticationControllerTest {
         }
 
         @Test
-        @WithAnonymousUser
         void unknownGuest() throws Exception {
             //expect:
             webApp
