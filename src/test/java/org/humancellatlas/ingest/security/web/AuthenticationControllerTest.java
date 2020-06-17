@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
@@ -206,6 +207,7 @@ public class AuthenticationControllerTest {
         }
 
         @Test
+        @WithAnonymousUser
         void unknownGuest() throws Exception {
             //expect:
             webApp
