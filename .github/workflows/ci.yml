@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - task/fix-ci
     paths-ignore:
       - '.travis.yml'
       - '.gitlab-ci.yml'
