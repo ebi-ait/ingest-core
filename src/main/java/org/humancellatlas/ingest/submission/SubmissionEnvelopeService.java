@@ -22,7 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
-import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -78,12 +79,12 @@ public class SubmissionEnvelopeService {
     @NonNull
     private SubmissionErrorRepository submissionErrorRepository;
 
-    public void handleSubmitRequest(SubmissionEnvelope envelope, Set<SubmitAction> submitActions) {
+    public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
         if (submitActions.contains(SubmitAction.ARCHIVE) || submitActions.contains(SubmitAction.EXPORT)) {
-            envelope.setSubmitActions(submitActions);
+            envelope.setSubmitActions(new HashSet<>(submitActions));
             submissionEnvelopeRepository.save(envelope);
         } else {
-            throw new RuntimeException((String.format(
+            throw new IllegalArgumentException((String.format(
                     "Envelope with id %s is submitted without the required submit actions",
                     envelope.getId(), envelope.getSubmissionState())));
         }

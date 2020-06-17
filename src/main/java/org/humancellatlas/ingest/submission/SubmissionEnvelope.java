@@ -12,10 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Document
@@ -42,6 +39,7 @@ public class SubmissionEnvelope extends AbstractEntity {
         this.submissionState = SubmissionState.PENDING;
         this.triggersAnalysis = true;
         this.isUpdate = false;
+        this.submitActions = new HashSet<>();
     }
 
     public SubmissionEnvelope(String id) {

@@ -35,7 +35,7 @@ public class Links {
     public static final String EXPORT_URL = "/exportEvent";
     public static final String EXPORTED_REL = "exported";
     public static final String EXPORTED_URL = "/exportedEvent";
-    public static final String CLEANUP_REL = "cleaning";
+    public static final String CLEANUP_REL = "cleanup";
     public static final String CLEANUP_URL = "/cleanupEvent";
     public static final String COMPLETE_REL = "complete";
     public static final String COMPLETE_URL = "/completionEvent";
