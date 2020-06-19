@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 plugins {
     id 'org.springframework.boot' version '2.1.6.RELEASE'
     id 'java'
@@ -43,6 +45,13 @@ task verify {
     dependsOn test
     dependsOn integrationTest
     integrationTest.mustRunAfter test
+}
+
+tasks.withType(Test) {
+    testLogging {
+        showStackTraces = true
+        exceptionFormat = TestExceptionFormat.FULL
+    }
 }
 
 dependencies {
