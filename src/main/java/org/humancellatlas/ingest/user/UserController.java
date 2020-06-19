@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.security.Account;
+import org.humancellatlas.ingest.security.Role;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
@@ -54,7 +55,7 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
     @RequestMapping(value = "/summary")
     @ResponseBody
     public Summary summary() {
-        String user = getCurrentUserAccountId();
+        String user = getCurrentAccount().getId();
         long pendingSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.PENDING, user);
         long draftSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.DRAFT, user);
         long validatingubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.VALIDATING, user);
@@ -70,7 +71,7 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
 
     @RequestMapping(value = "/submissionEnvelopes")
     public PagedResources<Resource<SubmissionEnvelope>> getUserSubmissionEnvelopes(Pageable pageable) {
-        Page<SubmissionEnvelope> submissionEnvelopes = submissionEnvelopeRepository.findByUser(getCurrentUserAccountId(), pageable);
+        Page<SubmissionEnvelope> submissionEnvelopes = submissionEnvelopeRepository.findByUser(getCurrentAccount().getId(), pageable);
         PagedResources<Resource<SubmissionEnvelope>> pagedResources =  submissionEnvelopePagedResourcesAssembler.toResource(submissionEnvelopes);
         for (Resource<SubmissionEnvelope> resource : pagedResources)
         {
@@ -82,7 +83,15 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
 
     @RequestMapping(value = "/projects")
     public PagedResources<Resource<Project>> getUserProjects(Pageable pageable) {
-        Page<Project> projects = projectRepository.findByUser(getCurrentUserAccountId(), pageable);
+
+        Page<Project> projects = Page.empty();
+
+        if (getCurrentAccount().getRoles().contains(Role.WRANGLER)) {
+            projects = projectRepository.findByUserOrPrimaryWrangler(getCurrentAccount().getId(), getCurrentAccount().getId(), pageable);
+        } else {
+            projects = projectRepository.findByUser(getCurrentAccount().getId(), pageable);
+        }
+        
         PagedResources<Resource<Project>> pagedResources = projectPagedResourcesAssembler.toResource(projects);
         for (Resource<Project> resource : pagedResources)
         {
@@ -91,10 +100,10 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
         return pagedResources;
     }
 
-    private String getCurrentUserAccountId() {
+    private Account getCurrentAccount() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Account account = (Account) authentication.getPrincipal();
-        return account.getId();
+        return account;
     }
 
     @Override
