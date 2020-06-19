@@ -1,9 +1,19 @@
 package org.humancellatlas.ingest.archiving.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+@JsonSerialize(using = ArchiveEntityTypeSerializer.class)
 public enum ArchiveEntityType {
-    SAMPLE,
-    PROJECT,
-    STUDY,
-    SEQUENCING_EXPERIMENT,
-    SEQUENCING_RUN
+    SAMPLE("sample"),
+    PROJECT("project"),
+    STUDY("study"),
+    SEQUENCING_EXPERIMENT("sequencingExperiment"),
+    SEQUENCING_RUN("sequencingRun");
+
+    protected String type;
+
+    ArchiveEntityType(String type) {
+        this.type = type;
+    }
 }
+

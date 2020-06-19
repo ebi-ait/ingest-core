@@ -113,8 +113,14 @@ public class MessageRouter {
         return true;
     }
 
-    public void sendAssayForExport(ExportData exportData) {
+    public void sendManifestForExport(ExportData exportData) {
         messageSender.queueNewExportMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED,
+                exportData.toAssaySubmittedMessage(linkGenerator),
+                System.currentTimeMillis());
+    }
+
+    public void sendExperimentForExport(ExportData exportData) {
+        messageSender.queueNewExportMessage(ASSAY_EXCHANGE, EXPERIMENT_SUBMITTED,
                 exportData.toAssaySubmittedMessage(linkGenerator),
                 System.currentTimeMillis());
     }

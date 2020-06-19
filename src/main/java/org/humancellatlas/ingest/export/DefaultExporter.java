@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 @Component
 public class DefaultExporter implements Exporter {
@@ -52,17 +51,15 @@ public class DefaultExporter implements Exporter {
     }
 
     @Override
-    public void exportBundles(SubmissionEnvelope envelope) {
+    public void exportManifests(SubmissionEnvelope envelope) {
         Collection<String> assayingProcessIds = processService.findAssays(envelope);
-        Collection<String> analysisProcessIds = processService.findAnalyses(envelope);
 
-        log.info(String.format("Found %s assays and %s analysis processes for envelope with ID %s",
+        log.info(String.format("Found %s assays processes for envelope with ID %s",
                 assayingProcessIds.size(),
-                analysisProcessIds.size(),
                 envelope.getId()));
 
         IndexCounter counter = new IndexCounter();
-        int totalCount = assayingProcessIds.size() + analysisProcessIds.size();
+        int totalCount = assayingProcessIds.size();
 
         int partitionSize = 500;
         partitionProcessIds(assayingProcessIds, partitionSize)
@@ -70,14 +67,28 @@ public class DefaultExporter implements Exporter {
                 .map(processIdBatch -> processService.getProcesses(processIdBatch))
                 .flatMap(Function.identity())
                 .map(process -> new ExportData(counter.next(), totalCount, process, envelope))
-                .forEach(messageRouter::sendAssayForExport);
+                .forEach(messageRouter::sendManifestForExport);
+    }
 
-        partitionProcessIds(analysisProcessIds, partitionSize)
+    @Override
+    public void exportBundles(SubmissionEnvelope envelope) {
+        Collection<String> assayingProcessIds = processService.findAssays(envelope);
+
+        log.info(String.format("Found %s assays processes for envelope with ID %s",
+                assayingProcessIds.size(),
+                envelope.getId()));
+
+        IndexCounter counter = new IndexCounter();
+        int totalCount = assayingProcessIds.size();
+
+        int partitionSize = 500;
+
+        partitionProcessIds(assayingProcessIds, partitionSize)
                 .stream()
                 .map(processIdBatch -> processService.getProcesses(processIdBatch))
                 .flatMap(Function.identity())
                 .map(process -> new ExportData(counter.next(), totalCount, process, envelope))
-                .forEach(messageRouter::sendAnalysisForExport);
+                .forEach(messageRouter::sendExperimentForExport);
     }
 
     @Override
