@@ -20,7 +20,7 @@ import org.springframework.util.DigestUtils;
 
 @Component
 @RequiredArgsConstructor
-public class ProjectNotifications {
+public class ProjectEventHandler {
   private final NotificationService notificationService;
   private final Environment environment;
   private final IdentityService identityService;

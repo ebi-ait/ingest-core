@@ -7,7 +7,7 @@ import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.ValidationEvent;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.project.Project;
-import org.humancellatlas.ingest.project.ProjectNotifications;
+import org.humancellatlas.ingest.project.ProjectEventHandler;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ValidationStateChangeListener implements ApplicationListener<ValidationEvent> {
     private final @NonNull MessageRouter messageRouter;
-    private final @NonNull ProjectNotifications projectNotifications;
+    private final @NonNull ProjectEventHandler projectEventHandler;
 
     @Override
     public void onApplicationEvent(ValidationEvent event) {
@@ -23,7 +23,7 @@ public class ValidationStateChangeListener implements ApplicationListener<Valida
         messageRouter.routeStateTrackingUpdateMessageFor(document);
 
         if(document.getType().equals(EntityType.PROJECT)) {
-            projectNotifications.validatedProject((Project) document);
+            projectEventHandler.validatedProject((Project) document);
         }
     }
 }

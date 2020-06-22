@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Getter
 public class ProjectChangeListener extends AbstractMongoEventListener<Project> {
-    private final ProjectNotifications projectNotifications;
+    private final ProjectEventHandler projectEventHandler;
 
     @Override
     public void onBeforeSave(BeforeSaveEvent<Project> event) {
@@ -25,6 +25,6 @@ public class ProjectChangeListener extends AbstractMongoEventListener<Project> {
     @Override
     public void onAfterSave(AfterSaveEvent<Project> event) {
         Project project = event.getSource();
-        projectNotifications.editedProjectMetadata(project);
+        projectEventHandler.editedProjectMetadata(project);
     }
 }

@@ -52,7 +52,7 @@ public class ProjectService {
     private final @NonNull MetadataUpdateService metadataUpdateService;
     private final @NonNull BundleManifestRepository bundleManifestRepository;
 
-    private final @NonNull ProjectNotifications projectNotifications;
+    private final @NonNull ProjectEventHandler projectEventHandler;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -107,7 +107,7 @@ public class ProjectService {
         if (projectBag.submissionEnvelopes.isEmpty()) {
             projectBag.projects.forEach(_project -> {
                 projectRepository.delete(_project);
-                projectNotifications.deletedProject(_project);
+                projectEventHandler.deletedProject(_project);
             });
         } else {
             throw new NonEmptyProject();
