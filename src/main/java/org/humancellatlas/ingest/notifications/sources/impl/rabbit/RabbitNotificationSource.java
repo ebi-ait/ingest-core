@@ -18,44 +18,46 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class RabbitNotificationSource implements NotificationSource {
-  private final InmemoryNotificationSource inmemoryNotificationSource = new InmemoryNotificationSource();
-  private final RabbitMessagingTemplate rabbitMessagingTemplate;
-  private final AmqpConfig amqpConfig;
 
-  @RabbitListener(queues = Queues.NOTIFICATIONS_QUEUE)
-  private void listen(String notification) {
-    this.inmemoryNotificationSource.supply(Collections.singletonList(fromJsonString(notification)));
-  }
+    private final InmemoryNotificationSource inmemoryNotificationSource = new InmemoryNotificationSource();
+    private final RabbitMessagingTemplate rabbitMessagingTemplate;
+    private final AmqpConfig amqpConfig;
 
-  @Override
-  public Stream<Notification> stream() {
-    return this.inmemoryNotificationSource.stream();
-  }
-
-  @Override
-  public void supply(List<Notification> notifications) {
-    notifications.forEach(notification -> {
-      this.rabbitMessagingTemplate.convertAndSend(amqpConfig.getSendExchange(),
-                                                  amqpConfig.getSendRoutingKey(),
-                                                  jsonString(notification));
-    });
-  }
-
-  private static String jsonString(Notification notification) {
-    try {
-      return new ObjectMapper().registerModules(new JavaTimeModule())
-                               .writeValueAsString(notification);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    private static String jsonString(Notification notification) {
+        try {
+            return new ObjectMapper().registerModules(new JavaTimeModule())
+                                     .writeValueAsString(notification);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
-  }
 
-  private static Notification fromJsonString(String notification) {
-    try {
-      return new ObjectMapper().registerModules(new JavaTimeModule())
-                               .readValue(notification, Notification.class);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    private static Notification fromJsonString(String notification) {
+        try {
+            return new ObjectMapper().registerModules(new JavaTimeModule())
+                                     .readValue(notification, Notification.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
-  }
+
+    @RabbitListener(queues = Queues.NOTIFICATIONS_QUEUE)
+    private void listen(String notification) {
+        this.inmemoryNotificationSource
+            .supply(Collections.singletonList(fromJsonString(notification)));
+    }
+
+    @Override
+    public Stream<Notification> stream() {
+        return this.inmemoryNotificationSource.stream();
+    }
+
+    @Override
+    public void supply(List<Notification> notifications) {
+        notifications.forEach(notification -> {
+            this.rabbitMessagingTemplate.convertAndSend(amqpConfig.getSendExchange(),
+                                                        amqpConfig.getSendRoutingKey(),
+                                                        jsonString(notification));
+        });
+    }
 }

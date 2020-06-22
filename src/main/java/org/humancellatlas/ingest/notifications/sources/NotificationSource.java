@@ -5,7 +5,8 @@ import java.util.stream.Stream;
 import org.humancellatlas.ingest.notifications.model.Notification;
 
 public interface NotificationSource {
-  Stream<Notification> stream();
 
-  void supply(List<Notification> notifications);
+    Stream<Notification> stream();
+
+    void supply(List<Notification> notifications);
 }

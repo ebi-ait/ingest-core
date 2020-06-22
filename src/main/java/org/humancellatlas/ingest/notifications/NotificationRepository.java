@@ -9,18 +9,20 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 public interface NotificationRepository extends MongoRepository<Notification, String> {
-  @RestResource(exported = false)
-  <S extends Notification> S save(S notification);
-  @RestResource(exported = false)
-  void delete(Notification notification);
 
-  @RestResource(exported = false)
-  Stream<Notification> findByStateOrderByNotifyAtDesc(NotificationState state);
+    @RestResource(exported = false)
+    <S extends Notification> S save(S notification);
 
-  @RestResource(rel = "findByChecksumValue")
-  <S extends Notification> Optional<S> findByChecksum_Value(String checksumValue);
+    @RestResource(exported = false)
+    void delete(Notification notification);
 
-  @RestResource(exported = false)
-  <S extends Notification> Optional<S> findByChecksum(Checksum checksumValue);
+    @RestResource(exported = false)
+    Stream<Notification> findByStateOrderByNotifyAtDesc(NotificationState state);
+
+    @RestResource(rel = "findByChecksumValue")
+    <S extends Notification> Optional<S> findByChecksum_Value(String checksumValue);
+
+    @RestResource(exported = false)
+    <S extends Notification> Optional<S> findByChecksum(Checksum checksumValue);
 
 }

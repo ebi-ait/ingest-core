@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class AmqpConfig {
-  private final String sendExchange;
-  private final String sendRoutingKey;
+
+    private final String sendExchange;
+    private final String sendRoutingKey;
 }

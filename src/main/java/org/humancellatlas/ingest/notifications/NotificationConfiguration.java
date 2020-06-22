@@ -24,58 +24,60 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties({NotificationProperties.class, SmtpProperties.class, AmqpProperties.class})
 public class NotificationConfiguration {
 
-  @ConfigurationProperties(prefix = "notifications")
-  class NotificationProperties {
-    @ConfigurationProperties(prefix = "notifications.smtp")
-    @NoArgsConstructor
-    @Getter
-    @Setter
-    class SmtpProperties {
-      private String host = "localhost";
-      private int port = 572;
-      private String username = "provide username";
-      private String password = "provide password";
-
+    @Bean
+    public SMTPConfig smtpConfig(SmtpProperties smtpEnvVars) {
+        return SMTPConfig.builder()
+                         .host(smtpEnvVars.getHost())
+                         .port(smtpEnvVars.getPort())
+                         .username(smtpEnvVars.getUsername())
+                         .password(smtpEnvVars.getPassword())
+                         .build();
     }
 
-    @ConfigurationProperties(prefix = "notifications.amqp")
-    @NoArgsConstructor
-    @Getter
-    @Setter
-    class AmqpProperties {
-      private String sendExchange = "provide notifications send exchange";
-      private String sendRoutingKey = "provide notifications routing key";
+    @Bean
+    public AmqpConfig amqpConfig(AmqpProperties amqpEnvVars) {
+        return AmqpConfig.builder()
+                         .sendExchange(amqpEnvVars.getSendExchange())
+                         .sendRoutingKey(amqpEnvVars.getSendRoutingKey())
+                         .build();
     }
-  }
 
+    @Bean
+    public Collection<NotificationProcessor> notificationProcessors(SMTPConfig smtpConfig) {
+        EmailNotificationProcessor emailNotificationProcessor = new EmailNotificationProcessor(smtpConfig);
+        return Collections.singletonList(emailNotificationProcessor);
+    }
 
-  @Bean
-  public SMTPConfig smtpConfig(SmtpProperties smtpEnvVars) {
-    return SMTPConfig.builder()
-                     .host(smtpEnvVars.getHost())
-                     .port(smtpEnvVars.getPort())
-                     .username(smtpEnvVars.getUsername())
-                     .password(smtpEnvVars.getPassword())
-                     .build();
-  }
+    @Bean
+    public NotificationSource notificationSource(RabbitMessagingTemplate rabbitMessagingTemplate,
+                                                 AmqpConfig amqpConfig) {
+        return new RabbitNotificationSource(rabbitMessagingTemplate, amqpConfig);
+    }
 
-  @Bean
-  public AmqpConfig amqpConfig(AmqpProperties amqpEnvVars) {
-    return AmqpConfig.builder()
-                     .sendExchange(amqpEnvVars.getSendExchange())
-                     .sendRoutingKey(amqpEnvVars.getSendRoutingKey())
-                     .build();
-  }
+    @ConfigurationProperties(prefix = "notifications")
+    class NotificationProperties {
 
-  @Bean
-  public Collection<NotificationProcessor> notificationProcessors(SMTPConfig smtpConfig) {
-    EmailNotificationProcessor emailNotificationProcessor = new EmailNotificationProcessor(smtpConfig);
-    return Collections.singletonList(emailNotificationProcessor);
-  }
+        @ConfigurationProperties(prefix = "notifications.smtp")
+        @NoArgsConstructor
+        @Getter
+        @Setter
+        class SmtpProperties {
 
-  @Bean
-  public NotificationSource notificationSource(RabbitMessagingTemplate rabbitMessagingTemplate,
-                                               AmqpConfig amqpConfig) {
-    return new RabbitNotificationSource(rabbitMessagingTemplate, amqpConfig);
-  }
+            private String host = "localhost";
+            private int port = 572;
+            private String username = "provide username";
+            private String password = "provide password";
+
+        }
+
+        @ConfigurationProperties(prefix = "notifications.amqp")
+        @NoArgsConstructor
+        @Getter
+        @Setter
+        class AmqpProperties {
+
+            private String sendExchange = "provide notifications send exchange";
+            private String sendRoutingKey = "provide notifications routing key";
+        }
+    }
 }
