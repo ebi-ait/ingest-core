@@ -64,7 +64,7 @@ public class NotificationConfiguration {
         class SmtpProperties {
 
             private String host = "localhost";
-            private int port = 572;
+            private int port = 587;
             private String username = "provide username";
             private String password = "provide password";
 
