@@ -15,13 +15,4 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RepositoryRestController
 @ExposesResourceFor(Notification.class)
 @RequiredArgsConstructor
-public class NotificationController {
-  private final NotificationService notificationService;
-
-  @RequestMapping(path = "notifications", method = RequestMethod.POST)
-  ResponseEntity<?> createNotification(@RequestBody NotificationRequest notificationRequest,
-                                       PersistentEntityResourceAssembler assembler) {
-    Notification createdNotification = this.notificationService.createNotification(notificationRequest);
-    return ResponseEntity.ok(assembler.toFullResource(createdNotification));
-  }
-}
+public class NotificationController {}
