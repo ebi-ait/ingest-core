@@ -41,8 +41,7 @@ public class NotificationCoordinator {
         this.notificationSource
             .stream()
             .forEach(notification -> {
-                Notification processingNotification = this.notificationService
-                    .changeState(notification, NotificationState.PROCESSING);
+                Notification processingNotification = this.notificationService.changeState(notification, NotificationState.PROCESSING);
 
                 this.processNotification(processingNotification)
                     .filter(report -> !report.isSuccessful())

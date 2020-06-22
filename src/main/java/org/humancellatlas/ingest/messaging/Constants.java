@@ -41,7 +41,7 @@ public class Constants {
         public static final String UPLOAD_AREA_CREATE = "ingest.upload.area.create";
         public static final String UPLOAD_AREA_CLEANUP = "ingest.upload.area.cleanup";
 
-        public static final String ADD_NOTIFICATION = "ingest.notification.add";
+        public static final String NOTIFICATION_NEW = "ingest.notifications.new";
     }
 
 }
