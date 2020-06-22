@@ -3,8 +3,11 @@ package org.humancellatlas.ingest.notifications;
 import java.util.Collection;
 import java.util.Collections;
 import lombok.Getter;
-import org.humancellatlas.ingest.messaging.Constants.Exchanges;
-import org.humancellatlas.ingest.messaging.Constants.Routing;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.humancellatlas.ingest.notifications.NotificationConfiguration.NotificationProperties;
+import org.humancellatlas.ingest.notifications.NotificationConfiguration.NotificationProperties.AmqpProperties;
+import org.humancellatlas.ingest.notifications.NotificationConfiguration.NotificationProperties.SmtpProperties;
 import org.humancellatlas.ingest.notifications.processors.NotificationProcessor;
 import org.humancellatlas.ingest.notifications.processors.impl.email.EmailNotificationProcessor;
 import org.humancellatlas.ingest.notifications.processors.impl.email.SMTPConfig;
@@ -12,59 +15,52 @@ import org.humancellatlas.ingest.notifications.sources.NotificationSource;
 import org.humancellatlas.ingest.notifications.sources.impl.rabbit.AmqpConfig;
 import org.humancellatlas.ingest.notifications.sources.impl.rabbit.RabbitNotificationSource;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 @Configuration
+@EnableConfigurationProperties({NotificationProperties.class, SmtpProperties.class, AmqpProperties.class})
 public class NotificationConfiguration {
 
-  @Component
-  @Getter
-  class SmtpEnvVars {
-    private final String smtpHost;
-    private final int smtpPort;
-    private final String username;
-    private final String password;
+  @ConfigurationProperties(prefix = "notifications")
+  class NotificationProperties {
+    @ConfigurationProperties(prefix = "notifications.smtp")
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    class SmtpProperties {
+      private String host = "localhost";
+      private int port = 572;
+      private String username = "provide username";
+      private String password = "provide password";
 
-    @Autowired
-    public SmtpEnvVars(Environment environment) {
-      this.smtpHost = environment.getProperty("NOTIFICATIONS_SMTP_HOST", "localhost");
-      this.smtpPort = Integer.parseInt(environment.getProperty("NOTIFICATIONS_SMTP_PORT", "587"));
-      this.username = environment.getProperty("NOTIFICATIONS_SMTP_USERNAME", "admin");
-      this.password = environment.getProperty("NOTIFICATIONS_SMTP_PASSWORD", "password");
+    }
+
+    @ConfigurationProperties(prefix = "notifications.amqp")
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    class AmqpProperties {
+      private String sendExchange = "provide notifications send exchange";
+      private String sendRoutingKey = "provide notifications routing key";
     }
   }
 
-  @Component
-  @Getter
-  class AmqpEnvVars {
-    private final String sendExchange;
-    private final String sendRoutingKey;
-
-    @Autowired
-    public AmqpEnvVars(Environment environment) {
-      this.sendExchange = environment.getProperty("NOTIFICATIONS_AMQP_SEND_EXCHANGE",
-                                                  Exchanges.NOTIFICATIONS_EXCHANGE);
-      this.sendRoutingKey = environment.getProperty("NOTIFICATIONS_AMQP_SEND_ROUTING_KEY",
-                                                    Routing.ADD_NOTIFICATION);
-    }
-  }
 
   @Bean
-  public SMTPConfig smtpConfig(SmtpEnvVars smtpEnvVars) {
+  public SMTPConfig smtpConfig(SmtpProperties smtpEnvVars) {
     return SMTPConfig.builder()
-                     .host(smtpEnvVars.getSmtpHost())
-                     .port(smtpEnvVars.getSmtpPort())
+                     .host(smtpEnvVars.getHost())
+                     .port(smtpEnvVars.getPort())
                      .username(smtpEnvVars.getUsername())
                      .password(smtpEnvVars.getPassword())
                      .build();
   }
 
   @Bean
-  public AmqpConfig amqpConfig(AmqpEnvVars amqpEnvVars) {
+  public AmqpConfig amqpConfig(AmqpProperties amqpEnvVars) {
     return AmqpConfig.builder()
                      .sendExchange(amqpEnvVars.getSendExchange())
                      .sendRoutingKey(amqpEnvVars.getSendRoutingKey())
