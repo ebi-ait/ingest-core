@@ -78,7 +78,7 @@ public class NotificationServicesTest {
                                              .build()))
            .when(notificationRepository).findByChecksum(testChecksum);
 
-    Assertions.assertThat(notificationService.retrieveForChecksum(testChecksum).orElseThrow())
+    Assertions.assertThat(notificationService.retrieveForChecksum(testChecksum).orElseThrow().getChecksum())
               .isEqualTo(testChecksum);
   }
 
