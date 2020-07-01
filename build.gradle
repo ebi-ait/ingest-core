@@ -76,6 +76,7 @@ dependencies {
     implementation 'com.auth0:auth0-spring-security-api:1.2.5'
     implementation 'com.auth0:java-jwt:3.8.2'
     implementation 'com.auth0:jwks-rsa:0.8.3'
+    implementation 'javax.mail:mail:1.4.1'
 
     implementation 'org.jolokia:jolokia-core'
     implementation 'org.zalando:problem:0.23.0'

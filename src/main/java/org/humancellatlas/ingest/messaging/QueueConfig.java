@@ -3,6 +3,9 @@ package org.humancellatlas.ingest.messaging;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.humancellatlas.ingest.messaging.Constants.Exchanges;
+import org.humancellatlas.ingest.messaging.Constants.Queues;
+import org.humancellatlas.ingest.messaging.Constants.Routing;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
@@ -46,9 +49,14 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean TopicExchange stateTrackingExchange() { return new TopicExchange(Constants.Exchanges.STATE_TRACKING); }
 
+    @Bean Queue queueNotifications() { return new Queue(Queues.NOTIFICATIONS_QUEUE, true); }
+
+    @Bean TopicExchange notificationExchange() { return new TopicExchange(Exchanges.NOTIFICATIONS_EXCHANGE); }
+
     @Bean TopicExchange assayExchange() { return new TopicExchange(Constants.Exchanges.ASSAY_EXCHANGE); }
 
     @Bean TopicExchange uploadAreaExchange() { return new TopicExchange(Constants.Exchanges.UPLOAD_AREA_EXCHANGE); }
+
 
     /* bindings */
 
@@ -79,6 +87,11 @@ public class QueueConfig implements RabbitListenerConfigurer {
     @Bean Binding bindingUpdateQueue(Queue queueBundleUpdate, TopicExchange assayExchange) {
         return BindingBuilder.bind(queueBundleUpdate).to(assayExchange).with(Constants.Routing.UPDATE_SUBMITTED);
     }
+
+    @Bean Binding bindingNewNotificationQueue(Queue queueNotifications, TopicExchange notificationExchange) {
+        return BindingBuilder.bind(queueNotifications).to(notificationExchange).with(Routing.NOTIFICATION_NEW);
+    }
+
 
     /* rabbit config */
 

@@ -59,6 +59,9 @@ public class ProjectServiceTest {
     @MockBean
     private BundleManifestRepository bundleManifestRepository;
 
+    @MockBean
+    private ProjectEventHandler projectEventHandler;
+
     @BeforeEach
     void setUp() {
         applicationContext.getBeansWithAnnotation(MockBean.class).forEach(Mockito::reset);
