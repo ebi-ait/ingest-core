@@ -7,6 +7,7 @@ import org.humancellatlas.ingest.archiving.Error;
 import org.humancellatlas.ingest.archiving.submission.ArchiveSubmission;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.hateoas.Identifiable;
@@ -15,10 +16,15 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Getter
+@Setter
 @Document
 public class ArchiveEntity implements Identifiable<String> {
+    @DBRef(lazy = true)
+    ArchiveSubmission archiveSubmission;
+
     @Id
     @JsonIgnore
     private String id;
@@ -26,28 +32,24 @@ public class ArchiveEntity implements Identifiable<String> {
     @CreatedDate
     private Instant created;
 
-    @Setter
     private ArchiveEntityType type;
 
-    @Setter
+    @Indexed(unique = true)
+    private String alias;
+
+    @Indexed(unique = true)
     private String dspUuid;
 
-    @Setter
     private URI dspUrl;
 
-    @Setter
     private String accession;
 
-    @Setter
     private Object conversion;
 
-    @Setter
-    private List<String> metadataUuids;
-    
-    private @Setter
-    @DBRef(lazy = true)
-    ArchiveSubmission archiveSubmission;
+    private Set<String> metadataUuids;
 
-    private @Setter
-    List<Error> errors = new ArrayList<>();
+    private Set<String> accessionedMetadataUuids;
+
+    private List<Error> errors = new ArrayList<>();
+
 }

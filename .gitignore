@@ -30,3 +30,4 @@ nbdist/
 
 out
 bin/
+.vscode/

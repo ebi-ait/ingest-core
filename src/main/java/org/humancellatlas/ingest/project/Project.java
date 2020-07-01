@@ -52,6 +52,8 @@ public class Project extends MetadataDocument {
     @Setter
     private Object identifyingOrganisms;
 
+    private String primaryWrangler;
+
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Project(Object content) {

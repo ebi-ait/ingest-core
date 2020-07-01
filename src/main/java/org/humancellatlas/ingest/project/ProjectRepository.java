@@ -36,6 +36,11 @@ public interface ProjectRepository extends MongoRepository<Project, String> , Pr
     @RestResource(path = "findByUser", rel = "findByUser")
     Page<Project> findByUser(@Param(value = "user") String user, Pageable pageable);
 
+    @RestResource(rel = "findByUserAndPrimaryWrangler")
+    Page<Project> findByUserOrPrimaryWrangler(@Param(value = "user") String user, 
+                                                @Param(value = "primaryWrangler") String primaryWrangler, 
+                                                Pageable pageable);
+
     Page<Project> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
     @RestResource(exported = false)

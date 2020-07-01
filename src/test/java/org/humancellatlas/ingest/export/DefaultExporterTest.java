@@ -10,7 +10,6 @@ import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,7 +17,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -69,29 +67,23 @@ public class DefaultExporterTest {
         doReturn(assayIds).when(processService).findAssays(any(SubmissionEnvelope.class));
 
         //and:
-        Set<String> analysisIds = mockProcessIds(3);
-        doReturn(analysisIds).when(processService).findAnalyses(any(SubmissionEnvelope.class));
-
-        //and:
         Set<ExportData> receivedData = mockSendingThroughMessageRouter();
 
         //when:
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        exporter.exportBundles(submissionEnvelope);
+        exporter.exportManifests(submissionEnvelope);
 
         //then:
-        int expectedCount = 5;
+        int expectedCount = 2;
         assertThat(receivedData).hasSize(expectedCount);
         assertUniqueIndexes(receivedData);
         assertCorrectTotalCount(receivedData, expectedCount);
         assertCorrectSubmissionEnvelope(receivedData, submissionEnvelope);
-        assertAllProcessesExported(assayIds, analysisIds, receivedData);
+        assertAllProcessesExported(assayIds, receivedData);
 
         //and:
         verify(messageRouter, times(assayIds.size()))
-                .sendAssayForExport(any(ExportData.class));
-        verify(messageRouter, times(analysisIds.size()))
-                .sendAnalysisForExport(any(ExportData.class));
+                .sendManifestForExport(any(ExportData.class));
     }
 
     private Set<String> mockProcessIds(int max) {
@@ -106,8 +98,7 @@ public class DefaultExporterTest {
             exportData.add(invocation.getArgument(0));
             return null;
         };
-        doAnswer(addToSet).when(messageRouter).sendAssayForExport(any(ExportData.class));
-        doAnswer(addToSet).when(messageRouter).sendAnalysisForExport(any(ExportData.class));
+        doAnswer(addToSet).when(messageRouter).sendManifestForExport(any(ExportData.class));
         return exportData;
     }
 
@@ -115,7 +106,7 @@ public class DefaultExporterTest {
         List<Integer> indexes = receivedData.stream()
                 .map(ExportData::getIndex)
                 .collect(toList());
-        assertThat(indexes).containsOnlyOnce(0, 1, 2, 3, 4);
+        assertThat(indexes).containsOnlyOnce(0, 1);
     }
 
     private void assertCorrectTotalCount(Set<ExportData> receivedData, int expectedCount) {
@@ -129,7 +120,7 @@ public class DefaultExporterTest {
         receivedData.forEach(exportData -> assertThat(exportData.getSubmissionEnvelope()).isEqualTo(submissionEnvelope));
     }
 
-    private void assertAllProcessesExported(Set<String> assayIds, Set<String> analysisIds,
+    private void assertAllProcessesExported(Set<String> assayIds,
                                             Set<ExportData> exportData) {
 
         List<Process> sentProcesses = exportData.stream()
@@ -137,7 +128,6 @@ public class DefaultExporterTest {
                                                 .collect(toList());
 
         assertThat(sentProcesses.stream().map(Process::getId)).containsAll(assayIds);
-        assertThat(sentProcesses.stream().map(Process::getId)).containsAll(analysisIds);
     }
 
     @Configuration

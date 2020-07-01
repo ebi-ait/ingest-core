@@ -12,18 +12,18 @@ import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.patch.PatchRepository;
 import org.humancellatlas.ingest.process.ProcessRepository;
-import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
+import org.humancellatlas.ingest.state.SubmitAction;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -51,23 +51,45 @@ public class SubmissionEnvelopeService {
 
     @NonNull
     private final SubmissionManifestRepository submissionManifestRepository;
-    private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
+
+    @NonNull
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
     @NonNull
     private BundleManifestRepository bundleManifestRepository;
+
     @NonNull
     private ProjectRepository projectRepository;
+
     @NonNull
     private ProcessRepository processRepository;
+
     @NonNull
     private ProtocolRepository protocolRepository;
+
     @NonNull
     private FileRepository fileRepository;
+
     @NonNull
     private BiomaterialRepository biomaterialRepository;
+
     @NonNull
     private PatchRepository patchRepository;
+
     @NonNull
     private SubmissionErrorRepository submissionErrorRepository;
+
+    public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
+        if (submitActions.contains(SubmitAction.ARCHIVE) || submitActions.contains(SubmitAction.EXPORT)) {
+            envelope.setSubmitActions(new HashSet<>(submitActions));
+            submissionEnvelopeRepository.save(envelope);
+        } else {
+            throw new IllegalArgumentException((String.format(
+                    "Envelope with id %s is submitted without the required submit actions",
+                    envelope.getId(), envelope.getSubmissionState())));
+        }
+        handleEnvelopeStateUpdateRequest(envelope, SubmissionState.SUBMITTED);
+    }
 
     public void handleEnvelopeStateUpdateRequest(SubmissionEnvelope envelope,
                                                  SubmissionState state) {
@@ -80,15 +102,35 @@ public class SubmissionEnvelopeService {
         }
     }
 
-    public void handleSubmissionRequest(SubmissionEnvelope envelope) {
-        if (!envelope.getIsUpdate()) {
-            handleSubmitOriginalSubmission(envelope);
+    public void handleCommitSubmit(SubmissionEnvelope envelope) {
+        if (envelope.getSubmitActions().contains(SubmitAction.ARCHIVE)) {
+            archiveSubmission(envelope);
+        } else if (envelope.getSubmitActions().contains(SubmitAction.EXPORT)) {
+            exportSubmission(envelope);
         } else {
-            handleSubmitUpdateSubmission(envelope);
+            throw new RuntimeException((String.format(
+                    "Envelope with id %s is submitted without the required submit actions",
+                    envelope.getId(), envelope.getSubmissionState())));
         }
     }
 
-    private void handleSubmitOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
+    private void archiveSubmission(SubmissionEnvelope envelope) {
+        if (!envelope.getIsUpdate()) {
+            exporter.exportManifests(envelope);
+        } else {
+            // do nothing for now
+        }
+    }
+
+    public void exportSubmission(SubmissionEnvelope envelope) {
+        if (!envelope.getIsUpdate()) {
+            exportOriginalSubmission(envelope);
+        } else {
+            exportUpdateSubmission(envelope);
+        }
+    }
+
+    private void exportOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
         executorService.submit(() -> {
             try {
                 exporter.exportBundles(submissionEnvelope);
@@ -98,13 +140,31 @@ public class SubmissionEnvelopeService {
         });
     }
 
-    private void handleSubmitUpdateSubmission(SubmissionEnvelope submissionEnvelope) {
+    private void exportUpdateSubmission(SubmissionEnvelope submissionEnvelope) {
         executorService.submit(() -> {
             try {
                 metadataUpdateService.applyUpdates(submissionEnvelope);
                 exporter.updateBundles(submissionEnvelope);
             } catch (Exception e) {
                 log.error("Uncaught Exception Applying Updates or Exporting Bundles", e);
+            }
+        });
+    }
+
+    public void handleCommitArchived(SubmissionEnvelope envelope) {
+        if (envelope.getSubmitActions().contains(SubmitAction.EXPORT)) {
+            exportSubmission(envelope);
+        }
+    }
+
+    public void handleCommitExported(SubmissionEnvelope submissionEnvelope) {
+        executorService.submit(() -> {
+            try {
+                if (submissionEnvelope.getSubmitActions().contains(SubmitAction.CLEANUP)) {
+                    handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.CLEANUP);
+                }
+            } catch (Exception e) {
+                log.error("Uncaught Exception exporting Bundles", e);
             }
         });
     }
@@ -143,7 +203,6 @@ public class SubmissionEnvelopeService {
 
 
     /**
-     *
      * Ensures that any links to metadata in the submission are removed.
      *
      * @param submissionEnvelope
@@ -152,69 +211,69 @@ public class SubmissionEnvelopeService {
         long startTime = System.currentTimeMillis();
 
         processRepository.findBySubmissionEnvelope(submissionEnvelope)
-                         .forEach(p -> {
-                             fileRepository.findByInputToProcessesContains(p)
-                                           .forEach(file -> {
-                                               file.getInputToProcesses().remove(p);
-                                               fileRepository.save(file);
-                                           });
+                .forEach(p -> {
+                    fileRepository.findByInputToProcessesContains(p)
+                            .forEach(file -> {
+                                file.getInputToProcesses().remove(p);
+                                fileRepository.save(file);
+                            });
 
-                             fileRepository.findByDerivedByProcessesContains(p)
-                                           .forEach(file -> {
-                                               file.getDerivedByProcesses().remove(p);
-                                               fileRepository.save(file);
-                                           });
+                    fileRepository.findByDerivedByProcessesContains(p)
+                            .forEach(file -> {
+                                file.getDerivedByProcesses().remove(p);
+                                fileRepository.save(file);
+                            });
 
-                             biomaterialRepository.findByInputToProcessesContains(p)
-                                                  .forEach(biomaterial -> {
-                                                      biomaterial.getInputToProcesses().remove(p);
-                                                      biomaterialRepository.save(biomaterial);
-                                                  });
+                    biomaterialRepository.findByInputToProcessesContains(p)
+                            .forEach(biomaterial -> {
+                                biomaterial.getInputToProcesses().remove(p);
+                                biomaterialRepository.save(biomaterial);
+                            });
 
-                             biomaterialRepository.findByDerivedByProcessesContains(p)
-                                                  .forEach(biomaterial -> {
-                                                      biomaterial.getDerivedByProcesses().remove(p);
-                                                      biomaterialRepository.save(biomaterial);
-                                                  });
-                         });
+                    biomaterialRepository.findByDerivedByProcessesContains(p)
+                            .forEach(biomaterial -> {
+                                biomaterial.getDerivedByProcesses().remove(p);
+                                biomaterialRepository.save(biomaterial);
+                            });
+                });
 
         protocolRepository.findBySubmissionEnvelope(submissionEnvelope)
-                          .forEach(protocol -> processRepository.findByProtocolsContains(protocol)
-                                                                .forEach(process -> {
-                                                                    process.getProtocols().remove(protocol);
-                                                                    processRepository.save(process);
-                                                                }));
+                .forEach(protocol -> processRepository.findByProtocolsContains(protocol)
+                        .forEach(process -> {
+                            process.getProtocols().remove(protocol);
+                            processRepository.save(process);
+                        }));
 
         bundleManifestRepository.findByEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString())
-                                .forEach(bundleManifest -> processRepository.findByInputBundleManifestsContains(bundleManifest)
-                                                                            .forEach(process -> {
-                                                                                process.getInputBundleManifests().remove(bundleManifest);
-                                                                                processRepository.save(process);
-                                                                            }));
+                .forEach(bundleManifest -> processRepository.findByInputBundleManifestsContains(bundleManifest)
+                        .forEach(process -> {
+                            process.getInputBundleManifests().remove(bundleManifest);
+                            processRepository.save(process);
+                        }));
 
         fileRepository.findBySubmissionEnvelope(submissionEnvelope)
-                      .forEach(file -> projectRepository.findBySupplementaryFilesContains(file)
-                                                        .forEach(project -> {
-                                                            project.getSupplementaryFiles().remove(file);
-                                                            projectRepository.save(project);
-                                                        }));
+                .forEach(file -> projectRepository.findBySupplementaryFilesContains(file)
+                        .forEach(project -> {
+                            project.getSupplementaryFiles().remove(file);
+                            projectRepository.save(project);
+                        }));
 
         // project cleanup
 
         projectRepository.findBySubmissionEnvelope(submissionEnvelope)
-                         .forEach(project -> {
-                             project.setSubmissionEnvelope(null); // TODO: address this; we should implement project containers that aren't deleted as part of deleteSubmission()
-                             projectRepository.save(project);
-                         });
+                .forEach(project -> {
+                    project.setSubmissionEnvelope(null); // TODO: address this; we should implement project containers that aren't deleted as part of deleteSubmission()
+                    projectRepository.save(project);
+                });
 
         projectRepository.findBySubmissionEnvelopesContains(submissionEnvelope)
-                         .forEach(project -> {
-                             project.getSubmissionEnvelopes().remove(submissionEnvelope);
-                             projectRepository.save(project);
-                         });
+                .forEach(project -> {
+                    project.getSubmissionEnvelopes().remove(submissionEnvelope);
+                    projectRepository.save(project);
+                });
 
         long endTime = System.currentTimeMillis();
-        float duration = ((float)(endTime - startTime)) / 1000;
+        float duration = ((float) (endTime - startTime)) / 1000;
         String durationStr = new DecimalFormat("#,###.##").format(duration);
         log.info("cleanup link time: {} s", durationStr);
     }

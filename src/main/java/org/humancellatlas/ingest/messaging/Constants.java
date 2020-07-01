@@ -34,9 +34,10 @@ public class Constants {
         public static final String ENVELOPE_STATE_UPDATE = "ingest.state-tracking.envelope.state.update";
         public static final String ENVELOPE_CREATE = "ingest.state-tracking.envelope.create";
         public static final String METADATA_UPDATE = "ingest.state-tracking.document.update";
-        public static final String ASSAY_SUBMITTED = "ingest.bundle.assay.submitted";
+        public static final String ASSAY_SUBMITTED = "ingest.assay.manifest.submitted";
+        public static final String EXPERIMENT_SUBMITTED = "ingest.assay.experiment.submitted";
         public static final String ANALYSIS_SUBMITTED = "ingest.bundle.analysis.submitted";
-        public static final String UPDATE_SUBMITTED = "ingest.bundle.update.submitted";
+        public static final String UPDATE_SUBMITTED = "ingest.update.experiment.submitted";
 
         public static final String UPLOAD_AREA_CREATE = "ingest.upload.area.create";
         public static final String UPLOAD_AREA_CLEANUP = "ingest.upload.area.cleanup";

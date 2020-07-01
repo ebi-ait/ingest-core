@@ -14,6 +14,9 @@ public enum SubmissionState {
     SUBMITTED,
     PROCESSING,
     ARCHIVING,
+    ARCHIVED,
+    EXPORTING,
+    EXPORTED,
     CLEANUP,
     COMPLETE
 }
