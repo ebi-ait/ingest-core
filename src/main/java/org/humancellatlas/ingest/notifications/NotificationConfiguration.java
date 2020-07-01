@@ -28,7 +28,7 @@ public class NotificationConfiguration {
     public SMTPConfig smtpConfig(SmtpProperties smtpEnvVars) {
         return SMTPConfig.builder()
                          .host(smtpEnvVars.getHost())
-                         .port(smtpEnvVars.getPort())
+                         .port(Integer.parseInt(smtpEnvVars.getPort()))
                          .username(smtpEnvVars.getUsername())
                          .password(smtpEnvVars.getPassword())
                          .build();
@@ -64,7 +64,7 @@ public class NotificationConfiguration {
         class SmtpProperties {
 
             private String host = "localhost";
-            private int port = 587;
+            private String port = "587";
             private String username = "provide username";
             private String password = "provide password";
 
