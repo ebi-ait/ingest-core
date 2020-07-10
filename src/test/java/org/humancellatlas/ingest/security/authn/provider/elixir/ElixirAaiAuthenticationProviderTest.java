@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.security.authn.provider.elixir;
 
-import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
@@ -15,7 +14,6 @@ import org.humancellatlas.ingest.security.AccountRepository;
 import org.humancellatlas.ingest.security.JwtGenerator;
 import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
 import org.humancellatlas.ingest.security.common.jwk.JwtVerifierResolver;
-import org.humancellatlas.ingest.security.exception.InvalidUserEmail;
 import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,31 +161,10 @@ public class ElixirAaiAuthenticationProviderTest {
         }
 
         @Test
-        @DisplayName("invalid user email")
-        public void testForInvalidUserEmail() throws JsonProcessingException {
-            //given:
-            String invalidEmail = "email@embl.ac.uk";
-            UserInfo userInfo = new UserInfo("sub", "name", "pref", "giv", "fam", invalidEmail);
-            mockBackEnd.enqueue(new MockResponse()
-                    .setBody(objectMapper.writeValueAsString(userInfo))
-                    .addHeader("Content-Type", "application/json"));
-
-            //and:
-            String jwt = new JwtGenerator("elixir").generate();
-            doReturn(JWT.decode(jwt)).when(jwtVerifier).verify(anyString());
-            Authentication jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
-
-            //expect:
-            assertThatThrownBy(() -> {
-                authenticationProvider.authenticate(jwtAuthentication);
-            }).isInstanceOf(InvalidUserEmail.class).hasMessageContaining(invalidEmail);
-        }
-
-        @Test
         @DisplayName("valid user email")
         public void testForValidUserEmail() throws JsonProcessingException {
             //given:
-            UserInfo userInfo = new UserInfo("subject", "name", "pref", "giv", "fam", "email@ebi.ac.uk");
+            UserInfo userInfo = new UserInfo("subject", "name", "pref", "giv", "fam", "email@embl.ac.uk");
             mockBackEnd.enqueue(new MockResponse()
                     .setBody(objectMapper.writeValueAsString(userInfo))
                     .addHeader("Content-Type", "application/json"));

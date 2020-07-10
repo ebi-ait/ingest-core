@@ -10,7 +10,6 @@ import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
 import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
 import org.humancellatlas.ingest.security.common.jwk.DelegatingJwtAuthentication;
 import org.humancellatlas.ingest.security.common.jwk.JwtVerifierResolver;
-import org.humancellatlas.ingest.security.exception.InvalidUserEmail;
 import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
 import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.slf4j.Logger;
@@ -59,7 +58,6 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
 
             token = verifiedAuth.getToken();
             UserInfo userInfo = retrieveUserInfo(token);
-            validateEmail(userInfo);
 
             Account account = accountRepository.findByProviderReference(userInfo.getSubjectId());
             OpenIdAuthentication openIdAuth = new OpenIdAuthentication(account);
@@ -82,12 +80,6 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
     private void verifyIssuer(String issuer) {
         if (!issuer.contains("elixir")) {
             throw new UnlistedJwtIssuer(String.format("Not an Elxir AAI issued token: %s", issuer), issuer);
-        }
-    }
-
-    private void validateEmail(UserInfo userInfo) {
-        if (userInfo.getEmail().indexOf("@ebi.ac.uk") < 0) {
-            throw new InvalidUserEmail(userInfo.getEmail());
         }
     }
 
