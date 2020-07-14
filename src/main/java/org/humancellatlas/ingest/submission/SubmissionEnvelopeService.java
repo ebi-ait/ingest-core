@@ -184,10 +184,12 @@ public class SubmissionEnvelopeService {
     }
 
     public void deleteSubmission(SubmissionEnvelope submissionEnvelope, boolean forceDelete) {
-        if (!(submissionEnvelope.isOpen() || forceDelete))
+        if (!(submissionEnvelope.isOpen() || forceDelete)) {
             throw new UnsupportedOperationException("Cannot delete submission if it is already submitted!");
-
-        this.cleanupLinksToSubmissionMetadata(submissionEnvelope);
+        }
+        if (!forceDelete) {
+            this.cleanupLinksToSubmissionMetadata(submissionEnvelope);
+        }
 
         biomaterialRepository.deleteBySubmissionEnvelope(submissionEnvelope);
         processRepository.deleteBySubmissionEnvelope(submissionEnvelope);
