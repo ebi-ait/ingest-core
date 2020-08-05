@@ -34,7 +34,6 @@ public class ArchiveEntity implements Identifiable<String> {
 
     private ArchiveEntityType type;
 
-    @Indexed(unique = true)
     private String alias;
 
     @Indexed(unique = true)
