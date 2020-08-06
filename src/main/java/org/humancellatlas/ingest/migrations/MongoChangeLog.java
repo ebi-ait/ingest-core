@@ -84,4 +84,12 @@ public class MongoChangeLog {
 
         db.getCollection("project").updateMany(filter, update);
     }
+
+    @ChangeSet(order = "2020-08-06", id = "Drop Alias Index on archiveEntity", author = "alexie.staffer@ebi.ac.uk")
+    public void dropAliasIndexOnArchiveEntity(MongoDatabase db) {
+        db.getCollection("archiveEntity").dropIndex("alias");
+        // If the collection does not exist this code will still succeed,
+        // Which is good because we may change the collection name soon.
+    }
+
 }
