@@ -48,4 +48,11 @@ public class ArchiveSubmissionController {
         Page<ArchiveEntity> archiveEntities = archiveEntityRepository.findByArchiveSubmission(archiveSubmission, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(archiveEntities, resourceAssembler));
     }
+
+    @RequestMapping(path = "archiveSubmissions/{sub_id}", method = RequestMethod.DELETE)
+    ResponseEntity deleteSubmission(@PathVariable("sub_id") ArchiveSubmission archiveSubmission) {
+        archiveEntityRepository.deleteByArchiveSubmission(archiveSubmission);
+        archiveSubmissionRepository.delete(archiveSubmission);
+        return ResponseEntity.accepted().build();
+    }
 }
