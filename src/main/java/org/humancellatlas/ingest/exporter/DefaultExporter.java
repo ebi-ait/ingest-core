@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.export;
+package org.humancellatlas.ingest.exporter;
 
 import org.apache.commons.collections4.ListUtils;
 import org.humancellatlas.ingest.bundle.BundleManifest;
@@ -66,7 +66,7 @@ public class DefaultExporter implements Exporter {
                 .stream()
                 .map(processIdBatch -> processService.getProcesses(processIdBatch))
                 .flatMap(Function.identity())
-                .map(process -> new ExportData(counter.next(), totalCount, process, envelope))
+                .map(process -> new ExporterData(counter.next(), totalCount, process, envelope))
                 .forEach(messageRouter::sendManifestForExport);
     }
 
@@ -87,7 +87,7 @@ public class DefaultExporter implements Exporter {
                 .stream()
                 .map(processIdBatch -> processService.getProcesses(processIdBatch))
                 .flatMap(Function.identity())
-                .map(process -> new ExportData(counter.next(), totalCount, process, envelope))
+                .map(process -> new ExporterData(counter.next(), totalCount, process, envelope))
                 .forEach(messageRouter::sendExperimentForExport);
     }
 

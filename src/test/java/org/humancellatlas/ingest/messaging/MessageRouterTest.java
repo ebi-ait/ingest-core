@@ -4,7 +4,7 @@ import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.config.ConfigurationService;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
-import org.humancellatlas.ingest.export.ExportData;
+import org.humancellatlas.ingest.exporter.ExporterData;
 import org.humancellatlas.ingest.messaging.model.AbstractEntityMessage;
 import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.process.Process;
@@ -120,7 +120,7 @@ public class MessageRouterTest {
         verify(messageSender, never()).queueDocumentStateUpdateMessage(any(URI.class), any(AbstractEntityMessage.class), anyLong());
     }
 
-    private void doTestSendForExport(String routingKey, Consumer<ExportData> testMethod) {
+    private void doTestSendForExport(String routingKey, Consumer<ExporterData> testMethod) {
         //given:
         String processId = "78bbd9";
         Process process = new Process(processId);
@@ -134,14 +134,14 @@ public class MessageRouterTest {
         submissionEnvelope.setUuid(envelopeUuid);
 
         //and:
-        ExportData exportData = new ExportData(2, 4, process, submissionEnvelope);
+        ExporterData exporterData = new ExporterData(2, 4, process, submissionEnvelope);
 
         //and:
         String callbackLink = "/processes/78bbd9";
         doReturn(callbackLink).when(linkGenerator).createCallback(any(Class.class), anyString());
 
         //when:
-        testMethod.accept(exportData);
+        testMethod.accept(exporterData);
 
         //then:
         ArgumentCaptor<ExportMessage> messageCaptor = ArgumentCaptor.forClass(ExportMessage.class);

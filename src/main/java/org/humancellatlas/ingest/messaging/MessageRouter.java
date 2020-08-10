@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 import org.humancellatlas.ingest.config.ConfigurationService;
 import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
-import org.humancellatlas.ingest.export.ExportData;
+import org.humancellatlas.ingest.exporter.ExporterData;
 import org.humancellatlas.ingest.messaging.model.BundleUpdateMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
@@ -113,21 +113,21 @@ public class MessageRouter {
         return true;
     }
 
-    public void sendManifestForExport(ExportData exportData) {
+    public void sendManifestForExport(ExporterData exporterData) {
         messageSender.queueNewExportMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED,
-                exportData.toAssaySubmittedMessage(linkGenerator),
+                exporterData.toAssaySubmittedMessage(linkGenerator),
                 System.currentTimeMillis());
     }
 
-    public void sendExperimentForExport(ExportData exportData) {
+    public void sendExperimentForExport(ExporterData exporterData) {
         messageSender.queueNewExportMessage(ASSAY_EXCHANGE, EXPERIMENT_SUBMITTED,
-                exportData.toAssaySubmittedMessage(linkGenerator),
+                exporterData.toAssaySubmittedMessage(linkGenerator),
                 System.currentTimeMillis());
     }
 
-    public void sendAnalysisForExport(ExportData exportData) {
+    public void sendAnalysisForExport(ExporterData exporterData) {
         messageSender.queueNewExportMessage(ASSAY_EXCHANGE, ANALYSIS_SUBMITTED,
-                exportData.toAssaySubmittedMessage(linkGenerator),
+                exporterData.toAssaySubmittedMessage(linkGenerator),
                 System.currentTimeMillis());
     }
 

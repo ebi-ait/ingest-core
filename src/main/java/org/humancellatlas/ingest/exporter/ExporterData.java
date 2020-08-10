@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.export;
+package org.humancellatlas.ingest.exporter;
 
 import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
 import org.humancellatlas.ingest.core.Uuid;
@@ -7,9 +7,7 @@ import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 
-import java.util.UUID;
-
-public class ExportData {
+public class ExporterData {
 
     private final int index;
     private final int totalCount;
@@ -18,7 +16,7 @@ public class ExportData {
 
     private final SubmissionEnvelope submissionEnvelope;
 
-    public ExportData(int index, int totalCount, Process process, SubmissionEnvelope
+    public ExporterData(int index, int totalCount, Process process, SubmissionEnvelope
             submissionEnvelope) {
         this.index = index;
         this.totalCount = totalCount;
