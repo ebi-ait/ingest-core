@@ -95,7 +95,7 @@ public class DefaultExporter implements Exporter {
         JSONObject context = new JSONObject();
         context.put("totalAssayCount", totalCount);
 
-        ExportDestination exportDestination = new ExportDestination(DCP, "v1", null);
+        ExportDestination exportDestination = new ExportDestination(DCP, "v2", null);
 
         ExportJobRequest exportJobRequest = new ExportJobRequest(exportDestination, context);
 
