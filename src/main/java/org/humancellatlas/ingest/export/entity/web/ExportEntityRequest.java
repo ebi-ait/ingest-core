@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.export.ExportError;
 import org.humancellatlas.ingest.export.ExportState;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class ExportEntityRequest {
@@ -13,7 +14,7 @@ public class ExportEntityRequest {
     ExportState status;
 
     @NonNull
-    Object context;
+    Map<String, Object> context;
 
     @NonNull
     List<ExportError> errors;

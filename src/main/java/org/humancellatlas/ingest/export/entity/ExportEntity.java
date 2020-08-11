@@ -15,8 +15,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.hateoas.Identifiable;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -39,7 +39,7 @@ public class ExportEntity implements Identifiable<String> {
     private Instant createdDate;
 
     @NonNull
-    private Object context;
+    private Map<String, Object> context;
 
     @NonNull
     private List<ExportError> errors;

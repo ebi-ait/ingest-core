@@ -19,6 +19,7 @@ import org.springframework.hateoas.Identifiable;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -47,7 +48,7 @@ public class ExportJob implements Identifiable<String> {
     @LastModifiedDate
     private Instant updatedDate;
 
-    private Object context;
+    private Map<String, Object> context;
 
     private List<ExportError> errors;
 

@@ -4,11 +4,13 @@ import lombok.Data;
 import lombok.NonNull;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
 
+import java.util.Map;
+
 @Data
 public class ExportJobRequest {
     @NonNull
     ExportDestination destination;
 
     @NonNull
-    Object context;
+    Map<String, Object> context;
 }
