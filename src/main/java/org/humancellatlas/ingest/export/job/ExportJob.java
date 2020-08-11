@@ -3,7 +3,7 @@ package org.humancellatlas.ingest.export.job;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Builder;
-import lombok.RequiredArgsConstructor;
+import lombok.NonNull;
 import org.humancellatlas.ingest.export.ExportError;
 import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
@@ -19,7 +19,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.hateoas.Identifiable;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -53,9 +52,4 @@ public class ExportJob implements Identifiable<String> {
 
     private List<ExportError> errors;
 
-    public static ExportJobBuilder buildNew() {
-        return ExportJob.builder()
-            .status(ExportState.Exporting)
-            .errors(new ArrayList<ExportError>());
-    }
 }

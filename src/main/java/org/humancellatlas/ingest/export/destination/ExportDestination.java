@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.export.destination;
 
 import lombok.Data;
+import lombok.NonNull;
 
 @Data
 public class ExportDestination {

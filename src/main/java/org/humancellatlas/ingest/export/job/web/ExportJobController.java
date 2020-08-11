@@ -8,7 +8,6 @@ import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestinationName;
 import org.humancellatlas.ingest.export.job.ExportJob;
-import org.humancellatlas.ingest.export.job.ExportJobRepository;
 import org.humancellatlas.ingest.export.job.ExportJobService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
@@ -33,16 +32,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 @ExposesResourceFor(ExportJob.class)
 public class ExportJobController {
     private final ExportJobService exportJobService;
-    private final ExportJobRepository exportJobRepository;
 
     private final PagedResourcesAssembler pagedResourcesAssembler;
 
 
 
     @PostMapping(path = "/submissionEnvelopes/{sub_id}" + Links.EXPORT_JOB_URL)
-    ResponseEntity<PersistentEntityResource> createExportJob(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                                        @RequestBody ExportJobRequest exportJobRequest,
-                                                                        final PersistentEntityResourceAssembler resourceAssembler) {
+    ResponseEntity<PersistentEntityResource> createExportJob(
+        SubmissionEnvelope submissionEnvelope,
+        @RequestBody ExportJobRequest exportJobRequest,
+        final PersistentEntityResourceAssembler resourceAssembler) {
         ExportJob newExportJob = exportJobService.createExportJob(submissionEnvelope, exportJobRequest);
         PersistentEntityResource newExportJobResource = resourceAssembler.toFullResource(newExportJob);
         return ResponseEntity.created(URI.create(newExportJobResource.getId().getHref())).body(newExportJobResource);
