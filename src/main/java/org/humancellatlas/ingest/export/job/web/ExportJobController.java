@@ -25,10 +25,7 @@ import java.util.UUID;
 @ExposesResourceFor(ExportJob.class)
 public class ExportJobController {
     private final ExportJobService exportJobService;
-
     private final PagedResourcesAssembler pagedResourcesAssembler;
-
-
 
     @PostMapping(path = "/submissionEnvelopes/{id}" + Links.EXPORT_JOB_URL)
     ResponseEntity<PersistentEntityResource> createExportJob(@PathVariable("id") SubmissionEnvelope submission,

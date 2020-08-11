@@ -3,6 +3,8 @@ package org.humancellatlas.ingest.export.entity;
 import lombok.AllArgsConstructor;
 import org.humancellatlas.ingest.export.entity.web.ExportEntityRequest;
 import org.humancellatlas.ingest.export.job.ExportJob;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,5 +20,9 @@ public class ExportEntityService {
             .errors(exportEntityRequest.getErrors())
             .build();
         return exportEntityRepository.insert(newExportEntity);
+    }
+
+    public Page getEntitiesForJob(ExportJob exportJob, Pageable pageable) {
+        return exportEntityRepository.findByExportJob(exportJob,pageable);
     }
 }
