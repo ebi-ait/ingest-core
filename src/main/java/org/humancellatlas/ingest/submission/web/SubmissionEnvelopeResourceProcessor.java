@@ -16,8 +16,6 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static org.humancellatlas.ingest.state.SubmissionState.SUBMITTED;
-
 /**
  * Javadocs go here!
  *
@@ -82,6 +80,12 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         return entityLinks.linkForSingleResource(submissionEnvelope)
                           .slash(Links.SUBMISSION_MANIFEST_URL)
                           .withRel(Links.SUBMISSION_MANIFEST_REL);
+    }
+
+    private Link getExportJobsLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+            .slash(Links.EXPORT_JOBS_URL)
+            .withRel(Links.EXPORT_JOBS_REL);
     }
 
     private Link getSubmissionErrorsLink(SubmissionEnvelope submissionEnvelope) {
@@ -242,7 +246,7 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         }
     }
 
-
+    @Override
     public Resource<SubmissionEnvelope> process(Resource<SubmissionEnvelope> resource) {
         SubmissionEnvelope submissionEnvelope = resource.getContent();
 
@@ -256,6 +260,7 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         resource.add(getAnalysesLink(submissionEnvelope));
         resource.add(getBundleManifestsLink(submissionEnvelope));
         resource.add(getSubmissionManifestsLink(submissionEnvelope));
+        resource.add(getExportJobsLink(submissionEnvelope));
         resource.add(getSubmissionErrorsLink(submissionEnvelope));
         resource.add(getSubmissionDocumentStateLink(submissionEnvelope));
 
