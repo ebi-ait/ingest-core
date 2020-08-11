@@ -3,7 +3,6 @@ package org.humancellatlas.ingest.export.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NonNull;
 import org.humancellatlas.ingest.export.ExportError;
 import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.job.ExportJob;
@@ -26,22 +25,18 @@ public class ExportEntity implements Identifiable<String> {
     @JsonIgnore
     private String id;
 
-    @NonNull
     @Indexed
     @DBRef(lazy = true)
     private ExportJob exportJob;
 
-    @NonNull
     @Indexed
     private ExportState status;
 
     @CreatedDate
     private Instant createdDate;
 
-    @NonNull
     private Map<String, Object> context;
 
-    @NonNull
     private List<ExportError> errors;
 
 }
