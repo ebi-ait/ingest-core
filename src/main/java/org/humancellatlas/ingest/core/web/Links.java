@@ -128,5 +128,8 @@ public class Links {
     // Links to ExportJobs
     public static final String EXPORT_JOB_URL = "/exportJobs";
     public static final String EXPORT_JOB_REL = "exportJobs";
+    public static final String EXPORT_JOB_FIND_URL = "/find";
+    public static final String EXPORT_JOB_FIND_REL = "find";
+
 
 }
