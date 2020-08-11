@@ -4,6 +4,8 @@ import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.config.ConfigurationService;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
+import org.humancellatlas.ingest.export.ExportState;
+import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.exporter.ExporterData;
 import org.humancellatlas.ingest.messaging.model.AbstractEntityMessage;
 import org.humancellatlas.ingest.messaging.model.ExportMessage;
@@ -22,11 +24,10 @@ import org.springframework.data.rest.core.mapping.ResourceMappings;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.function.Consumer;
+import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
-import static org.humancellatlas.ingest.messaging.Constants.Routing.ANALYSIS_SUBMITTED;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.EXPERIMENT_SUBMITTED;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.any;
@@ -58,16 +59,11 @@ public class MessageRouterTest {
     private ConfigurationService configurationService;
 
     @Test
-    public void testSendAssayForExport() {
+    public void testSendManifestForExport() {
         //expect:
-        doTestSendForExport(EXPERIMENT_SUBMITTED, messageRouter::sendExperimentForExport);
+        doTestSendForExport(EXPERIMENT_SUBMITTED);
     }
 
-    @Test
-    public void testSendAnalysisForExport() {
-        //expect:
-        doTestSendForExport(ANALYSIS_SUBMITTED, messageRouter::sendAnalysisForExport);
-    }
 
     @Test
     public void testRouteStateTrackingUpdateMessageFor() {
@@ -120,7 +116,7 @@ public class MessageRouterTest {
         verify(messageSender, never()).queueDocumentStateUpdateMessage(any(URI.class), any(AbstractEntityMessage.class), anyLong());
     }
 
-    private void doTestSendForExport(String routingKey, Consumer<ExporterData> testMethod) {
+    private void doTestSendForExport(String routingKey) {
         //given:
         String processId = "78bbd9";
         Process process = new Process(processId);
@@ -141,7 +137,15 @@ public class MessageRouterTest {
         doReturn(callbackLink).when(linkGenerator).createCallback(any(Class.class), anyString());
 
         //when:
-        testMethod.accept(exporterData);
+        messageRouter.sendExperimentForExport(exporterData, ExportJob.builder()
+                .status(ExportState.Exporting)
+                .errors(new ArrayList<>())
+                .context(new Object())
+                .submission(submissionEnvelope)
+                .destination(null)
+                .id("id")
+                .context(null)
+                .build());
 
         //then:
         ArgumentCaptor<ExportMessage> messageCaptor = ArgumentCaptor.forClass(ExportMessage.class);

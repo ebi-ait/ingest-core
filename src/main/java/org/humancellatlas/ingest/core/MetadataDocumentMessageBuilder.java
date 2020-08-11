@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.core;
 
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
+import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.messaging.model.BundleUpdateMessage;
 import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.messaging.model.MessageProtocol;
@@ -124,9 +125,15 @@ public class MetadataDocumentMessageBuilder {
                 metadataDocId, metadataDocUuid, validationState, callbackLink, envelopeId);
     }
 
-    public ExportMessage buildAssaySubmittedMessage() {
+    public ExportMessage buildExperimentSubmittedMessage(ExportJob exportJob) {
         String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
-        return new ExportMessage(UUID.randomUUID(), Instant.now().toString(), messageProtocol, metadataDocId, metadataDocUuid, callbackLink,
+        return new ExportMessage(UUID.randomUUID(), Instant.now().toString(), messageProtocol, exportJob.getId(), metadataDocId, metadataDocUuid, callbackLink,
+                documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
+    }
+
+    public ExportMessage buildManifestSubmittedMessage() {
+        String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
+        return new ExportMessage(UUID.randomUUID(), Instant.now().toString(), messageProtocol, null, metadataDocId, metadataDocUuid, callbackLink,
                 documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
 

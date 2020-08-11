@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.exporter;
 import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
+import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.messaging.model.ExportMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -40,7 +41,7 @@ public class ExporterData {
         return submissionEnvelope;
     }
 
-    public ExportMessage toAssaySubmittedMessage(LinkGenerator linkGenerator) {
+    public ExportMessage toExperimentSubmittedMessage(LinkGenerator linkGenerator, ExportJob exportJob) {
         Uuid submissionUuid = submissionEnvelope.getUuid();
         MetadataDocumentMessageBuilder builder = MetadataDocumentMessageBuilder.using(linkGenerator)
                 .messageFor(process)
@@ -52,7 +53,22 @@ public class ExporterData {
             builder.withEnvelopeUuid(submissionUuid.getUuid().toString());
         }
 
-        return builder.buildAssaySubmittedMessage();
+        return builder.buildExperimentSubmittedMessage(exportJob);
+    }
+
+    public ExportMessage toManifestSubmittedMessage(LinkGenerator linkGenerator) {
+        Uuid submissionUuid = submissionEnvelope.getUuid();
+        MetadataDocumentMessageBuilder builder = MetadataDocumentMessageBuilder.using(linkGenerator)
+                .messageFor(process)
+                .withEnvelopeId(submissionEnvelope.getId())
+                .withAssayIndex(index)
+                .withTotalAssays(totalCount);
+
+        if(submissionUuid != null && submissionUuid.getUuid() != null){
+            builder.withEnvelopeUuid(submissionUuid.getUuid().toString());
+        }
+
+        return builder.buildManifestSubmittedMessage();
     }
 
 }

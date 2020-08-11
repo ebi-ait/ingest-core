@@ -12,6 +12,7 @@ public class ExportMessage implements AbstractEntityMessage {
     private final String versionTimestamp;
 
     private final MessageProtocol messageProtocol;
+    private final String exportJobId;
     private final String documentId;
     private final String documentUuid;
     private final String callbackLink;

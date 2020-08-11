@@ -4,6 +4,7 @@ import lombok.NoArgsConstructor;
 import org.humancellatlas.ingest.config.ConfigurationService;
 import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
+import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.exporter.ExporterData;
 import org.humancellatlas.ingest.messaging.model.BundleUpdateMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
@@ -115,19 +116,13 @@ public class MessageRouter {
 
     public void sendManifestForExport(ExporterData exporterData) {
         messageSender.queueNewExportMessage(ASSAY_EXCHANGE, ASSAY_SUBMITTED,
-                exporterData.toAssaySubmittedMessage(linkGenerator),
+                exporterData.toManifestSubmittedMessage(linkGenerator),
                 System.currentTimeMillis());
     }
 
-    public void sendExperimentForExport(ExporterData exporterData) {
+    public void sendExperimentForExport(ExporterData exporterData, ExportJob exportJob) {
         messageSender.queueNewExportMessage(ASSAY_EXCHANGE, EXPERIMENT_SUBMITTED,
-                exporterData.toAssaySubmittedMessage(linkGenerator),
-                System.currentTimeMillis());
-    }
-
-    public void sendAnalysisForExport(ExporterData exporterData) {
-        messageSender.queueNewExportMessage(ASSAY_EXCHANGE, ANALYSIS_SUBMITTED,
-                exporterData.toAssaySubmittedMessage(linkGenerator),
+                exporterData.toExperimentSubmittedMessage(linkGenerator, exportJob),
                 System.currentTimeMillis());
     }
 
@@ -137,7 +132,6 @@ public class MessageRouter {
                 bundleUpdateMessage,
                 System.currentTimeMillis());
     }
-
 
     /* messages to the upload/staging area manager */
 
