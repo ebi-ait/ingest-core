@@ -4,6 +4,6 @@ public enum ExportDestinationName {
     DCP,
     DSP,
     ENA,
-    BioSamples,
-    BioStudies
+    BIO_SAMPLES,
+    BIO_STUDIES
 }

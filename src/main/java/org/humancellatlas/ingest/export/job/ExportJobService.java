@@ -11,8 +11,6 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.humancellatlas.ingest.export.job.web.ExportJobRequest;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -25,7 +23,7 @@ public class ExportJobService {
 
     public ExportJob createExportJob(SubmissionEnvelope submissionEnvelope, ExportJobRequest exportJobRequest) {
         ExportJob newExportJob = ExportJob.builder()
-            .status(ExportState.Exporting)
+            .status(ExportState.EXPORTING)
             .errors(new ArrayList<>())
             .context(new Object())
             .submission(submissionEnvelope)
