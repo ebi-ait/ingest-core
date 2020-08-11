@@ -5,6 +5,7 @@ import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestinationName;
 import org.humancellatlas.ingest.export.job.ExportJob;
+import org.humancellatlas.ingest.export.job.ExportJobRepository;
 import org.humancellatlas.ingest.export.job.ExportJobService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -25,7 +26,18 @@ import java.util.UUID;
 @ExposesResourceFor(ExportJob.class)
 public class ExportJobController {
     private final ExportJobService exportJobService;
+    private final ExportJobRepository exportJobRepository;
     private final PagedResourcesAssembler pagedResourcesAssembler;
+
+    @GetMapping(path = "/submissionEnvelopes/{id}" + Links.EXPORT_JOBS_URL)
+    ResponseEntity<?> getExportJobsForSubmission(@PathVariable("id") SubmissionEnvelope submission,
+                                                 Pageable pageable,
+                                                 PersistentEntityResourceAssembler resourceAssembler) {
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(
+            exportJobRepository.findBySubmission(submission, pageable),
+            resourceAssembler
+        ));
+    }
 
     @PostMapping(path = "/submissionEnvelopes/{id}" + Links.EXPORT_JOBS_URL)
     ResponseEntity<PersistentEntityResource> createExportJob(@PathVariable("id") SubmissionEnvelope submission,
