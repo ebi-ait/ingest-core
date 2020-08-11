@@ -31,7 +31,7 @@ public class ExportEntityController {
     private final ExportEntityRepository exportEntityRepository;
     private final PagedResourcesAssembler pagedAssembler;
 
-    @GetMapping(path = Links.EXPORT_JOB_URL + "/{id}/entities")
+    @GetMapping(path = Links.EXPORT_JOBS_URL + "/{id}/entities")
     ResponseEntity<?> getExportJobEntities(@PathVariable("id") ExportJob exportJob,
                                            @RequestParam(name = "status", required = false) ExportState exportState,
                                            Pageable pageable,
@@ -45,7 +45,7 @@ public class ExportEntityController {
         return ResponseEntity.ok(pagedAssembler.toResource(entityPage ,assembler));
     }
 
-    @PostMapping(path = Links.EXPORT_JOB_URL + "/{id}/entities")
+    @PostMapping(path = Links.EXPORT_JOBS_URL + "/{id}/entities")
     ResponseEntity<PersistentEntityResource> createExportEntity(@PathVariable("id") ExportJob exportJob,
                                                                 @RequestBody ExportEntityRequest exportEntityRequest,
                                                                 PersistentEntityResourceAssembler resourceAssembler){

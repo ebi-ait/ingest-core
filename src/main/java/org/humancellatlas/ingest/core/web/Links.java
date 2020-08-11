@@ -126,8 +126,8 @@ public class Links {
     public static final String COMPLETE_STAGING_JOB_REL = "completeStagingJob";
 
     // Links to ExportJobs
-    public static final String EXPORT_JOB_URL = "/exportJobs";
-    public static final String EXPORT_JOB_REL = "exportJobs";
+    public static final String EXPORT_JOBS_URL = "/exportJobs";
+    public static final String EXPORT_JOBS_REL = "exportJobs";
     public static final String EXPORT_JOB_FIND_URL = "/find";
     public static final String EXPORT_JOB_FIND_REL = "find";
 
