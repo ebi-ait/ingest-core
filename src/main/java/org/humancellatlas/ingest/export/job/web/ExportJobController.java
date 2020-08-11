@@ -30,7 +30,7 @@ public class ExportJobController {
     @PostMapping(path = "/submissionEnvelopes/{id}" + Links.EXPORT_JOB_URL)
     ResponseEntity<PersistentEntityResource> createExportJob(@PathVariable("id") SubmissionEnvelope submission,
                                                             @RequestBody ExportJobRequest exportJobRequest,
-                                                            final PersistentEntityResourceAssembler resourceAssembler) {
+                                                            PersistentEntityResourceAssembler resourceAssembler) {
         ExportJob newExportJob = exportJobService.createExportJob(submission, exportJobRequest);
         PersistentEntityResource newExportJobResource = resourceAssembler.toFullResource(newExportJob);
         return ResponseEntity.created(URI.create(newExportJobResource.getId().getHref())).body(newExportJobResource);
@@ -42,7 +42,7 @@ public class ExportJobController {
                                     @RequestParam("destination") ExportDestinationName exportDestinationName,
                                     @RequestParam("version") String destinationVersion,
                                     Pageable pageable,
-                                    final PersistentEntityResourceAssembler resourceAssembler) {
+                                    PersistentEntityResourceAssembler resourceAssembler) {
         String version = destinationVersion.isEmpty() ? null : destinationVersion;
         Page<ExportJob> searchResults = this.exportJobService.find(submissionUuid, exportState, exportDestinationName, version, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(searchResults, resourceAssembler));
