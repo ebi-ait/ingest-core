@@ -1,7 +1,9 @@
 package org.humancellatlas.ingest.export.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NonNull;
 import org.humancellatlas.ingest.export.ExportError;
 import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.job.ExportJob;
@@ -13,27 +15,33 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.hateoas.Identifiable;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Builder
 @Document
 public class ExportEntity implements Identifiable<String> {
     @Id
     @JsonIgnore
-    private final String id;
+    private String id;
 
+    @NonNull
     @Indexed
     @DBRef(lazy = true)
-    private final ExportJob exportJob;
+    private ExportJob exportJob;
 
+    @NonNull
     @Indexed
-    private final ExportState status;
+    private ExportState status;
 
     @CreatedDate
-    private final Instant createdDate;
+    private Instant createdDate;
 
-    private final Object context;
+    @NonNull
+    private Object context;
 
-    private final List<ExportError> errors;
+    @NonNull
+    private List<ExportError> errors;
 
 }
