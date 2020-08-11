@@ -56,9 +56,4 @@ public class ExportJob implements Identifiable<String> {
 
     private List<ExportError> errors;
 
-    public static ExportJobBuilder buildNew() {
-        return ExportJob.builder()
-            .status(ExportState.Exporting)
-            .errors(new ArrayList<ExportError>());
-    }
 }
