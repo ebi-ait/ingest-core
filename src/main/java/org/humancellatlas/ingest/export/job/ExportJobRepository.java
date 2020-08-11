@@ -9,8 +9,5 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 @CrossOrigin
 public interface ExportJobRepository extends MongoRepository<ExportJob, String> {
-    @RestResource(exported = false)
-    <T extends ExportJob> T findBySubmissionAndStatusAndDestinationNameAndDestinationVersion(
-        SubmissionEnvelope submissionEnvelope, ExportState exportState,
-        ExportDestinationName destinationName, String destinationVersion);
+
 }
