@@ -2,6 +2,8 @@ package org.humancellatlas.ingest.migrations;
 
 import com.github.mongobee.changeset.ChangeLog;
 import com.github.mongobee.changeset.ChangeSet;
+import com.mongodb.client.ListIndexesIterable;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
@@ -85,11 +87,15 @@ public class MongoChangeLog {
         db.getCollection("project").updateMany(filter, update);
     }
 
-    @ChangeSet(order = "2020-08-06", id = "Drop Alias Index on archiveEntity", author = "alexie.staffer@ebi.ac.uk")
+    @ChangeSet(order = "2020-08-11", id = "Drop Alias Index on archiveEntity", author = "karoly@ebi.ac.uk")
     public void dropAliasIndexOnArchiveEntity(MongoDatabase db) {
-        db.getCollection("archiveEntity").dropIndex("alias");
-        // If the collection does not exist this code will still succeed,
-        // Which is good because we may change the collection name soon.
+        final String indexNameToDrop = "alias";
+        final MongoCollection<Document> archiveEntity = db.getCollection("archiveEntity");
+        for (final Document document : archiveEntity.listIndexes()) {
+            if (document.getString("name").equals(indexNameToDrop)) {
+                archiveEntity.dropIndex(indexNameToDrop);
+                break;
+            }
+        }
     }
-
 }
