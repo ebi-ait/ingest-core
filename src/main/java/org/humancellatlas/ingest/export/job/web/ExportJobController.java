@@ -33,6 +33,9 @@ public class ExportJobController {
     ResponseEntity<?> getExportJobsForSubmission(@PathVariable("id") SubmissionEnvelope submission,
                                                  Pageable pageable,
                                                  PersistentEntityResourceAssembler resourceAssembler) {
+        if (submission == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(
             exportJobRepository.findBySubmission(submission, pageable),
             resourceAssembler
@@ -43,6 +46,9 @@ public class ExportJobController {
     ResponseEntity<PersistentEntityResource> createExportJob(@PathVariable("id") SubmissionEnvelope submission,
                                                             @RequestBody ExportJobRequest exportJobRequest,
                                                             PersistentEntityResourceAssembler resourceAssembler) {
+        if (submission == null) {
+            return ResponseEntity.notFound().build();
+        }
         ExportJob newExportJob = exportJobService.createExportJob(submission, exportJobRequest);
         PersistentEntityResource newExportJobResource = resourceAssembler.toFullResource(newExportJob);
         return ResponseEntity.created(URI.create(newExportJobResource.getId().getHref())).body(newExportJobResource);
