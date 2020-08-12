@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.export;
+package org.humancellatlas.ingest.exporter;
 
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 
