@@ -2,7 +2,9 @@ package org.humancellatlas.ingest.export.job.web;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.export.job.ExportJob;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
@@ -16,14 +18,26 @@ public class ExportJobResourceProcessor implements ResourceProcessor<Resource<Ex
 
     private Link getEntitiesLink(ExportJob exportJob) {
         return entityLinks.linkForSingleResource(exportJob)
-            .slash("/entities")
-            .withRel("entities");
+            .slash(Links.EXPORT_JOB_ENTITIES_URL)
+            .withRel(Links.EXPORT_JOB_ENTITIES_REL);
+    }
+
+    private Link getEntitiesStatusLink(ExportJob exportJob) {
+        return entityLinks.linkForSingleResource(exportJob)
+            .slash(Links.EXPORT_JOB_ENTITIES_URL + "?status={status}")
+            .withRel(Links.EXPORT_JOB_ENTITIES_BY_STATUS_REL);
+    }
+
+    private Link getSubmissionLink(SubmissionEnvelope submission) {
+        return entityLinks.linkForSingleResource(submission).withRel("submission");
     }
 
     @Override
     public Resource<ExportJob> process(Resource<ExportJob> resource) {
         ExportJob exportJob = resource.getContent();
         resource.add(getEntitiesLink(exportJob));
+        resource.add(getEntitiesStatusLink(exportJob));
+        resource.add(getSubmissionLink(exportJob.getSubmission()));
         return resource;
     }
 }

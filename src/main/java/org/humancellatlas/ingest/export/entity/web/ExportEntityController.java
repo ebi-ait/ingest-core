@@ -31,11 +31,11 @@ public class ExportEntityController {
     private final ExportEntityRepository exportEntityRepository;
     private final PagedResourcesAssembler pagedAssembler;
 
-    @GetMapping(path = Links.EXPORT_JOBS_URL + "/{id}/entities")
-    ResponseEntity<?> getExportJobEntities(@PathVariable("id") ExportJob exportJob,
-                                           @RequestParam(name = "status", required = false) ExportState exportState,
-                                           Pageable pageable,
-                                           PersistentEntityResourceAssembler assembler) {
+    @GetMapping(path = Links.EXPORT_JOBS_URL + "/{id}" + Links.EXPORT_JOB_ENTITIES_URL)
+    public ResponseEntity<?> getExportJobEntities(@PathVariable("id") ExportJob exportJob,
+                                                  @RequestParam(name = "status", required = false) ExportState exportState,
+                                                  Pageable pageable,
+                                                  PersistentEntityResourceAssembler assembler) {
         if (exportJob == null) {
             return ResponseEntity.notFound().build();
         }
@@ -48,7 +48,18 @@ public class ExportEntityController {
         return ResponseEntity.ok(pagedAssembler.toResource(entityPage ,assembler));
     }
 
-    @PostMapping(path = Links.EXPORT_JOBS_URL + "/{id}/entities")
+    @GetMapping(path = Links.EXPORT_JOBS_URL + "/{job_id}" + Links.EXPORT_JOB_ENTITIES_URL + "/{entity_id}")
+    ResponseEntity<?> getExportJobEntity(@PathVariable("job_id") ExportJob exportJob,
+                                        @PathVariable("entity_id") ExportEntity exportEntity,
+                                         PersistentEntityResourceAssembler assembler) {
+        if (exportJob == null || exportEntity == null) {
+            return ResponseEntity.notFound().build();
+        }
+        PersistentEntityResource newExportEntityResource = assembler.toFullResource(exportEntity);
+        return ResponseEntity.ok(newExportEntityResource);
+    }
+
+    @PostMapping(path = Links.EXPORT_JOBS_URL + "/{id}" + Links.EXPORT_JOB_ENTITIES_URL)
     ResponseEntity<PersistentEntityResource> createExportEntity(@PathVariable("id") ExportJob exportJob,
                                                                 @RequestBody ExportEntityRequest exportEntityRequest,
                                                                 PersistentEntityResourceAssembler resourceAssembler){

@@ -128,6 +128,11 @@ public class Links {
     // Links to ExportJobs
     public static final String EXPORT_JOBS_URL = "/exportJobs";
     public static final String EXPORT_JOBS_REL = "exportJobs";
+
+    public static final String EXPORT_JOB_ENTITIES_URL = "/entities";
+    public static final String EXPORT_JOB_ENTITIES_REL = "exportEntities";
+    public static final String EXPORT_JOB_ENTITIES_BY_STATUS_REL = "exportEntitiesByStatus";
+
     public static final String EXPORT_JOB_FIND_URL = "/find";
     public static final String EXPORT_JOB_FIND_REL = "find";
 

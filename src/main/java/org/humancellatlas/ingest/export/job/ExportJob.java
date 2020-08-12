@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.hateoas.Identifiable;
 
 import java.time.Instant;
@@ -38,6 +39,8 @@ public class ExportJob implements Identifiable<String> {
 
     @Indexed
     @DBRef(lazy = true)
+    @RestResource(exported = false)
+    @JsonIgnore
     private final SubmissionEnvelope submission;
 
     private final ExportDestination destination;
