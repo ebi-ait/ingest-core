@@ -36,6 +36,9 @@ public class ExportEntityController {
                                            @RequestParam(name = "status", required = false) ExportState exportState,
                                            Pageable pageable,
                                            PersistentEntityResourceAssembler assembler) {
+        if (exportJob == null) {
+            return ResponseEntity.notFound().build();
+        }
         Page<ExportEntity> entityPage;
         if (exportState == null) {
             entityPage = exportEntityRepository.findByExportJob(exportJob, pageable);
@@ -49,6 +52,9 @@ public class ExportEntityController {
     ResponseEntity<PersistentEntityResource> createExportEntity(@PathVariable("id") ExportJob exportJob,
                                                                 @RequestBody ExportEntityRequest exportEntityRequest,
                                                                 PersistentEntityResourceAssembler resourceAssembler){
+        if (exportJob == null) {
+            return ResponseEntity.notFound().build();
+        }
         ExportEntity newExportEntity = exportEntityService.createExportEntity(exportJob, exportEntityRequest);
         PersistentEntityResource newExportEntityResource = resourceAssembler.toFullResource(newExportEntity);
         return ResponseEntity.created(URI.create(newExportEntityResource.getId().getHref())).body(newExportEntityResource);
