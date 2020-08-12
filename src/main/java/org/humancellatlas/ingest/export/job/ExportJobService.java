@@ -25,7 +25,6 @@ public class ExportJobService {
         ExportJob newExportJob = ExportJob.builder()
             .status(ExportState.EXPORTING)
             .errors(new ArrayList<>())
-            .context(new Object())
             .submission(submissionEnvelope)
             .destination(exportJobRequest.getDestination())
             .context(exportJobRequest.getContext())
