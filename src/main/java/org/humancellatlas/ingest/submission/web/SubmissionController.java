@@ -97,6 +97,14 @@ public class SubmissionController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(projects, resourceAssembler));
     }
 
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/relatedProjects", method = RequestMethod.GET)
+    ResponseEntity<?> getRelatedProjects(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                  Pageable pageable,
+                                  final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Project> projects = getProjectRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(projects, resourceAssembler));
+    }
+
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols", method = RequestMethod.GET)
     ResponseEntity<?> getProtocols(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                    Pageable pageable,
