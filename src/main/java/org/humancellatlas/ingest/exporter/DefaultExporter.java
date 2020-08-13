@@ -10,10 +10,15 @@ import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
+import org.humancellatlas.ingest.export.destination.ExportDestination;
+import org.humancellatlas.ingest.export.job.ExportJob;
+import org.humancellatlas.ingest.export.job.ExportJobService;
+import org.humancellatlas.ingest.export.job.web.ExportJobRequest;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.messaging.model.BundleUpdateMessage;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +26,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.function.Function;
+
+import static org.humancellatlas.ingest.export.destination.ExportDestinationName.DCP;
 
 @Component
 public class DefaultExporter implements Exporter {
@@ -32,6 +39,8 @@ public class DefaultExporter implements Exporter {
     private MetadataCrudService metadataCrudService;
     @Autowired
     private BundleManifestService bundleManifestService;
+    @Autowired
+    private ExportJobService exportJobService;
     @Autowired
     private BundleManifestRepository bundleManifestRepository;
     @Autowired
@@ -83,12 +92,21 @@ public class DefaultExporter implements Exporter {
 
         int partitionSize = 500;
 
+        JSONObject context = new JSONObject();
+        context.put("totalAssayCount", totalCount);
+
+        ExportDestination exportDestination = new ExportDestination(DCP, "v2", null);
+
+        ExportJobRequest exportJobRequest = new ExportJobRequest(exportDestination, context);
+
+        ExportJob exportJob = exportJobService.createExportJob(envelope, exportJobRequest);
+
         partitionProcessIds(assayingProcessIds, partitionSize)
                 .stream()
                 .map(processIdBatch -> processService.getProcesses(processIdBatch))
                 .flatMap(Function.identity())
                 .map(process -> new ExporterData(counter.next(), totalCount, process, envelope))
-                .forEach(messageRouter::sendExperimentForExport);
+                .forEach(exportData -> messageRouter.sendExperimentForExport(exportData, exportJob));
     }
 
     @Override
