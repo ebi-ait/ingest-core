@@ -41,7 +41,7 @@ public class MetadataCrudService {
         }
     }
 
-    public  <T extends MetadataDocument> T save(T metadataDocument) {
+    public <T extends MetadataDocument> T save(T metadataDocument) {
         MetadataCrudStrategy crudStrategy = crudStrategyForMetadataType(metadataDocument.getType());
         return (T) crudStrategy.saveMetadataDocument(metadataDocument);
     }

@@ -72,14 +72,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/submissionEnvelopes").authenticated()
-                .antMatchers(HttpMethod.POST, "/submissionEnvelopes/*/projects").authenticated()
-                .antMatchers(HttpMethod.POST, "/projects**").authenticated()
+                .antMatchers(POST, "/**").authenticated()
                 .antMatchers(GET, "/projects").hasAuthority(WRANGLER.name())
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
                 .antMatchers(GET, "/auth/account").authenticated()
                 .requestMatchers(this::isRequestForSecuredResourceFromProxy).authenticated()
-                .antMatchers(GET, "/**").permitAll();
+                .antMatchers(GET, "/**").hasAuthority(WRANGLER.name())
+                .antMatchers(PUT, "/**").hasAuthority(WRANGLER.name())
+                .antMatchers(PATCH, "/**").hasAuthority(WRANGLER.name())
+                .antMatchers(DELETE, "/**").hasAuthority(WRANGLER.name());
     }
 
     private Boolean isRequestForSecuredResourceFromProxy(HttpServletRequest request) {
