@@ -19,6 +19,8 @@ import org.humancellatlas.ingest.state.SubmitAction;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
@@ -187,7 +189,15 @@ public class SubmissionEnvelopeService {
         if (!(submissionEnvelope.isOpen() || forceDelete))
             throw new UnsupportedOperationException("Cannot delete submission if it is already submitted!");
 
-        this.cleanupLinksToSubmissionMetadata(submissionEnvelope);
+        RetryTemplate retry = RetryTemplate.builder()
+                .maxAttempts(5)
+                .fixedBackoff(75)
+                .retryOn(OptimisticLockingFailureException.class)
+                .build();
+        retry.execute(context -> {
+            cleanupLinksToSubmissionMetadata(submissionEnvelope);
+            return null;
+        });
 
         biomaterialRepository.deleteBySubmissionEnvelope(submissionEnvelope);
         processRepository.deleteBySubmissionEnvelope(submissionEnvelope);
@@ -197,7 +207,6 @@ public class SubmissionEnvelopeService {
         patchRepository.deleteBySubmissionEnvelope(submissionEnvelope);
         submissionManifestRepository.deleteBySubmissionEnvelope(submissionEnvelope);
         submissionErrorRepository.deleteBySubmissionEnvelope(submissionEnvelope);
-
         submissionEnvelopeRepository.delete(submissionEnvelope);
     }
 

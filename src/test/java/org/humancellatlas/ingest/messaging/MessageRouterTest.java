@@ -25,6 +25,7 @@ import org.springframework.data.rest.core.mapping.ResourceMappings;
 import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
@@ -138,9 +139,9 @@ public class MessageRouterTest {
 
         //when:
         messageRouter.sendExperimentForExport(exporterData, ExportJob.builder()
-                .status(ExportState.Exporting)
+                .status(ExportState.EXPORTING)
                 .errors(new ArrayList<>())
-                .context(new Object())
+                .context(new HashMap<>())
                 .submission(submissionEnvelope)
                 .destination(null)
                 .id("id")
