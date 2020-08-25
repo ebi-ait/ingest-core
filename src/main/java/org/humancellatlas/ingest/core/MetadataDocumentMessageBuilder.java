@@ -57,20 +57,6 @@ public class MetadataDocumentMessageBuilder {
         return builder;
     }
 
-    public MetadataDocumentMessageBuilder messageFor(BundleManifest bundleManifest) {
-        MetadataDocumentMessageBuilder builder = withDocumentType(bundleManifest.getClass())
-                .withId(bundleManifest.getId())
-                .withUuid(bundleManifest.getBundleUuid().toString());
-
-        return builder;
-    }
-
-    public MetadataDocumentMessageBuilder withMessageProtocol(MessageProtocol messageProtocol) {
-        this.messageProtocol = messageProtocol;
-
-        return this;
-    }
-
     private <T extends Identifiable> MetadataDocumentMessageBuilder withDocumentType(
             Class<T> documentClass) {
         this.documentType = documentClass;
@@ -127,7 +113,7 @@ public class MetadataDocumentMessageBuilder {
 
     public ExportMessage buildExperimentSubmittedMessage(ExportJob exportJob) {
         String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
-        return new ExportMessage(UUID.randomUUID(), Instant.now().toString(), messageProtocol, exportJob.getId(), metadataDocId, metadataDocUuid, callbackLink,
+        return new ExportMessage(UUID.fromString(metadataDocUuid), Instant.now().toString(), messageProtocol, exportJob.getId(), metadataDocId, metadataDocUuid, callbackLink,
                 documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
 
