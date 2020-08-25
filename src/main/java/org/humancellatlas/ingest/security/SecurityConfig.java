@@ -36,8 +36,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     static {
         List<AntPathRequestMatcher> antPathMatchers = new ArrayList<>();
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/user/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/**"));
         antPathMatchers.addAll(defineAntPathMatchers(PATCH, "/**"));
         antPathMatchers.addAll(defineAntPathMatchers(PUT, "/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(DELETE, "/**"));
         antPathMatchers.addAll(defineAntPathMatchers(POST, "/messaging/**", "/files**", "/biomaterials**", "/protocols**", "/processes**",
                 "/files**", "/bundleManifests**"));
         SECURED_ANT_PATHS = Collections.unmodifiableList(antPathMatchers);
@@ -75,9 +77,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(POST, "/**").authenticated()
                 .antMatchers(GET, "/projects").hasAuthority(WRANGLER.name())
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
-                .antMatchers(GET, "/auth/account").authenticated()
                 .requestMatchers(this::isRequestForSecuredResourceFromProxy).authenticated()
-                .antMatchers(GET, "/**").hasAuthority(WRANGLER.name())
+                .antMatchers(GET, "/**").authenticated()
                 .antMatchers(PUT, "/**").hasAuthority(WRANGLER.name())
                 .antMatchers(PATCH, "/**").hasAuthority(WRANGLER.name())
                 .antMatchers(DELETE, "/**").hasAuthority(WRANGLER.name());
