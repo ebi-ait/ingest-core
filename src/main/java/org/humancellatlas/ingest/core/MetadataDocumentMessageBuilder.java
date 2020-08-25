@@ -28,6 +28,7 @@ public class MetadataDocumentMessageBuilder {
     private String metadataDocUuid;
     private String envelopeId;
     private String envelopeUuid;
+    private Instant metadataDocVersion;
     private ValidationState validationState;
     private int assayIndex;
     private int totalAssays;
@@ -53,6 +54,7 @@ public class MetadataDocumentMessageBuilder {
         if (metadataDocumentUuid != null && metadataDocumentUuid.getUuid() != null) {
             builder = builder.withUuid(metadataDocument.getUuid().getUuid().toString());
         }
+        builder = builder.withVersion(metadataDocument.getDcpVersion());
 
         return builder;
     }
@@ -71,6 +73,12 @@ public class MetadataDocumentMessageBuilder {
 
     private MetadataDocumentMessageBuilder withUuid(String metadataDocUuid) {
         this.metadataDocUuid = metadataDocUuid;
+
+        return this;
+    }
+
+    private MetadataDocumentMessageBuilder withVersion(Instant metadataDocVersion) {
+        this.metadataDocVersion = metadataDocVersion;
 
         return this;
     }
@@ -113,7 +121,7 @@ public class MetadataDocumentMessageBuilder {
 
     public ExportMessage buildExperimentSubmittedMessage(ExportJob exportJob) {
         String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
-        return new ExportMessage(UUID.fromString(metadataDocUuid), Instant.now().toString(), messageProtocol, exportJob.getId(), metadataDocId, metadataDocUuid, callbackLink,
+        return new ExportMessage(UUID.fromString(metadataDocUuid), metadataDocVersion.toString(), messageProtocol, exportJob.getId(), metadataDocId, metadataDocUuid, callbackLink,
                 documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
 
