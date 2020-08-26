@@ -28,6 +28,7 @@ public class MetadataDocumentMessageBuilder {
     private String metadataDocUuid;
     private String envelopeId;
     private String envelopeUuid;
+    private Instant metadataDocVersion;
     private ValidationState validationState;
     private int assayIndex;
     private int totalAssays;
@@ -53,22 +54,9 @@ public class MetadataDocumentMessageBuilder {
         if (metadataDocumentUuid != null && metadataDocumentUuid.getUuid() != null) {
             builder = builder.withUuid(metadataDocument.getUuid().getUuid().toString());
         }
+        builder = builder.withVersion(metadataDocument.getDcpVersion());
 
         return builder;
-    }
-
-    public MetadataDocumentMessageBuilder messageFor(BundleManifest bundleManifest) {
-        MetadataDocumentMessageBuilder builder = withDocumentType(bundleManifest.getClass())
-                .withId(bundleManifest.getId())
-                .withUuid(bundleManifest.getBundleUuid().toString());
-
-        return builder;
-    }
-
-    public MetadataDocumentMessageBuilder withMessageProtocol(MessageProtocol messageProtocol) {
-        this.messageProtocol = messageProtocol;
-
-        return this;
     }
 
     private <T extends Identifiable> MetadataDocumentMessageBuilder withDocumentType(
@@ -85,6 +73,12 @@ public class MetadataDocumentMessageBuilder {
 
     private MetadataDocumentMessageBuilder withUuid(String metadataDocUuid) {
         this.metadataDocUuid = metadataDocUuid;
+
+        return this;
+    }
+
+    private MetadataDocumentMessageBuilder withVersion(Instant metadataDocVersion) {
+        this.metadataDocVersion = metadataDocVersion;
 
         return this;
     }
@@ -127,7 +121,7 @@ public class MetadataDocumentMessageBuilder {
 
     public ExportMessage buildExperimentSubmittedMessage(ExportJob exportJob) {
         String callbackLink = linkGenerator.createCallback(documentType, metadataDocId);
-        return new ExportMessage(UUID.randomUUID(), Instant.now().toString(), messageProtocol, exportJob.getId(), metadataDocId, metadataDocUuid, callbackLink,
+        return new ExportMessage(UUID.fromString(metadataDocUuid), metadataDocVersion.toString(), messageProtocol, exportJob.getId(), metadataDocId, metadataDocUuid, callbackLink,
                 documentType.getSimpleName(), envelopeId, envelopeUuid, assayIndex, totalAssays);
     }
 

@@ -123,6 +123,8 @@ public class MessageRouterTest {
         Process process = new Process(processId);
         Uuid processUuid = Uuid.newUuid();
         process.setUuid(processUuid);
+        Instant version = Instant.now();
+        process.setDcpVersion(version);
 
         //and:
         String envelopeId = "87bcf3";
