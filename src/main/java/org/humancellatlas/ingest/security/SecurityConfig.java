@@ -35,9 +35,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final List<AntPathRequestMatcher> SECURED_ANT_PATHS;
     static {
         List<AntPathRequestMatcher> antPathMatchers = new ArrayList<>();
-        antPathMatchers.addAll(defineAntPathMatchers(GET, "/user/**"));
         antPathMatchers.addAll(defineAntPathMatchers(POST, "/**"));
         SECURED_ANT_PATHS = Collections.unmodifiableList(antPathMatchers);
+    }
+
+    private static final List<AntPathRequestMatcher> SECURED_WRANGLER_ANT_PATHS;
+    static {
+        List<AntPathRequestMatcher> antPathMatchers = new ArrayList<>();
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/projects"));
+        antPathMatchers.addAll(defineAntPathMatchers(PUT, "/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(PATCH, "/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(DELETE, "/**"));
+        SECURED_WRANGLER_ANT_PATHS = Collections.unmodifiableList(antPathMatchers);
     }
 
     private static List<AntPathRequestMatcher> defineAntPathMatchers(HttpMethod method,
@@ -69,18 +78,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()
                 .authorizeRequests()
-                .antMatchers(POST, "/**").authenticated()
-                .antMatchers(GET, "/projects").hasAuthority(WRANGLER.name())
+                .antMatchers(POST, "/submissionEnvelopes").authenticated()
+                .antMatchers(POST, "/projects").authenticated()
+                .antMatchers(GET, "/user/**").authenticated()
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
-                .requestMatchers(this::isRequestForSecuredResourceFromProxy).authenticated()
-                .antMatchers(PUT, "/**").hasAuthority(WRANGLER.name())
-                .antMatchers(PATCH, "/**").hasAuthority(WRANGLER.name())
-                .antMatchers(DELETE, "/**").hasAuthority(WRANGLER.name());
+                .requestMatchers(this::isSecuredEndpointFromOutside).authenticated()
+                .requestMatchers(this::isSecuredWranglerEndpointFromOutside).hasAuthority(WRANGLER.name());
     }
 
-    private Boolean isRequestForSecuredResourceFromProxy(HttpServletRequest request) {
+    private Boolean isSecuredEndpointFromOutside(HttpServletRequest request) {
         return SECURED_ANT_PATHS.stream().anyMatch(matcher -> matcher.matches(request)) &&
-                Optional.ofNullable(request.getHeader(FORWARDED_FOR)).isPresent();
+                this.isRequestOutsideProxy(request);
+    }
+
+    private Boolean isSecuredWranglerEndpointFromOutside(HttpServletRequest request) {
+        return SECURED_WRANGLER_ANT_PATHS.stream().anyMatch(matcher -> matcher.matches(request)) &&
+                this.isRequestOutsideProxy(request);
+    }
+
+    private Boolean isRequestOutsideProxy(HttpServletRequest request) {
+        return Optional.ofNullable(request.getHeader(FORWARDED_FOR)).isPresent();
     }
 
 }
