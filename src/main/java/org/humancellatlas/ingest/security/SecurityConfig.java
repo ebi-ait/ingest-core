@@ -2,6 +2,9 @@ package org.humancellatlas.ingest.security;
 
 import com.auth0.spring.security.api.BearerSecurityContextRepository;
 import com.auth0.spring.security.api.JwtAuthenticationEntryPoint;
+import lombok.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,6 +32,8 @@ import static org.springframework.http.HttpMethod.*;
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    @NonNull
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private static final String FORWARDED_FOR = "X-Forwarded-For";
 
@@ -99,7 +104,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private Boolean isRequestOutsideProxy(HttpServletRequest request) {
+        this.log.debug("forwarded for header %s", request.getHeader(FORWARDED_FOR));
         return Optional.ofNullable(request.getHeader(FORWARDED_FOR)).isPresent();
     }
+
+
 
 }
