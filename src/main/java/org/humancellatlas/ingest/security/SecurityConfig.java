@@ -36,12 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     static {
         List<AntPathRequestMatcher> antPathMatchers = new ArrayList<>();
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/user/**"));
-        antPathMatchers.addAll(defineAntPathMatchers(GET, "/**"));
-        antPathMatchers.addAll(defineAntPathMatchers(PATCH, "/**"));
-        antPathMatchers.addAll(defineAntPathMatchers(PUT, "/**"));
-        antPathMatchers.addAll(defineAntPathMatchers(DELETE, "/**"));
-        antPathMatchers.addAll(defineAntPathMatchers(POST, "/messaging/**", "/files**", "/biomaterials**", "/protocols**", "/processes**",
-                "/files**", "/bundleManifests**"));
+        antPathMatchers.addAll(defineAntPathMatchers(POST, "/**"));
         SECURED_ANT_PATHS = Collections.unmodifiableList(antPathMatchers);
     }
 
