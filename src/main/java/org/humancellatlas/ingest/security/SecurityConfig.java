@@ -16,10 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -38,6 +35,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String FORWARDED_FOR = "X-Forwarded-For";
 
     private static final List<AntPathRequestMatcher> SECURED_ANT_PATHS;
+
     static {
         List<AntPathRequestMatcher> antPathMatchers = new ArrayList<>();
         antPathMatchers.addAll(defineAntPathMatchers(POST, "/**"));
@@ -45,6 +43,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private static final List<AntPathRequestMatcher> SECURED_WRANGLER_ANT_PATHS;
+
     static {
         List<AntPathRequestMatcher> antPathMatchers = new ArrayList<>();
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/projects"));
@@ -55,7 +54,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private static List<AntPathRequestMatcher> defineAntPathMatchers(HttpMethod method,
-            String...patterns) {
+                                                                     String... patterns) {
         return Stream.of(patterns)
                 .map(pattern -> new AntPathRequestMatcher(pattern, method.name()))
                 .collect(toList());
@@ -65,7 +64,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final AuthenticationProvider elixirAuthenticationPovider;
 
     public SecurityConfig(@Qualifier(GCP) AuthenticationProvider gcp,
-            @Qualifier(ELIXIR) AuthenticationProvider elixir) {
+                          @Qualifier(ELIXIR) AuthenticationProvider elixir) {
         this.gcpAuthenticationProvider = gcp;
         this.elixirAuthenticationPovider = elixir;
     }
@@ -105,10 +104,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private Boolean isRequestOutsideProxy(HttpServletRequest request) {
         this.log.debug(String.format("forwarded for header %s", request.getHeader(FORWARDED_FOR)));
-        this.log.debug(String.format("headers %s", request.getHeaderNames().toString()));
+
+        Enumeration<String> headerNames = request.getHeaderNames();
+
+        if (headerNames != null) {
+            while (headerNames.hasMoreElements()) {
+                this.log.debug("Header: " + request.getHeader(headerNames.nextElement()));
+            }
+        }
         return Optional.ofNullable(request.getHeader(FORWARDED_FOR)).isPresent();
     }
-
 
 
 }
