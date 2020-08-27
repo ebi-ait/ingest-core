@@ -5,6 +5,8 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
+import org.humancellatlas.ingest.security.Account;
+import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
 import org.humancellatlas.ingest.security.common.jwk.DelegatingJwtAuthentication;
 import org.humancellatlas.ingest.security.common.jwk.JwtVerifierResolver;
 import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
@@ -47,7 +49,9 @@ public class GoogleServiceJwtAuthenticationProvider implements AuthenticationPro
             Authentication jwtAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
             logger.info("Authenticated with jwt with scopes {}", jwtAuth.getAuthorities());
 
-            return jwtAuth;
+            Account account = Account.SERVICE;
+            OpenIdAuthentication openIdAuth = new OpenIdAuthentication(account);
+            return openIdAuth;
         } catch (JWTVerificationException e) {
             logger.error("JWT verification failed: {}", e.getMessage());
             throw new JwtVerificationFailed(e);
