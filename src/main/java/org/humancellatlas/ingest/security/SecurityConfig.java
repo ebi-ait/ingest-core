@@ -32,7 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @NonNull
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private static final String FORWARDED_FOR = "X-Forwarded-For";
+    private static final String FORWARDED_HOST = "x-forwarded-host";
 
     private static final List<AntPathRequestMatcher> SECURED_ANT_PATHS;
 
@@ -103,17 +103,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private Boolean isRequestOutsideProxy(HttpServletRequest request) {
-        this.log.debug(String.format("forwarded for header %s", request.getHeader(FORWARDED_FOR)));
-
-        Enumeration<String> headerNames = request.getHeaderNames();
-
-        if (headerNames != null) {
-            while (headerNames.hasMoreElements()) {
-                String header = headerNames.nextElement();
-                this.log.debug(header + ":" + request.getHeader(header));
-            }
-        }
-        return Optional.ofNullable(request.getHeader(FORWARDED_FOR)).isPresent();
+        return Optional.ofNullable(request.getHeader(FORWARDED_HOST)).isPresent();
     }
 
 
