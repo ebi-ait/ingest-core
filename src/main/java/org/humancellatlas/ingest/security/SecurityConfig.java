@@ -84,7 +84,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(GET, "/auth/account").authenticated()
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
                 .requestMatchers(this::isSecuredEndpointFromOutside).authenticated()
-                .requestMatchers(this::isSecuredWranglerEndpointFromOutside).hasAuthority(WRANGLER.name());
+                .requestMatchers(this::isSecuredWranglerEndpointFromOutside).hasAuthority(WRANGLER.name())
+                .antMatchers(GET, "/**").permitAll();
     }
 
     private Boolean isSecuredEndpointFromOutside(HttpServletRequest request) {
