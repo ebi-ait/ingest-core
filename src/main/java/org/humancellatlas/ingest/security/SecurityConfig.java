@@ -29,9 +29,6 @@ import static org.springframework.http.HttpMethod.*;
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    @NonNull
-    private final Logger log = LoggerFactory.getLogger(getClass());
-
     private static final String FORWARDED_HOST = "x-forwarded-host";
 
     private static final List<AntPathRequestMatcher> SECURED_ANT_PATHS;
@@ -105,6 +102,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private Boolean isRequestOutsideProxy(HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(FORWARDED_HOST)).isPresent();
     }
-
 
 }
