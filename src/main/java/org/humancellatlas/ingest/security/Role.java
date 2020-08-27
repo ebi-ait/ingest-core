@@ -4,7 +4,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 public enum Role implements GrantedAuthority {
 
-    WRANGLER, CONTRIBUTOR, GUEST;
+    WRANGLER, CONTRIBUTOR, GUEST, SERVICE;
 
     @Override
     public String getAuthority() {

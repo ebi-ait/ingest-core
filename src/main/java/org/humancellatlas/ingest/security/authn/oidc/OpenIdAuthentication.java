@@ -70,7 +70,7 @@ public class OpenIdAuthentication implements Authentication {
             authenticated = false;
             return;
         }
-        authenticated = account == Account.GUEST || credentials.getSubjectId().equalsIgnoreCase(account.getProviderReference());
+        authenticated = account == Account.GUEST || account == Account.SERVICE || credentials.getSubjectId().equalsIgnoreCase(account.getProviderReference());
     }
 
 }

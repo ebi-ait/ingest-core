@@ -14,6 +14,7 @@ import java.util.Set;
 public class Account {
 
     public static final Account GUEST = new GuestAccount();
+    public static final Account SERVICE = new ServiceAccount();
     /**
      * A Null Object subclass of Account that represents an unregistered Guest.
      */
@@ -25,6 +26,21 @@ public class Account {
             super(EMPTY, EMPTY);
             setName(EMPTY);
             addRole(Role.GUEST);
+        }
+
+    }
+
+    /**
+     * A Null Object subclass of Account that represents a service.
+     */
+    private static class ServiceAccount extends Account {
+
+        private static final String EMPTY = "";
+
+        private ServiceAccount() {
+            super(EMPTY, EMPTY);
+            setName(EMPTY);
+            addRole(Role.SERVICE);
         }
 
     }
