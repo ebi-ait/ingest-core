@@ -74,6 +74,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
                 .requestMatchers(this::isRequestForSecuredResourceFromProxy).authenticated()
                 .antMatchers(GET, "/**").authenticated()
+                .antMatchers(GET, "/health").permitAll()
                 .antMatchers(PUT, "/**").hasAuthority(WRANGLER.name())
                 .antMatchers(PATCH, "/**").hasAuthority(WRANGLER.name())
                 .antMatchers(DELETE, "/**").hasAuthority(WRANGLER.name());
