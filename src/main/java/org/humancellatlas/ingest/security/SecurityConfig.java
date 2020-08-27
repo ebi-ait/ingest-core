@@ -110,7 +110,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         if (headerNames != null) {
             while (headerNames.hasMoreElements()) {
                 String header = headerNames.nextElement();
-                this.log.debug(header + ":" + request.getHeader(headerNames.nextElement()));
+                this.log.debug(header + ":" + request.getHeader(header));
             }
         }
         return Optional.ofNullable(request.getHeader(FORWARDED_FOR)).isPresent();
