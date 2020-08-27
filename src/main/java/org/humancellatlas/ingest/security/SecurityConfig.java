@@ -69,12 +69,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()
                 .authorizeRequests()
+                .antMatchers(GET, "/health").permitAll()
                 .antMatchers(POST, "/**").authenticated()
                 .antMatchers(GET, "/projects").hasAuthority(WRANGLER.name())
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
                 .requestMatchers(this::isRequestForSecuredResourceFromProxy).authenticated()
                 .antMatchers(GET, "/**").authenticated()
-                .antMatchers(GET, "/health").permitAll()
                 .antMatchers(PUT, "/**").hasAuthority(WRANGLER.name())
                 .antMatchers(PATCH, "/**").hasAuthority(WRANGLER.name())
                 .antMatchers(DELETE, "/**").hasAuthority(WRANGLER.name());
