@@ -95,7 +95,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
                 // TODO allow for now to support archiving thru cli
                 .antMatchers("/archiveSubmissions").permitAll()
+                .antMatchers("/archiveSubmissions/**").permitAll()
                 .antMatchers("/archiveEntities").permitAll()
+                .antMatchers("/archiveEntities/**").permitAll()
                 .antMatchers(PUT,"/submissions/*/archivedEvent").permitAll()
 
                 .requestMatchers(this::isSecuredWranglerEndpointFromOutside).hasAnyAuthority(WRANGLER.name(), SERVICE.name())
