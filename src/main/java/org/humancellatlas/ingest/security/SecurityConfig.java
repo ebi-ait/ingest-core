@@ -92,14 +92,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(GET, "/user/**").authenticated()
                 .antMatchers(GET, "/auth/account").authenticated()
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
-
-                // TODO allow for now to support archiving thru cli
-                .antMatchers("/archiveSubmissions").permitAll()
-                .antMatchers("/archiveSubmissions/**").permitAll()
-                .antMatchers("/archiveEntities").permitAll()
-                .antMatchers("/archiveEntities/**").permitAll()
-                .antMatchers(PUT,"/submissions/*/archivedEvent").permitAll()
-
                 .requestMatchers(this::isSecuredWranglerEndpointFromOutside).hasAnyAuthority(WRANGLER.name(), SERVICE.name())
                 .requestMatchers(this::isSecuredEndpointFromOutside).authenticated()
                 .antMatchers(GET, "/**").permitAll();
