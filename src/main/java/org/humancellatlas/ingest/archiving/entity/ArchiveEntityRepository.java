@@ -15,6 +15,8 @@ public interface ArchiveEntityRepository extends MongoRepository<ArchiveEntity, 
     Page<ArchiveEntity> findByAlias(String alias,
                                     Pageable pageable);
 
+    ArchiveEntity findByArchiveSubmissionAndAlias(ArchiveSubmission archiveSubmission, String alias);
+
     ArchiveEntity findByDspUuid(String dspUuid);
 
     Page<ArchiveEntity> findByArchiveSubmissionAndType(ArchiveSubmission archiveSubmission,
