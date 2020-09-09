@@ -27,6 +27,10 @@ import java.util.stream.Stream;
 @CrossOrigin
 public interface ProjectRepository extends MongoRepository<Project, String> , ProjectRepositoryCustom{
 
+    @Override
+    @RestResource(exported = false)
+    <S extends Project> S save(S entity);
+
     @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
     Page<Project> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
 
@@ -67,4 +71,5 @@ public interface ProjectRepository extends MongoRepository<Project, String> , Pr
 
     @RestResource(exported = false)
     Stream<Project> findByUuid(Uuid uuid);
+
 }

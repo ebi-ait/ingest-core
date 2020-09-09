@@ -60,6 +60,10 @@ public class ProjectService {
         return log;
     }
 
+    public void register(Project project) {
+        projectRepository.save(new Project(""));
+    }
+
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
         if(! project.getIsUpdate()) {
             return metadataCrudService.addToSubmissionEnvelopeAndSave(project, submissionEnvelope);

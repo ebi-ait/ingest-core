@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -146,6 +147,24 @@ public class ProjectServiceTest {
             //then:
             assertThat(returnDocumentIds)
                 .containsExactlyInAnyOrderElementsOf(documentIds);
+        }
+
+    }
+
+    @Nested
+    class Registration {
+
+        @Test
+        @DisplayName("success")
+        void succeed() {
+            //given:
+            var project = new Project("{\"name\": \"project\"}");
+
+            //when:
+            projectService.register(project);
+
+            //then:
+            verify(projectRepository).save(any(Project.class));
         }
 
     }
