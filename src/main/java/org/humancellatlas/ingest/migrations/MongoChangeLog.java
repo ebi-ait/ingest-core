@@ -2,14 +2,22 @@ package org.humancellatlas.ingest.migrations;
 
 import com.github.mongobee.changeset.ChangeLog;
 import com.github.mongobee.changeset.ChangeSet;
+import com.mongodb.MongoCommandException;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @ChangeLog
 public class MongoChangeLog {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoChangeLog.class);
+
+    private static final Integer MONGO_INDEX_NOT_FOUND = 27;
+
     @ChangeSet(order = "2019-10-30", id = "featureCompatibilityVersion 3.4", author = "alexie.staffer@ebi.ac.uk")
     public void featureCompatibilityThreeFour(MongoDatabase db) {
         if (MongoVersionHelper.featureCompatibilityLessThan(db, "3.4"))
@@ -87,9 +95,14 @@ public class MongoChangeLog {
 
     @ChangeSet(order = "2020-08-06", id = "Drop Alias Index on archiveEntity", author = "alexie.staffer@ebi.ac.uk")
     public void dropAliasIndexOnArchiveEntity(MongoDatabase db) {
-        db.getCollection("archiveEntity").dropIndex("alias");
-        // If the collection does not exist this code will still succeed,
-        // Which is good because we may change the collection name soon.
+        try {
+            db.getCollection("archiveEntity").dropIndex("alias");
+            // If the collection does not exist this code will still succeed,
+            // Which is good because we may change the collection name soon.
+        } catch (MongoCommandException e) {
+            if (!MONGO_INDEX_NOT_FOUND.equals(e.getErrorCode())) throw e;
+            LOGGER.info(e.getErrorMessage());
+        }
     }
 
 }
