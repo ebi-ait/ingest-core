@@ -158,13 +158,19 @@ public class ProjectServiceTest {
         @DisplayName("success")
         void succeed() {
             //given:
-            var project = new Project("{\"name\": \"project\"}");
+            String content = "{\"name\": \"project\"}";
+            Project project = new Project(content);
+
+            //and:
+            Project persistentProject = new Project(content);
+            doReturn(persistentProject).when(projectRepository).save(project);
 
             //when:
-            projectService.register(project);
+            Project result = projectService.register(project);
 
             //then:
-            verify(projectRepository).save(any(Project.class));
+            verify(projectRepository).save(project);
+            assertThat(result).isEqualTo(persistentProject);
         }
 
     }

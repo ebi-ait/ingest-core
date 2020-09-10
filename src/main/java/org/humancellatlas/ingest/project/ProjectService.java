@@ -60,8 +60,9 @@ public class ProjectService {
         return log;
     }
 
-    public void register(Project project) {
-        projectRepository.save(new Project(""));
+    public Project register(final Project project) {
+        Project persistentProject = projectRepository.save(project);
+        return persistentProject;
     }
 
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
