@@ -1,9 +1,6 @@
 package org.humancellatlas.ingest.project;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.notifications.NotificationService;
 import org.humancellatlas.ingest.notifications.exception.DuplicateNotification;
@@ -17,6 +14,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Optional;
+
+import static org.springframework.util.DigestUtils.md5DigestAsHex;
 
 @Component
 @RequiredArgsConstructor
@@ -44,8 +47,11 @@ public class ProjectEventHandler {
         }
     }
 
-    public void registeredProject(Project project) {
-
+    public Notification registeredProject(Project project) {
+        String message = "A new project [" + project.getUuid() + "] was registered.";
+        String header = "project-registered";
+        Checksum checksum = new Checksum(header, md5DigestAsHex((header + ":" + project.getUuid()).getBytes()));
+        return notifyWranglersByEmail(message, checksum);
     }
 
     public Notification editedProjectMetadata(Project project) {
@@ -110,14 +116,14 @@ public class ProjectEventHandler {
         String checksumInput = String
             .format("%s:%s", "project-edited", project.getUuid().getUuid());
         return new Checksum("project-edited",
-                            DigestUtils.md5DigestAsHex(checksumInput.getBytes()));
+                            md5DigestAsHex(checksumInput.getBytes()));
     }
 
     private Checksum deletedProjectChecksum(Project project) {
         String checksumInput = String
             .format("%s:%s", "project-deleted", project.getUuid().getUuid());
         return new Checksum("project-deleted",
-                            DigestUtils.md5DigestAsHex(checksumInput.getBytes()));
+                            md5DigestAsHex(checksumInput.getBytes()));
     }
 
     private Checksum validProjectChecksum(Project project) {
@@ -126,7 +132,7 @@ public class ProjectEventHandler {
                                              project.getUuid().getUuid(),
                                              objectToString(project.getContent()));
         return new Checksum("project-validated",
-                            DigestUtils.md5DigestAsHex(checksumInput.getBytes()));
+                            md5DigestAsHex(checksumInput.getBytes()));
     }
 
     private String emailNotificationsFromAddress() {

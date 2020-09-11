@@ -29,4 +29,10 @@ public class Uuid {
         uuid.setUuid(UUID.randomUUID());
         return uuid;
     }
+
+    @Override
+    public String toString() {
+        return uuid.toString();
+    }
+
 }
