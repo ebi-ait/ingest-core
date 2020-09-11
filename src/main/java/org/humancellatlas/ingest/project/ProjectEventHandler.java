@@ -44,6 +44,10 @@ public class ProjectEventHandler {
         }
     }
 
+    public void registeredProject(Project project) {
+
+    }
+
     public Notification editedProjectMetadata(Project project) {
         String notificationContent = String.format("Project %s was updated:\n\nNew content:\n\n%s",
                                                    project.getUuid().getUuid().toString(),
@@ -129,4 +133,5 @@ public class ProjectEventHandler {
         return environment.getProperty("PROJECT_NOTIFICATIONS_FROM_ADDRESS",
                                        "hca-notifications-test@ebi.ac.uk");
     }
+
 }

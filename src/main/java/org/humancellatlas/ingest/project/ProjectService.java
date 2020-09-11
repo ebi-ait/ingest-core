@@ -62,6 +62,7 @@ public class ProjectService {
 
     public Project register(final Project project) {
         Project persistentProject = projectRepository.save(project);
+        projectEventHandler.registeredProject(persistentProject);
         return persistentProject;
     }
 

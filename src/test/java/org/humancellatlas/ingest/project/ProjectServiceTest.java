@@ -171,6 +171,7 @@ public class ProjectServiceTest {
             //then:
             verify(projectRepository).save(project);
             assertThat(result).isEqualTo(persistentProject);
+            verify(projectEventHandler).registeredProject(persistentProject);
         }
 
     }
