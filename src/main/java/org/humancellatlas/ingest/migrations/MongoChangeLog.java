@@ -98,4 +98,12 @@ public class MongoChangeLog {
             }
         }
     }
+
+    @ChangeSet(order = "2020-09-15", id = "singelton project.dataAccess.type", author = "alexie.staffer@ebi.ac.uk")
+    public void singeltonProjectDataAccessType(MongoDatabase db) {
+        Document filter = Document.parse("{'dataAccess.type': {$type: 'array'}}");
+        List<Document> update = new ArrayList<>();
+        update.add(new Document("$set", Document.parse("{ 'dataAccess.type': { $arrayElemAt: [ '$dataAccess.type', 0 ] } }")));
+        db.getCollection("project").updateMany(filter, update);
+    }
 }
