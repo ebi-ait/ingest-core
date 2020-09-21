@@ -46,6 +46,13 @@ public class ProjectController {
     private final @NonNull ProjectService projectService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
+    @PostMapping("/projects")
+    ResponseEntity<Resource> register(@RequestBody final Project project,
+            final PersistentEntityResourceAssembler assembler) {
+        Project result = projectService.register(project);
+        return ResponseEntity.ok().body(assembler.toFullResource(result));
+    }
+
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
     ResponseEntity<Resource<?>> addProjectToEnvelope(
             @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,

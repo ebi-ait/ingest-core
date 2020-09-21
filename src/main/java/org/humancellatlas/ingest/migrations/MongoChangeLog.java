@@ -2,16 +2,27 @@ package org.humancellatlas.ingest.migrations;
 
 import com.github.mongobee.changeset.ChangeLog;
 import com.github.mongobee.changeset.ChangeSet;
+<<<<<<< HEAD
 import com.mongodb.client.ListIndexesIterable;
 import com.mongodb.client.MongoCollection;
+=======
+import com.mongodb.MongoCommandException;
+>>>>>>> feature/project-notification
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @ChangeLog
 public class MongoChangeLog {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoChangeLog.class);
+
+    private static final Integer MONGO_INDEX_NOT_FOUND = 27;
+
     @ChangeSet(order = "2019-10-30", id = "featureCompatibilityVersion 3.4", author = "alexie.staffer@ebi.ac.uk")
     public void featureCompatibilityThreeFour(MongoDatabase db) {
         if (MongoVersionHelper.featureCompatibilityLessThan(db, "3.4"))
@@ -89,13 +100,13 @@ public class MongoChangeLog {
 
     @ChangeSet(order = "2020-08-11", id = "Drop Alias Index on archiveEntity", author = "karoly@ebi.ac.uk")
     public void dropAliasIndexOnArchiveEntity(MongoDatabase db) {
-        final String indexNameToDrop = "alias";
-        final MongoCollection<Document> archiveEntity = db.getCollection("archiveEntity");
-        for (final Document document : archiveEntity.listIndexes()) {
-            if (document.getString("name").equals(indexNameToDrop)) {
-                archiveEntity.dropIndex(indexNameToDrop);
-                break;
-            }
+        try {
+            db.getCollection("archiveEntity").dropIndex("alias");
+            // If the collection does not exist this code will still succeed,
+            // Which is good because we may change the collection name soon.
+        } catch (MongoCommandException e) {
+            if (!MONGO_INDEX_NOT_FOUND.equals(e.getErrorCode())) throw e;
+            LOGGER.info(e.getErrorMessage());
         }
     }
 }
