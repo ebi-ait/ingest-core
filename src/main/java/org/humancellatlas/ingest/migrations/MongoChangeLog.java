@@ -2,12 +2,7 @@ package org.humancellatlas.ingest.migrations;
 
 import com.github.mongobee.changeset.ChangeLog;
 import com.github.mongobee.changeset.ChangeSet;
-<<<<<<< HEAD
-import com.mongodb.client.ListIndexesIterable;
-import com.mongodb.client.MongoCollection;
-=======
 import com.mongodb.MongoCommandException;
->>>>>>> feature/project-notification
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.slf4j.Logger;
