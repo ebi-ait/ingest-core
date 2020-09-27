@@ -53,6 +53,11 @@ public class ProjectController {
         return ResponseEntity.ok().body(assembler.toFullResource(result));
     }
 
+    @PatchMapping("/projects")
+    ResponseEntity<Resource> update() {
+        return ResponseEntity.ok(null);
+    }
+
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
     ResponseEntity<Resource<?>> addProjectToEnvelope(
             @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
