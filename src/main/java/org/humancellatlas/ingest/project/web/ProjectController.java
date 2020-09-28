@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.patch.JsonPatcher;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
@@ -27,6 +28,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -46,16 +49,24 @@ public class ProjectController {
     private final @NonNull ProjectService projectService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
+    private final @NonNull JsonPatcher jsonPatcher;
+
     @PostMapping("/projects")
-    ResponseEntity<Resource> register(@RequestBody final Project project,
+    ResponseEntity<Resource<?>> register(@RequestBody final Project project,
             final PersistentEntityResourceAssembler assembler) {
         Project result = projectService.register(project);
         return ResponseEntity.ok().body(assembler.toFullResource(result));
     }
 
-    @PatchMapping("/projects")
-    ResponseEntity<Resource> update() {
-        return ResponseEntity.ok(null);
+    @PatchMapping("/projects/{id}")
+    ResponseEntity<Resource<?>> update(@PathVariable("id") Project project, HttpServletRequest request,
+            final PersistentEntityResourceAssembler assembler) {
+        try {
+            jsonPatcher.merge(request.getInputStream(), project);
+            return ResponseEntity.ok().body(assembler.toFullResource(project));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
