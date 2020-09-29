@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.project.web;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -59,14 +60,10 @@ public class ProjectController {
     }
 
     @PatchMapping("/projects/{id}")
-    ResponseEntity<Resource<?>> update(@PathVariable("id") Project project, HttpServletRequest request,
+    ResponseEntity<Resource<?>> update(@PathVariable("id") Project project, @RequestBody ObjectNode patch,
             final PersistentEntityResourceAssembler assembler) {
-        try {
-            jsonPatcher.merge(request.getInputStream(), project);
-            return ResponseEntity.ok().body(assembler.toFullResource(project));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        jsonPatcher.merge(patch, project);
+        return ResponseEntity.ok().body(assembler.toFullResource(project));
     }
 
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
