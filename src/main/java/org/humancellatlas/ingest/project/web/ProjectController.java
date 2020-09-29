@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.patch.JsonPatcher;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectEventHandler;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
@@ -49,6 +50,8 @@ public class ProjectController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectController.class);
 
     private final @NonNull ProjectService projectService;
+    private final @NonNull ProjectEventHandler projectEventHandler;
+
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
     private final @NonNull ProjectRepository projectRepository;
@@ -63,11 +66,15 @@ public class ProjectController {
     }
 
     @PatchMapping("/projects/{id}")
-    ResponseEntity<Resource<?>> update(@PathVariable("id") final Project project, @RequestBody final ObjectNode patch,
-            final PersistentEntityResourceAssembler assembler) {
-        jsonPatcher.merge(patch, project);
-        projectRepository.save(project);
-        return ResponseEntity.ok().body(assembler.toFullResource(project));
+    ResponseEntity<Resource<?>> update(@PathVariable("id") final Project project,
+            @RequestParam(value = "partial", defaultValue = "false") Boolean partial,
+            @RequestBody final ObjectNode patch, final PersistentEntityResourceAssembler assembler) {
+        Project patchedProject = jsonPatcher.merge(patch, project);
+        patchedProject = projectRepository.save(patchedProject);
+        if (!partial) {
+            projectEventHandler.editedProjectMetadata(patchedProject);
+        }
+        return ResponseEntity.ok().body(assembler.toFullResource(patchedProject));
     }
 
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
