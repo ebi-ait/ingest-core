@@ -66,6 +66,10 @@ public class ProjectService {
         return persistentProject;
     }
 
+    public void partialUpdate(String id, Project update) {
+        projectRepository.save(update);
+    }
+
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
         if(! project.getIsUpdate()) {
             return metadataCrudService.addToSubmissionEnvelopeAndSave(project, submissionEnvelope);

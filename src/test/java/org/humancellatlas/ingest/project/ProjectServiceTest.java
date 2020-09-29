@@ -21,6 +21,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -28,6 +31,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -172,6 +176,36 @@ public class ProjectServiceTest {
             verify(projectRepository).save(project);
             assertThat(result).isEqualTo(persistentProject);
             verify(projectEventHandler).registeredProject(persistentProject);
+        }
+
+    }
+
+    @Nested
+    class Update {
+
+        @Test
+        @DisplayName("partial update succeeds")
+        void partialUpdateSuccess() {
+            //given:
+            String id = "78bcb901";
+            var content = Map.of(
+                    "name", "sample",
+                    "description", "test"
+            );
+            Project project = new Project(content);
+            doReturn(Optional.of(project)).when(projectRepository).findById(id);
+
+            //and:
+            var updatedContent = new HashMap<String, Object>();
+            updatedContent.putAll(content);
+            updatedContent.put("name", "updated sample");
+            Project updatedProject = new Project(updatedContent);
+
+            //when:
+            projectService.partialUpdate(id, updatedProject);
+
+            //then:
+            verify(projectRepository).save(any(Project.class));
         }
 
     }
