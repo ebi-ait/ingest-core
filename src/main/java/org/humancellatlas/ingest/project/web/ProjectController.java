@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.patch.JsonPatcher;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
 import org.humancellatlas.ingest.query.MetadataCriteria;
@@ -50,6 +51,8 @@ public class ProjectController {
     private final @NonNull ProjectService projectService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
+    private final @NonNull ProjectRepository projectRepository;
+
     private final @NonNull JsonPatcher jsonPatcher;
 
     @PostMapping("/projects")
@@ -60,9 +63,10 @@ public class ProjectController {
     }
 
     @PatchMapping("/projects/{id}")
-    ResponseEntity<Resource<?>> update(@PathVariable("id") Project project, @RequestBody ObjectNode patch,
+    ResponseEntity<Resource<?>> update(@PathVariable("id") final Project project, @RequestBody final ObjectNode patch,
             final PersistentEntityResourceAssembler assembler) {
         jsonPatcher.merge(patch, project);
+        projectRepository.save(project);
         return ResponseEntity.ok().body(assembler.toFullResource(project));
     }
 

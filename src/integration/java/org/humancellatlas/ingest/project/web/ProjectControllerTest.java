@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.project.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.data.MapEntry;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
@@ -71,7 +72,12 @@ class ProjectControllerTest {
             //Using Map here because reading directly to Project converts the entire JSON to Project.content.
             Map<String, Object> updated = objectMapper.readValue(response.getContentAsString(), Map.class);
             assertThat(updated.get("content")).isInstanceOf(Map.class);
-            assertThat((Map) updated.get("content")).containsOnly(entry("description", "test updated"));
+            MapEntry<String, String> updatedDescription = entry("description", "test updated");
+            assertThat((Map) updated.get("content")).containsOnly(updatedDescription);
+
+            //and:
+            project = repository.findById(project.getId()).get();
+            assertThat((Map) project.getContent()).containsOnly(updatedDescription);
         }
 
     }
