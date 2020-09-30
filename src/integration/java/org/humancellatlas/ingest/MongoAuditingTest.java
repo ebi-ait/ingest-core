@@ -1,12 +1,10 @@
 package org.humancellatlas.ingest;
 
-import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.HashMap;
@@ -15,9 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 public class MongoAuditingTest {
-
-    @MockBean
-    private MigrationConfiguration migrationConfiguration;
 
     @Autowired
     private ProjectRepository projectRepository;
