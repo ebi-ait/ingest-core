@@ -1,7 +1,7 @@
 package org.humancellatlas.ingest.migrations;
 
-import com.github.mongobee.changeset.ChangeLog;
-import com.github.mongobee.changeset.ChangeSet;
+import com.github.cloudyrock.mongock.ChangeLog;
+import com.github.cloudyrock.mongock.ChangeSet;
 import com.mongodb.MongoCommandException;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
