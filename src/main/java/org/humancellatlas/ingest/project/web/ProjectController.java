@@ -1,12 +1,16 @@
 package org.humancellatlas.ingest.project.web;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.patch.JsonPatcher;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectEventHandler;
+import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
 import org.humancellatlas.ingest.query.MetadataCriteria;
@@ -27,6 +31,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -44,13 +50,31 @@ public class ProjectController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectController.class);
 
     private final @NonNull ProjectService projectService;
+    private final @NonNull ProjectEventHandler projectEventHandler;
+
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
+    private final @NonNull ProjectRepository projectRepository;
+
+    private final @NonNull JsonPatcher jsonPatcher;
+
     @PostMapping("/projects")
-    ResponseEntity<Resource> register(@RequestBody final Project project,
+    ResponseEntity<Resource<?>> register(@RequestBody final Project project,
             final PersistentEntityResourceAssembler assembler) {
         Project result = projectService.register(project);
         return ResponseEntity.ok().body(assembler.toFullResource(result));
+    }
+
+    @PatchMapping("/projects/{id}")
+    ResponseEntity<Resource<?>> update(@PathVariable("id") final Project project,
+            @RequestParam(value = "partial", defaultValue = "false") Boolean partial,
+            @RequestBody final ObjectNode patch, final PersistentEntityResourceAssembler assembler) {
+        Project patchedProject = jsonPatcher.merge(patch, project);
+        patchedProject = projectRepository.save(patchedProject);
+        if (!partial) {
+            projectEventHandler.editedProjectMetadata(patchedProject);
+        }
+        return ResponseEntity.ok().body(assembler.toFullResource(patchedProject));
     }
 
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
