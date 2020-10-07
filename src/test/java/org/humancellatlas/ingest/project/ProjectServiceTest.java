@@ -151,6 +151,31 @@ public class ProjectServiceTest {
     }
 
     @Nested
+    class Registration {
+
+        @Test
+        @DisplayName("success")
+        void succeed() {
+            //given:
+            String content = "{\"name\": \"project\"}";
+            Project project = new Project(content);
+
+            //and:
+            Project persistentProject = new Project(content);
+            doReturn(persistentProject).when(projectRepository).save(project);
+
+            //when:
+            Project result = projectService.register(project);
+
+            //then:
+            verify(projectRepository).save(project);
+            assertThat(result).isEqualTo(persistentProject);
+            verify(projectEventHandler).registeredProject(persistentProject);
+        }
+
+    }
+
+    @Nested
     class Deletion {
 
         @Test

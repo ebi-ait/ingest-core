@@ -24,7 +24,6 @@ public class ProjectChangeListener extends AbstractMongoEventListener<Project> {
 
     @Override
     public void onAfterSave(AfterSaveEvent<Project> event) {
-        Project project = event.getSource();
-        projectEventHandler.editedProjectMetadata(project);
+        //do nothing
     }
 }
