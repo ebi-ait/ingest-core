@@ -13,38 +13,50 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.humancellatlas.ingest.security.ElixirConfig.ELIXIR;
 import static org.humancellatlas.ingest.security.GcpConfig.GCP;
-import static org.humancellatlas.ingest.security.Role.GUEST;
-import static org.humancellatlas.ingest.security.Role.WRANGLER;
+import static org.humancellatlas.ingest.security.Role.*;
 import static org.springframework.http.HttpMethod.*;
 
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    private static final String FORWARDED_HOST = "x-forwarded-host";
 
-    private static final String FORWARDED_FOR = "X-Forwarded-For";
+    private static final List<AntPathRequestMatcher> SECURED_ANT_PATHS = setupSecuredAntPaths();
 
-    private static final List<AntPathRequestMatcher> SECURED_ANT_PATHS;
-    static {
+    private static final List<AntPathRequestMatcher> SECURED_WRANGLER_ANT_PATHS = setupWranglerAntPaths();
+
+    private static List<AntPathRequestMatcher> setupSecuredAntPaths() {
         List<AntPathRequestMatcher> antPathMatchers = new ArrayList<>();
-        antPathMatchers.addAll(defineAntPathMatchers(GET, "/user/**"));
-        antPathMatchers.addAll(defineAntPathMatchers(PATCH, "/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(POST, "/**"));
+        return Collections.unmodifiableList(antPathMatchers);
+    }
+
+    private static List<AntPathRequestMatcher> setupWranglerAntPaths() {
+        List<AntPathRequestMatcher> antPathMatchers = new ArrayList<>();
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/bundleManifests"));
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionManifests"));
+
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionEnvelopes"));
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/biomaterials"));
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/files"));
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/processes"));
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/protocols"));
+
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/projects"));
         antPathMatchers.addAll(defineAntPathMatchers(PUT, "/**"));
-        antPathMatchers.addAll(defineAntPathMatchers(POST, "/messaging/**", "/files**", "/biomaterials**", "/protocols**", "/processes**",
-                "/files**", "/bundleManifests**"));
-        SECURED_ANT_PATHS = Collections.unmodifiableList(antPathMatchers);
+        antPathMatchers.addAll(defineAntPathMatchers(PATCH, "/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(DELETE, "/**"));
+        return Collections.unmodifiableList(antPathMatchers);
     }
 
     private static List<AntPathRequestMatcher> defineAntPathMatchers(HttpMethod method,
-            String...patterns) {
+                                                                     String... patterns) {
         return Stream.of(patterns)
                 .map(pattern -> new AntPathRequestMatcher(pattern, method.name()))
                 .collect(toList());
@@ -54,7 +66,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final AuthenticationProvider elixirAuthenticationPovider;
 
     public SecurityConfig(@Qualifier(GCP) AuthenticationProvider gcp,
-            @Qualifier(ELIXIR) AuthenticationProvider elixir) {
+                          @Qualifier(ELIXIR) AuthenticationProvider elixir) {
         this.gcpAuthenticationProvider = gcp;
         this.elixirAuthenticationPovider = elixir;
     }
@@ -72,19 +84,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/submissionEnvelopes").authenticated()
-                .antMatchers(HttpMethod.POST, "/submissionEnvelopes/*/projects").authenticated()
-                .antMatchers(HttpMethod.POST, "/projects**").authenticated()
-                .antMatchers(GET, "/projects").hasAuthority(WRANGLER.name())
-                .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
+                .antMatchers(POST, "/submissionEnvelopes").authenticated()
+                .antMatchers(POST, "/projects").authenticated()
+                .antMatchers(GET, "/user/**").authenticated()
                 .antMatchers(GET, "/auth/account").authenticated()
-                .requestMatchers(this::isRequestForSecuredResourceFromProxy).authenticated()
+                .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
+                .requestMatchers(SecurityConfig::isSecuredWranglerEndpointFromOutside).hasAnyAuthority(WRANGLER.name(), SERVICE.name())
+                .requestMatchers(SecurityConfig::isSecuredEndpointFromOutside).authenticated()
                 .antMatchers(GET, "/**").permitAll();
     }
 
-    private Boolean isRequestForSecuredResourceFromProxy(HttpServletRequest request) {
+    private static Boolean isSecuredEndpointFromOutside(HttpServletRequest request) {
         return SECURED_ANT_PATHS.stream().anyMatch(matcher -> matcher.matches(request)) &&
-                Optional.ofNullable(request.getHeader(FORWARDED_FOR)).isPresent();
+                SecurityConfig.isRequestOutsideProxy(request);
+    }
+
+    private static Boolean isSecuredWranglerEndpointFromOutside(HttpServletRequest request) {
+        return SECURED_WRANGLER_ANT_PATHS.stream().anyMatch(matcher -> matcher.matches(request)) &&
+                SecurityConfig.isRequestOutsideProxy(request);
+    }
+
+    private static Boolean isRequestOutsideProxy(HttpServletRequest request) {
+        return Optional.ofNullable(request.getHeader(FORWARDED_HOST)).isPresent();
     }
 
 }
