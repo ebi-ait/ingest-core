@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.biomaterial;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.humancellatlas.ingest.core.EntityType;
@@ -17,6 +18,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
 /**
  * Created by rolando on 16/02/2018.
@@ -62,6 +65,11 @@ public class Biomaterial extends MetadataDocument {
         this.derivedByProcesses.add(process);
 
         return this;
+    }
+
+    @JsonProperty(access=READ_ONLY)
+    public boolean isLinked() {
+        return !inputToProcesses.isEmpty() || !derivedByProcesses.isEmpty();
     }
 
 }
