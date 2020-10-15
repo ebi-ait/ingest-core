@@ -19,6 +19,8 @@ import org.springframework.data.rest.core.annotation.RestResource;
 
 import java.util.*;
 
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+
 @Getter
 @Setter
 @Document
@@ -91,6 +93,10 @@ public class File extends MetadataDocument {
         super.setSubmissionEnvelope(submissionEnvelope);
         addAsDerivedByProcess(analysis);
     }
-    
+
+    @JsonProperty(access=READ_ONLY)
+    public boolean isLinked() {
+        return !inputToProcesses.isEmpty() || !derivedByProcesses.isEmpty();
+    }
 
 }
