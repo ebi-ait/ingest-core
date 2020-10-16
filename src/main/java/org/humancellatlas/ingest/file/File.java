@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Checksums;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -90,6 +91,17 @@ public class File extends MetadataDocument {
         SubmissionEnvelope submissionEnvelope = analysis.getSubmissionEnvelope();
         super.setSubmissionEnvelope(submissionEnvelope);
         addAsDerivedByProcess(analysis);
+    }
+
+    /**
+     * Removes a process to the collection of processes that this file was derived by
+     *
+     * @param process the process to add
+     * @return a reference to this file
+     */
+    public File removeAsDerivedByProcess(Process process) {
+        this.derivedByProcesses.remove(process);
+        return this;
     }
     
 
