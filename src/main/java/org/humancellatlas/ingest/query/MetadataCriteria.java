@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 public class MetadataCriteria {
-    String contentField;
+    String field;
     Operator operator;
     Object value;
 }

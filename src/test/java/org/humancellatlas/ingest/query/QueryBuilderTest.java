@@ -16,9 +16,9 @@ public class QueryBuilderTest {
         QueryBuilder queryBuilder = new QueryBuilder();
 
         List<MetadataCriteria> metadataCriteriaList = new ArrayList<>();
-        metadataCriteriaList.add(new MetadataCriteria("contentField", Operator.IS, "value"));
+        metadataCriteriaList.add(new MetadataCriteria("field", Operator.IS, "value"));
         Query expectedQuery = new Query();
-        Criteria criteria = Criteria.where("contentField").is("value");
+        Criteria criteria = Criteria.where("field").is("value");
         expectedQuery.addCriteria(new Criteria().orOperator(new Criteria[]{criteria}));
 
         //when:
@@ -35,9 +35,9 @@ public class QueryBuilderTest {
         QueryBuilder queryBuilder = new QueryBuilder();
 
         List<MetadataCriteria> metadataCriteriaList = new ArrayList<>();
-        metadataCriteriaList.add(new MetadataCriteria("contentField", Operator.IS, "value"));
+        metadataCriteriaList.add(new MetadataCriteria("field", Operator.IS, "value"));
         Query expectedQuery = new Query();
-        Criteria criteria = Criteria.where("contentField").is("value");
+        Criteria criteria = Criteria.where("field").is("value");
         expectedQuery.addCriteria(new Criteria().andOperator(new Criteria[]{criteria}));
 
         //when:

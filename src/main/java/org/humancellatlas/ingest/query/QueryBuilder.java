@@ -15,8 +15,8 @@ public class QueryBuilder {
         List<Criteria> criterias = new ArrayList<>();
 
         for (MetadataCriteria metadataCriteria : criteriaList) {
-            String contentField = metadataCriteria.getContentField();
-            Criteria criteria = Criteria.where(contentField);
+            String field = metadataCriteria.getField();
+            Criteria criteria = Criteria.where(field);
             switch (metadataCriteria.getOperator()) {
                 case IS:
                     try {
