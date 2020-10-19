@@ -65,43 +65,13 @@ public class BiomaterialController {
     return ResponseEntity.accepted().body(resource);
   }
 
-  @RequestMapping(path = "biomaterials/{id}/inputBiomaterial/{input_id}", method = RequestMethod.PUT)
-  ResponseEntity<Resource<?>> addInputBiomaterial(@PathVariable("id") Biomaterial biomaterial,
-                                                        @PathVariable("input_id") Biomaterial inputBiomaterial,
-                                                        @RequestBody Process process,
-                                                        PersistentEntityResourceAssembler assembler) {
-    biomaterialService.addInputBiomaterial(inputBiomaterial, process, biomaterial);
-    PersistentEntityResource resource = assembler.toFullResource(biomaterial);
-    return ResponseEntity.accepted().body(resource);
-
-  }
-
-  @RequestMapping(path = "biomaterials/{id}/inputBiomaterials", method = RequestMethod.GET)
-  ResponseEntity<PagedResources> getInputBiomaterials(@PathVariable("id") Biomaterial biomaterial,
-                                                   Pageable pageable,
-                                                   final PersistentEntityResourceAssembler resourceAssembler) {
-    Page<Biomaterial> inputBiomaterials = biomaterialService.getInputBiomaterials(biomaterial, pageable);
-    return ResponseEntity.ok(pagedResourcesAssembler.toResource(inputBiomaterials, resourceAssembler));
-  }
-
-  @RequestMapping(path = "biomaterials/{id}/inputBiomaterials/{input_id}", method = RequestMethod.DELETE)
-  ResponseEntity<Resource<?>> deleteInputBiomaterial(@PathVariable("id") Biomaterial biomaterial,
-                                                  @PathVariable("input_id") Biomaterial inputBiomaterial,
-                                                  PersistentEntityResourceAssembler assembler) {
-    biomaterialService.deleteInputBiomaterial(biomaterial, inputBiomaterial);
-    return ResponseEntity.accepted().build();
-
-  }
-
   @PostMapping(path = "/biomaterials/query")
   ResponseEntity<PagedResources<Resource<Project>>> queryProjects(
           @RequestBody List<MetadataCriteria> criteriaList,
           @RequestParam("operator") Optional<String> operator,
           Pageable pageable,
           final PersistentEntityResourceAssembler resourceAssembler) {
-    Boolean andCriteria = false;
-    if (operator.isPresent() && operator.get().toLowerCase().equals("and"))
-      andCriteria = true; //otherwise "or" will be used.
+    Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
     Page<Biomaterial> biomaterials = biomaterialService.findByCriteria(criteriaList, andCriteria, pageable);
     return ResponseEntity.ok(pagedResourcesAssembler.toResource(biomaterials, resourceAssembler));
   }

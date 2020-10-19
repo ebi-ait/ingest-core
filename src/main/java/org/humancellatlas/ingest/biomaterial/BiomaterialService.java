@@ -5,10 +5,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
-import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
-import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
@@ -52,66 +50,7 @@ public class BiomaterialService {
         }
     }
 
-    public void addInputBiomaterial(Biomaterial inputBiomaterial, Process process, Biomaterial biomaterial) {
-        if (process != null) {
-            processRepository.save(process);
-            biomaterial.addAsDerivedByProcess(process);
-            inputBiomaterial.addAsInputToProcess(process);
-            biomaterialRepository.save(biomaterial);
-        } else {
-            throw new RuntimeException("There should be a process to link biomaterials");
-        }
-    }
-
-    public Page<Biomaterial> getInputBiomaterials(Biomaterial biomaterial, Pageable pageable) {
-        // Currently, any given biomaterial or file would be the output of a single process, not multiple ones
-        // See conversation: https://embl-ebi-ait.slack.com/archives/C016R78CDV1/p1602757614320200
-        Page<Biomaterial> inputBiomaterials = new PageImpl<>(Collections.emptyList());
-        Set<Process> derivedByProcesses = biomaterial.getDerivedByProcesses();
-        if (!derivedByProcesses.isEmpty()) {
-            Process derivedByProcess = derivedByProcesses.iterator().next();
-            inputBiomaterials = biomaterialRepository.findByInputToProcessesContaining(derivedByProcess, pageable);
-
-        }
-        return inputBiomaterials;
-    }
-
-    public void deleteInputBiomaterial(Biomaterial biomaterial, Biomaterial biomaterialToDelete) {
-        Set<Process> derivedByProcesses = biomaterial.getDerivedByProcesses();
-
-        if (!derivedByProcesses.isEmpty()) {
-            Process derivedByProcess = derivedByProcesses.iterator().next();
-            Stream<Biomaterial> inputBiomaterials = biomaterialRepository.findByInputToProcessesContains(derivedByProcess);
-
-            List<Biomaterial> inputBiomaterialList = inputBiomaterials.collect(Collectors.toList());
-            long inputBiomaterialCount = inputBiomaterialList.size();
-
-            if (inputBiomaterialCount == 0) {
-                throw new RuntimeException(
-                        String.format("A biomaterial with uuid %s has a process with uuid %s " +
-                                        "that is not linked to any biomaterial input",
-                                biomaterial.getUuid().toString(), derivedByProcess.getUuid())
-                );
-            } else {
-                inputBiomaterialList.forEach(inputBiomaterial -> {
-                    if (inputBiomaterial.equals(biomaterialToDelete)){
-                        inputBiomaterial.removeAsInputToProcess(derivedByProcess);
-                        biomaterial.removeAsDerivedByProcess(derivedByProcess);
-                        biomaterialRepository.save(inputBiomaterial);
-                        biomaterialRepository.save(biomaterial);
-                    }
-                });
-
-                if (inputBiomaterialCount == 1) {
-                    processRepository.delete(derivedByProcess);
-                }
-            }
-
-
-        }
-    }
-
-    public Page<Biomaterial> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable){
+    public Page<Biomaterial> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable) {
         return this.biomaterialRepository.findByCriteria(criteriaList, andCriteria, pageable);
     }
 }

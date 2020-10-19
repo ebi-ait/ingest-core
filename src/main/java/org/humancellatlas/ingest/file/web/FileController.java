@@ -102,32 +102,4 @@ public class FileController {
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }
-
-    @RequestMapping(path = "files/{id}/inputBiomaterial/{input_id}", method = RequestMethod.PUT)
-    ResponseEntity<Resource<?>> addInputBiomaterial(@PathVariable("id") File file,
-                                                    @PathVariable("input_id") Biomaterial inputBiomaterial,
-                                                    @RequestBody Process process,
-                                                    PersistentEntityResourceAssembler assembler) {
-        fileService.addInputBiomaterial(file, process, inputBiomaterial);
-        PersistentEntityResource resource = assembler.toFullResource(file);
-        return ResponseEntity.accepted().body(resource);
-    }
-
-    @RequestMapping(path = "files/{id}/inputBiomaterials", method = RequestMethod.GET)
-    ResponseEntity<PagedResources> getInputBiomaterials(@PathVariable("id") File file,
-                                                    Pageable pageable,
-                                                    PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Biomaterial> inputBiomaterials = fileService.getInputBiomaterials(file, pageable);
-        return ResponseEntity.ok(pagedResourcesAssembler.toResource(inputBiomaterials, resourceAssembler));
-    }
-
-    @RequestMapping(path = "files/{id}/inputBiomaterials/{input_id}", method = RequestMethod.DELETE)
-    ResponseEntity<Resource<?>> deleteInputBiomaterial(@PathVariable("id") File file,
-                                                       @PathVariable("input_id") Biomaterial inputBiomaterial,
-                                                       PersistentEntityResourceAssembler assembler) {
-        fileService.deleteInputBiomaterial(file, inputBiomaterial);
-        return ResponseEntity.accepted().build();
-
-    }
-
 }
