@@ -16,9 +16,11 @@ public class BiomaterialRepositoryImpl implements BiomaterialRepositoryCustom {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    @Autowired
+    private QueryBuilder queryBuilder;
+
     @Override
     public Page<Biomaterial> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable) {
-        QueryBuilder queryBuilder = new QueryBuilder();
         Query query = queryBuilder.build(criteriaList, andCriteria);
 
         long count = mongoTemplate.count(query, Biomaterial.class);

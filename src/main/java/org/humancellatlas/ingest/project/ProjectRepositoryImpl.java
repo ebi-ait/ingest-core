@@ -20,9 +20,11 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    @Autowired
+    private QueryBuilder queryBuilder;
+
     @Override
     public Page<Project> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable) {
-        QueryBuilder queryBuilder = new QueryBuilder();
         Query query = queryBuilder.build(criteriaList, andCriteria);
 
         long count = mongoTemplate.count(query, Project.class);

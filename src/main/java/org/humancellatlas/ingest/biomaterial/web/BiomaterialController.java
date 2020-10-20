@@ -65,6 +65,7 @@ public class BiomaterialController {
     return ResponseEntity.accepted().body(resource);
   }
 
+  //  It's not possible in Angular's HttpClient to send a body, using POST here
   @PostMapping(path = "/biomaterials/query")
   ResponseEntity<PagedResources<Resource<Project>>> queryProjects(
           @RequestBody List<MetadataCriteria> criteriaList,
@@ -75,5 +76,4 @@ public class BiomaterialController {
     Page<Biomaterial> biomaterials = biomaterialService.findByCriteria(criteriaList, andCriteria, pageable);
     return ResponseEntity.ok(pagedResourcesAssembler.toResource(biomaterials, resourceAssembler));
   }
-
 }

@@ -3,11 +3,13 @@ package org.humancellatlas.ingest.query;
 import org.springframework.data.mongodb.InvalidMongoDbApiUsageException;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@Component
 public class QueryBuilder {
     public Query build(List<MetadataCriteria> criteriaList, Boolean andCriteria){
         Query query = new Query();
