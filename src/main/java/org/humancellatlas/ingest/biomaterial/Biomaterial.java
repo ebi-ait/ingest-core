@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.process.Process;
@@ -70,6 +71,27 @@ public class Biomaterial extends MetadataDocument {
     @JsonProperty(access=READ_ONLY)
     public boolean isLinked() {
         return !inputToProcesses.isEmpty() || !derivedByProcesses.isEmpty();
+    }
+    /**
+     * Removes a process to the collection of processes that this biomaterial serves as an input to
+     *
+     * @param process the process to add
+     * @return a reference to this biomaterial
+     */
+    public Biomaterial removeAsInputToProcess(Process process) {
+        this.inputToProcesses.remove(process);
+        return this;
+    }
+
+    /**
+     * Removes a process to the collection of processes that this biomaterial was derived by
+     *
+     * @param process the process to add
+     * @return a reference to this biomaterial
+     */
+    public Biomaterial removeAsDerivedByProcess(Process process) {
+        this.derivedByProcesses.remove(process);
+        return this;
     }
 
 }

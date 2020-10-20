@@ -3,19 +3,27 @@ package org.humancellatlas.ingest.file;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
+import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.core.Checksums;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.exception.CoreEntityNotFoundException;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Javadocs go here!
@@ -32,6 +40,10 @@ public class FileService {
     private final @NonNull
     FileRepository fileRepository;
     private final @NonNull
+    BiomaterialRepository biomaterialRepository;
+    private final @NonNull
+    ProcessRepository processRepository;
+    private final @NonNull
     MetadataDocumentEventHandler metadataDocumentEventHandler;
     private final @NonNull
     MetadataCrudService metadataCrudService;
@@ -42,7 +54,7 @@ public class FileService {
     public File createFile(String fileName, File file, SubmissionEnvelope submissionEnvelope) {
         if (!fileRepository.findBySubmissionEnvelopeAndFileName(submissionEnvelope, fileName).isEmpty()) {
             throw new FileAlreadyExistsException(String.format("File with name %s already exists in envelope %s", fileName, submissionEnvelope.getId()),
-                                                 fileName);
+                    fileName);
         } else {
             file.setFileName(fileName);
             file.setUuid(Uuid.newUuid());
@@ -53,7 +65,7 @@ public class FileService {
 
     public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
         File createdFile;
-        if(! file.getIsUpdate()) {
+        if (!file.getIsUpdate()) {
             createdFile = metadataCrudService.addToSubmissionEnvelopeAndSave(file, submissionEnvelope);
         } else {
             createdFile = metadataUpdateService.acceptUpdate(file, submissionEnvelope);
@@ -63,7 +75,7 @@ public class FileService {
     }
 
     public File addFileValidationJob(File file, ValidationJob validationJob) {
-        if(file.getChecksums().getSha1().equals(validationJob.getChecksums().getSha1())) {
+        if (file.getChecksums().getSha1().equals(validationJob.getChecksums().getSha1())) {
             file.setValidationJob(validationJob);
             return fileRepository.save(file);
         } else {
@@ -93,6 +105,6 @@ public class FileService {
             // todo log
             throw new CoreEntityNotFoundException(String.format("Couldn't find envelope with with uuid %s", envelopeUuid));
         }
-
     }
+
 }

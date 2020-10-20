@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.security.authn.provider.elixir;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
 import org.humancellatlas.ingest.security.Account;
@@ -63,6 +64,8 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
             OpenIdAuthentication openIdAuth = new OpenIdAuthentication(account);
             openIdAuth.authenticateWith(userInfo);
             return openIdAuth;
+        } catch (TokenExpiredException e) {
+            throw new JwtVerificationFailed(e);
         } catch (JWTVerificationException e) {
             LOGGER.error("JWT verification failed: {}", e.getMessage());
             throw new JwtVerificationFailed(e);
