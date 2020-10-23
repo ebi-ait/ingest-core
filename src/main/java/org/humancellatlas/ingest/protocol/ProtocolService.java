@@ -9,7 +9,12 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
 
 /**
  * Javadocs go here!
@@ -21,6 +26,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Getter
 public class ProtocolService {
+
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull ProtocolRepository protocolRepository;
     private final @NonNull MetadataCrudService metadataCrudService;
@@ -39,6 +45,10 @@ public class ProtocolService {
         } else {
             return metadataUpdateService.acceptUpdate(protocol, submissionEnvelope);
         }
+    }
+
+    public Page<Protocol> retrieve(SubmissionEnvelope submission, Pageable pageable) {
+        return new PageImpl(Collections.emptyList());
     }
 
 }
