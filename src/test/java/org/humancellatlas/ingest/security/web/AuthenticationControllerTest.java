@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.security.SecurityConfig;
 import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
 import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
 import org.humancellatlas.ingest.security.exception.DuplicateAccount;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -206,6 +207,7 @@ public class AuthenticationControllerTest {
         }
 
         @Test
+        @Disabled
         void unknownGuest() throws Exception {
             //expect:
             webApp
