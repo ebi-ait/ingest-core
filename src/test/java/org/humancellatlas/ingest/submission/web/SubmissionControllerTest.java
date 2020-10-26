@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
+import org.humancellatlas.ingest.protocol.ProtocolService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
@@ -43,6 +44,8 @@ public class SubmissionControllerTest {
     private SubmissionEnvelopeService submissionEnvelopeService;
     @MockBean
     private ProcessService processService;
+    @MockBean
+    private ProtocolService protocolService;
 
     @MockBean
     private SubmissionEnvelopeRepository submissionEnvelopeRepository;
