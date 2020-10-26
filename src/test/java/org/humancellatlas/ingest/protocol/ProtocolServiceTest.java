@@ -53,22 +53,26 @@ public class ProtocolServiceTest {
             SubmissionEnvelope submission = new SubmissionEnvelope("89bcba7");
 
             //and:
-            Protocol protocol = new Protocol("test");
+            Protocol linked = new Protocol("linked");
+            Protocol notLinked = new Protocol("not linked");
             Pageable pageable = mock(Pageable.class);
-            doReturn(new PageImpl(asList(protocol))).when(protocolRepository)
+            doReturn(new PageImpl(asList(linked, notLinked))).when(protocolRepository)
                     .findBySubmissionEnvelope(submission, pageable);
 
             //and:
-            doReturn(Optional.of(new Process())).when(processRepository).findOneByProtocolsContains(protocol);
+            doReturn(Optional.of(new Process())).when(processRepository).findOneByProtocolsContains(linked);
+            doReturn(Optional.empty()).when(processRepository).findOneByProtocolsContains(notLinked);
 
             //when:
             Page<Protocol> results = protocolService.retrieve(submission, pageable);
 
             //then:
             assertThat(results).isNotNull();
-            assertThat(results.getTotalElements()).isEqualTo(1);
-            assertThat(results.getContent().get(0)).isEqualTo(protocol);
-            assertThat(protocol.isLinked()).isTrue();
+            assertThat(results.getTotalElements()).isEqualTo(2);
+
+            //and:
+            assertThat(linked.isLinked()).isTrue();
+            assertThat(notLinked.isLinked()).isFalse();
         }
 
     }
