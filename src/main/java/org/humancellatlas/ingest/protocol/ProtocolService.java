@@ -11,12 +11,8 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.Collections;
 
 /**
  * Javadocs go here!
@@ -54,7 +50,7 @@ public class ProtocolService {
     public Page<Protocol> retrieve(SubmissionEnvelope submission, Pageable pageable) {
         Page<Protocol> protocols = protocolRepository.findBySubmissionEnvelope(submission, pageable);
         protocols.forEach(protocol -> {
-            processRepository.findOneByProtocolsContains(protocol).ifPresent(protocol::useFor);
+            processRepository.findOneByProtocolsContains(protocol).ifPresent(it -> protocol.markAsLinked());
         });
         return protocols;
     }

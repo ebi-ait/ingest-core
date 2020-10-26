@@ -28,7 +28,7 @@ public class Protocol extends MetadataDocument {
     to this Protocol. In that case, the isLinked implementation will need to be changed to check if the list of
     processes is empty or not. This approach was not initially chosen because it would have required data migration.
      */
-    public void useFor(Process process) {
+    public void markAsLinked() {
         this.linked = true;
     }
 
