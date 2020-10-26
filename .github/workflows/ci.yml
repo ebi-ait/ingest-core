@@ -28,4 +28,4 @@ jobs:
       - name: Display Gradle environment
         run: ./gradlew -v
       - name: Gradle verification
-        run: ./gradlew verify
+        run: ./gradlew clean verify
