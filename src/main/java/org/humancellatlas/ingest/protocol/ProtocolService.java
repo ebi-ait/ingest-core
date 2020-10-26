@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -27,10 +29,12 @@ import java.util.Collections;
 @Getter
 public class ProtocolService {
 
-    private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
-    private final @NonNull ProtocolRepository protocolRepository;
     private final @NonNull MetadataCrudService metadataCrudService;
     private final @NonNull MetadataUpdateService metadataUpdateService;
+
+    private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
+    private final @NonNull ProtocolRepository protocolRepository;
+    private final @NonNull ProcessRepository processRepository;
 
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -48,7 +52,11 @@ public class ProtocolService {
     }
 
     public Page<Protocol> retrieve(SubmissionEnvelope submission, Pageable pageable) {
-        return new PageImpl(Collections.emptyList());
+        Page<Protocol> protocols = protocolRepository.findBySubmissionEnvelope(submission, pageable);
+        protocols.forEach(protocol -> {
+            processRepository.findOneByProtocolsContains(protocol).ifPresent(protocol::useFor);
+        });
+        return protocols;
     }
 
 }

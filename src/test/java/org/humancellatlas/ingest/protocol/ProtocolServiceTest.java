@@ -2,6 +2,8 @@ package org.humancellatlas.ingest.protocol;
 
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.Nested;
@@ -10,9 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Arrays;
+import java.util.Optional;
+
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 @SpringBootTest(classes=ProtocolService.class)
@@ -31,6 +39,9 @@ public class ProtocolServiceTest {
     private ProtocolRepository protocolRepository;
 
     @MockBean
+    private ProcessRepository processRepository;
+
+    @MockBean
     private SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
     @Nested
@@ -41,11 +52,23 @@ public class ProtocolServiceTest {
             //given:
             SubmissionEnvelope submission = new SubmissionEnvelope("89bcba7");
 
+            //and:
+            Protocol protocol = new Protocol("test");
+            Pageable pageable = mock(Pageable.class);
+            doReturn(new PageImpl(asList(protocol))).when(protocolRepository)
+                    .findBySubmissionEnvelope(submission, pageable);
+
+            //and:
+            doReturn(Optional.of(new Process())).when(processRepository).findOneByProtocolsContains(protocol);
+
             //when:
-            Page<Protocol> results = protocolService.retrieve(submission, mock(Pageable.class));
+            Page<Protocol> results = protocolService.retrieve(submission, pageable);
 
             //then:
             assertThat(results).isNotNull();
+            assertThat(results.getTotalElements()).isEqualTo(1);
+            assertThat(results.getContent().get(0)).isEqualTo(protocol);
+            assertThat(protocol.isLinked()).isTrue();
         }
 
     }
