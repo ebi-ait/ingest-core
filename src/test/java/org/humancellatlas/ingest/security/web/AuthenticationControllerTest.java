@@ -207,8 +207,6 @@ public class AuthenticationControllerTest {
         }
 
         @Test
-        //TODO this test was disabled because it was causing the Github CI script to fail for some reason.
-        //The error can't be reproduced elsewhere.
         void unknownGuest() throws Exception {
             //expect:
             webApp
