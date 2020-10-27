@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
 
-class FileRepositoryImpl implements FileRepositoryCustom {
+public class FileRepositoryImpl implements FileRepositoryCustom {
     @Autowired
     private MongoTemplate mongoTemplate;
 
