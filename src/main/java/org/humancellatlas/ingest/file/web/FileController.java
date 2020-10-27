@@ -11,6 +11,8 @@ import org.humancellatlas.ingest.file.FileService;
 import org.humancellatlas.ingest.file.ValidationJob;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +27,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -101,5 +104,17 @@ public class FileController {
         File entity = getFileService().addFileValidationJob(file, validationJob);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
+    }
+
+    //  It's not possible in Angular's HttpClient to send a body, using POST here
+    @PostMapping(path = "/files/query")
+    ResponseEntity<PagedResources<Resource<Project>>> queryFiles(
+            @RequestBody List<MetadataCriteria> criteriaList,
+            @RequestParam("operator") Optional<String> operator,
+            Pageable pageable,
+            final PersistentEntityResourceAssembler resourceAssembler) {
+        Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
+        Page<File> projects = fileService.findByCriteria(criteriaList, andCriteria, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
     }
 }
