@@ -5,8 +5,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
-import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.query.MetadataCriteria;
+import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
@@ -27,10 +27,13 @@ import java.util.List;
 @RequiredArgsConstructor
 @Getter
 public class ProtocolService {
-    private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
-    private final @NonNull ProtocolRepository protocolRepository;
+
     private final @NonNull MetadataCrudService metadataCrudService;
     private final @NonNull MetadataUpdateService metadataUpdateService;
+
+    private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
+    private final @NonNull ProtocolRepository protocolRepository;
+    private final @NonNull ProcessRepository processRepository;
 
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -40,15 +43,24 @@ public class ProtocolService {
     }
 
     public Protocol addProtocolToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Protocol protocol) {
-        if(! protocol.getIsUpdate()) {
+        if (!protocol.getIsUpdate()) {
             return metadataCrudService.addToSubmissionEnvelopeAndSave(protocol, submissionEnvelope);
         } else {
             return metadataUpdateService.acceptUpdate(protocol, submissionEnvelope);
         }
     }
 
-    public Page<Protocol> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable){
+
+    public Page<Protocol> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable) {
         return this.protocolRepository.findByCriteria(criteriaList, andCriteria, pageable);
+    }
+
+    public Page<Protocol> retrieve(SubmissionEnvelope submission, Pageable pageable) {
+        Page<Protocol> protocols = protocolRepository.findBySubmissionEnvelope(submission, pageable);
+        protocols.forEach(protocol -> {
+            processRepository.findOneByProtocolsContains(protocol).ifPresent(it -> protocol.markAsLinked());
+        });
+        return protocols;
     }
 
 }
