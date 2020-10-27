@@ -18,6 +18,7 @@ import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
+import org.humancellatlas.ingest.protocol.ProtocolService;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
 import org.humancellatlas.ingest.state.ValidationState;
@@ -60,6 +61,7 @@ public class SubmissionController {
     private final @NonNull SubmissionEnvelopeService submissionEnvelopeService;
     private final @NonNull SubmissionStateMachineService submissionStateMachineService;
     private final @NonNull ProcessService processService;
+    private final @NonNull ProtocolService protocolService;
 
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull FileRepository fileRepository;
@@ -109,7 +111,7 @@ public class SubmissionController {
     ResponseEntity<?> getProtocols(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                    Pageable pageable,
                                    final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Protocol> protocols = getProtocolRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
+        Page<Protocol> protocols = protocolService.retrieve(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
     }
 

@@ -53,4 +53,8 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
     Stream<Process> findByProtocolsContains(Protocol protocol);
 
     Stream<Process> findByInputBundleManifestsContains(BundleManifest bundleManifest);
+
+    @RestResource(exported = false)
+    Optional<Process> findOneByProtocolsContains(Protocol protocol);
+
 }
