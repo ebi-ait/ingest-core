@@ -10,6 +10,7 @@ import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
@@ -216,5 +217,9 @@ public class ProcessService {
 
     public Stream<Process> getProcesses(Collection<String> processIds) {
         return processRepository.findAllByIdIn(processIds);
+    }
+
+    public Page<Process> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable){
+        return this.processRepository.findByCriteria(criteriaList, andCriteria, pageable);
     }
 }
