@@ -51,8 +51,11 @@ public class Process extends MetadataDocument {
 
     public Process addInputBundleManifest(BundleManifest bundleManifest) {
         this.inputBundleManifests.add(bundleManifest);
-
         return this;
+    }
+
+    public void addProtocol(Protocol protocol) {
+        protocols.add(protocol);
     }
 
 }

@@ -15,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
@@ -60,8 +59,8 @@ public class ProtocolServiceTest {
                     .findBySubmissionEnvelope(submission, pageable);
 
             //and:
-            doReturn(Optional.of(new Process())).when(processRepository).findOneByProtocolsContains(linked);
-            doReturn(Optional.empty()).when(processRepository).findOneByProtocolsContains(notLinked);
+            doReturn(Optional.of(new Process())).when(processRepository).findFirstByProtocolsContains(linked);
+            doReturn(Optional.empty()).when(processRepository).findFirstByProtocolsContains(notLinked);
 
             //when:
             Page<Protocol> results = protocolService.retrieve(submission, pageable);
