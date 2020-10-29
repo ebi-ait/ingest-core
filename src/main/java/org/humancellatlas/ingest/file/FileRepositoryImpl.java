@@ -21,10 +21,8 @@ public class FileRepositoryImpl implements FileRepositoryCustom {
     @Override
     public Page<File> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable) {
         Query query = queryBuilder.build(criteriaList, andCriteria);
-
         long count = mongoTemplate.count(query, File.class);
-        query.with(pageable);
-        List<File> result = mongoTemplate.find(query, File.class);
+        List<File> result = mongoTemplate.find(query.with(pageable), File.class);
 
         return new PageImpl<>(result, pageable, count);
     };

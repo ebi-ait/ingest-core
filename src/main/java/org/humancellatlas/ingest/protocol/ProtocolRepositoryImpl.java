@@ -21,10 +21,8 @@ public class ProtocolRepositoryImpl implements ProtocolRepositoryCustom {
     @Override
     public Page<Protocol> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable) {
         Query query = queryBuilder.build(criteriaList, andCriteria);
-
         long count = mongoTemplate.count(query, Protocol.class);
-        query.with(pageable);
-        List<Protocol> result = mongoTemplate.find(query, Protocol.class);
+        List<Protocol> result = mongoTemplate.find(query.with(pageable), Protocol.class);
 
         return new PageImpl<>(result, pageable, count);
     };

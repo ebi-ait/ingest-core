@@ -22,8 +22,7 @@ public class ProcessRepositoryImpl implements ProcessRepositoryCustom{
     public Page<Process> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable) {
         Query query = queryBuilder.build(criteriaList, andCriteria);
         long count = mongoTemplate.count(query, Process.class);
-        query.with(pageable);
-        List<Process> result = mongoTemplate.find(query, Process.class);
+        List<Process> result = mongoTemplate.find(query.with(pageable), Process.class);
 
         return new PageImpl<>(result, pageable, count);
     };
