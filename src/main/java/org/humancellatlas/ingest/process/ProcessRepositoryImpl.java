@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
 
-public class ProcessRepositoryImpl implements ProcessRepositoryCustom{
+public class ProcessRepositoryImpl implements ProcessRepositoryCustom {
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -21,9 +21,9 @@ public class ProcessRepositoryImpl implements ProcessRepositoryCustom{
     @Override
     public Page<Process> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable) {
         Query query = queryBuilder.build(criteriaList, andCriteria);
-        long count = mongoTemplate.count(query, Process.class);
         List<Process> result = mongoTemplate.find(query.with(pageable), Process.class);
+        long count = mongoTemplate.count(query, Process.class);
 
         return new PageImpl<>(result, pageable, count);
-    };
+    }
 }

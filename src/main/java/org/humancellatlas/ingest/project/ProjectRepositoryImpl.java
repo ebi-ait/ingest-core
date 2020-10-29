@@ -26,9 +26,9 @@ public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
     @Override
     public Page<Project> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable) {
         Query query = queryBuilder.build(criteriaList, andCriteria);
-        long count = mongoTemplate.count(query, Project.class);
         List<Project> result = mongoTemplate.find(query.with(pageable), Project.class);
+        long count = mongoTemplate.count(query, Project.class);
 
         return new PageImpl<>(result, pageable, count);
-    };
+    }
 }
