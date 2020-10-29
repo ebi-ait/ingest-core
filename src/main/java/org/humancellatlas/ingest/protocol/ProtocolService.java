@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
@@ -13,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Javadocs go here!
@@ -40,7 +43,7 @@ public class ProtocolService {
     }
 
     public Protocol addProtocolToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Protocol protocol) {
-        if(! protocol.getIsUpdate()) {
+        if (!protocol.getIsUpdate()) {
             return metadataCrudService.addToSubmissionEnvelopeAndSave(protocol, submissionEnvelope);
         } else {
             return metadataUpdateService.acceptUpdate(protocol, submissionEnvelope);

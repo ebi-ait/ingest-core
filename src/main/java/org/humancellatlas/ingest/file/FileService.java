@@ -13,6 +13,7 @@ import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;

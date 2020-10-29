@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.biomaterial;
+package org.humancellatlas.ingest.file;
 
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.query.QueryBuilder;
@@ -11,8 +11,7 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
 
-public class BiomaterialRepositoryImpl implements BiomaterialRepositoryCustom {
-
+public class FileRepositoryImpl implements FileRepositoryCustom {
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -20,13 +19,11 @@ public class BiomaterialRepositoryImpl implements BiomaterialRepositoryCustom {
     private QueryBuilder queryBuilder;
 
     @Override
-    public Page<Biomaterial> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable) {
+    public Page<File> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable) {
         Query query = queryBuilder.build(criteriaList, andCriteria);
-        List<Biomaterial> result = mongoTemplate.find(query.with(pageable), Biomaterial.class);
-        long count = mongoTemplate.count(query, Biomaterial.class);
+        List<File> result = mongoTemplate.find(query.with(pageable), File.class);
+        long count = mongoTemplate.count(query, File.class);
 
         return new PageImpl<>(result, pageable, count);
     }
-
-
 }

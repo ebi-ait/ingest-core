@@ -22,7 +22,7 @@ import java.util.stream.Stream;
  * @date 31/08/17
  */
 @CrossOrigin
-public interface ProtocolRepository extends MongoRepository<Protocol, String> {
+public interface ProtocolRepository extends MongoRepository<Protocol, String>, ProtocolRepositoryCustom {
 
     public Page<Protocol> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
