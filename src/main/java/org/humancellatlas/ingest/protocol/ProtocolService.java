@@ -50,11 +50,6 @@ public class ProtocolService {
         }
     }
 
-
-    public Page<Protocol> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable) {
-        return this.protocolRepository.findByCriteria(criteriaList, andCriteria, pageable);
-    }
-
     public Page<Protocol> retrieve(SubmissionEnvelope submission, Pageable pageable) {
         Page<Protocol> protocols = protocolRepository.findBySubmissionEnvelope(submission, pageable);
         protocols.forEach(protocol -> {

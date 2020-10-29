@@ -108,7 +108,4 @@ public class FileService {
         }
     }
 
-    public Page<File> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable){
-        return this.fileRepository.findByCriteria(criteriaList, andCriteria, pageable);
-    }
 }

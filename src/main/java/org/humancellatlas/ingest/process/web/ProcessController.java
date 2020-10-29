@@ -7,10 +7,8 @@ import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
-import org.humancellatlas.ingest.process.BundleReference;
-import org.humancellatlas.ingest.process.InputFileReference;
+import org.humancellatlas.ingest.process.*;
 import org.humancellatlas.ingest.process.Process;
-import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -40,6 +38,7 @@ import java.util.UUID;
 @Getter
 public class ProcessController {
     private final @NonNull ProcessService processService;
+    private final @NonNull ProcessRepository processRepository;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
     @RequestMapping(path = "processes/{proc_id}/inputBiomaterials", method = RequestMethod.GET)
@@ -165,7 +164,7 @@ public class ProcessController {
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
         Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
-        Page<Process> processes = processService.findByCriteria(criteriaList, andCriteria, pageable);
+        Page<Process> processes = processRepository.findByCriteria(criteriaList, andCriteria, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
     }
 }

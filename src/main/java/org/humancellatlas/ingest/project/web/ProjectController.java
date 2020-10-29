@@ -119,7 +119,7 @@ public class ProjectController {
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
         Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
-        Page<Project> projects = projectService.findByCriteria(criteriaList, andCriteria, pageable);
+        Page<Project> projects = projectRepository.findByCriteria(criteriaList, andCriteria, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
     }
 

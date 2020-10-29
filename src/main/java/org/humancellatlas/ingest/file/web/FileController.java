@@ -5,10 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
-import org.humancellatlas.ingest.file.File;
-import org.humancellatlas.ingest.file.FileAlreadyExistsException;
-import org.humancellatlas.ingest.file.FileService;
-import org.humancellatlas.ingest.file.ValidationJob;
+import org.humancellatlas.ingest.file.*;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.Project;
@@ -46,6 +43,9 @@ public class FileController {
 
     @NonNull
     private final FileService fileService;
+
+    @NonNull
+    private final FileRepository fileRepository;
 
     @NonNull
     private final ProcessRepository processRepository;
@@ -114,7 +114,7 @@ public class FileController {
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
         Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
-        Page<File> projects = fileService.findByCriteria(criteriaList, andCriteria, pageable);
+        Page<File> projects = fileRepository.findByCriteria(criteriaList, andCriteria, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
     }
 }

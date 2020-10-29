@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.protocol.Protocol;
+import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.protocol.ProtocolService;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -36,6 +37,7 @@ import java.util.UUID;
 @Getter
 public class ProtocolController {
     private final @NonNull ProtocolService protocolService;
+    private final @NonNull ProtocolRepository protocolRepository;
 
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
@@ -70,7 +72,7 @@ public class ProtocolController {
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
         Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
-        Page<Protocol> protocols = protocolService.findByCriteria(criteriaList, andCriteria, pageable);
+        Page<Protocol> protocols = protocolRepository.findByCriteria(criteriaList, andCriteria, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(protocols, resourceAssembler));
     }
 }

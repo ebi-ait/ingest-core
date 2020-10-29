@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
+import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.biomaterial.BiomaterialService;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
@@ -40,6 +41,8 @@ public class BiomaterialController {
 
   private final @NonNull BiomaterialService biomaterialService;
 
+  private final @NonNull BiomaterialRepository biomaterialRepository;
+
   private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
   @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.POST)
@@ -73,7 +76,7 @@ public class BiomaterialController {
           Pageable pageable,
           final PersistentEntityResourceAssembler resourceAssembler) {
     Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
-    Page<Biomaterial> biomaterials = biomaterialService.findByCriteria(criteriaList, andCriteria, pageable);
+    Page<Biomaterial> biomaterials = biomaterialRepository.findByCriteria(criteriaList, andCriteria, pageable);
     return ResponseEntity.ok(pagedResourcesAssembler.toResource(biomaterials, resourceAssembler));
   }
 }

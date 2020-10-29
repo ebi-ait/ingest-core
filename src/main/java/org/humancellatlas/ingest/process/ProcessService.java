@@ -218,8 +218,4 @@ public class ProcessService {
     public Stream<Process> getProcesses(Collection<String> processIds) {
         return processRepository.findAllByIdIn(processIds);
     }
-
-    public Page<Process> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable){
-        return this.processRepository.findByCriteria(criteriaList, andCriteria, pageable);
-    }
 }

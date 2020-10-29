@@ -100,10 +100,6 @@ public class ProjectService {
                 });
     }
 
-    public Page<Project> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable){
-        return this.projectRepository.findByCriteria(criteriaList, andCriteria, pageable);
-    }
-
     public Set<SubmissionEnvelope> getSubmissionEnvelopes(Project project) {
         return gather(project).submissionEnvelopes;
     }

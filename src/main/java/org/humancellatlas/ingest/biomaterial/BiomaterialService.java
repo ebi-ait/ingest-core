@@ -49,8 +49,4 @@ public class BiomaterialService {
             return metadataUpdateService.acceptUpdate(biomaterial, submissionEnvelope);
         }
     }
-
-    public Page<Biomaterial> findByCriteria(List<MetadataCriteria> criteriaList, Boolean andCriteria, Pageable pageable) {
-        return this.biomaterialRepository.findByCriteria(criteriaList, andCriteria, pageable);
-    }
 }
