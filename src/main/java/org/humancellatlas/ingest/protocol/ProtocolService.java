@@ -58,7 +58,7 @@ public class ProtocolService {
     public Page<Protocol> retrieve(SubmissionEnvelope submission, Pageable pageable) {
         Page<Protocol> protocols = protocolRepository.findBySubmissionEnvelope(submission, pageable);
         protocols.forEach(protocol -> {
-            processRepository.findOneByProtocolsContains(protocol).ifPresent(it -> protocol.markAsLinked());
+            processRepository.findFirstByProtocolsContains(protocol).ifPresent(it -> protocol.markAsLinked());
         });
         return protocols;
     }
