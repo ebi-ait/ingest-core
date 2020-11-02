@@ -86,9 +86,12 @@ dependencies {
     implementation 'org.zalando:problem:0.23.0'
 
     implementation 'org.mongodb:mongo-java-driver:3.11.2'
-    compile 'com.github.cloudyrock.mongock:mongock-bom:4.1.17'
-    compile 'com.github.cloudyrock.mongock:mongock-spring-v5:4.1.17'
-    compile 'com.github.cloudyrock.mongock:mongodb-springdata-v2-driver:4.1.17'
+    //implementation('com.github.cloudyrock.mongock:mongock-bom:4.1.17')
+    implementation('com.github.cloudyrock.mongock:mongock-spring-v5:4.1.17')
+    implementation ('com.github.cloudyrock.mongock:mongodb-springdata-v2-driver:4.1.17'){
+        exclude group: 'org.mongodb', module: 'mongo-java-driver'
+        exclude group: 'org.springframework.data', module: 'spring-data-mongodb'
+    }
 
     compile 'org.projectreactor:reactor-spring:1.0.1.RELEASE'
     compile 'org.projectlombok:lombok'

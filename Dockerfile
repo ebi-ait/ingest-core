@@ -4,6 +4,7 @@ WORKDIR /opt
 
 ENV LC_ALL=C
 ENV MONGO_URI=mongodb://localhost:27017/admin
+#ENV MONGO_URI=mongodb+srv://ingest:c92$RhSw*jnMkFd3JXGgdxB6tMg%TWzp@dev-mongo-cluster.xms6s.mongodb.net/test?retryWrites=true&w=majority
 ENV RABBIT_HOST=localhost
 ENV RABBIT_PORT=5672
 ENV SCHEMA_BASE_URI=https://schema.humancellatlas.org
