@@ -38,7 +38,7 @@ public class MetadataController {
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
     @RequestMapping(path = "/{metadataType}/{id}" + Links.DRAFT_URL, method = RequestMethod.PUT)
-    HttpEntity<?> draftBiomaterial(@PathVariable("metadataType") String metadataType,
+    HttpEntity<?> draftEvent(@PathVariable("metadataType") String metadataType,
                                    @PathVariable("id") String metadataId,
                                    PersistentEntityResourceAssembler assembler) {
         MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(entityTypeForCollection(metadataType),
@@ -48,7 +48,7 @@ public class MetadataController {
     }
 
     @RequestMapping(path = "/{metadataType}/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validatingBiomaterial(@PathVariable("metadataType") String metadataType,
+    HttpEntity<?> validatingEvent(@PathVariable("metadataType") String metadataType,
                                         @PathVariable("id") String metadataId,
                                         PersistentEntityResourceAssembler assembler) {
         MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(entityTypeForCollection(metadataType),
@@ -58,7 +58,7 @@ public class MetadataController {
     }
 
     @RequestMapping(path = "/{metadataType}/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> validateBiomaterial(@PathVariable("metadataType") String metadataType,
+    HttpEntity<?> validEvent(@PathVariable("metadataType") String metadataType,
                                       @PathVariable("id") String metadataId,
                                       PersistentEntityResourceAssembler assembler) {
         MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(entityTypeForCollection(metadataType),
@@ -68,7 +68,7 @@ public class MetadataController {
     }
 
     @RequestMapping(path = "/{metadataType}/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> invalidateBiomaterial(@PathVariable("metadataType") String metadataType,
+    HttpEntity<?> invalidEvent(@PathVariable("metadataType") String metadataType,
                                         @PathVariable("id") String metadataId,
                                         PersistentEntityResourceAssembler assembler) {
         MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(entityTypeForCollection(metadataType),
@@ -78,7 +78,7 @@ public class MetadataController {
     }
 
     @RequestMapping(path = "/{metadataType}/query", method = RequestMethod.POST)
-    ResponseEntity<PagedResources<Resource<?>>> queryProtocols(
+    ResponseEntity<PagedResources<Resource<?>>> query(
         @PathVariable("metadataType") String metadataType,
         @RequestBody List<MetadataCriteria> criteriaList,
         @RequestParam("operator") Optional<String> operator,
