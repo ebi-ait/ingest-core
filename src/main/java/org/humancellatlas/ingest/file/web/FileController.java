@@ -105,16 +105,4 @@ public class FileController {
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }
-
-    //  It's not possible in Angular's HttpClient to send a body, using POST here
-    @PostMapping(path = "/files/query")
-    ResponseEntity<PagedResources<Resource<Project>>> queryFiles(
-            @RequestBody List<MetadataCriteria> criteriaList,
-            @RequestParam("operator") Optional<String> operator,
-            Pageable pageable,
-            final PersistentEntityResourceAssembler resourceAssembler) {
-        Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
-        Page<File> projects = fileRepository.findByCriteria(criteriaList, andCriteria, pageable);
-        return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
-    }
 }

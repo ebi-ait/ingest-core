@@ -155,17 +155,5 @@ public class ProcessController {
         Page<Process> processes = processService.findProcessesByInputBundleUuid(UUID.fromString(bundleUuid), pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
     }
-
-    //  It's not possible in Angular's HttpClient to send a body, using POST here
-    @PostMapping(path = "/processes/query")
-    ResponseEntity<PagedResources<Resource<Protocol>>> queryProtocols(
-            @RequestBody List<MetadataCriteria> criteriaList,
-            @RequestParam("operator") Optional<String> operator,
-            Pageable pageable,
-            final PersistentEntityResourceAssembler resourceAssembler) {
-        Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
-        Page<Process> processes = processRepository.findByCriteria(criteriaList, andCriteria, pageable);
-        return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
-    }
 }
 

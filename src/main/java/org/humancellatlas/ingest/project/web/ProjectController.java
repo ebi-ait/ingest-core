@@ -111,18 +111,6 @@ public class ProjectController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(resultPage, resourceAssembler));
     }
 
-    //  It's not possible in Angular's HttpClient to send a body, using POST here
-    @PostMapping(path = "/projects/query")
-    ResponseEntity<PagedResources<Resource<Project>>> queryProjects(
-            @RequestBody List<MetadataCriteria> criteriaList,
-            @RequestParam("operator") Optional<String> operator,
-            Pageable pageable,
-            final PersistentEntityResourceAssembler resourceAssembler) {
-        Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
-        Page<Project> projects = projectRepository.findByCriteria(criteriaList, andCriteria, pageable);
-        return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
-    }
-
     @PutMapping(path = "projects/{proj_id}/submissionEnvelopes/{sub_id}")
     ResponseEntity<Resource<?>> linkSubmissionToProject (
             @PathVariable("proj_id") Project project,
