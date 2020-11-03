@@ -18,7 +18,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @CrossOrigin
-public interface ProcessRepository extends MongoRepository<Process, String> , ProcessRepositoryCustom {
+public interface ProcessRepository extends MongoRepository<Process, String> {
 
     @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
     Page<Process> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
