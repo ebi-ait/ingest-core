@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 
 @CrossOrigin
-public interface BiomaterialRepository extends MongoRepository<Biomaterial, String> , BiomaterialRepositoryCustom {
+public interface BiomaterialRepository extends MongoRepository<Biomaterial, String> {
 
     @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
     Page<Biomaterial> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);

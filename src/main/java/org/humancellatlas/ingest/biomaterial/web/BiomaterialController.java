@@ -67,16 +67,4 @@ public class BiomaterialController {
     PersistentEntityResource resource = assembler.toFullResource(entity);
     return ResponseEntity.accepted().body(resource);
   }
-
-  //  It's not possible in Angular's HttpClient to send a body, using POST here
-  @PostMapping(path = "/biomaterials/query")
-  ResponseEntity<PagedResources<Resource<Project>>> queryProjects(
-          @RequestBody List<MetadataCriteria> criteriaList,
-          @RequestParam("operator") Optional<String> operator,
-          Pageable pageable,
-          final PersistentEntityResourceAssembler resourceAssembler) {
-    Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
-    Page<Biomaterial> biomaterials = biomaterialRepository.findByCriteria(criteriaList, andCriteria, pageable);
-    return ResponseEntity.ok(pagedResourcesAssembler.toResource(biomaterials, resourceAssembler));
-  }
 }

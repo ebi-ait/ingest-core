@@ -63,16 +63,4 @@ public class ProtocolController {
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }
-
-    //  It's not possible in Angular's HttpClient to send a body, using POST here
-    @PostMapping(path = "/protocols/query")
-    ResponseEntity<PagedResources<Resource<Protocol>>> queryProtocols(
-            @RequestBody List<MetadataCriteria> criteriaList,
-            @RequestParam("operator") Optional<String> operator,
-            Pageable pageable,
-            final PersistentEntityResourceAssembler resourceAssembler) {
-        Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
-        Page<Protocol> protocols = protocolRepository.findByCriteria(criteriaList, andCriteria, pageable);
-        return ResponseEntity.ok(pagedResourcesAssembler.toResource(protocols, resourceAssembler));
-    }
 }

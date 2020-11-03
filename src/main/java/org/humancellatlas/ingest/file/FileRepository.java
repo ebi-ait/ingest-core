@@ -22,7 +22,7 @@ import java.util.stream.Stream;
  * Created by rolando on 06/09/2017.
  */
 @CrossOrigin
-public interface FileRepository extends MongoRepository<File, String>, FileRepositoryCustom {
+public interface FileRepository extends MongoRepository<File, String> {
 
     @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
     Page<File> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
