@@ -21,7 +21,7 @@ import java.util.List;
  * Created by prabhat on 02/11/2020.
  */
 @Service
-public class GenericQueryService {
+public class MetadataQueryService {
     @Autowired
     private MongoTemplate mongoTemplate;
 

@@ -9,7 +9,7 @@ import java.util.Optional;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
-import org.humancellatlas.ingest.query.GenericQueryService;
+import org.humancellatlas.ingest.query.MetadataQueryService;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -34,7 +34,7 @@ import org.springframework.hateoas.Resource;
 @ExposesResourceFor(MetadataDocument.class)
 public class MetadataController {
     private final @NonNull ValidationStateChangeService validationStateChangeService;
-    private final @NonNull GenericQueryService genericQueryService;
+    private final @NonNull MetadataQueryService metadataQueryService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
     @RequestMapping(path = "/{metadataType}/{id}" + Links.DRAFT_URL, method = RequestMethod.PUT)
@@ -85,7 +85,7 @@ public class MetadataController {
         Pageable pageable,
         final PersistentEntityResourceAssembler assembler) {
         Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
-        Page<?> docs = genericQueryService.findByCriteria(entityTypeForCollection(metadataType), criteriaList, andCriteria, pageable);
+        Page<?> docs = metadataQueryService.findByCriteria(entityTypeForCollection(metadataType), criteriaList, andCriteria, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(docs, assembler));
     }
 
