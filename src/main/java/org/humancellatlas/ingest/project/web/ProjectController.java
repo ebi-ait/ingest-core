@@ -4,15 +4,23 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
+import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.patch.JsonPatcher;
+import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectEventHandler;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
+import org.humancellatlas.ingest.protocol.Protocol;
+import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
@@ -50,11 +58,16 @@ public class ProjectController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectController.class);
 
     private final @NonNull ProjectService projectService;
+
     private final @NonNull ProjectEventHandler projectEventHandler;
 
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
     private final @NonNull ProjectRepository projectRepository;
+    private final @NonNull BiomaterialRepository biomaterialRepository;
+    private final @NonNull ProcessRepository processRepository;
+    private final @NonNull ProtocolRepository protocolRepository;
+    private final @NonNull FileRepository fileRepository;
 
     private final @NonNull JsonPatcher jsonPatcher;
 
@@ -109,6 +122,51 @@ public class ProjectController {
         var envelopes = projectService.getSubmissionEnvelopes(project);
         var resultPage = new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(resultPage, resourceAssembler));
+    }
+
+    @RequestMapping(path = "/project/{project_id}/biomaterials", method = RequestMethod.GET)
+    ResponseEntity<?> getBiomaterials(@PathVariable("project_id") Project project,
+                                      Pageable pageable,
+                                      final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Biomaterial> biomaterials = getBiomaterialRepository().findByProject(project, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(biomaterials, resourceAssembler));
+    }
+
+    @RequestMapping(path = "/project/{project_id}/processes", method = RequestMethod.GET)
+    ResponseEntity<?> getProcesses(@PathVariable("project_id") Project project,
+                                   Pageable pageable,
+                                   final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Process> processes = getProcessRepository().findByProject(project, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
+    }
+
+    @RequestMapping(path = "/project/{project_id}/protocols", method = RequestMethod.GET)
+    ResponseEntity<?> getProtocols(@PathVariable("project_id") Project project,
+                                   Pageable pageable,
+                                   final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Protocol> protocols = getProtocolRepository().findByProject(project, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
+    }
+
+    @RequestMapping(path = "/project/{project_id}/files", method = RequestMethod.GET)
+    ResponseEntity<?> getFiles(@PathVariable("project_id") Project project,
+                               Pageable pageable,
+                               final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<File> files = getFileRepository().findByProject(project, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
+    }
+
+
+    //  It's not possible in Angular's HttpClient to send a body, using POST here
+    @PostMapping(path = "/projects/query")
+    ResponseEntity<PagedResources<Resource<Project>>> queryProjects(
+            @RequestBody List<MetadataCriteria> criteriaList,
+            @RequestParam("operator") Optional<String> operator,
+            Pageable pageable,
+            final PersistentEntityResourceAssembler resourceAssembler) {
+        Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
+        Page<Project> projects = projectRepository.findByCriteria(criteriaList, andCriteria, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
     }
 
     @PutMapping(path = "projects/{proj_id}/submissionEnvelopes/{sub_id}")

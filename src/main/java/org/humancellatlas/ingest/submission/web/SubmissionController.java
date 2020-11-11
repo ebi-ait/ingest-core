@@ -83,14 +83,6 @@ public class SubmissionController {
         return ResponseEntity.ok(resourceAssembler.toFullResource(updateSubmission));
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files", method = RequestMethod.GET)
-    ResponseEntity<?> getFiles(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                               Pageable pageable,
-                               final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<File> files = getFileRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
-        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
-    }
-
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/projects", method = RequestMethod.GET)
     ResponseEntity<?> getProjects(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                   Pageable pageable,
@@ -107,6 +99,24 @@ public class SubmissionController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(projects, resourceAssembler));
     }
 
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.GET)
+    ResponseEntity<?> getBiomaterials(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                      Pageable pageable,
+                                      final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Biomaterial> biomaterials = getBiomaterialRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(biomaterials, resourceAssembler));
+    }
+
+
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/processes", method = RequestMethod.GET)
+    ResponseEntity<?> getProcesses(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                   Pageable pageable,
+                                   final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Process> processes = getProcessRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes
+                , resourceAssembler));
+    }
+
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols", method = RequestMethod.GET)
     ResponseEntity<?> getProtocols(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                    Pageable pageable,
@@ -115,12 +125,12 @@ public class SubmissionController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.GET)
-    ResponseEntity<?> getBiomaterials(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                      Pageable pageable,
-                                      final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Biomaterial> biomaterials = getBiomaterialRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
-        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(biomaterials, resourceAssembler));
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files", method = RequestMethod.GET)
+    ResponseEntity<?> getFiles(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                               Pageable pageable,
+                               final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<File> files = getFileRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/bundleManifests", method = RequestMethod.GET)
@@ -140,15 +150,6 @@ public class SubmissionController {
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/processes", method = RequestMethod.GET)
-    ResponseEntity<?> getProcesses(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                   Pageable pageable,
-                                   final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Process> processes = getProcessRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
-        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes
-                , resourceAssembler));
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/biomaterials/{state}", method = RequestMethod.GET)
