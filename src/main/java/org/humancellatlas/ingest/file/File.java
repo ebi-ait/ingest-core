@@ -10,6 +10,7 @@ import org.humancellatlas.ingest.core.Checksums;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
@@ -32,10 +33,19 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 public class File extends MetadataDocument {
 
     @Indexed
-    @RestResource @DBRef(lazy = true) private Set<Process> inputToProcesses = new HashSet<>();
+    private @Setter
+    @DBRef(lazy = true)
+    Project project;
 
     @Indexed
-    @RestResource @DBRef(lazy = true) private Set<Process> derivedByProcesses = new HashSet<>();
+    @RestResource
+    @DBRef(lazy = true)
+    private Set<Process> inputToProcesses = new HashSet<>();
+
+    @Indexed
+    @RestResource
+    @DBRef(lazy = true)
+    private Set<Process> derivedByProcesses = new HashSet<>();
 
     @Indexed
     private String fileName;
@@ -47,7 +57,7 @@ public class File extends MetadataDocument {
     private Long size;
     private String fileContentType;
 
-    public File(){
+    public File() {
         super(EntityType.FILE, null);
         setDataFileUuid(UUID.randomUUID());
     }
@@ -77,7 +87,7 @@ public class File extends MetadataDocument {
      */
     public File addAsDerivedByProcess(Process process) {
 
-    	// XXX why we implementing this check here but not above??
+        // XXX why we implementing this check here but not above??
         String processId = process.getId();
         boolean processInList = derivedByProcesses.stream()
                 .map(Process::getId)
@@ -95,7 +105,7 @@ public class File extends MetadataDocument {
         addAsDerivedByProcess(analysis);
     }
 
-    @JsonProperty(access=READ_ONLY)
+    @JsonProperty(access = READ_ONLY)
     public boolean isLinked() {
         return !inputToProcesses.isEmpty() || !derivedByProcesses.isEmpty();
     }
@@ -110,6 +120,6 @@ public class File extends MetadataDocument {
         this.derivedByProcesses.remove(process);
         return this;
     }
-    
+
 
 }

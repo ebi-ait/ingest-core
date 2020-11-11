@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -31,13 +32,24 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 @EqualsAndHashCode(callSuper = true)
 public class Biomaterial extends MetadataDocument {
 
-    @RestResource @DBRef(lazy = true) private Set<Project> projects = new HashSet<>();
+    @Indexed
+    private @Setter
+    @DBRef(lazy = true)
+    Project project;
+
+    @RestResource
+    @DBRef(lazy = true)
+    private Set<Project> projects = new HashSet<>();
 
     @Indexed
-    @RestResource @DBRef(lazy = true) private Set<Process> inputToProcesses = new HashSet<>();
+    @RestResource
+    @DBRef(lazy = true)
+    private Set<Process> inputToProcesses = new HashSet<>();
 
     @Indexed
-    @RestResource @DBRef(lazy = true) private  Set<Process> derivedByProcesses = new HashSet<>();
+    @RestResource
+    @DBRef(lazy = true)
+    private Set<Process> derivedByProcesses = new HashSet<>();
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Biomaterial(Object content) {
@@ -68,10 +80,11 @@ public class Biomaterial extends MetadataDocument {
         return this;
     }
 
-    @JsonProperty(access=READ_ONLY)
+    @JsonProperty(access = READ_ONLY)
     public boolean isLinked() {
         return !inputToProcesses.isEmpty() || !derivedByProcesses.isEmpty();
     }
+
     /**
      * Removes a process to the collection of processes that this biomaterial serves as an input to
      *

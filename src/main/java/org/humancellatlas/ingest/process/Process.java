@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.process;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -25,20 +26,29 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 public class Process extends MetadataDocument {
 
+    @Indexed
+    private @Setter
+    @DBRef(lazy = true)
+    Project project;
+
     @RestResource
     @DBRef(lazy = true)
     private Set<Project> projects = new HashSet<>();
+
     @RestResource
     @DBRef(lazy = true)
     private Set<Protocol> protocols = new HashSet<>();
+
     @RestResource
     @DBRef(lazy = true)
     @Indexed
     private Set<BundleManifest> inputBundleManifests = new HashSet<>();
 
-    private @DBRef Set<Process> chainedProcesses = new HashSet<>();
+    private @DBRef
+    Set<Process> chainedProcesses = new HashSet<>();
 
-    public Process() {}
+    public Process() {
+    }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public Process(Object content) {
