@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.biomaterial;
 
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -27,8 +28,9 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
     @RestResource(rel = "findByUuid", path = "findByUuid")
     Optional<Biomaterial> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
-    Page<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
-            Pageable pageable);
+    Page<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+
+    Page<Biomaterial> findByProject(Project project, Pageable pageable);
 
     @RestResource(exported = false)
     Stream<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
@@ -40,9 +42,9 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
     Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(rel = "findBySubmissionAndValidationState")
-    public Page<Biomaterial> findBySubmissionEnvelopeAndValidationState(@Param
-            ("envelopeUri") SubmissionEnvelope submissionEnvelope, @Param("state")
-            ValidationState state, Pageable pageable);
+    public Page<Biomaterial> findBySubmissionEnvelopeAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
+                                                                        @Param("state") ValidationState state,
+                                                                        Pageable pageable);
 
     @RestResource(exported = false)
     Stream<Biomaterial> findByInputToProcessesContains(Process process);

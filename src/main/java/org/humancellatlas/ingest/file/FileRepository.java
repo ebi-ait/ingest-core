@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.file;
 
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -30,16 +31,27 @@ public interface FileRepository extends MongoRepository<File, String> {
     @RestResource(rel = "findByUuid", path = "findByUuid")
     Optional<File> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
+    Page<File> findByProject(Project project, Pageable pageable);
+
     @RestResource(rel = "findBySubmissionEnvelope")
     Page<File> findBySubmissionEnvelope(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
     @RestResource(exported = false)
     Stream<File> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
+    List<File> findBySubmissionEnvelopeAndFileName(SubmissionEnvelope submissionEnvelope, String fileName);
+
+
+    @RestResource(rel = "findBySubmissionAndValidationState")
+    public Page<File> findBySubmissionEnvelopeAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
+                                                                 @Param("state") ValidationState state,
+                                                                 Pageable pageable);
+
+    @RestResource(exported = false)
+    Collection<File> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+
     @RestResource(exported = false)
     Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
-
-    List<File> findBySubmissionEnvelopeAndFileName(SubmissionEnvelope submissionEnvelope, String fileName);
 
     @RestResource(rel = "findByValidationId")
     File findByValidationJobValidationId(@Param("validationId") UUID id);
@@ -54,10 +66,4 @@ public interface FileRepository extends MongoRepository<File, String> {
 
     Page<File> findByDerivedByProcessesContaining(Process process, Pageable pageable);
 
-    @RestResource(rel = "findBySubmissionAndValidationState")
-    public Page<File> findBySubmissionEnvelopeAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
-                                                                            @Param("state") ValidationState state,
-                                                                            Pageable pageable);
-    @RestResource(exported = false)
-    Collection<File> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 }

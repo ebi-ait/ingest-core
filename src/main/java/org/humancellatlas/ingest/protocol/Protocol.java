@@ -3,13 +3,21 @@ package org.humancellatlas.ingest.protocol;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.project.Project;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 @Getter
 @EqualsAndHashCode(callSuper = true)
 public class Protocol extends MetadataDocument {
+    @Indexed
+    private @Setter
+    @DBRef(lazy = true)
+    Project project;
 
     private boolean linked = false;
 

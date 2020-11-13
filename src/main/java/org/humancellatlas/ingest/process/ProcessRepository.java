@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.process;
 
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -26,11 +27,20 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
     @RestResource(rel = "findByUuid", path = "findByUuid")
     Optional<Process> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
-    Page<Process> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
-            Pageable pageable);
+    Page<Process> findByProject(Project project, Pageable pageable);
+
+    Page<Process> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
     @RestResource(exported = false)
     Stream<Process> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+
+    @RestResource(rel = "findBySubmissionAndValidationState")
+    public Page<Process> findBySubmissionEnvelopeAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
+                                                                    @Param("state") ValidationState state,
+                                                                    Pageable pageable);
+
+    @RestResource(exported = false)
+    Collection<Process> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(exported = false)
     Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
@@ -38,16 +48,8 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
     @RestResource(exported = false)
     Page<Process> findByInputBundleManifestsContaining(BundleManifest bundleManifest, Pageable pageable);
 
-    @RestResource(rel = "findBySubmissionAndValidationState")
-    public Page<Process> findBySubmissionEnvelopeAndValidationState(@Param
-            ("envelopeUri") SubmissionEnvelope submissionEnvelope, @Param("state")
-            ValidationState state, Pageable pageable);
-
     @RestResource(exported = false)
     public Stream<Process> findAllByIdIn(Collection<String> ids);
-
-    @RestResource(exported = false)
-    Collection<Process> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(exported = false)
     Stream<Process> findByProtocolsContains(Protocol protocol);
