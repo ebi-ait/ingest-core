@@ -1,4 +1,4 @@
-FROM openjdk:11
+FROM quay.io/ebi-ait/ingest-base-images:openjdk_11
 
 WORKDIR /opt
 
