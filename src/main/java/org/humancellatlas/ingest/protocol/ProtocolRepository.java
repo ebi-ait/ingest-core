@@ -49,4 +49,8 @@ public interface ProtocolRepository extends MongoRepository<Protocol, String> {
     @RestResource(rel = "findByUuid", path = "findByUuid")
     Optional<Protocol> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
+    long countBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+
+    long countBySubmissionEnvelopeAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState validationState);
+
 }
