@@ -72,12 +72,12 @@ public interface FileRepository extends MongoRepository<File, String> {
     long countBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     @Query(value = "{'submissionEnvelope.id': ?0, validationErrors: {$elemMatch: {errorType: ?1} }}", count = true)
-    long countBySubmissionEnvelopeIdAndErrorType(String submissionEnvelopeId, String errorType);
+    long countBySubmissionEnvelopeIdAndErrorType(@Param("id") String submissionEnvelopeId, @Param("errorType") String errorType);
 
     @Query(value = "{'submissionEnvelope.id': ?0, validationErrors: {$elemMatch: {errorType: ?1} }}")
-    Page<File> findBySubmissionEnvelopeIdAndErrorType(String submissionEnvelopeId, String errorType, Pageable pageable);
+    Page<File> findBySubmissionEnvelopeIdAndErrorType(@Param("id") String submissionEnvelopeId, @Param("errorType") String errorType, Pageable pageable);
 
     @Query(value = "{'submissionEnvelope.id': ?0, validationErrors: {$not: {$elemMatch: {errorType: ?1} }}}", count = true)
-    long countBySubmissionEnvelopeIdAndNotErrorType(String submissionEnvelopeId, String errorType);
+    long countBySubmissionEnvelopeIdAndNotErrorType(@Param("id") String submissionEnvelopeId, @Param("errorType") String errorType);
 
 }
