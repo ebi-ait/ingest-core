@@ -58,11 +58,14 @@ public class SubmissionSummaryController implements ResourceProcessor<Repository
         long invalidProcesses = processRepository.countBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.INVALID);
         long invalidProtocols = protocolRepository.countBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.INVALID);
 
+        long totalInvalid = invalidBiomaterials + invalidFiles + invalidProcesses + invalidProtocols;
+
         summary.setInvalidBiomaterials(invalidBiomaterials);
         summary.setInvalidFiles(invalidFiles);
         summary.setMissingFiles(missingFiles);
         summary.setInvalidProcesses(invalidProcesses);
         summary.setInvalidProtocols(invalidProtocols);
+        summary.setTotalInvalid(totalInvalid);
 
         return summary;
     }
@@ -77,6 +80,7 @@ public class SubmissionSummaryController implements ResourceProcessor<Repository
         private Long totalFiles, invalidFiles, missingFiles;
         private Long totalProcesses, invalidProcesses;
         private Long totalProtocols, invalidProtocols;
+        private Long totalInvalid;
 
     }
     
