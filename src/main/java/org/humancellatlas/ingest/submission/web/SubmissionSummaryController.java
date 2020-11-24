@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.submission.web;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.file.ValidationErrorType;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.ValidationState;
@@ -53,8 +54,7 @@ public class SubmissionSummaryController implements ResourceProcessor<Repository
 
         long invalidBiomaterials = biomaterialRepository.countBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.INVALID);
         long invalidFiles = fileRepository.countBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.INVALID);
-        // TODO: DO NOT use hardcoded error message
-        long missingFiles = fileRepository.countBySubmissionEnvelopeIdAndValidationErrorsMessage(submissionEnvelope.getId(), "Valid metadata. File is not uploaded.");
+        long missingFiles = fileRepository.countBySubmissionEnvelopeIdAndErrorType(submissionEnvelope.getId(), ValidationErrorType.FILE_NOT_UPLOADED.name());
         long invalidProcesses = processRepository.countBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.INVALID);
         long invalidProtocols = protocolRepository.countBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.INVALID);
 
