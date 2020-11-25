@@ -55,5 +55,9 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
     Stream<Biomaterial> findByDerivedByProcessesContains(Process process);
 
     Page<Biomaterial> findByDerivedByProcessesContaining(Process process, Pageable pageable);
+    
+    long countBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+
+    long countBySubmissionEnvelopeAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState validationState);
 
 }

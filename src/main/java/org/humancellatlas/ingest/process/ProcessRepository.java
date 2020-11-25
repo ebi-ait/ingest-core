@@ -58,5 +58,9 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
 
     @RestResource(exported = false)
     Optional<Process> findFirstByProtocolsContains(Protocol protocol);
+    
+    long countBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+
+    long countBySubmissionEnvelopeAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState validationState);
 
 }

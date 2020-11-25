@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -65,5 +66,18 @@ public interface FileRepository extends MongoRepository<File, String> {
     Stream<File> findByDerivedByProcessesContains(Process process);
 
     Page<File> findByDerivedByProcessesContaining(Process process, Pageable pageable);
+
+    long countBySubmissionEnvelopeAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState validationState);
+
+    long countBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+
+    @Query(value = "{'submissionEnvelope.id': ?0, validationErrors: {$elemMatch: {errorType: ?1} }}", count = true)
+    long countBySubmissionEnvelopeIdAndErrorType(@Param("id") String submissionEnvelopeId, @Param("errorType") String errorType);
+
+    @Query(value = "{'submissionEnvelope.id': ?0, validationErrors: {$elemMatch: {errorType: ?1} }}")
+    Page<File> findBySubmissionEnvelopeIdAndErrorType(@Param("id") String submissionEnvelopeId, @Param("errorType") String errorType, Pageable pageable);
+
+    @Query(value = "{'submissionEnvelope.id': ?0, validationErrors: {$not: {$elemMatch: {errorType: ?1} }}}", count = true)
+    long countBySubmissionEnvelopeIdAndNotErrorType(@Param("id") String submissionEnvelopeId, @Param("errorType") String errorType);
 
 }
