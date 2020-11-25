@@ -53,8 +53,13 @@ public class SubmissionSummaryController implements ResourceProcessor<Repository
         summary.setTotalProtocols(protocolRepository.countBySubmissionEnvelope(submissionEnvelope));
 
         long invalidBiomaterials = biomaterialRepository.countBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.INVALID);
+
         long invalidFiles = fileRepository.countBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.INVALID);
+
+        long fileMetadataErrors = fileRepository.countBySubmissionEnvelopeIdAndErrorType(submissionEnvelope.getId(), ValidationErrorType.METADATA_ERROR.name());
         long missingFiles = fileRepository.countBySubmissionEnvelopeIdAndErrorType(submissionEnvelope.getId(), ValidationErrorType.FILE_NOT_UPLOADED.name());
+        long fileErrors = fileRepository.countBySubmissionEnvelopeIdAndErrorType(submissionEnvelope.getId(), ValidationErrorType.FILE_ERROR.name());
+
         long invalidProcesses = processRepository.countBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.INVALID);
         long invalidProtocols = protocolRepository.countBySubmissionEnvelopeAndValidationState(submissionEnvelope, ValidationState.INVALID);
 
@@ -62,7 +67,9 @@ public class SubmissionSummaryController implements ResourceProcessor<Repository
 
         summary.setInvalidBiomaterials(invalidBiomaterials);
         summary.setInvalidFiles(invalidFiles);
+        summary.setFileMetadataErrors(fileMetadataErrors);
         summary.setMissingFiles(missingFiles);
+        summary.setFileErrors(fileErrors);
         summary.setInvalidProcesses(invalidProcesses);
         summary.setInvalidProtocols(invalidProtocols);
         summary.setTotalInvalid(totalInvalid);
@@ -77,7 +84,7 @@ public class SubmissionSummaryController implements ResourceProcessor<Repository
 
         private Uuid uuid;
         private Long totalBiomaterials, invalidBiomaterials;
-        private Long totalFiles, invalidFiles, missingFiles;
+        private Long totalFiles, invalidFiles, fileMetadataErrors, missingFiles, fileErrors;
         private Long totalProcesses, invalidProcesses;
         private Long totalProtocols, invalidProtocols;
         private Long totalInvalid;
