@@ -38,7 +38,6 @@ public class MetadataStateChangeListener extends AbstractMongoEventListener<Meta
         messageRouter.routeValidationMessageFor(document);
     }
 
-
     @Override
     public void onBeforeConvert(BeforeConvertEvent<MetadataDocument> event) {
         MetadataDocument document = event.getSource();
