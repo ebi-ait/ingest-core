@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
+import org.springframework.data.rest.core.annotation.HandleAfterSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,11 @@ public class MetadataDocumentEventHandler {
     @HandleAfterCreate
     public void metadataDocumentAfterCreate(MetadataDocument document) {
         this.handleMetadataDocumentCreate(document);
+    }
+
+    @HandleAfterSave
+    public void metadataDocumentAfterSave(MetadataDocument document) {
+        messageRouter.routeStateTrackingUpdateMessageFor(document);
     }
 
     public void handleMetadataDocumentCreate(MetadataDocument document) {
