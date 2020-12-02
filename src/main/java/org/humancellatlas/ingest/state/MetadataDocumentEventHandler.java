@@ -22,6 +22,7 @@ public class MetadataDocumentEventHandler {
         this.handleMetadataDocumentCreate(document);
     }
 
+    // Notify state tracker of updates
     @HandleAfterSave
     public void metadataDocumentAfterSave(MetadataDocument document) {
         messageRouter.routeStateTrackingUpdateMessageFor(document);
