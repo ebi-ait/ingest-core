@@ -59,7 +59,7 @@ public class FileListener {
                                                .findByUuidUuid(envelopeUuid));
         if(envelopeForMessage.isPresent()){
             try {
-                fileService.createFile(fileMessage.getFileName(), new File(), envelopeForMessage.get());
+                fileService.addFileToSubmissionEnvelope(envelopeForMessage.get(), new File(null, fileMessage.getFileName()));
             } catch (FileAlreadyExistsException e) {
                 log.info(String.format("File listener attempted to create a File resource with name %s but it already existed for envelope %s",
                                        fileMessage.getFileName(),
