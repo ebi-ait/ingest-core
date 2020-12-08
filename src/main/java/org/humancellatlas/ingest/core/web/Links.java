@@ -79,16 +79,14 @@ public class Links {
     public static final String PROJECTS_REL = "projects";
     public static final String PROTOCOLS_URL = "/protocols";
     public static final String PROTOCOLS_REL = "protocols";
-    public static final String ASSAYS_URL = "/assays";
-    public static final String ASSAYS_REL = "assays";
-    public static final String ANALYSES_URL = "/analyses";
-    public static final String ANALYSES_REL = "analyses";
     public static final String BUNDLE_MANIFESTS_URL = "/bundleManifests";
     public static final String BUNDLE_MANIFESTS_REL = "bundleManifests";
     public static final String SUBMISSION_MANIFEST_URL = "/submissionManifest";
     public static final String SUBMISSION_MANIFEST_REL = "submissionManifest";
     public static final String SUBMISSION_ERRORS_URL = "/submissionErrors";
     public static final String SUBMISSION_ERRORS_REL = "submissionEnvelopeErrors";
+    public static final String SUBMISSION_SUMMARY_URL = "/summary";
+    public static final String SUBMISSION_SUMMARY_REL = "summary";
     public static final String SUBMISSION_DOCUMENTS_SM_URL = "/documentSmReport";
     public static final String SUBMISSION_DOCUMENTS_SM_REL = "documentSmReport";
 
@@ -99,12 +97,6 @@ public class Links {
     public static final String FILE_REF_URL = "/fileReference";
     public static final String FILE_REF_REL = "inputFileReferences";
     public static final String FILE_REF_OLD_EVIL_REL = "add-file-reference";
-
-    // Links to Processes
-    public static final String INPUT_TO_PROCESSES_URL = "/inputToProcesses";
-    public static final String INPUT_TO_PROCESSES_REL = "inputToProcesses";
-    public static final String DERIVED_BY_PROCESSES_URL = "/derivedByProcesses";
-    public static final String DERIVED_BY_PROCESSES_REL = "derivedByProcesses";
 
     // Links from Processes
     public static final String INPUT_BIOMATERIALS_URL = "/inputBiomaterials";

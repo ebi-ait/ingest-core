@@ -23,8 +23,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @RestController
-@RequestMapping("/submissionEnvelopes")
-public class SubmissionSummaryController implements ResourceProcessor<RepositoryLinksResource> {
+public class SubmissionSummaryController {
 
     @Autowired
     BiomaterialRepository biomaterialRepository;
@@ -35,13 +34,8 @@ public class SubmissionSummaryController implements ResourceProcessor<Repository
     @Autowired
     ProtocolRepository protocolRepository;
 
-    @Override
-    public RepositoryLinksResource process(RepositoryLinksResource resource) {
-        resource.add(ControllerLinkBuilder.linkTo(SubmissionSummaryController.class).withRel("submissionEnvelopes"));
-        return resource;
-    }
 
-    @RequestMapping(path = "/{sub_id}/summary", method = RequestMethod.GET)
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/summary", method = RequestMethod.GET)
     @ResponseBody
     public SubmissionSummary submissionSummary(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope) {
 
