@@ -83,7 +83,7 @@ public class ProjectServiceTest {
             submissionSet1.forEach(submission ->  project1.addToSubmissionEnvelopes(submission));
 
             //and:
-            var project2 = new Project(null);
+            var project2 = new Project("project2");
             BeanUtils.copyProperties(project1, project2);
             var submissionSet2 = IntStream.range(10, 15)
                     .mapToObj(Integer::toString)
@@ -116,7 +116,7 @@ public class ProjectServiceTest {
             submissionSet1.forEach(project1::addToSubmissionEnvelopes);
 
             //and:
-            var project2 = new Project("Project2");
+            var project2 = new Project("project2");
             BeanUtils.copyProperties(project1, project2);
             var submissionSet2 = IntStream.range(10, 15)
                 .mapToObj(Integer::toString)
@@ -210,11 +210,11 @@ public class ProjectServiceTest {
             var project = new Project("test project");
 
             //and: copy of project with no submissions
-            var persistentEmptyProject = new Project(null);
+            var persistentEmptyProject = new Project("project");
             BeanUtils.copyProperties(project, persistentEmptyProject);
 
             //and: copy of project with submissions
-            var persistentNonEmptyProject = new Project(null);
+            var persistentNonEmptyProject = new Project("project");
             BeanUtils.copyProperties(project, persistentNonEmptyProject);
             IntStream.range(0, 3)
                     .mapToObj(Integer::toString).map(SubmissionEnvelope::new)

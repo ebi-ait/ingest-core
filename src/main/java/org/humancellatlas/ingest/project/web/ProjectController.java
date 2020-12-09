@@ -21,7 +21,6 @@ import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
-import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +34,16 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.*;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Javadocs go here!
@@ -177,6 +179,44 @@ public class ProjectController {
             Map<String, String> errorResponse = Map.of("message", message);
             return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
         }
+    }
+
+    @RequestMapping(path = "/projects/{id}", method = RequestMethod.PATCH)
+    HttpEntity<?> patchBiomaterial(@PathVariable("id") Project project,
+                                   @RequestBody Project projectPatch,
+                                   PersistentEntityResourceAssembler assembler) {
+
+        if(projectPatch.getContent() != null){
+            project.setContent(projectPatch.getContent());
+        }
+
+        if(projectPatch.getReleaseDate() != null){
+            project.setReleaseDate(projectPatch.getReleaseDate());
+        }
+
+        if(projectPatch.getPrimaryWrangler() != null){
+            project.setPrimaryWrangler(projectPatch.getPrimaryWrangler());
+        }
+
+        if(projectPatch.getAccessionDate() != null){
+            project.setAccessionDate(projectPatch.getAccessionDate());
+        }
+
+        if(projectPatch.getTechnology() != null){
+            project.setTechnology(projectPatch.getTechnology());
+        }
+
+        if(projectPatch.getDataAccess() != null){
+            project.setDataAccess(projectPatch.getDataAccess());
+        }
+
+        if(projectPatch.getIdentifyingOrganisms() != null){
+            project.setIdentifyingOrganisms(projectPatch.getIdentifyingOrganisms());
+        }
+
+        Project entity = projectRepository.save(project);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return  ResponseEntity.accepted().body(resource);
     }
 
 }

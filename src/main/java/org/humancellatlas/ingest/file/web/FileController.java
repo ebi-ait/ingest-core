@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.time.Instant;
+
 /**
  * Javadocs go here!
  *
@@ -70,4 +72,21 @@ public class FileController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @RequestMapping(path = "/files/{id}", method = RequestMethod.PATCH)
+    HttpEntity<?> patchBiomaterial(@PathVariable("id") File file,
+                                   @RequestBody File filePatch,
+                                   PersistentEntityResourceAssembler assembler) {
+
+        if(filePatch.getContent() != null){
+            file.setContent(filePatch.getContent());
+        }
+
+        if(filePatch.getFileName() != null){
+            file.setFileName(filePatch.getFileName());
+        }
+
+        File entity = fileRepository.save(file);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return  ResponseEntity.accepted().body(resource);
+    }
 }

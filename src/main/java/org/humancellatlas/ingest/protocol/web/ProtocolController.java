@@ -7,21 +7,18 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.protocol.ProtocolService;
-import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -62,5 +59,18 @@ public class ProtocolController {
         Protocol entity = getProtocolService().addProtocolToSubmissionEnvelope(submissionEnvelope, protocol);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
+    }
+
+    @RequestMapping(path = "/protocols/{id}", method = RequestMethod.PATCH)
+    HttpEntity<?> patchBiomaterial(@PathVariable("id") Protocol protocol,
+                                   @RequestBody Protocol protocolPatch,
+                                   PersistentEntityResourceAssembler assembler) {
+        if(protocolPatch.getContent() != null){
+            protocol.setContent(protocolPatch.getContent());
+        }
+
+        Protocol entity = protocolRepository.save(protocol);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return  ResponseEntity.accepted().body(resource);
     }
 }

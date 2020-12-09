@@ -53,6 +53,7 @@ public class Project extends MetadataDocument {
     @Setter
     private Object identifyingOrganisms;
 
+    @Setter
     private String primaryWrangler;
 
 
