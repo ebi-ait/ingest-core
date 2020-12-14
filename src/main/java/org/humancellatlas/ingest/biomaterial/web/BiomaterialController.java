@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.biomaterial.web;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,8 @@ import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.biomaterial.BiomaterialService;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.patch.JsonPatcher;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -19,6 +22,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,6 +42,8 @@ public class BiomaterialController {
   private final @NonNull BiomaterialRepository biomaterialRepository;
 
   private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
+
+  private final @NonNull JsonPatcher jsonPatcher;
 
   @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.POST)
   ResponseEntity<Resource<?>> addBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -64,13 +70,13 @@ public class BiomaterialController {
 
   @RequestMapping(path = "/biomaterials/{id}", method = RequestMethod.PATCH)
   HttpEntity<?> patchBiomaterial(@PathVariable("id") Biomaterial biomaterial,
-                                 @RequestBody Biomaterial biomaterialPatch,
+                                 @RequestBody final ObjectNode patch,
                                  PersistentEntityResourceAssembler assembler) {
-    if(biomaterialPatch.getContent() != null){
-      biomaterial.setContent(biomaterialPatch.getContent());
-    }
+    List<String> allowedFields = List.of("content");
+    ObjectNode validPatch = patch.retain(allowedFields);
+    Biomaterial patchedBiomaterial = jsonPatcher.merge(validPatch, biomaterial);
 
-    Biomaterial entity = biomaterialRepository.save(biomaterial);
+    Biomaterial entity = biomaterialRepository.save(patchedBiomaterial);
     PersistentEntityResource resource = assembler.toFullResource(entity);
     return  ResponseEntity.accepted().body(resource);
   }

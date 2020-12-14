@@ -40,10 +40,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Javadocs go here!
@@ -75,16 +72,19 @@ public class ProjectController {
 
     @PostMapping("/projects")
     ResponseEntity<Resource<?>> register(@RequestBody final Project project,
-            final PersistentEntityResourceAssembler assembler) {
+                                         final PersistentEntityResourceAssembler assembler) {
         Project result = projectService.register(project);
         return ResponseEntity.ok().body(assembler.toFullResource(result));
     }
 
     @PatchMapping("/projects/{id}")
     ResponseEntity<Resource<?>> update(@PathVariable("id") final Project project,
-            @RequestParam(value = "partial", defaultValue = "false") Boolean partial,
-            @RequestBody final ObjectNode patch, final PersistentEntityResourceAssembler assembler) {
-        Project patchedProject = jsonPatcher.merge(patch, project);
+                                       @RequestParam(value = "partial", defaultValue = "false") Boolean partial,
+                                       @RequestBody final ObjectNode patch, final PersistentEntityResourceAssembler assembler) {
+
+        List<String> allowedFields = List.of("content", "releaseDate", "primaryWrangler", "accessionDate", "technology", "dataAccess", "identifyingOrganisms");
+        ObjectNode validPatch = patch.retain(allowedFields);
+        Project patchedProject = jsonPatcher.merge(validPatch, project);
         patchedProject = projectRepository.save(patchedProject);
         if (!partial) {
             projectEventHandler.editedProjectMetadata(patchedProject);
@@ -159,7 +159,7 @@ public class ProjectController {
     }
 
     @PutMapping(path = "projects/{proj_id}/submissionEnvelopes/{sub_id}")
-    ResponseEntity<Resource<?>> linkSubmissionToProject (
+    ResponseEntity<Resource<?>> linkSubmissionToProject(
             @PathVariable("proj_id") Project project,
             @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
             PersistentEntityResourceAssembler assembler) {
@@ -179,44 +179,6 @@ public class ProjectController {
             Map<String, String> errorResponse = Map.of("message", message);
             return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
         }
-    }
-
-    @RequestMapping(path = "/projects/{id}", method = RequestMethod.PATCH)
-    HttpEntity<?> patchBiomaterial(@PathVariable("id") Project project,
-                                   @RequestBody Project projectPatch,
-                                   PersistentEntityResourceAssembler assembler) {
-
-        if(projectPatch.getContent() != null){
-            project.setContent(projectPatch.getContent());
-        }
-
-        if(projectPatch.getReleaseDate() != null){
-            project.setReleaseDate(projectPatch.getReleaseDate());
-        }
-
-        if(projectPatch.getPrimaryWrangler() != null){
-            project.setPrimaryWrangler(projectPatch.getPrimaryWrangler());
-        }
-
-        if(projectPatch.getAccessionDate() != null){
-            project.setAccessionDate(projectPatch.getAccessionDate());
-        }
-
-        if(projectPatch.getTechnology() != null){
-            project.setTechnology(projectPatch.getTechnology());
-        }
-
-        if(projectPatch.getDataAccess() != null){
-            project.setDataAccess(projectPatch.getDataAccess());
-        }
-
-        if(projectPatch.getIdentifyingOrganisms() != null){
-            project.setIdentifyingOrganisms(projectPatch.getIdentifyingOrganisms());
-        }
-
-        Project entity = projectRepository.save(project);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
-        return  ResponseEntity.accepted().body(resource);
     }
 
 }

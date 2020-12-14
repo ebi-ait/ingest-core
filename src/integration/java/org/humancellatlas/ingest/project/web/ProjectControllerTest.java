@@ -108,6 +108,46 @@ class ProjectControllerTest {
             postCondition.accept(project);
         }
 
+        @Test
+        void onlyUpdateAllowedFields() throws Exception {
+            //given:
+            var content = new HashMap<String, Object>();
+            content.put("description", "test");
+            Project project = new Project(content);
+            project = repository.save(project);
+
+            //when:
+            content.put("description", "test updated");
+            MvcResult result = webApp
+                    .perform(patch("/projects/{id}", project.getId())
+                            .contentType(APPLICATION_JSON_VALUE)
+                            .content("{\"content\": " + objectMapper.writeValueAsString(content) + ", \"validationState\": \"VALID\"}"))
+                    .andReturn();
+
+            //expect:
+            MockHttpServletResponse response = result.getResponse();
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+            assertThat(response.getContentType()).containsPattern("application/.*json.*");
+
+            //and:
+            //Using Map here because reading directly to Project converts the entire JSON to Project.content.
+            Map<String, Object> updated = objectMapper.readValue(response.getContentAsString(), Map.class);
+            assertThat(updated.get("content")).isInstanceOf(Map.class);
+            MapEntry<String, String> updatedDescription = entry("description", "test updated");
+            assertThat((Map) updated.get("content")).containsOnly(updatedDescription);
+            assertThat(updated.get("validationState")).isEqualTo("DRAFT");
+
+            //and:
+            project = repository.findById(project.getId()).get();
+            assertThat((Map) project.getContent()).containsOnly(updatedDescription);
+
+            //and:
+            var projectCaptor = ArgumentCaptor.forClass(Project.class);
+            verify(projectEventHandler).editedProjectMetadata(projectCaptor.capture());
+            Project handledProject = projectCaptor.getValue();
+            assertThat(handledProject.getId()).isEqualTo(project.getId());
+        }
+
     }
 
 }

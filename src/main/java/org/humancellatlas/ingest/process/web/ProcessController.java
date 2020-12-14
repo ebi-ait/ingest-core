@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.process.web;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -7,8 +8,10 @@ import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.patch.JsonPatcher;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.*;
+import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,6 +42,7 @@ public class ProcessController {
     private final @NonNull ProcessService processService;
     private final @NonNull ProcessRepository processRepository;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
+    private final @NonNull JsonPatcher jsonPatcher;
 
     @RequestMapping(path = "processes/{proc_id}/inputBiomaterials", method = RequestMethod.GET)
     ResponseEntity<?> getProcessInputBiomaterials(@PathVariable("proc_id") Process process,
@@ -155,15 +160,14 @@ public class ProcessController {
     }
 
     @RequestMapping(path = "/processes/{id}", method = RequestMethod.PATCH)
-    HttpEntity<?> patchBiomaterial(@PathVariable("id") Process process,
-                                   @RequestBody Process processPatch,
-                                   PersistentEntityResourceAssembler assembler) {
-        if(processPatch.getContent() != null){
-            process.setContent(processPatch.getContent());
-        }
+    HttpEntity<?> patchProcess(@PathVariable("id") Process process,
+                               @RequestBody final ObjectNode patch,
+                               PersistentEntityResourceAssembler assembler) {
+        List<String> allowedFields = List.of("content");
+        ObjectNode validPatch = patch.retain(allowedFields);
+        Process patchedProcess = jsonPatcher.merge(validPatch, process);
 
-
-        Process entity = processRepository.save(process);
+        Process entity = processRepository.save(patchedProcess);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return  ResponseEntity.accepted().body(resource);
     }

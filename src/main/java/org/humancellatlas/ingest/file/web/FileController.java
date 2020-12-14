@@ -1,9 +1,12 @@
 package org.humancellatlas.ingest.file.web;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.file.*;
+import org.humancellatlas.ingest.patch.JsonPatcher;
+import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * Javadocs go here!
@@ -47,9 +51,12 @@ public class FileController {
     @NonNull
     private final PagedResourcesAssembler pagedResourcesAssembler;
 
+    @NonNull
+    private final JsonPatcher jsonPatcher;
+
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
-                                method = RequestMethod.POST,
-                                produces = MediaTypes.HAL_JSON_VALUE)
+            method = RequestMethod.POST,
+            produces = MediaTypes.HAL_JSON_VALUE)
     ResponseEntity<Resource<?>> createFile(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                            @RequestBody File file,
                                            final PersistentEntityResourceAssembler assembler) {
@@ -73,20 +80,15 @@ public class FileController {
     }
 
     @RequestMapping(path = "/files/{id}", method = RequestMethod.PATCH)
-    HttpEntity<?> patchBiomaterial(@PathVariable("id") File file,
-                                   @RequestBody File filePatch,
-                                   PersistentEntityResourceAssembler assembler) {
+    HttpEntity<?> patchFile(@PathVariable("id") File file,
+                            @RequestBody final ObjectNode patch,
+                            PersistentEntityResourceAssembler assembler) {
+        List<String> allowedFields = List.of("content", "fileName");
+        ObjectNode validPatch = patch.retain(allowedFields);
+        File patchedFile = jsonPatcher.merge(validPatch, file);
 
-        if(filePatch.getContent() != null){
-            file.setContent(filePatch.getContent());
-        }
-
-        if(filePatch.getFileName() != null){
-            file.setFileName(filePatch.getFileName());
-        }
-
-        File entity = fileRepository.save(file);
+        File entity = fileRepository.save(patchedFile);
         PersistentEntityResource resource = assembler.toFullResource(entity);
-        return  ResponseEntity.accepted().body(resource);
+        return ResponseEntity.accepted().body(resource);
     }
 }
