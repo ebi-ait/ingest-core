@@ -43,6 +43,10 @@ public class MetadataStateChangeListener extends AbstractMongoEventListener<Meta
     public void onBeforeConvert(BeforeConvertEvent<MetadataDocument> event) {
         MetadataDocument document = event.getSource();
 
+        if (!Optional.ofNullable(document.getDcpVersion()).isPresent()) {
+            document.setDcpVersion(document.getSubmissionDate());
+        }
+
         if (!Optional.ofNullable(document.getUuid()).isPresent()) {
             document.setUuid(Uuid.newUuid());
         }
