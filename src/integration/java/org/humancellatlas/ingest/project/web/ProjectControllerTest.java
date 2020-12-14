@@ -7,6 +7,7 @@ import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectEventHandler;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.schemas.SchemaService;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -140,12 +141,7 @@ class ProjectControllerTest {
             //and:
             project = repository.findById(project.getId()).get();
             assertThat((Map) project.getContent()).containsOnly(updatedDescription);
-
-            //and:
-            var projectCaptor = ArgumentCaptor.forClass(Project.class);
-            verify(projectEventHandler).editedProjectMetadata(projectCaptor.capture());
-            Project handledProject = projectCaptor.getValue();
-            assertThat(handledProject.getId()).isEqualTo(project.getId());
+            assertThat(project.getValidationState()).isEqualTo(ValidationState.DRAFT);
         }
 
     }
