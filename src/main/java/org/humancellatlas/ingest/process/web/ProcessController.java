@@ -163,7 +163,7 @@ public class ProcessController {
     HttpEntity<?> patchProcess(@PathVariable("id") Process process,
                                @RequestBody final ObjectNode patch,
                                PersistentEntityResourceAssembler assembler) {
-        List<String> allowedFields = List.of("content");
+        List<String> allowedFields = List.of("content", "validationErrors");
         ObjectNode validPatch = patch.retain(allowedFields);
         Process patchedProcess = jsonPatcher.merge(validPatch, process);
 

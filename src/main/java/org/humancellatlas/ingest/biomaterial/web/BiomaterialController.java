@@ -72,7 +72,7 @@ public class BiomaterialController {
   HttpEntity<?> patchBiomaterial(@PathVariable("id") Biomaterial biomaterial,
                                  @RequestBody final ObjectNode patch,
                                  PersistentEntityResourceAssembler assembler) {
-    List<String> allowedFields = List.of("content");
+    List<String> allowedFields = List.of("content", "validationErrors");
     ObjectNode validPatch = patch.retain(allowedFields);
     Biomaterial patchedBiomaterial = jsonPatcher.merge(validPatch, biomaterial);
 

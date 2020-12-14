@@ -83,7 +83,7 @@ public class FileController {
     HttpEntity<?> patchFile(@PathVariable("id") File file,
                             @RequestBody final ObjectNode patch,
                             PersistentEntityResourceAssembler assembler) {
-        List<String> allowedFields = List.of("content", "fileName");
+        List<String> allowedFields = List.of("content", "fileName", "validationJob", "validationErrors");
         ObjectNode validPatch = patch.retain(allowedFields);
         File patchedFile = jsonPatcher.merge(validPatch, file);
 

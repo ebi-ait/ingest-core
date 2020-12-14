@@ -71,7 +71,7 @@ public class ProtocolController {
     HttpEntity<?> patchProtocol(@PathVariable("id") Protocol protocol,
                                 @RequestBody final ObjectNode patch,
                                 PersistentEntityResourceAssembler assembler) {
-        List<String> allowedFields = List.of("content");
+        List<String> allowedFields = List.of("content", "validationErrors");
         ObjectNode validPatch = patch.retain(allowedFields);
         Protocol patchedProtocol = jsonPatcher.merge(validPatch, protocol);
 
