@@ -115,6 +115,7 @@ public abstract class MetadataDocument extends AbstractEntity {
         if (this.content == null || !this.content.equals(content)) {
             this.content = content;
             this.contentLastModified = Instant.now();
+            this.setDcpVersion(this.contentLastModified);
         }
     }
 
