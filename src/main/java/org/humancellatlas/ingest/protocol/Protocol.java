@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.protocol;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,8 +22,8 @@ public class Protocol extends MetadataDocument {
 
     private boolean linked = false;
 
-    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public Protocol(Object content) {
+    @JsonCreator
+    public Protocol(@JsonProperty("content") Object content) {
         super(EntityType.PROTOCOL, content);
     }
 

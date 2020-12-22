@@ -50,7 +50,10 @@ public class File extends MetadataDocument {
     @Indexed
     private String fileName;
     private String cloudUrl;
+
     private Checksums checksums;
+    private Checksums lastExportedChecksums;
+
     private ValidationJob validationJob;
     private UUID validationId;
     private UUID dataFileUuid;
@@ -63,8 +66,10 @@ public class File extends MetadataDocument {
     }
 
     @JsonCreator
-    public File(@JsonProperty("content") Object content) {
+    public File(@JsonProperty("content") Object content,
+                @JsonProperty("fileName") String fileName) {
         super(EntityType.FILE, content);
+        this.setFileName(fileName);
     }
 
     /**

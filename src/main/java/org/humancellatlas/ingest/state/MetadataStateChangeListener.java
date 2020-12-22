@@ -43,6 +43,8 @@ public class MetadataStateChangeListener extends AbstractMongoEventListener<Meta
     public void onBeforeConvert(BeforeConvertEvent<MetadataDocument> event) {
         MetadataDocument document = event.getSource();
 
+//      TODO Ideally, this should be being set when the submission is submitted.
+//      The exporter could set this. Putting this back here for now for convenience.
         if (!Optional.ofNullable(document.getDcpVersion()).isPresent()) {
             document.setDcpVersion(document.getSubmissionDate());
         }

@@ -58,18 +58,6 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 .withRel(Links.PROTOCOLS_REL);
     }
 
-    private Link getAssaysLink(SubmissionEnvelope submissionEnvelope) {
-        return entityLinks.linkForSingleResource(submissionEnvelope)
-                .slash(Links.ASSAYS_URL)
-                .withRel(Links.ASSAYS_REL);
-    }
-
-    private Link getAnalysesLink(SubmissionEnvelope submissionEnvelope) {
-        return entityLinks.linkForSingleResource(submissionEnvelope)
-                          .slash(Links.ANALYSES_URL)
-                          .withRel(Links.ANALYSES_REL);
-    }
-
     private Link getBundleManifestsLink(SubmissionEnvelope submissionEnvelope) {
         return entityLinks.linkForSingleResource(submissionEnvelope)
                           .slash(Links.BUNDLE_MANIFESTS_URL)
@@ -92,6 +80,12 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         return entityLinks.linkForSingleResource(submissionEnvelope)
                 .slash(Links.SUBMISSION_ERRORS_URL)
                 .withRel(Links.SUBMISSION_ERRORS_REL);
+    }
+
+    private Link getSubmissionSummary(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                .slash(Links.SUBMISSION_SUMMARY_URL)
+                .withRel(Links.SUBMISSION_SUMMARY_REL);
     }
 
     private Link getSubmissionDocumentStateLink(SubmissionEnvelope submissionEnvelope) {
@@ -256,13 +250,12 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         resource.add(getFilesLink(submissionEnvelope));
         resource.add(getProjectsLink(submissionEnvelope));
         resource.add(getProtocolsLink(submissionEnvelope));
-        resource.add(getAssaysLink(submissionEnvelope));
-        resource.add(getAnalysesLink(submissionEnvelope));
         resource.add(getBundleManifestsLink(submissionEnvelope));
         resource.add(getSubmissionManifestsLink(submissionEnvelope));
         resource.add(getExportJobsLink(submissionEnvelope));
         resource.add(getSubmissionErrorsLink(submissionEnvelope));
         resource.add(getSubmissionDocumentStateLink(submissionEnvelope));
+        resource.add(getSubmissionSummary(submissionEnvelope));
 
 
         // add subresource links for allowed state transition requests

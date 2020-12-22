@@ -125,7 +125,7 @@ public class SubmissionEnvelopeServiceTest {
 
         //given metadata outside the SubmissionEnvelope
         Biomaterial testOutsideBiomaterial = new Biomaterial(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
-        File testOutsideFile = new File(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
+        File testOutsideFile = new File(Map.ofEntries(Map.entry("key", UUID.randomUUID())), "");
         Process testOutsideProcess = new Process(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
 
         //given links to metadata outside of the SubmissionEnvelope

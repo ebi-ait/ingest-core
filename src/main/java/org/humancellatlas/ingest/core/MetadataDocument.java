@@ -22,26 +22,37 @@ import java.util.List;
  * @date 31/08/17
  */
 @Getter
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = "contentLastModified")
 public abstract class MetadataDocument extends AbstractEntity {
 
     @Setter
+    private Instant firstDcpVersion;
+
     private Instant dcpVersion;
 
-    @Setter
+    private Instant contentLastModified;
+
     private Object content;
 
-    // This property holds the reference to the submissionEnvelope this metadatadocument was part of.
-    // A metadatadocument is part of one submissionEnvelope.
-    // The other end of this relationship can be defined as a Set of metadataDocuments in SubmissionEnvelope.
+    // This property holds the reference to the submissionEnvelope this metadata document was part of.
+    // A metadata document is part of one submissionEnvelope.
+    // The other end of this relationship can be defined as a set of metadataDocuments in a submissionEnvelope.
     @Indexed
-    private @Setter @DBRef(lazy = true) SubmissionEnvelope submissionEnvelope;
+    @Setter
+    @DBRef(lazy = true)
+    private SubmissionEnvelope submissionEnvelope;
 
-    private @Setter Accession accession;
-    private @Setter ValidationState validationState;
-    private @Setter List<Object> validationErrors;
+    private @Setter
+    Accession accession;
 
-    private @Setter @Field
+    private @Setter
+    ValidationState validationState;
+
+    private @Setter
+    List<Object> validationErrors;
+
+    private @Setter
+    @Field
     Boolean isUpdate = false;
 
 
@@ -51,12 +62,14 @@ public abstract class MetadataDocument extends AbstractEntity {
         return log;
     }
 
-    protected MetadataDocument(){}
+    protected MetadataDocument() {
+    }
 
     protected MetadataDocument(EntityType type,
                                Object content) {
         super(type);
         this.content = content;
+        this.contentLastModified = Instant.now();
         this.validationState = ValidationState.DRAFT;
     }
 
@@ -95,8 +108,24 @@ public abstract class MetadataDocument extends AbstractEntity {
 
     public MetadataDocument enactStateTransition(ValidationState targetState) {
         this.validationState = targetState;
-
         return this;
     }
 
+    public void setContent(Object content) {
+        if (this.content == null || !this.content.equals(content)) {
+            this.content = content;
+            this.contentLastModified = Instant.now();
+            this.setDcpVersion(this.contentLastModified);
+        }
+    }
+
+    public void setDcpVersion(Instant dcpVersion) {
+        // DCP version should never be set to null
+        if (dcpVersion != null) {
+            if (this.dcpVersion == null) {
+                this.firstDcpVersion = dcpVersion;
+            }
+            this.dcpVersion = dcpVersion;
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.process;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,8 +51,8 @@ public class Process extends MetadataDocument {
     public Process() {
     }
 
-    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public Process(Object content) {
+    @JsonCreator
+    public Process(@JsonProperty("content") Object content) {
         super(EntityType.PROCESS, content);
     }
 

@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.project;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -52,11 +53,12 @@ public class Project extends MetadataDocument {
     @Setter
     private Object identifyingOrganisms;
 
+    @Setter
     private String primaryWrangler;
 
 
-    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public Project(Object content) {
+    @JsonCreator
+    public Project(@JsonProperty("content") Object content) {
         super(EntityType.PROJECT, content);
     }
 

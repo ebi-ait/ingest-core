@@ -21,7 +21,6 @@ import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
-import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +34,12 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -73,16 +72,19 @@ public class ProjectController {
 
     @PostMapping("/projects")
     ResponseEntity<Resource<?>> register(@RequestBody final Project project,
-            final PersistentEntityResourceAssembler assembler) {
+                                         final PersistentEntityResourceAssembler assembler) {
         Project result = projectService.register(project);
         return ResponseEntity.ok().body(assembler.toFullResource(result));
     }
 
     @PatchMapping("/projects/{id}")
     ResponseEntity<Resource<?>> update(@PathVariable("id") final Project project,
-            @RequestParam(value = "partial", defaultValue = "false") Boolean partial,
-            @RequestBody final ObjectNode patch, final PersistentEntityResourceAssembler assembler) {
-        Project patchedProject = jsonPatcher.merge(patch, project);
+                                       @RequestParam(value = "partial", defaultValue = "false") Boolean partial,
+                                       @RequestBody final ObjectNode patch, final PersistentEntityResourceAssembler assembler) {
+
+        List<String> allowedFields = List.of("content", "releaseDate", "primaryWrangler", "accessionDate", "technology", "dataAccess", "identifyingOrganisms", "validationErrors");
+        ObjectNode validPatch = patch.retain(allowedFields);
+        Project patchedProject = jsonPatcher.merge(validPatch, project);
         patchedProject = projectRepository.save(patchedProject);
         if (!partial) {
             projectEventHandler.editedProjectMetadata(patchedProject);
@@ -157,7 +159,7 @@ public class ProjectController {
     }
 
     @PutMapping(path = "projects/{proj_id}/submissionEnvelopes/{sub_id}")
-    ResponseEntity<Resource<?>> linkSubmissionToProject (
+    ResponseEntity<Resource<?>> linkSubmissionToProject(
             @PathVariable("proj_id") Project project,
             @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
             PersistentEntityResourceAssembler assembler) {

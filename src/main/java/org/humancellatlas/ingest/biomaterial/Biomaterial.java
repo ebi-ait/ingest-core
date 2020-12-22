@@ -51,8 +51,8 @@ public class Biomaterial extends MetadataDocument {
     @DBRef(lazy = true)
     private Set<Process> derivedByProcesses = new HashSet<>();
 
-    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public Biomaterial(Object content) {
+    @JsonCreator
+    public Biomaterial(@JsonProperty("content") Object content) {
         super(EntityType.BIOMATERIAL, content);
     }
 
