@@ -86,7 +86,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(POST, "/submissionEnvelopes").authenticated()
                 .antMatchers(POST, "/projects").hasAnyAuthority(CONTRIBUTOR.name())
-                .antMatchers(PATCH, "/projects").hasAnyAuthority(CONTRIBUTOR.name())
+                .antMatchers(PATCH, "/projects/*").hasAnyAuthority(CONTRIBUTOR.name())
                 .antMatchers(GET, "/user/**").authenticated()
                 .antMatchers(GET, "/auth/account").authenticated()
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
