@@ -31,9 +31,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final List<AntPathRequestMatcher> SECURED_WRANGLER_ANT_PATHS = setupWranglerAntPaths();
 
+    // The following endpoints are only secured when access from the outside the cluster
+
     private static List<AntPathRequestMatcher> setupSecuredAntPaths() {
         List<AntPathRequestMatcher> antPathMatchers = new ArrayList<>();
         antPathMatchers.addAll(defineAntPathMatchers(POST, "/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(PATCH, "/projects/*"));
         return Collections.unmodifiableList(antPathMatchers);
     }
 
@@ -85,8 +88,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .authorizeRequests()
                 .antMatchers(POST, "/submissionEnvelopes").authenticated()
-                .antMatchers(POST, "/projects").hasAnyAuthority(CONTRIBUTOR.name())
-                .antMatchers(PATCH, "/projects/*").hasAnyAuthority(CONTRIBUTOR.name())
+                .antMatchers(POST, "/projects").authenticated()
                 .antMatchers(GET, "/user/**").authenticated()
                 .antMatchers(GET, "/auth/account").authenticated()
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
