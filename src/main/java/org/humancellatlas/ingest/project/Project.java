@@ -48,7 +48,7 @@ public class Project extends MetadataDocument {
     private Object technology;
 
     @Setter
-    private Object organs;
+    private Object organ;
 
     @Setter
     private Object dataAccess;
