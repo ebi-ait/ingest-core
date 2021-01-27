@@ -12,7 +12,7 @@ export SVC_AUTH_AUDIENCE=https://dev.data.humancellatlas.org/
 export USR_AUTH_AUDIENCE=https://dev.data.humancellatlas.org/
 export GCP_JWK_PROVIDER_BASE_URL=https://www.googleapis.com/service_accounts/v1/jwk/
 export GCP_PROJECT_WHITELIST=hca-dcp-production.iam.gserviceaccount.com,human-cell-atlas-travis-test.iam.gserviceaccount.com,broad-dsde-mint-dev.iam.gserviceaccount.com,broad-dsde-mint-test.iam.gserviceaccount.com,broad-dsde-mint-staging.iam.gserviceaccount.com
-export SCHEMA_BASE_URI=https://schema.dev.data.humancellatlas.org/
+export SCHEMA_BASE_URI=https://schema.humancellatlas.org/
 
 ./gradlew clean assemble
 
