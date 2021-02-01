@@ -82,7 +82,7 @@ public class ProjectController {
                                        @RequestParam(value = "partial", defaultValue = "false") Boolean partial,
                                        @RequestBody final ObjectNode patch, final PersistentEntityResourceAssembler assembler) {
 
-        List<String> allowedFields = List.of("content", "releaseDate", "primaryWrangler", "accessionDate", "technology", "dataAccess", "identifyingOrganisms", "validationErrors");
+        List<String> allowedFields = List.of("content", "releaseDate", "primaryWrangler", "accessionDate", "technology", "organ", "dataAccess", "identifyingOrganisms", "validationErrors");
         ObjectNode validPatch = patch.retain(allowedFields);
         Project patchedProject = jsonPatcher.merge(validPatch, project);
         patchedProject = projectRepository.save(patchedProject);
