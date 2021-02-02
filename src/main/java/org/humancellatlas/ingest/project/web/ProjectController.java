@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.project.web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
@@ -8,7 +9,9 @@ import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleType;
+import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.patch.JsonPatcher;
@@ -21,6 +24,7 @@ import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +62,8 @@ public class ProjectController {
 
     private final @NonNull ProjectService projectService;
 
+    private final @NonNull ValidationStateChangeService validationStateChangeService;
+
     private final @NonNull ProjectEventHandler projectEventHandler;
 
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
@@ -84,8 +90,15 @@ public class ProjectController {
 
         List<String> allowedFields = List.of("content", "releaseDate", "primaryWrangler", "accessionDate", "technology", "organ", "dataAccess", "identifyingOrganisms", "validationErrors");
         ObjectNode validPatch = patch.retain(allowedFields);
+
+        ObjectMapper mapper = new ObjectMapper();
+        Boolean contentChanged = validPatch.get("content").equals(mapper.valueToTree(project).get("content"));
+
         Project patchedProject = jsonPatcher.merge(validPatch, project);
         patchedProject = projectRepository.save(patchedProject);
+        if(!contentChanged) {
+            validationStateChangeService.changeValidationState(EntityType.PROJECT, project.getId(), ValidationState.DRAFT);
+        }
         if (!partial) {
             projectEventHandler.editedProjectMetadata(patchedProject);
         }
