@@ -92,11 +92,11 @@ public class ProjectController {
         ObjectNode validPatch = patch.retain(allowedFields);
 
         ObjectMapper mapper = new ObjectMapper();
-        Boolean contentChanged = validPatch.get("content").equals(mapper.valueToTree(project).get("content"));
+        Boolean contentChanged = !validPatch.get("content").equals(mapper.valueToTree(project).get("content"));
 
         Project patchedProject = jsonPatcher.merge(validPatch, project);
         patchedProject = projectRepository.save(patchedProject);
-        if(!contentChanged) {
+        if(contentChanged) {
             validationStateChangeService.changeValidationState(EntityType.PROJECT, project.getId(), ValidationState.DRAFT);
         }
         if (!partial) {
