@@ -4,9 +4,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.file.*;
-import org.humancellatlas.ingest.patch.JsonPatcher;
-import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -18,12 +17,8 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.util.List;
 
 /**
@@ -52,7 +47,7 @@ public class FileController {
     private final PagedResourcesAssembler pagedResourcesAssembler;
 
     @NonNull
-    private final JsonPatcher jsonPatcher;
+    private final MetadataUpdateService metadataUpdateService;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
             method = RequestMethod.POST,
@@ -79,16 +74,14 @@ public class FileController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/files/{id}", method = RequestMethod.PATCH)
+    @PatchMapping(path = "/files/{id}")
     HttpEntity<?> patchFile(@PathVariable("id") File file,
                             @RequestBody final ObjectNode patch,
                             PersistentEntityResourceAssembler assembler) {
         List<String> allowedFields = List.of("content", "fileName", "validationJob", "validationErrors");
         ObjectNode validPatch = patch.retain(allowedFields);
-        File patchedFile = jsonPatcher.merge(validPatch, file);
-
-        File entity = fileRepository.save(patchedFile);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
+        File updatedFile = metadataUpdateService.update(file, validPatch);
+        PersistentEntityResource resource = assembler.toFullResource(updatedFile);
         return ResponseEntity.accepted().body(resource);
     }
 }

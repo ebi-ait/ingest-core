@@ -9,9 +9,10 @@ import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
-import org.humancellatlas.ingest.patch.JsonPatcher;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.Project;
@@ -34,12 +35,10 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.util.*;
 
 /**
@@ -58,6 +57,8 @@ public class ProjectController {
 
     private final @NonNull ProjectService projectService;
 
+    private final @NonNull ValidationStateChangeService validationStateChangeService;
+
     private final @NonNull ProjectEventHandler projectEventHandler;
 
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
@@ -68,7 +69,7 @@ public class ProjectController {
     private final @NonNull ProtocolRepository protocolRepository;
     private final @NonNull FileRepository fileRepository;
 
-    private final @NonNull JsonPatcher jsonPatcher;
+    private final @NonNull MetadataUpdateService metadataUpdateService;
 
     @PostMapping("/projects")
     ResponseEntity<Resource<?>> register(@RequestBody final Project project,
@@ -82,14 +83,15 @@ public class ProjectController {
                                        @RequestParam(value = "partial", defaultValue = "false") Boolean partial,
                                        @RequestBody final ObjectNode patch, final PersistentEntityResourceAssembler assembler) {
 
-        List<String> allowedFields = List.of("content", "releaseDate", "primaryWrangler", "accessionDate", "technology", "dataAccess", "identifyingOrganisms", "validationErrors");
+        List<String> allowedFields = List.of("content", "releaseDate", "primaryWrangler", "accessionDate", "technology", "organ", "dataAccess", "identifyingOrganisms", "validationErrors");
         ObjectNode validPatch = patch.retain(allowedFields);
-        Project patchedProject = jsonPatcher.merge(validPatch, project);
-        patchedProject = projectRepository.save(patchedProject);
+
+        Project updatedProject = metadataUpdateService.update(project, validPatch);
+
         if (!partial) {
-            projectEventHandler.editedProjectMetadata(patchedProject);
+            projectEventHandler.editedProjectMetadata(updatedProject);
         }
-        return ResponseEntity.ok().body(assembler.toFullResource(patchedProject));
+        return ResponseEntity.ok().body(assembler.toFullResource(updatedProject));
     }
 
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
