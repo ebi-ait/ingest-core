@@ -5,8 +5,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.patch.JsonPatcher;
-import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.protocol.ProtocolService;
@@ -21,7 +21,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,6 +42,8 @@ public class ProtocolController {
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
     private final @NonNull JsonPatcher jsonPatcher;
+
+    private final @NonNull MetadataUpdateService metadataUpdateService;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProtocolToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -73,10 +74,8 @@ public class ProtocolController {
                                 PersistentEntityResourceAssembler assembler) {
         List<String> allowedFields = List.of("content", "validationErrors");
         ObjectNode validPatch = patch.retain(allowedFields);
-        Protocol patchedProtocol = jsonPatcher.merge(validPatch, protocol);
-
-        Protocol entity = protocolRepository.save(patchedProtocol);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
+        Protocol updatedProtocol = metadataUpdateService.update(protocol, validPatch);
+        PersistentEntityResource resource = assembler.toFullResource(updatedProtocol);
         return ResponseEntity.accepted().body(resource);
     }
 }

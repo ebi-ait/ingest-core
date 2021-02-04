@@ -6,12 +6,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
-import org.humancellatlas.ingest.patch.JsonPatcher;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.*;
-import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +25,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,7 +40,7 @@ public class ProcessController {
     private final @NonNull ProcessService processService;
     private final @NonNull ProcessRepository processRepository;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
-    private final @NonNull JsonPatcher jsonPatcher;
+    private final @NonNull MetadataUpdateService metadataUpdateService;
 
     @RequestMapping(path = "processes/{proc_id}/inputBiomaterials", method = RequestMethod.GET)
     ResponseEntity<?> getProcessInputBiomaterials(@PathVariable("proc_id") Process process,
@@ -102,15 +100,15 @@ public class ProcessController {
 
     @Deprecated
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL)
-    ResponseEntity<Resource<?>> addBundleReference(){
+    ResponseEntity<Resource<?>> addBundleReference() {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL,
-                    method = RequestMethod.PUT)
+            method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> oldAddBundleReference(@PathVariable("analysis_id") Process analysis,
-                                                   @RequestBody BundleReference bundleReference,
-                                                   final PersistentEntityResourceAssembler assembler) {
+                                                      @RequestBody BundleReference bundleReference,
+                                                      final PersistentEntityResourceAssembler assembler) {
         Process entity = getProcessService().resolveBundleReferencesForProcess(analysis, bundleReference);
         PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
@@ -127,12 +125,12 @@ public class ProcessController {
     }
 
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL)
-    ResponseEntity<Resource<?>> addOutputFileReference(){
+    ResponseEntity<Resource<?>> addOutputFileReference() {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL,
-                    method = RequestMethod.PUT)
+            method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> addOutputFileReference(@PathVariable("analysis_id") Process analysis,
                                                        @RequestBody File file,
                                                        final PersistentEntityResourceAssembler assembler) {
@@ -159,17 +157,15 @@ public class ProcessController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
     }
 
-    @RequestMapping(path = "/processes/{id}", method = RequestMethod.PATCH)
+    @PatchMapping(path = "/processes/{id}")
     HttpEntity<?> patchProcess(@PathVariable("id") Process process,
                                @RequestBody final ObjectNode patch,
                                PersistentEntityResourceAssembler assembler) {
         List<String> allowedFields = List.of("content", "validationErrors");
         ObjectNode validPatch = patch.retain(allowedFields);
-        Process patchedProcess = jsonPatcher.merge(validPatch, process);
-
-        Process entity = processRepository.save(patchedProcess);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
-        return  ResponseEntity.accepted().body(resource);
+        Process updatedProcess = metadataUpdateService.update(process, validPatch);
+        PersistentEntityResource resource = assembler.toFullResource(updatedProcess);
+        return ResponseEntity.accepted().body(resource);
     }
 }
 
