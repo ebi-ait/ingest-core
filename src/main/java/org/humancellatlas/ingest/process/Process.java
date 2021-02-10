@@ -69,4 +69,10 @@ public class Process extends MetadataDocument {
         protocols.add(protocol);
     }
 
+    // Stub code to check if process is an assay process
+    // TODO: implement!
+    public boolean isAssayProcess() {
+        return true;
+    }
+
 }

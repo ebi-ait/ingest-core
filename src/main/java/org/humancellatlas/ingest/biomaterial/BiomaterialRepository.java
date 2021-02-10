@@ -48,6 +48,7 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
 
     @RestResource(exported = false)
     Stream<Biomaterial> findByInputToProcessesContains(Process process);
+    long countByInputToProcessesContains(Process process);
 
     Page<Biomaterial> findByInputToProcessesContaining(Process process, Pageable pageable);
 

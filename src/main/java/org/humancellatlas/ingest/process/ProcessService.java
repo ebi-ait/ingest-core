@@ -167,6 +167,17 @@ public class ProcessService {
         return results;
     }
 
+    public Set<String> findArrays2(SubmissionEnvelope submissionEnvelope) {
+        Set<String> results = new LinkedHashSet<>();
+        processRepository.findBySubmissionEnvelope(submissionEnvelope)
+                         .forEach(process -> {
+                            if (biomaterialRepository.countByInputToProcessesContains(process) > 0) {
+                                results.add(process.getId());
+                            }
+                         });
+        return results;
+    }
+
     /**
      *
      * Find all analysis process IDs in a submission
