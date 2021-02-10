@@ -36,6 +36,7 @@ public class Constants {
         public static final String METADATA_UPDATE = "ingest.state-tracking.document.update";
         public static final String ASSAY_SUBMITTED = "ingest.assay.manifest.submitted";
         public static final String EXPERIMENT_SUBMITTED = "ingest.assay.experiment.submitted";
+        public static final String DATA_SUBMITTED = "ingest.assay.data.submitted";
         public static final String ANALYSIS_SUBMITTED = "ingest.bundle.analysis.submitted";
         public static final String UPDATE_SUBMITTED = "ingest.update.experiment.submitted";
 

@@ -81,6 +81,8 @@ public class DefaultExporter implements Exporter {
 
     @Override
     public void exportBundles(SubmissionEnvelope envelope) {
+
+        // collect assay process to export
         Collection<String> assayingProcessIds = processService.findAssays(envelope);
 
         log.info(String.format("Found %s assays processes for envelope with ID %s",
@@ -101,12 +103,22 @@ public class DefaultExporter implements Exporter {
 
         ExportJob exportJob = exportJobService.createExportJob(envelope, exportJobRequest);
 
+        // trigger data files export
+        String projectUuid = null;
+        Collection<MetadataDocument> projects = metadataCrudService.findAllBySubmission(envelope, EntityType.PROJECT);
+        if (projects.size() == 1) {
+            projectUuid = ((MetadataDocument) projects.toArray()[0]).getUuid().toString();
+        }
+        messageRouter.sendExportData(envelope.getUuid().toString(), projectUuid, exportJob.getId());
+
+        // trigger metadata export per assay
         partitionProcessIds(assayingProcessIds, partitionSize)
                 .stream()
                 .map(processIdBatch -> processService.getProcesses(processIdBatch))
                 .flatMap(Function.identity())
                 .map(process -> new ExporterData(counter.next(), totalCount, process, envelope))
                 .forEach(exportData -> messageRouter.sendExperimentForExport(exportData, exportJob));
+
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.exporter.ExporterData;
 import org.humancellatlas.ingest.messaging.model.BundleUpdateMessage;
+import org.humancellatlas.ingest.messaging.model.DataExportMessage;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeStateUpdateMessage;
@@ -127,9 +128,13 @@ public class MessageRouter {
     }
 
     public void sendBundlesToUpdateForExport(BundleUpdateMessage bundleUpdateMessage) {
-        messageSender.queueNewExportMessage(ASSAY_EXCHANGE,
-                UPDATE_SUBMITTED,
+        messageSender.queueNewExportMessage(ASSAY_EXCHANGE, UPDATE_SUBMITTED,
                 bundleUpdateMessage,
+                System.currentTimeMillis());
+    }
+
+    public void sendExportData(String submissionUuid, String projectUuid, String exportJobId) {
+        messageSender.queueNewExportMessage(ASSAY_EXCHANGE, DATA_SUBMITTED, new DataExportMessage(submissionUuid, projectUuid, exportJobId),
                 System.currentTimeMillis());
     }
 
