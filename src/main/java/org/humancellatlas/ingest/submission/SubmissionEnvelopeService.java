@@ -82,7 +82,7 @@ public class SubmissionEnvelopeService {
     private SubmissionErrorRepository submissionErrorRepository;
 
     public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
-        if (submitActions.contains(SubmitAction.ARCHIVE) || submitActions.contains(SubmitAction.EXPORT)) {
+        if (submitActions.contains(SubmitAction.ARCHIVE) || submitActions.contains(SubmitAction.EXPORT) || submitActions.contains(SubmitAction.EXPORT_METADATA)) {
             envelope.setSubmitActions(new HashSet<>(submitActions));
             submissionEnvelopeRepository.save(envelope);
         } else {
@@ -107,7 +107,7 @@ public class SubmissionEnvelopeService {
     public void handleCommitSubmit(SubmissionEnvelope envelope) {
         if (envelope.getSubmitActions().contains(SubmitAction.ARCHIVE)) {
             archiveSubmission(envelope);
-        } else if (envelope.getSubmitActions().contains(SubmitAction.EXPORT)) {
+        } else if (envelope.getSubmitActions().contains(SubmitAction.EXPORT) || envelope.getSubmitActions().contains(SubmitAction.EXPORT_METADATA)) {
             exportSubmission(envelope);
         } else {
             throw new RuntimeException((String.format(
