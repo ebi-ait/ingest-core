@@ -6,7 +6,8 @@ workflow:
 
 stages:
   - build
-  - test
+  - unit-test
+  - integration
 
 cache:
   paths:
@@ -19,8 +20,8 @@ build:
   script:
     - ./gradlew
     
-test:
-  stage: test
+unit-test:
+  stage: unit-test
   script:
     - ./gradlew verify
   artifacts:
@@ -29,7 +30,7 @@ test:
         - build/test-results/**/TEST-*.xml
 
 integration:
-  stage: test
+  stage: integration
   trigger: 
     project: hca/ingest-integration-tests
     branch: dev
