@@ -2,9 +2,10 @@ image: openjdk:11
 
 workflow:
   rules:
-    - if: $CI_COMMIT_BRANCH == 'master'
+    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == 'dev'
 
 stages:
+  - build
   - test
 
 cache:
@@ -12,6 +13,12 @@ cache:
     - .gradle/wrapper
     - .gradle/caches
 
+
+build:
+  stage: build
+  script:
+    - ./gradlew
+    
 test:
   stage: test
   script:
