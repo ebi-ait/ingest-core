@@ -33,4 +33,5 @@ integration:
   trigger: 
     project: hca/ingest-integration-tests
     branch: dev
+    strategy: depend
 
