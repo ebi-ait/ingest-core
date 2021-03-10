@@ -27,3 +27,10 @@ test:
     reports:
       junit:
         - build/test-results/**/TEST-*.xml
+
+integration:
+  stage: test
+  trigger: 
+    project: hca/ingest-integration-tests
+    branch: dev
+
