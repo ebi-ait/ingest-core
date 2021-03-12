@@ -82,7 +82,7 @@ public class SubmissionEnvelopeService {
     private SubmissionErrorRepository submissionErrorRepository;
 
     public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
-        if (submitActions.contains(SubmitAction.ARCHIVE) || submitActions.contains(SubmitAction.EXPORT) || submitActions.contains(SubmitAction.EXPORT_METADATA)) {
+        if (isSubmitAction(submitActions)) {
             envelope.setSubmitActions(new HashSet<>(submitActions));
             submissionEnvelopeRepository.save(envelope);
         } else {
@@ -285,5 +285,11 @@ public class SubmissionEnvelopeService {
         float duration = ((float) (endTime - startTime)) / 1000;
         String durationStr = new DecimalFormat("#,###.##").format(duration);
         log.info("cleanup link time: {} s", durationStr);
+    }
+
+    private boolean isSubmitAction(List<SubmitAction> submitActions) {
+        return submitActions.contains(SubmitAction.ARCHIVE)
+                || submitActions.contains(SubmitAction.EXPORT)
+                || submitActions.contains(SubmitAction.EXPORT_METADATA);
     }
 }
