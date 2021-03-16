@@ -31,7 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final List<AntPathRequestMatcher> SECURED_WRANGLER_ANT_PATHS = setupWranglerAntPaths();
 
-    // The following endpoints are only secured when access from the outside the cluster
+    // The following endpoints are only secured when accessed from the outside the cluster
 
     private static List<AntPathRequestMatcher> setupSecuredAntPaths() {
         List<AntPathRequestMatcher> antPathMatchers = new ArrayList<>();
@@ -92,8 +92,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(GET, "/user/**").authenticated()
                 .antMatchers(GET, "/auth/account").authenticated()
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
-                .requestMatchers(SecurityConfig::isSecuredWranglerEndpointFromOutside).hasAnyAuthority(WRANGLER.name(), SERVICE.name())
                 .requestMatchers(SecurityConfig::isSecuredEndpointFromOutside).authenticated()
+                .requestMatchers(SecurityConfig::isSecuredWranglerEndpointFromOutside).hasAnyAuthority(WRANGLER.name(), SERVICE.name())
                 .antMatchers(GET, "/**").permitAll();
     }
 
