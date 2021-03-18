@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
-import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.errors.SubmissionErrorRepository;
 import org.humancellatlas.ingest.exporter.Exporter;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -29,6 +28,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+//
+//import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+
 @Service
 @RequiredArgsConstructor
 public class SubmissionEnvelopeService {
@@ -38,9 +40,6 @@ public class SubmissionEnvelopeService {
 
     @NonNull
     private final Exporter exporter;
-
-    @NonNull
-    private final MetadataUpdateService metadataUpdateService;
 
     @NonNull
     private final ExecutorService executorService = Executors.newFixedThreadPool(5);
@@ -117,38 +116,15 @@ public class SubmissionEnvelopeService {
     }
 
     private void archiveSubmission(SubmissionEnvelope envelope) {
-        if (!envelope.getIsUpdate()) {
             exporter.exportManifests(envelope);
-        } else {
-            // do nothing for now
-        }
     }
 
-    public void exportSubmission(SubmissionEnvelope envelope) {
-        if (!envelope.getIsUpdate()) {
-            exportOriginalSubmission(envelope);
-        } else {
-            exportUpdateSubmission(envelope);
-        }
-    }
-
-    private void exportOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
+    public void exportSubmission(SubmissionEnvelope submissionEnvelope) {
         executorService.submit(() -> {
             try {
                 exporter.exportBundles(submissionEnvelope);
             } catch (Exception e) {
                 log.error("Uncaught Exception exporting Bundles", e);
-            }
-        });
-    }
-
-    private void exportUpdateSubmission(SubmissionEnvelope submissionEnvelope) {
-        executorService.submit(() -> {
-            try {
-                metadataUpdateService.applyUpdates(submissionEnvelope);
-                exporter.updateBundles(submissionEnvelope);
-            } catch (Exception e) {
-                log.error("Uncaught Exception Applying Updates or Exporting Bundles", e);
             }
         });
     }
