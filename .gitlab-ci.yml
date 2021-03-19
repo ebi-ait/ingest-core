@@ -6,16 +6,20 @@ workflow:
   rules:
     - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == 'dev'
 
+variables:
+  FASTQ_VALIDATOR_IMAGE: "quay.io/ebi-ait/fastq_utils:54bcf9f"
+  APP_NAME: "ingest-core"
+
 stages:
   - build
   - unit-test
+  - deploy-dev
   - integration
 
 cache:
   paths:
     - .gradle/wrapper
     - .gradle/caches
-
 
 build:
   stage: build
@@ -25,7 +29,14 @@ build:
     - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
     - docker build -t $CI_REGISTRY/$CI_PROJECT_PATH:latest .
     - docker push $CI_REGISTRY/$CI_PROJECT_PATH:latest
-    
+
+deploy-dev:
+  stage: deploy-dev
+  script:
+    - kubectx ingest-eks-dev
+    - kubectl ns dev-environment
+    - helm upgrade -f k8s/dev.yaml k8s/$APP_NAME $APP_NAME --set-string environment=dev,fastqImage=$FASTQ_VALIDATOR_IMAGE,image=$($(*)),replicas=1 --wait --install
+
 unit-test:
   image: quay.io/ebi-ait/ingest-base-images:openjdk_11
   stage: unit-test
