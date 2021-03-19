@@ -1,6 +1,6 @@
 image: quay.io/ebi-ait/ingest-base-images:docker-stable
 services:
-  - quay.io/ebi-ait/ingest-base-images:docker-dind
+  - docker:dind
 
 workflow:
   rules:
