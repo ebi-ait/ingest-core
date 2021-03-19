@@ -9,7 +9,6 @@ workflow:
 stages:
   - build
   - unit-test
-  - deploy-dev
   - integration
 
 cache:
