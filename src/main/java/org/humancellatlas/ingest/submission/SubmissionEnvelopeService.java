@@ -25,11 +25,9 @@ import org.springframework.stereotype.Service;
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-//
-//import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 
 @Service
 @RequiredArgsConstructor
@@ -104,9 +102,10 @@ public class SubmissionEnvelopeService {
     }
 
     public void handleCommitSubmit(SubmissionEnvelope envelope) {
-        if (envelope.getSubmitActions().contains(SubmitAction.ARCHIVE)) {
+        Set<SubmitAction> submitActions = envelope.getSubmitActions();
+        if (submitActions.contains(SubmitAction.ARCHIVE)) {
             archiveSubmission(envelope);
-        } else if (envelope.getSubmitActions().contains(SubmitAction.EXPORT) || envelope.getSubmitActions().contains(SubmitAction.EXPORT_METADATA)) {
+        } else if (shouldExport(submitActions)) {
             exportSubmission(envelope);
         } else {
             throw new RuntimeException((String.format(
@@ -267,5 +266,9 @@ public class SubmissionEnvelopeService {
         return submitActions.contains(SubmitAction.ARCHIVE)
                 || submitActions.contains(SubmitAction.EXPORT)
                 || submitActions.contains(SubmitAction.EXPORT_METADATA);
+    }
+
+    private boolean shouldExport(Set<SubmitAction> submitActions) {
+        return submitActions.contains(SubmitAction.EXPORT) || submitActions.contains(SubmitAction.EXPORT_METADATA);
     }
 }
