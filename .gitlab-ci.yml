@@ -1,4 +1,4 @@
-image: docker:stable
+image: quay.io/ebi-ait/ingest-base-images:docker-stable
 services:
   - docker:dind
 
