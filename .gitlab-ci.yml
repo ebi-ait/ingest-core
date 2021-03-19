@@ -1,4 +1,6 @@
-image: openjdk:11
+image: docker:stable
+services:
+  - docker:dind
 
 workflow:
   rules:
@@ -7,6 +9,7 @@ workflow:
 stages:
   - build
   - unit-test
+  - deploy-dev
   - integration
 
 cache:
@@ -25,6 +28,7 @@ build:
     - docker push $IMAGE_NAME
     
 unit-test:
+  image: openjdk:11
   stage: unit-test
   script:
     - ./gradlew verify
