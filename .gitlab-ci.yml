@@ -7,6 +7,7 @@ workflow:
     - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == 'dev'
 
 variables:
+  FASTQ_VALIDATOR_IMAGE: "quay.io/ebi-ait/fastq_utils:54bcf9f"
   APP_NAME: "ingest-core"
 
 stages:
@@ -34,7 +35,7 @@ deploy-dev:
   script:
     - kubectx ingest-eks-dev
     - kubectl ns dev-environment
-    - helm upgrade -f k8s/dev.yaml k8s/$APP_NAME $APP_NAME --set-string environment=dev,replicas=1 --wait --install
+    - helm upgrade -f k8s/dev.yaml k8s/$APP_NAME $APP_NAME --set-string environment=dev,image=$CI_REGISTRY/$CI_PROJECT_PATH:latest,replicas=1 --wait --install
 
 unit-test:
   image: quay.io/ebi-ait/ingest-base-images:openjdk_11

@@ -62,7 +62,7 @@ spec:
               value: {{ .Values.notifications.amqp.sendExchange }}
             - name: NOTIFICATIONS_AMQP_SEND_ROUTING_KEY
               value: {{ .Values.notifications.amqp.sendRoutingKey }}
-          image: dockerhub.ebi.ac.uk/hca/ingest-core:latest
+          image: provide_through_set_flag
           imagePullPolicy: Always
           name: ingest-core
           ports:
