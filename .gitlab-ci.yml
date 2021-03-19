@@ -32,9 +32,11 @@ build:
 
 deploy-dev:
   stage: deploy-dev
+  image: ebiwd/alpine-ssh:latest
+  environment:
+    name: dev
+    url: https://dev.contribute.data.humancellatlas.org/
   script:
-    - kubectx ingest-eks-dev
-    - kubectl ns dev-environment
     - helm upgrade -f k8s/dev.yaml k8s/$APP_NAME $APP_NAME --set-string environment=dev,image=$CI_REGISTRY/$CI_PROJECT_PATH:latest,replicas=1 --wait --install
 
 unit-test:
