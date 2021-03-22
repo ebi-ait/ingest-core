@@ -32,6 +32,7 @@ build:
 
 deploy-dev:
   stage: deploy-dev
+  image: ebiwd/alpine-ssh:latest
   environment:
     name: dev
     url: https://dev.contribute.data.humancellatlas.org/
