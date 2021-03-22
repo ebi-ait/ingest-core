@@ -1,3 +1,7 @@
+services:
+  - name: quay.io/ebi-ait/ingest-base-images:docker-dind
+    alias: docker
+
 workflow:
   rules:
     - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == 'dev'
@@ -19,8 +23,6 @@ cache:
 
 build:
   stage: build
-  tags:
-    - dind
   script:
     - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
     - docker build -t $CI_REGISTRY/$CI_PROJECT_PATH:latest .
