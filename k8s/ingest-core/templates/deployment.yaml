@@ -5,7 +5,7 @@ metadata:
   labels:
     role: ingestion
   name: ingest-core
-  namespace: {{ .Values.environment }}-environment
+  namespace: ingest-core-3022-{{ .Values.environment }}
 spec:
   selector:
     matchLabels:
