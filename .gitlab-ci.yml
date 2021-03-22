@@ -38,7 +38,6 @@ deploy-dev:
     name: dev
     url: https://dev.contribute.data.humancellatlas.org/
   script:
-    - kubectl ns dev-environment
     - helm package k8s/$APP_NAME
     - helm upgrade -f k8s/dev.yaml $APP_NAME k8s/$APP_NAME --set-string environment=dev,image=$CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_SHA,replicas=$DEV_REPLICAS --wait --install
 
