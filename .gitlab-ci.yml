@@ -26,7 +26,7 @@ build:
   script:
     - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
     - docker build -t $CI_REGISTRY/$CI_PROJECT_PATH:latest .
-    - docker push $CI_REGISTRY/$CI_PROJECT_PATH:latest
+    - docker push $CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_SHA
 
 deploy-dev:
   stage: deploy-dev
@@ -37,7 +37,7 @@ deploy-dev:
   script:
     - helm init -c
     - helm package k8s/$APP_NAME
-    - helm upgrade -f k8s/dev.yaml $APP_NAME k8s/$APP_NAME --set-string environment=dev,image=$CI_REGISTRY/$CI_PROJECT_PATH:latest,replicas=1 --wait --install
+    - helm upgrade -f k8s/dev.yaml $APP_NAME k8s/$APP_NAME --set-string environment=dev,image=$CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_SHA,replicas=1 --wait --install
 
 unit-test:
   image: quay.io/ebi-ait/ingest-base-images:openjdk_11
