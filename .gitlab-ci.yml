@@ -32,12 +32,11 @@ build:
 
 deploy-dev:
   stage: deploy-dev
-  image: ebiwd/alpine-ssh:latest
+  image: quay.io/ebi-ait/ingest-base-images:alpine-helm-3.5.3
   environment:
     name: dev
     url: https://dev.contribute.data.humancellatlas.org/
   script:
-    - helm init -c
     - helm package k8s/$APP_NAME
     - helm upgrade -f k8s/dev.yaml $APP_NAME k8s/$APP_NAME --set-string environment=dev,image=$CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_SHA,replicas=1 --wait --install
 
