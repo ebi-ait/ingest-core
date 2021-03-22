@@ -1,21 +1,11 @@
 package org.humancellatlas.ingest.exporter;
 
 import org.apache.commons.collections4.ListUtils;
-import org.humancellatlas.ingest.bundle.BundleManifest;
-import org.humancellatlas.ingest.bundle.BundleManifestRepository;
-import org.humancellatlas.ingest.bundle.BundleManifestService;
-import org.humancellatlas.ingest.core.EntityType;
-import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
-import org.humancellatlas.ingest.core.Uuid;
-import org.humancellatlas.ingest.core.service.MetadataCrudService;
-import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
 import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.export.job.ExportJobService;
 import org.humancellatlas.ingest.export.job.web.ExportJobRequest;
 import org.humancellatlas.ingest.messaging.MessageRouter;
-import org.humancellatlas.ingest.messaging.model.BundleUpdateMessage;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.json.simple.JSONObject;
@@ -24,7 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
 import static org.humancellatlas.ingest.export.destination.ExportDestinationName.DCP;
@@ -35,18 +27,12 @@ public class DefaultExporter implements Exporter {
     private final Logger log = LoggerFactory.getLogger(getClass());
     @Autowired
     private ProcessService processService;
-    @Autowired
-    private MetadataCrudService metadataCrudService;
-    @Autowired
-    private BundleManifestService bundleManifestService;
+
     @Autowired
     private ExportJobService exportJobService;
-    @Autowired
-    private BundleManifestRepository bundleManifestRepository;
+
     @Autowired
     private MessageRouter messageRouter;
-    @Autowired
-    private LinkGenerator linkGenerator;
 
     /**
      * Divides a set of process IDs into lists of size partitionSize
@@ -107,38 +93,6 @@ public class DefaultExporter implements Exporter {
                 .flatMap(Function.identity())
                 .map(process -> new ExporterData(counter.next(), totalCount, process, envelope))
                 .forEach(exportData -> messageRouter.sendExperimentForExport(exportData, exportJob));
-    }
-
-    @Override
-    public void updateBundles(SubmissionEnvelope submissionEnvelope) {
-        Collection<MetadataDocument> documentsToUpdate = new ArrayList<>();
-        documentsToUpdate.addAll(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.PROJECT));
-        documentsToUpdate.addAll(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.BIOMATERIAL));
-        documentsToUpdate.addAll(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.PROTOCOL));
-        documentsToUpdate.addAll(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.PROCESS));
-        documentsToUpdate.addAll(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.FILE));
-
-        Map<String, Set<MetadataDocument>> bundleManifestsToUpdate = bundleManifestService.bundleManifestsForDocuments(documentsToUpdate);
-        int totalCount = bundleManifestsToUpdate.size();
-
-        IndexCounter counter = new IndexCounter();
-        Uuid submissionUuid = submissionEnvelope.getUuid();
-        bundleManifestsToUpdate.keySet().stream().map(bundleManifestUuid -> {
-            MetadataDocumentMessageBuilder builder = MetadataDocumentMessageBuilder.using(linkGenerator)
-                    .withEnvelopeId(submissionEnvelope.getId())
-                    .withAssayIndex(counter.next())
-                    .withTotalAssays(totalCount);
-            if (submissionUuid != null && submissionUuid.getUuid() != null) {
-                builder.withEnvelopeUuid(submissionUuid.getUuid().toString());
-            }
-            Optional<BundleManifest> maybeBundleManifest = bundleManifestRepository.findTopByBundleUuidOrderByBundleVersionDesc(bundleManifestUuid);
-            BundleUpdateMessage exportMessage = maybeBundleManifest.map(bundleManifest -> builder.buildBundleUpdateMessage(bundleManifest, bundleManifestsToUpdate.get(bundleManifestUuid)))
-                    .orElseThrow(() -> {
-                        throw new RuntimeException(String.format("Failed to find a bundle manifest for bundle UUID %s", bundleManifestUuid));
-                    });
-
-            return exportMessage;
-        }).forEach(messageRouter::sendBundlesToUpdateForExport);
     }
 
     private static class IndexCounter {

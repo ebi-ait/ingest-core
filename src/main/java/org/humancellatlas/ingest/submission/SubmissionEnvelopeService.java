@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
-import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.errors.SubmissionErrorRepository;
 import org.humancellatlas.ingest.exporter.Exporter;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -26,6 +25,7 @@ import org.springframework.stereotype.Service;
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -38,9 +38,6 @@ public class SubmissionEnvelopeService {
 
     @NonNull
     private final Exporter exporter;
-
-    @NonNull
-    private final MetadataUpdateService metadataUpdateService;
 
     @NonNull
     private final ExecutorService executorService = Executors.newFixedThreadPool(5);
@@ -82,7 +79,7 @@ public class SubmissionEnvelopeService {
     private SubmissionErrorRepository submissionErrorRepository;
 
     public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
-        if (submitActions.contains(SubmitAction.ARCHIVE) || submitActions.contains(SubmitAction.EXPORT)) {
+        if (isSubmitAction(submitActions)) {
             envelope.setSubmitActions(new HashSet<>(submitActions));
             submissionEnvelopeRepository.save(envelope);
         } else {
@@ -105,9 +102,10 @@ public class SubmissionEnvelopeService {
     }
 
     public void handleCommitSubmit(SubmissionEnvelope envelope) {
-        if (envelope.getSubmitActions().contains(SubmitAction.ARCHIVE)) {
+        Set<SubmitAction> submitActions = envelope.getSubmitActions();
+        if (submitActions.contains(SubmitAction.ARCHIVE)) {
             archiveSubmission(envelope);
-        } else if (envelope.getSubmitActions().contains(SubmitAction.EXPORT)) {
+        } else if (shouldExport(submitActions)) {
             exportSubmission(envelope);
         } else {
             throw new RuntimeException((String.format(
@@ -117,38 +115,15 @@ public class SubmissionEnvelopeService {
     }
 
     private void archiveSubmission(SubmissionEnvelope envelope) {
-        if (!envelope.getIsUpdate()) {
             exporter.exportManifests(envelope);
-        } else {
-            // do nothing for now
-        }
     }
 
-    public void exportSubmission(SubmissionEnvelope envelope) {
-        if (!envelope.getIsUpdate()) {
-            exportOriginalSubmission(envelope);
-        } else {
-            exportUpdateSubmission(envelope);
-        }
-    }
-
-    private void exportOriginalSubmission(SubmissionEnvelope submissionEnvelope) {
+    public void exportSubmission(SubmissionEnvelope submissionEnvelope) {
         executorService.submit(() -> {
             try {
                 exporter.exportBundles(submissionEnvelope);
             } catch (Exception e) {
                 log.error("Uncaught Exception exporting Bundles", e);
-            }
-        });
-    }
-
-    private void exportUpdateSubmission(SubmissionEnvelope submissionEnvelope) {
-        executorService.submit(() -> {
-            try {
-                metadataUpdateService.applyUpdates(submissionEnvelope);
-                exporter.updateBundles(submissionEnvelope);
-            } catch (Exception e) {
-                log.error("Uncaught Exception Applying Updates or Exporting Bundles", e);
             }
         });
     }
@@ -285,5 +260,15 @@ public class SubmissionEnvelopeService {
         float duration = ((float) (endTime - startTime)) / 1000;
         String durationStr = new DecimalFormat("#,###.##").format(duration);
         log.info("cleanup link time: {} s", durationStr);
+    }
+
+    private boolean isSubmitAction(List<SubmitAction> submitActions) {
+        return submitActions.contains(SubmitAction.ARCHIVE)
+                || submitActions.contains(SubmitAction.EXPORT)
+                || submitActions.contains(SubmitAction.EXPORT_METADATA);
+    }
+
+    private boolean shouldExport(Set<SubmitAction> submitActions) {
+        return submitActions.contains(SubmitAction.EXPORT) || submitActions.contains(SubmitAction.EXPORT_METADATA);
     }
 }

@@ -4,18 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.exception.RedundantUpdateException;
-import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.patch.JsonPatcher;
 import org.humancellatlas.ingest.patch.PatchService;
-import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Service;
-
-import java.util.Collection;
 
 @AllArgsConstructor
 @Service
@@ -56,31 +51,6 @@ public class MetadataUpdateService {
                     originalDocument.getId(),
                     updateDocument.getId()));
         }
-    }
-
-    public void applyUpdates(SubmissionEnvelope submissionEnvelope) {
-        applyUpdateDocuments(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.BIOMATERIAL));
-        applyUpdateDocuments(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.FILE));
-        applyUpdateDocuments(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.PROCESS));
-        applyUpdateDocuments(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.PROJECT));
-        applyUpdateDocuments(metadataCrudService.findAllBySubmission(submissionEnvelope, EntityType.PROTOCOL));
-    }
-
-    private <T extends MetadataDocument> void applyUpdateDocuments(Collection<T> documents) {
-        for (T updateDocument : documents) {
-            String documentUuid = updateDocument.getUuid().getUuid().toString();
-            EntityType entityType = updateDocument.getType();
-            T originalDocument = metadataCrudService.findOriginalByUuid(documentUuid, entityType);
-            T upsertedDocument = applyUpdateDocument(originalDocument, updateDocument);
-            metadataCrudService.save(upsertedDocument);
-        }
-    }
-
-    private <T extends MetadataDocument> T applyUpdateDocument(T canonicalDocument, T updateDocument) {
-        canonicalDocument.setDcpVersion(updateDocument.getDcpVersion());
-        canonicalDocument.setValidationState(updateDocument.getValidationState());
-        canonicalDocument.setContent(updateDocument.getContent());
-        return canonicalDocument;
     }
 
 }

@@ -8,5 +8,4 @@ public interface Exporter {
 
     void exportBundles(SubmissionEnvelope submissionEnvelope);
 
-    void updateBundles(SubmissionEnvelope submissionEnvelope);
 }
