@@ -23,6 +23,8 @@ cache:
 
 build:
   stage: build
+  tags:
+    - dind
   script:
     - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
     - docker build -t $CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_SHA .
