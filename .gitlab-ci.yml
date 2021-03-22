@@ -9,6 +9,7 @@ workflow:
 variables:
   FASTQ_VALIDATOR_IMAGE: "quay.io/ebi-ait/fastq_utils:54bcf9f"
   APP_NAME: "ingest-core"
+  DEV_REPLICAS: 1
 
 stages:
   - build
@@ -38,7 +39,7 @@ deploy-dev:
     url: https://dev.contribute.data.humancellatlas.org/
   script:
     - helm package k8s/$APP_NAME
-    - helm upgrade -f k8s/dev.yaml $APP_NAME k8s/$APP_NAME --set-string environment=dev,image=$CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_SHA,replicas=1 --wait --install
+    - helm upgrade -f k8s/dev.yaml $APP_NAME k8s/$APP_NAME --set-string environment=dev,image=$CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_SHA,replicas=$DEV_REPLICAS --wait --install
 
 unit-test:
   image: quay.io/ebi-ait/ingest-base-images:openjdk_11
