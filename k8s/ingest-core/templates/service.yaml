@@ -4,7 +4,7 @@ metadata:
   labels:
     role: ingestion
   name: ingest-core-service
-  namespace: ingest-core-3022-{{ .Values.environment }}
+  namespace: {{ .Values.environment }}-environment
 spec:
   ports:
     - port: 80
