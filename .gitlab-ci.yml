@@ -10,7 +10,7 @@ variables:
   FASTQ_VALIDATOR_IMAGE: "quay.io/ebi-ait/fastq_utils:54bcf9f"
   APP_NAME: "ingest-core"
   DEV_REPLICAS: 1
-  IMAGE_NAME: $CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_SHA
+  IMAGE_NAME: quay.io/ebi-ait/$CI_PROJECT_NAME:$CI_COMMIT_SHORT_SHA
 
 stages:
   - build
@@ -28,7 +28,7 @@ build:
   tags:
     - dind
   script:
-    - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+    - echo $QUAY_PASSWORD | docker login quay.io -u $QUAY_USERNAME --password-stdin $CI_REGISTRY
     - docker build -t $IMAGE_NAME .
     - docker push $IMAGE_NAME
 
