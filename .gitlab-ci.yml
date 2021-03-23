@@ -97,7 +97,7 @@ deploy-prod:
     name: prod
     url: https://contribute.data.humancellatlas.org/
     kubernetes:
-      namespace: staging-environment
+      namespace: prod-environment
   script:
     - helm package k8s/$APP_NAME
     - helm upgrade -f k8s/dev.yaml $APP_NAME k8s/$APP_NAME --set-string environment=prod,image=$IMAGE_NAME,replicas=$DEV_REPLICAS --wait --install
