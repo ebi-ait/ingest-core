@@ -35,10 +35,10 @@ build:
 deploy-dev:
   stage: deploy-dev
   image: quay.io/ebi-ait/ingest-base-images:dtzar_helm-kubectl-3.5.0
+  environment:
+    name: dev-environment
+    url: https://dev.contribute.data.humancellatlas.org/
   script:
-    - mkdir -p $HOME/.kube
-    - echo -n $KUBE_CONFIG | base64 -d > $HOME/.kube/config
-    - kubectl config use-context ingest-eks-dev
     - helm package k8s/$APP_NAME
     - helm upgrade -f k8s/dev.yaml $APP_NAME k8s/$APP_NAME --set-string environment=dev,image=$IMAGE_NAME,replicas=$DEV_REPLICAS --wait --install --force
 
