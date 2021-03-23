@@ -38,9 +38,13 @@ deploy-dev:
   environment:
     name: dev
     url: https://dev.contribute.data.humancellatlas.org/
+  variables:
+    NAMESPACE: environment-dev
+    KUBE_CONFIG: $HX_WP_KUBE_CONFIG
   script:
     - mkdir -p $HOME/.kube
     - echo ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config use-context ingest-eks-dev
     - helm package k8s/$APP_NAME
     - helm upgrade -f k8s/dev.yaml $APP_NAME k8s/$APP_NAME --set-string environment=dev,image=$IMAGE_NAME,replicas=$DEV_REPLICAS --wait --install --force
 
