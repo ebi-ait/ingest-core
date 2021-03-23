@@ -39,6 +39,8 @@ deploy-dev:
     name: dev
     url: https://dev.contribute.data.humancellatlas.org/
   script:
+    - echo $KUBE_NAMESPACE
+    - echo $KUBE_TOKEN
     - helm package k8s/$APP_NAME
     - helm upgrade -f k8s/dev.yaml $APP_NAME k8s/$APP_NAME --set-string environment=dev,image=$IMAGE_NAME,replicas=$DEV_REPLICAS --wait --install --force
 
