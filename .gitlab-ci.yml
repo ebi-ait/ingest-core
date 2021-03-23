@@ -36,7 +36,7 @@ deploy-dev:
   stage: deploy-dev
   image: quay.io/ebi-ait/ingest-base-images:dtzar_helm-kubectl-3.5.0
   environment:
-    name: dev-environment
+    name: dev
     url: https://dev.contribute.data.humancellatlas.org/
   script:
     - helm package k8s/$APP_NAME
