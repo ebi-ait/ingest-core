@@ -28,7 +28,7 @@ build:
   tags:
     - dind
   script:
-    - echo $QUAY_PASSWORD | docker login quay.io -u $QUAY_USERNAME --password-stdin $CI_REGISTRY
+    - echo $QUAY_PASSWORD | docker login quay.io -u $QUAY_USERNAME --password-stdin
     - docker build -t $IMAGE_NAME .
     - docker push $IMAGE_NAME
 
