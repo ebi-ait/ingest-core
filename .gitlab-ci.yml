@@ -18,7 +18,7 @@ cache:
     - .gradle/wrapper
     - .gradle/caches
 
-unit-test:
+Unit Test:
   image: quay.io/ebi-ait/ingest-base-images:openjdk_11
   stage: unit-test
   script:
