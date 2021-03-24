@@ -1,0 +1,15 @@
+debug: false
+notifications:
+  smtp:
+    host: email-smtp.us-east-1.amazonaws.com
+    port: "587"
+    wranglerEmails: hca-notifications@ebi.ac.uk
+    projectNotificationsFromAddress: hca-notifications@ebi.ac.uk
+  amqp:
+    sendExchange: ingest.notifications.exchange
+    sendRoutingKey: ingest.notifications.new
+
+gcpProjectWhitelist: "ingest-service-301110.iam.gserviceaccount.com"
+svcAuthAudience: https://data.humancellatlas.org/
+usrAuthAudience: https://dev.data.humancellatlas.org/
+aaiAuthority: "https://login.elixir-czech.org/oidc/"
