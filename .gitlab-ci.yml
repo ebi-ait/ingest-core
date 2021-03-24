@@ -5,11 +5,17 @@ services:
 variables:
   APP_NAME: $CI_PROJECT_NAME
   DEV_REPLICAS: 1
+  STAGING_REPLICAS: 1
+  PROD_REPLICAS: 1
   IMAGE_NAME: quay.io/ebi-ait/$CI_PROJECT_NAME:$CI_COMMIT_SHORT_SHA
+  DEV_RELEASE_IMAGE: quay.io/ebi-ait/$CI_PROJECT_NAME:latest-dev
+  MASTER_RELEASE_IMAGE: quay.io/ebi-ait/$CI_PROJECT_NAME:latest
 
 stages:
   - build
   - unit-test
+  - release-dev
+  - release-master
   - deploy-dev
   - integration-dev
   - deploy-staging
@@ -41,6 +47,30 @@ unit-test:
       junit:
         - build/test-results/**/TEST-*.xml
 
+release-dev:
+  stage: release-dev
+  only:
+    - dev
+  tags:
+    - dind
+  script:
+    - echo $QUAY_PASSWORD | docker login quay.io -u $QUAY_USERNAME --password-stdin
+    - docker pull $IMAGE_NAME
+    - docker tag $IMAGE_NAME $DEV_RELEASE_IMAGE
+    - docker push $DEV_RELEASE_IMAGE
+
+release-master:
+  stage: release-master
+  only:
+    - master
+  tags:
+    - dind
+  script:
+    - echo $QUAY_PASSWORD | docker login quay.io -u $QUAY_USERNAME --password-stdin
+    - docker pull $IMAGE_NAME
+    - docker tag $IMAGE_NAME $MASTER_RELEASE_IMAGE
+    - docker push $MASTER_RELEASE_IMAGE
+
 deploy-dev:
   stage: deploy-dev
   only:
@@ -53,7 +83,7 @@ deploy-dev:
       namespace: dev-environment
   script:
     - helm package k8s/$APP_NAME
-    - helm upgrade -f k8s/dev.yaml $APP_NAME k8s/$APP_NAME --set-string environment=dev,image=$IMAGE_NAME,replicas=$DEV_REPLICAS --wait --install
+    - helm upgrade -f k8s/dev.yaml $APP_NAME k8s/$APP_NAME --set-string environment=dev,image=$DEV_RELEASE_IMAGE,replicas=$DEV_REPLICAS --wait --install
 
 integration-dev:
   stage: integration-dev
@@ -76,7 +106,7 @@ deploy-staging:
       namespace: staging-environment
   script:
     - helm package k8s/$APP_NAME
-    - helm upgrade -f k8s/dev.yaml $APP_NAME k8s/$APP_NAME --set-string environment=staging,image=$IMAGE_NAME,replicas=$DEV_REPLICAS --wait --install
+    - helm upgrade -f k8s/staging.yaml $APP_NAME k8s/$APP_NAME --set-string environment=staging,image=$MASTER_RELEASE_IMAGE,replicas=$STAGING_REPLICAS --wait --install
 
 integration-staging:
   stage: integration-staging
@@ -100,7 +130,7 @@ deploy-prod:
       namespace: prod-environment
   script:
     - helm package k8s/$APP_NAME
-    - helm upgrade -f k8s/dev.yaml $APP_NAME k8s/$APP_NAME --set-string environment=prod,image=$IMAGE_NAME,replicas=$DEV_REPLICAS --wait --install
+    - helm upgrade -f k8s/prod.yaml $APP_NAME k8s/$APP_NAME --set-string environment=prod,image=$MASTER_RELEASE_IMAGE,replicas=$PROD_REPLICAS --wait --install
 
 integration-prod:
   stage: integration-prod
