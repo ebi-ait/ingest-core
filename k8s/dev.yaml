@@ -13,3 +13,4 @@ gcpProjectWhitelist: "ingest-service-301110.iam.gserviceaccount.com"
 svcAuthAudience: https://dev.data.humancellatlas.org/
 usrAuthAudience: https://dev.data.humancellatlas.org/
 aaiAuthority: "https://login.elixir-czech.org/oidc/"
+schema: schema.dev.data.humancellatlas.org
