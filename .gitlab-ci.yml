@@ -1,29 +1,18 @@
-image: openjdk:11
-
-workflow:
-  rules:
-    - if: $CI_EXTERNAL_PULL_REQUEST_TARGET_BRANCH_NAME == 'dev'
-
-stages:
-  - build
-  - test
+include:
+  remote: 'https://raw.githubusercontent.com/ebi-ait/gitlab-ci-templates/master/build-release-deploy.yml'
 
 cache:
   paths:
     - .gradle/wrapper
     - .gradle/caches
 
-
-build:
+Unit Test:
+  image: quay.io/ebi-ait/ingest-base-images:openjdk_11
   stage: build
-  script:
-    - ./gradlew
-    
-test:
-  stage: test
   script:
     - ./gradlew verify
   artifacts:
     reports:
       junit:
         - build/test-results/**/TEST-*.xml
+

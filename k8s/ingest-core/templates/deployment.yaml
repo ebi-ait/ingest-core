@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+    app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+  labels:
+    role: ingestion
+  name: ingest-core
+  namespace: {{ .Values.environment }}-environment
+spec:
+  selector:
+    matchLabels:
+      app: ingest-core
+  replicas: {{ .Values.replicas }}
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: ingest-core
+      annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+    spec:
+      containers:
+        - env:
+            - name: DEBUG
+              value: {{ .Values.debug | quote }}
+            - name: MONGO_URI
+              value: mongodb://${MONGO_SERVICE_SERVICE_HOST}:${MONGO_SERVICE_SERVICE_PORT}/admin
+            - name: RABBIT_HOST
+              value: ${RABBIT_SERVICE_SERVICE_HOST}
+            - name: RABBIT_PORT
+              value: ${RABBIT_SERVICE_SERVICE_PORT_SERVICE}
+            - name: SCHEMA_BASE_URI
+              value: https://{{ .Values.schema }}/
+            - name: STATE_TRACKER_HOST
+              value: $(INGEST_STATE_TRACKING_SERVICE_SERVICE_HOST)
+            - name: STATE_TRACKER_PORT
+              value: $(INGEST_STATE_TRACKING_SERVICE_SERVICE_PORT)
+            - name: GCP_PROJECT_WHITELIST
+              value: {{ .Values.gcpProjectWhitelist }}
+            - name: SVC_AUTH_AUDIENCE
+              value: {{ .Values.svcAuthAudience }}
+            - name: USR_AUTH_AUDIENCE
+              value: {{ .Values.usrAuthAudience }}
+            - name: AUTH_ISSUER
+              value: {{ .Values.aaiAuthority }}
+            - name: NOTIFICATIONS_SMTP_HOST
+              value: {{ .Values.notifications.smtp.host }}
+            - name: NOTIFICATIONS_SMTP_PORT
+              value: "587"
+            - name: NOTIFICATIONS_SMTP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: notifications-smtp-username
+                  name: aws-keys
+            - name: NOTIFICATIONS_SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: notifications-smtp-password
+                  name: aws-keys
+            - name: NOTIFICATIONS_AMQP_SEND_EXCHANGE
+              value: {{ .Values.notifications.amqp.sendExchange }}
+            - name: NOTIFICATIONS_AMQP_SEND_ROUTING_KEY
+              value: {{ .Values.notifications.amqp.sendRoutingKey }}
+          image: {{ .Values.image }}
+          imagePullPolicy: Always
+          name: ingest-core
+          ports:
+            - name: http
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 3
