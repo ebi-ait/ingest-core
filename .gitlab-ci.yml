@@ -1,18 +1,6 @@
 include:
   remote: 'https://raw.githubusercontent.com/ebi-ait/gitlab-ci-templates/master/build-release-deploy.yml'
 
-stages:
-  - build
-  - unit-test
-  - release-dev
-  - release-master
-  - deploy-dev
-  - integration-dev
-  - deploy-staging
-  - integration-staging
-  - deploy-prod
-  - integration-prod
-
 cache:
   paths:
     - .gradle/wrapper
@@ -20,7 +8,7 @@ cache:
 
 Unit Test:
   image: quay.io/ebi-ait/ingest-base-images:openjdk_11
-  stage: unit-test
+  needs: []
   script:
     - ./gradlew verify
   artifacts:
