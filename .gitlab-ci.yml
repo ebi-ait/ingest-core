@@ -8,7 +8,7 @@ cache:
 
 Unit Test:
   image: quay.io/ebi-ait/ingest-base-images:openjdk_11
-  stage: build
+  stage: test
   script:
     - ./gradlew verify
   artifacts:
