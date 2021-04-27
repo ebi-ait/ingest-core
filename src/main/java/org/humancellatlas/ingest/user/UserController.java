@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.security.Account;
+import org.humancellatlas.ingest.security.AccountRepository;
 import org.humancellatlas.ingest.security.Role;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -19,12 +20,13 @@ import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.*;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin
@@ -36,6 +38,9 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
 
     @Autowired
     ProjectRepository projectRepository;
+
+    @Autowired
+    AccountRepository accountRepository;
 
     @Autowired
     private PagedResourcesAssembler<SubmissionEnvelope> submissionEnvelopePagedResourcesAssembler;
@@ -83,7 +88,6 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
 
     @RequestMapping(value = "/projects")
     public PagedResources<Resource<Project>> getUserProjects(Pageable pageable) {
-
         Page<Project> projects = Page.empty();
 
         if (getCurrentAccount().getRoles().contains(Role.WRANGLER)) {
@@ -105,6 +109,13 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
         Account account = (Account) authentication.getPrincipal();
         return account;
     }
+
+    @GetMapping("/list")
+    ResponseEntity<List<Account>> listUsers(
+            @RequestParam("role") Optional<Role> role) {
+        return role.map(value -> ResponseEntity.ok(accountRepository.findAccountByRolesEquals(value))).orElseGet(() -> ResponseEntity.ok(accountRepository.findAll()));
+    }
+
 
     @Override
     public RepositoryLinksResource process(RepositoryLinksResource resource) {
