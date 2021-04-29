@@ -113,7 +113,8 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
     @GetMapping("/list")
     ResponseEntity<List<Account>> listUsers(
             @RequestParam("role") Optional<Role> role) {
-        return role.map(value -> ResponseEntity.ok(accountRepository.findAccountByRolesEquals(value))).orElseGet(() -> ResponseEntity.ok(accountRepository.findAll()));
+        return role.map(value -> ResponseEntity.ok(accountRepository.findAccountByRoles(value)))
+                .orElseGet(() -> ResponseEntity.ok(accountRepository.findAll()));
     }
 
 
