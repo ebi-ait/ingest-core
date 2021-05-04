@@ -20,13 +20,21 @@ import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.*;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
+
 import java.util.Optional;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
 @RestController
 @CrossOrigin
@@ -77,9 +85,8 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
     @RequestMapping(value = "/submissionEnvelopes")
     public PagedResources<Resource<SubmissionEnvelope>> getUserSubmissionEnvelopes(Pageable pageable) {
         Page<SubmissionEnvelope> submissionEnvelopes = submissionEnvelopeRepository.findByUser(getCurrentAccount().getId(), pageable);
-        PagedResources<Resource<SubmissionEnvelope>> pagedResources =  submissionEnvelopePagedResourcesAssembler.toResource(submissionEnvelopes);
-        for (Resource<SubmissionEnvelope> resource : pagedResources)
-        {
+        PagedResources<Resource<SubmissionEnvelope>> pagedResources = submissionEnvelopePagedResourcesAssembler.toResource(submissionEnvelopes);
+        for (Resource<SubmissionEnvelope> resource : pagedResources) {
             resource.add(entityLinks.linkForSingleResource(resource.getContent()).withRel(Link.REL_SELF));
             submissionEnvelopeResourceProcessor.process(resource);
         }
@@ -95,10 +102,9 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
         } else {
             projects = projectRepository.findByUser(getCurrentAccount().getId(), pageable);
         }
-        
+
         PagedResources<Resource<Project>> pagedResources = projectPagedResourcesAssembler.toResource(projects);
-        for (Resource<Project> resource : pagedResources)
-        {
+        for (Resource<Project> resource : pagedResources) {
             resource.add(entityLinks.linkForSingleResource(resource.getContent()).withRel(Link.REL_SELF));
         }
         return pagedResources;
@@ -110,9 +116,12 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
         return account;
     }
 
-    @GetMapping("/list")
-    ResponseEntity<List<Account>> listUsers(
-            @RequestParam("role") Optional<Role> role) {
+    @GetMapping(path = "/list", produces=APPLICATION_JSON_UTF8_VALUE)
+    ResponseEntity<?> listUsers(Authentication authentication,
+                                @RequestParam("role") Optional<Role> role) {
+        if (!authentication.getAuthorities().contains(Role.WRANGLER))
+            return new ResponseEntity<>("Unauthorized", HttpStatus.UNAUTHORIZED);
+
         return role.map(value -> ResponseEntity.ok(accountRepository.findAccountByRoles(value)))
                 .orElseGet(() -> ResponseEntity.ok(accountRepository.findAll()));
     }
