@@ -12,4 +12,5 @@ public interface AccountRepository extends MongoRepository<Account, String> {
 
     Account findByProviderReference(String providerReference);
 
+    List<Account> findAccountByRoles(Role role);
 }
