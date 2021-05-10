@@ -6,6 +6,6 @@ public interface Exporter {
 
     void exportManifests(SubmissionEnvelope submissionEnvelope);
 
-    void exportBundles(SubmissionEnvelope submissionEnvelope);
+    void exportProcesses(SubmissionEnvelope submissionEnvelope);
 
 }

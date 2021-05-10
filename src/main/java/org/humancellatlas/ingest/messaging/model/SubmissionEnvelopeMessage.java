@@ -9,8 +9,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public class SubmissionEnvelopeMessage implements AbstractEntityMessage {
-    private final MessageProtocol messageProtocol;
+public class SubmissionEnvelopeMessage {
     private final String documentType;
     private final String documentId;
     private final String documentUuid;

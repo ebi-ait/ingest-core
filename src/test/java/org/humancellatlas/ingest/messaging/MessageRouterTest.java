@@ -6,9 +6,8 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.job.ExportJob;
-import org.humancellatlas.ingest.exporter.ExporterData;
-import org.humancellatlas.ingest.messaging.model.AbstractEntityMessage;
-import org.humancellatlas.ingest.messaging.model.ExportMessage;
+import org.humancellatlas.ingest.exporter.ExperimentProcess;
+import org.humancellatlas.ingest.messaging.model.ManifestMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -28,8 +27,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.humancellatlas.ingest.messaging.Constants.Exchanges.ASSAY_EXCHANGE;
+import static org.humancellatlas.ingest.messaging.Constants.Exchanges.EXPORTER_EXCHANGE;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.EXPERIMENT_SUBMITTED;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.MANIFEST_SUBMITTED;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
@@ -62,7 +62,7 @@ public class MessageRouterTest {
     @Test
     public void testSendManifestForExport() {
         //expect:
-        doTestSendForExport(EXPERIMENT_SUBMITTED);
+        doTestSendForExport(MANIFEST_SUBMITTED);
     }
 
 
@@ -77,7 +77,7 @@ public class MessageRouterTest {
         // when:
         messageRouter.routeStateTrackingUpdateMessageFor(project);
 
-        verify(messageSender, times(1)).queueDocumentStateUpdateMessage(any(URI.class), any(AbstractEntityMessage.class), anyLong());
+        verify(messageSender, times(1)).queueDocumentStateUpdateMessage(any(URI.class), any(), anyLong());
     }
 
     @Test
@@ -91,7 +91,7 @@ public class MessageRouterTest {
         // when:
         messageRouter.routeStateTrackingUpdateMessageFor(project);
 
-        verify(messageSender, times(1)).queueDocumentStateUpdateMessage(any(URI.class), any(AbstractEntityMessage.class), anyLong());
+        verify(messageSender, times(1)).queueDocumentStateUpdateMessage(any(URI.class), any(), anyLong());
     }
 
     @Test
@@ -101,7 +101,7 @@ public class MessageRouterTest {
         // when:
         messageRouter.routeStateTrackingUpdateMessageFor(project);
 
-        verify(messageSender, never()).queueDocumentStateUpdateMessage(any(URI.class), any(AbstractEntityMessage.class), anyLong());
+        verify(messageSender, never()).queueDocumentStateUpdateMessage(any(URI.class), any(), anyLong());
     }
 
     @Test
@@ -114,7 +114,7 @@ public class MessageRouterTest {
             messageRouter.routeStateTrackingUpdateMessageFor(project);
         });
 
-        verify(messageSender, never()).queueDocumentStateUpdateMessage(any(URI.class), any(AbstractEntityMessage.class), anyLong());
+        verify(messageSender, never()).queueDocumentStateUpdateMessage(any(URI.class), any(), anyLong());
     }
 
     private void doTestSendForExport(String routingKey) {
@@ -132,31 +132,25 @@ public class MessageRouterTest {
         Uuid envelopeUuid = Uuid.newUuid();
         submissionEnvelope.setUuid(envelopeUuid);
 
+        process.setSubmissionEnvelope(submissionEnvelope);
+
         //and:
-        ExporterData exporterData = new ExporterData(2, 4, process, submissionEnvelope);
+        ExperimentProcess exporterData = new ExperimentProcess(2, 4, process);
 
         //and:
         String callbackLink = "/processes/78bbd9";
         doReturn(callbackLink).when(linkGenerator).createCallback(any(Class.class), anyString());
 
         //when:
-        messageRouter.sendExperimentForExport(exporterData, ExportJob.builder()
-                .status(ExportState.EXPORTING)
-                .errors(new ArrayList<>())
-                .context(new HashMap<>())
-                .submission(submissionEnvelope)
-                .destination(null)
-                .id("id")
-                .context(null)
-                .build());
+        messageRouter.sendManifestForExport(exporterData);
 
         //then:
-        ArgumentCaptor<ExportMessage> messageCaptor = ArgumentCaptor.forClass(ExportMessage.class);
-        verify(messageSender).queueNewExportMessage(eq(ASSAY_EXCHANGE), eq(routingKey),
+        ArgumentCaptor<ManifestMessage> messageCaptor = ArgumentCaptor.forClass(ManifestMessage.class);
+        verify(messageSender).queueNewExportMessage(eq(EXPORTER_EXCHANGE), eq(routingKey),
                 messageCaptor.capture(), anyLong());
 
         //and:
-        ExportMessage submittedMessage = messageCaptor.getValue();
+        ManifestMessage submittedMessage = messageCaptor.getValue();
         assertThat(submittedMessage)
                 .extracting("documentId", "documentUuid", "callbackLink", "documentType",
                         "envelopeId", "envelopeUuid", "index", "total")

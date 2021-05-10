@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.messaging;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,24 +46,19 @@ public class MessageSender {
         MessageBuffer.VALIDATION.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
 
-    public void queueAccessionMessage(String exchange, String routingKey,
-            MetadataDocumentMessage payload, long intendedSendTime){
-        MessageBuffer.ACCESSIONER.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
-    }
-
-    public void queueNewExportMessage(String exchange, String routingKey, ExportMessage payload, long intendedSendTime){
+    public void queueNewExportMessage(String exchange, String routingKey, Object payload, long intendedSendTime){
         MessageBuffer.EXPORT.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
 
-    public void queueNewExportMessage(String exchange, String routingKey, BundleUpdateMessage payload, long intendedSendTime){
+    public void queueNewExportJob(String exchange, String routingKey, Object payload, long intendedSendTime){
         MessageBuffer.EXPORT.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
 
-    public void queueStateTrackingMessage(String exchange, String routingKey, AbstractEntityMessage payload, long intendedSendTime){
+    public void queueStateTrackingMessage(String exchange, String routingKey, Object payload, long intendedSendTime){
         MessageBuffer.STATE_TRACKING.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
 
-    public void queueDocumentStateUpdateMessage(URI uri, AbstractEntityMessage payload, long intendedSendTime) {
+    public void queueDocumentStateUpdateMessage(URI uri, Object payload, long intendedSendTime) {
         MessageBuffer.STATE_TRACKING.queueHttpMessage(uri, payload, intendedSendTime);
     }
 
@@ -94,11 +90,11 @@ public class MessageSender {
         private String exchange;
         private String routingKey;
         private URI uri;
-        private final AbstractEntityMessage payload;
+        private final Object payload;
 
         private final long intendedStartTime;
 
-        public QueuedMessage(String exchange, String routingKey, AbstractEntityMessage payload, long intendedStartTime) {
+        public QueuedMessage(String exchange, String routingKey, Object payload, long intendedStartTime) {
             this.messageProtocol = MessageProtocol.AMQP;
             this.exchange = exchange;
             this.routingKey = routingKey;
@@ -106,7 +102,7 @@ public class MessageSender {
             this.intendedStartTime = intendedStartTime;
         }
 
-        public QueuedMessage(URI uri, AbstractEntityMessage payload, long intendedStartTime) {
+        public QueuedMessage(URI uri, Object payload, long intendedStartTime) {
             this.messageProtocol = MessageProtocol.HTTP;
             this.uri = uri;
             this.payload = payload;
@@ -152,7 +148,7 @@ public class MessageSender {
 
         //TODO each enum should already know exchange and routing key
         //Why are these part of the contract when they're already defined in Constants?
-        void queueAmqpMessage(String exchange, String routingKey, AbstractEntityMessage payload, long intendedStartTime) {
+        void queueAmqpMessage(String exchange, String routingKey, Object payload, long intendedStartTime) {
             QueuedMessage message = new QueuedMessage(exchange, routingKey, payload, intendedStartTime + delayMillis);
             try {
                 messageQueue.add(message);
@@ -162,7 +158,7 @@ public class MessageSender {
             }
         }
 
-        void queueHttpMessage(URI uri, AbstractEntityMessage payload, long intendedStartTime) {
+        void queueHttpMessage(URI uri, Object payload, long intendedStartTime) {
             QueuedMessage message = new QueuedMessage(uri, payload, intendedStartTime + delayMillis);
             try {
                 messageQueue.add(message);
