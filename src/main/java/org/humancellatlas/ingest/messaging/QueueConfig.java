@@ -84,10 +84,6 @@ public class QueueConfig implements RabbitListenerConfigurer {
         return BindingBuilder.bind(queueStateTracking).to(stateTrackingExchange).with(Constants.Queues.STATE_TRACKING);
     }
 
-    @Bean Binding bindingUpdateQueue(Queue queueBundleUpdate, TopicExchange assayExchange) {
-        return BindingBuilder.bind(queueBundleUpdate).to(assayExchange).with(Constants.Routing.UPDATE_SUBMITTED);
-    }
-
     @Bean Binding bindingNewNotificationQueue(Queue queueNotifications, TopicExchange notificationExchange) {
         return BindingBuilder.bind(queueNotifications).to(notificationExchange).with(Routing.NOTIFICATION_NEW);
     }

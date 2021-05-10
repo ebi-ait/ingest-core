@@ -126,13 +126,6 @@ public class MessageRouter {
                 System.currentTimeMillis());
     }
 
-    public void sendBundlesToUpdateForExport(BundleUpdateMessage bundleUpdateMessage) {
-        messageSender.queueNewExportMessage(ASSAY_EXCHANGE,
-                UPDATE_SUBMITTED,
-                bundleUpdateMessage,
-                System.currentTimeMillis());
-    }
-
     /* messages to the upload/staging area manager */
 
     public boolean routeRequestUploadAreaCredentials(SubmissionEnvelope envelope) {
