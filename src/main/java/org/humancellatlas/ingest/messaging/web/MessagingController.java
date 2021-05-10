@@ -26,7 +26,7 @@ public class MessagingController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaTypes.HAL_JSON_VALUE)
     ResponseEntity<Resource<?>> publishFileUploadInfo(@RequestBody ObjectNode uploadInfo){
-        Message uploadInfoMessage = new Message(Constants.Exchanges.FILE_STAGED_EXCHANGE, Constants.Queues.FILE_STAGED, uploadInfo);
+        Message uploadInfoMessage = new Message(Constants.Exchanges.FILE_STAGED_EXCHANGE, Constants.Queues.FILE_STAGED_QUEUE, uploadInfo);
         getMessageService().publish(uploadInfoMessage);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -35,7 +35,7 @@ public class MessagingController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaTypes.HAL_JSON_VALUE)
     ResponseEntity<Resource<?>> publishFileValidationResult(@RequestBody ObjectNode validationResult){
-        Message uploadInfoMessage = new Message(Constants.Exchanges.VALIDATION, Constants.Queues.FILE_VALIDATION, validationResult);
+        Message uploadInfoMessage = new Message(Constants.Exchanges.VALIDATION_EXCHANGE, Constants.Queues.FILE_VALIDATION_QUEUE, validationResult);
         getMessageService().publish(uploadInfoMessage);
         return new ResponseEntity<>(HttpStatus.OK);
     }
