@@ -28,7 +28,7 @@ public class FileListener {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
 
-    @RabbitListener(queues = Constants.Queues.FILE_STAGED)
+    @RabbitListener(queues = Constants.Queues.FILE_STAGED_QUEUE)
     public void handleFileStagedEvent(FileMessage fileMessage) {
         if(!StringUtils.isEmpty(fileMessage.getContentType())
                 && fileMessage.getMediaType().isPresent()

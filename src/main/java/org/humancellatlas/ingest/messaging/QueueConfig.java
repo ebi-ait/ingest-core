@@ -17,74 +17,69 @@ import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 
-/**
- * @author Simon Jupp
- * @date 04/09/2017 Samples, Phenotypes and Ontologies Team, EMBL-EBI
- */
+
 @Configuration
 public class QueueConfig implements RabbitListenerConfigurer {
-    @Bean Queue queueFileUpdate() { return new Queue(Constants.Queues.FILE_UPDATE, false); }
+    @Bean
+    Queue queueFileStaged() {
+        return new Queue(Constants.Queues.FILE_STAGED_QUEUE, false);
+    }
 
-    @Bean Queue queueBundleUpdate() { return new Queue(Constants.Routing.UPDATE_SUBMITTED, true); }
+    @Bean
+    FanoutExchange fileStagedExchange() {
+        return new FanoutExchange(Constants.Exchanges.FILE_STAGED_EXCHANGE);
+    }
 
-    @Bean FanoutExchange fileExchange() { return new FanoutExchange(Constants.Exchanges.FILE_FANOUT); }
+    @Bean
+    Queue queueMetadataValidation() {
+        return new Queue(Constants.Queues.METADATA_VALIDATION_QUEUE, false);
+    }
 
-    @Bean Queue queueFileStaged() { return new Queue(Constants.Queues.FILE_STAGED, false); }
+    @Bean
+    DirectExchange validationExchange() {
+        return new DirectExchange(Constants.Exchanges.VALIDATION_EXCHANGE);
+    }
 
-    @Bean FanoutExchange fileStagedExchange() { return new FanoutExchange(Constants.Exchanges.FILE_STAGED_EXCHANGE); }
+    @Bean
+    TopicExchange stateTrackingExchange() {
+        return new TopicExchange(Constants.Exchanges.STATE_TRACKING_EXCHANGE);
+    }
 
-    @Bean Queue queueValidationRequired() { return new Queue(Constants.Queues.VALIDATION_REQUIRED, false); }
+    @Bean
+    Queue queueNotifications() {
+        return new Queue(Queues.NOTIFICATIONS_QUEUE, true);
+    }
 
-    @Bean DirectExchange validationExchange() { return new DirectExchange(Constants.Exchanges.VALIDATION); }
+    @Bean
+    TopicExchange notificationExchange() {
+        return new TopicExchange(Exchanges.NOTIFICATIONS_EXCHANGE);
+    }
 
-    @Bean Queue queueAccessionRequired() { return new Queue(Constants.Queues.ACCESSION_REQUIRED, false); }
+    @Bean
+    TopicExchange exporterExchange() {
+        return new TopicExchange(Constants.Exchanges.EXPORTER_EXCHANGE);
+    }
 
-    @Bean DirectExchange accessionExchange() { return new DirectExchange(Constants.Exchanges.ACCESSION); }
-
-    @Bean Queue queueArchival() { return new Queue(Constants.Queues.SUBMISSION_ARCHIVAL, false); }
-
-    @Bean DirectExchange archivalExchange() { return new DirectExchange(Constants.Exchanges.SUBMISSION_ARCHIVAL_DIRECT); }
-
-    @Bean Queue queueStateTracking() { return new Queue(Constants.Queues.STATE_TRACKING, false); }
-
-    @Bean TopicExchange stateTrackingExchange() { return new TopicExchange(Constants.Exchanges.STATE_TRACKING); }
-
-    @Bean Queue queueNotifications() { return new Queue(Queues.NOTIFICATIONS_QUEUE, true); }
-
-    @Bean TopicExchange notificationExchange() { return new TopicExchange(Exchanges.NOTIFICATIONS_EXCHANGE); }
-
-    @Bean TopicExchange assayExchange() { return new TopicExchange(Constants.Exchanges.ASSAY_EXCHANGE); }
-
-    @Bean TopicExchange uploadAreaExchange() { return new TopicExchange(Constants.Exchanges.UPLOAD_AREA_EXCHANGE); }
+    @Bean
+    TopicExchange uploadAreaExchange() {
+        return new TopicExchange(Constants.Exchanges.UPLOAD_AREA_EXCHANGE);
+    }
 
 
     /* bindings */
 
-    @Bean Binding bindingFileStaged(Queue queueFileStaged, FanoutExchange fileStagedExchange) {
+    @Bean
+    Binding bindingFileStaged(Queue queueFileStaged, FanoutExchange fileStagedExchange) {
         return BindingBuilder.bind(queueFileStaged).to(fileStagedExchange);
     }
 
-    @Bean Binding bindingFile(Queue queueFileUpdate, FanoutExchange fileExchange) {
-        return BindingBuilder.bind(queueFileUpdate).to(fileExchange);
+    @Bean
+    Binding bindingValidation(Queue queueMetadataValidation, DirectExchange validationExchange) {
+        return BindingBuilder.bind(queueMetadataValidation).to(validationExchange).with(Constants.Queues.METADATA_VALIDATION_QUEUE);
     }
-
-    @Bean Binding bindingValidation(Queue queueValidationRequired, DirectExchange validationExchange) {
-        return BindingBuilder.bind(queueValidationRequired).to(validationExchange).with(Constants.Queues.VALIDATION_REQUIRED);
-    }
-
-    @Bean Binding bindingAccession(Queue queueAccessionRequired, DirectExchange accessionExchange) {
-        return BindingBuilder.bind(queueAccessionRequired).to(accessionExchange).with(Constants.Queues.ACCESSION_REQUIRED);
-    }
-
-    @Bean Binding bindingArchival(Queue queueArchival, DirectExchange archivalExchange) {
-        return BindingBuilder.bind(queueArchival).to(archivalExchange).with(Constants.Queues.SUBMISSION_ARCHIVAL);
-    }
-
-    @Bean Binding bindingStateTracking(Queue queueStateTracking, TopicExchange stateTrackingExchange) {
-        return BindingBuilder.bind(queueStateTracking).to(stateTrackingExchange).with(Constants.Queues.STATE_TRACKING);
-    }
-
-    @Bean Binding bindingNewNotificationQueue(Queue queueNotifications, TopicExchange notificationExchange) {
+    
+    @Bean
+    Binding bindingNewNotificationQueue(Queue queueNotifications, TopicExchange notificationExchange) {
         return BindingBuilder.bind(queueNotifications).to(notificationExchange).with(Routing.NOTIFICATION_NEW);
     }
 
@@ -98,12 +93,12 @@ public class QueueConfig implements RabbitListenerConfigurer {
 
     @Bean
     public MappingJackson2MessageConverter jackson2Converter() {
-       ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
 
-       mapper.registerModule(new JavaTimeModule());
-       mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        mapper.registerModule(new JavaTimeModule());
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
-       return new MappingJackson2MessageConverter();
+        return new MappingJackson2MessageConverter();
     }
 
     @Bean
