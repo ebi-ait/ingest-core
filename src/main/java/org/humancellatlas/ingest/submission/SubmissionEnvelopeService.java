@@ -121,7 +121,7 @@ public class SubmissionEnvelopeService {
     public void exportSubmission(SubmissionEnvelope submissionEnvelope) {
         executorService.submit(() -> {
             try {
-                exporter.exportBundles(submissionEnvelope);
+                exporter.exportProcesses(submissionEnvelope);
             } catch (Exception e) {
                 log.error("Uncaught Exception exporting Bundles", e);
             }

@@ -4,10 +4,13 @@ import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestService;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
+import org.humancellatlas.ingest.export.entity.ExportEntityService;
 import org.humancellatlas.ingest.export.job.ExportJobService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessService;
+import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +52,12 @@ public class DefaultExporterTest {
     private ExportJobService exportJobService;
 
     @MockBean
+    private ProjectRepository projectRepository;
+
+    @MockBean
+    private ExportEntityService exportEntityService;
+
+    @MockBean
     private BundleManifestService bundleManifestService;
 
     @MockBean
@@ -58,23 +67,27 @@ public class DefaultExporterTest {
     private LinkGenerator linkGenerator;
 
     @Test
-    public void testExportBundles() {
+    public void testExportManifests() {
         //given:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         Set<String> assayIds = mockProcessIds(2);
         when(processService.getProcesses(any())).thenAnswer(
                 (Answer<Stream<Process>>) invocation -> {
                     List<String> ids = invocation.getArgument(0);
-                    return ids.stream().map(Process::new);
+                    return ids.stream().map(id -> {
+                            Process process = new Process(id);
+                            process.setSubmissionEnvelope(submissionEnvelope);
+                            return process;
+                    });
                 }
         );
 
         doReturn(assayIds).when(processService).findAssays(any(SubmissionEnvelope.class));
 
         //and:
-        Set<ExporterData> receivedData = mockSendingThroughMessageRouter();
+        Set<ExperimentProcess> receivedData = mockSendingThroughMessageRouter();
 
         //when:
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         exporter.exportManifests(submissionEnvelope);
 
         //then:
@@ -87,7 +100,7 @@ public class DefaultExporterTest {
 
         //and:
         verify(messageRouter, times(assayIds.size()))
-                .sendManifestForExport(any(ExporterData.class));
+                .sendManifestForExport(any(ExperimentProcess.class));
     }
 
     private Set<String> mockProcessIds(int max) {
@@ -96,39 +109,39 @@ public class DefaultExporterTest {
                         .collect(Collectors.toSet());
     }
 
-    private Set<ExporterData> mockSendingThroughMessageRouter() {
-        final Set<ExporterData> exporterData = new HashSet<>();
+    private Set<ExperimentProcess> mockSendingThroughMessageRouter() {
+        final Set<ExperimentProcess> experimentProcess = new HashSet<>();
         Answer<Void> addToSet = invocation ->  {
-            exporterData.add(invocation.getArgument(0));
+            experimentProcess.add(invocation.getArgument(0));
             return null;
         };
-        doAnswer(addToSet).when(messageRouter).sendManifestForExport(any(ExporterData.class));
-        return exporterData;
+        doAnswer(addToSet).when(messageRouter).sendManifestForExport(any(ExperimentProcess.class));
+        return experimentProcess;
     }
 
-    private void assertUniqueIndexes(Set<ExporterData> receivedData) {
+    private void assertUniqueIndexes(Set<ExperimentProcess> receivedData) {
         List<Integer> indexes = receivedData.stream()
-                .map(ExporterData::getIndex)
+                .map(ExperimentProcess::getIndex)
                 .collect(toList());
         assertThat(indexes).containsOnlyOnce(0, 1);
     }
 
-    private void assertCorrectTotalCount(Set<ExporterData> receivedData, int expectedCount) {
+    private void assertCorrectTotalCount(Set<ExperimentProcess> receivedData, int expectedCount) {
         receivedData.stream().forEach(exporterData -> {
             assertThat(exporterData.getTotalCount()).isEqualTo(expectedCount);
         });
     }
 
-    private void assertCorrectSubmissionEnvelope(Set<ExporterData> receivedData,
+    private void assertCorrectSubmissionEnvelope(Set<ExperimentProcess> receivedData,
             SubmissionEnvelope submissionEnvelope) {
         receivedData.forEach(exporterData -> assertThat(exporterData.getSubmissionEnvelope()).isEqualTo(submissionEnvelope));
     }
 
     private void assertAllProcessesExported(Set<String> assayIds,
-                                            Set<ExporterData> exporterData) {
+                                            Set<ExperimentProcess> exporterData) {
 
         List<Process> sentProcesses = exporterData.stream()
-                                                .map(ExporterData::getProcess)
+                                                .map(ExperimentProcess::getProcess)
                                                 .collect(toList());
 
         assertThat(sentProcesses.stream().map(Process::getId)).containsAll(assayIds);

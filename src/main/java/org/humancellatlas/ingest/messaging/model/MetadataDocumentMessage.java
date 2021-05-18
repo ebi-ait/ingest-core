@@ -13,8 +13,7 @@ import org.humancellatlas.ingest.state.ValidationState;
  */
 @Getter
 @AllArgsConstructor
-public class MetadataDocumentMessage implements AbstractEntityMessage {
-    private final MessageProtocol messageProtocol;
+public class MetadataDocumentMessage {
     private final String documentType;
     private final String documentId;
     private final String documentUuid;
