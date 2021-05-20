@@ -62,6 +62,9 @@ public class Project extends MetadataDocument {
     @Setter
     private Object publishedToCatalogue;
 
+    @Setter
+    private Object publicationsInfo;
+
 
     @JsonCreator
     public Project(@JsonProperty("content") Object content) {
