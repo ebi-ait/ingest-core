@@ -67,4 +67,7 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
     @RestResource(exported = false)
     Stream<Project> findByUuid(Uuid uuid);
 
+    @RestResource(rel = "catalogue", path = "catalogue")
+    Page<Project> findByPublishedToCatalogueTrue(Pageable pageable);
+
 }
