@@ -63,7 +63,7 @@ public class Project extends MetadataDocument {
     private Boolean publishedToCatalogue;
 
     @Setter
-    private Object publicationsInfo;
+    private List<Object> publicationsInfo;
 
 
     @JsonCreator
