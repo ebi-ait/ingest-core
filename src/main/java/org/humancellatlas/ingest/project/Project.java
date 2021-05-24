@@ -59,6 +59,12 @@ public class Project extends MetadataDocument {
     @Setter
     private String primaryWrangler;
 
+    @Setter
+    private Boolean publishedToCatalogue;
+
+    @Setter
+    private List<Object> publicationsInfo;
+
 
     @JsonCreator
     public Project(@JsonProperty("content") Object content) {

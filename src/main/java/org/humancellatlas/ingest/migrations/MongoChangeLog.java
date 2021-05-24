@@ -112,4 +112,20 @@ public class MongoChangeLog {
         update.add(new Document("$set", Document.parse("{ 'dataAccess.type': { $arrayElemAt: [ '$dataAccess.type', 0 ] } }")));
         db.getCollection("project").updateMany(filter, update);
     }
+
+    @ChangeSet(order = "2021-05-20", id = "Set default project catalogue", author = "alexie.staffer@ebi.ac.uk")
+    public void setDefaultProjectCatalogue(MongoDatabase db) {
+        Document filter = Document.parse("{ }");
+        List<Document> update = new ArrayList<>();
+        update.add(new Document("$set", Document.parse("{ 'publishedToCatalogue': false }")));
+        db.getCollection("project").updateMany(filter, update);
+    }
+
+    @ChangeSet(order = "2021-05-20", id = "set default publications info", author = "alexie.staffer@ebi.ac.uk")
+    public void setDefaultPublicationsInfo(MongoDatabase db) {
+        Document filter = Document.parse("{ }");
+        List<Document> update = new ArrayList<>();
+        update.add(new Document("$set", Document.parse("{ 'publicationsInfo': [] }")));
+        db.getCollection("project").updateMany(filter, update);
+    }
 }
