@@ -60,7 +60,7 @@ public class Project extends MetadataDocument {
     private String primaryWrangler;
 
     @Setter
-    private Object publishedToCatalogue;
+    private Boolean publishedToCatalogue;
 
     @Setter
     private Object publicationsInfo;
