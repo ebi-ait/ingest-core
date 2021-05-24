@@ -74,6 +74,10 @@ public class Project extends MetadataDocument {
     @Setter
     private int wranglingPriority;
 
+    @Setter
+    private String wranglingNotes;
+
+
     @JsonCreator
     public Project(@JsonProperty("content") Object content) {
         super(EntityType.PROJECT, content);
