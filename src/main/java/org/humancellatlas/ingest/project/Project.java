@@ -57,13 +57,25 @@ public class Project extends MetadataDocument {
     private Object identifyingOrganisms;
 
     @Setter
-    private String primaryWrangler;
-
-    @Setter
     private Boolean publishedToCatalogue;
 
     @Setter
     private List<Object> publicationsInfo;
+
+    @Setter
+    private String primaryWrangler;
+
+    @Setter
+    private String secondaryWrangler;
+
+    @Setter
+    private WranglingState wranglingState;
+
+    @Setter
+    private int wranglingPriority;
+
+    @Setter
+    private String wranglingNotes;
 
 
     @JsonCreator
