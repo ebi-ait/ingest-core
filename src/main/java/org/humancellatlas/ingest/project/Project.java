@@ -60,7 +60,10 @@ public class Project extends MetadataDocument {
     private String primaryWrangler;
 
     @Setter
-    private Boolean publishedToCatalogue;
+    private Boolean isInCatalogue;
+
+    @Setter
+    private Instant cataloguedDate;
 
     @Setter
     private List<Object> publicationsInfo;
