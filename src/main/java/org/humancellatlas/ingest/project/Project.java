@@ -58,6 +58,18 @@ public class Project extends MetadataDocument {
 
     @Setter
     private String primaryWrangler;
+    
+    @Setter
+    private String secondaryWrangler;
+    
+    @Setter
+    private WranglingState wranglingState;
+
+    @Setter
+    private int wranglingPriority;
+
+    @Setter
+    private String wranglingNotes;
 
     @Setter
     private Boolean isInCatalogue;
