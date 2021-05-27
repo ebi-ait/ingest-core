@@ -87,12 +87,7 @@ public class ProjectController {
             "organ", "dataAccess", "identifyingOrganisms", "validationErrors", "isInCatalogue", "publicationsInfo"
         );
         ObjectNode validPatch = patch.retain(allowedFields);
-
-        Project updatedProject = metadataUpdateService.update(project, validPatch);
-
-        if (!partial) {
-            projectEventHandler.editedProjectMetadata(updatedProject);
-        }
+        Project updatedProject = projectService.update(project, validPatch, !partial);
         return ResponseEntity.ok().body(assembler.toFullResource(updatedProject));
     }
 

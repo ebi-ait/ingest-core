@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.project;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,10 +63,30 @@ public class ProjectService {
     }
 
     public Project register(final Project project) {
+        project.setCataloguedDate(null);
+        if (project.getIsInCatalogue()) {
+            project.setCataloguedDate(Instant.now());
+        }
         Project persistentProject = projectRepository.save(project);
         projectEventHandler.registeredProject(persistentProject);
         return persistentProject;
     }
+
+    public Project update(final Project project, ObjectNode patch, Boolean sendNotification) {
+        if (patch.has("isInCatalogue")
+            && patch.get("isInCatalogue").asBoolean()
+            && project.getCataloguedDate() == null){
+            project.setCataloguedDate(Instant.now());
+        }
+
+        Project updatedProject = metadataUpdateService.update(project, patch);
+
+        if (sendNotification) {
+            projectEventHandler.editedProjectMetadata(updatedProject);
+        }
+        return  updatedProject;
+    }
+
 
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
         if(! project.getIsUpdate()) {
