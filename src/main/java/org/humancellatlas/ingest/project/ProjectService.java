@@ -65,7 +65,7 @@ public class ProjectService {
 
     public Project register(final Project project) {
         project.setCataloguedDate(null);
-        if (isNull(project.getIsInCatalogue()) || project.getIsInCatalogue()) {
+        if (!isNull(project.getIsInCatalogue()) && project.getIsInCatalogue()) {
             project.setCataloguedDate(Instant.now());
         }
         Project persistentProject = projectRepository.save(project);
