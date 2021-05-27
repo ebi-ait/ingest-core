@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.lang.String.format;
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toSet;
 
 
@@ -64,7 +65,7 @@ public class ProjectService {
 
     public Project register(final Project project) {
         project.setCataloguedDate(null);
-        if (project.getIsInCatalogue()) {
+        if (isNull(project.getIsInCatalogue()) || project.getIsInCatalogue()) {
             project.setCataloguedDate(Instant.now());
         }
         Project persistentProject = projectRepository.save(project);
