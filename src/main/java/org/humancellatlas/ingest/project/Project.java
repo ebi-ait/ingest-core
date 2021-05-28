@@ -9,7 +9,6 @@ import lombok.Setter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.file.File;
-import org.humancellatlas.ingest.project.wranglingpriority.WranglingPriority;
 import org.humancellatlas.ingest.project.wranglingstate.WranglingState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -68,7 +67,7 @@ public class Project extends MetadataDocument {
     private WranglingState wranglingState;
 
     @Setter
-    private WranglingPriority wranglingPriority;
+    private Integer wranglingPriority;
 
     @Setter
     private String wranglingNotes;
