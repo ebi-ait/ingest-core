@@ -4,17 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.humancellatlas.ingest.project.WranglingState;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 
 import static junit.framework.TestCase.assertEquals;
 
 @JsonTest
-@RunWith(SpringRunner.class)
 public class WranglingStateTest {
     @Autowired
     private ObjectMapper objectMapper;
