@@ -1,4 +1,4 @@
-package org.humancellatlas.ingest.project.wranglingpriority;
+package org.humancellatlas.ingest.project;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
