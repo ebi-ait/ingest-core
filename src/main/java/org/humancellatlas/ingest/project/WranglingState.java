@@ -1,10 +1,10 @@
-package org.humancellatlas.ingest.project.wranglingstate;
+package org.humancellatlas.ingest.project;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@JsonSerialize(using = WranglingStateSerializer.class)
-@JsonDeserialize(using = WranglingStateDeserializer.class)
+
 public enum WranglingState {
     NEW("New"),
     ELIGIBLE("Eligible"),
@@ -19,5 +19,10 @@ public enum WranglingState {
 
     WranglingState(String status) {
         this.text = status;
+    }
+
+    @JsonValue
+    public String getValue() {
+        return this.text;
     }
 }
