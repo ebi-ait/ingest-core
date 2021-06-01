@@ -66,7 +66,7 @@ public class Project extends MetadataDocument {
     private WranglingState wranglingState;
 
     @Setter
-    private int wranglingPriority;
+    private Integer wranglingPriority;
 
     @Setter
     private String wranglingNotes;
