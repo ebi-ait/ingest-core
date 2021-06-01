@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-
+@JsonSerialize(using = WranglingStateSerializer.class)
 public enum WranglingState {
     NEW("New"),
     ELIGIBLE("Eligible"),
