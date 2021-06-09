@@ -85,7 +85,7 @@ public class ProjectController {
 
         List<String> allowedFields = List.of("content", "releaseDate",
                 "primaryWrangler", "secondaryWrangler", "wranglingState", "wranglingPriority", "wranglingNotes",
-                "accessionDate", "technology", "organ", "dataAccess", "identifyingOrganisms", "validationErrors", "isInCatalogue", "publicationsInfo");
+                "accessionDate", "technology", "organ", "cellCount", "dataAccess", "identifyingOrganisms", "validationErrors", "isInCatalogue", "publicationsInfo");
 
         ObjectNode validPatch = patch.retain(allowedFields);
         Project updatedProject = projectService.update(project, validPatch, !partial);
