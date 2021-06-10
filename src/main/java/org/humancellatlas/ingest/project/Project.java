@@ -51,6 +51,9 @@ public class Project extends MetadataDocument {
     private Object organ;
 
     @Setter
+    private Integer cellCount;
+
+    @Setter
     private Object dataAccess;
 
     @Setter
