@@ -13,7 +13,8 @@ public enum WranglingState {
     STALLED("Stalled"),
     SUBMITTED("Submitted"),
     PUBLISHED_IN_DCP("Published in DCP"),
-    DELETED("Deleted");
+    DELETED("Deleted"),
+    NEW_SUGGESTION("New Suggestion");
 
     protected String text;
 
