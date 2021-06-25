@@ -73,6 +73,20 @@ public class ProjectService {
         return persistentProject;
     }
 
+    public Project createSuggestedProject(final ObjectNode suggestion) {
+        Project suggestedProject = new Project(null);
+        suggestedProject.setWranglingState(WranglingState.NEW_SUGGESTION);
+        var notes = String.format(
+            "DOI: %s \nName: %s \nEmail: %s \nComments: %s",
+            suggestion.get("doi"),
+            suggestion.get("name"),
+            suggestion.get("email"),
+            suggestion.get("comments")
+        );
+        suggestedProject.setWranglingNotes(notes);
+        return this.register(suggestedProject);
+    }
+
     public Project update(final Project project, ObjectNode patch, Boolean sendNotification) {
         if (patch.has("isInCatalogue")
             && patch.get("isInCatalogue").asBoolean()
