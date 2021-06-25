@@ -78,6 +78,13 @@ public class ProjectController {
         return ResponseEntity.ok().body(assembler.toFullResource(result));
     }
 
+    @PostMapping("/projects/suggestion")
+    ResponseEntity<Resource<?>> suggest(@RequestBody final ObjectNode suggestion,
+                                         final PersistentEntityResourceAssembler assembler) {
+        Project suggestedProject = projectService.createSuggestedProject(suggestion);
+        return ResponseEntity.ok().body(assembler.toFullResource(suggestedProject));
+    }
+
     @PatchMapping("/projects/{id}")
     ResponseEntity<Resource<?>> update(@PathVariable("id") final Project project,
                                        @RequestParam(value = "partial", defaultValue = "false") Boolean partial,
