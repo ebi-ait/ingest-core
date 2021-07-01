@@ -40,7 +40,7 @@ public class SchemaService {
 
     public List<Schema> getLatestSchemas() {
         List<Schema> allSchemas = schemaRepository.findAll();
-        Collections.sort(allSchemas, Collections.reverseOrder());
+        allSchemas.sort(Collections.reverseOrder());
 
         Set<LatestSchema> latestSchemas = new LinkedHashSet<>();
         allSchemas.stream()
@@ -52,9 +52,19 @@ public class SchemaService {
                             .collect(Collectors.toList());
     }
 
+    public Schema getLatestSchemaByEntityType(String highLevelEntity, String entityType) {
+        List<Schema> allLatestSchema = filterLatestSchemas(highLevelEntity).stream()
+                .filter(schema -> schema.getConcreteEntity().matches(entityType))
+                .collect(Collectors.toList());
+
+        return allLatestSchema.size() > 0 ? allLatestSchema.get(0) : null;
+    }
+
     @Scheduled(fixedDelay = EVERY_24_HOURS)
     public void updateSchemasCollection() {
         String schemaBaseUri = environment.getProperty("SCHEMA_BASE_URI");
+
+        if (schemaBaseUri == null) return;
 
         if (schemaBaseUri.endsWith("/")) {
             schemaBaseUri = schemaBaseUri.substring(0, schemaBaseUri.length() - 1);
