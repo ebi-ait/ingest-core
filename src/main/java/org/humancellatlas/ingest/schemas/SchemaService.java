@@ -62,9 +62,10 @@ public class SchemaService {
 
     @Scheduled(fixedDelay = EVERY_24_HOURS)
     public void updateSchemasCollection() {
-        String schemaBaseUri = environment.getProperty("SCHEMA_BASE_URI");
+        String schemaBaseUri = getSchemaBaseUri();
 
-        if (schemaBaseUri == null) return;
+        if (schemaBaseUri == null)
+            throw new SchemaScrapeException("SCHEMA_BASE_URI environmental variable should not be null.");
 
         if (schemaBaseUri.endsWith("/")) {
             schemaBaseUri = schemaBaseUri.substring(0, schemaBaseUri.length() - 1);
@@ -74,6 +75,10 @@ public class SchemaService {
         schemaScraper.getAllSchemaURIs(URI.create(schemaBaseUri)).stream()
                 .filter(schemaUri -> !schemaUri.toString().contains("index.html") && !schemaUri.toString().contains("property_migrations"))
                 .forEach(this::doUpdate);
+    }
+
+    public String getSchemaBaseUri() {
+        return environment.getProperty("SCHEMA_BASE_URI");
     }
 
     private void doUpdate(URI schemaUri) {
