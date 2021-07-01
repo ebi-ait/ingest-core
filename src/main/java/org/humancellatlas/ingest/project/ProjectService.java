@@ -11,7 +11,7 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
-import org.humancellatlas.ingest.query.MetadataCriteria;
+import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
@@ -22,9 +22,7 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
@@ -53,6 +51,7 @@ public class ProjectService {
     private final @NonNull ProjectRepository projectRepository;
     private final @NonNull MetadataCrudService metadataCrudService;
     private final @NonNull MetadataUpdateService metadataUpdateService;
+    private final @NonNull SchemaService schemaService;
     private final @NonNull BundleManifestRepository bundleManifestRepository;
 
     private final @NonNull ProjectEventHandler projectEventHandler;
@@ -74,7 +73,8 @@ public class ProjectService {
     }
 
     public Project createSuggestedProject(final ObjectNode suggestion) {
-        Project suggestedProject = new Project(null);
+        Map<String, String> content = createBaseContentForProject();
+        Project suggestedProject = new Project(content);
         suggestedProject.setWranglingState(WranglingState.NEW_SUGGESTION);
         var notes = String.format(
             "DOI: %s \nName: %s \nEmail: %s \nComments: %s",
@@ -151,6 +151,15 @@ public class ProjectService {
         } else {
             throw new NonEmptyProject();
         }
+    }
+
+    private Map<String, String> createBaseContentForProject() {
+        Map<String, String> content = new HashMap<>();
+        final String entityType = "project";
+        final String highLevelEntity = "type";
+        content.put("describedBy", schemaService.getLatestSchemaByEntityType(highLevelEntity, entityType).getSchemaUri());
+        content.put("schema_type", entityType);
+        return content;
     }
 
     private ProjectBag gather(Project project) {

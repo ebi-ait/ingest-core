@@ -1,10 +1,14 @@
 package org.humancellatlas.ingest.project;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.assertj.core.api.Assertions;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
+import org.humancellatlas.ingest.schemas.Schema;
+import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,12 +25,15 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -55,6 +62,9 @@ public class ProjectServiceTest {
 
     @MockBean
     private MetadataUpdateService metadataUpdateService;
+
+    @MockBean
+    private SchemaService schemaService;
 
     @MockBean
     private BundleManifestRepository bundleManifestRepository;
@@ -232,4 +242,49 @@ public class ProjectServiceTest {
 
     }
 
+    @Nested
+    class SuggestedProject {
+
+        @Test
+        @DisplayName("Register a project")
+        void givenSuggestionCreatesProjectSuccessfully() {
+            //given:
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectNode suggestion = mapper.createObjectNode();
+            suggestion.put("doi", "doi123");
+            suggestion.put("name", "Test User");
+            suggestion.put("email", "test@example.com");
+            suggestion.put("comments", "This is a comment");
+
+            //and:
+            final String highLevelEntity = "type";
+            Schema projectSchema = new Schema(highLevelEntity, "2.0","project", "project", "project", "mock.io/mock-schema-project");
+            doReturn(projectSchema).when(schemaService).getLatestSchemaByEntityType(highLevelEntity, "project");
+
+            Map<String, String> content = new HashMap<>();
+            final String entityType = "project";
+            content.put("describedBy", schemaService.getLatestSchemaByEntityType(highLevelEntity, entityType).getSchemaUri());
+            content.put("schema_type", entityType);
+
+            Project persistentProject = new Project(content);
+            persistentProject.setWranglingState(WranglingState.NEW_SUGGESTION);
+            persistentProject.setWranglingNotes(
+                String.format(
+                    "DOI: %s \nName: %s \nEmail: %s \nComments: %s",
+                    suggestion.get("doi"),
+                    suggestion.get("name"),
+                    suggestion.get("email"),
+                    suggestion.get("comments")
+                )
+            );
+            doReturn(persistentProject).when(projectRepository).save(any(Project.class));
+
+
+            //when:
+            Project result = projectService.createSuggestedProject(suggestion);
+
+            //then:
+            assertThat(result).isEqualTo(persistentProject);
+        }
+    }
 }
