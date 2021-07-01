@@ -90,7 +90,7 @@ public class ProjectServiceTest {
                     .map(SubmissionEnvelope::new)
                     .collect(toSet());
 
-            submissionSet1.forEach(submission ->  project1.addToSubmissionEnvelopes(submission));
+            submissionSet1.forEach(project1::addToSubmissionEnvelopes);
 
             //and:
             var project2 = new Project("project2");
@@ -99,7 +99,7 @@ public class ProjectServiceTest {
                     .mapToObj(Integer::toString)
                     .map(SubmissionEnvelope::new)
                     .collect(toSet());
-            submissionSet2.forEach(submission -> project2.addToSubmissionEnvelopes(submission));
+            submissionSet2.forEach(project2::addToSubmissionEnvelopes);
 
             //and:
             doReturn(Stream.of(project1, project2))
@@ -136,9 +136,9 @@ public class ProjectServiceTest {
 
             var project3 = new Project(null);
             BeanUtils.copyProperties(project1, project3);
-            submissionSet1.forEach(submission -> {
-                project3.addToSubmissionEnvelopes(new SubmissionEnvelope(submission.getId()));
-            });
+            submissionSet1.forEach(submission ->
+                project3.addToSubmissionEnvelopes(new SubmissionEnvelope(submission.getId()))
+            );
 
             var documentIds = new ArrayList<String>();
             submissionSet1.forEach(submission -> documentIds.add(submission.getId()));
@@ -198,9 +198,9 @@ public class ProjectServiceTest {
             var persistentProjects = IntStream.range(0, 3)
                     .mapToObj(number -> new Project(null))
                     .collect(toList());
-            persistentProjects.forEach(persistentProject -> {
-                BeanUtils.copyProperties(project, persistentProject);
-            });
+            persistentProjects.forEach(persistentProject ->
+                BeanUtils.copyProperties(project, persistentProject)
+            );
             doReturn(persistentProjects.stream())
                     .when(projectRepository).findByUuid(project.getUuid());
 
@@ -208,9 +208,9 @@ public class ProjectServiceTest {
             projectService.delete(project);
 
             //then:
-            persistentProjects.forEach(persistentProject -> {
-                verify(projectRepository).delete(persistentProject);
-            });
+            persistentProjects.forEach(persistentProject ->
+                verify(projectRepository).delete(persistentProject)
+            );
         }
 
         @Test
@@ -235,9 +235,9 @@ public class ProjectServiceTest {
                     .when(projectRepository).findByUuid(project.getUuid());
 
             //expect:
-            Assertions.assertThatThrownBy(() -> {
-                projectService.delete(project);
-            }).isInstanceOf(NonEmptyProject.class);
+            Assertions.assertThatThrownBy(() ->
+                projectService.delete(project)
+            ).isInstanceOf(NonEmptyProject.class);
         }
 
     }
