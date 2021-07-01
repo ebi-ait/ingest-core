@@ -10,8 +10,9 @@ import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.notifications.model.Notification;
+import org.humancellatlas.ingest.notifications.processors.impl.email.EmailMetadata;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
-import org.humancellatlas.ingest.query.MetadataCriteria;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
@@ -22,8 +23,9 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static java.lang.String.format;
@@ -84,8 +86,25 @@ public class ProjectService {
             suggestion.get("comments")
         );
         suggestedProject.setWranglingNotes(notes);
-        return this.register(suggestedProject);
+        Project persistentSuggestion = this.register(suggestedProject);
+        this.notifyWranglersOfNewSuggestion(persistentSuggestion);
+        return persistentSuggestion;
     }
+
+    private void notifyWranglersOfNewSuggestion(Project suggestion) {
+        // Build Email Metadata
+        // Real values needed
+        var email = new EmailMetadata();
+        email.setFrom("some@email.com");
+        email.setTo("another@email.com");
+        email.setSubject("New Project Suggestion");
+        email.setBody(suggestion.getUuid().getUuid().toString());
+        // How to get EmailMetadata handled EmailNotificationProcessor?
+
+        // The Could build a json map and send to the notifications prococessor?
+        // Map<String, ?> notification = new Map<String, Object>()
+        // var notification = Notification.buildNew().metadata({"email": {}});
+ }
 
     public Project update(final Project project, ObjectNode patch, Boolean sendNotification) {
         if (patch.has("isInCatalogue")
