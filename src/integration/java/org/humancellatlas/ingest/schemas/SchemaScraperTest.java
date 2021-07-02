@@ -5,11 +5,13 @@ import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.schemas.schemascraper.SchemaScraper;
 import org.humancellatlas.ingest.schemas.schemascraper.impl.S3BucketSchemaScraper;
 
+import org.humancellatlas.ingest.schemas.schemascraper.impl.SchemaScrapeException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.env.MockEnvironment;
@@ -23,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
 
 
@@ -32,7 +35,8 @@ import static org.mockito.Mockito.doReturn;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 public class SchemaScraperTest {
-    @Autowired SchemaService schemaService;
+    @SpyBean
+    SchemaService schemaService;
 
     @MockBean SchemaRepository schemaRepository;
 
@@ -76,7 +80,7 @@ public class SchemaScraperTest {
     }
 
     @Test
-    public void testSchemaParse_BundleUris() throws Exception {
+    public void testSchemaParse_BundleUris() {
         try {
             // when
             schemaService.schemaDescriptionFromSchemaUris(Arrays.asList(URI.create("bundle/1.2.3/biomaterial"),
@@ -90,7 +94,7 @@ public class SchemaScraperTest {
     }
 
     @Test
-    public void testSchemaParse_ModuleUris() throws Exception {
+    public void testSchemaParse_ModuleUris() {
         try {
             // when
             schemaService.schemaDescriptionFromSchemaUris(Arrays.asList(URI.create("module/biomaterial/5.1.0/growth_condition"),
@@ -104,7 +108,7 @@ public class SchemaScraperTest {
     }
 
     @Test
-    public void testSchemaParse_TypeUris() throws Exception {
+    public void testSchemaParse_TypeUris() {
         try {
             // when
             schemaService.schemaDescriptionFromSchemaUris(Arrays.asList(URI.create("type/biomaterial/5.0.1/cell_line"),
@@ -118,7 +122,7 @@ public class SchemaScraperTest {
     }
 
     @Test
-    public void testSchemaParse_SubdomainTypeUris() throws Exception {
+    public void testSchemaParse_SubdomainTypeUris() {
         try {
             // when
             schemaService.schemaDescriptionFromSchemaUris(Arrays.asList(URI.create("type/process/biomaterial_collection/5.1.0/collection_process"),
@@ -155,7 +159,7 @@ public class SchemaScraperTest {
     }
 
     @Test
-    public void testGetLatestSchemas() throws Exception {
+    public void testGetLatestSchemas() {
         Schema mockSchemaA = new Schema("mockHighLevel-A", "2.0","mockDomain-A","mockSubdomain-A","mockConcrete-A", "mock.io/mock-schema-a");
         Schema mockSchemaB = new Schema("mockHighLevel-B", "1.9","mockDomain-B","mockSubdomain-B","mockConcrete-B", "mock.io/mock-schema-a");
         Schema mockSchemaOldA = new Schema("mockHighLevel-A", "1.9","mockDomain-A","mockSubdomain-A","mockConcrete-A", "mock.io/mock-schema-duplicate-a");
@@ -166,15 +170,13 @@ public class SchemaScraperTest {
         Collection<Schema> latestSchemas = schemaService.getLatestSchemas();
         assert latestSchemas.size() == 2;
         latestSchemas.forEach(schema -> {
-            if(schema.getSchemaUri().equals("mock.io/mock-schema-duplicate-a")){
-                assert false;
-            }
+            assert !schema.getSchemaUri().equals("mock.io/mock-schema-duplicate-a");
         });
         assert true;
     }
 
     @Test
-    public void testFilterLatestSchemas() throws Exception {
+    public void testFilterLatestSchemas() {
         Schema mockSchemaA = new Schema("mockHighLevel-A", "2.0","mockDomain-A","mockSubdomain-A","mockConcrete-A", "mock.io/mock-schema-a");
         Schema mockSchemaB = new Schema("mockHighLevel-B", "1.9","mockDomain-B","mockSubdomain-B","mockConcrete-B", "mock.io/mock-schema-a");
         Schema mockSchemaOldA = new Schema("mockHighLevel-A", "1.9","mockDomain-A","mockSubdomain-A","mockConcrete-A", "mock.io/mock-schema-duplicate-a");
@@ -187,6 +189,20 @@ public class SchemaScraperTest {
         latestSchemas.forEach(schema -> {
             assert schema.getHighLevelEntity().equals("mockHighLevel-B");
         });
+    }
+
+    @Test
+    public void testEmptyEnvironmentVariable() {
+        doReturn(null).when(schemaService).getSchemaBaseUri();
+
+        Exception exception = assertThrows(SchemaScrapeException.class, () ->
+            schemaService.updateSchemasCollection()
+        );
+
+        String expectedMessage = "SCHEMA_BASE_URI environmental variable should not be null.";
+        String actualMessage = exception.getMessage();
+
+        assertEquals(actualMessage, expectedMessage);
     }
 
     @Configuration
