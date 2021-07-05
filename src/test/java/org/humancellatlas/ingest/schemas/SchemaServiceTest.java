@@ -28,12 +28,12 @@ public class SchemaServiceTest {
     private SchemaScraper schemaScraper;
 
     @Test
-    public void testGetLatestSchemas() {
+    public void testGetLatestSchemasVersions() {
         //given:
-        Schema version1_2_3 = createTestSchema("1.2.3");
-        Schema version1_2_4 = createTestSchema("1.2.4");
-        Schema version2_0 = createTestSchema("2.0");
-        Schema version11_1_1 = createTestSchema("11.1.1");
+        Schema version1_2_3 = createTestSchema("1.2.3", "process_core");
+        Schema version1_2_4 = createTestSchema("1.2.4", "process_core");
+        Schema version2_0 = createTestSchema("2.0", "process_core");
+        Schema version11_1_1 = createTestSchema("11.1.1", "process_core");
 
         //and:
         List<Schema> schemas = asList(version2_0, version1_2_3, version11_1_1, version1_2_4);
@@ -48,8 +48,78 @@ public class SchemaServiceTest {
         assertThat(latestSchema.getSchemaVersion()).isEqualTo(version11_1_1.getSchemaVersion());
     }
 
-    private Schema createTestSchema(String schemaVersion) {
-        return new Schema("core", schemaVersion, "process", "", "process_core",
+    @Test
+    public void testGetLatestSchemasCount() {
+        //given:
+        Schema version1_2_3 = createTestSchema("1.2.3", "process_core");
+        Schema version1_2_4 = createTestSchema("1.2.4", "process_core");
+        Schema version2_0 = createTestSchema("2.0", "process_core");
+        Schema version11_1_1 = createTestSchema("11.1.1", "process_core");
+        Schema protocol_version1_2_3 = createTestSchema("1.2.3", "protocol");
+        Schema biomaterial_version1_2_4 = createTestSchema("1.2.4", "biomaterial");
+        Schema project_version2_0 = createTestSchema("2.0", "project");
+        Schema project_version11_1_1 = createTestSchema("11.1.1", "project");
+
+        //and:
+        List<Schema> schemas = asList(version2_0, version1_2_3, version11_1_1, version1_2_4,
+                protocol_version1_2_3, biomaterial_version1_2_4, project_version2_0, project_version11_1_1);
+        doReturn(schemas).when(schemaRepository).findAll();
+
+        //when:
+        List<Schema> latestSchemas = schemaService.getLatestSchemas();
+
+        //then:
+        assertThat(latestSchemas).hasSize(4);
+    }
+
+
+    @Test
+    public void testGetLatestSchemaByEntityTypeWithExistingType() {
+        //given:
+        final String projectEntityType = "project";
+        final String oldSchemaVersion = "2.0";
+        final String newSchemaVersion = "11.1.1";
+        Schema protocol_version1_2_3 = createTestSchema(oldSchemaVersion, "protocol");
+        Schema biomaterial_version1_2_4 = createTestSchema(newSchemaVersion, "biomaterial");
+        Schema project_version2_0 = createTestSchema(oldSchemaVersion, projectEntityType);
+        Schema project_version11_1_1 = createTestSchema(newSchemaVersion, projectEntityType);
+
+        //and:
+        List<Schema> schemas = asList(project_version2_0, protocol_version1_2_3, project_version11_1_1, biomaterial_version1_2_4);
+        doReturn(schemas).when(schemaRepository).findAll();
+
+        //when:
+        Schema latestSchema = schemaService.getLatestSchemaByEntityType("type", projectEntityType);
+
+        //then:
+        assertThat(latestSchema.getConcreteEntity()).isEqualTo(projectEntityType);
+        assertThat(latestSchema.getSchemaVersion()).isEqualTo(newSchemaVersion);
+    }
+
+    @Test
+    public void testGetLatestSchemaByEntityTypeWithNonExistingType() {
+        //given:
+        final String projectEntityType = "project";
+        final String oldSchemaVersion = "2.0";
+        final String newSchemaVersion = "11.1.1";
+        Schema protocol_version1_2_3 = createTestSchema(oldSchemaVersion, "protocol");
+        Schema biomaterial_version1_2_4 = createTestSchema(newSchemaVersion, "biomaterial");
+        Schema project_version2_0 = createTestSchema(oldSchemaVersion, projectEntityType);
+        Schema project_version11_1_1 = createTestSchema(newSchemaVersion, projectEntityType);
+
+        //and:
+        List<Schema> schemas = asList(project_version2_0, protocol_version1_2_3, project_version11_1_1, biomaterial_version1_2_4);
+        doReturn(schemas).when(schemaRepository).findAll();
+
+        //when:
+        Schema latestSchema = schemaService.getLatestSchemaByEntityType("type", "non_exists");
+
+        //then:
+        assertThat(latestSchema).isNull();
+    }
+
+    private Schema createTestSchema(String schemaVersion, String entityType) {
+        return new Schema("type", schemaVersion, entityType, entityType, entityType,
                 "http://schema.humancellatlas.org");
     }
 
