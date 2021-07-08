@@ -183,32 +183,27 @@ public class ProjectService {
     }
 
     public Page<Project> filterProjects(String search, String wranglingState, String wrangler, Pageable pageable) {
-        List<Criteria> filterCriteria = new ArrayList<>();
+        List<Criteria> criterias = new ArrayList<>();
+        criterias.add(Criteria.where("isUpdate").is(false));
         Query query = new Query();
 
         if (wranglingState != null) {
-            filterCriteria.add(Criteria.where("wranglingState").is(wranglingState));
+            criterias.add(Criteria.where("wranglingState").is(wranglingState));
         }
 
         if (wrangler != null) {
-            filterCriteria.add(Criteria.where("primaryWrangler").is(wrangler));
+            criterias.add(Criteria.where("primaryWrangler").is(wrangler));
         }
 
         if (search != null) {
-            filterCriteria.add(new Criteria().orOperator(
+            criterias.add(new Criteria().orOperator(
                     Criteria.where("content.project_core.project_title").regex(search, "i"),
                     Criteria.where("content.project_core.project_description").regex(search, "i"),
                     Criteria.where("content.project_core.project_short_name").regex(search, "i")
             ));
         }
 
-        if (!filterCriteria.isEmpty()) {
-            query.addCriteria(new Criteria().andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()])));
-        } else {
-            // this follows the logic on UI for displaying all projects
-            // ASK: shouldn't this criteria also be part of the filters?
-            query.addCriteria(Criteria.where("isUpdate").is(false));
-        }
+        query.addCriteria(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
 
         System.out.println(query.toString());
 
