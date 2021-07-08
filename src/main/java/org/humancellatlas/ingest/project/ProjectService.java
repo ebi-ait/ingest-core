@@ -16,8 +16,13 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +38,8 @@ import static java.util.stream.Collectors.toSet;
 @RequiredArgsConstructor
 @Getter
 public class ProjectService {
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     //Helper class for capturing copies of a Project and all Submission Envelopes related to them.
     private static class ProjectBag {
@@ -175,4 +182,36 @@ public class ProjectService {
         return new ProjectBag(projects, envelopes);
     }
 
+    public Page<Project> filterProjects(String search, String wranglingState, String wrangler, Pageable pageable) {
+        List<Criteria> filterCriteria = new ArrayList<>();
+        Query query = new Query();
+
+        if (wranglingState != null) {
+            filterCriteria.add(Criteria.where("wranglingState").is(wranglingState));
+        }
+
+        if (wrangler != null) {
+            filterCriteria.add(Criteria.where("primaryWrangler").is(wrangler));
+        }
+
+        if (search != null) {
+            filterCriteria.add(new Criteria().orOperator(
+                    Criteria.where("content.project_core.project_title").regex(search, "i"),
+                    Criteria.where("content.project_core.project_description").regex(search, "i"),
+                    Criteria.where("content.project_core.project_short_name").regex(search, "i")
+            ));
+        }
+
+        if (!filterCriteria.isEmpty()) {
+            query.addCriteria(new Criteria().andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()])));
+        } else {
+            query.addCriteria(new Criteria());
+        }
+
+        System.out.println(query.toString());
+
+        List<Project> projects = mongoTemplate.find(query.with(pageable), Project.class);
+        long count = mongoTemplate.count(query, Project.class);
+        return new PageImpl<>(projects, pageable, count);
+    }
 }

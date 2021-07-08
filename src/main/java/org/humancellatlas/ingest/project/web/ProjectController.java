@@ -15,10 +15,7 @@ import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
-import org.humancellatlas.ingest.project.Project;
-import org.humancellatlas.ingest.project.ProjectEventHandler;
-import org.humancellatlas.ingest.project.ProjectRepository;
-import org.humancellatlas.ingest.project.ProjectService;
+import org.humancellatlas.ingest.project.*;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
@@ -28,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -40,7 +39,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-
+import com.mongodb.QueryBuilder;
 /**
  * Javadocs go here!
  *
@@ -202,5 +201,17 @@ public class ProjectController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
         }
     }
+
+    @GetMapping(path = "projects/filter")
+    public ResponseEntity<PagedResources<Resource<Project>>> filterProjects(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String wranglingState,
+            @RequestParam(required = false) String wrangler,
+            Pageable pageable,
+            final PersistentEntityResourceAssembler resourceAssembler) {
+        var projects = projectService.filterProjects(search, wranglingState, wrangler, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
+    }
+
 
 }
