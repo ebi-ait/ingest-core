@@ -205,7 +205,9 @@ public class ProjectService {
         if (!filterCriteria.isEmpty()) {
             query.addCriteria(new Criteria().andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()])));
         } else {
-            query.addCriteria(new Criteria());
+            // this follows the logic on UI for displaying all projects
+            // ASK: shouldn't this criteria also be part of the filters?
+            query.addCriteria(Criteria.where("isUpdate").is(false));
         }
 
         System.out.println(query.toString());
