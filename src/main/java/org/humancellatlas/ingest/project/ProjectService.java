@@ -206,6 +206,8 @@ public class ProjectService {
 
         query.addCriteria(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
 
+        log.debug("Project Search query: " + query.toString());
+
         List<Project> projects = mongoTemplate.find(query.with(pageable), Project.class);
         long count = mongoTemplate.count(query, Project.class);
         return new PageImpl<>(projects, pageable, count);
