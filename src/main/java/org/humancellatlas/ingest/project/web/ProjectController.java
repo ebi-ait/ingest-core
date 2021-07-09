@@ -201,14 +201,12 @@ public class ProjectController {
 
     @GetMapping(path = "projects/filter")
     public ResponseEntity<PagedResources<Resource<Project>>> filterProjects(
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) String wranglingState,
-            @RequestParam(required = false) String wrangler,
+            @ModelAttribute SearchFilter searchFilter,
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
-        var projects = projectService.filterProjects(search, wranglingState, wrangler, pageable);
+        System.out.println(searchFilter);
+        var projects = projectService.filterProjects(searchFilter, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
     }
-
 
 }

@@ -11,6 +11,7 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
+import org.humancellatlas.ingest.project.web.SearchFilter;
 import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
@@ -182,30 +183,28 @@ public class ProjectService {
         return new ProjectBag(projects, envelopes);
     }
 
-    public Page<Project> filterProjects(String search, String wranglingState, String wrangler, Pageable pageable) {
+    public Page<Project> filterProjects(SearchFilter searchFilter, Pageable pageable) {
         List<Criteria> criterias = new ArrayList<>();
         criterias.add(Criteria.where("isUpdate").is(false));
         Query query = new Query();
 
-        if (wranglingState != null) {
-            criterias.add(Criteria.where("wranglingState").is(wranglingState));
+        if (searchFilter.getWranglingState() != null) {
+            criterias.add(Criteria.where("wranglingState").is(searchFilter.getWranglingState()));
         }
 
-        if (wrangler != null) {
-            criterias.add(Criteria.where("primaryWrangler").is(wrangler));
+        if (searchFilter.getWrangler() != null) {
+            criterias.add(Criteria.where("primaryWrangler").is(searchFilter.getWrangler()));
         }
 
-        if (search != null) {
+        if (searchFilter.getSearch() != null) {
             criterias.add(new Criteria().orOperator(
-                    Criteria.where("content.project_core.project_title").regex(search, "i"),
-                    Criteria.where("content.project_core.project_description").regex(search, "i"),
-                    Criteria.where("content.project_core.project_short_name").regex(search, "i")
+                    Criteria.where("content.project_core.project_title").regex(searchFilter.getSearch(), "i"),
+                    Criteria.where("content.project_core.project_description").regex(searchFilter.getSearch(), "i"),
+                    Criteria.where("content.project_core.project_short_name").regex(searchFilter.getSearch(), "i")
             ));
         }
 
         query.addCriteria(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
-
-        System.out.println(query.toString());
 
         List<Project> projects = mongoTemplate.find(query.with(pageable), Project.class);
         long count = mongoTemplate.count(query, Project.class);
