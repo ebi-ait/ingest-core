@@ -204,7 +204,6 @@ public class ProjectController {
             @ModelAttribute SearchFilter searchFilter,
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
-        System.out.println(searchFilter);
         var projects = projectService.filterProjects(searchFilter, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
     }

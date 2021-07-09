@@ -196,11 +196,12 @@ public class ProjectService {
             criterias.add(Criteria.where("primaryWrangler").is(searchFilter.getWrangler()));
         }
 
-        if (searchFilter.getSearch() != null) {
+        String search = searchFilter.getSearch();
+        if (search != null) {
             criterias.add(new Criteria().orOperator(
-                    Criteria.where("content.project_core.project_title").regex(searchFilter.getSearch(), "i"),
-                    Criteria.where("content.project_core.project_description").regex(searchFilter.getSearch(), "i"),
-                    Criteria.where("content.project_core.project_short_name").regex(searchFilter.getSearch(), "i")
+                    Criteria.where("content.project_core.project_title").regex(search, "i"),
+                    Criteria.where("content.project_core.project_description").regex(search, "i"),
+                    Criteria.where("content.project_core.project_short_name").regex(search, "i")
             ));
         }
 
