@@ -188,22 +188,26 @@ public class ProjectService {
         criterias.add(Criteria.where("isUpdate").is(false));
         Query query = new Query();
 
-        if (searchFilter.getWranglingState() != null) {
-            criterias.add(Criteria.where("wranglingState").is(searchFilter.getWranglingState()));
-        }
 
-        if (searchFilter.getWrangler() != null) {
-            criterias.add(Criteria.where("primaryWrangler").is(searchFilter.getWrangler()));
-        }
+        Optional<String> opt = Optional.ofNullable(searchFilter.getWranglingState());
+        opt.ifPresent(wranglingState -> {
+            criterias.add(Criteria.where("wranglingState").is(wranglingState));
+        });
 
-        String search = searchFilter.getSearch();
-        if (search != null) {
+
+        opt = Optional.ofNullable(searchFilter.getWrangler());
+        opt.ifPresent(wrangler -> {
+            criterias.add(Criteria.where("primaryWrangler").is(wrangler));
+        });
+
+        opt = Optional.ofNullable(searchFilter.getSearch());
+        opt.ifPresent(search -> {
             criterias.add(new Criteria().orOperator(
                     Criteria.where("content.project_core.project_title").regex(search, "i"),
                     Criteria.where("content.project_core.project_description").regex(search, "i"),
                     Criteria.where("content.project_core.project_short_name").regex(search, "i")
             ));
-        }
+        });
 
         query.addCriteria(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
 
