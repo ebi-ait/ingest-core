@@ -6,7 +6,8 @@ import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.project.web.SearchFilter;
 import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
-import org.junit.Before;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
@@ -16,14 +17,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest()
-
 class ProjectFilterTest {
 
     // class under test
-//    @Autowired
     private ProjectService projectService;
 
     // participants
@@ -54,13 +56,12 @@ class ProjectFilterTest {
 
     @Test
     void testSearchFilter() {
-        setup();
         assertThat(mongoTemplate).isNotNull();
 
         // given
-        this.mongoTemplate.save(new Project("{\"name\": \"project1\", \"content\": {\"project_core\":{\"project_title\":\"project1\"}}}"));
-        this.mongoTemplate.save(new Project("{\"name\": \"project2\", \"content\": {\"project_core\":{\"project_title\":\"project2\"}}}"));
-        this.mongoTemplate.save(new Project("{\"name\": \"project3\", \"content\": {\"project_core\":{\"project_title\":\"project3\"}}}"));
+        this.mongoTemplate.save(makeTestProject("project1"));
+        this.mongoTemplate.save(makeTestProject("project2"));
+        this.mongoTemplate.save(makeTestProject("project3"));
 
         //when
         SearchFilter searchFilter = new SearchFilter("project1", null, null);
@@ -71,7 +72,16 @@ class ProjectFilterTest {
         assertThat(result.getTotalElements()).isEqualTo(1);
     }
 
-    @Before
+    @NotNull
+    private Project makeTestProject(String title) {
+        Map content = new HashMap<String, Object>();
+        content.put("project_core", Map.of("project_title", title));
+        Project project = new Project(content);
+        return project;
+    }
+
+
+    @BeforeEach
     private void setup() {
         this.projectService = new ProjectService(
                 mongoTemplate,
