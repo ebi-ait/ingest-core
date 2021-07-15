@@ -88,6 +88,17 @@ class ProjectFilterTest {
     }
 
     @Test
+    void test_criteria_building_with_pageable() {
+        SearchFilter searchFilter = new SearchFilter("project1", null, null);
+        Query query = projectService.buildProjectsQuery(searchFilter);
+        Pageable pageable = PageRequest.of(1, 10);
+        Project actual = this.mongoTemplate.findOne(query.with(pageable), Project.class);
+        assertThat(actual)
+                .usingComparatorForFields(upToMillies, "contentLastModified")
+                .isEqualToComparingFieldByFieldRecursively(project1);
+    }
+
+    @Test
     void filter_by_state() {
         Project project4 = makeProject("project4");
         project4.setWranglingState(WranglingState.IN_PROGRESS);
