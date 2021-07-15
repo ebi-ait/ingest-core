@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.project.web.SearchFilter;
 import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
@@ -53,15 +54,7 @@ class ProjectFilterTest {
 
     @Test
     void testSearchFilter() {
-        this.projectService = new ProjectService(
-                mongoTemplate,
-                submissionEnvelopeRepository,
-                projectRepository,
-                metadataCrudService,
-                metadataUpdateService,
-                schemaService,
-                bundleManifestRepository,
-                projectEventHandler);
+        setup();
         assertThat(mongoTemplate).isNotNull();
 
         // given
@@ -76,6 +69,19 @@ class ProjectFilterTest {
 
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
+    }
+
+    @Before
+    private void setup() {
+        this.projectService = new ProjectService(
+                mongoTemplate,
+                submissionEnvelopeRepository,
+                projectRepository,
+                metadataCrudService,
+                metadataUpdateService,
+                schemaService,
+                bundleManifestRepository,
+                projectEventHandler);
     }
 
 }
