@@ -7,6 +7,8 @@ public class SearchFilter {
     @Getter String wranglingState;
     @Getter String wrangler;
 
+    public SearchFilter() {}
+
     public SearchFilter(String search, String wranglingState, String wrangler) {
         this.search = search;
         this.wranglingState = wranglingState;

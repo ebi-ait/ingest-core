@@ -7,6 +7,7 @@ import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
+import org.humancellatlas.ingest.project.web.SearchFilter;
 import org.humancellatlas.ingest.schemas.Schema;
 import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -22,6 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -33,6 +37,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -50,6 +55,9 @@ public class ProjectServiceTest {
 
     @Autowired
     private ProjectService projectService;
+
+    @MockBean
+    private MongoTemplate mongoTemplate;
 
     @MockBean
     private SubmissionEnvelopeRepository submissionEnvelopeRepository;
@@ -285,6 +293,134 @@ public class ProjectServiceTest {
 
             //then:
             assertThat(result).isEqualTo(persistentProject);
+        }
+    }
+
+
+    @Nested
+    class FilterProject {
+        private String primaryWranglerKey = "primaryWrangler";
+        private String isUpdateKey = "isUpdate";
+        private String wranglingStateKey = "wranglingState";
+        private String projectTitleKey = "content.project_core.project_title";
+        private String projectDescripionKey = "content.project_core.project_description";
+        private String projectShortNameKey = "content.project_core.project_short_name";
+
+        private String searchText = "search text";
+        private String wranglingStateValue = "NEW";
+        private String primaryWranglerValue = "primary wrangler 1";
+
+        Criteria getDefaultFilter() {
+            return Criteria.where(isUpdateKey).is(false);
+        }
+
+        Criteria filterByWrangler(String wrangler) {
+            return Criteria.where(primaryWranglerKey).is(wrangler);
+        }
+
+        Criteria filterByWranglingState(String wranglingState) {
+            return Criteria.where(wranglingStateKey).is(wranglingState);
+        }
+
+        Criteria filterBySearch(String search) {
+            return new Criteria().orOperator(
+                    Criteria.where(projectTitleKey).regex(search, "i"),
+                    Criteria.where(projectDescripionKey).regex(search, "i"),
+                    Criteria.where(projectShortNameKey).regex(search, "i")
+            );
+        }
+
+        Query buildQuery(Criteria[] criteria_list) {
+            return new Query().addCriteria(new Criteria().andOperator(criteria_list));
+        }
+
+        @Test
+        @DisplayName("get all projects")
+        void getProjectsWithNoFilter() {
+            // given empty search filter
+            SearchFilter searchFilter = new SearchFilter();
+            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+
+            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter()});
+            assertEquals(expectedResult, actualResult);
+        }
+
+        @Test
+        @DisplayName("filter projects by primary wrangler")
+        void getProjectsByPrimaryWrangler() {
+
+            SearchFilter searchFilter = new SearchFilter(null, null, primaryWranglerValue);
+            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+
+            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter(), filterByWrangler(primaryWranglerValue)});
+            assertEquals(expectedResult, actualResult);
+        }
+
+        @Test
+        @DisplayName("filter projects by wrangling state")
+        void getProjectsByWranglingState() {
+            SearchFilter searchFilter = new SearchFilter(null, wranglingStateValue, null);
+            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+
+            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter(), filterByWranglingState(wranglingStateValue)});
+            assertEquals(expectedResult, actualResult);
+        }
+
+        @Test
+        @DisplayName("filter projects by search text")
+        void getProjectsBySearchText() {
+
+            SearchFilter searchFilter = new SearchFilter(searchText, null, null);
+            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+
+            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter(), filterBySearch(searchText)});
+            assertThat(expectedResult.getQueryObject()).isEqualTo(actualResult.getQueryObject());
+        }
+
+        @Test
+        @DisplayName("filter projects by search text and wrangler")
+        void getProjectsBySearchTextAndWrangler() {
+
+            SearchFilter searchFilter = new SearchFilter(searchText, null, primaryWranglerValue);
+            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+
+            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter(), filterBySearch(searchText), filterByWrangler(primaryWranglerValue)});
+            assertEquals(expectedResult, actualResult);
+        }
+
+        @Test
+        @DisplayName("filter projects by search text, wrangler and wrangling state")
+        void getProjectsBySearchTextWranglerAndWranglingState() {
+
+            SearchFilter searchFilter = new SearchFilter(searchText, wranglingStateValue, primaryWranglerValue);
+            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+
+            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter(), filterBySearch(searchText), filterByWrangler(primaryWranglerValue), filterByWranglingState(wranglingStateValue)});
+            assertEquals(expectedResult, actualResult);
+
+        }
+
+        @Test
+        @DisplayName("filter projects by search text and wrangling state")
+        void getProjectsBySearchTextAndWranglingState() {
+
+            SearchFilter searchFilter = new SearchFilter(searchText, wranglingStateValue, null);
+            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+
+            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter(), filterBySearch(searchText), filterByWranglingState(wranglingStateValue)});
+            assertEquals(expectedResult, actualResult);
+        }
+
+        @Test
+        @DisplayName("filter projects by wrangling and wrangling state")
+        void getProjectsByWranglerAndWranglingState() {
+
+            SearchFilter searchFilter = new SearchFilter(null, wranglingStateValue, primaryWranglerValue);
+            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+
+            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter(),filterByWranglingState(wranglingStateValue),filterByWrangler(primaryWranglerValue)});
+            assertEquals(expectedResult, actualResult);
+
         }
     }
 }

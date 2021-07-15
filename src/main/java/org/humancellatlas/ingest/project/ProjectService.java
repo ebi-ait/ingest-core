@@ -184,10 +184,17 @@ public class ProjectService {
     }
 
     public Page<Project> filterProjects(SearchFilter searchFilter, Pageable pageable) {
+        Query query = this.buildProjectsQuery(searchFilter);
+        log.debug("Project Search query: " + query.toString());
+
+        List<Project> projects = mongoTemplate.find(query.with(pageable), Project.class);
+        long count = mongoTemplate.count(query, Project.class);
+        return new PageImpl<>(projects, pageable, count);
+    }
+
+    public Query buildProjectsQuery(SearchFilter searchFilter) {
         List<Criteria> criteria_list = new ArrayList<>();
         criteria_list.add(Criteria.where("isUpdate").is(false));
-        Query query = new Query();
-
 
         Optional<String> opt = Optional.ofNullable(searchFilter.getWranglingState());
         opt.ifPresent(wranglingState -> {
@@ -209,12 +216,7 @@ public class ProjectService {
             ));
         });
 
-        query.addCriteria(new Criteria().andOperator(criteria_list.toArray(new Criteria[criteria_list.size()])));
-
-        log.debug("Project Search query: " + query.toString());
-
-        List<Project> projects = mongoTemplate.find(query.with(pageable), Project.class);
-        long count = mongoTemplate.count(query, Project.class);
-        return new PageImpl<>(projects, pageable, count);
+        Criteria queryCriteria = new Criteria().andOperator(criteria_list.toArray(new Criteria[criteria_list.size()]));
+        return new Query().addCriteria(queryCriteria);
     }
 }
