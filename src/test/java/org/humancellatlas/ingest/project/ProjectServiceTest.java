@@ -28,9 +28,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -330,8 +328,9 @@ public class ProjectServiceTest {
             );
         }
 
-        Query buildQuery(Criteria[] criteria_list) {
-            return new Query().addCriteria(new Criteria().andOperator(criteria_list));
+        Query buildQuery(ArrayList<Criteria> criteria_list) {
+            return new Query().addCriteria(new Criteria().andOperator(criteria_list.toArray
+                    (new Criteria[criteria_list.size()])));
         }
 
         @Test
@@ -339,9 +338,9 @@ public class ProjectServiceTest {
         void getProjectsWithNoFilter() {
             // given empty search filter
             SearchFilter searchFilter = new SearchFilter();
-            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+            Query actualResult = projectService.buildProjectsQuery(searchFilter);
 
-            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter()});
+            Query expectedResult = this.buildQuery(new ArrayList<>(Arrays.asList(getDefaultFilter())));
             assertEquals(expectedResult, actualResult);
         }
 
@@ -350,9 +349,9 @@ public class ProjectServiceTest {
         void getProjectsByPrimaryWrangler() {
 
             SearchFilter searchFilter = new SearchFilter(null, null, primaryWranglerValue);
-            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+            Query actualResult = projectService.buildProjectsQuery(searchFilter);
 
-            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter(), filterByWrangler(primaryWranglerValue)});
+            Query expectedResult = this.buildQuery(new ArrayList<>(Arrays.asList(getDefaultFilter(), filterByWrangler(primaryWranglerValue))));
             assertEquals(expectedResult, actualResult);
         }
 
@@ -360,9 +359,9 @@ public class ProjectServiceTest {
         @DisplayName("filter projects by wrangling state")
         void getProjectsByWranglingState() {
             SearchFilter searchFilter = new SearchFilter(null, wranglingStateValue, null);
-            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+            Query actualResult = projectService.buildProjectsQuery(searchFilter);
 
-            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter(), filterByWranglingState(wranglingStateValue)});
+            Query expectedResult = this.buildQuery(new ArrayList<>(Arrays.asList(getDefaultFilter(), filterByWranglingState(wranglingStateValue))));
             assertEquals(expectedResult, actualResult);
         }
 
@@ -371,10 +370,10 @@ public class ProjectServiceTest {
         void getProjectsBySearchText() {
 
             SearchFilter searchFilter = new SearchFilter(searchText, null, null);
-            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+            Query actualResult = projectService.buildProjectsQuery(searchFilter);
 
-            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter(), filterBySearch(searchText)});
-            assertThat(expectedResult.getQueryObject()).isEqualTo(actualResult.getQueryObject());
+            Query expectedResult = this.buildQuery(new ArrayList<>(Arrays.asList(getDefaultFilter(), filterBySearch(searchText))));
+            assertEquals(expectedResult, actualResult);
         }
 
         @Test
@@ -382,9 +381,9 @@ public class ProjectServiceTest {
         void getProjectsBySearchTextAndWrangler() {
 
             SearchFilter searchFilter = new SearchFilter(searchText, null, primaryWranglerValue);
-            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+            Query actualResult = projectService.buildProjectsQuery(searchFilter);
 
-            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter(), filterBySearch(searchText), filterByWrangler(primaryWranglerValue)});
+            Query expectedResult = this.buildQuery(new ArrayList<>(Arrays.asList(getDefaultFilter(), filterBySearch(searchText), filterByWrangler(primaryWranglerValue))));
             assertEquals(expectedResult, actualResult);
         }
 
@@ -393,9 +392,9 @@ public class ProjectServiceTest {
         void getProjectsBySearchTextWranglerAndWranglingState() {
 
             SearchFilter searchFilter = new SearchFilter(searchText, wranglingStateValue, primaryWranglerValue);
-            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+            Query actualResult = projectService.buildProjectsQuery(searchFilter);
 
-            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter(), filterBySearch(searchText), filterByWrangler(primaryWranglerValue), filterByWranglingState(wranglingStateValue)});
+            Query expectedResult = this.buildQuery(new ArrayList<>(Arrays.asList(getDefaultFilter(), filterBySearch(searchText), filterByWrangler(primaryWranglerValue), filterByWranglingState(wranglingStateValue))));
             assertEquals(expectedResult, actualResult);
 
         }
@@ -405,9 +404,9 @@ public class ProjectServiceTest {
         void getProjectsBySearchTextAndWranglingState() {
 
             SearchFilter searchFilter = new SearchFilter(searchText, wranglingStateValue, null);
-            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+            Query actualResult = projectService.buildProjectsQuery(searchFilter);
 
-            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter(), filterBySearch(searchText), filterByWranglingState(wranglingStateValue)});
+            Query expectedResult = this.buildQuery(new ArrayList<>(Arrays.asList(getDefaultFilter(), filterBySearch(searchText), filterByWranglingState(wranglingStateValue))));
             assertEquals(expectedResult, actualResult);
         }
 
@@ -416,9 +415,9 @@ public class ProjectServiceTest {
         void getProjectsByWranglerAndWranglingState() {
 
             SearchFilter searchFilter = new SearchFilter(null, wranglingStateValue, primaryWranglerValue);
-            Query expectedResult = projectService.buildProjectsQuery(searchFilter);
+            Query actualResult = projectService.buildProjectsQuery(searchFilter);
 
-            Query actualResult = this.buildQuery(new Criteria[]{getDefaultFilter(),filterByWranglingState(wranglingStateValue),filterByWrangler(primaryWranglerValue)});
+            Query expectedResult = this.buildQuery(new ArrayList<>(Arrays.asList(getDefaultFilter(),filterByWranglingState(wranglingStateValue),filterByWrangler(primaryWranglerValue))));
             assertEquals(expectedResult, actualResult);
 
         }
