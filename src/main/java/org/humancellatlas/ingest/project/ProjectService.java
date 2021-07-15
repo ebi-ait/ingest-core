@@ -27,7 +27,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.*;
 
@@ -86,11 +85,11 @@ public class ProjectService {
         Project suggestedProject = new Project(content);
         suggestedProject.setWranglingState(WranglingState.NEW_SUGGESTION);
         var notes = String.format(
-            "DOI: %s \nName: %s \nEmail: %s \nComments: %s",
-            suggestion.get("doi"),
-            suggestion.get("name"),
-            suggestion.get("email"),
-            suggestion.get("comments")
+                "DOI: %s \nName: %s \nEmail: %s \nComments: %s",
+                suggestion.get("doi"),
+                suggestion.get("name"),
+                suggestion.get("email"),
+                suggestion.get("comments")
         );
         suggestedProject.setWranglingNotes(notes);
         return this.register(suggestedProject);
@@ -98,8 +97,8 @@ public class ProjectService {
 
     public Project update(final Project project, ObjectNode patch, Boolean sendNotification) {
         if (patch.has("isInCatalogue")
-            && patch.get("isInCatalogue").asBoolean()
-            && project.getCataloguedDate() == null){
+                && patch.get("isInCatalogue").asBoolean()
+                && project.getCataloguedDate() == null) {
             project.setCataloguedDate(Instant.now());
         }
 
@@ -108,12 +107,12 @@ public class ProjectService {
         if (sendNotification) {
             projectEventHandler.editedProjectMetadata(updatedProject);
         }
-        return  updatedProject;
+        return updatedProject;
     }
 
 
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
-        if(! project.getIsUpdate()) {
+        if (!project.getIsUpdate()) {
             return metadataCrudService.addToSubmissionEnvelopeAndSave(project, submissionEnvelope);
         } else {
             return metadataUpdateService.acceptUpdate(project, submissionEnvelope);
@@ -135,7 +134,7 @@ public class ProjectService {
     }
 
     public Page<BundleManifest> findBundleManifestsByProjectUuidAndBundleType(Uuid projectUuid, BundleType bundleType,
-            Pageable pageable) {
+                                                                              Pageable pageable) {
         return this.projectRepository
                 .findByUuidUuidAndIsUpdateFalse(projectUuid.getUuid())
                 .map(project -> bundleManifestRepository.findBundleManifestsByProjectAndBundleType(project,
@@ -197,25 +196,25 @@ public class ProjectService {
         List<Criteria> criteria_list = new ArrayList<>();
         criteria_list.add(Criteria.where("isUpdate").is(false));
 
-        Optional<String> opt = Optional.ofNullable(searchFilter.getWranglingState());
-        opt.ifPresent(wranglingState -> {
-            criteria_list.add(Criteria.where("wranglingState").is(wranglingState));
-        });
+        Optional.ofNullable(searchFilter.getWranglingState())
+                .ifPresent(wranglingState -> {
+                    criteria_list.add(Criteria.where("wranglingState").is(wranglingState));
+                });
 
 
-        opt = Optional.ofNullable(searchFilter.getWrangler());
-        opt.ifPresent(wrangler -> {
-            criteria_list.add(Criteria.where("primaryWrangler").is(wrangler));
-        });
+        Optional.ofNullable(searchFilter.getWrangler())
+                .ifPresent(wrangler -> {
+                    criteria_list.add(Criteria.where("primaryWrangler").is(wrangler));
+                });
 
-        opt = Optional.ofNullable(searchFilter.getSearch());
-        opt.ifPresent(search -> {
-            criteria_list.add(new Criteria().orOperator(
-                    Criteria.where("content.project_core.project_title").regex(search, "i"),
-                    Criteria.where("content.project_core.project_description").regex(search, "i"),
-                    Criteria.where("content.project_core.project_short_name").regex(search, "i")
-            ));
-        });
+        Optional.ofNullable(searchFilter.getSearch())
+                .ifPresent(search -> {
+                    criteria_list.add(new Criteria().orOperator(
+                            Criteria.where("content.project_core.project_title").regex(search, "i"),
+                            Criteria.where("content.project_core.project_description").regex(search, "i"),
+                            Criteria.where("content.project_core.project_short_name").regex(search, "i")
+                    ));
+                });
 
         Criteria queryCriteria = new Criteria().andOperator(criteria_list.toArray(new Criteria[criteria_list.size()]));
         return new Query().addCriteria(queryCriteria);
