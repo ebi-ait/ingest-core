@@ -27,6 +27,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.*;
 
@@ -40,7 +41,7 @@ import static java.util.stream.Collectors.toSet;
 @Getter
 public class ProjectService {
     @Autowired
-    private MongoTemplate mongoTemplate;
+    private final MongoTemplate mongoTemplate;
 
     //Helper class for capturing copies of a Project and all Submission Envelopes related to them.
     private static class ProjectBag {
