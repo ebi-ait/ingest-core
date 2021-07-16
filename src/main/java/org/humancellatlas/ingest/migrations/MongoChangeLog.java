@@ -130,4 +130,9 @@ public class MongoChangeLog {
         db.getCollection("project").updateMany(filter, update);
     }
 
+    @ChangeSet(order = "2021-07-16", id = "Add index to project", author = "jcbwndsr@ebi.ac.uk", runAlways = true)
+    public void addIndexToProject(MongoDatabase db) {
+        Document indexQuery = Document.parse("{'$**': 'text' }");
+        db.getCollection("project").createIndex(indexQuery);
+    }
 }
