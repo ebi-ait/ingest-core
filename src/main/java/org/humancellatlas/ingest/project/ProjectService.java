@@ -23,7 +23,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.CriteriaDefinition;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.TextCriteria;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -193,7 +195,7 @@ public class ProjectService {
     }
 
     public Query buildProjectsQuery(SearchFilter searchFilter) {
-        List<Criteria> criteria_list = new ArrayList<>();
+        List<CriteriaDefinition> criteria_list = new ArrayList<>();
         criteria_list.add(Criteria.where("isUpdate").is(false));
 
         Optional.ofNullable(searchFilter.getWranglingState())
@@ -209,11 +211,7 @@ public class ProjectService {
 
         Optional.ofNullable(searchFilter.getSearch())
                 .ifPresent(search -> {
-                    criteria_list.add(new Criteria().orOperator(
-                            Criteria.where("content.project_core.project_title").regex(search, "i"),
-                            Criteria.where("content.project_core.project_description").regex(search, "i"),
-                            Criteria.where("content.project_core.project_short_name").regex(search, "i")
-                    ));
+                    criteria_list.add(TextCriteria.forDefaultLanguage().matching(search));
                 });
 
         Criteria queryCriteria = new Criteria().andOperator(criteria_list.toArray(new Criteria[criteria_list.size()]));
