@@ -195,7 +195,7 @@ public class ProjectService {
     }
 
     public Query buildProjectsQuery(SearchFilter searchFilter) {
-        List<CriteriaDefinition> criteria_list = new ArrayList<>();
+        List<Criteria> criteria_list = new ArrayList<>();
         criteria_list.add(Criteria.where("isUpdate").is(false));
 
         Optional.ofNullable(searchFilter.getWranglingState())
@@ -209,12 +209,13 @@ public class ProjectService {
                     criteria_list.add(Criteria.where("primaryWrangler").is(wrangler));
                 });
 
+        Criteria queryCriteria = new Criteria().andOperator(criteria_list.toArray(new Criteria[criteria_list.size()]));
+        Query query = new Query().addCriteria(queryCriteria);
         Optional.ofNullable(searchFilter.getSearch())
                 .ifPresent(search -> {
-                    criteria_list.add(TextCriteria.forDefaultLanguage().matching(search));
+                    query.addCriteria(TextCriteria.forDefaultLanguage().matching(String.valueOf(search)));
                 });
 
-        Criteria queryCriteria = new Criteria().andOperator(criteria_list.toArray(new Criteria[criteria_list.size()]));
-        return new Query().addCriteria(queryCriteria);
+        return query;
     }
 }
