@@ -1,17 +1,13 @@
 package org.humancellatlas.ingest.project.web;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
+@ToString
+@AllArgsConstructor
 public class SearchFilter {
     @Getter String search;
     @Getter String wranglingState;
     @Getter String wrangler;
-
-    public SearchFilter() {}
-
-    public SearchFilter(String search, String wranglingState, String wrangler) {
-        this.search = search;
-        this.wranglingState = wranglingState;
-        this.wrangler = wrangler;
-    }
 }

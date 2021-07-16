@@ -337,7 +337,7 @@ public class ProjectServiceTest {
         @DisplayName("get all projects")
         void getProjectsWithNoFilter() {
             // given empty search filter
-            SearchFilter searchFilter = new SearchFilter();
+            SearchFilter searchFilter = new SearchFilter(null, null, null);
             Query actualResult = projectService.buildProjectsQuery(searchFilter);
 
             Query expectedResult = this.buildQuery(new ArrayList<>(Arrays.asList(getDefaultFilter())));
