@@ -201,7 +201,6 @@ public class ProjectService {
                     criteria_list.add(Criteria.where("wranglingState").is(wranglingState));
                 });
 
-
         Optional.ofNullable(searchFilter.getWrangler())
                 .ifPresent(wrangler -> {
                     criteria_list.add(Criteria.where("primaryWrangler").is(wrangler));
@@ -209,6 +208,7 @@ public class ProjectService {
 
         Optional.ofNullable(searchFilter.getSearch())
                 .ifPresent(search -> {
+                    // TextCriteria.forDefaultLanguage().matchingPhrase(searchPhrase);
                     criteria_list.add(new Criteria().orOperator(
                             Criteria.where("content.project_core.project_title").regex(search, "i"),
                             Criteria.where("content.project_core.project_description").regex(search, "i"),
