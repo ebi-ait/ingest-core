@@ -34,7 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProjectFilterTest {
 
     // class under test
-//    @Autowired
     private ProjectService projectService;
 
     // participants
