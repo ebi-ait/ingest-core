@@ -106,7 +106,8 @@ class ProjectFilterTest {
     @Test
     void filter_by_state() {
         Project project4 = makeProject("project4");
-//        project4.setWranglingState(WranglingState.);
+        project4.setWranglingState(WranglingState.IN_PROGRESS);
+        this.mongoTemplate.save(project4);
 
         //when
         SearchFilter filterNew = new SearchFilter(null, "NEW", null);
@@ -115,10 +116,10 @@ class ProjectFilterTest {
         Page<Project> result = projectService.filterProjects(filterNew, pageable);
 
         // then
-        assertThat(result.getContent()).hasSize(3);
         assertThat(result.getContent())
+                .hasSize(3)
                 .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
-                .usingElementComparatorIgnoringFields("supplementaryFiles", "submissionEnvelopes")
+                .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(project1, project2, project3);
     }
 
@@ -133,10 +134,10 @@ class ProjectFilterTest {
 
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
-        assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent())
+                .hasSize(1)
                 .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
-                .usingElementComparatorIgnoringFields("supplementaryFiles", "submissionEnvelopes")
+                .usingRecursiveFieldByFieldElementComparator()
                 .containsExactly(this.project2);
     }
 
@@ -150,8 +151,8 @@ class ProjectFilterTest {
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
 
         // then
-        assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent())
+                .hasSize(1)
                 .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
                 .usingElementComparatorIgnoringFields("supplementaryFiles", "submissionEnvelopes")
                 .containsExactly(project1);
@@ -191,6 +192,7 @@ class ProjectFilterTest {
         });
 
         assertThat(this.mongoTemplate.findAll(Project.class)).hasSize(3);
+
     }
 
     @AfterEach
