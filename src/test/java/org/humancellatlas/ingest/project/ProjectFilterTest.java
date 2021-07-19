@@ -85,7 +85,7 @@ class ProjectFilterTest {
     @Test
     void test_criteria_building() {
         SearchFilter searchFilter = new SearchFilter(null, "NEW", null);
-        Query query = projectService.buildProjectsQuery(searchFilter);
+        Query query = ProjectQueryBuilder.buildProjectsQuery(searchFilter);
         Project actual = this.mongoTemplate.find(query, Project.class).get(0);
         assertThat(actual)
                 .usingComparatorForFields(upToMillies, "contentLastModified")
@@ -95,7 +95,7 @@ class ProjectFilterTest {
     @Test
     void test_criteria_building_with_pageable() {
         SearchFilter searchFilter = new SearchFilter("project1", null, null);
-        Query query = projectService.buildProjectsQuery(searchFilter);
+        Query query = ProjectQueryBuilder.buildProjectsQuery(searchFilter);
         Pageable pageable = PageRequest.of(0, 10);
         Project actual = this.mongoTemplate.find(query.with(pageable), Project.class).get(0);
         assertThat(actual)

@@ -184,38 +184,11 @@ public class ProjectService {
     }
 
     public Page<Project> filterProjects(SearchFilter searchFilter, Pageable pageable) {
-        Query query = this.buildProjectsQuery(searchFilter);
+        Query query = ProjectQueryBuilder.buildProjectsQuery(searchFilter);
         log.debug("Project Search query: " + query.toString());
 
         List<Project> projects = mongoTemplate.find(query.with(pageable), Project.class);
         long count = mongoTemplate.count(query, Project.class);
         return new PageImpl<>(projects, pageable, count);
-    }
-
-    public Query buildProjectsQuery(SearchFilter searchFilter) {
-        List<Criteria> criteria_list = new ArrayList<>();
-        criteria_list.add(Criteria.where("isUpdate").is(false));
-
-        Optional.ofNullable(searchFilter.getWranglingState())
-                .ifPresent(wranglingState -> {
-                    criteria_list.add(Criteria.where("wranglingState").is(wranglingState));
-                });
-
-        Optional.ofNullable(searchFilter.getWrangler())
-                .ifPresent(wrangler -> {
-                    criteria_list.add(Criteria.where("primaryWrangler").is(wrangler));
-                });
-
-        Optional.ofNullable(searchFilter.getSearch())
-                .ifPresent(search -> {
-                    criteria_list.add(new Criteria().orOperator(
-                            Criteria.where("content.project_core.project_title").regex(search, "i"),
-                            Criteria.where("content.project_core.project_description").regex(search, "i"),
-                            Criteria.where("content.project_core.project_short_name").regex(search, "i")
-                    ));
-                });
-
-        Criteria queryCriteria = new Criteria().andOperator(criteria_list.toArray(new Criteria[criteria_list.size()]));
-        return new Query().addCriteria(queryCriteria);
     }
 }
