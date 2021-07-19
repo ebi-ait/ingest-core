@@ -174,7 +174,7 @@ class ProjectFilterTest {
         initTestData();
     }
 
-    private void inittestData() {
+    private void initTestData() {
         this.project1 = makeProject("project1");
         this.project2 = makeProject("project2");
         this.project3 = makeProject("project3");
