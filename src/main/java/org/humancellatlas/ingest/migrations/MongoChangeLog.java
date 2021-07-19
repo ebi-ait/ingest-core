@@ -132,7 +132,26 @@ public class MongoChangeLog {
 
     @ChangeSet(order = "2021-07-16", id = "Add index to project", author = "jcbwndsr@ebi.ac.uk", runAlways = true)
     public void addIndexToProject(MongoDatabase db) {
-        Document indexQuery = Document.parse("{'$**': 'text' }");
+        Document indexQuery = Document.parse("{" +
+                "'content.project_core.project_title': 'text'," +
+                "'content.project_core.project_short_name': 'text'," +
+                "'content.project_core.project_description': 'text'," +
+                "'content.publications.authors': 'text'," +
+                "'content.publications.title': 'text'," +
+                "'content.publications.doi': 'text'," +
+                "'content.contributors.name': 'text'," +
+                "'content.insdc_project_accessions': 'text'," +
+                "'content.ega_accessions': 'text'," +
+                "'content.dbgap_accessions': 'text'," +
+                "'content.geo_series_accessions': 'text'," +
+                "'content.array_express_accessions': 'text'," +
+                "'content.insdc_study_accessions': 'text'," +
+                "'content.biostudies_accessions': 'text'," +
+                "'technology.ontologies.ontology': 'text'," +
+                "'technology.ontologies.ontology_label': 'text'," +
+                "'organ.ontologies.ontology': 'text'," +
+                "'organ.ontologies.ontology_label': 'text'," +
+                "}");
         db.getCollection("project").createIndex(indexQuery);
     }
 }
