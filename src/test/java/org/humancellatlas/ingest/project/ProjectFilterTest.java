@@ -171,6 +171,22 @@ class ProjectFilterTest {
 
     @BeforeEach
     private void setup() {
+        initProjectService();
+        inittestData();
+    }
+
+    private void inittestData() {
+        this.project1 = makeProject("project1");
+        this.project2 = makeProject("project2");
+        this.project3 = makeProject("project3");
+        Arrays.asList(project1, project2, project3).forEach(project -> {
+            this.mongoTemplate.save(project);
+            this.projectService.register(project);
+        });
+        assertThat(this.mongoTemplate.findAll(Project.class)).hasSize(3);
+    }
+
+    private void initProjectService() {
         this.projectService = new ProjectService(
                 mongoTemplate,
                 submissionEnvelopeRepository,
@@ -181,18 +197,6 @@ class ProjectFilterTest {
                 bundleManifestRepository,
                 projectEventHandler);
         assertThat(this.mongoTemplate.findAll(Project.class)).hasSize(0);
-
-        this.project1 = makeProject("project1");
-        this.project2 = makeProject("project2");
-        this.project3 = makeProject("project3");
-        Arrays.asList(project1, project2, project3).forEach(project -> {
-            this.mongoTemplate.save(project);
-            this.projectService.register(project);
-
-        });
-
-        assertThat(this.mongoTemplate.findAll(Project.class)).hasSize(3);
-
     }
 
     @AfterEach
