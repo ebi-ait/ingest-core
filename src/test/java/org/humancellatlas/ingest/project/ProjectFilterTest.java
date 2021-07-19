@@ -192,7 +192,6 @@ class ProjectFilterTest {
         });
 
         assertThat(this.mongoTemplate.findAll(Project.class)).hasSize(3);
-
     }
 
     @AfterEach
