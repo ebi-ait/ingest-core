@@ -171,7 +171,7 @@ class ProjectFilterTest {
     @BeforeEach
     private void setup() {
         initProjectService();
-        inittestData();
+        initTestData();
     }
 
     private void inittestData() {
