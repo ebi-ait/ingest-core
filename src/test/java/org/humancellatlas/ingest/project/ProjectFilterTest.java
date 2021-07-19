@@ -9,8 +9,10 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,18 +20,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataMongoTest()
+@DataMongoTest
 class ProjectFilterTest {
 
     // class under test
+//    @Autowired
     private ProjectService projectService;
 
     // participants
@@ -79,9 +84,9 @@ class ProjectFilterTest {
 
     @Test
     void test_criteria_building() {
-        SearchFilter searchFilter = new SearchFilter("project1", null, null);
+        SearchFilter searchFilter = new SearchFilter(null, "NEW", null);
         Query query = projectService.buildProjectsQuery(searchFilter);
-        Project actual = this.mongoTemplate.findOne(query, Project.class);
+        Project actual = this.mongoTemplate.find(query, Project.class).get(0);
         assertThat(actual)
                 .usingComparatorForFields(upToMillies, "contentLastModified")
                 .isEqualToComparingFieldByFieldRecursively(project1);
@@ -91,8 +96,8 @@ class ProjectFilterTest {
     void test_criteria_building_with_pageable() {
         SearchFilter searchFilter = new SearchFilter("project1", null, null);
         Query query = projectService.buildProjectsQuery(searchFilter);
-        Pageable pageable = PageRequest.of(1, 10);
-        Project actual = this.mongoTemplate.findOne(query.with(pageable), Project.class);
+        Pageable pageable = PageRequest.of(0, 10);
+        Project actual = this.mongoTemplate.find(query.with(pageable), Project.class).get(0);
         assertThat(actual)
                 .usingComparatorForFields(upToMillies, "contentLastModified")
                 .isEqualToComparingFieldByFieldRecursively(project1);
@@ -102,32 +107,38 @@ class ProjectFilterTest {
     void filter_by_state() {
         Project project4 = makeProject("project4");
         project4.setWranglingState(WranglingState.IN_PROGRESS);
+        this.mongoTemplate.save(project4);
 
         //when
-        SearchFilter filterNew = new SearchFilter(null, "New", null);
+        SearchFilter filterNew = new SearchFilter(null, "NEW", null);
 
-        Pageable pageable = PageRequest.of(1, 10);
+        Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(filterNew, pageable);
 
         // then
-        assertThat(result.getTotalElements()).isEqualTo(1);
-        assertThat(result.getContent()).hasSize(3);
-        assertThat(result.getContent()).containsExactlyInAnyOrder(project1, project2, project3);
+        assertThat(result.getContent())
+                .hasSize(3)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactlyInAnyOrder(project1, project2, project3);
     }
 
     @Test
-    void filter_by_wrnagler() {
+    void filter_by_wrangler() {
         // given
         //when
         SearchFilter searchFilter = new SearchFilter(null, null, "wrangler_project2");
 
-        Pageable pageable = PageRequest.of(1, 10);
+        Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
 
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent()).containsExactly(this.project2);
+        assertThat(result.getContent())
+                .hasSize(1)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactly(this.project2);
     }
 
     @Test
@@ -136,13 +147,15 @@ class ProjectFilterTest {
         //when
         SearchFilter searchFilter = new SearchFilter("project1", null, null);
 
-        Pageable pageable = PageRequest.of(1, 10);
+        Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
 
         // then
-        assertThat(result.getTotalElements()).isEqualTo(1);
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent()).containsExactly(project1);
+        assertThat(result.getContent())
+                .hasSize(1)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingElementComparatorIgnoringFields("supplementaryFiles", "submissionEnvelopes")
+                .containsExactly(project1);
     }
 
     private static Project makeProject(String title) {
@@ -168,13 +181,18 @@ class ProjectFilterTest {
                 bundleManifestRepository,
                 projectEventHandler);
         assertThat(this.mongoTemplate.findAll(Project.class)).hasSize(0);
+
         this.project1 = makeProject("project1");
         this.project2 = makeProject("project2");
         this.project3 = makeProject("project3");
-        this.mongoTemplate.save(project1);
-        this.mongoTemplate.save(project2);
-        this.mongoTemplate.save(project3);
+        Arrays.asList(project1, project2, project3).forEach(project -> {
+            this.mongoTemplate.save(project);
+            this.projectService.register(project);
+
+        });
+
         assertThat(this.mongoTemplate.findAll(Project.class)).hasSize(3);
+
     }
 
     @AfterEach

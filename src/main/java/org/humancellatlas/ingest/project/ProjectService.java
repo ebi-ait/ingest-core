@@ -203,7 +203,6 @@ public class ProjectService {
                     criteria_list.add(Criteria.where("wranglingState").is(wranglingState));
                 });
 
-
         Optional.ofNullable(searchFilter.getWrangler())
                 .ifPresent(wrangler -> {
                     criteria_list.add(Criteria.where("primaryWrangler").is(wrangler));
