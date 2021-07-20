@@ -34,7 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProjectFilterTest {
 
     // class under test
-//    @Autowired
     private ProjectService projectService;
 
     // participants
@@ -172,10 +171,10 @@ class ProjectFilterTest {
     @BeforeEach
     private void setup() {
         initProjectService();
-        inittestData();
+        initTestData();
     }
 
-    private void inittestData() {
+    private void initTestData() {
         this.project1 = makeProject("project1");
         this.project2 = makeProject("project2");
         this.project3 = makeProject("project3");
