@@ -115,5 +115,5 @@ dependencies {
 
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 
-    integrationRuntimeOnly 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:2.2.0'
+    testRuntimeOnly 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:2.2.0'
 }

@@ -11,13 +11,19 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
+import org.humancellatlas.ingest.project.web.SearchFilter;
 import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +39,8 @@ import static java.util.stream.Collectors.toSet;
 @RequiredArgsConstructor
 @Getter
 public class ProjectService {
+    @Autowired
+    private final MongoTemplate mongoTemplate;
 
     //Helper class for capturing copies of a Project and all Submission Envelopes related to them.
     private static class ProjectBag {
@@ -77,11 +85,11 @@ public class ProjectService {
         Project suggestedProject = new Project(content);
         suggestedProject.setWranglingState(WranglingState.NEW_SUGGESTION);
         var notes = String.format(
-            "DOI: %s \nName: %s \nEmail: %s \nComments: %s",
-            suggestion.get("doi"),
-            suggestion.get("name"),
-            suggestion.get("email"),
-            suggestion.get("comments")
+                "DOI: %s \nName: %s \nEmail: %s \nComments: %s",
+                suggestion.get("doi"),
+                suggestion.get("name"),
+                suggestion.get("email"),
+                suggestion.get("comments")
         );
         suggestedProject.setWranglingNotes(notes);
         return this.register(suggestedProject);
@@ -89,8 +97,8 @@ public class ProjectService {
 
     public Project update(final Project project, ObjectNode patch, Boolean sendNotification) {
         if (patch.has("isInCatalogue")
-            && patch.get("isInCatalogue").asBoolean()
-            && project.getCataloguedDate() == null){
+                && patch.get("isInCatalogue").asBoolean()
+                && project.getCataloguedDate() == null) {
             project.setCataloguedDate(Instant.now());
         }
 
@@ -99,12 +107,12 @@ public class ProjectService {
         if (sendNotification) {
             projectEventHandler.editedProjectMetadata(updatedProject);
         }
-        return  updatedProject;
+        return updatedProject;
     }
 
 
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
-        if(! project.getIsUpdate()) {
+        if (!project.getIsUpdate()) {
             return metadataCrudService.addToSubmissionEnvelopeAndSave(project, submissionEnvelope);
         } else {
             return metadataUpdateService.acceptUpdate(project, submissionEnvelope);
@@ -126,7 +134,7 @@ public class ProjectService {
     }
 
     public Page<BundleManifest> findBundleManifestsByProjectUuidAndBundleType(Uuid projectUuid, BundleType bundleType,
-            Pageable pageable) {
+                                                                              Pageable pageable) {
         return this.projectRepository
                 .findByUuidUuidAndIsUpdateFalse(projectUuid.getUuid())
                 .map(project -> bundleManifestRepository.findBundleManifestsByProjectAndBundleType(project,
@@ -175,4 +183,12 @@ public class ProjectService {
         return new ProjectBag(projects, envelopes);
     }
 
+    public Page<Project> filterProjects(SearchFilter searchFilter, Pageable pageable) {
+        Query query = ProjectQueryBuilder.buildProjectsQuery(searchFilter);
+        log.debug("Project Search query: " + query.toString());
+
+        List<Project> projects = mongoTemplate.find(query.with(pageable), Project.class);
+        long count = mongoTemplate.count(query, Project.class);
+        return new PageImpl<>(projects, pageable, count);
+    }
 }
