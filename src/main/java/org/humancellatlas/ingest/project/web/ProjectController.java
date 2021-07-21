@@ -15,7 +15,10 @@ import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
-import org.humancellatlas.ingest.project.*;
+import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectEventHandler;
+import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
@@ -201,12 +204,9 @@ public class ProjectController {
 
     @GetMapping(path = "projects/filter")
     public ResponseEntity<PagedResources<Resource<Project>>> filterProjects(
-            @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "wranglingState", required = false) String wranglingState,
-            @RequestParam(value = "wrangler", required = false) String wrangler,
+            @ModelAttribute SearchFilter searchFilter,
             Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
-        SearchFilter searchFilter = new SearchFilter(search, wranglingState, wrangler);
         var projects = projectService.filterProjects(searchFilter, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
     }

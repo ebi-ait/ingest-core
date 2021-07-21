@@ -34,7 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProjectFilterTest {
 
     // class under test
-//    @Autowired
     private ProjectService projectService;
 
     // participants
@@ -85,7 +84,7 @@ class ProjectFilterTest {
     @Test
     void test_criteria_building() {
         SearchFilter searchFilter = new SearchFilter(null, "NEW", null);
-        Query query = projectService.buildProjectsQuery(searchFilter);
+        Query query = ProjectQueryBuilder.buildProjectsQuery(searchFilter);
         Project actual = this.mongoTemplate.find(query, Project.class).get(0);
         assertThat(actual)
                 .usingComparatorForFields(upToMillies, "contentLastModified")
@@ -95,7 +94,7 @@ class ProjectFilterTest {
     @Test
     void test_criteria_building_with_pageable() {
         SearchFilter searchFilter = new SearchFilter("project1", null, null);
-        Query query = projectService.buildProjectsQuery(searchFilter);
+        Query query = ProjectQueryBuilder.buildProjectsQuery(searchFilter);
         Pageable pageable = PageRequest.of(0, 10);
         Project actual = this.mongoTemplate.find(query.with(pageable), Project.class).get(0);
         assertThat(actual)
@@ -171,6 +170,22 @@ class ProjectFilterTest {
 
     @BeforeEach
     private void setup() {
+        initProjectService();
+        initTestData();
+    }
+
+    private void initTestData() {
+        this.project1 = makeProject("project1");
+        this.project2 = makeProject("project2");
+        this.project3 = makeProject("project3");
+        Arrays.asList(project1, project2, project3).forEach(project -> {
+            this.mongoTemplate.save(project);
+            this.projectService.register(project);
+        });
+        assertThat(this.mongoTemplate.findAll(Project.class)).hasSize(3);
+    }
+
+    private void initProjectService() {
         this.projectService = new ProjectService(
                 mongoTemplate,
                 submissionEnvelopeRepository,
@@ -181,18 +196,6 @@ class ProjectFilterTest {
                 bundleManifestRepository,
                 projectEventHandler);
         assertThat(this.mongoTemplate.findAll(Project.class)).hasSize(0);
-
-        this.project1 = makeProject("project1");
-        this.project2 = makeProject("project2");
-        this.project3 = makeProject("project3");
-        Arrays.asList(project1, project2, project3).forEach(project -> {
-            this.mongoTemplate.save(project);
-            this.projectService.register(project);
-
-        });
-
-        assertThat(this.mongoTemplate.findAll(Project.class)).hasSize(3);
-
     }
 
     @AfterEach
