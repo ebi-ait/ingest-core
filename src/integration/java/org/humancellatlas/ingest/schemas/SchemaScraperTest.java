@@ -1,7 +1,6 @@
 package org.humancellatlas.ingest.schemas;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.schemas.schemascraper.SchemaScraper;
 import org.humancellatlas.ingest.schemas.schemascraper.impl.S3BucketSchemaScraper;
 
@@ -39,8 +38,6 @@ public class SchemaScraperTest {
     SchemaService schemaService;
 
     @MockBean SchemaRepository schemaRepository;
-
-    @MockBean MigrationConfiguration migrationConfiguration;
 
     WireMockServer wireMockServer;
 
