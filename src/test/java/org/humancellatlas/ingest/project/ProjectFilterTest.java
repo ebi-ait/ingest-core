@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.index.TextIndexDefinition;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -182,6 +183,11 @@ class ProjectFilterTest {
             this.mongoTemplate.save(project);
             this.projectService.register(project);
         });
+        this.mongoTemplate.indexOps(Project.class).ensureIndex(
+                new TextIndexDefinition.TextIndexDefinitionBuilder()
+                        .onField("content.project_core.project_title")
+                        .build()
+        );
         assertThat(this.mongoTemplate.findAll(Project.class)).hasSize(3);
     }
 
