@@ -7,6 +7,7 @@ import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
+import org.humancellatlas.ingest.project.web.SearchFilter;
 import org.humancellatlas.ingest.schemas.Schema;
 import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -22,17 +23,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -50,6 +53,9 @@ public class ProjectServiceTest {
 
     @Autowired
     private ProjectService projectService;
+
+    @MockBean
+    private MongoTemplate mongoTemplate;
 
     @MockBean
     private SubmissionEnvelopeRepository submissionEnvelopeRepository;
@@ -287,4 +293,5 @@ public class ProjectServiceTest {
             assertThat(result).isEqualTo(persistentProject);
         }
     }
+
 }

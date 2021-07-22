@@ -40,7 +40,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-
 /**
  * Javadocs go here!
  *
@@ -201,6 +200,15 @@ public class ProjectController {
             Map<String, String> errorResponse = Map.of("message", message);
             return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
         }
+    }
+
+    @GetMapping(path = "projects/filter")
+    public ResponseEntity<PagedResources<Resource<Project>>> filterProjects(
+            @ModelAttribute SearchFilter searchFilter,
+            Pageable pageable,
+            final PersistentEntityResourceAssembler resourceAssembler) {
+        var projects = projectService.filterProjects(searchFilter, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
     }
 
 }
