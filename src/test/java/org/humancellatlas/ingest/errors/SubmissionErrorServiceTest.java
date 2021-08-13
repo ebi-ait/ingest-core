@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {SubmissionErrorService.class})
-public class SubmissionErrorTest {
+public class SubmissionErrorServiceTest {
     @MockBean
     private Pageable pageable;
     @MockBean
@@ -40,7 +40,7 @@ public class SubmissionErrorTest {
                 .thenReturn(new PageImpl<SubmissionError>(Collections.emptyList()));
 
         //then:
-        assertThat(submissionErrorService.getErrorsFromEnvelope(submissionEnvelope,pageable)).isEmpty();
+        assertThat(submissionErrorService.getErrorsFromEnvelope(submissionEnvelope, pageable)).isEmpty();
 
     }
 
@@ -107,5 +107,16 @@ public class SubmissionErrorTest {
                 .withDetail(UUID.randomUUID().toString() + UUID.randomUUID().toString())
                 .withInstance(baseType.resolve(type + "/" + UUID.randomUUID()))
                 .build();
+    }
+
+    @Test
+    public void deleteSubmissionEnvelopeErrors() {
+        //given:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        //when:
+        submissionErrorService.deleteSubmissionEnvelopeErrors(submissionEnvelope);
+        //then:
+        verify(submissionErrorRepository).deleteBySubmissionEnvelope(submissionEnvelope);
+
     }
 }

@@ -21,4 +21,8 @@ public class SubmissionErrorService {
         submissionErrorRepository.insert(submissionError);
         return submissionError;
     }
+
+    public void deleteSubmissionEnvelopeErrors(SubmissionEnvelope submissionEnvelope) {
+        submissionErrorRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+    }
 }
