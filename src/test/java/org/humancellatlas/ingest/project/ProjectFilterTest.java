@@ -10,10 +10,8 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +20,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.TextIndexDefinition;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -67,11 +64,7 @@ class ProjectFilterTest {
     private Project project2;
     private Project project3;
 
-    Comparator<Instant> upToMillies = new Comparator<Instant>() {
-        public int compare(Instant d1, Instant d2) {
-            return d1.truncatedTo(ChronoUnit.MILLIS).compareTo(d2.truncatedTo(ChronoUnit.MILLIS));
-        }
-    };
+    Comparator<Instant> upToMillies = Comparator.comparing(d -> d.truncatedTo(ChronoUnit.MILLIS));
 
     @Test
     void test_raw_criteria() {
@@ -248,7 +241,7 @@ class ProjectFilterTest {
     }
 
     private static Project makeProject(String title) {
-        Map content = Map.of("project_core",
+        Map<String, Map<String, String>> content = Map.of("project_core",
                 Map.of("project_title", title));
         Project project = new Project(content);
         project.setIsUpdate(false);
