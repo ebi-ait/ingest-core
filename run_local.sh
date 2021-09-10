@@ -7,7 +7,7 @@ export RABBIT_HOST=localhost
 export RABBIT_PORT=5672
 export SCHEMA_BASE_URI=https://schema.humancellatlas.org
 
-export AUTH_ISSUER=https://login.elixir-czech.org/oidc
+export AUTH_ISSUER=https://login.elixir-czech.org/oidc/
 export SVC_AUTH_AUDIENCE=https://dev.data.humancellatlas.org/
 export USR_AUTH_AUDIENCE=https://dev.data.humancellatlas.org/
 export GCP_JWK_PROVIDER_BASE_URL=https://www.googleapis.com/service_accounts/v1/jwk/
