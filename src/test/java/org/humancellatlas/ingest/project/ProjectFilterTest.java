@@ -237,7 +237,7 @@ class ProjectFilterTest {
 
     @Test
     void all_args_constructor() {
-        new SearchFilter("a", "b", "c","organ", SearchType.AllKeywords);
+        new SearchFilter("a", "b", "c", SearchType.AllKeywords);
     }
 
     private static Project makeProject(String title) {

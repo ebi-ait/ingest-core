@@ -12,7 +12,7 @@ import java.util.Optional;
 public class ProjectFilterQueryBuilderTest {
     @Test
     void null_search_type_with_non_null_text() {
-        SearchFilter searchFilter = new SearchFilter("project keyword",null,null,null,null);
+        SearchFilter searchFilter = new SearchFilter("project keyword",null,null,null);
         ProjectQueryBuilder.buildProjectsQuery(searchFilter);
     }
 
