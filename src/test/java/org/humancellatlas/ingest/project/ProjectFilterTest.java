@@ -4,6 +4,7 @@ import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.project.web.SearchFilter;
+import org.humancellatlas.ingest.project.web.SearchType;
 import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -84,7 +85,7 @@ class ProjectFilterTest {
 
     @Test
     void test_criteria_building() {
-        SearchFilter searchFilter = new SearchFilter(null, "NEW", null);
+        SearchFilter searchFilter = SearchFilter.builder().wranglingState("NEW").build();
         Query query = ProjectQueryBuilder.buildProjectsQuery(searchFilter);
         Project actual = this.mongoTemplate.find(query, Project.class).get(0);
         assertThat(actual)
@@ -94,7 +95,7 @@ class ProjectFilterTest {
 
     @Test
     void test_criteria_building_with_pageable() {
-        SearchFilter searchFilter = new SearchFilter("project1", null, null);
+        SearchFilter searchFilter = SearchFilter.builder().search("project1").build();
         Query query = ProjectQueryBuilder.buildProjectsQuery(searchFilter);
         Pageable pageable = PageRequest.of(0, 10);
         Project actual = this.mongoTemplate.find(query.with(pageable), Project.class).get(0);
@@ -110,7 +111,7 @@ class ProjectFilterTest {
         this.mongoTemplate.save(project4);
 
         //when
-        SearchFilter filterNew = new SearchFilter(null, "NEW", null);
+        SearchFilter filterNew = SearchFilter.builder().wranglingState("NEW").build();
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(filterNew, pageable);
@@ -127,7 +128,7 @@ class ProjectFilterTest {
     void filter_by_wrangler() {
         // given
         //when
-        SearchFilter searchFilter = new SearchFilter(null, null, "wrangler_project2");
+        SearchFilter searchFilter = SearchFilter.builder().wrangler(this.project2.getPrimaryWrangler()).build();
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
@@ -145,7 +146,7 @@ class ProjectFilterTest {
     void filter_by_text() {
         // given
         //when
-        SearchFilter searchFilter = new SearchFilter("project1", null, null);
+        SearchFilter searchFilter = SearchFilter.builder().search("project1").build();
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
@@ -156,6 +157,94 @@ class ProjectFilterTest {
                 .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
                 .usingElementComparatorIgnoringFields("supplementaryFiles", "submissionEnvelopes")
                 .containsExactly(project1);
+    }
+
+    @Test
+    void query_all_keywords(){
+        SearchFilter searchFilter = SearchFilter.builder().search("human liver").build();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Project> result = projectService.filterProjects(searchFilter, pageable);
+
+        // then
+        assertThat(result.getContent())
+                .hasSize(1)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingElementComparatorIgnoringFields("supplementaryFiles", "submissionEnvelopes")
+                .containsExactly(project1);
+    }
+    @Test
+    void query_all_keywords__order_independent(){
+        SearchFilter searchFilter = SearchFilter.builder()
+                .search("liver human")
+                .searchType(SearchType.AllKeywords)
+                .build();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Project> result = projectService.filterProjects(searchFilter, pageable);
+
+        // then
+        assertThat(result.getContent())
+                .hasSize(1)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingElementComparatorIgnoringFields("supplementaryFiles", "submissionEnvelopes")
+                .containsExactly(project1);
+    }
+    @Test
+    void query_any_keywords(){
+        SearchFilter searchFilter = SearchFilter.builder()
+                .search("liver mouse")
+                .searchType(SearchType.AnyKeyword)
+                .build();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Project> result = projectService.filterProjects(searchFilter, pageable);
+        Page<Project> resultFromReverse = projectService.filterProjects(searchFilter, pageable);
+
+        // then
+        assertThat(result.getContent())
+                .hasSize(2)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingElementComparatorIgnoringFields("supplementaryFiles", "submissionEnvelopes")
+                .containsExactly(project1, project2);
+    }
+    @Test
+    void query_exact_phrase__correct_order(){
+        SearchFilter searchFilter = SearchFilter.builder()
+                .search("human liver")
+                .searchType(SearchType.ExactMatch)
+                .build();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Project> result = projectService.filterProjects(searchFilter, pageable);
+        Page<Project> resultFromReverse = projectService.filterProjects(searchFilter, pageable);
+
+        // then
+        assertThat(result.getContent())
+                .hasSize(1)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingElementComparatorIgnoringFields("supplementaryFiles", "submissionEnvelopes")
+                .containsExactly(project1);
+    }
+
+    @Test
+    void query_exact_phrase__reverse_order(){
+        SearchFilter searchFilter = SearchFilter.builder()
+                .search("liver human")
+                .searchType(SearchType.ExactMatch)
+                .build();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Project> result = projectService.filterProjects(searchFilter, pageable);
+
+        // then
+        assertThat(result.getContent())
+                .hasSize(0);
+    }
+
+    @Test
+    void all_args_constructor() {
+        new SearchFilter("a", "b", "c","organ", SearchType.AllKeywords);
     }
 
     private static Project makeProject(String title) {
@@ -176,9 +265,9 @@ class ProjectFilterTest {
     }
 
     private void initTestData() {
-        this.project1 = makeProject("project1");
-        this.project2 = makeProject("project2");
-        this.project3 = makeProject("project3");
+        this.project1 = makeProject("project1 human liver");
+        this.project2 = makeProject("project2 mouse liver");
+        this.project3 = makeProject("project3 lung human");
         Arrays.asList(project1, project2, project3).forEach(project -> {
             this.mongoTemplate.save(project);
             this.projectService.register(project);
