@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.core.query.TextCriteria;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,7 +38,7 @@ public class ProjectQueryBuilder {
         return query;
     }
 
-    private static final Map<SearchType, Function<SearchFilter, String>> x = Map.of(
+    private static final Map<SearchType, Function<SearchFilter, String>> keywordFormatterMap = Map.of(
             SearchType.ExactMatch, (SearchFilter searchFilter)->encloseInQuotes(searchFilter.getSearch()),
             SearchType.AllKeywords, (SearchFilter searchFilter)->Stream.of(splitBySpace(searchFilter))
                     .map(ProjectQueryBuilder::encloseInQuotes)
@@ -52,8 +51,8 @@ public class ProjectQueryBuilder {
         }
         return Optional.ofNullable(searchFilter)
                 .map(SearchFilter::getSearchType)
-                .map(x::get)
-                .map(x->x.apply(searchFilter))
+                .map(keywordFormatterMap::get)
+                .map(formatterFunction->formatterFunction.apply(searchFilter))
                 .orElse(searchFilter.getSearch());
     }
 

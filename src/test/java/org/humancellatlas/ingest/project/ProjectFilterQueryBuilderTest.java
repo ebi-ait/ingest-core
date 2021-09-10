@@ -28,7 +28,7 @@ public class ProjectFilterQueryBuilderTest {
             "AnyKeyword,k1 \"k2\" k3,k1 \"k2\" k3",
             "ExactMatch,\"k1\" k2,\"k1\" k2",
     })
-    public void test_name_me(String searchTypeStr, String input, String expected) {
+    public void quoting_in_mongo_syntax_by_search_type(String searchTypeStr, String input, String expected) {
         SearchType searchType = searchTypeStr.equals("null")?null:SearchType.valueOf(searchTypeStr);
         SearchFilter searchFilter = SearchFilter.builder()
                 .search(input)
