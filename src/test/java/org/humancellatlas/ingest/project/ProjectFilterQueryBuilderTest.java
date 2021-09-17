@@ -12,8 +12,9 @@ import java.util.Optional;
 public class ProjectFilterQueryBuilderTest {
     @Test
     void null_search_type_with_non_null_text() {
-        SearchFilter searchFilter = new SearchFilter("project keyword",null,null,null);
+        SearchFilter searchFilter = new SearchFilter("project keyword", null, null, null);
         ProjectQueryBuilder.buildProjectsQuery(searchFilter);
+        // no exception thrown when searchType is null
     }
 
     @ParameterizedTest
@@ -29,7 +30,7 @@ public class ProjectFilterQueryBuilderTest {
             "ExactMatch,\"k1\" k2,\"k1\" k2",
     })
     public void quoting_in_mongo_syntax_by_search_type(String searchTypeStr, String input, String expected) {
-        SearchType searchType = searchTypeStr.equals("null")?null:SearchType.valueOf(searchTypeStr);
+        SearchType searchType = searchTypeStr.equals("null") ? null : SearchType.valueOf(searchTypeStr);
         SearchFilter searchFilter = SearchFilter.builder()
                 .search(input)
                 .searchType(searchType)
@@ -37,10 +38,5 @@ public class ProjectFilterQueryBuilderTest {
         Assertions.assertThat(ProjectQueryBuilder.formatSearchString(searchFilter))
                 .isEqualTo(expected);
     }
-    // null k1 k2 -> k1 k2
-
-    // * "k1 k2" -> "k1 k2"
-    // * "k1" "k2" -> "k1" "k2"
-    // * k1 "k2" k3 -> k1 "k2" k3
 
 }
