@@ -105,6 +105,7 @@ dependencies {
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'com.github.tomakehurst:wiremock-standalone:2.14.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.3.1'
     testImplementation('org.mockito:mockito-junit-jupiter:3.0.0') {
         exclude group: 'org.mockito', module: 'mockito-core'
     }

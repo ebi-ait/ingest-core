@@ -8,8 +8,12 @@ import org.humancellatlas.ingest.project.ProjectEventHandler;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.state.ValidationState;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -28,9 +32,14 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
@@ -144,6 +153,85 @@ class ProjectControllerTest {
             assertThat(project.getValidationState()).isEqualTo(ValidationState.DRAFT);
         }
 
+    }
+
+    @Nested
+    class Filter {
+        @BeforeEach
+        public void setup(){
+            Project project = makeProject();
+            repository.save(project);
+        }
+
+        @NotNull
+        private Project makeProject() {
+            var content = new HashMap<String, Object>();
+            content.put("description", "test kw1");
+            Project project = new Project(content);
+            return project;
+        }
+
+        @ParameterizedTest(
+                name = "[{index}] all values, some null: {arguments}"
+        )
+        @CsvSource({
+                "kw1,null,null,AllKeywords",
+                "kw1,null,null,AnyKeyword",
+                "kw1,null,null,UnsuppportedSearchType",
+                "kw1,null,null,null",
+        })
+        public void allValuesSetSomeNull(String search, String wrangler, String wranglingState, String searchType) throws Exception {
+            //given:
+            var content = Map.of(
+                    "search", search,
+                    "wrangler", wrangler,
+                    "wranglingState", wranglingState,
+                    "searchType", searchType
+            );
+
+            webApp
+                    .perform(get("/projects/filter")
+                            .contentType(APPLICATION_JSON_VALUE)
+                            .content(objectMapper.writeValueAsString(content)))
+                    .andDo(print())
+                    .andExpect(handler().handlerType(ProjectController.class))
+                    .andExpect(status().isOk());
+        }
+
+        @ParameterizedTest(
+                name = "[{index}] nulls missing from filter payload: {arguments}"
+        )
+        @CsvSource({
+                "kw1,null,null,AllKeywords",
+                "kw1,null,null,AnyKeyword",
+                "kw1,null,null,Unsuppported",
+                "kw1,null,null,null",
+                "kw1,Amnon,null,null",
+                "null,null,NEW,null",
+                "null,null,Unsupported,null",
+                "null,null,null,null",
+        })
+        public void nullsAreMissingFromPayload(String search, String wrangler, String wranglingState, String searchType) throws Exception {
+            var content = new HashMap<String,String>();
+            putIfNotNull(content, search, "search");
+            putIfNotNull(content, wrangler, "wrangler");
+            putIfNotNull(content, wranglingState, "wranglingState");
+            putIfNotNull(content, searchType, "searchType");
+            webApp
+                    .perform(get("/projects/filter")
+                            .contentType(APPLICATION_JSON_VALUE)
+                            .content(objectMapper.writeValueAsString(content)))
+                    .andDo(print())
+                    .andExpect(handler().handlerType(ProjectController.class))
+                    .andExpect(status().isOk());
+
+        }
+
+        private void putIfNotNull(HashMap<String, String> content, String value, String key) {
+            if(!"null".equals(value)){
+                content.put(key, value);
+            }
+        }
     }
 
 }

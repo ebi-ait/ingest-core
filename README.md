@@ -26,6 +26,20 @@ You will need a mongo database running on localhost with default ports to run th
 ## Running locally
 You can run ingest-core on your local system with the script
 
+### populating the local DB
+
+You could populate the local DB with prod data using the following script:
+
+```bash
+mkdir -p ~/dev/ait/data/mongodb/
+cd ~/dev/ait/data/mongodb/
+latest_backup=$(aws s3 ls s3://ingest-db-backup/prod/ | awk '{print $4}' | sort | tail -n 1)
+aws s3 cp "s3://ingest-db-backup/prod/${latest_backup}" ${latest_backup}
+tar -xzvf $latest_backup
+backup_dir=$(echo "$latest_backup" | sed "s/\.tar\.gz//g")
+mongorestore --drop "./data/db/dump/${backup_dir}"
+```
+
 `./run_local.sh`
 
 ## Privacy
