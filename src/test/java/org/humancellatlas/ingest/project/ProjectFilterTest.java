@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.project;
 
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.project.web.SearchFilter;
@@ -236,6 +237,26 @@ class ProjectFilterTest {
     }
 
     @Test
+    void lookup_by_uuid() {
+        String uuidString = project1.getUuid().getUuid().toString();
+        SearchFilter searchFilter = SearchFilter.builder()
+                .search(uuidString)
+                .build();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Project> result = projectService.filterProjects(searchFilter, pageable);
+
+        // then
+        assertThat(result.getContent())
+                .hasSize(1)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingElementComparatorIgnoringFields("supplementaryFiles", "submissionEnvelopes")
+                .containsExactly(project1);
+    }
+
+
+
+    @Test
     void all_args_constructor() {
         new SearchFilter("a", "b", "c", SearchType.AllKeywords);
     }
@@ -247,9 +268,9 @@ class ProjectFilterTest {
         project.setIsUpdate(false);
         project.setPrimaryWrangler("wrangler_" + title);
         project.setWranglingState(WranglingState.NEW);
+        project.setUuid(Uuid.newUuid());
         return project;
     }
-
 
     @BeforeEach
     private void setup() {
