@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.project;
 import org.humancellatlas.ingest.project.web.SearchFilter;
 import org.humancellatlas.ingest.project.web.SearchType;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.CriteriaDefinition;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.TextCriteria;
 
@@ -14,28 +15,45 @@ import java.util.stream.Stream;
 public class ProjectQueryBuilder {
 
     public static Query buildProjectsQuery(SearchFilter searchFilter) {
-        List<Criteria> criteria_list = new ArrayList<>();
-        criteria_list.add(Criteria.where("isUpdate").is(false));
+        List<Criteria> criteriaList = new ArrayList<>();
+        criteriaList.add(Criteria.where("isUpdate").is(false));
+        addCriterionForAttribute(criteriaList, "wranglingState", searchFilter.getWranglingState());
+        addCriterionForAttribute(criteriaList, "primaryWrangler", searchFilter.getWrangler());
 
-        Optional.ofNullable(searchFilter.getWranglingState())
-                .ifPresent(wranglingState -> {
-                    criteria_list.add(Criteria.where("wranglingState").is(wranglingState));
-                });
-
-        Optional.ofNullable(searchFilter.getWrangler())
-                .ifPresent(wrangler -> {
-                    criteria_list.add(Criteria.where("primaryWrangler").is(wrangler));
-                });
-
-        Criteria queryCriteria = new Criteria().andOperator(criteria_list.toArray(new Criteria[criteria_list.size()]));
+        Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[criteriaList.size()]));
         Query query = new Query().addCriteria(queryCriteria);
-        Optional.ofNullable(searchFilter.getSearch())
-                .map(search -> ProjectQueryBuilder.formatSearchString(searchFilter))
-                .ifPresent(search -> {
-                    query.addCriteria(TextCriteria.forDefaultLanguage().matching(String.valueOf(search)));
-                });
-
+        addKeywordSearchCriteria(searchFilter)
+                .ifPresent(query::addCriteria);
         return query;
+    }
+
+    private static Optional<CriteriaDefinition> addKeywordSearchCriteria(SearchFilter searchFilter) {
+        try {
+            return buildUuidCriteria(searchFilter);
+        } catch (IllegalArgumentException  e) {
+            return buildTextCriteria(searchFilter);
+        }
+    }
+
+    private static Optional<CriteriaDefinition> buildTextCriteria(SearchFilter searchFilter) {
+        return Optional.ofNullable(searchFilter.getSearch())
+                .map(search -> ProjectQueryBuilder.formatSearchString(searchFilter))
+                .map(search ->
+                        TextCriteria.forDefaultLanguage().matching(String.valueOf(search)));
+    }
+
+    private static Optional<CriteriaDefinition> buildUuidCriteria(SearchFilter searchFilter) {
+        return Optional.ofNullable(searchFilter.getSearch())
+                .map(UUID::fromString)
+                .map(uuid -> Criteria.where("uuid.uuid").is(uuid));
+    }
+
+    private static void addCriterionForAttribute(List<Criteria> criteria_list,
+                                                 String attributreName,
+                                                 String attributeValue) {
+        Optional.ofNullable(attributeValue)
+                .map(value -> Criteria.where(attributreName).is(value))
+                .ifPresent(criteria_list::add);
     }
 
     private static final Map<SearchType, Function<SearchFilter, String>> keywordFormatterMap = Map.of(
