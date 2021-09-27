@@ -11,7 +11,7 @@ import lombok.ToString;
 public class SearchFilter {
     @Getter String search;
     @Getter String wranglingState;
-    @Getter String wrangler;
+    @Getter String primaryWrangler;
 
     @Builder.Default
     @Getter SearchType searchType = SearchType.AllKeywords;

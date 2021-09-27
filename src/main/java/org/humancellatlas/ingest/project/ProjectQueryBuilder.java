@@ -18,7 +18,7 @@ public class ProjectQueryBuilder {
         List<Criteria> criteriaList = new ArrayList<>();
         criteriaList.add(Criteria.where("isUpdate").is(false));
         addCriterionForAttribute(criteriaList, "wranglingState", searchFilter.getWranglingState());
-        addCriterionForAttribute(criteriaList, "primaryWrangler", searchFilter.getWrangler());
+        addCriterionForAttribute(criteriaList, "primaryWrangler", searchFilter.getPrimaryWrangler());
 
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[criteriaList.size()]));
         Query query = new Query().addCriteria(queryCriteria);
