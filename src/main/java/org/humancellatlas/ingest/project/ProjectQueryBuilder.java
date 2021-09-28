@@ -19,13 +19,13 @@ public class ProjectQueryBuilder {
         criteriaList.add(Criteria.where("isUpdate").is(false));
         addIsCriterionForAttribute(criteriaList, "wranglingState", searchFilter.getWranglingState());
         addIsCriterionForAttribute(criteriaList, "primaryWrangler", searchFilter.getPrimaryWrangler());
-        addIsCriterionForAttribute(criteriaList, "wranglingPriority", searchFilter.getPriority());
+        addIsCriterionForAttribute(criteriaList, "wranglingPriority", searchFilter.getWranglingPriority());
         addLTECriterionForAttribute(criteriaList, "cellCount", searchFilter.getMaxCellCount());
         addGTECriterionForAttribute(criteriaList, "cellCount", searchFilter.getMinCellCount());
-        addInCriterionForAttribute(criteriaList, "identifyingOrganisms", searchFilter.getSpecies());
+        addInCriterionForAttribute(criteriaList, "identifyingOrganisms", searchFilter.getIdentifyingOrganism());
         addIsCriterionForAttribute(criteriaList, "organ", searchFilter.getOrgan());
 
-        Optional.ofNullable(searchFilter.getHcaPublication())
+        Optional.ofNullable(searchFilter.getHasOfficialHcaPublication())
                 .map(value ->
                         Criteria.where("content.publications")
                                 .elemMatch(Criteria.where("official_hca_publication").is(value))
