@@ -15,7 +15,7 @@ public class SearchFilter {
     @Getter Integer wranglingPriority;
     @Getter Boolean hasOfficialHcaPublication;
     @Getter String identifyingOrganism;
-    @Getter String organ;
+    @Getter String organOntology;
 
     @Builder.Default
     @Getter SearchType searchType = SearchType.AllKeywords;

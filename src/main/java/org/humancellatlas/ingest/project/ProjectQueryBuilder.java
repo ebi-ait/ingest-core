@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.query.CriteriaDefinition;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.TextCriteria;
 
+import javax.swing.text.html.Option;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -23,14 +24,17 @@ public class ProjectQueryBuilder {
         addLTECriterionForAttribute(criteriaList, "cellCount", searchFilter.getMaxCellCount());
         addGTECriterionForAttribute(criteriaList, "cellCount", searchFilter.getMinCellCount());
         addInCriterionForAttribute(criteriaList, "identifyingOrganisms", searchFilter.getIdentifyingOrganism());
-        addIsCriterionForAttribute(criteriaList, "organ", searchFilter.getOrgan());
 
         Optional.ofNullable(searchFilter.getHasOfficialHcaPublication())
                 .map(value ->
                         Criteria.where("content.publications")
                                 .elemMatch(Criteria.where("official_hca_publication").is(value))
-                )
-                .ifPresent(criteriaList::add);
+                ).ifPresent(criteriaList::add);
+
+        Optional.ofNullable(searchFilter.getOrganOntology())
+                .map(value ->
+                        Criteria.where("organ.ontologies").elemMatch(Criteria.where("ontology").is(value))
+                ).ifPresent(criteriaList::add);
 
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[criteriaList.size()]));
         Query query = new Query().addCriteria(queryCriteria);
