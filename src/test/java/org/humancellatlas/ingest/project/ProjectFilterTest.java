@@ -122,7 +122,7 @@ class ProjectFilterTest {
     void filter_by_wrangler() {
         // given
         //when
-        SearchFilter searchFilter = SearchFilter.builder().wrangler(this.project2.getPrimaryWrangler()).build();
+        SearchFilter searchFilter = SearchFilter.builder().primaryWrangler(this.project2.getPrimaryWrangler()).build();
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
@@ -258,7 +258,18 @@ class ProjectFilterTest {
 
     @Test
     void all_args_constructor() {
-        new SearchFilter("a", "b", "c", SearchType.AllKeywords);
+        new SearchFilter(
+                "a",
+                "b",
+                "c",
+                1,
+                false,
+                "Human",
+                "AN_ONTOLOGY_TERM",
+                SearchType.AllKeywords,
+                0,
+                10000
+        );
     }
 
     private static Project makeProject(String title) {
@@ -269,6 +280,7 @@ class ProjectFilterTest {
         project.setPrimaryWrangler("wrangler_" + title);
         project.setWranglingState(WranglingState.NEW);
         project.setUuid(Uuid.newUuid());
+        project.setCellCount(100);
         return project;
     }
 
