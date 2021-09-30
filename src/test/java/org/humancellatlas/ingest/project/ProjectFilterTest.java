@@ -233,21 +233,22 @@ class ProjectFilterTest {
     void filter_by_cell_count() {
         //given
         Project project4 = makeProject("project4");
-        project4.setCellCount(1000);
+        Integer cellCount = 1000;
+        project4.setContent(Map.of("estimated_cell_count", cellCount));
         this.mongoTemplate.save(project4);
         //when
-        SearchFilter searchFilter = SearchFilter.builder().maxCellCount(project1.getCellCount()).minCellCount(0).build();
+        SearchFilter searchFilter = SearchFilter.builder().maxCellCount(cellCount).minCellCount(cellCount).build();
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
 
         // then
-        assertThat(result.getTotalElements()).isEqualTo(3);
+        assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent())
-                .hasSize(3)
+                .hasSize(1)
                 .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
                 .usingRecursiveFieldByFieldElementComparator()
-                .containsExactlyInAnyOrder(project1, project2, project3);
+                .containsExactly(project4);
     }
 
     @Test
@@ -392,7 +393,6 @@ class ProjectFilterTest {
         project.setPrimaryWrangler("wrangler_" + title);
         project.setWranglingState(WranglingState.NEW);
         project.setUuid(Uuid.newUuid());
-        project.setCellCount(100);
         project.setWranglingPriority(1);
         return project;
     }
