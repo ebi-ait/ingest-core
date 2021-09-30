@@ -379,9 +379,9 @@ class ProjectFilterTest {
                 false,
                 "Human",
                 "AN_ONTOLOGY_TERM",
-                SearchType.AllKeywords,
                 0,
-                10000
+                10000,
+                SearchType.AllKeywords
         );
     }
 
