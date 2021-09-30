@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -134,6 +135,117 @@ class ProjectFilterTest {
                 .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
                 .usingRecursiveFieldByFieldElementComparator()
                 .containsExactly(this.project2);
+    }
+
+    @Test
+    void filter_by_wrangling_priority() {
+        //given
+        Project project4 = makeProject("project4");
+        project4.setWranglingPriority(3);
+        this.mongoTemplate.save(project4);
+        //when
+        SearchFilter searchFilter = SearchFilter.builder().wranglingPriority(this.project1.getWranglingPriority()).build();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Project> result = projectService.filterProjects(searchFilter, pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(3);
+        assertThat(result.getContent())
+                .hasSize(3)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactlyInAnyOrder(project1, project2, project3);
+    }
+
+    @Test
+    void filter_by_official_hca_publication() {
+        //given
+        Project project4 = makeProject("project4");
+        var content = Map.of(
+                "project_core", Map.of("project_title", "Project 4"),
+                "publications", List.of(Map.of("official_hca_publication", true))
+        );
+        project4.setContent(content);
+        this.mongoTemplate.save(project4);
+
+        //when
+        SearchFilter searchFilter = SearchFilter.builder().hasOfficialHcaPublication(true).build();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Project> result = projectService.filterProjects(searchFilter, pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent())
+                .hasSize(1)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactly(project4);
+    }
+
+    @Test
+    void filter_by_identifying_organisms() {
+        //given
+        Project project4 = makeProject("project4");
+        project4.setIdentifyingOrganisms(List.of("Human"));
+        this.mongoTemplate.save(project4);
+
+        //when
+        SearchFilter searchFilter = SearchFilter.builder().identifyingOrganism("Human").build();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Project> result = projectService.filterProjects(searchFilter, pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent())
+                .hasSize(1)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactly(project4);
+    }
+
+    @Test
+    void filter_by_organ_ontology() {
+        //given
+        Project project4 = makeProject("project4");
+        project4.setOrgan(Map.of("ontologies", List.of(Map.of("ontology", "AN_ONTOLOGY"))));
+        this.mongoTemplate.save(project4);
+        //when
+        SearchFilter searchFilter = SearchFilter.builder().organOntology("AN_ONTOLOGY").build();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Project> result = projectService.filterProjects(searchFilter, pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent())
+                .hasSize(1)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactly(project4);
+    }
+
+    @Test
+    void filter_by_cell_count() {
+        //given
+        Project project4 = makeProject("project4");
+        project4.setCellCount(1000);
+        this.mongoTemplate.save(project4);
+        //when
+        SearchFilter searchFilter = SearchFilter.builder().maxCellCount(project1.getCellCount()).minCellCount(0).build();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Project> result = projectService.filterProjects(searchFilter, pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(3);
+        assertThat(result.getContent())
+                .hasSize(3)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactlyInAnyOrder(project1, project2, project3);
     }
 
     @Test
@@ -254,8 +366,6 @@ class ProjectFilterTest {
                 .containsExactly(project1);
     }
 
-
-
     @Test
     void all_args_constructor() {
         new SearchFilter(
@@ -281,6 +391,7 @@ class ProjectFilterTest {
         project.setWranglingState(WranglingState.NEW);
         project.setUuid(Uuid.newUuid());
         project.setCellCount(100);
+        project.setWranglingPriority(1);
         return project;
     }
 
