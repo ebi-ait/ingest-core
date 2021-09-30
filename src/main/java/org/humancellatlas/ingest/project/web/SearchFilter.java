@@ -16,11 +16,9 @@ public class SearchFilter {
     @Getter Boolean hasOfficialHcaPublication;
     @Getter String identifyingOrganism;
     @Getter String organOntology;
+    @Getter Integer minCellCount;
+    @Getter Integer maxCellCount;
 
     @Builder.Default
     @Getter SearchType searchType = SearchType.AllKeywords;
-    @Builder.Default
-    @Getter Integer minCellCount = 0;
-    @Builder.Default
-    @Getter Integer maxCellCount = Integer.MAX_VALUE;
 }
