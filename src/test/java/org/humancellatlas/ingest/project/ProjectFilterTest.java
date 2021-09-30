@@ -188,11 +188,12 @@ class ProjectFilterTest {
     void filter_by_identifying_organisms() {
         //given
         Project project4 = makeProject("project4");
-        project4.setIdentifyingOrganisms(List.of("Human"));
+        String human = "Human";
+        project4.setIdentifyingOrganisms(List.of(human));
         this.mongoTemplate.save(project4);
 
         //when
-        SearchFilter searchFilter = SearchFilter.builder().identifyingOrganism("Human").build();
+        SearchFilter searchFilter = SearchFilter.builder().identifyingOrganism(human).build();
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
@@ -210,10 +211,11 @@ class ProjectFilterTest {
     void filter_by_organ_ontology() {
         //given
         Project project4 = makeProject("project4");
-        project4.setOrgan(Map.of("ontologies", List.of(Map.of("ontology", "AN_ONTOLOGY"))));
+        String ontologyTerm = "AN_ONTOLOGY";
+        project4.setOrgan(Map.of("ontologies", List.of(Map.of("ontology", ontologyTerm))));
         this.mongoTemplate.save(project4);
         //when
-        SearchFilter searchFilter = SearchFilter.builder().organOntology("AN_ONTOLOGY").build();
+        SearchFilter searchFilter = SearchFilter.builder().organOntology(ontologyTerm).build();
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
