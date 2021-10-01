@@ -23,7 +23,10 @@ public class ProjectQueryBuilder {
         addLTECriterionForAttribute(criteriaList, "cellCount", searchFilter.getMaxCellCount());
         addGTECriterionForAttribute(criteriaList, "cellCount", searchFilter.getMinCellCount());
         addInCriterionForAttribute(criteriaList, "identifyingOrganisms", searchFilter.getIdentifyingOrganism());
-        addIsCriterionForAttribute(criteriaList, "dataAccess.type", searchFilter.getDataAccess());
+
+        if(searchFilter.getDataAccess() != null){
+            addIsCriterionForAttribute(criteriaList, "dataAccess.type", searchFilter.getDataAccess().getLabel());
+        }
 
         Optional.ofNullable(searchFilter.getHasOfficialHcaPublication())
                 .map(value ->

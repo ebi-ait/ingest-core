@@ -254,7 +254,7 @@ class ProjectFilterTest {
     void filter_by_data_access() {
         //given
         Project project4 = makeProject("project4");
-        project4.setDataAccess(Map.of("type", DataAccessTypes.OPEN.toString()));
+        project4.setDataAccess(Map.of("type", DataAccessTypes.OPEN.getLabel()));
         this.mongoTemplate.save(project4);
         //when
         SearchFilter searchFilter = SearchFilter.builder().dataAccess(DataAccessTypes.OPEN).build();

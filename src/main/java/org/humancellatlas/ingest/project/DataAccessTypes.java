@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.project;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
 import org.humancellatlas.ingest.archiving.entity.ArchiveEntityTypeSerializer;
 
 @JsonSerialize(using = ArchiveEntityTypeSerializer.class)
@@ -11,9 +12,10 @@ public enum DataAccessTypes {
     COMPLICATED("It's complicated"),
     SEQUENCING_RUN("sequencingRun");
 
-    protected String type;
+    @Getter
+    final String label;
 
-    DataAccessTypes(String type) {
-        this.type = type;
+    DataAccessTypes(String label) {
+        this.label = label;
     }
 }
