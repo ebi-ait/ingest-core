@@ -251,6 +251,27 @@ class ProjectFilterTest {
     }
 
     @Test
+    void filter_by_data_access() {
+        //given
+        Project project4 = makeProject("project4");
+        project4.setDataAccess(Map.of("type", DataAccessTypes.OPEN.toString()));
+        this.mongoTemplate.save(project4);
+        //when
+        SearchFilter searchFilter = SearchFilter.builder().dataAccess(DataAccessTypes.OPEN).build();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Project> result = projectService.filterProjects(searchFilter, pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent())
+                .hasSize(1)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactly(project4);
+    }
+
+    @Test
     void filter_by_text() {
         // given
         //when
@@ -380,6 +401,7 @@ class ProjectFilterTest {
                 "AN_ONTOLOGY_TERM",
                 0,
                 10000,
+                DataAccessTypes.MANAGED,
                 SearchType.AllKeywords
         );
     }

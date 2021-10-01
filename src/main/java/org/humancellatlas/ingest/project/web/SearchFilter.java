@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
+import org.humancellatlas.ingest.project.DataAccessTypes;
 
 @AllArgsConstructor
 @Builder
@@ -18,6 +19,8 @@ public class SearchFilter {
     @Getter String organOntology;
     @Getter Integer minCellCount;
     @Getter Integer maxCellCount;
+    @Getter
+    DataAccessTypes dataAccess;
 
     @Builder.Default
     @Getter SearchType searchType = SearchType.AllKeywords;

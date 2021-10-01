@@ -22,6 +22,7 @@ public class ProjectFilterQueryBuilderTest {
                 null,
                 null,
                 null,
+                null,
                 null
         );
         ProjectQueryBuilder.buildProjectsQuery(searchFilter);
