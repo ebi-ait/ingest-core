@@ -10,7 +10,6 @@ public enum DataAccessTypes {
     MANAGED("All managed access"),
     MIXTURE("A mixture of open and managed"),
     COMPLICATED("It's complicated"),
-    SEQUENCING_RUN("sequencingRun");
 
     @Getter
     final String label;
