@@ -17,8 +17,27 @@ public class ProjectQueryBuilder {
     public static Query buildProjectsQuery(SearchFilter searchFilter) {
         List<Criteria> criteriaList = new ArrayList<>();
         criteriaList.add(Criteria.where("isUpdate").is(false));
-        addCriterionForAttribute(criteriaList, "wranglingState", searchFilter.getWranglingState());
-        addCriterionForAttribute(criteriaList, "primaryWrangler", searchFilter.getWrangler());
+        addIsCriterionForAttribute(criteriaList, "wranglingState", searchFilter.getWranglingState());
+        addIsCriterionForAttribute(criteriaList, "primaryWrangler", searchFilter.getPrimaryWrangler());
+        addIsCriterionForAttribute(criteriaList, "wranglingPriority", searchFilter.getWranglingPriority());
+        addLTECriterionForAttribute(criteriaList, "cellCount", searchFilter.getMaxCellCount());
+        addGTECriterionForAttribute(criteriaList, "cellCount", searchFilter.getMinCellCount());
+        addInCriterionForAttribute(criteriaList, "identifyingOrganisms", searchFilter.getIdentifyingOrganism());
+
+        if(searchFilter.getDataAccess() != null){
+            addIsCriterionForAttribute(criteriaList, "dataAccess.type", searchFilter.getDataAccess().getLabel());
+        }
+
+        Optional.ofNullable(searchFilter.getHasOfficialHcaPublication())
+                .map(value ->
+                        Criteria.where("content.publications")
+                                .elemMatch(Criteria.where("official_hca_publication").is(value))
+                ).ifPresent(criteriaList::add);
+
+        Optional.ofNullable(searchFilter.getOrganOntology())
+                .map(value ->
+                        Criteria.where("organ.ontologies").elemMatch(Criteria.where("ontology").is(value))
+                ).ifPresent(criteriaList::add);
 
         Criteria queryCriteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[criteriaList.size()]));
         Query query = new Query().addCriteria(queryCriteria);
@@ -48,11 +67,35 @@ public class ProjectQueryBuilder {
                 .map(uuid -> Criteria.where("uuid.uuid").is(uuid));
     }
 
-    private static void addCriterionForAttribute(List<Criteria> criteria_list,
-                                                 String attributreName,
-                                                 String attributeValue) {
+    private static void addIsCriterionForAttribute(List<Criteria> criteria_list,
+                                                   String attributeName,
+                                                   Object attributeValue) {
         Optional.ofNullable(attributeValue)
-                .map(value -> Criteria.where(attributreName).is(value))
+                .map(value -> Criteria.where(attributeName).is(value))
+                .ifPresent(criteria_list::add);
+    }
+
+    private static void addLTECriterionForAttribute(List<Criteria> criteria_list,
+                                                       String attributeName,
+                                                       Integer attributeValue) {
+        Optional.ofNullable(attributeValue)
+                .map(value -> Criteria.where(attributeName).lte(value))
+                .ifPresent(criteria_list::add);
+    }
+
+    private static void addGTECriterionForAttribute(List<Criteria> criteria_list,
+                                                    String attributeName,
+                                                    Integer attributeValue) {
+        Optional.ofNullable(attributeValue)
+                .map(value -> Criteria.where(attributeName).gte(value))
+                .ifPresent(criteria_list::add);
+    }
+
+    private static void addInCriterionForAttribute(List<Criteria> criteria_list,
+                                                    String attributeName,
+                                                    Object attributeValue) {
+        Optional.ofNullable(attributeValue)
+                .map(value -> Criteria.where(attributeName).in(value))
                 .ifPresent(criteria_list::add);
     }
 
