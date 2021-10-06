@@ -26,7 +26,7 @@ public class MetadataUpdateService {
         ObjectMapper mapper = new ObjectMapper();
 
         Boolean contentChanged = patch.get("content") != null &&
-                !patch.get("content").equals(mapper.valueToTree(metadataDocument).get("content"));
+                !patch.get("content").equals(mapper.valueToTree(metadataDocument.getContent()));
 
         T patchedMetadata = jsonPatcher.merge(patch, metadataDocument);
         T doc = metadataCrudService.save(patchedMetadata);

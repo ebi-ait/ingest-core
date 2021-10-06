@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.core.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.patch.JsonPatcher;
 import org.humancellatlas.ingest.patch.PatchService;
 import org.humancellatlas.ingest.project.Project;
@@ -147,5 +148,36 @@ public class MetadataUpdateServiceTest {
         assertThat(updatedProject).isEqualTo(project);
         verify(metadataCrudService).save(project);
         verify(validationStateChangeService, never()).changeValidationState(project.getType(), project.getId(), ValidationState.DRAFT);
+    }
+
+    @Test
+    public void testUpdateProjectWithSupplementaryFileShouldNotThrowRecursionError() {
+        //given:
+        ObjectMapper mapper = new ObjectMapper();
+
+        ObjectNode content = mapper.createObjectNode();
+        ObjectNode projectCore0 = content.putObject("project_core");
+        projectCore0.put("project_title", "Project with supplementary file");
+
+        Project project = new Project(content);
+        File file = new File();
+        file.setProject(project);
+        project.getSupplementaryFiles().add(file);
+
+        ObjectNode patch = mapper.createObjectNode();
+        ObjectNode newContent = patch.putObject("content");
+        ObjectNode projectCore = newContent.putObject("project_core");
+        projectCore.put("project_title", "Update a project with supplementary file");
+
+        when(metadataCrudService.save(any())).thenReturn(project);
+        when(jsonPatcher.merge(any(ObjectNode.class), any())).thenReturn(project);
+
+        //when:
+        Project updatedProject = service.update(project, patch);
+
+        //then:
+        assertThat(updatedProject).isEqualTo(project);
+        verify(metadataCrudService).save(project);
+        verify(validationStateChangeService).changeValidationState(project.getType(), project.getId(), ValidationState.DRAFT);
     }
 }
