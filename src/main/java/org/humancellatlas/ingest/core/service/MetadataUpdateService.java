@@ -12,6 +12,8 @@ import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @AllArgsConstructor
 @Service
 public class MetadataUpdateService {
@@ -25,11 +27,12 @@ public class MetadataUpdateService {
     public <T extends MetadataDocument> T update(T metadataDocument, ObjectNode patch) {
         ObjectMapper mapper = new ObjectMapper();
 
-        Boolean contentChanged = patch.get("content") != null &&
-                !patch.get("content").equals(mapper.valueToTree(metadataDocument.getContent()));
-
         T patchedMetadata = jsonPatcher.merge(patch, metadataDocument);
         T doc = metadataCrudService.save(patchedMetadata);
+
+        Boolean contentChanged = Optional.ofNullable(patch.get("content"))
+                .map(content -> !content.equals(mapper.valueToTree(metadataDocument.getContent())))
+                .orElse(false);
 
         if (contentChanged) {
             validationStateChangeService.changeValidationState(doc.getType(), doc.getId(), ValidationState.DRAFT);
