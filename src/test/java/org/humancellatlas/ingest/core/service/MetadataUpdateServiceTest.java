@@ -42,8 +42,6 @@ public class MetadataUpdateServiceTest {
     @MockBean
     private ValidationStateChangeService validationStateChangeService;
 
-    private ObjectMapper mapper = new ObjectMapper();
-
     @Test
     public void testUpdateShouldSaveAndReturnUpdatedMetadata() {
         //given:
@@ -150,6 +148,7 @@ public class MetadataUpdateServiceTest {
     }
 
     private ObjectNode createProjectMetadataWithTitle(String title) {
+        ObjectMapper mapper = new ObjectMapper();
         ObjectNode content = mapper.createObjectNode();
         ObjectNode projectCore0 = content.putObject("project_core");
         projectCore0.put("project_title", title);
