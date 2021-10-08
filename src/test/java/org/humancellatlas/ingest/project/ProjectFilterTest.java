@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.project;
 
+import org.humancellatlas.ingest.ProjectJson;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
@@ -407,9 +408,8 @@ class ProjectFilterTest {
     }
 
     private static Project makeProject(String title) {
-        Map<String, Map<String, String>> content = Map.of("project_core",
-                Map.of("project_title", title));
-        Project project = new Project(content);
+        Map<String, Object> projectJson = ProjectJson.fromTitle(title).toMap();
+        Project project = new Project(projectJson.get("content"));
         project.setIsUpdate(false);
         project.setPrimaryWrangler("wrangler_" + title);
         project.setWranglingState(WranglingState.NEW);
