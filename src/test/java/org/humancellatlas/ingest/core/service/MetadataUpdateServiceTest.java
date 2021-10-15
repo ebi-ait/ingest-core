@@ -1,7 +1,10 @@
 package org.humancellatlas.ingest.core.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.humancellatlas.ingest.ProjectJson;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.patch.JsonPatcher;
 import org.humancellatlas.ingest.patch.PatchService;
 import org.humancellatlas.ingest.project.Project;
@@ -43,18 +46,10 @@ public class MetadataUpdateServiceTest {
     @Test
     public void testUpdateShouldSaveAndReturnUpdatedMetadata() {
         //given:
-        ObjectMapper mapper = new ObjectMapper();
-
-        ObjectNode content = mapper.createObjectNode();
-        ObjectNode projectCore0 = content.putObject("project_core");
-        projectCore0.put("project_title", "Old Project Title");
-
+        JsonNode content = ProjectJson.fromTitle("Old Project Title").toObjectNode().get("content");
         Project project = new Project(content);
 
-        ObjectNode patch = mapper.createObjectNode();
-        ObjectNode newContent = patch.putObject("content");
-        ObjectNode projectCore = newContent.putObject("project_core");
-        projectCore.put("project_title", "New Project Title");
+        ObjectNode patch = ProjectJson.fromTitle("New Project Title").toObjectNode();
 
         when(metadataCrudService.save(any())).thenReturn(project);
         when(jsonPatcher.merge(any(ObjectNode.class), any())).thenReturn(project);
@@ -70,18 +65,10 @@ public class MetadataUpdateServiceTest {
     @Test
     public void testUpdateShouldSetStateToDraftWhenContentChanged() {
         //given:
-        ObjectMapper mapper = new ObjectMapper();
-
-        ObjectNode content = mapper.createObjectNode();
-        ObjectNode projectCore0 = content.putObject("project_core");
-        projectCore0.put("project_title", "Old Project Title");
-
+        JsonNode content = ProjectJson.fromTitle("Old Project Title").toObjectNode().get("content");
         Project project = new Project(content);
 
-        ObjectNode patch = mapper.createObjectNode();
-        ObjectNode newContent = patch.putObject("content");
-        ObjectNode projectCore = newContent.putObject("project_core");
-        projectCore.put("project_title", "New Project Title");
+        ObjectNode patch = ProjectJson.fromTitle("New Project Title").toObjectNode();
 
         when(metadataCrudService.save(any())).thenReturn(project);
         when(jsonPatcher.merge(any(ObjectNode.class), any())).thenReturn(project);
@@ -98,18 +85,10 @@ public class MetadataUpdateServiceTest {
     @Test
     public void testUpdateShouldNotSetStateWhenContentIsUnchanged() {
         //given:
-        ObjectMapper mapper = new ObjectMapper();
-
-        ObjectNode content = mapper.createObjectNode();
-        ObjectNode projectCore0 = content.putObject("project_core");
-        projectCore0.put("project_title", "Old Project Title");
-
+        JsonNode content = ProjectJson.fromTitle("Old Project Title").toObjectNode().get("content");
         Project project = new Project(content);
 
-        ObjectNode patch = mapper.createObjectNode();
-        ObjectNode newContent = patch.putObject("content");
-        ObjectNode projectCore = newContent.putObject("project_core");
-        projectCore.put("project_title", "Old Project Title");
+        ObjectNode patch = ProjectJson.fromTitle("Old Project Title").toObjectNode();
 
         when(metadataCrudService.save(any())).thenReturn(project);
         when(jsonPatcher.merge(any(ObjectNode.class), any())).thenReturn(project);
@@ -126,14 +105,10 @@ public class MetadataUpdateServiceTest {
     @Test
     public void testUpdateShouldNotSetStateWhenNoContent() {
         //given:
-        ObjectMapper mapper = new ObjectMapper();
-
-        ObjectNode content = mapper.createObjectNode();
-        ObjectNode projectCore0 = content.putObject("project_core");
-        projectCore0.put("project_title", "Old Project Title");
-
+        JsonNode content = ProjectJson.fromTitle("Old Project Title").toObjectNode().get("content");
         Project project = new Project(content);
 
+        ObjectMapper mapper = new ObjectMapper();
         ObjectNode patch = mapper.createObjectNode();
         patch.put("releaseDate", "2021-02-03T04:35:39.641Z");
 
@@ -148,4 +123,31 @@ public class MetadataUpdateServiceTest {
         verify(metadataCrudService).save(project);
         verify(validationStateChangeService, never()).changeValidationState(project.getType(), project.getId(), ValidationState.DRAFT);
     }
+
+    @Test
+    public void testUpdateProjectWithSupplementaryFileShouldNotThrowRecursionError() {
+        //given:
+        JsonNode content = ProjectJson.fromTitle("Project with supplementary file").toObjectNode().get("content");
+        Project project = new Project(content);
+
+        File supplementaryFile = new File();
+        supplementaryFile.setProject(project);
+        project.getSupplementaryFiles().add(supplementaryFile);
+
+        ObjectNode patch = ProjectJson.fromTitle("Updated project with supplementary file").toObjectNode();
+
+        when(metadataCrudService.save(any())).thenReturn(project);
+        when(jsonPatcher.merge(any(ObjectNode.class), any())).thenReturn(project);
+
+        //when:
+        Project updatedProject = service.update(project, patch);
+
+        //then:
+        assertThat(updatedProject).isEqualTo(project);
+        verify(metadataCrudService).save(project);
+        verify(validationStateChangeService).changeValidationState(project.getType(), project.getId(), ValidationState.DRAFT);
+    }
+
+
+
 }
