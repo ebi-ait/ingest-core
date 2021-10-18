@@ -20,6 +20,7 @@ public class SearchFilter {
     @Getter Integer minCellCount;
     @Getter Integer maxCellCount;
     @Getter DataAccessTypes dataAccess;
+    @Getter Integer release;
 
     @Builder.Default
     @Getter SearchType searchType = SearchType.AllKeywords;
