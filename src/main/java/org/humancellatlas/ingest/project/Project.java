@@ -83,6 +83,8 @@ public class Project extends MetadataDocument {
     @Setter
     private List<Object> publicationsInfo;
 
+    @Setter
+    private Integer release;
 
     @JsonCreator
     public Project(@JsonProperty("content") Object content) {
