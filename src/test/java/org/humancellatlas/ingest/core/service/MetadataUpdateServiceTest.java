@@ -15,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.mapping.context.PersistentEntities;
+import org.springframework.data.rest.webmvc.mapping.Associations;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,7 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {MetadataUpdateService.class})
+@SpringBootTest(classes = {MetadataUpdateService.class, JsonPatcher.class, ObjectMapper.class})
 public class MetadataUpdateServiceTest {
     @Autowired
     private MetadataUpdateService service;
@@ -33,15 +35,21 @@ public class MetadataUpdateServiceTest {
     @MockBean
     private MetadataCrudService metadataCrudService;
 
-    @MockBean
+    @Autowired
     private JsonPatcher jsonPatcher;
+
 
     @MockBean
     private PatchService patchService;
 
-
     @MockBean
     private ValidationStateChangeService validationStateChangeService;
+
+    @MockBean
+    PersistentEntities persistentEntities;
+
+    @MockBean
+    private Associations associations;
 
     @Test
     public void testUpdateShouldSaveAndReturnUpdatedMetadata() {
@@ -52,7 +60,6 @@ public class MetadataUpdateServiceTest {
         ObjectNode patch = ProjectJson.fromTitle("New Project Title").toObjectNode();
 
         when(metadataCrudService.save(any())).thenReturn(project);
-        when(jsonPatcher.merge(any(ObjectNode.class), any())).thenReturn(project);
 
         //when:
         Project updatedProject = service.update(project, patch);
@@ -71,7 +78,6 @@ public class MetadataUpdateServiceTest {
         ObjectNode patch = ProjectJson.fromTitle("New Project Title").toObjectNode();
 
         when(metadataCrudService.save(any())).thenReturn(project);
-        when(jsonPatcher.merge(any(ObjectNode.class), any())).thenReturn(project);
 
         //when:
         Project updatedProject = service.update(project, patch);
@@ -91,7 +97,6 @@ public class MetadataUpdateServiceTest {
         ObjectNode patch = ProjectJson.fromTitle("Old Project Title").toObjectNode();
 
         when(metadataCrudService.save(any())).thenReturn(project);
-        when(jsonPatcher.merge(any(ObjectNode.class), any())).thenReturn(project);
 
         //when:
         Project updatedProject = service.update(project, patch);
@@ -110,10 +115,9 @@ public class MetadataUpdateServiceTest {
 
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode patch = mapper.createObjectNode();
-        patch.put("releaseDate", "2021-02-03T04:35:39.641Z");
+        patch.put("isInCatalogue", false);
 
         when(metadataCrudService.save(any())).thenReturn(project);
-        when(jsonPatcher.merge(any(ObjectNode.class), any())).thenReturn(project);
 
         //when:
         Project updatedProject = service.update(project, patch);
@@ -137,7 +141,6 @@ public class MetadataUpdateServiceTest {
         ObjectNode patch = ProjectJson.fromTitle("Updated project with supplementary file").toObjectNode();
 
         when(metadataCrudService.save(any())).thenReturn(project);
-        when(jsonPatcher.merge(any(ObjectNode.class), any())).thenReturn(project);
 
         //when:
         Project updatedProject = service.update(project, patch);
@@ -147,7 +150,6 @@ public class MetadataUpdateServiceTest {
         verify(metadataCrudService).save(project);
         verify(validationStateChangeService).changeValidationState(project.getType(), project.getId(), ValidationState.DRAFT);
     }
-
 
 
 }
