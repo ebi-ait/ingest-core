@@ -55,9 +55,6 @@ public class ProjectServiceTest {
     private ProjectService projectService;
 
     @MockBean
-    private MongoTemplate mongoTemplate;
-
-    @MockBean
     private SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
     @MockBean

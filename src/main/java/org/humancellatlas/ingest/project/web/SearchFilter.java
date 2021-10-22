@@ -19,8 +19,8 @@ public class SearchFilter {
     @Getter String organOntology;
     @Getter Integer minCellCount;
     @Getter Integer maxCellCount;
-    @Getter DataAccessTypes dataAccess;
     @Getter Integer release;
+    @Getter DataAccessTypes dataAccess;
 
     @Builder.Default
     @Getter SearchType searchType = SearchType.AllKeywords;
