@@ -27,12 +27,12 @@ public class MetadataUpdateService {
     public <T extends MetadataDocument> T update(T metadataDocument, ObjectNode patch) {
         ObjectMapper mapper = new ObjectMapper();
 
-        T patchedMetadata = jsonPatcher.merge(patch, metadataDocument);
-        T doc = metadataCrudService.save(patchedMetadata);
-
         Boolean contentChanged = Optional.ofNullable(patch.get("content"))
                 .map(content -> !content.equals(mapper.valueToTree(metadataDocument.getContent())))
                 .orElse(false);
+
+        T patchedMetadata = jsonPatcher.merge(patch, metadataDocument);
+        T doc = metadataCrudService.save(patchedMetadata);
 
         if (contentChanged) {
             validationStateChangeService.changeValidationState(doc.getType(), doc.getId(), ValidationState.DRAFT);
