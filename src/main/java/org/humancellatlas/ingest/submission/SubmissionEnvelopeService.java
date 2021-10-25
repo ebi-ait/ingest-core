@@ -13,6 +13,7 @@ import org.humancellatlas.ingest.patch.PatchRepository;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
+import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
@@ -98,6 +99,18 @@ public class SubmissionEnvelopeService {
                     envelope.getId(), envelope.getSubmissionState(), state));
         } else {
             messageRouter.routeStateTrackingUpdateMessageForEnvelopeEvent(envelope, state);
+        }
+    }
+
+    public void handleGraphValidationStateUpdateRequest(SubmissionEnvelope envelope,
+                                                        SubmissionGraphValidationState state) {
+        if (!envelope.allowedGraphValidationStateTransitions().contains(state)) {
+            throw new RuntimeException(String.format(
+                    "Envelope with id %s cannot be transitioned from graphValidationState %s to graphValidationState %s",
+                    envelope.getId(), envelope.getGraphValidationState(), state));
+        } else {
+            envelope.enactGraphValidationStateTransition(state);
+            submissionEnvelopeRepository.save(envelope);
         }
     }
 
