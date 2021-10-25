@@ -19,6 +19,7 @@ import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.protocol.ProtocolService;
+import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
 import org.humancellatlas.ingest.state.ValidationState;
@@ -307,6 +308,34 @@ public class SubmissionController {
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_COMPLETE_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactCompleteEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelope.enactStateTransition(SubmissionState.COMPLETE);
+        getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_GRAPH_PENDING_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactGraphPending(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        submissionEnvelope.enactGraphValidationStateTransition(SubmissionGraphValidationState.PENDING);
+        getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_GRAPH_VALIDATING_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactGraphValidating(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        submissionEnvelope.enactGraphValidationStateTransition(SubmissionGraphValidationState.VALIDATING);
+        getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_GRAPH_VALID_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactGraphValid(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        submissionEnvelope.enactGraphValidationStateTransition(SubmissionGraphValidationState.VALID);
+        getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_GRAPH_INVALID_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactGraphInvalid(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        submissionEnvelope.enactGraphValidationStateTransition(SubmissionGraphValidationState.INVALID);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }

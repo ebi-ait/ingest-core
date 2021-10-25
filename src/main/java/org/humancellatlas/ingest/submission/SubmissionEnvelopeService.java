@@ -92,7 +92,7 @@ public class SubmissionEnvelopeService {
 
     public void handleEnvelopeStateUpdateRequest(SubmissionEnvelope envelope,
                                                  SubmissionState state) {
-        if (!envelope.allowedStateTransitions().contains(state)) {
+        if (!envelope.allowedSubmissionStateTransitions().contains(state)) {
             throw new StateTransitionNotAllowed(String.format(
                     "Envelope with id %s cannot be transitioned from state %s to state %s",
                     envelope.getId(), envelope.getSubmissionState(), state));

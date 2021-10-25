@@ -66,6 +66,14 @@ public class Links {
     public static final String COMMIT_CLEANUP_URL = "/commitCleanupEvent";
     public static final String COMMIT_COMPLETE_REL = "commitComplete";
     public static final String COMMIT_COMPLETE_URL = "/commitCompleteEvent";
+    public static final String COMMIT_GRAPH_PENDING_REL = "commitGraphPending";
+    public static final String COMMIT_GRAPH_PENDING_URL = "/commitGraphPendingEvent";
+    public static final String COMMIT_GRAPH_VALIDATING_REL = "commitGraphValidating";
+    public static final String COMMIT_GRAPH_VALIDATING_URL = "/commitGraphValidatingEvent";
+    public static final String COMMIT_GRAPH_VALID_REL = "commitGraphValid";
+    public static final String COMMIT_GRAPH_VALID_URL = "/commitGraphValidEvent";
+    public static final String COMMIT_GRAPH_INVALID_REL = "commitGraphInvalid";
+    public static final String COMMIT_GRAPH_INVALID_URL = "/commitGraphInvalidEvent";
 
 
     // Links to entities for submission envelopes
