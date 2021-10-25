@@ -80,6 +80,13 @@ public class SubmissionEnvelopeService {
     private SubmissionErrorRepository submissionErrorRepository;
 
     public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
+        if(envelope.getGraphValidationState() != SubmissionGraphValidationState.VALID) {
+            throw new RuntimeException((String.format(
+                    "Envelope with id %s cannot be submitted without a valid graphValidationState",
+                    envelope.getId()
+            )));
+        }
+
         if (isSubmitAction(submitActions)) {
             envelope.setSubmitActions(new HashSet<>(submitActions));
             submissionEnvelopeRepository.save(envelope);
@@ -115,13 +122,6 @@ public class SubmissionEnvelopeService {
     }
 
     public void handleCommitSubmit(SubmissionEnvelope envelope) {
-        if(envelope.getGraphValidationState() != SubmissionGraphValidationState.VALID) {
-            throw new RuntimeException((String.format(
-                    "Envelope with id %s cannot be submitted without a valid graphValidationState",
-                    envelope.getId()
-            )));
-        }
-        
         Set<SubmitAction> submitActions = envelope.getSubmitActions();
         if (submitActions.contains(SubmitAction.ARCHIVE)) {
             archiveSubmission(envelope);

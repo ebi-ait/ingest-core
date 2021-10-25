@@ -39,6 +39,7 @@ public class SubmissionEnvelope extends AbstractEntity {
     public SubmissionEnvelope() {
         super(EntityType.SUBMISSION);
         this.submissionState = SubmissionState.PENDING;
+        this.graphValidationState = SubmissionGraphValidationState.PENDING;
         this.triggersAnalysis = true;
         this.isUpdate = false;
         this.submitActions = new HashSet<>();
