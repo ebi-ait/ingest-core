@@ -19,7 +19,7 @@ public class SearchFilter {
     @Getter String organOntology;
     @Getter Integer minCellCount;
     @Getter Integer maxCellCount;
-    @Getter Integer release;
+    @Getter Integer dcpReleaseNumber;
     @Getter DataAccessTypes dataAccess;
 
     @Builder.Default

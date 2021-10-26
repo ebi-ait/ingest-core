@@ -394,10 +394,10 @@ class ProjectFilterTest {
     void filter_by_release() {
         //given
         Project project4 = makeProject("project4");
-        project4.setRelease(11);
+        project4.setDcpReleaseNumber(11);
         this.mongoTemplate.save(project4);
         //when
-        SearchFilter searchFilter = SearchFilter.builder().release(11).build();
+        SearchFilter searchFilter = SearchFilter.builder().dcpReleaseNumber(11).build();
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
@@ -438,7 +438,7 @@ class ProjectFilterTest {
         project.setUuid(Uuid.newUuid());
         project.setCellCount(100);
         project.setWranglingPriority(1);
-        project.setRelease(1);
+        project.setDcpReleaseNumber(1);
         return project;
     }
 
