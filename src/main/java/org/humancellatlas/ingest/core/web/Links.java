@@ -67,6 +67,15 @@ public class Links {
     public static final String COMMIT_COMPLETE_REL = "commitComplete";
     public static final String COMMIT_COMPLETE_URL = "/commitCompleteEvent";
 
+    // Links to request to change to graph validation state of an envelope
+    public static final String GRAPH_PENDING_REL = "graphPending";
+    public static final String GRAPH_PENDING_URL = "/graphPendingEvent";
+    public static final String GRAPH_VALIDATING_REL = "graphValidating";
+    public static final String GRAPH_VALIDATING_URL = "/graphValidatingEvent";
+    public static final String GRAPH_VALID_REL = "graphValid";
+    public static final String GRAPH_VALID_URL = "/graphValidEvent";
+    public static final String GRAPH_INVALID_REL = "graphInvalid";
+    public static final String GRAPH_INVALID_URL = "/graphInvalidEvent";
 
     // Links to entities for submission envelopes
     public static final String BIOMATERIALS_URL = "/biomaterials";

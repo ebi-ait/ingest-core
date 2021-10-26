@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.protocol.ProtocolService;
+import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
@@ -26,7 +27,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.humancellatlas.ingest.state.SubmissionState.SUBMITTED;
+import static org.humancellatlas.ingest.state.SubmissionState.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -113,6 +114,28 @@ public class SubmissionControllerTest {
         //then:
         assertThat(response).isNotNull();
         verify(submissionEnvelopeService).deleteSubmission(submissionEnvelope, true);
+    }
+
+    @Test
+    public void testDraftStateTransition() {
+        //given:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        submissionEnvelope.enactGraphValidationStateTransition(SubmissionGraphValidationState.VALID);
+        assertThat(submissionEnvelope.getGraphValidationState()).isEqualTo(SubmissionGraphValidationState.VALID);
+
+        //and:
+        PersistentEntityResourceAssembler resourceAssembler =
+                mock(PersistentEntityResourceAssembler.class);
+
+        // When:
+        HttpEntity<?> response = controller.enactDraftEnvelope(submissionEnvelope,
+                resourceAssembler);
+
+        //then:
+        assertThat(response).isNotNull();
+        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(DRAFT);
+        assertThat(submissionEnvelope.getGraphValidationState()).isEqualTo(SubmissionGraphValidationState.PENDING);
+        verify(submissionEnvelopeRepository).save(submissionEnvelope);
     }
     @Configuration
     static class TestConfiguration {}
