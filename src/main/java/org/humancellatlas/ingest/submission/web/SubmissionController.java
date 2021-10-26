@@ -334,8 +334,13 @@ public class SubmissionController {
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_INVALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> graphInvalidRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        return this.performGraphRequest(SubmissionGraphValidationState.INVALID, submissionEnvelope, resourceAssembler);
+    HttpEntity<?> graphInvalidRequest(
+            @PathVariable("id") SubmissionEnvelope submissionEnvelope,
+            @RequestBody() String validationErrors,
+            final PersistentEntityResourceAssembler resourceAssembler) {
+        HttpEntity<?> response = this.performGraphRequest(SubmissionGraphValidationState.INVALID, submissionEnvelope, resourceAssembler);
+        submissionEnvelope.setGraphValidationErrors(validationErrors);
+        return response;
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMISSION_DOCUMENTS_SM_URL, method = RequestMethod.GET)
