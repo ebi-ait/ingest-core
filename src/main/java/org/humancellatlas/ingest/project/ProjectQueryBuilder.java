@@ -23,7 +23,7 @@ public class ProjectQueryBuilder {
         addLTECriterionForAttribute(criteriaList, "cellCount", searchFilter.getMaxCellCount());
         addGTECriterionForAttribute(criteriaList, "cellCount", searchFilter.getMinCellCount());
         addInCriterionForAttribute(criteriaList, "identifyingOrganisms", searchFilter.getIdentifyingOrganism());
-        addInCriterionForAttribute(criteriaList, "release", searchFilter.getRelease());
+        addInCriterionForAttribute(criteriaList, "release", searchFilter.getDcpReleaseNumber());
 
         if(searchFilter.getDataAccess() != null){
             addIsCriterionForAttribute(criteriaList, "dataAccess.type", searchFilter.getDataAccess().getLabel());
