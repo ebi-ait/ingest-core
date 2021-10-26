@@ -130,20 +130,16 @@ public class SubmissionEnvelope extends AbstractEntity {
     }
 
 
-    public SubmissionEnvelope enactStateTransition(SubmissionState targetState) {
+    public void enactStateTransition(SubmissionState targetState) {
         if (this.submissionState != targetState) {
             this.submissionState = targetState;
         }
-
-        return this;
     }
 
-    public SubmissionEnvelope enactGraphValidationStateTransition(SubmissionGraphValidationState targetState) {
+    public void enactGraphValidationStateTransition(SubmissionGraphValidationState targetState) {
         if (this.graphValidationState != targetState) {
             this.graphValidationState = targetState;
         }
-
-        return this;
     }
 
     public boolean isOpen() {
