@@ -114,6 +114,7 @@ public class SubmissionEnvelope extends AbstractEntity {
                 allowedStates.add(SubmissionGraphValidationState.VALIDATING);
                 break;
             case VALIDATING:
+                allowedStates.add(SubmissionGraphValidationState.PENDING);
                 allowedStates.add(SubmissionGraphValidationState.VALID);
                 allowedStates.add(SubmissionGraphValidationState.INVALID);
                 break;
