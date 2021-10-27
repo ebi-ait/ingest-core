@@ -336,10 +336,10 @@ public class SubmissionController {
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_INVALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> graphInvalidRequest(
             @PathVariable("id") SubmissionEnvelope submissionEnvelope,
-            @RequestBody() String validationErrors,
+            @RequestBody() String validationError,
             final PersistentEntityResourceAssembler resourceAssembler) {
         HttpEntity<?> response = this.performGraphRequest(SubmissionGraphValidationState.INVALID, submissionEnvelope, resourceAssembler);
-        submissionEnvelope.setGraphValidationErrorMessage(validationErrors);
+        submissionEnvelope.setGraphValidationErrorMessage(validationError);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return response;
     }
