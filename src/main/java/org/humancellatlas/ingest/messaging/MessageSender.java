@@ -79,7 +79,8 @@ public class MessageSender {
                 MessageBuffer.EXPORT,
                 MessageBuffer.UPLOAD_MANAGER,
                 MessageBuffer.VALIDATION,
-                MessageBuffer.STATE_TRACKING);
+                MessageBuffer.STATE_TRACKING,
+                MessageBuffer.GRAPH_VALIDATION);
 
         amqpMessageBuffers
                 .forEach(buffer -> scheduler.scheduleWithFixedDelay(new AmqpHttpMixinBufferSender(buffer, new RestTemplate(), rabbitMessagingTemplate),
@@ -155,10 +156,7 @@ public class MessageSender {
         //TODO each enum should already know exchange and routing key
         //Why are these part of the contract when they're already defined in Constants?
         void queueAmqpMessage(String exchange, String routingKey, Object payload, long intendedStartTime) {
-            System.out.println(payload);
-            System.out.println(exchange);
-            System.out.println(routingKey);
-            QueuedMessage message = new QueuedMessage(exchange, routingKey, "hi", intendedStartTime + delayMillis);
+            QueuedMessage message = new QueuedMessage(exchange, routingKey, payload, intendedStartTime + delayMillis);
             try {
                 messageQueue.add(message);
             } catch (IllegalStateException e) {
