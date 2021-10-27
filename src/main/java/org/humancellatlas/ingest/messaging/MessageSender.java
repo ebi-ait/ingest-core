@@ -46,6 +46,11 @@ public class MessageSender {
         MessageBuffer.VALIDATION.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
 
+    public void queueGraphValidationMessage(String exchange, String routingKey, Object payload,
+                                               long intendedSendTime) {
+        MessageBuffer.GRAPH_VALIDATION.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
+    }
+
     public void queueNewExportMessage(String exchange, String routingKey, Object payload, long intendedSendTime){
         MessageBuffer.EXPORT.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
@@ -129,7 +134,8 @@ public class MessageSender {
         EXPORT(SECONDS.toMillis(5)),
         UPLOAD_MANAGER(SECONDS.toMillis(1)),
         ACCESSIONER(SECONDS.toMillis(2)),
-        STATE_TRACKING(500L);
+        STATE_TRACKING(500L),
+        GRAPH_VALIDATION(SECONDS.toMillis(5));
 
         @Getter
         private final Long delayMillis;
@@ -149,7 +155,10 @@ public class MessageSender {
         //TODO each enum should already know exchange and routing key
         //Why are these part of the contract when they're already defined in Constants?
         void queueAmqpMessage(String exchange, String routingKey, Object payload, long intendedStartTime) {
-            QueuedMessage message = new QueuedMessage(exchange, routingKey, payload, intendedStartTime + delayMillis);
+            System.out.println(payload);
+            System.out.println(exchange);
+            System.out.println(routingKey);
+            QueuedMessage message = new QueuedMessage(exchange, routingKey, "hi", intendedStartTime + delayMillis);
             try {
                 messageQueue.add(message);
             } catch (IllegalStateException e) {
