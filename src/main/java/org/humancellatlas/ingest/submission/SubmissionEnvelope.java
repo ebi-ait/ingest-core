@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.EntityType;
+import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
 import org.slf4j.Logger;
@@ -27,6 +28,9 @@ public class SubmissionEnvelope extends AbstractEntity {
     private @Setter
     StagingDetails stagingDetails;
     private SubmissionState submissionState;
+    private SubmissionGraphValidationState graphValidationState;
+    private @Setter
+    String graphValidationErrorMessage;
     private @Setter
     Boolean triggersAnalysis;
     private @Setter
@@ -37,6 +41,7 @@ public class SubmissionEnvelope extends AbstractEntity {
     public SubmissionEnvelope() {
         super(EntityType.SUBMISSION);
         this.submissionState = SubmissionState.PENDING;
+        this.graphValidationState = SubmissionGraphValidationState.PENDING;
         this.triggersAnalysis = true;
         this.isUpdate = false;
         this.submitActions = new HashSet<>();
@@ -51,7 +56,7 @@ public class SubmissionEnvelope extends AbstractEntity {
         return log;
     }
 
-    public static List<SubmissionState> allowedStateTransitions(SubmissionState fromState) {
+    public static List<SubmissionState> allowedSubmissionStateTransitions(SubmissionState fromState) {
         List<SubmissionState> allowedStates = new ArrayList<>();
         switch (fromState) {
             case PENDING:
@@ -98,17 +103,47 @@ public class SubmissionEnvelope extends AbstractEntity {
         return allowedStates;
     }
 
-    public List<SubmissionState> allowedStateTransitions() {
-        return allowedStateTransitions(getSubmissionState());
+    public List<SubmissionState> allowedSubmissionStateTransitions() {
+        return allowedSubmissionStateTransitions(getSubmissionState());
+    }
+
+    public static List<SubmissionGraphValidationState> allowedGraphValidationStateTransitions(SubmissionGraphValidationState fromState) {
+        List<SubmissionGraphValidationState> allowedStates = new ArrayList<>();
+        switch (fromState) {
+            case PENDING:
+                allowedStates.add(SubmissionGraphValidationState.VALIDATING);
+                break;
+            case VALIDATING:
+                allowedStates.add(SubmissionGraphValidationState.PENDING);
+                allowedStates.add(SubmissionGraphValidationState.VALID);
+                allowedStates.add(SubmissionGraphValidationState.INVALID);
+                break;
+            case VALID:
+            case INVALID:
+                allowedStates.add(SubmissionGraphValidationState.PENDING);
+                break;
+            default:
+                break;
+        }
+        return allowedStates;
+    }
+
+    public List<SubmissionGraphValidationState> allowedGraphValidationStateTransitions() {
+        return allowedGraphValidationStateTransitions(getGraphValidationState());
     }
 
 
-    public SubmissionEnvelope enactStateTransition(SubmissionState targetState) {
+    public void enactStateTransition(SubmissionState targetState) {
         if (this.submissionState != targetState) {
             this.submissionState = targetState;
         }
+    }
 
-        return this;
+    public void enactGraphValidationStateTransition(SubmissionGraphValidationState targetState) {
+        if (this.graphValidationState != targetState) {
+            this.graphValidationState = targetState;
+            this.graphValidationErrorMessage = "";
+        }
     }
 
     public boolean isOpen() {

@@ -259,7 +259,7 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
 
 
         // add subresource links for allowed state transition requests
-        submissionEnvelope.allowedStateTransitions().stream()
+        submissionEnvelope.allowedSubmissionStateTransitions().stream()
                 .map(submissionState -> getStateTransitionLink(submissionEnvelope, submissionState))
                 .filter(Optional::isPresent)
                 .map(Optional::get)

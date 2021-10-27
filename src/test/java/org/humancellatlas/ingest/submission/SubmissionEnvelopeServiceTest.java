@@ -17,6 +17,9 @@ import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
+import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
+import org.humancellatlas.ingest.state.SubmissionState;
+import org.humancellatlas.ingest.state.SubmitAction;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +36,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -193,5 +199,36 @@ public class SubmissionEnvelopeServiceTest {
         assertThat(project.getSupplementaryFiles()).isEmpty();
         verify(projectRepository, atLeastOnce()).save(project);
         verify(submissionEnvelopeRepository).delete(submissionEnvelope);
+    }
+
+    @Test
+    public void testSubmissionBlocked() {
+        //given:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        submissionEnvelope.enactStateTransition(SubmissionState.VALID);
+        assertThat(submissionEnvelope.getGraphValidationState()).isEqualTo(SubmissionGraphValidationState.PENDING);
+
+        //when
+        Throwable exception = assertThrows(RuntimeException.class,
+                () -> service.handleSubmitRequest(submissionEnvelope, List.of(SubmitAction.EXPORT))
+        );
+
+        // then:
+        assertThat(exception.getMessage()).contains("without a valid graphValidationState");
+        verify(submissionEnvelopeRepository, never()).save(submissionEnvelope);
+    }
+
+    @Test
+    public void testSubmissionUnblocked() {
+        //given:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        submissionEnvelope.enactStateTransition(SubmissionState.VALID);
+        submissionEnvelope.enactGraphValidationStateTransition(SubmissionGraphValidationState.VALID);
+
+        //when
+        service.handleSubmitRequest(submissionEnvelope, List.of(SubmitAction.EXPORT));
+
+        // then:
+        verify(submissionEnvelopeRepository).save(submissionEnvelope);
     }
 }
