@@ -30,6 +30,8 @@ public class SubmissionEnvelope extends AbstractEntity {
     private SubmissionState submissionState;
     private SubmissionGraphValidationState graphValidationState;
     private @Setter
+    String graphValidationErrorMessage;
+    private @Setter
     Boolean triggersAnalysis;
     private @Setter
     Boolean isUpdate;
@@ -112,6 +114,7 @@ public class SubmissionEnvelope extends AbstractEntity {
                 allowedStates.add(SubmissionGraphValidationState.VALIDATING);
                 break;
             case VALIDATING:
+                allowedStates.add(SubmissionGraphValidationState.PENDING);
                 allowedStates.add(SubmissionGraphValidationState.VALID);
                 allowedStates.add(SubmissionGraphValidationState.INVALID);
                 break;
@@ -139,6 +142,7 @@ public class SubmissionEnvelope extends AbstractEntity {
     public void enactGraphValidationStateTransition(SubmissionGraphValidationState targetState) {
         if (this.graphValidationState != targetState) {
             this.graphValidationState = targetState;
+            this.graphValidationErrorMessage = "";
         }
     }
 
