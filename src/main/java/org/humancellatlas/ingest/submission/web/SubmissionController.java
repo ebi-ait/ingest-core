@@ -339,7 +339,7 @@ public class SubmissionController {
             @RequestBody() String validationErrors,
             final PersistentEntityResourceAssembler resourceAssembler) {
         HttpEntity<?> response = this.performGraphRequest(SubmissionGraphValidationState.INVALID, submissionEnvelope, resourceAssembler);
-        submissionEnvelope.setGraphValidationErrors(validationErrors);
+        submissionEnvelope.setGraphValidationErrorMessage(validationErrors);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return response;
     }

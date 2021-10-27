@@ -30,7 +30,7 @@ public class SubmissionEnvelope extends AbstractEntity {
     private SubmissionState submissionState;
     private SubmissionGraphValidationState graphValidationState;
     private @Setter
-    String graphValidationErrors;
+    String graphValidationErrorMessage;
     private @Setter
     Boolean triggersAnalysis;
     private @Setter
@@ -141,7 +141,7 @@ public class SubmissionEnvelope extends AbstractEntity {
     public void enactGraphValidationStateTransition(SubmissionGraphValidationState targetState) {
         if (this.graphValidationState != targetState) {
             this.graphValidationState = targetState;
-            this.graphValidationErrors = "";
+            this.graphValidationErrorMessage = "";
         }
     }
 
