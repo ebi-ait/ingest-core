@@ -53,7 +53,7 @@ public class MessageRouter {
     public boolean routeGraphValidationMessageFor(SubmissionEnvelope envelope) {
         if (envelope.getGraphValidationState().equals(SubmissionGraphValidationState.PENDING)) {
             this.messageSender.queueGraphValidationMessage(
-                    Constants.Exchanges.GRAPH_VALIDATION_EXCHANGE,
+                    Constants.Exchanges.VALIDATION_EXCHANGE,
                     Constants.Queues.GRAPH_VALIDATION_QUEUE,
                     messageFor(envelope),
                     System.currentTimeMillis()

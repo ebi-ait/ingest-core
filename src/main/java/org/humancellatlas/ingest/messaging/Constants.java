@@ -11,7 +11,6 @@ public class Constants {
 
     public class Exchanges {
         public static final String VALIDATION_EXCHANGE = "ingest.validation.exchange";
-        public static final String GRAPH_VALIDATION_EXCHANGE = "ingest.validation.graph.exchange";
         public static final String FILE_STAGED_EXCHANGE = "ingest.file.staged.exchange";
         public static final String STATE_TRACKING_EXCHANGE = "ingest.state-tracking.exchange";
         public static final String EXPORTER_EXCHANGE = "ingest.exporter.exchange";
