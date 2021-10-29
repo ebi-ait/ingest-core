@@ -6,6 +6,7 @@ public class Constants {
         public static final String FILE_VALIDATION_QUEUE = "ingest.file.validation.queue";
         public static final String METADATA_VALIDATION_QUEUE = "ingest.metadata.validation.queue";
         public static final String NOTIFICATIONS_QUEUE = "ingest.notifications.queue";
+        public static final String GRAPH_VALIDATION_QUEUE = "ingest.validation.graph.queue";
     }
 
     public class Exchanges {

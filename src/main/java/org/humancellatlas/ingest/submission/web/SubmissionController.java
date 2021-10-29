@@ -11,6 +11,7 @@ import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.exporter.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
@@ -72,6 +73,8 @@ public class SubmissionController {
     private final @NonNull ProcessRepository processRepository;
     private final @NonNull BundleManifestRepository bundleManifestRepository;
     private final @NonNull SubmissionManifestRepository submissionManifestRepository;
+
+    private final MessageRouter messageRouter;
 
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
     private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
@@ -342,6 +345,13 @@ public class SubmissionController {
         submissionEnvelope.setGraphValidationErrorMessage(validationError);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return response;
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}/validateGraph", method = RequestMethod.POST)
+    HttpEntity<?> requestGraphValidation(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
+                                         final PersistentEntityResourceAssembler resourceAssembler) {
+        messageRouter.routeGraphValidationMessageFor(submissionEnvelope);
+        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMISSION_DOCUMENTS_SM_URL, method = RequestMethod.GET)

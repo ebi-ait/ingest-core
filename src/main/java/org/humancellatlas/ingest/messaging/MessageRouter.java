@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.exporter.ExperimentProcess;
 import org.humancellatlas.ingest.messaging.model.*;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -46,6 +47,20 @@ public class MessageRouter {
         } else {
             return false;
         }
+    }
+
+    /* messages to graph validator */
+    public boolean routeGraphValidationMessageFor(SubmissionEnvelope envelope) {
+        if (envelope.getGraphValidationState().equals(SubmissionGraphValidationState.PENDING)) {
+            this.messageSender.queueGraphValidationMessage(
+                    Constants.Exchanges.VALIDATION_EXCHANGE,
+                    Constants.Queues.GRAPH_VALIDATION_QUEUE,
+                    messageFor(envelope),
+                    System.currentTimeMillis()
+            );
+            return true;
+        }
+        return false;
     }
 
     /* messages to state tracker */

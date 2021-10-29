@@ -41,6 +41,9 @@ public class QueueConfig implements RabbitListenerConfigurer {
     }
 
     @Bean
+    Queue queueGraphValidation() { return new Queue(Constants.Queues.GRAPH_VALIDATION_QUEUE); }
+
+    @Bean
     TopicExchange stateTrackingExchange() {
         return new TopicExchange(Constants.Exchanges.STATE_TRACKING_EXCHANGE);
     }
@@ -76,6 +79,11 @@ public class QueueConfig implements RabbitListenerConfigurer {
     @Bean
     Binding bindingValidation(Queue queueMetadataValidation, DirectExchange validationExchange) {
         return BindingBuilder.bind(queueMetadataValidation).to(validationExchange).with(Constants.Queues.METADATA_VALIDATION_QUEUE);
+    }
+
+    @Bean
+    Binding bindingGraphValidation(Queue queueGraphValidation, DirectExchange validationExchange) {
+        return BindingBuilder.bind(queueGraphValidation).to(validationExchange).with(Constants.Queues.GRAPH_VALIDATION_QUEUE);
     }
     
     @Bean

@@ -4,6 +4,7 @@ import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.exporter.Exporter;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.project.ProjectRepository;
@@ -68,6 +69,8 @@ public class SubmissionControllerTest {
     private PagedResourcesAssembler pagedResourcesAssembler;
     @MockBean
     private SubmissionStateMachineService submissionStateMachineService;
+    @MockBean
+    private MessageRouter messageRouter;
 
     @Test
     public void testEnactSubmitEnvelope() {
