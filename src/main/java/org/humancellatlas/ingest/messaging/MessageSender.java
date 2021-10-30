@@ -46,6 +46,11 @@ public class MessageSender {
         MessageBuffer.VALIDATION.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
 
+    public void queueGraphValidationMessage(String exchange, String routingKey, Object payload,
+                                               long intendedSendTime) {
+        MessageBuffer.GRAPH_VALIDATION.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
+    }
+
     public void queueNewExportMessage(String exchange, String routingKey, Object payload, long intendedSendTime){
         MessageBuffer.EXPORT.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
@@ -74,7 +79,8 @@ public class MessageSender {
                 MessageBuffer.EXPORT,
                 MessageBuffer.UPLOAD_MANAGER,
                 MessageBuffer.VALIDATION,
-                MessageBuffer.STATE_TRACKING);
+                MessageBuffer.STATE_TRACKING,
+                MessageBuffer.GRAPH_VALIDATION);
 
         amqpMessageBuffers
                 .forEach(buffer -> scheduler.scheduleWithFixedDelay(new AmqpHttpMixinBufferSender(buffer, new RestTemplate(), rabbitMessagingTemplate),
@@ -129,7 +135,8 @@ public class MessageSender {
         EXPORT(SECONDS.toMillis(5)),
         UPLOAD_MANAGER(SECONDS.toMillis(1)),
         ACCESSIONER(SECONDS.toMillis(2)),
-        STATE_TRACKING(500L);
+        STATE_TRACKING(500L),
+        GRAPH_VALIDATION(SECONDS.toMillis(5));
 
         @Getter
         private final Long delayMillis;
