@@ -350,8 +350,9 @@ public class SubmissionController {
     @RequestMapping(path = "/submissionEnvelopes/{id}/validateGraph", method = RequestMethod.POST)
     HttpEntity<?> requestGraphValidation(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                          final PersistentEntityResourceAssembler resourceAssembler) {
+        HttpEntity<?> response = this.performGraphRequest(SubmissionGraphValidationState.REQUESTED, submissionEnvelope, resourceAssembler);
         messageRouter.routeGraphValidationMessageFor(submissionEnvelope);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+        return response;
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMISSION_DOCUMENTS_SM_URL, method = RequestMethod.GET)
