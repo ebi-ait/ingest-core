@@ -111,8 +111,11 @@ public class SubmissionEnvelope extends AbstractEntity {
         List<SubmissionGraphValidationState> allowedStates = new ArrayList<>();
         switch (fromState) {
             case PENDING:
-                allowedStates.add(SubmissionGraphValidationState.VALIDATING);
+                allowedStates.add(SubmissionGraphValidationState.REQUESTED);
                 break;
+            case REQUESTED:
+                allowedStates.add(SubmissionGraphValidationState.PENDING);
+                allowedStates.add(SubmissionGraphValidationState.VALIDATING);
             case VALIDATING:
                 allowedStates.add(SubmissionGraphValidationState.PENDING);
                 allowedStates.add(SubmissionGraphValidationState.VALID);
@@ -121,7 +124,7 @@ public class SubmissionEnvelope extends AbstractEntity {
             case VALID:
             case INVALID:
                 allowedStates.add(SubmissionGraphValidationState.PENDING);
-                allowedStates.add(SubmissionGraphValidationState.VALIDATING);
+                allowedStates.add(SubmissionGraphValidationState.REQUESTED);
                 break;
             default:
                 break;
