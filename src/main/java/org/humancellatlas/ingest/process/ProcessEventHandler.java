@@ -8,12 +8,13 @@ import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.*;
+import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
 import static org.humancellatlas.ingest.core.EntityType.PROCESS;
 
-@RepositoryEventHandler()
+@Component
 @RequiredArgsConstructor
 public class ProcessEventHandler {
 
