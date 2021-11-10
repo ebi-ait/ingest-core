@@ -21,12 +21,12 @@ public class BiomaterialEventHandler {
     private final @NonNull ValidationStateChangeService validationStateChangeService;
 
     @HandleAfterLinkDelete
-    public void handleInputProcessLinkingAfterDelete(Biomaterial biomaterial, Set<Process> processes) {
+    public void handleProcessLinkingAfterDelete(Biomaterial biomaterial, Set<Process> processes) {
         validationStateChangeService.changeValidationState(BIOMATERIAL, biomaterial.getId(), ValidationState.DRAFT);
     }
 
     @HandleAfterLinkSave
-    public void handleInputProcessLinkingAfterSave(Biomaterial biomaterial, Set<Process> processes) {
+    public void handleProcessLinkingAfterSave(Biomaterial biomaterial, Set<Process> processes) {
         validationStateChangeService.changeValidationState(BIOMATERIAL, biomaterial.getId(), ValidationState.DRAFT);
     }
 
