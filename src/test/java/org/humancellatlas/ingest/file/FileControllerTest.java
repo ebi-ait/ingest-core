@@ -14,6 +14,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -45,7 +47,7 @@ public class FileControllerTest {
     @Test
     public void testDeleteInputToProcessTriggersValidationStateToDraft() throws Exception {
         // given
-        Process process = new Process("process");
+        Process process = new Process(UUID.randomUUID());
         processRepository.save(process);
 
         // and
@@ -62,7 +64,7 @@ public class FileControllerTest {
     @Test
     public void testSaveInputToProcessTriggersValidationStateToDraft() throws Exception {
         // given
-        Process process = new Process("process1");
+        Process process = new Process(UUID.randomUUID());
         processRepository.save(process);
 
         // and
@@ -80,7 +82,7 @@ public class FileControllerTest {
     @Test
     public void testDeleteDerivedByProcessTriggersValidationStateToDraft() throws Exception {
         // given
-        Process process = new Process("process2");
+        Process process = new Process(UUID.randomUUID());
         processRepository.save(process);
 
         // and
@@ -97,7 +99,7 @@ public class FileControllerTest {
     @Test
     public void testDerivedByProcessTriggersValidationStateToDraft() throws Exception {
         // given
-        Process process = new Process("process3");
+        Process process = new Process(UUID.randomUUID());
         processRepository.save(process);
 
         // and

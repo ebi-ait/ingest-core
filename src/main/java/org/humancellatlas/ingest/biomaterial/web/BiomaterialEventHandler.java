@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.springframework.data.rest.core.annotation.HandleAfterLinkDelete;
 import org.springframework.data.rest.core.annotation.HandleAfterLinkSave;
@@ -28,6 +29,11 @@ public class BiomaterialEventHandler {
     @HandleAfterLinkSave
     public void handleProcessLinkingAfterSave(Biomaterial biomaterial, Set<Process> processes) {
         validationStateChangeService.changeValidationState(BIOMATERIAL, biomaterial.getId(), ValidationState.DRAFT);
+    }
+
+    @HandleAfterLinkSave
+    public void fixForBug(Biomaterial biomaterial, Set<Project> projects) {
+        // do nothing
     }
 
 }

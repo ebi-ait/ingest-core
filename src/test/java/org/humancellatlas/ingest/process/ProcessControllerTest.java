@@ -14,6 +14,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -45,11 +47,11 @@ class ProcessControllerTest {
    @Test
    public void testDeleteProtocolTriggersValidationStateToDraft() throws Exception {
        // given
-       Protocol protocol = new Protocol("protocol");
+       Protocol protocol = new Protocol(UUID.randomUUID());
        protocolRepository.save(protocol);
 
        // and
-       Process process = new Process("process");
+       Process process = new Process(UUID.randomUUID());
        process.addProtocol(protocol);
        processRepository.save(process);
 
@@ -62,11 +64,11 @@ class ProcessControllerTest {
    @Test
    public void testSaveProtocolTriggersValidationStateToDraft() throws Exception {
        // given
-       Protocol protocol = new Protocol("protocol1");
+       Protocol protocol = new Protocol(UUID.randomUUID());
        protocolRepository.save(protocol);
 
        // and
-       Process process = new Process("process1");
+       Process process = new Process(UUID.randomUUID());
        processRepository.save(process);
 
        // send post request
