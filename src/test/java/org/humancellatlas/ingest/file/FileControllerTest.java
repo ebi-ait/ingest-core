@@ -85,7 +85,7 @@ public class FileControllerTest {
 
         // and
         File file = new File();
-        file.addAsInputToProcess(process);
+        file.addAsDerivedByProcess(process);
         fileRepository.save(file);
 
         // send delete request
