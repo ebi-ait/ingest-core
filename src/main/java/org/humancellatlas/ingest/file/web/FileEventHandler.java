@@ -8,13 +8,13 @@ import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.springframework.data.rest.core.annotation.HandleAfterLinkDelete;
 import org.springframework.data.rest.core.annotation.HandleAfterLinkSave;
-import org.springframework.stereotype.Component;
+import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 
 import java.util.Set;
 
 import static org.humancellatlas.ingest.core.EntityType.FILE;
 
-@Component
+@RepositoryEventHandler()
 @RequiredArgsConstructor
 public class FileEventHandler {
 

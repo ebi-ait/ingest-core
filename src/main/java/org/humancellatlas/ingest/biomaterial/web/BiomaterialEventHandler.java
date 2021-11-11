@@ -9,13 +9,12 @@ import org.humancellatlas.ingest.state.ValidationState;
 import org.springframework.data.rest.core.annotation.HandleAfterLinkDelete;
 import org.springframework.data.rest.core.annotation.HandleAfterLinkSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
-import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
 import static org.humancellatlas.ingest.core.EntityType.BIOMATERIAL;
 
-@Component
+@RepositoryEventHandler()
 @RequiredArgsConstructor
 public class BiomaterialEventHandler {
 
