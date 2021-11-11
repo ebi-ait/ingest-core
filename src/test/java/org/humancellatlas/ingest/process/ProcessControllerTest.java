@@ -12,14 +12,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
@@ -64,14 +62,13 @@ class ProcessControllerTest {
    @Test
    public void testSaveProtocolTriggersValidationStateToDraft() throws Exception {
        // given
-       Protocol protocol = new Protocol("protocol");
+       Protocol protocol = new Protocol("protocol1");
        protocolRepository.save(protocol);
 
        // and
-       Process process = new Process("process");
-//       process.addProtocol(protocol);
+       Process process = new Process("process1");
        processRepository.save(process);
-       System.out.println(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString());
+
        // send post request
        webApp.perform(post("/processes/{processId}/protocols/", process.getId())
                .contentType("text/uri-list")
