@@ -27,20 +27,14 @@ public class FileListener {
     private final @NonNull FileService fileService;
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-
     @RabbitListener(queues = Constants.Queues.FILE_STAGED_QUEUE)
     public void handleFileStagedEvent(FileMessage fileMessage) {
         if(!StringUtils.isEmpty(fileMessage.getContentType())
                 && fileMessage.getMediaType().isPresent()
                 && fileMessage.getMediaType().get().equals(FileMediaTypes.HCA_DATA_FILE)){
             try {
-                this.createFileFromFileMessage(fileMessage);
-                fileService.updateStagedFile(fileMessage.getStagingAreaId(),
-                                             fileMessage.getFileName(),
-                                             fileMessage.getCloudUrl(),
-                                             fileMessage.getChecksums(),
-                                             fileMessage.getSize(),
-                                             fileMessage.getContentType());
+                fileService.createFileFromFileMessage(fileMessage);
+                fileService.updateFileFromFileMessage(fileMessage);
             } catch (CoreEntityNotFoundException e) {
                 log.warn(e.getMessage());
                 throw new AmqpRejectAndDontRequeueException(e.getMessage());
@@ -49,25 +43,5 @@ public class FileListener {
                 throw new AmqpRejectAndDontRequeueException(e.getMessage());
             }
         }
-    }
-
-    private void createFileFromFileMessage(FileMessage fileMessage) throws CoreEntityNotFoundException {
-        UUID envelopeUuid = UUID.fromString(fileMessage.getStagingAreaId());
-
-        Optional<SubmissionEnvelope> envelopeForMessage =
-                Optional.ofNullable(fileService.getSubmissionEnvelopeRepository()
-                                               .findByUuidUuid(envelopeUuid));
-        if(envelopeForMessage.isPresent()){
-            try {
-                fileService.addFileToSubmissionEnvelope(envelopeForMessage.get(), new File(null, fileMessage.getFileName()));
-            } catch (FileAlreadyExistsException e) {
-                log.info(String.format("File listener attempted to create a File resource with name %s but it already existed for envelope %s",
-                                       fileMessage.getFileName(),
-                                       envelopeForMessage.get().getId()));
-            }
-        } else {
-            throw new CoreEntityNotFoundException(String.format("Couldn't find envelope with with uuid %s", envelopeUuid.toString()));
-        }
-
     }
 }
