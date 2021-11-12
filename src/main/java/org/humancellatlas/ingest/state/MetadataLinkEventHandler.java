@@ -26,7 +26,7 @@ public class MetadataLinkEventHandler {
 
     @HandleAfterLinkDelete
     public void handleProtocolLinkingAfterDelete(Process process, Set<Protocol> protocols) {
-        //changeValidationStatetoDraft(process, PROCESS);
+        changeValidationStatetoDraft(process, PROCESS);
     }
 
     @HandleAfterLinkSave
