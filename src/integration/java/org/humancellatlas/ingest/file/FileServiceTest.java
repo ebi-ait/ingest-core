@@ -88,9 +88,30 @@ public class FileServiceTest {
         when(fileRepository.findBySubmissionEnvelopeAndFileName(submissionEnvelope, fileMessage.getFileName())).thenReturn(files);
         when(fileRepository.save(file)).thenReturn(file);
     }
+    @Test
+    public void testCreateFileFromFileMessage() throws CoreEntityNotFoundException {
+        //given:
+        when(fileRepository.findBySubmissionEnvelopeAndFileName(submissionEnvelope, fileMessage.getFileName())).thenReturn(new ArrayList<>());
+
+        //when:
+        fileService.createFileFromFileMessage(fileMessage);
+
+        //then:
+        verify(metadataCrudService).addToSubmissionEnvelopeAndSave(any(File.class), any(SubmissionEnvelope.class));
+    }
 
     @Test
-    public void testUpdateStagedFile() throws CoreEntityNotFoundException {
+    public void testCreateFileFromFileMessageNotCreated() throws CoreEntityNotFoundException {
+        //when:
+        fileService.createFileFromFileMessage(fileMessage);
+
+        //then:
+        verify(metadataCrudService, never()).addToSubmissionEnvelopeAndSave(any(File.class), any(SubmissionEnvelope.class));
+    }
+
+
+    @Test
+    public void testUpdateFileFromFileMessage() throws CoreEntityNotFoundException {
         //when:
         fileService.updateFileFromFileMessage(fileMessage);
 
@@ -103,7 +124,7 @@ public class FileServiceTest {
     }
 
     @Test
-    public void testUpdateStagedFileRetry() throws CoreEntityNotFoundException {
+    public void testUpdateFileFromFileMessageRetry() throws CoreEntityNotFoundException {
         //given:
         when(fileRepository.save(file))
                 .thenThrow(new OptimisticLockingFailureException("Error"))
