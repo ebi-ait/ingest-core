@@ -11,11 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -56,9 +60,14 @@ public class FileControllerTest {
         fileRepository.save(file);
 
         // send delete request
-        webApp.perform(delete("/files/{fileId}/inputToProcesses/{processId}", file.getId(), process.getId()));
+        MvcResult result = webApp.perform(delete("/files/{fileId}/inputToProcesses/{processId}", file.getId(), process.getId()))
+                .andReturn();
+
+        MockHttpServletResponse response = result.getResponse();
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
+
         // verify service being called
-        verify(validationStateChangeService, times(1)).changeValidationState(any(),any(), eq(ValidationState.DRAFT));
+        verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
     }
 
     @Test
@@ -72,11 +81,16 @@ public class FileControllerTest {
         fileRepository.save(file);
 
         // send post request
-        webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
+        MvcResult result = webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()));
+                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
+                .andReturn();
+
+        MockHttpServletResponse response = result.getResponse();
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
+
         // verify service being called
-        verify(validationStateChangeService, times(1)).changeValidationState(any(),any(), eq(ValidationState.DRAFT));
+        verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
     }
 
     @Test
@@ -91,9 +105,14 @@ public class FileControllerTest {
         fileRepository.save(file);
 
         // send delete request
-        webApp.perform(delete("/files/{fileId}/derivedByProcesses/{processId}", file.getId(), process.getId()));
+        MvcResult result = webApp.perform(delete("/files/{fileId}/derivedByProcesses/{processId}", file.getId(), process.getId()))
+                .andReturn();
+
+        MockHttpServletResponse response = result.getResponse();
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
+
         // verify service being called
-        verify(validationStateChangeService, times(1)).changeValidationState(any(),any(), eq(ValidationState.DRAFT));
+        verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
     }
 
     @Test
@@ -107,10 +126,15 @@ public class FileControllerTest {
         fileRepository.save(file);
 
         // send post request
-        webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
+        MvcResult result = webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()));
+                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
+                .andReturn();
+
+        MockHttpServletResponse response = result.getResponse();
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
+
         // verify service being called
-        verify(validationStateChangeService, times(1)).changeValidationState(any(),any(), eq(ValidationState.DRAFT));
+        verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
     }
 }
