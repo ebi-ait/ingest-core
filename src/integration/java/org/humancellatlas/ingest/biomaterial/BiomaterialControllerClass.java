@@ -71,7 +71,6 @@ public class BiomaterialControllerClass {
         MockHttpServletResponse response = result.getResponse();
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
 
-        // verify service being called
         verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
     }
 
@@ -94,7 +93,6 @@ public class BiomaterialControllerClass {
         MockHttpServletResponse response = result.getResponse();
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
 
-        // verify service being called
         verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
 
     }
@@ -117,7 +115,6 @@ public class BiomaterialControllerClass {
         MockHttpServletResponse response = result.getResponse();
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
 
-        // verify service being called
         verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
     }
 
@@ -139,7 +136,7 @@ public class BiomaterialControllerClass {
 
         MockHttpServletResponse response = result.getResponse();
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
-        // verify service being called
+
         verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
     }
 
