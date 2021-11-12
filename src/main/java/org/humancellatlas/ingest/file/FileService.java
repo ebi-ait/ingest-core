@@ -9,15 +9,23 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.exception.CoreEntityNotFoundException;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.file.web.FileMessage;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Javadocs go here!
@@ -44,6 +52,7 @@ public class FileService {
     private final @NonNull
     MetadataUpdateService metadataUpdateService;
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
         if (!fileRepository.findBySubmissionEnvelopeAndFileName(submissionEnvelope, file.getFileName()).isEmpty()) {
@@ -65,28 +74,61 @@ public class FileService {
         }
     }
 
-    public File updateStagedFile(String envelopeUuid, String fileName, String newFileUrl, Checksums checksums, Long size, String contentType) throws CoreEntityNotFoundException {
-        Optional<SubmissionEnvelope> envelope = Optional.ofNullable(submissionEnvelopeRepository.findByUuid(new Uuid(envelopeUuid)));
 
-        if (envelope.isPresent()) {
-            List<File> filesInEnvelope = fileRepository.findBySubmissionEnvelopeAndFileName(envelope.get(), fileName);
-
-            if (filesInEnvelope.size() != 1) {
-                throw new RuntimeException(String.format("Expected 1 file with name %s, but found %s", fileName, filesInEnvelope.size()));
-            } else {
-                File file = filesInEnvelope.get(0);
-                file.setCloudUrl(newFileUrl);
-                file.setChecksums(checksums);
-                file.setSize(size);
-                file.setFileContentType(contentType);
-                file.enactStateTransition(ValidationState.DRAFT);
-                File updatedFile = fileRepository.save(file);
-                return updatedFile;
-            }
-        } else {
-            // todo log
-            throw new CoreEntityNotFoundException(String.format("Couldn't find envelope with with uuid %s", envelopeUuid));
+    public void createFileFromFileMessage(FileMessage fileMessage) throws CoreEntityNotFoundException {
+        String envelopeUuid = fileMessage.getStagingAreaId();
+        SubmissionEnvelope envelope = findEnvelope(envelopeUuid);
+        try {
+            addFileToSubmissionEnvelope(envelope, new File(null, fileMessage.getFileName()));
+        } catch (FileAlreadyExistsException e) {
+            log.info(String.format("File listener attempted to create a File resource with name %s but it already existed for envelope %s",
+                    fileMessage.getFileName(),
+                    envelope.getId()));
         }
+
+    }
+
+    @Retryable(
+            value = OptimisticLockingFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 500))
+    public File updateFileFromFileMessage(FileMessage fileMessage) throws CoreEntityNotFoundException {
+        String envelopeUuid = fileMessage.getStagingAreaId();
+        SubmissionEnvelope envelope = findEnvelope(envelopeUuid);
+        File updatedFile = findAndUpdateFile(fileMessage, envelope);
+        return updatedFile;
+    }
+
+    private File findAndUpdateFile(FileMessage fileMessage, SubmissionEnvelope envelope) {
+        String fileName = fileMessage.getFileName();
+        File file = findFile(fileName, envelope);
+
+        String newFileUrl = fileMessage.getCloudUrl();
+        Checksums checksums = fileMessage.getChecksums();
+        Long size = fileMessage.getSize();
+        String contentType = fileMessage.getContentType();
+
+        file.setCloudUrl(newFileUrl);
+        file.setChecksums(checksums);
+        file.setSize(size);
+        file.setFileContentType(contentType);
+        file.enactStateTransition(ValidationState.DRAFT);
+        File updatedFile = fileRepository.save(file);
+        return updatedFile;
+    }
+
+    private SubmissionEnvelope findEnvelope(String envelopeUuid) throws CoreEntityNotFoundException {
+        return Optional.ofNullable(submissionEnvelopeRepository.findByUuid(new Uuid(envelopeUuid)))
+                .orElseThrow(() -> new CoreEntityNotFoundException(String.format("Couldn't find envelope with with uuid %s", envelopeUuid)));
+    }
+
+    private File findFile(String fileName, SubmissionEnvelope envelope) {
+        List<File> filesInEnvelope = fileRepository.findBySubmissionEnvelopeAndFileName(envelope, fileName);
+
+        if (filesInEnvelope.size() != 1) {
+            throw new RuntimeException(String.format("Expected 1 file with name %s, but found %s", fileName, filesInEnvelope.size()));
+        }
+        return filesInEnvelope.get(0);
     }
 
 }
