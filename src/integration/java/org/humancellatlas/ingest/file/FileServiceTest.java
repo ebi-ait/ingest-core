@@ -73,13 +73,14 @@ public class FileServiceTest {
     @BeforeEach
     void setUp() {
         applicationContext.getBeansWithAnnotation(MockBean.class).forEach(Mockito::reset);
+
         Checksums checksums = new Checksums("sha1", "sha256", "crc32c", "s3Etag");
         String submissionUuid = UUID.randomUUID().toString();
         String filename = "filename";
         fileMessage = new FileMessage("cloudUrl", filename, submissionUuid, "content_type", checksums, 123);
+
         submissionEnvelope = new SubmissionEnvelope("submission1");
 
-        //given:
         file = new File();
         List<File> files = new ArrayList<>();
         files.add(file);
