@@ -326,6 +326,12 @@ public class SubmissionController {
         return this.performGraphRequest(SubmissionGraphValidationState.PENDING, submissionEnvelope, resourceAssembler);
     }
 
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_REQUESTED_URL, method = RequestMethod.PUT)
+    HttpEntity<?> graphRequestedRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        // This method is used for skipping graph validation and manually setting the state if desired to mock the flow
+        return this.performGraphRequest(SubmissionGraphValidationState.REQUESTED, submissionEnvelope, resourceAssembler);
+    }
+
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> graphValidatingRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         return this.performGraphRequest(SubmissionGraphValidationState.VALIDATING, submissionEnvelope, resourceAssembler);
