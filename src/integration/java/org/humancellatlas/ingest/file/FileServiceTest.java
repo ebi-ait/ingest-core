@@ -89,6 +89,7 @@ public class FileServiceTest {
         when(fileRepository.findBySubmissionEnvelopeAndFileName(submissionEnvelope, fileMessage.getFileName())).thenReturn(files);
         when(fileRepository.save(file)).thenReturn(file);
     }
+
     @Test
     public void testCreateFileFromFileMessage() throws CoreEntityNotFoundException {
         //given:
