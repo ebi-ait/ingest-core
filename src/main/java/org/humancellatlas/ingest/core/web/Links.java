@@ -70,6 +70,8 @@ public class Links {
     // Links to request to change to graph validation state of an envelope
     public static final String GRAPH_PENDING_REL = "graphPending";
     public static final String GRAPH_PENDING_URL = "/graphPendingEvent";
+    public static final String GRAPH_REQUESTED_REL = "graphRequested";
+    public static final String GRAPH_REQUESTED_URL = "/graphRequestedEvent";
     public static final String GRAPH_VALIDATING_REL = "graphValidating";
     public static final String GRAPH_VALIDATING_URL = "/graphValidatingEvent";
     public static final String GRAPH_VALID_REL = "graphValid";
