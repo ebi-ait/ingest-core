@@ -14,7 +14,7 @@ public class Checksums {
     @JsonProperty("s3_etag")
     private String s3Etag;
 
-    protected Checksums(String sha1, String sha256, String crc32c, String s3Etag) {
+    public Checksums(String sha1, String sha256, String crc32c, String s3Etag) {
         this.sha1 = sha1;
         this.sha256 = sha256;
         this.crc32c = crc32c;
