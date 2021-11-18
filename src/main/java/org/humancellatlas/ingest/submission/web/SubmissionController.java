@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.submission.web;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
