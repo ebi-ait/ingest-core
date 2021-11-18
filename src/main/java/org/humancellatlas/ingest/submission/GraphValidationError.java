@@ -1,9 +1,8 @@
 package org.humancellatlas.ingest.submission;
-import lombok.Getter;
+import lombok.Data;
 
+@Data
 public class GraphValidationError {
-    @Getter()
     private String test;
-    @Getter()
     private String message;
 }
