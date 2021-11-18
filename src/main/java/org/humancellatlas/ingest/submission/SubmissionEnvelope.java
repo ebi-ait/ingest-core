@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.submission;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,7 +31,7 @@ public class SubmissionEnvelope extends AbstractEntity {
     private SubmissionState submissionState;
     private SubmissionGraphValidationState graphValidationState;
     private @Setter
-    String graphValidationErrorMessage;
+    List<GraphValidationError> graphValidationErrors;
     private @Setter
     Boolean triggersAnalysis;
     private @Setter
@@ -146,7 +147,7 @@ public class SubmissionEnvelope extends AbstractEntity {
     public void enactGraphValidationStateTransition(SubmissionGraphValidationState targetState) {
         if (this.graphValidationState != targetState) {
             this.graphValidationState = targetState;
-            this.graphValidationErrorMessage = "";
+            this.setGraphValidationErrors(null);
         }
     }
 
