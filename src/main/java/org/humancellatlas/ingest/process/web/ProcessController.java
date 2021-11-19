@@ -161,7 +161,7 @@ public class ProcessController {
     HttpEntity<?> patchProcess(@PathVariable("id") Process process,
                                @RequestBody final ObjectNode patch,
                                PersistentEntityResourceAssembler assembler) {
-        List<String> allowedFields = List.of("content", "validationErrors");
+        List<String> allowedFields = List.of("content", "validationErrors", "graphValidationErrors");
         ObjectNode validPatch = patch.retain(allowedFields);
         Process updatedProcess = metadataUpdateService.update(process, validPatch);
         PersistentEntityResource resource = assembler.toFullResource(updatedProcess);

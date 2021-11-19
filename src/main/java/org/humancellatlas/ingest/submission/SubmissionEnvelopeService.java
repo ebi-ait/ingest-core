@@ -118,6 +118,9 @@ public class SubmissionEnvelopeService {
         } else {
             envelope.enactGraphValidationStateTransition(state);
             submissionEnvelopeRepository.save(envelope);
+
+            removeGraphValidationErrors(envelope);
+
         }
     }
 
@@ -290,5 +293,31 @@ public class SubmissionEnvelopeService {
 
     private boolean shouldExport(Set<SubmitAction> submitActions) {
         return submitActions.contains(SubmitAction.EXPORT) || submitActions.contains(SubmitAction.EXPORT_METADATA);
+    }
+
+    private void removeGraphValidationErrors(SubmissionEnvelope submissionEnvelope) {
+        biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope)
+                .forEach(biomaterial -> {
+                    biomaterial.setGraphValidationErrors(null);
+                    biomaterialRepository.save(biomaterial);
+                });
+
+        processRepository.findBySubmissionEnvelope(submissionEnvelope)
+                .forEach(process -> {
+                    process.setGraphValidationErrors(null);
+                    processRepository.save(process);
+                });
+
+        protocolRepository.findBySubmissionEnvelope(submissionEnvelope)
+                .forEach(protocol -> {
+                    protocol.setGraphValidationErrors(null);
+                    protocolRepository.save(protocol);
+                });
+
+        fileRepository.findBySubmissionEnvelope(submissionEnvelope)
+                .forEach(file -> {
+                    file.setGraphValidationErrors(null);
+                    fileRepository.save(file);
+                });
     }
 }

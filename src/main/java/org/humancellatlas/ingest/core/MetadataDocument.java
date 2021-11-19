@@ -52,6 +52,9 @@ public abstract class MetadataDocument extends AbstractEntity {
     List<Object> validationErrors;
 
     private @Setter
+    List<String> graphValidationErrors;
+
+    private @Setter
     @Field
     Boolean isUpdate = false;
 

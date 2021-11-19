@@ -71,7 +71,7 @@ public class BiomaterialController {
     HttpEntity<?> patchBiomaterial(@PathVariable("id") Biomaterial biomaterial,
                                    @RequestBody final ObjectNode patch,
                                    PersistentEntityResourceAssembler assembler) {
-        List<String> allowedFields = List.of("content", "validationErrors");
+        List<String> allowedFields = List.of("content", "validationErrors", "graphValidationErrors");
         ObjectNode validPatch = patch.retain(allowedFields);
         Biomaterial updatedBiomaterial = metadataUpdateService.update(biomaterial, validPatch);
         PersistentEntityResource resource = assembler.toFullResource(updatedBiomaterial);
