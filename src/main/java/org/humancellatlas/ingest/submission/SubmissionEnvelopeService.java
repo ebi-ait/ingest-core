@@ -24,6 +24,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -298,25 +299,25 @@ public class SubmissionEnvelopeService {
     private void removeGraphValidationErrors(SubmissionEnvelope submissionEnvelope) {
         biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope)
                 .forEach(biomaterial -> {
-                    biomaterial.setGraphValidationErrors(null);
+                    biomaterial.setGraphValidationErrors(new ArrayList<>());
                     biomaterialRepository.save(biomaterial);
                 });
 
         processRepository.findBySubmissionEnvelope(submissionEnvelope)
                 .forEach(process -> {
-                    process.setGraphValidationErrors(null);
+                    process.setGraphValidationErrors(new ArrayList<>());
                     processRepository.save(process);
                 });
 
         protocolRepository.findBySubmissionEnvelope(submissionEnvelope)
                 .forEach(protocol -> {
-                    protocol.setGraphValidationErrors(null);
+                    protocol.setGraphValidationErrors(new ArrayList<>());
                     protocolRepository.save(protocol);
                 });
 
         fileRepository.findBySubmissionEnvelope(submissionEnvelope)
                 .forEach(file -> {
-                    file.setGraphValidationErrors(null);
+                    file.setGraphValidationErrors(new ArrayList<>());
                     fileRepository.save(file);
                 });
     }
