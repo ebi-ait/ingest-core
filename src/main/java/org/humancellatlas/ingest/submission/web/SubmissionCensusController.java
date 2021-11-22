@@ -38,7 +38,7 @@ public class SubmissionCensusController {
     @Getter
     @Setter
     @NoArgsConstructor
-    public class SubmissionCensus {
+    public static class SubmissionCensus {
         private UUID uuid;
 
     }
