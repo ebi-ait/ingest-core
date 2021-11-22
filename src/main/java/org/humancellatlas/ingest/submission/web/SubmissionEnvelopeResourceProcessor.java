@@ -88,6 +88,12 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 .withRel(Links.SUBMISSION_SUMMARY_REL);
     }
 
+    private Link getSubmissionCensus(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+            .slash(Links.SUBMISSION_CENSUS_URL)
+            .withRel(Links.SUBMISSION_CENSUS_REL);
+    }
+
     private Link getSubmissionDocumentStateLink(SubmissionEnvelope submissionEnvelope) {
         return entityLinks.linkForSingleResource(submissionEnvelope)
                           .slash(Links.SUBMISSION_DOCUMENTS_SM_URL)
@@ -256,6 +262,7 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         resource.add(getSubmissionErrorsLink(submissionEnvelope));
         resource.add(getSubmissionDocumentStateLink(submissionEnvelope));
         resource.add(getSubmissionSummary(submissionEnvelope));
+        resource.add(getSubmissionCensus(submissionEnvelope));
 
 
         // add subresource links for allowed state transition requests

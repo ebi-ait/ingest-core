@@ -98,6 +98,9 @@ public class Links {
     public static final String SUBMISSION_ERRORS_REL = "submissionEnvelopeErrors";
     public static final String SUBMISSION_SUMMARY_URL = "/summary";
     public static final String SUBMISSION_SUMMARY_REL = "summary";
+    public static final String SUBMISSION_CENSUS_URL = "/census";
+    public static final String SUBMISSION_CENSUS_REL = "census";
+
     public static final String SUBMISSION_DOCUMENTS_SM_URL = "/documentSmReport";
     public static final String SUBMISSION_DOCUMENTS_SM_REL = "documentSmReport";
 
