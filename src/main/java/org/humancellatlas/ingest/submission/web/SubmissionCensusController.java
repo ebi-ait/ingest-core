@@ -2,7 +2,6 @@ package org.humancellatlas.ingest.submission.web;
 
 import lombok.Getter;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
-import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
@@ -11,10 +10,7 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 public class SubmissionCensusController {
@@ -38,17 +34,44 @@ public class SubmissionCensusController {
     @Getter
     public class SubmissionCensus {
         private final UUID uuid;
-        private final Dictionary<String, UUID> processes;
+        private final Dictionary<String, ProcessCensus> processes = new Hashtable<>();
+        private final Dictionary<String, UUID> protocols = new Hashtable<>();
+        private final Dictionary<String, UUID> biomaterials = new Hashtable<>();
+        private final Dictionary<String, UUID> files = new Hashtable<>();
 
         public SubmissionCensus(SubmissionEnvelope submissionEnvelope){
             this.uuid = submissionEnvelope.getUuid().getUuid();
-            this.processes = new Hashtable<>();
-            Collection<Process> allProcesses = processRepository.findAllBySubmissionEnvelope(submissionEnvelope);
-            allProcesses.forEach(process -> this.setDictionary(this.processes, process));
+            processRepository
+                .findBySubmissionEnvelope(submissionEnvelope)
+                .forEach(process -> this.processes.put(process.getId(), new ProcessCensus(process)));
+            protocolRepository
+                .findBySubmissionEnvelope(submissionEnvelope)
+                .forEach(protocol -> this.protocols.put(protocol.getId(), protocol.getUuid().getUuid()));
+            biomaterialRepository
+                .findBySubmissionEnvelope(submissionEnvelope)
+                .forEach(biomaterial -> this.biomaterials.put(biomaterial.getId(), biomaterial.getUuid().getUuid()));
+            fileRepository
+                .findBySubmissionEnvelope(submissionEnvelope)
+                .forEach(file -> this.files.put(file.getId(), file.getUuid().getUuid()));
         }
+    }
 
-        private void setDictionary(Dictionary<String, UUID> dictionary, AbstractEntity entity){
-            dictionary.put(entity.getId(), entity.getUuid().getUuid());
+    @Getter
+    public class ProcessCensus {
+        private final UUID uuid;
+        private final Collection<String> protocols = new HashSet<>();
+        private final Collection<String> inputBiomaterials = new HashSet<>();
+        private final Collection<String> derivedBiomaterials = new HashSet<>();
+        private final Collection<String> inputFiles = new HashSet<>();
+        private final Collection<String> derivedFiles = new HashSet<>();
+
+        public ProcessCensus(Process process) {
+            this.uuid = process.getUuid().getUuid();
+            process.getProtocols().forEach(protocol -> this.protocols.add(protocol.getId()));
+            biomaterialRepository.findByInputToProcessesContains(process).forEach(biomaterial -> this.inputBiomaterials.add(biomaterial.getId()));
+            biomaterialRepository.findByDerivedByProcessesContains(process).forEach(biomaterial -> this.derivedBiomaterials.add(biomaterial.getId()));
+            fileRepository.findByInputToProcessesContains(process).forEach(file -> this.inputFiles.add(file.getId()));
+            fileRepository.findByDerivedByProcessesContains(process).forEach(file -> this.derivedFiles.add(file.getId()));
         }
     }
 }
