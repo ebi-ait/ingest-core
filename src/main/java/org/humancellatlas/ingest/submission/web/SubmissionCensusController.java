@@ -4,13 +4,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
-import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 public class SubmissionCensusController {
@@ -29,7 +30,7 @@ public class SubmissionCensusController {
     @ResponseBody
     public SubmissionCensus submissionCensus(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope) {
         SubmissionCensus submissionCensus = new SubmissionCensus();
-        submissionCensus.setUuid(submissionEnvelope.getUuid());
+        submissionCensus.setUuid(submissionEnvelope.getUuid().getUuid());
 
         return submissionCensus;
     }
@@ -38,7 +39,7 @@ public class SubmissionCensusController {
     @Setter
     @NoArgsConstructor
     public class SubmissionCensus {
-        private Uuid uuid;
+        private UUID uuid;
 
     }
     
