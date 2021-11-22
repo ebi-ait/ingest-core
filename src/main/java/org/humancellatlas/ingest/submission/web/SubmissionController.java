@@ -24,10 +24,7 @@ import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
 import org.humancellatlas.ingest.state.ValidationState;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
-import org.humancellatlas.ingest.submission.SubmissionStateMachineService;
+import org.humancellatlas.ingest.submission.*;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.slf4j.Logger;
@@ -345,10 +342,10 @@ public class SubmissionController {
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_INVALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> graphInvalidRequest(
             @PathVariable("id") SubmissionEnvelope submissionEnvelope,
-            @RequestBody() String validationError,
+            @RequestBody List<GraphValidationError> validationError,
             final PersistentEntityResourceAssembler resourceAssembler) {
         HttpEntity<?> response = this.performGraphRequest(SubmissionGraphValidationState.INVALID, submissionEnvelope, resourceAssembler);
-        submissionEnvelope.setGraphValidationErrorMessage(validationError);
+        submissionEnvelope.setGraphValidationErrors(validationError);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return response;
     }
