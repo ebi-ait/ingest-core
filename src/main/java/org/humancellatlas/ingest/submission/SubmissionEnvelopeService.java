@@ -117,13 +117,11 @@ public class SubmissionEnvelopeService {
                     "Envelope with id %s cannot be transitioned from graphValidationState %s to graphValidationState %s",
                     envelope.getId(), envelope.getGraphValidationState(), state));
         } else {
-            Boolean wasInvalid = envelope.getGraphValidationState() == SubmissionGraphValidationState.INVALID;
-            envelope.enactGraphValidationStateTransition(state);
-            submissionEnvelopeRepository.save(envelope);
-
-            if(wasInvalid) {
+            if(envelope.getGraphValidationState() == SubmissionGraphValidationState.INVALID) {
                 removeGraphValidationErrors(envelope);
             }
+            envelope.enactGraphValidationStateTransition(state);
+            submissionEnvelopeRepository.save(envelope);
         }
     }
 
