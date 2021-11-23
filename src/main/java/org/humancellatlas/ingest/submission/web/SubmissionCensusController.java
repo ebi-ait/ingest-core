@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.submission.web;
 import lombok.Getter;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
@@ -38,7 +39,7 @@ public class SubmissionCensusController {
         private final Dictionary<String, ProcessCensus> processes = new Hashtable<>();
         private final Dictionary<String, UUID> protocols = new Hashtable<>();
         private final Dictionary<String, BiomaterialCensus> biomaterials = new Hashtable<>();
-        private final Dictionary<String, UUID> files = new Hashtable<>();
+        private final Dictionary<String, FileCensus> files = new Hashtable<>();
 
         public SubmissionCensus(SubmissionEnvelope submissionEnvelope){
             this.uuid = submissionEnvelope.getUuid().getUuid();
@@ -53,12 +54,12 @@ public class SubmissionCensusController {
                 .forEach(biomaterial -> this.biomaterials.put(biomaterial.getId(), new BiomaterialCensus(biomaterial)));
             fileRepository
                 .findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(file -> this.files.put(file.getId(), file.getUuid().getUuid()));
+                .forEach(file -> this.files.put(file.getId(), new FileCensus(file)));
         }
     }
 
     @Getter
-    public class ProcessCensus {
+    public static class ProcessCensus {
         private final UUID uuid;
         private final Collection<String> protocols = new HashSet<>();
 
@@ -69,7 +70,7 @@ public class SubmissionCensusController {
     }
 
     @Getter
-    public class BiomaterialCensus {
+    public static class BiomaterialCensus {
         private final UUID uuid;
         private final Collection<String> derivedByProcesses = new HashSet<>();
         private final Collection<String> inputToProcesses = new HashSet<>();
@@ -78,6 +79,19 @@ public class SubmissionCensusController {
             this.uuid = biomaterial.getUuid().getUuid();
             biomaterial.getDerivedByProcesses().forEach(process -> this.derivedByProcesses.add(process.getId()));
             biomaterial.getInputToProcesses().forEach(process -> this.inputToProcesses.add(process.getId()));
+        }
+    }
+
+    @Getter
+    public static class FileCensus {
+        private final UUID uuid;
+        private final Collection<String> derivedByProcesses = new HashSet<>();
+        private final Collection<String> inputToProcesses = new HashSet<>();
+
+        public FileCensus(File file) {
+            this.uuid = file.getUuid().getUuid();
+            file.getDerivedByProcesses().forEach(process -> this.derivedByProcesses.add(process.getId()));
+            file.getInputToProcesses().forEach(process -> this.inputToProcesses.add(process.getId()));
         }
     }
 }
