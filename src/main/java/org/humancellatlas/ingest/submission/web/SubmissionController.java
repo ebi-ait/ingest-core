@@ -224,7 +224,9 @@ public class SubmissionController {
     HttpEntity<?> enactDraftEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelope.enactStateTransition(SubmissionState.DRAFT);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        submissionEnvelopeService.handleGraphValidationStateUpdateRequest(submissionEnvelope, SubmissionGraphValidationState.PENDING);
+        if(submissionEnvelope.getGraphValidationState() != SubmissionGraphValidationState.PENDING) {
+            submissionEnvelopeService.handleGraphValidationStateUpdateRequest(submissionEnvelope, SubmissionGraphValidationState.PENDING);
+        }
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
