@@ -56,11 +56,11 @@ public class BiomaterialControllerClass {
     @Test
     public void testDeleteInputToProcessTriggersValidationStateToDraft() throws Exception {
         // given
-        Process process = new Process("process1");
+        Process process = new Process();
         processRepository.save(process);
 
         // and
-        Biomaterial biomaterial = new Biomaterial("biomaterial1");
+        Biomaterial biomaterial = new Biomaterial();
         biomaterial.addAsInputToProcess(process);
         biomaterialRepository.save(biomaterial);
 
@@ -77,11 +77,11 @@ public class BiomaterialControllerClass {
     @Test
     public void testSaveInputToProcessTriggersValidationStateToDraft() throws Exception {
         // given
-        Process process = new Process("process2");
+        Process process = new Process();
         processRepository.save(process);
 
         // and
-        Biomaterial biomaterial = new Biomaterial("biomaterial2");
+        Biomaterial biomaterial = new Biomaterial(UUID.randomUUID().toString());
         biomaterialRepository.save(biomaterial);
 
         // send post request
@@ -100,11 +100,11 @@ public class BiomaterialControllerClass {
     @Test
     public void testDeleteDerivedByProcessTriggersValidationStateToDraft() throws Exception {
         // given
-        Process process = new Process("process3");
+        Process process = new Process();
         processRepository.save(process);
 
         // and
-        Biomaterial biomaterial = new Biomaterial("biomaterial3");
+        Biomaterial biomaterial = new Biomaterial();
         biomaterial.addAsDerivedByProcess(process);
         biomaterialRepository.save(biomaterial);
 
@@ -121,11 +121,11 @@ public class BiomaterialControllerClass {
     @Test
     public void testDerivedByProcessTriggersValidationStateToDraft() throws Exception {
         // given
-        Process process = new Process("process4");
+        Process process = new Process();
         processRepository.save(process);
 
         // and
-        Biomaterial biomaterial = new Biomaterial("biomaterial4");
+        Biomaterial biomaterial = new Biomaterial();
         biomaterialRepository.save(biomaterial);
 
         // send post request
