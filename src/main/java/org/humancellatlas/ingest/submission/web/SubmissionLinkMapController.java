@@ -29,16 +29,16 @@ public class SubmissionLinkMapController {
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/linkingMap", method = RequestMethod.GET)
     @ResponseBody
-    public SubmissionLinkingMap submissionLinkMap(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope) {
+    public SubmissionLinkingMap getSubmissionLinkMap(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope) {
         return new SubmissionLinkingMap(submissionEnvelope);
     }
 
     @Getter
     public class SubmissionLinkingMap {
-        private final Dictionary<String, ProcessLinkingMap> processes = new Hashtable<>();
-        private final Dictionary<String, UUID> protocols = new Hashtable<>();
-        private final Dictionary<String, BiomaterialLinkingMap> biomaterials = new Hashtable<>();
-        private final Dictionary<String, FileLinkingMap> files = new Hashtable<>();
+        final Dictionary<String, ProcessLinkingMap> processes = new Hashtable<>();
+        final Dictionary<String, UUID> protocols = new Hashtable<>();
+        final Dictionary<String, BiomaterialLinkingMap> biomaterials = new Hashtable<>();
+        final Dictionary<String, FileLinkingMap> files = new Hashtable<>();
 
         public SubmissionLinkingMap(SubmissionEnvelope submissionEnvelope){
             processRepository
@@ -55,9 +55,9 @@ public class SubmissionLinkMapController {
 
     @Getter
     public class ProcessLinkingMap {
-        private final Collection<String> protocols = new HashSet<>();
-        private final Collection<String> inputBiomaterials = new HashSet<>();
-        private final Collection<String> inputFiles = new HashSet<>();
+        final Collection<String> protocols = new HashSet<>();
+        final Collection<String> inputBiomaterials = new HashSet<>();
+        final Collection<String> inputFiles = new HashSet<>();
 
         public ProcessLinkingMap(Process process) {
             process.getProtocols().forEach(protocol -> this.protocols.add(protocol.getId()));
@@ -68,8 +68,8 @@ public class SubmissionLinkMapController {
 
     @Getter
     public static class BiomaterialLinkingMap {
-        private final Collection<String> derivedByProcesses = new HashSet<>();
-        private final Collection<String> inputToProcesses = new HashSet<>();
+        final Collection<String> derivedByProcesses = new HashSet<>();
+        final Collection<String> inputToProcesses = new HashSet<>();
 
         public BiomaterialLinkingMap(Biomaterial biomaterial) {
             biomaterial.getDerivedByProcesses().forEach(process -> this.derivedByProcesses.add(process.getId()));
@@ -79,8 +79,8 @@ public class SubmissionLinkMapController {
 
     @Getter
     public static class FileLinkingMap {
-        private final Collection<String> derivedByProcesses = new HashSet<>();
-        private final Collection<String> inputToProcesses = new HashSet<>();
+        final Collection<String> derivedByProcesses = new HashSet<>();
+        final Collection<String> inputToProcesses = new HashSet<>();
 
         public FileLinkingMap(File file) {
             file.getDerivedByProcesses().forEach(process -> this.derivedByProcesses.add(process.getId()));
