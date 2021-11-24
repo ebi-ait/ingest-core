@@ -81,7 +81,7 @@ public class BiomaterialControllerClass {
         processRepository.save(process);
 
         // and
-        Biomaterial biomaterial = new Biomaterial(UUID.randomUUID().toString());
+        Biomaterial biomaterial = new Biomaterial();
         biomaterialRepository.save(biomaterial);
 
         // send post request
