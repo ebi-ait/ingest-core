@@ -80,4 +80,6 @@ public interface FileRepository extends MongoRepository<File, String> {
     @Query(value = "{'submissionEnvelope.id': ?0, validationErrors: {$not: {$elemMatch: {errorType: ?1} }}}", count = true)
     long countBySubmissionEnvelopeIdAndNotErrorType(@Param("id") String submissionEnvelopeId, @Param("errorType") String errorType);
 
+    @Query(value = "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }", count = true)
+    long countBySubmissionEnvelopeAndCountWithGraphValidationErrors(String submissionEnvelopeId);
 }

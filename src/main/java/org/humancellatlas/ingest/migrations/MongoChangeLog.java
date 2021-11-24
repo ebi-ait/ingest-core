@@ -154,4 +154,15 @@ public class MongoChangeLog {
                 "}");
         db.getCollection("project").createIndex(indexQuery);
     }
+
+    @ChangeSet(order = "2021-11-22", id = "Set empty graphValidationErrors", author = "jcbwndsr@ebi.ac.uk")
+    public void setGraphValidationErrors(MongoDatabase db) {
+        Document filter = Document.parse("{ }");
+        List<Document> update = new ArrayList<>();
+        update.add(new Document("$set", Document.parse("{ 'graphValidationErrors': [] }")));
+        db.getCollection("biomaterial").updateMany(filter, update);
+        db.getCollection("process").updateMany(filter, update);
+        db.getCollection("protocol").updateMany(filter, update);
+        db.getCollection("file").updateMany(filter, update);
+    }
 }

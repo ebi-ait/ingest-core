@@ -78,7 +78,7 @@ public class FileController {
     HttpEntity<?> patchFile(@PathVariable("id") File file,
                             @RequestBody final ObjectNode patch,
                             PersistentEntityResourceAssembler assembler) {
-        List<String> allowedFields = List.of("content", "fileName", "validationJob", "validationErrors");
+        List<String> allowedFields = List.of("content", "fileName", "validationJob", "validationErrors", "graphValidationErrors");
         ObjectNode validPatch = patch.retain(allowedFields);
         File updatedFile = metadataUpdateService.update(file, validPatch);
         PersistentEntityResource resource = assembler.toFullResource(updatedFile);
