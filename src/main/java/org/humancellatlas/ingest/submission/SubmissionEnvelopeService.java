@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -297,28 +298,28 @@ public class SubmissionEnvelopeService {
     }
 
     private void removeGraphValidationErrors(SubmissionEnvelope submissionEnvelope) {
-        biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(biomaterial -> {
-                    biomaterial.setGraphValidationErrors(new ArrayList<>());
-                    biomaterialRepository.save(biomaterial);
-                });
+        biomaterialRepository.saveAll(
+                biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope)
+                        .peek(biomaterial -> biomaterial.setGraphValidationErrors(new ArrayList<>()))
+                        .collect(Collectors.toList())
+        );
 
-        processRepository.findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(process -> {
-                    process.setGraphValidationErrors(new ArrayList<>());
-                    processRepository.save(process);
-                });
+        processRepository.saveAll(
+                processRepository.findBySubmissionEnvelope(submissionEnvelope)
+                        .peek(process -> process.setGraphValidationErrors(new ArrayList<>()))
+                        .collect(Collectors.toList())
+        );
 
-        protocolRepository.findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(protocol -> {
-                    protocol.setGraphValidationErrors(new ArrayList<>());
-                    protocolRepository.save(protocol);
-                });
+        protocolRepository.saveAll(
+                protocolRepository.findBySubmissionEnvelope(submissionEnvelope)
+                        .peek(protocol -> protocol.setGraphValidationErrors(new ArrayList<>()))
+                        .collect(Collectors.toList())
+        );
 
-        fileRepository.findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(file -> {
-                    file.setGraphValidationErrors(new ArrayList<>());
-                    fileRepository.save(file);
-                });
+        fileRepository.saveAll(
+                fileRepository.findBySubmissionEnvelope(submissionEnvelope)
+                        .peek(file -> file.setGraphValidationErrors(new ArrayList<>()))
+                        .collect(Collectors.toList())
+        );
     }
 }
