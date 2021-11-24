@@ -56,6 +56,9 @@ public class Biomaterial extends MetadataDocument {
         super(EntityType.BIOMATERIAL, content);
     }
 
+    public Biomaterial(String id) {
+        this.id = id;
+    }
     /**
      * Adds to the collection of processes that this biomaterial serves as an input to
      *
