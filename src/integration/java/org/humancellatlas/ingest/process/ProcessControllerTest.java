@@ -52,11 +52,11 @@ class ProcessControllerTest {
    @Test
    public void testDeleteProtocolTriggersValidationStateToDraft() throws Exception {
        // given
-       Protocol protocol = new Protocol(UUID.randomUUID());
+       Protocol protocol = new Protocol("protocol1");
        protocolRepository.save(protocol);
 
        // and
-       Process process = new Process(UUID.randomUUID());
+       Process process = new Process("process2");
        process.addProtocol(protocol);
        processRepository.save(process);
 
@@ -73,11 +73,11 @@ class ProcessControllerTest {
    @Test
    public void testSaveProtocolTriggersValidationStateToDraft() throws Exception {
        // given
-       Protocol protocol = new Protocol(UUID.randomUUID());
+       Protocol protocol = new Protocol("protocol2");
        protocolRepository.save(protocol);
 
        // and
-       Process process = new Process(UUID.randomUUID());
+       Process process = new Process("process2");
        processRepository.save(process);
 
        // send post request
