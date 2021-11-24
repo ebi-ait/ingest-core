@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-public class SubmissionCensusController {
+public class SubmissionLinkMapController {
 
     @Autowired
     BiomaterialRepository biomaterialRepository;
@@ -27,69 +27,62 @@ public class SubmissionCensusController {
     ProtocolRepository protocolRepository;
 
 
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/census", method = RequestMethod.GET)
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/linkingMap", method = RequestMethod.GET)
     @ResponseBody
-    public SubmissionCensus submissionCensus(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope) {
-        return new SubmissionCensus(submissionEnvelope);
+    public SubmissionLinkingMap submissionLinkMap(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope) {
+        return new SubmissionLinkingMap(submissionEnvelope);
     }
 
     @Getter
-    public class SubmissionCensus {
-        private final UUID uuid;
-        private final Dictionary<String, ProcessCensus> processes = new Hashtable<>();
+    public class SubmissionLinkingMap {
+        private final Dictionary<String, ProcessLinkingMap> processes = new Hashtable<>();
         private final Dictionary<String, UUID> protocols = new Hashtable<>();
-        private final Dictionary<String, BiomaterialCensus> biomaterials = new Hashtable<>();
-        private final Dictionary<String, FileCensus> files = new Hashtable<>();
+        private final Dictionary<String, BiomaterialLinkingMap> biomaterials = new Hashtable<>();
+        private final Dictionary<String, FileLinkingMap> files = new Hashtable<>();
 
-        public SubmissionCensus(SubmissionEnvelope submissionEnvelope){
-            this.uuid = submissionEnvelope.getUuid().getUuid();
+        public SubmissionLinkingMap(SubmissionEnvelope submissionEnvelope){
             processRepository
                 .findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(process -> this.processes.put(process.getId(), new ProcessCensus(process)));
-            protocolRepository
-                .findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(protocol -> this.protocols.put(protocol.getId(), protocol.getUuid().getUuid()));
+                .forEach(process -> this.processes.put(process.getId(), new ProcessLinkingMap(process)));
             biomaterialRepository
                 .findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(biomaterial -> this.biomaterials.put(biomaterial.getId(), new BiomaterialCensus(biomaterial)));
+                .forEach(biomaterial -> this.biomaterials.put(biomaterial.getId(), new BiomaterialLinkingMap(biomaterial)));
             fileRepository
                 .findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(file -> this.files.put(file.getId(), new FileCensus(file)));
+                .forEach(file -> this.files.put(file.getId(), new FileLinkingMap(file)));
         }
     }
 
     @Getter
-    public static class ProcessCensus {
-        private final UUID uuid;
+    public class ProcessLinkingMap {
         private final Collection<String> protocols = new HashSet<>();
+        private final Collection<String> inputBiomaterials = new HashSet<>();
+        private final Collection<String> inputFiles = new HashSet<>();
 
-        public ProcessCensus(Process process) {
-            this.uuid = process.getUuid().getUuid();
+        public ProcessLinkingMap(Process process) {
             process.getProtocols().forEach(protocol -> this.protocols.add(protocol.getId()));
+            biomaterialRepository.findByInputToProcessesContains(process).forEach(biomaterial -> this.inputBiomaterials.add(biomaterial.getId()));
+            fileRepository.findByInputToProcessesContains(process).forEach(file -> this.inputBiomaterials.add(file.getId()));
         }
     }
 
     @Getter
-    public static class BiomaterialCensus {
-        private final UUID uuid;
+    public static class BiomaterialLinkingMap {
         private final Collection<String> derivedByProcesses = new HashSet<>();
         private final Collection<String> inputToProcesses = new HashSet<>();
 
-        public BiomaterialCensus(Biomaterial biomaterial) {
-            this.uuid = biomaterial.getUuid().getUuid();
+        public BiomaterialLinkingMap(Biomaterial biomaterial) {
             biomaterial.getDerivedByProcesses().forEach(process -> this.derivedByProcesses.add(process.getId()));
             biomaterial.getInputToProcesses().forEach(process -> this.inputToProcesses.add(process.getId()));
         }
     }
 
     @Getter
-    public static class FileCensus {
-        private final UUID uuid;
+    public static class FileLinkingMap {
         private final Collection<String> derivedByProcesses = new HashSet<>();
         private final Collection<String> inputToProcesses = new HashSet<>();
 
-        public FileCensus(File file) {
-            this.uuid = file.getUuid().getUuid();
+        public FileLinkingMap(File file) {
             file.getDerivedByProcesses().forEach(process -> this.derivedByProcesses.add(process.getId()));
             file.getInputToProcesses().forEach(process -> this.inputToProcesses.add(process.getId()));
         }

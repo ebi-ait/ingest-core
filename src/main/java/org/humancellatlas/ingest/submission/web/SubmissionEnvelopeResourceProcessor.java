@@ -90,8 +90,8 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
 
     private Link getSubmissionCensus(SubmissionEnvelope submissionEnvelope) {
         return entityLinks.linkForSingleResource(submissionEnvelope)
-            .slash(Links.SUBMISSION_CENSUS_URL)
-            .withRel(Links.SUBMISSION_CENSUS_REL);
+            .slash(Links.SUBMISSION_LINKING_MAP_URL)
+            .withRel(Links.SUBMISSION_LINKING_MAP_REL);
     }
 
     private Link getSubmissionDocumentStateLink(SubmissionEnvelope submissionEnvelope) {
