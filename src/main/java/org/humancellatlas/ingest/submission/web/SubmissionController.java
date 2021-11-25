@@ -316,7 +316,6 @@ public class SubmissionController {
         if(envelope.getGraphValidationState() != state) {
             submissionEnvelopeService.handleGraphValidationStateUpdateRequest(envelope, state);
         }
-        submissionEnvelopeService.handleGraphValidationStateUpdateRequest(envelope, state);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(envelope));
     }
 
