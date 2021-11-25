@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -14,6 +15,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 
 @Getter
 @EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 public class Protocol extends MetadataDocument {
     @Indexed
     private @Setter
@@ -25,6 +27,10 @@ public class Protocol extends MetadataDocument {
     @JsonCreator
     public Protocol(@JsonProperty("content") Object content) {
         super(EntityType.PROTOCOL, content);
+    }
+
+    public Protocol(String id) {
+        this.id = id;
     }
 
     public boolean isLinked() {

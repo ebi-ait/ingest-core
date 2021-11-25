@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -30,6 +31,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 @Getter
 @Document
 @EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 public class Biomaterial extends MetadataDocument {
 
     @Indexed
@@ -56,6 +58,9 @@ public class Biomaterial extends MetadataDocument {
         super(EntityType.BIOMATERIAL, content);
     }
 
+    public Biomaterial(String id) {
+        this.id = id;
+    }
     /**
      * Adds to the collection of processes that this biomaterial serves as an input to
      *
