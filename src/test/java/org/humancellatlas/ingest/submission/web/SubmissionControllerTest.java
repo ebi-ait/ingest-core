@@ -137,8 +137,9 @@ public class SubmissionControllerTest {
         //then:
         assertThat(response).isNotNull();
         assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(DRAFT);
-        assertThat(submissionEnvelope.getGraphValidationState()).isEqualTo(SubmissionGraphValidationState.PENDING);
-        verify(submissionEnvelopeRepository).save(submissionEnvelope);
+
+        // This will handle the validation state update and deleting of graph validation errors on entities
+        verify(submissionEnvelopeService).handleGraphValidationStateUpdateRequest(submissionEnvelope, SubmissionGraphValidationState.PENDING);
     }
     @Configuration
     static class TestConfiguration {}

@@ -72,7 +72,7 @@ public class ProtocolController {
     HttpEntity<?> patchProtocol(@PathVariable("id") Protocol protocol,
                                 @RequestBody final ObjectNode patch,
                                 PersistentEntityResourceAssembler assembler) {
-        List<String> allowedFields = List.of("content", "validationErrors");
+        List<String> allowedFields = List.of("content", "validationErrors", "graphValidationErrors");
         ObjectNode validPatch = patch.retain(allowedFields);
         Protocol updatedProtocol = metadataUpdateService.update(protocol, validPatch);
         PersistentEntityResource resource = assembler.toFullResource(updatedProtocol);
