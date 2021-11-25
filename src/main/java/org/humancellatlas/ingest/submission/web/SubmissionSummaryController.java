@@ -35,7 +35,6 @@ public class SubmissionSummaryController {
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/summary", method = RequestMethod.GET)
     @ResponseBody
     public SubmissionSummary submissionSummary(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope) {
-
         SubmissionSummary summary = new SubmissionSummary();
         summary.setUuid(submissionEnvelope.getUuid());
         summary.setTotalBiomaterials(biomaterialRepository.countBySubmissionEnvelope(submissionEnvelope));
