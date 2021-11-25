@@ -224,10 +224,7 @@ public class SubmissionController {
     HttpEntity<?> enactDraftEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelope.enactStateTransition(SubmissionState.DRAFT);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        if(submissionEnvelope.getGraphValidationState() != SubmissionGraphValidationState.PENDING) {
-            submissionEnvelopeService.handleGraphValidationStateUpdateRequest(submissionEnvelope, SubmissionGraphValidationState.PENDING);
-        }
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+        return this.performGraphRequest(SubmissionGraphValidationState.PENDING, submissionEnvelope, resourceAssembler);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_VALIDATING_URL, method = RequestMethod.PUT)
@@ -316,6 +313,9 @@ public class SubmissionController {
     }
 
     private HttpEntity<?> performGraphRequest(SubmissionGraphValidationState state, SubmissionEnvelope envelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        if(envelope.getGraphValidationState() != state) {
+            submissionEnvelopeService.handleGraphValidationStateUpdateRequest(envelope, state);
+        }
         submissionEnvelopeService.handleGraphValidationStateUpdateRequest(envelope, state);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(envelope));
     }
