@@ -31,7 +31,6 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 @Getter
 @Document
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
 public class Biomaterial extends MetadataDocument {
 
     @Indexed

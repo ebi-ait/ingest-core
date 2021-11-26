@@ -15,7 +15,6 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 
 @Getter
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
 public class Protocol extends MetadataDocument {
     @Indexed
     private @Setter
