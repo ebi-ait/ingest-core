@@ -40,7 +40,7 @@ public interface FileRepository extends MongoRepository<File, String> {
     @RestResource(exported = false)
     Stream<File> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
-    List<File> findBySubmissionEnvelopeAndFileName(SubmissionEnvelope submissionEnvelope, String fileName);
+    List<File> findBySubmissionEnvelopeAndFileName(@Param("envelopeUri")SubmissionEnvelope submissionEnvelope, String fileName);
 
 
     @RestResource(rel = "findBySubmissionAndValidationState")
