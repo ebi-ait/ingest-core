@@ -98,9 +98,6 @@ public class FileControllerTest {
 
     @Test
     public void testDerivedByProcessTriggersValidationStateToDraft() throws Exception {
-        // given
-        fileRepository.save(file);
-
         // send post request
         webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
                 .contentType("text/uri-list")
