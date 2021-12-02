@@ -59,7 +59,6 @@ public class GlobalStateExceptionHandler {
         getLog().warn(String.format("Caught an illegal argument at '%s'; " +
                         "this will generate a BAD_REQUEST RESPONSE",
                 request.getRequestURL().toString()));
-        getLog().debug("Handling IllegalArgumentException and returning BAD_REQUEST response", e);
         getLog().error("Handling IllegalArgumentException and returning BAD_REQUEST response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
