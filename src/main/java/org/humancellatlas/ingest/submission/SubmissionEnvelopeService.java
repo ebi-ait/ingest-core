@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @Service
@@ -123,6 +124,14 @@ public class SubmissionEnvelopeService {
             }
             envelope.enactGraphValidationStateTransition(state);
             submissionEnvelopeRepository.save(envelope);
+
+            java.util.logging.Logger.getAnonymousLogger().log(Level.INFO, state.toString());
+            java.util.logging.Logger.getAnonymousLogger().log(Level.INFO, state.getSubmissionStateEquivalent().toString());
+
+            state.getSubmissionStateEquivalent().ifPresent(submissionState -> {
+                java.util.logging.Logger.getAnonymousLogger().log(Level.INFO, submissionState.toString());
+                this.handleEnvelopeStateUpdateRequest(envelope, submissionState);
+            });
         }
     }
 
