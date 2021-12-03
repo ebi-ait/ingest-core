@@ -4,7 +4,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.patch.Patch;
-import org.humancellatlas.ingest.patch.PatchRepository;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
 import org.springframework.hateoas.EntityLinks;
@@ -50,9 +49,9 @@ public class MetadataDocumentResourceProcessor implements ResourceProcessor<Reso
             case DRAFT:
                 return Optional.of(Links.DRAFT_REL);
             case VALIDATING:
-                return Optional.of(Links.VALIDATING_REL);
+                return Optional.of(Links.METADATA_VALIDATING_REL);
             case VALID:
-                return Optional.of(Links.VALID_REL);
+                return Optional.of(Links.METADATA_VALID_REL);
             case INVALID:
                 return Optional.of(Links.INVALID_REL);
             case PROCESSING:
@@ -70,9 +69,9 @@ public class MetadataDocumentResourceProcessor implements ResourceProcessor<Reso
             case DRAFT:
                 return Optional.of(Links.DRAFT_URL);
             case VALIDATING:
-                return Optional.of(Links.VALIDATING_URL);
+                return Optional.of(Links.METADATA_VALIDATING_URL);
             case VALID:
-                return Optional.of(Links.VALID_URL);
+                return Optional.of(Links.METADATA_VALID_URL);
             case INVALID:
                 return Optional.of(Links.INVALID_URL);
             case PROCESSING:
