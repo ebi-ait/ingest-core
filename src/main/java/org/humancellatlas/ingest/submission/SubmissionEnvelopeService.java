@@ -108,7 +108,7 @@ public class SubmissionEnvelopeService {
         } else {
             messageRouter.routeStateTrackingUpdateMessageForEnvelopeEvent(envelope, state);
 
-            if(envelope.getSubmissionState() == SubmissionState.GRAPH_VALIDATION_REQUESTED) {
+            if(state == SubmissionState.GRAPH_VALIDATION_REQUESTED) {
                 removeGraphValidationErrors(envelope);
             }
         }
