@@ -226,23 +226,23 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_VALIDATING_URL, method = RequestMethod.PUT)
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_METADATA_VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactValidatingEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.VALIDATING);
+        submissionEnvelope.enactStateTransition(SubmissionState.METADATA_VALIDATING);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_INVALID_URL, method = RequestMethod.PUT)
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_METADATA_INVALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactInvalidEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.INVALID);
+        submissionEnvelope.enactStateTransition(SubmissionState.METADATA_INVALID);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_VALID_URL, method = RequestMethod.PUT)
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_METADATA_VALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactValidEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.VALID);
+        submissionEnvelope.enactStateTransition(SubmissionState.METADATA_VALID);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }

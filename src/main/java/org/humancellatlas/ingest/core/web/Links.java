@@ -19,10 +19,10 @@ public class Links {
 
     public static final String DRAFT_REL = "draft";
     public static final String DRAFT_URL = "/draftEvent";
-    public static final String VALIDATING_REL = "validating";
-    public static final String VALIDATING_URL = "/validatingEvent";
-    public static final String VALID_REL = "valid";
-    public static final String VALID_URL = "/validEvent";
+    public static final String METADATA_VALIDATING_REL = "validating";
+    public static final String METADATA_VALIDATING_URL = "/validatingEvent";
+    public static final String METADATA_VALID_REL = "valid";
+    public static final String METADATA_VALID_URL = "/validEvent";
     public static final String GRAPH_VALIDATION_REQUESTED_REL = "graphValidationRequested";
     public static final String GRAPH_VALIDATION_REQUESTED_URL = "/graphValidationRequestedEvent";
     public static final String GRAPH_VALIDATING_REL = "graphValidating";
@@ -54,12 +54,12 @@ public class Links {
 
     public static final String COMMIT_DRAFT_REL = "commitDraft";
     public static final String COMMIT_DRAFT_URL = "/commitDraftEvent";
-    public static final String COMMIT_VALIDATING_REL = "commitValidating";
-    public static final String COMMIT_VALIDATING_URL = "/commitValidatingEvent";
-    public static final String COMMIT_VALID_REL = "commitValid";
-    public static final String COMMIT_VALID_URL = "/commitValidEvent";
-    public static final String COMMIT_INVALID_REL = "commitInvalid";
-    public static final String COMMIT_INVALID_URL = "/commitInvalidEvent";
+    public static final String COMMIT_METADATA_VALIDATING_REL = "commitValidating";
+    public static final String COMMIT_METADATA_VALIDATING_URL = "/commitValidatingEvent";
+    public static final String COMMIT_METADATA_VALID_REL = "commitValid";
+    public static final String COMMIT_METADATA_VALID_URL = "/commitValidEvent";
+    public static final String COMMIT_METADATA_INVALID_REL = "commitInvalid";
+    public static final String COMMIT_METADATA_INVALID_URL = "/commitInvalidEvent";
     public static final String COMMIT_GRAPH_VALIDATION_REQUESTED_REL = "commitGraphValidationRequested";
     public static final String COMMIT_GRAPH_VALIDATION_REQUESTED_URL = "/commitGraphValidationRequestedEvent";
     public static final String COMMIT_GRAPH_VALIDATING_REL = "commitGraphValidating";

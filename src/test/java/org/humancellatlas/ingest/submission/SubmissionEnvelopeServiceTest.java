@@ -36,7 +36,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -205,7 +204,7 @@ public class SubmissionEnvelopeServiceTest {
     public void testSubmissionBlocked() {
         //given:
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        submissionEnvelope.enactStateTransition(SubmissionState.VALID);
+        submissionEnvelope.enactStateTransition(SubmissionState.METADATA_VALID);
         assertThat(submissionEnvelope.getGraphValidationState()).isEqualTo(SubmissionGraphValidationState.PENDING);
 
         //when
@@ -222,7 +221,7 @@ public class SubmissionEnvelopeServiceTest {
     public void testSubmissionUnblocked() {
         //given:
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        submissionEnvelope.enactStateTransition(SubmissionState.VALID);
+        submissionEnvelope.enactStateTransition(SubmissionState.METADATA_VALID);
         submissionEnvelope.enactGraphValidationStateTransition(SubmissionGraphValidationState.VALID);
 
         //when

@@ -8,9 +8,9 @@ package org.humancellatlas.ingest.state;
 public enum SubmissionState {
     PENDING,
     DRAFT,
-    VALIDATING, // metadata
-    VALID, // metadata
-    INVALID, // metadata & graph
+    METADATA_VALIDATING,
+    METADATA_VALID,
+    METADATA_INVALID,
     GRAPH_VALIDATION_REQUESTED,
     GRAPH_VALIDATING,
     GRAPH_VALID,

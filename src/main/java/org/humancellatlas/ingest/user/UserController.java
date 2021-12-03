@@ -71,9 +71,9 @@ public class UserController implements ResourceProcessor<RepositoryLinksResource
         String user = getCurrentAccount().getId();
         long pendingSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.PENDING, user);
         long draftSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.DRAFT, user);
-        long validatingubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.VALIDATING, user);
-        long validSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.VALID, user);
-        long invalidSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.INVALID, user);
+        long validatingubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.METADATA_VALIDATING, user);
+        long validSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.METADATA_VALID, user);
+        long invalidSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.METADATA_INVALID, user);
         long submittedSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.SUBMITTED, user);
         long processingSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.PROCESSING, user);
         long cleanupSubmissions = submissionEnvelopeRepository.countBySubmissionStateAndUser(SubmissionState.CLEANUP, user);

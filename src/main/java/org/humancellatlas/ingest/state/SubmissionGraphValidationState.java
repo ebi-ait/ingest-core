@@ -5,9 +5,9 @@ import java.util.Optional;
 public enum SubmissionGraphValidationState {
     PENDING,
     REQUESTED(SubmissionState.DRAFT),
-    VALIDATING(SubmissionState.VALIDATING),
-    VALID(SubmissionState.VALID),
-    INVALID(SubmissionState.INVALID);
+    VALIDATING(SubmissionState.METADATA_VALIDATING),
+    VALID(SubmissionState.METADATA_VALID),
+    INVALID(SubmissionState.METADATA_INVALID);
 
     private SubmissionState submissionStateEquivalent;
 
