@@ -13,7 +13,8 @@ public enum SubmissionState {
     INVALID, // metadata & graph
     GRAPH_VALIDATION_REQUESTED,
     GRAPH_VALIDATING,
-    GRAPH_VALIDATED,
+    GRAPH_VALID,
+    GRAPH_INVALID,
     SUBMITTED,
     PROCESSING,
     ARCHIVING,

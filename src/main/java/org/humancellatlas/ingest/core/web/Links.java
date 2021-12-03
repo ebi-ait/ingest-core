@@ -27,8 +27,10 @@ public class Links {
     public static final String GRAPH_VALIDATION_REQUESTED_URL = "/graphValidationRequestedEvent";
     public static final String GRAPH_VALIDATING_REL = "graphValidating";
     public static final String GRAPH_VALIDATING_URL = "/graphValidatingEvent";
-    public static final String GRAPH_VALIDATED_REL = "graphValidated";
-    public static final String GRAPH_VALIDATED_URL = "/graphValidatedEvent";
+    public static final String GRAPH_VALID_REL = "graphValid";
+    public static final String GRAPH_VALID_URL = "/graphValidEvent";
+    public static final String GRAPH_INVALID_REL = "graphInvalid";
+    public static final String GRAPH_INVALID_URL = "/graphInvalidEvent";
     public static final String INVALID_REL = "invalid";
     public static final String INVALID_URL = "/invalidEvent";
     public static final String PROCESSING_REL ="processing";
@@ -62,8 +64,10 @@ public class Links {
     public static final String COMMIT_GRAPH_VALIDATION_REQUESTED_URL = "/commitGraphValidationRequestedEvent";
     public static final String COMMIT_GRAPH_VALIDATING_REL = "commitGraphValidating";
     public static final String COMMIT_GRAPH_VALIDATING_URL = "/commitGraphValidatingEvent";
-    public static final String COMMIT_GRAPH_VALIDATED_REL = "commitGraphValidated";
-    public static final String COMMIT_GRAPH_VALIDATED_URL = "/commitGraphValidated";
+    public static final String COMMIT_GRAPH_VALID_REL = "commitGraphValid";
+    public static final String COMMIT_GRAPH_VALID_URL = "/commitGraphValidEvent";
+    public static final String COMMIT_GRAPH_INVALID_REL = "commitGraphInvalid";
+    public static final String COMMIT_GRAPH_INVALID_URL = "/commitGraphInvalidEvent";
     public static final String COMMIT_PROCESSING_REL ="commitProcessing";
     public static final String COMMIT_PROCESSING_URL ="/commitProcessingEvent";
     public static final String COMMIT_ARCHIVING_REL = "commitArchiving";
