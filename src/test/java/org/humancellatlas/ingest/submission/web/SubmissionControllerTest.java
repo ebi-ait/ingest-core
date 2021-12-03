@@ -11,6 +11,7 @@ import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.protocol.ProtocolService;
 import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
+import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
@@ -123,8 +124,8 @@ public class SubmissionControllerTest {
     public void testDraftStateTransition() {
         //given:
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        submissionEnvelope.enactGraphValidationStateTransition(SubmissionGraphValidationState.VALID);
-        assertThat(submissionEnvelope.getGraphValidationState()).isEqualTo(SubmissionGraphValidationState.VALID);
+        submissionEnvelope.enactStateTransition(GRAPH_VALID);
+        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(GRAPH_VALID);
 
         //and:
         PersistentEntityResourceAssembler resourceAssembler =
@@ -137,9 +138,6 @@ public class SubmissionControllerTest {
         //then:
         assertThat(response).isNotNull();
         assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(DRAFT);
-
-        // This will handle the validation state update and deleting of graph validation errors on entities
-        verify(submissionEnvelopeService).handleGraphValidationStateUpdateRequest(submissionEnvelope, SubmissionGraphValidationState.PENDING);
     }
     @Configuration
     static class TestConfiguration {}
