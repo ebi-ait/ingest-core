@@ -13,7 +13,6 @@ import org.humancellatlas.ingest.patch.PatchRepository;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
-import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
@@ -30,7 +29,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @Service
@@ -83,7 +81,7 @@ public class SubmissionEnvelopeService {
     private SubmissionErrorRepository submissionErrorRepository;
 
     public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
-        if(envelope.getSubmissionState() != SubmissionState.GRAPH_VALIDATED) {
+        if(envelope.getSubmissionState() != SubmissionState.GRAPH_VALID) {
             throw new RuntimeException((String.format(
                     "Envelope with id %s cannot be submitted without a graph valid state",
                     envelope.getId()
