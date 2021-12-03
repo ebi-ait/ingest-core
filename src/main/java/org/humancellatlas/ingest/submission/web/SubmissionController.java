@@ -20,7 +20,6 @@ import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.protocol.ProtocolService;
-import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
 import org.humancellatlas.ingest.state.ValidationState;
@@ -224,7 +223,6 @@ public class SubmissionController {
     HttpEntity<?> enactDraftEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelope.enactStateTransition(SubmissionState.DRAFT);
         getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        submissionEnvelopeService.handleGraphValidationStateUpdateRequest(submissionEnvelope, SubmissionGraphValidationState.PENDING);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
@@ -313,43 +311,49 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
-    private HttpEntity<?> performGraphRequest(SubmissionGraphValidationState state, SubmissionEnvelope envelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelopeService.handleGraphValidationStateUpdateRequest(envelope, state);
+    private HttpEntity<?> enactStateTransition(SubmissionState state, SubmissionEnvelope envelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        envelope.enactStateTransition(state);
+        getSubmissionEnvelopeRepository().save(envelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(envelope));
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_PENDING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> graphPendingRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        return this.performGraphRequest(SubmissionGraphValidationState.PENDING, submissionEnvelope, resourceAssembler);
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_GRAPH_VALIDATION_REQUESTED_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactGraphValidationRequested(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        HttpEntity<?> response = this.enactStateTransition(SubmissionState.GRAPH_VALIDATION_REQUESTED, submissionEnvelope, resourceAssembler);
+        messageRouter.routeGraphValidationMessageFor(submissionEnvelope);
+        return response;
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_REQUESTED_URL, method = RequestMethod.PUT)
-    HttpEntity<?> graphRequestedRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        // This method is used for skipping graph validation and manually setting the state if desired to mock the flow
-        return this.performGraphRequest(SubmissionGraphValidationState.REQUESTED, submissionEnvelope, resourceAssembler);
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_GRAPH_VALIDATING_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactGraphValidating(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        return this.enactStateTransition(SubmissionState.GRAPH_VALIDATING, submissionEnvelope, resourceAssembler);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_GRAPH_VALIDATED_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactGraphValidationComplete(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        return this.enactStateTransition(SubmissionState.GRAPH_VALIDATED, submissionEnvelope, resourceAssembler);
+    }
+
+    private HttpEntity<?> performStateUpdateRequest(SubmissionState state, SubmissionEnvelope envelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        submissionEnvelopeService.handleEnvelopeStateUpdateRequest(envelope, state);
+        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(envelope));
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_VALIDATION_REQUESTED_URL, method = RequestMethod.PUT)
+    HttpEntity<?> requestGraphValidation(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
+                                         final PersistentEntityResourceAssembler resourceAssembler) {
+        return this.performStateUpdateRequest(SubmissionState.GRAPH_VALIDATION_REQUESTED, submissionEnvelope, resourceAssembler);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_VALIDATING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> graphValidatingRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        return this.performGraphRequest(SubmissionGraphValidationState.VALIDATING, submissionEnvelope, resourceAssembler);
-    }
-
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_VALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> graphValidRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        return this.performGraphRequest(SubmissionGraphValidationState.VALID, submissionEnvelope, resourceAssembler);
-    }
-
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_INVALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> graphInvalidRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        return this.performGraphRequest(SubmissionGraphValidationState.INVALID, submissionEnvelope, resourceAssembler);
-    }
-
-    @RequestMapping(path = "/submissionEnvelopes/{id}/validateGraph", method = RequestMethod.POST)
-    HttpEntity<?> requestGraphValidation(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
+    HttpEntity<?> requestGraphValidating(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                          final PersistentEntityResourceAssembler resourceAssembler) {
-        HttpEntity<?> response = this.performGraphRequest(SubmissionGraphValidationState.REQUESTED, submissionEnvelope, resourceAssembler);
-        messageRouter.routeGraphValidationMessageFor(submissionEnvelope);
-        return response;
+        return this.performStateUpdateRequest(SubmissionState.GRAPH_VALIDATING, submissionEnvelope, resourceAssembler);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_VALIDATED_URL, method = RequestMethod.PUT)
+    HttpEntity<?> requestGraphValidationComplete(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        return this.performStateUpdateRequest(SubmissionState.GRAPH_VALIDATED, submissionEnvelope, resourceAssembler);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMISSION_DOCUMENTS_SM_URL, method = RequestMethod.GET)

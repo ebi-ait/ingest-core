@@ -23,6 +23,12 @@ public class Links {
     public static final String VALIDATING_URL = "/validatingEvent";
     public static final String VALID_REL = "valid";
     public static final String VALID_URL = "/validEvent";
+    public static final String GRAPH_VALIDATION_REQUESTED_REL = "graphValidationRequested";
+    public static final String GRAPH_VALIDATION_REQUESTED_URL = "/graphValidationRequestedEvent";
+    public static final String GRAPH_VALIDATING_REL = "graphValidating";
+    public static final String GRAPH_VALIDATING_URL = "/graphValidatingEvent";
+    public static final String GRAPH_VALIDATED_REL = "graphValidated";
+    public static final String GRAPH_VALIDATED_URL = "/graphValidatedEvent";
     public static final String INVALID_REL = "invalid";
     public static final String INVALID_URL = "/invalidEvent";
     public static final String PROCESSING_REL ="processing";
@@ -52,6 +58,12 @@ public class Links {
     public static final String COMMIT_VALID_URL = "/commitValidEvent";
     public static final String COMMIT_INVALID_REL = "commitInvalid";
     public static final String COMMIT_INVALID_URL = "/commitInvalidEvent";
+    public static final String COMMIT_GRAPH_VALIDATION_REQUESTED_REL = "commitGraphValidationRequested";
+    public static final String COMMIT_GRAPH_VALIDATION_REQUESTED_URL = "/commitGraphValidationRequestedEvent";
+    public static final String COMMIT_GRAPH_VALIDATING_REL = "commitGraphValidating";
+    public static final String COMMIT_GRAPH_VALIDATING_URL = "/commitGraphValidatingEvent";
+    public static final String COMMIT_GRAPH_VALIDATED_REL = "commitGraphValidated";
+    public static final String COMMIT_GRAPH_VALIDATED_URL = "/commitGraphValidated";
     public static final String COMMIT_PROCESSING_REL ="commitProcessing";
     public static final String COMMIT_PROCESSING_URL ="/commitProcessingEvent";
     public static final String COMMIT_ARCHIVING_REL = "commitArchiving";
@@ -66,18 +78,6 @@ public class Links {
     public static final String COMMIT_CLEANUP_URL = "/commitCleanupEvent";
     public static final String COMMIT_COMPLETE_REL = "commitComplete";
     public static final String COMMIT_COMPLETE_URL = "/commitCompleteEvent";
-
-    // Links to request to change to graph validation state of an envelope
-    public static final String GRAPH_PENDING_REL = "graphPending";
-    public static final String GRAPH_PENDING_URL = "/graphPendingEvent";
-    public static final String GRAPH_REQUESTED_REL = "graphRequested";
-    public static final String GRAPH_REQUESTED_URL = "/graphRequestedEvent";
-    public static final String GRAPH_VALIDATING_REL = "graphValidating";
-    public static final String GRAPH_VALIDATING_URL = "/graphValidatingEvent";
-    public static final String GRAPH_VALID_REL = "graphValid";
-    public static final String GRAPH_VALID_URL = "/graphValidEvent";
-    public static final String GRAPH_INVALID_REL = "graphInvalid";
-    public static final String GRAPH_INVALID_URL = "/graphInvalidEvent";
 
     // Links to entities for submission envelopes
     public static final String BIOMATERIALS_URL = "/biomaterials";

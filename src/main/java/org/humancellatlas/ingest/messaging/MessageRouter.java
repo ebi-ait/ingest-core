@@ -51,7 +51,7 @@ public class MessageRouter {
 
     /* messages to graph validator */
     public boolean routeGraphValidationMessageFor(SubmissionEnvelope envelope) {
-        if (envelope.allowedGraphValidationStateTransitions().contains(SubmissionGraphValidationState.VALIDATING)) {
+        if (envelope.allowedSubmissionStateTransitions().contains(SubmissionState.GRAPH_VALIDATING)) {
             this.messageSender.queueGraphValidationMessage(
                     Constants.Exchanges.VALIDATION_EXCHANGE,
                     Constants.Queues.GRAPH_VALIDATION_QUEUE,
