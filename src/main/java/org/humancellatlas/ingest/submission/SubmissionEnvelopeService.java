@@ -83,9 +83,9 @@ public class SubmissionEnvelopeService {
     private SubmissionErrorRepository submissionErrorRepository;
 
     public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
-        if(envelope.getGraphValidationState() != SubmissionGraphValidationState.VALID) {
+        if(envelope.getSubmissionState() != SubmissionState.GRAPH_VALIDATED) {
             throw new RuntimeException((String.format(
-                    "Envelope with id %s cannot be submitted without a valid graphValidationState",
+                    "Envelope with id %s cannot be submitted without a graph valid state",
                     envelope.getId()
             )));
         }
@@ -109,29 +109,10 @@ public class SubmissionEnvelopeService {
                     envelope.getId(), envelope.getSubmissionState(), state));
         } else {
             messageRouter.routeStateTrackingUpdateMessageForEnvelopeEvent(envelope, state);
-        }
-    }
 
-    public void handleGraphValidationStateUpdateRequest(SubmissionEnvelope envelope,
-                                                        SubmissionGraphValidationState state) {
-        if (!envelope.allowedGraphValidationStateTransitions().contains(state)) {
-            throw new RuntimeException(String.format(
-                    "Envelope with id %s cannot be transitioned from graphValidationState %s to graphValidationState %s",
-                    envelope.getId(), envelope.getGraphValidationState(), state));
-        } else {
-            if(envelope.getGraphValidationState() == SubmissionGraphValidationState.INVALID) {
+            if(envelope.getSubmissionState() == SubmissionState.GRAPH_VALIDATION_REQUESTED) {
                 removeGraphValidationErrors(envelope);
             }
-            envelope.enactGraphValidationStateTransition(state);
-            submissionEnvelopeRepository.save(envelope);
-
-            java.util.logging.Logger.getAnonymousLogger().log(Level.INFO, state.toString());
-            java.util.logging.Logger.getAnonymousLogger().log(Level.INFO, state.getSubmissionStateEquivalent().toString());
-
-            state.getSubmissionStateEquivalent().ifPresent(submissionState -> {
-                java.util.logging.Logger.getAnonymousLogger().log(Level.INFO, submissionState.toString());
-                this.handleEnvelopeStateUpdateRequest(envelope, submissionState);
-            });
         }
     }
 

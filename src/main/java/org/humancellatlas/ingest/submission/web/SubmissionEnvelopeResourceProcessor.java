@@ -136,6 +136,12 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
 
     private Optional<String> getRelNameForRequestSubmissionState(SubmissionState submissionState) {
         switch (submissionState) {
+            case GRAPH_VALIDATION_REQUESTED:
+                return Optional.of(Links.GRAPH_VALIDATION_REQUESTED_REL);
+            case GRAPH_VALIDATING:
+                return Optional.of(Links.GRAPH_VALIDATING_REL);
+            case GRAPH_VALIDATED:
+                return Optional.of(Links.GRAPH_VALIDATED_REL);
             case SUBMITTED:
                 return Optional.of(Links.SUBMIT_REL);
             case ARCHIVED:
@@ -192,6 +198,12 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 return Optional.of(Links.COMMIT_INVALID_REL);
             case VALID:
                 return Optional.of(Links.COMMIT_VALID_REL);
+            case GRAPH_VALIDATION_REQUESTED:
+                return Optional.of(Links.COMMIT_GRAPH_VALIDATION_REQUESTED_REL);
+            case GRAPH_VALIDATING:
+                return Optional.of(Links.COMMIT_GRAPH_VALIDATING_REL);
+            case GRAPH_VALIDATED:
+                return Optional.of(Links.COMMIT_GRAPH_VALIDATED_REL);
             case SUBMITTED:
                 return Optional.of(Links.COMMIT_SUBMIT_REL);
             case PROCESSING:
@@ -224,6 +236,12 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 return Optional.of(Links.COMMIT_INVALID_URL);
             case VALID:
                 return Optional.of(Links.COMMIT_VALID_URL);
+            case GRAPH_VALIDATION_REQUESTED:
+                return Optional.of(Links.COMMIT_GRAPH_VALIDATION_REQUESTED_URL);
+            case GRAPH_VALIDATING:
+                return Optional.of(Links.COMMIT_GRAPH_VALIDATING_URL);
+            case GRAPH_VALIDATED:
+                return Optional.of(Links.COMMIT_GRAPH_VALIDATED_URL);
             case SUBMITTED:
                 return Optional.of(Links.COMMIT_SUBMIT_URL);
             case PROCESSING:
