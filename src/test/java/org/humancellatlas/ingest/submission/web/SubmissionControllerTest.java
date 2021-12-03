@@ -145,7 +145,7 @@ public class SubmissionControllerTest {
     }
 
     @Test
-    public void testHappyPath() {
+    public void testHappyValidationPath() {
         //given:
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         submissionEnvelope.enactStateTransition(DRAFT);
