@@ -70,10 +70,11 @@ public class BiomaterialControllerTest {
 
     @BeforeEach
     void setUp() {
-        process = new Process(UUID.randomUUID());
+        process = new Process();
         processRepository.save(process);
 
-        biomaterial = new Biomaterial(null);
+        biomaterial = new Biomaterial();
+        biomaterialRepository.save(biomaterial);
     }
 
     @Test
@@ -92,6 +93,7 @@ public class BiomaterialControllerTest {
     @Test
     public void testSaveInputToProcessTriggersValidationStateToDraft() throws Exception {
         // send post request
+
         webApp.perform(post("/biomaterials/{biomaterialId}/inputToProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
@@ -117,7 +119,7 @@ public class BiomaterialControllerTest {
     @Test
     public void testDerivedByProcessTriggersValidationStateToDraft() throws Exception {
         // send post request
-        webApp.perform(post("/biomaterials/{biomaterialId}/derivedByProcesses/", biomaterial.getId())
+        webApp.perform(post("/biomaterials/{biomaterialId}/derivedByProcesses", biomaterial.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isNoContent());
