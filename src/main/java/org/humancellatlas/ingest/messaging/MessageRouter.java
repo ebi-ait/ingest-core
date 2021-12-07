@@ -7,8 +7,6 @@ import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.exporter.ExperimentProcess;
 import org.humancellatlas.ingest.messaging.model.*;
-import org.humancellatlas.ingest.project.Project;
-import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
