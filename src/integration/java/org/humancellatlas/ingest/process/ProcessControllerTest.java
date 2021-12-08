@@ -2,7 +2,6 @@ package org.humancellatlas.ingest.process;
 
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
-import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
