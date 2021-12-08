@@ -104,7 +104,8 @@ public class BiomaterialControllerTest {
 
         // then
         verifyStatesInDraft();
-        verifyUnlinking();
+        Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
+        assertThat(updatedBiomaterial.getInputToProcesses()).doesNotContain(process);
     }
 
     @Test
@@ -119,13 +120,8 @@ public class BiomaterialControllerTest {
 
         // then
         verifyStatesInDraft();
-        verifyUnlinking();
-    }
-
-    private void verifyUnlinking() {
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getDerivedByProcesses()).doesNotContain(process);
-        assertThat(updatedBiomaterial.getInputToProcesses()).doesNotContain(process);
     }
 
     private void verifyStatesInDraft() {

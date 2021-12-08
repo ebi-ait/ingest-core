@@ -10,7 +10,6 @@ import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.file.*;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
-import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -145,7 +144,7 @@ public class FileController {
     HttpEntity<?> unlinkBiomaterialAsInputToProcess(@PathVariable("id") File file,
                                                     @PathVariable("processId") Process process,
                                                     PersistentEntityResourceAssembler assembler) {
-        file.removeAsDerivedByProcess(process);
+        file.removeAsInputToProcess(process);
         fileRepository.save(file);
 
         validationStateChangeService.changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);

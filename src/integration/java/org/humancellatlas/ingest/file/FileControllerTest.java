@@ -102,7 +102,8 @@ public class FileControllerTest {
 
         // then
         verifyStatesInDraft();
-        verifyUnlinking();
+        File updatedFile = fileRepository.findById(file.getId()).get();
+        assertThat(updatedFile.getDerivedByProcesses()).doesNotContain(process);
     }
 
     @Test
@@ -117,12 +118,7 @@ public class FileControllerTest {
 
         // then
         verifyStatesInDraft();
-        verifyUnlinking();
-    }
-
-    private void verifyUnlinking() {
         File updatedFile = fileRepository.findById(file.getId()).get();
-        assertThat(updatedFile.getDerivedByProcesses()).doesNotContain(process);
         assertThat(updatedFile.getInputToProcesses()).doesNotContain(process);
     }
 

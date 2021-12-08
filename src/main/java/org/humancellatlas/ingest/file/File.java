@@ -130,5 +130,10 @@ public class File extends MetadataDocument {
         return this;
     }
 
+    public File removeAsInputToProcess(Process process) {
+        this.inputToProcesses.remove(process);
+        return this;
+    }
+
 
 }
