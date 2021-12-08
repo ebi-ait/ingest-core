@@ -2,7 +2,6 @@ package org.humancellatlas.ingest.process;
 
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
-import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
@@ -84,7 +83,7 @@ class ProcessControllerTest {
         webApp.perform(put("/processes/{id}/protocols/", process.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol2.getId()
-                        +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol3.getId()))
+                        + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol3.getId()))
                 .andExpect(status().isAccepted());
 
 
@@ -106,7 +105,7 @@ class ProcessControllerTest {
         webApp.perform(post("/processes/{id}/protocols/", process.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol.getId()
-                        +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol2.getId()))
+                        + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol2.getId()))
                 .andExpect(status().isAccepted());
 
         verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
