@@ -95,10 +95,11 @@ public class BiomaterialControllerTest {
         biomaterial.addAsInputToProcess(process);
         biomaterialRepository.save(biomaterial);
 
-        // send delete request
+        // when
         webApp.perform(delete("/biomaterials/{biomaterialId}/inputToProcesses/{processId}", biomaterial.getId(), process.getId()))
                 .andExpect(status().isNoContent());
 
+        // then
         verify(validationStateChangeService, times(1)).changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
         verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
 
@@ -106,7 +107,6 @@ public class BiomaterialControllerTest {
 
     @Test
     public void testLinkBiomaterialAsDerivedByProcessChangesTheirValidationStatesToDraft() throws Exception {
-        // send post request
         webApp.perform(post("/biomaterials/{biomaterialId}/derivedByProcesses/{processId}", biomaterial.getId(), process.getId()))
                 .andExpect(status().isAccepted());
 
@@ -120,10 +120,11 @@ public class BiomaterialControllerTest {
         biomaterial.addAsDerivedByProcess(process);
         biomaterialRepository.save(biomaterial);
 
-        // send delete request
+        // when
         webApp.perform(delete("/biomaterials/{biomaterialId}/derivedByProcesses/{processId}", biomaterial.getId(), process.getId()))
                 .andExpect(status().isNoContent());
 
+        // then
         verify(validationStateChangeService, times(1)).changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
         verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
 
