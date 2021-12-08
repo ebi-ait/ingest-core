@@ -1,40 +1,26 @@
 package org.humancellatlas.ingest.biomaterial;
 
 import org.humancellatlas.ingest.config.MigrationConfiguration;
-import org.humancellatlas.ingest.core.Checksums;
-import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
-import org.humancellatlas.ingest.file.File;
-import org.humancellatlas.ingest.file.web.FileMessage;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.state.ValidationState;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -78,7 +64,33 @@ public class BiomaterialControllerTest {
     }
 
     @Test
-    public void testDeleteInputToProcessTriggersValidationStateToDraft() throws Exception {
+    public void testDisableDefaultInputToProcessesLinkEndpoint() throws Exception {
+        webApp.perform(post("/biomaterials/{biomaterialId}/inputToProcesses/", biomaterial.getId())
+                .contentType("text/uri-list")
+                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testDisableDefaultDerivedByProcessesLinkEndpoint() throws Exception {
+        webApp.perform(post("/biomaterials/{biomaterialId}/derivedByProcesses/", biomaterial.getId())
+                .contentType("text/uri-list")
+                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testLinkBiomaterialAsInputToProcessChangesTheirValidationStatesToDraft() throws Exception {
+        webApp.perform(post("/biomaterials/{biomaterialId}/inputToProcesses/{processId}", biomaterial.getId(), process.getId()))
+                .andExpect(status().isAccepted());
+
+        verify(validationStateChangeService, times(1)).changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+
+    }
+
+    @Test
+    public void testUnlinkBiomaterialAsInputToProcessChangesTheirValidationStatesToDraft() throws Exception {
         // given
         biomaterial.addAsInputToProcess(process);
         biomaterialRepository.save(biomaterial);
@@ -87,24 +99,23 @@ public class BiomaterialControllerTest {
         webApp.perform(delete("/biomaterials/{biomaterialId}/inputToProcesses/{processId}", biomaterial.getId(), process.getId()))
                 .andExpect(status().isNoContent());
 
-        verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
+        verify(validationStateChangeService, times(1)).changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+
     }
 
     @Test
-    public void testSaveInputToProcessTriggersValidationStateToDraft() throws Exception {
+    public void testLinkBiomaterialAsDerivedByProcessChangesTheirValidationStatesToDraft() throws Exception {
         // send post request
+        webApp.perform(post("/biomaterials/{biomaterialId}/derivedByProcesses/{processId}", biomaterial.getId(), process.getId()))
+                .andExpect(status().isAccepted());
 
-        webApp.perform(post("/biomaterials/{biomaterialId}/inputToProcesses/", biomaterial.getId())
-                .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
-                .andExpect(status().isNoContent());
-
-        verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
-
+        verify(validationStateChangeService, times(1)).changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
     }
 
     @Test
-    public void testDeleteDerivedByProcessTriggersValidationStateToDraft() throws Exception {
+    public void testDeleteDerivedByProcessChangesTheirValidationStatesToDraft() throws Exception {
         // given
         biomaterial.addAsDerivedByProcess(process);
         biomaterialRepository.save(biomaterial);
@@ -113,18 +124,10 @@ public class BiomaterialControllerTest {
         webApp.perform(delete("/biomaterials/{biomaterialId}/derivedByProcesses/{processId}", biomaterial.getId(), process.getId()))
                 .andExpect(status().isNoContent());
 
-        verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
+        verify(validationStateChangeService, times(1)).changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+
     }
 
-    @Test
-    public void testDerivedByProcessTriggersValidationStateToDraft() throws Exception {
-        // send post request
-        webApp.perform(post("/biomaterials/{biomaterialId}/derivedByProcesses", biomaterial.getId())
-                .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
-                .andExpect(status().isNoContent());
-
-        verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
-    }
 
 }

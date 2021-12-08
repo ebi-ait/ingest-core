@@ -63,7 +63,7 @@ public class MetadataLinkEventHandler {
     }
 
     private void changeValidationStatetoDraft(MetadataDocument metadataDocument, EntityType entityType) {
-        validationStateChangeService.changeValidationState(entityType, metadataDocument.getId(), ValidationState.DRAFT);
+//        validationStateChangeService.changeValidationState(entityType, metadataDocument.getId(), ValidationState.DRAFT);
     }
 
     private boolean isSetOfType(Object obj, Class<?> clazz) {

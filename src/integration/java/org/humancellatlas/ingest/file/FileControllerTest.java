@@ -60,50 +60,66 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testDeleteInputToProcessTriggersValidationStateToDraft() throws Exception {
-        // given
-        file.addAsInputToProcess(process);
-        fileRepository.save(file);
-
-        // send delete request
-        webApp.perform(delete("/files/{fileId}/inputToProcesses/{processId}", file.getId(), process.getId()))
-                .andExpect(status().isNoContent());
-
-        verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
-    }
-
-    @Test
-    public void testSaveInputToProcessTriggersValidationStateToDraft() throws Exception {
-        // send post request
+    public void testDisableLinkFileAsInputToProcessDefaultEnpoint() throws Exception {
         webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
-                .andExpect(status().isNoContent());
-
-        verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    public void testDeleteDerivedByProcessTriggersValidationStateToDraft() throws Exception {
+    public void testDisableLinkFileAsDerivedByProcessDefaultEnpoint() throws Exception {
+        webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
+                .contentType("text/uri-list")
+                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testUnlinkFileAsDerivedByProcessChangesTheirValidationStatesToDraft() throws Exception {
         // given
         file.addAsDerivedByProcess(process);
         fileRepository.save(file);
 
-        // send delete request
+        // when
         webApp.perform(delete("/files/{fileId}/derivedByProcesses/{processId}", file.getId(), process.getId()))
                 .andExpect(status().isNoContent());
 
-        verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
+        // then
+        verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
     }
 
     @Test
-    public void testDerivedByProcessTriggersValidationStateToDraft() throws Exception {
-        // send post request
-        webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
-                .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
+    public void testUnlinkFileAsInputToProcessChangesTheirValidationStatesToDraft() throws Exception {
+        // given
+        file.addAsInputToProcess(process);
+        fileRepository.save(file);
+
+        // when
+        webApp.perform(delete("/files/{fileId}/inputToProcesses/{processId}", file.getId(), process.getId()))
                 .andExpect(status().isNoContent());
 
-        verify(validationStateChangeService, times(1)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
+        // then
+        verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+    }
+
+    @Test
+    public void testLinkFileAsInputToProcessChangesTheirValidationStatesToDraft() throws Exception {
+        webApp.perform(post("/files/{fileId}/inputToProcesses/{processId}", file.getId(), process.getId()))
+                .andExpect(status().isAccepted());
+
+        verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+    }
+
+    @Test
+    public void testLinkFileAsDerivedByProcessChangesTheirValidationStatesToDraft() throws Exception {
+        webApp.perform(post("/files/{fileId}/derivedByProcesses/{processId}", file.getId(), process.getId()))
+                .andExpect(status().isAccepted());
+
+        verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
     }
 }

@@ -69,4 +69,8 @@ public class Process extends MetadataDocument {
         protocols.add(protocol);
     }
 
+    public void removeProtocol(Protocol protocol) {
+        protocols.remove(protocol);
+    }
+
 }
