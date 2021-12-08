@@ -67,8 +67,7 @@ public class FileControllerTest {
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isAccepted());
 
-        verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+        verifyStatesInDraft();
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses())
@@ -83,8 +82,7 @@ public class FileControllerTest {
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isAccepted());
 
-        verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+        verifyStatesInDraft();
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses())
@@ -103,11 +101,8 @@ public class FileControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-
-        File updatedFile = fileRepository.findById(file.getId()).get();
-        assertThat(updatedFile.getDerivedByProcesses()).doesNotContain(process);
+        verifyStatesInDraft();
+        verifyUnlinking();
     }
 
     @Test
@@ -121,10 +116,18 @@ public class FileControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
+        verifyStatesInDraft();
+        verifyUnlinking();
+    }
+
+    private void verifyUnlinking() {
+        File updatedFile = fileRepository.findById(file.getId()).get();
+        assertThat(updatedFile.getDerivedByProcesses()).doesNotContain(process);
+        assertThat(updatedFile.getInputToProcesses()).doesNotContain(process);
+    }
+
+    private void verifyStatesInDraft() {
         verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
         verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-
-        File updatedFile = fileRepository.findById(file.getId()).get();
-        assertThat(updatedFile.getInputToProcesses()).doesNotContain(process);
     }
 }

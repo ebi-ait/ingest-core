@@ -69,8 +69,7 @@ public class BiomaterialControllerTest {
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isAccepted());
 
-        verify(validationStateChangeService, times(1)).changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+        verifyStatesInDraft();
 
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getInputToProcesses())
@@ -85,8 +84,7 @@ public class BiomaterialControllerTest {
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isAccepted());
 
-        verify(validationStateChangeService, times(1)).changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+        verifyStatesInDraft();
 
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getDerivedByProcesses())
@@ -105,11 +103,8 @@ public class BiomaterialControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verify(validationStateChangeService, times(1)).changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-
-        Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
-        assertThat(updatedBiomaterial.getDerivedByProcesses()).doesNotContain(process);
+        verifyStatesInDraft();
+        verifyUnlinking();
     }
 
     @Test
@@ -123,12 +118,19 @@ public class BiomaterialControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verify(validationStateChangeService, times(1)).changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-
-        Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
-        assertThat(updatedBiomaterial.getDerivedByProcesses()).doesNotContain(process);
+        verifyStatesInDraft();
+        verifyUnlinking();
     }
 
+    private void verifyUnlinking() {
+        Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
+        assertThat(updatedBiomaterial.getDerivedByProcesses()).doesNotContain(process);
+        assertThat(updatedBiomaterial.getInputToProcesses()).doesNotContain(process);
+    }
+
+    private void verifyStatesInDraft() {
+        verify(validationStateChangeService, times(1)).changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+    }
 
 }
