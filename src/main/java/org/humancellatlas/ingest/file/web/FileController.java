@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.core.service.UriToEntityConversionService;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
@@ -27,10 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.springframework.data.rest.webmvc.RestMediaTypes.TEXT_URI_LIST_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -114,6 +112,7 @@ public class FileController {
 
         List<Process> processes = uriToEntityConversionService.convertLinks(incoming.getLinks(), Process.class);
         List<Process> unlinkedProcesses = new ArrayList<>();
+
         if (requestMethod.equals(HttpMethod.POST)) {
             processes.forEach(process -> {
                 file.addAsInputToProcess(process);
@@ -126,15 +125,13 @@ public class FileController {
 
         fileRepository.save(file);
 
-        unlinkedProcesses.forEach(unlinkedProcess -> {
-            validationStateChangeService.changeValidationState(unlinkedProcess.getType(), unlinkedProcess.getId(), ValidationState.DRAFT);
+        List<MetadataDocument> metadataToSetToDraft = new ArrayList<>();
+        metadataToSetToDraft.addAll(unlinkedProcesses);
+        metadataToSetToDraft.addAll(processes);
+        metadataToSetToDraft.add(file);
+        metadataToSetToDraft.forEach(metadataDocument -> {
+            validationStateChangeService.changeValidationState(metadataDocument.getType(), metadataDocument.getId(), ValidationState.DRAFT);
         });
-
-        processes.forEach(process -> {
-            validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-        });
-
-        validationStateChangeService.changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
 
         return ResponseEntity.accepted().build();
     }
@@ -159,15 +156,13 @@ public class FileController {
 
         fileRepository.save(file);
 
-        unlinkedProcesses.forEach(unlinkedProcess -> {
-            validationStateChangeService.changeValidationState(unlinkedProcess.getType(), unlinkedProcess.getId(), ValidationState.DRAFT);
+        List<MetadataDocument> metadataToSetToDraft = new ArrayList<>();
+        metadataToSetToDraft.addAll(unlinkedProcesses);
+        metadataToSetToDraft.addAll(processes);
+        metadataToSetToDraft.add(file);
+        metadataToSetToDraft.forEach(metadataDocument -> {
+            validationStateChangeService.changeValidationState(metadataDocument.getType(), metadataDocument.getId(), ValidationState.DRAFT);
         });
-
-        processes.forEach(process -> {
-            validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-        });
-
-        validationStateChangeService.changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
 
         return ResponseEntity.accepted().build();
     }

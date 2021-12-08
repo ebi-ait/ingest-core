@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.biomaterial.BiomaterialService;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.core.service.UriToEntityConversionService;
@@ -114,14 +115,13 @@ public class BiomaterialController {
 
         biomaterialRepository.save(biomaterial);
 
-        unlinkedProcesses.forEach(unlinkedProcess -> {
-            validationStateChangeService.changeValidationState(unlinkedProcess.getType(), unlinkedProcess.getId(), ValidationState.DRAFT);
+        List<MetadataDocument> metadataToSetToDraft = new ArrayList<>();
+        metadataToSetToDraft.addAll(unlinkedProcesses);
+        metadataToSetToDraft.addAll(processes);
+        metadataToSetToDraft.add(biomaterial);
+        metadataToSetToDraft.forEach(metadataDocument -> {
+            validationStateChangeService.changeValidationState(metadataDocument.getType(), metadataDocument.getId(), ValidationState.DRAFT);
         });
-        processes.forEach(process -> {
-            validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-        });
-
-        validationStateChangeService.changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
 
         return ResponseEntity.accepted().build();
     }
@@ -146,13 +146,13 @@ public class BiomaterialController {
 
         biomaterialRepository.save(biomaterial);
 
-        unlinkedProcesses.forEach(unlinkedProcess -> {
-            validationStateChangeService.changeValidationState(unlinkedProcess.getType(), unlinkedProcess.getId(), ValidationState.DRAFT);
+        List<MetadataDocument> metadataToSetToDraft = new ArrayList<>();
+        metadataToSetToDraft.addAll(unlinkedProcesses);
+        metadataToSetToDraft.addAll(processes);
+        metadataToSetToDraft.add(biomaterial);
+        metadataToSetToDraft.forEach(metadataDocument -> {
+            validationStateChangeService.changeValidationState(metadataDocument.getType(), metadataDocument.getId(), ValidationState.DRAFT);
         });
-        processes.forEach(process -> {
-            validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-        });
-        validationStateChangeService.changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
 
         return ResponseEntity.accepted().build();
     }
