@@ -72,7 +72,7 @@ public class BiomaterialControllerTest {
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()
                         + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(biomaterial, process, process2);
 
@@ -96,7 +96,7 @@ public class BiomaterialControllerTest {
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()
                         + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(biomaterial, process, process2, process3);
 
@@ -112,7 +112,7 @@ public class BiomaterialControllerTest {
         webApp.perform(post("/biomaterials/{id}/inputToProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(biomaterial, process);
 
@@ -131,7 +131,7 @@ public class BiomaterialControllerTest {
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()
                         + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(biomaterial, process, process2);
 
@@ -155,7 +155,7 @@ public class BiomaterialControllerTest {
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()
                         + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(biomaterial, process, process2, process3);
 
@@ -170,7 +170,7 @@ public class BiomaterialControllerTest {
         webApp.perform(post("/biomaterials/{id}/derivedByProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(biomaterial, process);
 

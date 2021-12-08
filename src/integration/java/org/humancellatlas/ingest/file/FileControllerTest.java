@@ -70,7 +70,7 @@ public class FileControllerTest {
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()
                         +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(file, process, process2);
 
@@ -94,7 +94,7 @@ public class FileControllerTest {
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()
                         +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(file, process, process2, process3);
 
@@ -109,7 +109,7 @@ public class FileControllerTest {
         webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(file, process);
 
@@ -124,7 +124,7 @@ public class FileControllerTest {
         webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(file, process);
 
@@ -143,7 +143,7 @@ public class FileControllerTest {
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()
                         +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(file, process, process2);
 
@@ -167,7 +167,7 @@ public class FileControllerTest {
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()
                         +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(file, process, process2, process3);
 

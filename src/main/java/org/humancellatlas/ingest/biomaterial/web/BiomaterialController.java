@@ -123,7 +123,7 @@ public class BiomaterialController {
             validationStateChangeService.changeValidationState(metadataDocument.getType(), metadataDocument.getId(), ValidationState.DRAFT);
         });
 
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.ok().build();
     }
 
     @RequestMapping(path = "/biomaterials/{id}/derivedByProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
@@ -154,7 +154,7 @@ public class BiomaterialController {
             validationStateChangeService.changeValidationState(metadataDocument.getType(), metadataDocument.getId(), ValidationState.DRAFT);
         });
 
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.ok().build();
     }
 
 

@@ -213,7 +213,7 @@ public class ProcessController {
 
         validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
 
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping(path = "/processes/{id}/protocols/{protocolId}")

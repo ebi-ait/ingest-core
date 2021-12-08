@@ -84,7 +84,7 @@ class ProcessControllerTest {
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol2.getId()
                         + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol3.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(process, protocol, protocol2, protocol3);
 
@@ -103,7 +103,7 @@ class ProcessControllerTest {
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol.getId()
                         + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol2.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(process, protocol, protocol2);
 
@@ -118,7 +118,7 @@ class ProcessControllerTest {
         webApp.perform(post("/processes/{processId}/protocols/", process.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol.getId()))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         verifyInDraft(process, protocol);
 
