@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.file;
 
 import org.humancellatlas.ingest.config.MigrationConfiguration;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,8 +70,7 @@ public class FileControllerTest {
                         +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isAccepted());
 
-        verifyStatesInDraft();
-        verify(validationStateChangeService, times(1)).changeValidationState(process2.getType(), process2.getId(), ValidationState.DRAFT);
+        verifyInDraft(file, process, process2);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses())
@@ -93,9 +94,7 @@ public class FileControllerTest {
                         +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isAccepted());
 
-        verifyStatesInDraft();
-        verify(validationStateChangeService, times(1)).changeValidationState(process2.getType(), process2.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(process3.getType(), process3.getId(), ValidationState.DRAFT);
+        verifyInDraft(file, process, process2, process3);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses())
@@ -110,7 +109,7 @@ public class FileControllerTest {
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isAccepted());
 
-        verifyStatesInDraft();
+        verifyInDraft(file, process);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses())
@@ -125,7 +124,7 @@ public class FileControllerTest {
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isAccepted());
 
-        verifyStatesInDraft();
+        verifyInDraft(file, process);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses())
@@ -144,8 +143,7 @@ public class FileControllerTest {
                         +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isAccepted());
 
-        verifyStatesInDraft();
-        verify(validationStateChangeService, times(1)).changeValidationState(process2.getType(), process2.getId(), ValidationState.DRAFT);
+        verifyInDraft(file, process, process2);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses())
@@ -169,9 +167,7 @@ public class FileControllerTest {
                         +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isAccepted());
 
-        verifyStatesInDraft();
-        verify(validationStateChangeService, times(1)).changeValidationState(process2.getType(), process2.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(process3.getType(), process3.getId(), ValidationState.DRAFT);
+        verifyInDraft(file, process, process2, process3);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses())
@@ -190,7 +186,8 @@ public class FileControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verifyStatesInDraft();
+        verifyInDraft(file, process);
+
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses()).doesNotContain(process);
     }
@@ -206,13 +203,15 @@ public class FileControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verifyStatesInDraft();
+        verifyInDraft(file, process);
+
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses()).doesNotContain(process);
     }
 
-    private void verifyStatesInDraft() {
-        verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+    private void verifyInDraft(MetadataDocument... values) {
+        Arrays.stream(values).forEach(value -> {
+            verify(validationStateChangeService, times(1)).changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT);
+        });
     }
 }

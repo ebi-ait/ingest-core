@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.process;
 
 import org.humancellatlas.ingest.config.MigrationConfiguration;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.project.Project;
@@ -17,6 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,7 +69,6 @@ class ProcessControllerTest {
 
         process = new Process(UUID.randomUUID());
         processRepository.save(process);
-
     }
 
     @Test
@@ -86,10 +87,7 @@ class ProcessControllerTest {
                         + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol3.getId()))
                 .andExpect(status().isAccepted());
 
-
-        verify(validationStateChangeService, times(1)).changeValidationState(protocol.getType(), protocol.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(protocol2.getType(), protocol2.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(protocol3.getType(), protocol3.getId(), ValidationState.DRAFT);
+        verifyInDraft(process, protocol, protocol2, protocol3);
 
         Process updatedProcess = processRepository.findById(process.getId()).get();
         assertThat(updatedProcess.getProtocols())
@@ -108,9 +106,7 @@ class ProcessControllerTest {
                         + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol2.getId()))
                 .andExpect(status().isAccepted());
 
-        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(protocol.getType(), protocol.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(protocol2.getType(), protocol2.getId(), ValidationState.DRAFT);
+        verifyInDraft(process, protocol, protocol2);
 
         Process updatedProcess = processRepository.findById(process.getId()).get();
         assertThat(updatedProcess.getProtocols())
@@ -125,8 +121,7 @@ class ProcessControllerTest {
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol.getId()))
                 .andExpect(status().isAccepted());
 
-        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(protocol.getType(), protocol.getId(), ValidationState.DRAFT);
+        verifyInDraft(process, protocol);
 
         Process updatedProcess = processRepository.findById(process.getId()).get();
         assertThat(updatedProcess.getProtocols())
@@ -145,8 +140,7 @@ class ProcessControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(protocol.getType(), protocol.getId(), ValidationState.DRAFT);
+        verifyInDraft(process, protocol);
 
         Process updatedProcess = processRepository.findById(process.getId()).get();
         assertThat(updatedProcess.getProtocols()).doesNotContain(protocol);
@@ -168,5 +162,11 @@ class ProcessControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(validationStateChangeService, times(0)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
+    }
+
+    private void verifyInDraft(MetadataDocument... values) {
+        Arrays.stream(values).forEach(value -> {
+            verify(validationStateChangeService, times(1)).changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT);
+        });
     }
 }
