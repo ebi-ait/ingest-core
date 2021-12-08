@@ -13,7 +13,6 @@ import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -23,12 +22,15 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static org.springframework.data.rest.webmvc.RestMediaTypes.TEXT_URI_LIST_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -106,35 +108,66 @@ public class FileController {
 
     @RequestMapping(path = "/files/{id}/inputToProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> overrideLinkFileAsInputToProcessesDefaultEndpoint(@PathVariable("id") File file,
-                                                                          @RequestBody Resources<Object> incoming,
-                                                                          PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+                                                                    @RequestBody Resources<Object> incoming,
+                                                                    HttpMethod requestMethod,
+                                                                    PersistentEntityResourceAssembler assembler) throws URISyntaxException {
 
-        // TODO handle both PUT and POST and all links
-        URI uri = new URI(incoming.getLinks().get(0).getHref());
-        Process process = uriToEntityConversionService.convert(uri, TypeDescriptor.valueOf(URI.class), TypeDescriptor.valueOf(Process.class));
+        List<Process> processes = uriToEntityConversionService.convertLinks(incoming.getLinks(), Process.class);
+        List<Process> unlinkedProcesses = new ArrayList<>();
+        if (requestMethod.equals(HttpMethod.POST)) {
+            processes.forEach(process -> {
+                file.addAsInputToProcess(process);
+            });
+        } else if (requestMethod.equals(HttpMethod.PUT)) {
+            unlinkedProcesses = new ArrayList(Arrays.asList(file.getInputToProcesses().toArray()));
+            file.getInputToProcesses().clear();
+            file.getInputToProcesses().addAll(processes);
+        }
 
-        file.addAsInputToProcess(process);
         fileRepository.save(file);
 
+        unlinkedProcesses.forEach(unlinkedProcess -> {
+            validationStateChangeService.changeValidationState(unlinkedProcess.getType(), unlinkedProcess.getId(), ValidationState.DRAFT);
+        });
+
+        processes.forEach(process -> {
+            validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+        });
+
         validationStateChangeService.changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
-        validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
 
         return ResponseEntity.accepted().build();
     }
 
     @RequestMapping(path = "/files/{id}/derivedByProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> overrideLinkFileAsDerivedByProcessesDefaultEndpoint(@PathVariable("id") File file,
-                                                                    @RequestBody Resources<Object> incoming,
-                                                                    PersistentEntityResourceAssembler assembler) throws URISyntaxException {
-        // TODO handle both PUT and POST and all links
-        URI uri = new URI(incoming.getLinks().get(0).getHref());
-        Process process = uriToEntityConversionService.convert(uri, TypeDescriptor.valueOf(URI.class), TypeDescriptor.valueOf(Process.class));
+                                                                      @RequestBody Resources<Object> incoming,
+                                                                      HttpMethod requestMethod,
+                                                                      PersistentEntityResourceAssembler assembler) throws URISyntaxException {
 
-        file.addAsDerivedByProcess(process);
+        List<Process> processes = uriToEntityConversionService.convertLinks(incoming.getLinks(), Process.class);
+        List<Process> unlinkedProcesses = new ArrayList<>();
+        if (requestMethod.equals(HttpMethod.POST)) {
+            processes.forEach(process -> {
+                file.addAsDerivedByProcess(process);
+            });
+        } else if (requestMethod.equals(HttpMethod.PUT)) {
+            unlinkedProcesses = new ArrayList(Arrays.asList(file.getDerivedByProcesses().toArray()));
+            file.getDerivedByProcesses().clear();
+            file.getDerivedByProcesses().addAll(processes);
+        }
+
         fileRepository.save(file);
 
+        unlinkedProcesses.forEach(unlinkedProcess -> {
+            validationStateChangeService.changeValidationState(unlinkedProcess.getType(), unlinkedProcess.getId(), ValidationState.DRAFT);
+        });
+
+        processes.forEach(process -> {
+            validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+        });
+
         validationStateChangeService.changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
-        validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
 
         return ResponseEntity.accepted().build();
     }

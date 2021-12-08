@@ -17,7 +17,6 @@ import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -28,15 +27,13 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.springframework.data.rest.webmvc.RestMediaTypes.TEXT_URI_LIST_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -55,8 +52,10 @@ public class ProcessController {
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
     private final @NonNull MetadataUpdateService metadataUpdateService;
 
-    private @Autowired ValidationStateChangeService validationStateChangeService;
-    private @Autowired UriToEntityConversionService uriToEntityConversionService;
+    private @Autowired
+    ValidationStateChangeService validationStateChangeService;
+    private @Autowired
+    UriToEntityConversionService uriToEntityConversionService;
 
     @RequestMapping(path = "processes/{proc_id}/inputBiomaterials", method = RequestMethod.GET)
     ResponseEntity<?> getProcessInputBiomaterials(@PathVariable("proc_id") Process process,
@@ -184,18 +183,35 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/processes/{id}/protocols", method = { PUT, POST }, consumes = {TEXT_URI_LIST_VALUE})
+    @RequestMapping(path = "/processes/{id}/protocols", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> overrideLinkProtocolsDefaultEndpoint(@PathVariable("id") Process process,
-                                             @RequestBody Resources<Object> incoming,
-                                             PersistentEntityResourceAssembler assembler) throws URISyntaxException {
-        // TODO handle both PUT and POST and all links
-        URI uri = new URI(incoming.getLinks().get(0).getHref());
-        Protocol protocol = uriToEntityConversionService.convert(uri, TypeDescriptor.valueOf(URI.class), TypeDescriptor.valueOf(Protocol.class));
-        process.addProtocol(protocol);
+                                                       @RequestBody Resources<Object> incoming,
+                                                       HttpMethod requestMethod,
+                                                       PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+
+        List<Protocol> protocols = uriToEntityConversionService.convertLinks(incoming.getLinks(), Protocol.class);
+        List<Protocol> unlinkedProtocols = new ArrayList<>();
+        if (requestMethod.equals(HttpMethod.POST)) {
+            protocols.forEach(protocol -> {
+                process.addProtocol(protocol);
+            });
+        } else if (requestMethod.equals(HttpMethod.PUT)) {
+            unlinkedProtocols = new ArrayList(Arrays.asList(process.getProtocols().toArray()));
+            process.getProtocols().clear();
+            process.getProtocols().addAll(protocols);
+        }
+
         processRepository.save(process);
 
+        unlinkedProtocols.forEach(unlinkedProtocol -> {
+            validationStateChangeService.changeValidationState(unlinkedProtocol.getType(), unlinkedProtocol.getId(), ValidationState.DRAFT);
+        });
+        
+        protocols.forEach(protocol -> {
+            validationStateChangeService.changeValidationState(protocol.getType(), protocol.getId(), ValidationState.DRAFT);
+        });
+
         validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-        validationStateChangeService.changeValidationState(protocol.getType(), protocol.getId(), ValidationState.DRAFT);
 
         return ResponseEntity.accepted().build();
     }

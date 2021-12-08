@@ -18,12 +18,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -61,7 +58,53 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testOverrideLinkFileAsInputToProcessDefaultEnpoint() throws Exception {
+    public void testOverrideLinkFileAsInputToMultipleProcessesDefaultPostEndpoint() throws Exception {
+        Process process2 = new Process();
+        processRepository.save(process2);
+
+        webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
+                .contentType("text/uri-list")
+                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()
+                        +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
+                .andExpect(status().isAccepted());
+
+        verifyStatesInDraft();
+        verify(validationStateChangeService, times(1)).changeValidationState(process2.getType(), process2.getId(), ValidationState.DRAFT);
+
+        File updatedFile = fileRepository.findById(file.getId()).get();
+        assertThat(updatedFile.getInputToProcesses())
+                .usingElementComparatorOnFields("id")
+                .containsExactly(process, process2);
+    }
+
+    @Test
+    public void testOverrideLinkFileAsInputToMultipleProcessesDefaultPutEndpoint() throws Exception {
+        file.addAsInputToProcess(process);
+        fileRepository.save(file);
+
+        Process process2 = new Process();
+        Process process3 = new Process();
+        processRepository.save(process2);
+        processRepository.save(process3);
+
+        webApp.perform(put("/files/{fileId}/inputToProcesses/", file.getId())
+                .contentType("text/uri-list")
+                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()
+                        +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
+                .andExpect(status().isAccepted());
+
+        verifyStatesInDraft();
+        verify(validationStateChangeService, times(1)).changeValidationState(process2.getType(), process2.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process3.getType(), process3.getId(), ValidationState.DRAFT);
+
+        File updatedFile = fileRepository.findById(file.getId()).get();
+        assertThat(updatedFile.getInputToProcesses())
+                .usingElementComparatorOnFields("id")
+                .containsExactly(process2, process3);
+    }
+
+    @Test
+    public void testOverrideLinkFileAsInputToProcessDefaultEndpoint() throws Exception {
         webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
@@ -76,7 +119,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testOverrideLinkFileAsDerivedByProcessDefaultEnpoint() throws Exception {
+    public void testOverrideLinkFileAsDerivedByProcessDefaultEndpoint() throws Exception {
         webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
@@ -88,6 +131,52 @@ public class FileControllerTest {
         assertThat(updatedFile.getDerivedByProcesses())
                 .usingElementComparatorOnFields("id")
                 .contains(process);
+    }
+
+    @Test
+    public void testOverrideLinkFileAsDerivedByMultipleProcessesDefaultPostEndpoint() throws Exception {
+        Process process2 = new Process();
+        processRepository.save(process2);
+
+        webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
+                .contentType("text/uri-list")
+                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()
+                        +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
+                .andExpect(status().isAccepted());
+
+        verifyStatesInDraft();
+        verify(validationStateChangeService, times(1)).changeValidationState(process2.getType(), process2.getId(), ValidationState.DRAFT);
+
+        File updatedFile = fileRepository.findById(file.getId()).get();
+        assertThat(updatedFile.getDerivedByProcesses())
+                .usingElementComparatorOnFields("id")
+                .containsExactly(process, process2);
+    }
+
+    @Test
+    public void testOverrideLinkFileAsDerivedByMultipleProcessesDefaultPutEndpoint() throws Exception {
+        file.addAsDerivedByProcess(process);
+        fileRepository.save(file);
+
+        Process process2 = new Process();
+        Process process3 = new Process();
+        processRepository.save(process2);
+        processRepository.save(process3);
+
+        webApp.perform(put("/files/{fileId}/derivedByProcesses/", file.getId())
+                .contentType("text/uri-list")
+                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()
+                        +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
+                .andExpect(status().isAccepted());
+
+        verifyStatesInDraft();
+        verify(validationStateChangeService, times(1)).changeValidationState(process2.getType(), process2.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process3.getType(), process3.getId(), ValidationState.DRAFT);
+
+        File updatedFile = fileRepository.findById(file.getId()).get();
+        assertThat(updatedFile.getDerivedByProcesses())
+                .usingElementComparatorOnFields("id")
+                .containsExactly(process2, process3);
     }
 
     @Test

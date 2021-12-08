@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.biomaterial;
 
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
@@ -19,8 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -62,8 +62,55 @@ public class BiomaterialControllerTest {
     }
 
     @Test
+    public void testOverrideLinkFileAsInputToMultipleProcessesDefaultPostEndpoint() throws Exception {
+        Process process2 = new Process();
+        processRepository.save(process2);
+
+        webApp.perform(post("/biomaterials/{id}/inputToProcesses/", biomaterial.getId())
+                .contentType("text/uri-list")
+                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()
+                        + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
+                .andExpect(status().isAccepted());
+
+        verifyStatesInDraft();
+        verify(validationStateChangeService, times(1)).changeValidationState(process2.getType(), process2.getId(), ValidationState.DRAFT);
+
+        Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
+        assertThat(updatedBiomaterial.getInputToProcesses())
+                .usingElementComparatorOnFields("id")
+                .containsExactly(process, process2);
+    }
+
+    @Test
+    public void testOverrideLinkFileAsInputToMultipleProcessesDefaultPutEndpoint() throws Exception {
+        biomaterial.addAsInputToProcess(process);
+        biomaterialRepository.save(biomaterial);
+
+        Process process2 = new Process();
+        Process process3 = new Process();
+        processRepository.save(process2);
+        processRepository.save(process3);
+
+        webApp.perform(put("/biomaterials/{id}/inputToProcesses/", biomaterial.getId())
+                .contentType("text/uri-list")
+                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()
+                        + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
+                .andExpect(status().isAccepted());
+
+        verifyStatesInDraft();
+        verify(validationStateChangeService, times(1)).changeValidationState(process2.getType(), process2.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process3.getType(), process3.getId(), ValidationState.DRAFT);
+
+        Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
+        assertThat(updatedBiomaterial.getInputToProcesses())
+                .usingElementComparatorOnFields("id")
+                .containsExactly(process2, process3);
+    }
+
+
+    @Test
     public void testOverrideDefaultInputToProcessesLinkEndpoint() throws Exception {
-        webApp.perform(post("/biomaterials/{biomaterialId}/inputToProcesses/", biomaterial.getId())
+        webApp.perform(post("/biomaterials/{id}/inputToProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isAccepted());
@@ -77,8 +124,54 @@ public class BiomaterialControllerTest {
     }
 
     @Test
+    public void testOverrideLinkFileAsDerivedByMultipleProcessesDefaultPostEndpoint() throws Exception {
+        Process process2 = new Process();
+        processRepository.save(process2);
+
+        webApp.perform(post("/biomaterials/{id}/derivedByProcesses/", biomaterial.getId())
+                .contentType("text/uri-list")
+                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()
+                        + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
+                .andExpect(status().isAccepted());
+
+        verifyStatesInDraft();
+        verify(validationStateChangeService, times(1)).changeValidationState(process2.getType(), process2.getId(), ValidationState.DRAFT);
+
+        Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
+        assertThat(updatedBiomaterial.getDerivedByProcesses())
+                .usingElementComparatorOnFields("id")
+                .containsExactly(process, process2);
+    }
+
+    @Test
+    public void testOverrideLinkFileAsDerivedByMultipleProcessesDefaultPutEndpoint() throws Exception {
+        biomaterial.addAsDerivedByProcess(process);
+        biomaterialRepository.save(biomaterial);
+
+        Process process2 = new Process();
+        Process process3 = new Process();
+        processRepository.save(process2);
+        processRepository.save(process3);
+
+        webApp.perform(put("/biomaterials/{id}/derivedByProcesses/", biomaterial.getId())
+                .contentType("text/uri-list")
+                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()
+                        + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
+                .andExpect(status().isAccepted());
+
+        verifyStatesInDraft();
+        verify(validationStateChangeService, times(1)).changeValidationState(process2.getType(), process2.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process3.getType(), process3.getId(), ValidationState.DRAFT);
+
+        Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
+        assertThat(updatedBiomaterial.getDerivedByProcesses())
+                .usingElementComparatorOnFields("id")
+                .containsExactly(process2, process3);
+    }
+
+    @Test
     public void testOverrideDefaultDerivedByProcessesLinkEndpoint() throws Exception {
-        webApp.perform(post("/biomaterials/{biomaterialId}/derivedByProcesses/", biomaterial.getId())
+        webApp.perform(post("/biomaterials/{id}/derivedByProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isAccepted());
@@ -98,7 +191,7 @@ public class BiomaterialControllerTest {
         biomaterialRepository.save(biomaterial);
 
         // when
-        webApp.perform(delete("/biomaterials/{biomaterialId}/inputToProcesses/{processId}", biomaterial.getId(), process.getId()))
+        webApp.perform(delete("/biomaterials/{id}/inputToProcesses/{processId}", biomaterial.getId(), process.getId()))
                 .andExpect(status().isNoContent());
 
         // then
@@ -114,7 +207,7 @@ public class BiomaterialControllerTest {
         biomaterialRepository.save(biomaterial);
 
         // when
-        webApp.perform(delete("/biomaterials/{biomaterialId}/derivedByProcesses/{processId}", biomaterial.getId(), process.getId()))
+        webApp.perform(delete("/biomaterials/{id}/derivedByProcesses/{processId}", biomaterial.getId(), process.getId()))
                 .andExpect(status().isNoContent());
 
         // then
