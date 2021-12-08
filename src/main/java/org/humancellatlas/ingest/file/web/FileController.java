@@ -5,13 +5,16 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.core.service.UriToEntityConversionService;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.file.*;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -24,6 +27,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import static org.springframework.data.rest.webmvc.RestMediaTypes.TEXT_URI_LIST_VALUE;
@@ -60,6 +65,9 @@ public class FileController {
 
     private @Autowired
     ValidationStateChangeService validationStateChangeService;
+
+    private @Autowired
+    UriToEntityConversionService uriToEntityConversionService;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
             method = RequestMethod.POST,
@@ -98,23 +106,30 @@ public class FileController {
     }
 
     @RequestMapping(path = "/files/{id}/inputToProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
-    HttpEntity<?> disableLinkFileAsInputToProcessesDefaultEndpoint(@PathVariable("id") File file,
+    HttpEntity<?> overrideLinkFileAsInputToProcessesDefaultEndpoint(@PathVariable("id") File file,
                                                                           @RequestBody Resources<Object> incoming,
-                                                                          PersistentEntityResourceAssembler assembler) {
-        return ResponseEntity.notFound().build();
+                                                                          PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+
+        // TODO handle both PUT and POST and all links
+        URI uri = new URI(incoming.getLinks().get(0).getHref());
+        Process process = uriToEntityConversionService.convert(uri, TypeDescriptor.valueOf(URI.class), TypeDescriptor.valueOf(Process.class));
+
+        file.addAsInputToProcess(process);
+        fileRepository.save(file);
+
+        validationStateChangeService.changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
+        validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+
+        return ResponseEntity.accepted().build();
     }
 
     @RequestMapping(path = "/files/{id}/derivedByProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
-    HttpEntity<?> disableLinkBiomaterialAsDerivedByProcessesDefaultEndpoint(@PathVariable("id") File file,
-                                                                            @RequestBody Resources<Object> incoming,
-                                                                            PersistentEntityResourceAssembler assembler) {
-        return ResponseEntity.notFound().build();
-    }
-
-    @PostMapping(path = "/files/{id}/derivedByProcesses/{processId}")
-    HttpEntity<?> linkBiomaterialAsDerivedByProcess(@PathVariable("id") File file,
-                                                    @PathVariable("processId") Process process,
-                                                    PersistentEntityResourceAssembler assembler) {
+    HttpEntity<?> overrideLinkFileAsDerivedByProcessesDefaultEndpoint(@PathVariable("id") File file,
+                                                                    @RequestBody Resources<Object> incoming,
+                                                                    PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+        // TODO handle both PUT and POST and all links
+        URI uri = new URI(incoming.getLinks().get(0).getHref());
+        Process process = uriToEntityConversionService.convert(uri, TypeDescriptor.valueOf(URI.class), TypeDescriptor.valueOf(Process.class));
 
         file.addAsDerivedByProcess(process);
         fileRepository.save(file);
@@ -125,19 +140,6 @@ public class FileController {
         return ResponseEntity.accepted().build();
     }
 
-    @PostMapping(path = "/files/{id}/inputToProcesses/{processId}")
-    HttpEntity<?> linkBiomaterialAsInputToProcess(@PathVariable("id") File file,
-                                                  @PathVariable("processId") Process process,
-                                                  PersistentEntityResourceAssembler assembler) {
-
-        file.addAsDerivedByProcess(process);
-        fileRepository.save(file);
-
-        validationStateChangeService.changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
-        validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-
-        return ResponseEntity.accepted().build();
-    }
 
     @DeleteMapping(path = "/files/{id}/inputToProcesses/{processId}")
     HttpEntity<?> unlinkBiomaterialAsInputToProcess(@PathVariable("id") File file,

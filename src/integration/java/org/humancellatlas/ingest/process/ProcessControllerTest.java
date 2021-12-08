@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.process;
 
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
@@ -19,6 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -70,20 +72,19 @@ class ProcessControllerTest {
     }
 
     @Test
-    public void testDisableLinkProtocolsDefaultEndpoint() throws Exception {
+    public void testOverrideLinkProtocolsDefaultEndpoint() throws Exception {
         webApp.perform(post("/processes/{processId}/protocols/", process.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol.getId()))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void testLinkProtocolToProcessChangesTheirValidationStatesToDraft() throws Exception {
-        webApp.perform(post("/processes/{processId}/protocols/{protocolId}", process.getId(), protocol.getId()))
                 .andExpect(status().isAccepted());
 
         verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
         verify(validationStateChangeService, times(1)).changeValidationState(protocol.getType(), protocol.getId(), ValidationState.DRAFT);
+
+        Process updatedProcess = processRepository.findById(process.getId()).get();
+        assertThat(updatedProcess.getProtocols())
+                .usingElementComparatorOnFields("id")
+                .contains(protocol);
     }
 
     @Test
@@ -99,6 +100,9 @@ class ProcessControllerTest {
         // then
         verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
         verify(validationStateChangeService, times(1)).changeValidationState(protocol.getType(), protocol.getId(), ValidationState.DRAFT);
+
+        Process updatedProcess = processRepository.findById(process.getId()).get();
+        assertThat(updatedProcess.getProtocols()).doesNotContain(protocol);
     }
 
     @Test

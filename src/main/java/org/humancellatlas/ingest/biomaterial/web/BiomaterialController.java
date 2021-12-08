@@ -9,12 +9,14 @@ import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.biomaterial.BiomaterialService;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.core.service.UriToEntityConversionService;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -27,6 +29,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -58,7 +62,7 @@ public class BiomaterialController {
     ValidationStateChangeService validationStateChangeService;
 
     private @Autowired
-    UriListHttpMessageConverter uriListHttpMessageConverter;
+    UriToEntityConversionService uriToEntityConversionService;
 
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -95,25 +99,14 @@ public class BiomaterialController {
     }
 
     @RequestMapping(path = "/biomaterials/{id}/inputToProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
-    HttpEntity<?> disableLinkBiomaterialAsInputToProcessesDefaultEndpoint(@PathVariable("id") Biomaterial biomaterial,
+    HttpEntity<?> overrideLinkBiomaterialAsInputToProcessesDefaultEndpoint(@PathVariable("id") Biomaterial biomaterial,
                                                              @RequestBody Resources<Object> incoming,
-                                                             PersistentEntityResourceAssembler assembler) {
-        return ResponseEntity.notFound().build();
-    }
+                                                             PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+        // TODO handle both PUT and POST and all links
+        URI uri = new URI(incoming.getLinks().get(0).getHref());
+        Process process = uriToEntityConversionService.convert(uri, TypeDescriptor.valueOf(URI.class), TypeDescriptor.valueOf(Process.class));
 
-    @RequestMapping(path = "/biomaterials/{id}/derivedByProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
-    HttpEntity<?> disableLinkBiomaterialAsDerivedByProcessesDefaultEndpoint(@PathVariable("id") Biomaterial biomaterial,
-                                                               @RequestBody Resources<Object> incoming,
-                                                               PersistentEntityResourceAssembler assembler) {
-        return ResponseEntity.notFound().build();
-    }
-
-    @PostMapping(path = "/biomaterials/{id}/derivedByProcesses/{processId}")
-    HttpEntity<?> linkBiomaterialAsDerivedByProcess(@PathVariable("id") Biomaterial biomaterial,
-                                                    @PathVariable("processId") Process process,
-                                                    PersistentEntityResourceAssembler assembler) {
-
-        biomaterial.addAsDerivedByProcess(process);
+        biomaterial.addAsInputToProcess(process);
         biomaterialRepository.save(biomaterial);
 
         validationStateChangeService.changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
@@ -122,12 +115,15 @@ public class BiomaterialController {
         return ResponseEntity.accepted().build();
     }
 
-    @PostMapping(path = "/biomaterials/{id}/inputToProcesses/{processId}")
-    HttpEntity<?> linkBiomaterialAsInputToProcess(@PathVariable("id") Biomaterial biomaterial,
-                                                  @PathVariable("processId") Process process,
-                                                  PersistentEntityResourceAssembler assembler) {
+    @RequestMapping(path = "/biomaterials/{id}/derivedByProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
+    HttpEntity<?> overrideLinkBiomaterialAsDerivedByProcessesDefaultEndpoint(@PathVariable("id") Biomaterial biomaterial,
+                                                               @RequestBody Resources<Object> incoming,
+                                                               PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+        // TODO handle both PUT and POST and all links
+        URI uri = new URI(incoming.getLinks().get(0).getHref());
+        Process process = uriToEntityConversionService.convert(uri, TypeDescriptor.valueOf(URI.class), TypeDescriptor.valueOf(Process.class));
 
-        biomaterial.addAsInputToProcess(process);
+        biomaterial.addAsDerivedByProcess(process);
         biomaterialRepository.save(biomaterial);
 
         validationStateChangeService.changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);

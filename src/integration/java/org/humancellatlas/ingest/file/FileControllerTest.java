@@ -17,6 +17,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -60,19 +61,35 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testDisableLinkFileAsInputToProcessDefaultEnpoint() throws Exception {
+    public void testOverrideLinkFileAsInputToProcessDefaultEnpoint() throws Exception {
         webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isAccepted());
+
+        verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+
+        File updatedFile = fileRepository.findById(file.getId()).get();
+        assertThat(updatedFile.getInputToProcesses())
+                .usingElementComparatorOnFields("id")
+                .containsExactly(process);
     }
 
     @Test
-    public void testDisableLinkFileAsDerivedByProcessDefaultEnpoint() throws Exception {
+    public void testOverrideLinkFileAsDerivedByProcessDefaultEnpoint() throws Exception {
         webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isAccepted());
+
+        verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+
+        File updatedFile = fileRepository.findById(file.getId()).get();
+        assertThat(updatedFile.getDerivedByProcesses())
+                .usingElementComparatorOnFields("id")
+                .contains(process);
     }
 
     @Test
@@ -88,6 +105,9 @@ public class FileControllerTest {
         // then
         verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
         verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+
+        File updatedFile = fileRepository.findById(file.getId()).get();
+        assertThat(updatedFile.getDerivedByProcesses()).doesNotContain(process);
     }
 
     @Test
@@ -103,23 +123,8 @@ public class FileControllerTest {
         // then
         verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
         verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-    }
 
-    @Test
-    public void testLinkFileAsInputToProcessChangesTheirValidationStatesToDraft() throws Exception {
-        webApp.perform(post("/files/{fileId}/inputToProcesses/{processId}", file.getId(), process.getId()))
-                .andExpect(status().isAccepted());
-
-        verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-    }
-
-    @Test
-    public void testLinkFileAsDerivedByProcessChangesTheirValidationStatesToDraft() throws Exception {
-        webApp.perform(post("/files/{fileId}/derivedByProcesses/{processId}", file.getId(), process.getId()))
-                .andExpect(status().isAccepted());
-
-        verify(validationStateChangeService, times(1)).changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
-        verify(validationStateChangeService, times(1)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+        File updatedFile = fileRepository.findById(file.getId()).get();
+        assertThat(updatedFile.getInputToProcesses()).doesNotContain(process);
     }
 }

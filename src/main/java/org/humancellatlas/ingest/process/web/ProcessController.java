@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.core.service.UriToEntityConversionService;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
@@ -16,8 +17,10 @@ import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.rest.core.UriToEntityConverter;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
@@ -30,6 +33,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -52,6 +57,7 @@ public class ProcessController {
     private final @NonNull MetadataUpdateService metadataUpdateService;
 
     private @Autowired ValidationStateChangeService validationStateChangeService;
+    private @Autowired UriToEntityConversionService uriToEntityConversionService;
 
     @RequestMapping(path = "processes/{proc_id}/inputBiomaterials", method = RequestMethod.GET)
     ResponseEntity<?> getProcessInputBiomaterials(@PathVariable("proc_id") Process process,
@@ -180,17 +186,12 @@ public class ProcessController {
     }
 
     @RequestMapping(path = "/processes/{id}/protocols", method = { PUT, POST }, consumes = {TEXT_URI_LIST_VALUE})
-    HttpEntity<?> disableLinkProtocolsDefaultEndpoint(@PathVariable("id") Process process,
+    HttpEntity<?> overrideLinkProtocolsDefaultEndpoint(@PathVariable("id") Process process,
                                              @RequestBody Resources<Object> incoming,
-                                             PersistentEntityResourceAssembler assembler) {
-        return ResponseEntity.notFound().build();
-    }
-
-    @PostMapping(path = "/processes/{id}/protocols/{protocolId}")
-    HttpEntity<?> linkProcessToProtocol(@PathVariable("id") Process process,
-                                        @PathVariable("protocolId") Protocol protocol,
-                                        PersistentEntityResourceAssembler assembler) {
-
+                                             PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+        // TODO handle both PUT and POST and all links
+        URI uri = new URI(incoming.getLinks().get(0).getHref());
+        Protocol protocol = uriToEntityConversionService.convert(uri, TypeDescriptor.valueOf(URI.class), TypeDescriptor.valueOf(Protocol.class));
         process.addProtocol(protocol);
         processRepository.save(process);
 
