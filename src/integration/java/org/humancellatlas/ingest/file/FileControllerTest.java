@@ -61,7 +61,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testPutLinkFileAsInputToMultipleProcesses() throws Exception {
+    public void testLinkFileAsInputToProcessesUsingPutMethodWithMultipleProcessesInPayload() throws Exception {
         file.addAsInputToProcess(process);
         fileRepository.save(file);
 
@@ -85,7 +85,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testPostLinkFileAsInputToMultipleProcesses() throws Exception {
+    public void testLinkFileAsInputToMultipleProcessesUsingPostMethodWithMultipleProcessesInPayload() throws Exception {
         Process process2 = new Process();
         processRepository.save(process2);
 
@@ -104,7 +104,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testPostLinkFileAsInputToOneProcess() throws Exception {
+    public void testLinkFileAsInputToProcessesUsingPostMethodWithOneProcessInPayload() throws Exception {
         webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
@@ -119,7 +119,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testPostLinkFileAsDerivedByOneProcess() throws Exception {
+    public void testLinkFileAsDerivedByProcessesUsingPostMethodWithOneProcessInPayload() throws Exception {
         webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
@@ -134,7 +134,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testPostLinkFileAsDerivedByMultipleProcesses() throws Exception {
+    public void testLinkFileAsDerivedByProcessesUsingPostMethodWithMultipleProcessesInPayload() throws Exception {
         Process process2 = new Process();
         processRepository.save(process2);
 
@@ -153,7 +153,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testPutLinkFileAsDerivedByMultipleProcesses() throws Exception {
+    public void testLinkFileAsDerivedByProcessesUsingPutMethodWithMultipleProcessesInPayload() throws Exception {
         file.addAsDerivedByProcess(process);
         fileRepository.save(file);
 
@@ -177,7 +177,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testUnlinkFileAsDerivedByProcess() throws Exception {
+    public void testUnlinkFileAsDerivedByProcesses() throws Exception {
         // given
         file.addAsDerivedByProcess(process);
         fileRepository.save(file);
@@ -194,7 +194,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testUnlinkFileAsInputToProcess() throws Exception {
+    public void testUnlinkFileAsInputToProcesses() throws Exception {
         // given
         file.addAsInputToProcess(process);
         fileRepository.save(file);
