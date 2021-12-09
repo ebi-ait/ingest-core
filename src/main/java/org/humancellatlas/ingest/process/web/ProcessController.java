@@ -184,10 +184,10 @@ public class ProcessController {
     }
 
     @RequestMapping(path = "/processes/{id}/protocols", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
-    HttpEntity<?> overrideLinkProtocolsDefaultEndpoint(@PathVariable("id") Process process,
-                                                       @RequestBody Resources<Object> incoming,
-                                                       HttpMethod requestMethod,
-                                                       PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+    HttpEntity<?> linkProtocolsToProcess(@PathVariable("id") Process process,
+                                         @RequestBody Resources<Object> incoming,
+                                         HttpMethod requestMethod,
+                                         PersistentEntityResourceAssembler assembler) throws URISyntaxException {
 
         List<Protocol> protocols = uriToEntityConversionService.convertLinks(incoming.getLinks(), Protocol.class);
         List<Protocol> unlinkedProtocols = new ArrayList<>();
