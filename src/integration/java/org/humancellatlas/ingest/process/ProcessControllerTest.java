@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -58,6 +59,8 @@ class ProcessControllerTest {
 
     Process process;
 
+    UriComponentsBuilder uriBuilder;
+
     @BeforeEach
     void setUp() {
         protocol = new Protocol(UUID.randomUUID());
@@ -68,6 +71,8 @@ class ProcessControllerTest {
 
         process = new Process(UUID.randomUUID());
         processRepository.save(process);
+
+        uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
     }
 
     @Test
@@ -82,8 +87,8 @@ class ProcessControllerTest {
 
         webApp.perform(put("/processes/{id}/protocols/", process.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol2.getId()
-                        + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol3.getId()))
+                .content(uriBuilder.build().toUriString() + "/protocols/" + protocol2.getId()
+                        + '\n' + uriBuilder.build().toUriString() + "/protocols/" + protocol3.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(process, protocol, protocol2, protocol3);
@@ -101,8 +106,8 @@ class ProcessControllerTest {
 
         webApp.perform(post("/processes/{id}/protocols/", process.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol.getId()
-                        + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol2.getId()))
+                .content(uriBuilder.build().toUriString() + "/protocols/" + protocol.getId()
+                        + '\n' + uriBuilder.build().toUriString() + "/protocols/" + protocol2.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(process, protocol, protocol2);
@@ -117,7 +122,7 @@ class ProcessControllerTest {
     public void testLinkProtocolsToProcessUsingPostMethodWithOneProtocolInPayload() throws Exception {
         webApp.perform(post("/processes/{processId}/protocols/", process.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/protocols/" + protocol.getId()))
+                .content(uriBuilder.build().toUriString() + "/protocols/" + protocol.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(process, protocol);
@@ -149,7 +154,7 @@ class ProcessControllerTest {
     public void testLinkProjectToProcessDoesNotChangeTheirValidationStatesToDraft() throws Exception {
         webApp.perform(put("/processes/{processId}/project", process.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/projects/" + project.getId()))
+                .content(uriBuilder.build().toUriString() + "/projects/" + project.getId()))
                 .andExpect(status().isNoContent());
 
         verify(validationStateChangeService, times(0)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));

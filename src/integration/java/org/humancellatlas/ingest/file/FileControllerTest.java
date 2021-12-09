@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -48,7 +49,9 @@ public class FileControllerTest {
 
     Process process;
 
-    File file = new File();
+    File file;
+
+    UriComponentsBuilder uriBuilder;
 
     @BeforeEach
     void setUp() {
@@ -57,7 +60,7 @@ public class FileControllerTest {
 
         file = new File();
         fileRepository.save(file);
-
+        uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
     }
 
     @Test
@@ -72,8 +75,8 @@ public class FileControllerTest {
 
         webApp.perform(put("/files/{fileId}/inputToProcesses/", file.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()
-                        +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
+                .content(uriBuilder.build().toUriString() + "/processes/" + process2.getId() + '\n'
+                        + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(file, process, process2, process3);
@@ -91,8 +94,8 @@ public class FileControllerTest {
 
         webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()
-                        +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
+                .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()
+                        + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(file, process, process2);
@@ -107,7 +110,7 @@ public class FileControllerTest {
     public void testLinkFileAsInputToProcessesUsingPostMethodWithOneProcessInPayload() throws Exception {
         webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
+                .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(file, process);
@@ -122,7 +125,7 @@ public class FileControllerTest {
     public void testLinkFileAsDerivedByProcessesUsingPostMethodWithOneProcessInPayload() throws Exception {
         webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
+                .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(file, process);
@@ -140,8 +143,8 @@ public class FileControllerTest {
 
         webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()
-                        +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
+                .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()
+                        + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(file, process, process2);
@@ -164,8 +167,8 @@ public class FileControllerTest {
 
         webApp.perform(put("/files/{fileId}/derivedByProcesses/", file.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()
-                        +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
+                .content(uriBuilder.build().toUriString() + "/processes/" + process2.getId() + '\n'
+                        + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(file, process, process2, process3);

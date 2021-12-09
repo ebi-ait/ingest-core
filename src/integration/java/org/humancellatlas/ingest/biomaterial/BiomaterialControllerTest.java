@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Arrays;
 
@@ -54,6 +55,8 @@ public class BiomaterialControllerTest {
 
     Biomaterial biomaterial;
 
+    UriComponentsBuilder uriBuilder;
+
     @BeforeEach
     void setUp() {
         process = new Process();
@@ -61,6 +64,8 @@ public class BiomaterialControllerTest {
 
         biomaterial = new Biomaterial();
         biomaterialRepository.save(biomaterial);
+
+        uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
     }
 
     @Test
@@ -70,8 +75,8 @@ public class BiomaterialControllerTest {
 
         webApp.perform(post("/biomaterials/{id}/inputToProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()
-                        + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
+                .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()
+                        + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(biomaterial, process, process2);
@@ -94,8 +99,8 @@ public class BiomaterialControllerTest {
 
         webApp.perform(put("/biomaterials/{id}/inputToProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()
-                        + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
+                .content(uriBuilder.build().toUriString() + "/processes/" + process2.getId()
+                        + '\n' + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(biomaterial, process, process2, process3);
@@ -111,7 +116,7 @@ public class BiomaterialControllerTest {
     public void testLinkBiomaterialAsInputToProcessesUsingPostMethodWithOneProcessInPayload() throws Exception {
         webApp.perform(post("/biomaterials/{id}/inputToProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
+                .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(biomaterial, process);
@@ -129,8 +134,8 @@ public class BiomaterialControllerTest {
 
         webApp.perform(post("/biomaterials/{id}/derivedByProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()
-                        + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
+                .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()
+                        + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(biomaterial, process, process2);
@@ -153,8 +158,8 @@ public class BiomaterialControllerTest {
 
         webApp.perform(put("/biomaterials/{id}/derivedByProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()
-                        + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
+                .content(uriBuilder.build().toUriString() + "/processes/" + process2.getId()
+                        + '\n' + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(biomaterial, process, process2, process3);
@@ -169,7 +174,7 @@ public class BiomaterialControllerTest {
     public void testLinkBiomaterialAsDerivedByProcessesUsingPostMethodWithOneProcessInPayload() throws Exception {
         webApp.perform(post("/biomaterials/{id}/derivedByProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
+                .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isOk());
 
         verifyMetadataValidationStateInDraft(biomaterial, process);
