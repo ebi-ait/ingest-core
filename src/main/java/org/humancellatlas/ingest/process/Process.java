@@ -65,12 +65,14 @@ public class Process extends MetadataDocument {
         return this;
     }
 
-    public void addProtocol(Protocol protocol) {
+    public Process addProtocol(Protocol protocol) {
         protocols.add(protocol);
+        return this;
     }
 
-    public void removeProtocol(Protocol protocol) {
+    public Process removeProtocol(Protocol protocol) {
         protocols.remove(protocol);
+        return this;
     }
 
 }
