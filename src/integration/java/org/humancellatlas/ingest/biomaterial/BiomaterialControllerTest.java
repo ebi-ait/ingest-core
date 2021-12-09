@@ -64,7 +64,7 @@ public class BiomaterialControllerTest {
     }
 
     @Test
-    public void testLinkBiomaterialAsInputToProcessesUsingPostMethodWithMultipleProcessesInPayload() throws Exception {
+    public void testLinkBiomaterialAsInputToProcessesUsingPostMethodWithManyProcessesInPayload() throws Exception {
         Process process2 = new Process();
         processRepository.save(process2);
 
@@ -83,7 +83,7 @@ public class BiomaterialControllerTest {
     }
 
     @Test
-    public void testLinkBiomaterialAsInputToProcessesUsingPutMethodWithMultipleProcessesInPayload() throws Exception {
+    public void testLinkBiomaterialAsInputToProcessesUsingPutMethodWithManyProcessesInPayload() throws Exception {
         biomaterial.addAsInputToProcess(process);
         biomaterialRepository.save(biomaterial);
 
@@ -123,7 +123,7 @@ public class BiomaterialControllerTest {
     }
 
     @Test
-    public void testLinkBiomaterialAsDerivedByProcessesUsingPostMethodWithMultipleProcessesInPayload() throws Exception {
+    public void testLinkBiomaterialAsDerivedByProcessesUsingPostMethodWithManyProcessesInPayload() throws Exception {
         Process process2 = new Process();
         processRepository.save(process2);
 
@@ -142,7 +142,7 @@ public class BiomaterialControllerTest {
     }
 
     @Test
-    public void testLinkBiomaterialAsDerivedByProcessesUsingPutMethodWithMultipleProcessesInPayload() throws Exception {
+    public void testLinkBiomaterialAsDerivedByProcessesUsingPutMethodWithManyProcessesInPayload() throws Exception {
         biomaterial.addAsDerivedByProcess(process);
         biomaterialRepository.save(biomaterial);
 

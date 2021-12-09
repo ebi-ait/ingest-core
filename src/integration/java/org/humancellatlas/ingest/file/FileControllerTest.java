@@ -61,7 +61,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testLinkFileAsInputToProcessesUsingPutMethodWithMultipleProcessesInPayload() throws Exception {
+    public void testLinkFileAsInputToProcessesUsingPutMethodWithManyProcessesInPayload() throws Exception {
         file.addAsInputToProcess(process);
         fileRepository.save(file);
 
@@ -85,7 +85,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testLinkFileAsInputToMultipleProcessesUsingPostMethodWithMultipleProcessesInPayload() throws Exception {
+    public void testLinkFileAsInputToMultipleProcessesUsingPostMethodWithManyProcessesInPayload() throws Exception {
         Process process2 = new Process();
         processRepository.save(process2);
 
@@ -134,7 +134,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testLinkFileAsDerivedByProcessesUsingPostMethodWithMultipleProcessesInPayload() throws Exception {
+    public void testLinkFileAsDerivedByProcessesUsingPostMethodWithManyProcessesInPayload() throws Exception {
         Process process2 = new Process();
         processRepository.save(process2);
 
@@ -153,7 +153,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testLinkFileAsDerivedByProcessesUsingPutMethodWithMultipleProcessesInPayload() throws Exception {
+    public void testLinkFileAsDerivedByProcessesUsingPutMethodWithManyProcessesInPayload() throws Exception {
         file.addAsDerivedByProcess(process);
         fileRepository.save(file);
 
