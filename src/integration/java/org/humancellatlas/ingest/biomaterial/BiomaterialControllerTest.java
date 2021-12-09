@@ -64,7 +64,7 @@ public class BiomaterialControllerTest {
     }
 
     @Test
-    public void testOverrideLinkFileAsInputToMultipleProcessesDefaultPostEndpoint() throws Exception {
+    public void testLinkBiomaterialAsInputToProcessesUsingPostMethodWithMultipleProcessesInPayload() throws Exception {
         Process process2 = new Process();
         processRepository.save(process2);
 
@@ -74,7 +74,7 @@ public class BiomaterialControllerTest {
                         + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
 
-        verifyInDraft(biomaterial, process, process2);
+        verifyMetadataValidationStateInDraft(biomaterial, process, process2);
 
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getInputToProcesses())
@@ -83,7 +83,7 @@ public class BiomaterialControllerTest {
     }
 
     @Test
-    public void testOverrideLinkFileAsInputToMultipleProcessesDefaultPutEndpoint() throws Exception {
+    public void testLinkBiomaterialAsInputToProcessesUsingPutMethodWithMultipleProcessesInPayload() throws Exception {
         biomaterial.addAsInputToProcess(process);
         biomaterialRepository.save(biomaterial);
 
@@ -98,7 +98,7 @@ public class BiomaterialControllerTest {
                         + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
 
-        verifyInDraft(biomaterial, process, process2, process3);
+        verifyMetadataValidationStateInDraft(biomaterial, process, process2, process3);
 
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getInputToProcesses())
@@ -108,13 +108,13 @@ public class BiomaterialControllerTest {
 
 
     @Test
-    public void testOverrideDefaultInputToProcessesLinkEndpoint() throws Exception {
+    public void testLinkBiomaterialAsInputToProcessesUsingPostMethodWithOneProcessInPayload() throws Exception {
         webApp.perform(post("/biomaterials/{id}/inputToProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isOk());
 
-        verifyInDraft(biomaterial, process);
+        verifyMetadataValidationStateInDraft(biomaterial, process);
 
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getInputToProcesses())
@@ -123,7 +123,7 @@ public class BiomaterialControllerTest {
     }
 
     @Test
-    public void testOverrideLinkFileAsDerivedByMultipleProcessesDefaultPostEndpoint() throws Exception {
+    public void testLinkBiomaterialAsDerivedByProcessesUsingPostMethodWithMultipleProcessesInPayload() throws Exception {
         Process process2 = new Process();
         processRepository.save(process2);
 
@@ -133,7 +133,7 @@ public class BiomaterialControllerTest {
                         + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
 
-        verifyInDraft(biomaterial, process, process2);
+        verifyMetadataValidationStateInDraft(biomaterial, process, process2);
 
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getDerivedByProcesses())
@@ -142,7 +142,7 @@ public class BiomaterialControllerTest {
     }
 
     @Test
-    public void testOverrideLinkFileAsDerivedByMultipleProcessesDefaultPutEndpoint() throws Exception {
+    public void testLinkBiomaterialAsDerivedByProcessesUsingPutMethodWithMultipleProcessesInPayload() throws Exception {
         biomaterial.addAsDerivedByProcess(process);
         biomaterialRepository.save(biomaterial);
 
@@ -157,7 +157,7 @@ public class BiomaterialControllerTest {
                         + '\n' + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
 
-        verifyInDraft(biomaterial, process, process2, process3);
+        verifyMetadataValidationStateInDraft(biomaterial, process, process2, process3);
 
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getDerivedByProcesses())
@@ -166,13 +166,13 @@ public class BiomaterialControllerTest {
     }
 
     @Test
-    public void testOverrideDefaultDerivedByProcessesLinkEndpoint() throws Exception {
+    public void testLinkBiomaterialAsDerivedByProcessesUsingPostMethodWithOneProcessInPayload() throws Exception {
         webApp.perform(post("/biomaterials/{id}/derivedByProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isOk());
 
-        verifyInDraft(biomaterial, process);
+        verifyMetadataValidationStateInDraft(biomaterial, process);
 
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getDerivedByProcesses())
@@ -181,7 +181,7 @@ public class BiomaterialControllerTest {
     }
 
     @Test
-    public void testUnlinkBiomaterialAsInputToProcessChangesTheirValidationStatesToDraft() throws Exception {
+    public void testUnlinkBiomaterialAsInputToProcesses() throws Exception {
         // given
         biomaterial.addAsInputToProcess(process);
         biomaterialRepository.save(biomaterial);
@@ -191,14 +191,14 @@ public class BiomaterialControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verifyInDraft(biomaterial, process);
+        verifyMetadataValidationStateInDraft(biomaterial, process);
 
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getInputToProcesses()).doesNotContain(process);
     }
 
     @Test
-    public void testDeleteDerivedByProcessChangesTheirValidationStatesToDraft() throws Exception {
+    public void testUnlinkBiomaterialAsDerivedByProcesses() throws Exception {
         // given
         biomaterial.addAsDerivedByProcess(process);
         biomaterialRepository.save(biomaterial);
@@ -208,13 +208,13 @@ public class BiomaterialControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verifyInDraft(biomaterial, process);
+        verifyMetadataValidationStateInDraft(biomaterial, process);
 
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getDerivedByProcesses()).doesNotContain(process);
     }
 
-    private void verifyInDraft(MetadataDocument... values) {
+    private void verifyMetadataValidationStateInDraft(MetadataDocument... values) {
         Arrays.stream(values).forEach(value -> {
             verify(validationStateChangeService, times(1)).changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT);
         });

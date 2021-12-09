@@ -127,10 +127,10 @@ public class BiomaterialController {
     }
 
     @RequestMapping(path = "/biomaterials/{id}/derivedByProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
-    HttpEntity<?> overrideLinkBiomaterialAsDerivedByProcessesDefaultEndpoint(@PathVariable("id") Biomaterial biomaterial,
-                                                                             @RequestBody Resources<Object> incoming,
-                                                                             HttpMethod requestMethod,
-                                                                             PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+    HttpEntity<?> linkBiomaterialAsDerivedByProcesses(@PathVariable("id") Biomaterial biomaterial,
+                                                      @RequestBody Resources<Object> incoming,
+                                                      HttpMethod requestMethod,
+                                                      PersistentEntityResourceAssembler assembler) throws URISyntaxException {
 
         List<Process> processes = uriToEntityConversionService.convertLinks(incoming.getLinks(), Process.class);
         List<Process> unlinkedProcesses = new ArrayList<>();
@@ -159,9 +159,9 @@ public class BiomaterialController {
 
 
     @DeleteMapping(path = "/biomaterials/{id}/inputToProcesses/{processId}")
-    HttpEntity<?> unlinkBiomaterialAsInputToProcess(@PathVariable("id") Biomaterial biomaterial,
-                                                    @PathVariable("processId") Process process,
-                                                    PersistentEntityResourceAssembler assembler) {
+    HttpEntity<?> unlinkBiomaterialAsInputToProcesses(@PathVariable("id") Biomaterial biomaterial,
+                                                      @PathVariable("processId") Process process,
+                                                      PersistentEntityResourceAssembler assembler) {
         biomaterial.removeAsInputToProcess(process);
         biomaterialRepository.save(biomaterial);
 
@@ -172,9 +172,9 @@ public class BiomaterialController {
     }
 
     @DeleteMapping(path = "/biomaterials/{id}/derivedByProcesses/{processId}")
-    HttpEntity<?> unlinkBiomaterialAsDerivedProcess(@PathVariable("id") Biomaterial biomaterial,
-                                                    @PathVariable("processId") Process process,
-                                                    PersistentEntityResourceAssembler assembler) {
+    HttpEntity<?> unlinkBiomaterialAsDerivedProcesses(@PathVariable("id") Biomaterial biomaterial,
+                                                      @PathVariable("processId") Process process,
+                                                      PersistentEntityResourceAssembler assembler) {
         biomaterial.removeAsDerivedByProcess(process);
         biomaterialRepository.save(biomaterial);
 
