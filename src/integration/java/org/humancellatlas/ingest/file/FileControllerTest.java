@@ -22,7 +22,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -62,26 +61,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testOverrideLinkFileAsInputToMultipleProcessesDefaultPostEndpoint() throws Exception {
-        Process process2 = new Process();
-        processRepository.save(process2);
-
-        webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
-                .contentType("text/uri-list")
-                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()
-                        +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
-                .andExpect(status().isOk());
-
-        verifyInDraft(file, process, process2);
-
-        File updatedFile = fileRepository.findById(file.getId()).get();
-        assertThat(updatedFile.getInputToProcesses())
-                .usingElementComparatorOnFields("id")
-                .containsExactly(process, process2);
-    }
-
-    @Test
-    public void testOverrideLinkFileAsInputToMultipleProcessesDefaultPutEndpoint() throws Exception {
+    public void testPutLinkFileAsInputToMultipleProcesses() throws Exception {
         file.addAsInputToProcess(process);
         fileRepository.save(file);
 
@@ -96,7 +76,7 @@ public class FileControllerTest {
                         +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
 
-        verifyInDraft(file, process, process2, process3);
+        verifyMetadataValidationStateInDraft(file, process, process2, process3);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses())
@@ -105,13 +85,32 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testOverrideLinkFileAsInputToProcessDefaultEndpoint() throws Exception {
+    public void testPostLinkFileAsInputToMultipleProcesses() throws Exception {
+        Process process2 = new Process();
+        processRepository.save(process2);
+
+        webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
+                .contentType("text/uri-list")
+                .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()
+                        +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
+                .andExpect(status().isOk());
+
+        verifyMetadataValidationStateInDraft(file, process, process2);
+
+        File updatedFile = fileRepository.findById(file.getId()).get();
+        assertThat(updatedFile.getInputToProcesses())
+                .usingElementComparatorOnFields("id")
+                .containsExactly(process, process2);
+    }
+
+    @Test
+    public void testPostLinkFileAsInputToOneProcess() throws Exception {
         webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isOk());
 
-        verifyInDraft(file, process);
+        verifyMetadataValidationStateInDraft(file, process);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses())
@@ -120,13 +119,13 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testOverrideLinkFileAsDerivedByProcessDefaultEndpoint() throws Exception {
+    public void testPostLinkFileAsDerivedByOneProcess() throws Exception {
         webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isOk());
 
-        verifyInDraft(file, process);
+        verifyMetadataValidationStateInDraft(file, process);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses())
@@ -135,7 +134,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testOverrideLinkFileAsDerivedByMultipleProcessesDefaultPostEndpoint() throws Exception {
+    public void testPostLinkFileAsDerivedByMultipleProcesses() throws Exception {
         Process process2 = new Process();
         processRepository.save(process2);
 
@@ -145,7 +144,7 @@ public class FileControllerTest {
                         +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
 
-        verifyInDraft(file, process, process2);
+        verifyMetadataValidationStateInDraft(file, process, process2);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses())
@@ -154,7 +153,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testOverrideLinkFileAsDerivedByMultipleProcessesDefaultPutEndpoint() throws Exception {
+    public void testPutLinkFileAsDerivedByMultipleProcesses() throws Exception {
         file.addAsDerivedByProcess(process);
         fileRepository.save(file);
 
@@ -169,7 +168,7 @@ public class FileControllerTest {
                         +'\n'+ ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
 
-        verifyInDraft(file, process, process2, process3);
+        verifyMetadataValidationStateInDraft(file, process, process2, process3);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses())
@@ -178,7 +177,7 @@ public class FileControllerTest {
     }
 
     @Test
-    public void testUnlinkFileAsDerivedByProcessChangesTheirValidationStatesToDraft() throws Exception {
+    public void testUnlinkFileAsDerivedByProcess() throws Exception {
         // given
         file.addAsDerivedByProcess(process);
         fileRepository.save(file);
@@ -188,14 +187,14 @@ public class FileControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verifyInDraft(file, process);
+        verifyMetadataValidationStateInDraft(file, process);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses()).doesNotContain(process);
     }
 
     @Test
-    public void testUnlinkFileAsInputToProcessChangesTheirValidationStatesToDraft() throws Exception {
+    public void testUnlinkFileAsInputToProcess() throws Exception {
         // given
         file.addAsInputToProcess(process);
         fileRepository.save(file);
@@ -205,13 +204,13 @@ public class FileControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verifyInDraft(file, process);
+        verifyMetadataValidationStateInDraft(file, process);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses()).doesNotContain(process);
     }
 
-    private void verifyInDraft(MetadataDocument... values) {
+    private void verifyMetadataValidationStateInDraft(MetadataDocument... values) {
         Arrays.stream(values).forEach(value -> {
             verify(validationStateChangeService, times(1)).changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT);
         });

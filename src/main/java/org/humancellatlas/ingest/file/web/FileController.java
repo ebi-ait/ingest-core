@@ -105,10 +105,10 @@ public class FileController {
     }
 
     @RequestMapping(path = "/files/{id}/inputToProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
-    HttpEntity<?> overrideLinkFileAsInputToProcessesDefaultEndpoint(@PathVariable("id") File file,
-                                                                    @RequestBody Resources<Object> incoming,
-                                                                    HttpMethod requestMethod,
-                                                                    PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+    HttpEntity<?> linkFileAsInputToProcesses(@PathVariable("id") File file,
+                                             @RequestBody Resources<Object> incoming,
+                                             HttpMethod requestMethod,
+                                             PersistentEntityResourceAssembler assembler) throws URISyntaxException {
 
         List<Process> processes = uriToEntityConversionService.convertLinks(incoming.getLinks(), Process.class);
         List<Process> unlinkedProcesses = new ArrayList<>();
@@ -137,10 +137,10 @@ public class FileController {
     }
 
     @RequestMapping(path = "/files/{id}/derivedByProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
-    HttpEntity<?> overrideLinkFileAsDerivedByProcessesDefaultEndpoint(@PathVariable("id") File file,
-                                                                      @RequestBody Resources<Object> incoming,
-                                                                      HttpMethod requestMethod,
-                                                                      PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+    HttpEntity<?> linkFileAsDerivedByProcesses(@PathVariable("id") File file,
+                                               @RequestBody Resources<Object> incoming,
+                                               HttpMethod requestMethod,
+                                               PersistentEntityResourceAssembler assembler) throws URISyntaxException {
 
         List<Process> processes = uriToEntityConversionService.convertLinks(incoming.getLinks(), Process.class);
         List<Process> unlinkedProcesses = new ArrayList<>();
@@ -169,9 +169,9 @@ public class FileController {
 
 
     @DeleteMapping(path = "/files/{id}/inputToProcesses/{processId}")
-    HttpEntity<?> unlinkBiomaterialAsInputToProcess(@PathVariable("id") File file,
-                                                    @PathVariable("processId") Process process,
-                                                    PersistentEntityResourceAssembler assembler) {
+    HttpEntity<?> unlinkFileAsInputToProcesses(@PathVariable("id") File file,
+                                               @PathVariable("processId") Process process,
+                                               PersistentEntityResourceAssembler assembler) {
         file.removeAsInputToProcess(process);
         fileRepository.save(file);
 
@@ -182,9 +182,9 @@ public class FileController {
     }
 
     @DeleteMapping(path = "/files/{id}/derivedByProcesses/{processId}")
-    HttpEntity<?> unlinkBiomaterialAsDerivedProcess(@PathVariable("id") File file,
-                                                    @PathVariable("processId") Process process,
-                                                    PersistentEntityResourceAssembler assembler) {
+    HttpEntity<?> unlinkFileAsDerivedByProcesses(@PathVariable("id") File file,
+                                                 @PathVariable("processId") Process process,
+                                                 PersistentEntityResourceAssembler assembler) {
         file.removeAsDerivedByProcess(process);
         fileRepository.save(file);
 
