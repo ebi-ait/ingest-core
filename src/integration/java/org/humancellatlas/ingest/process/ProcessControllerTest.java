@@ -55,6 +55,10 @@ class ProcessControllerTest {
 
     Protocol protocol;
 
+    Protocol protocol2;
+
+    Protocol protocol3;
+
     Project project;
 
     Process process;
@@ -63,13 +67,15 @@ class ProcessControllerTest {
 
     @BeforeEach
     void setUp() {
-        protocol = new Protocol(UUID.randomUUID());
-        protocolRepository.save(protocol);
+        protocol = new Protocol();
+        protocol2 = new Protocol();
+        protocol3 = new Protocol();
+        protocolRepository.saveAll(Arrays.asList(protocol, protocol2, protocol3));
 
         project = new Project(UUID.randomUUID());
         projectRepository.save(project);
 
-        process = new Process(UUID.randomUUID());
+        process = new Process();
         processRepository.save(process);
 
         uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
@@ -77,22 +83,19 @@ class ProcessControllerTest {
 
     @Test
     public void testLinkProtocolsToProcessUsingPutMethodWithManyProtocolsInPayload() throws Exception {
+        // given
         process.addProtocol(protocol);
         processRepository.save(process);
 
-        Protocol protocol2 = new Protocol();
-        Protocol protocol3 = new Protocol();
-        protocolRepository.save(protocol2);
-        protocolRepository.save(protocol3);
-
+        // when
         webApp.perform(put("/processes/{id}/protocols/", process.getId())
                 .contentType("text/uri-list")
                 .content(uriBuilder.build().toUriString() + "/protocols/" + protocol2.getId()
                         + '\n' + uriBuilder.build().toUriString() + "/protocols/" + protocol3.getId()))
                 .andExpect(status().isOk());
 
-        verifyMetadataValidationStateInDraft(process, protocol, protocol2, protocol3);
-
+        // then
+        verifyThatValidationStateChangedToDraft(process, protocol, protocol2, protocol3);
         Process updatedProcess = processRepository.findById(process.getId()).get();
         assertThat(updatedProcess.getProtocols())
                 .usingElementComparatorOnFields("id")
@@ -101,17 +104,15 @@ class ProcessControllerTest {
 
     @Test
     public void testLinkProtocolsToProcessUsingPostMethodWithManyProtocolsInPayload() throws Exception {
-        Protocol protocol2 = new Protocol();
-        protocolRepository.save(protocol2);
-
+        // when
         webApp.perform(post("/processes/{id}/protocols/", process.getId())
                 .contentType("text/uri-list")
                 .content(uriBuilder.build().toUriString() + "/protocols/" + protocol.getId()
                         + '\n' + uriBuilder.build().toUriString() + "/protocols/" + protocol2.getId()))
                 .andExpect(status().isOk());
 
-        verifyMetadataValidationStateInDraft(process, protocol, protocol2);
-
+        // then
+        verifyThatValidationStateChangedToDraft(process, protocol, protocol2);
         Process updatedProcess = processRepository.findById(process.getId()).get();
         assertThat(updatedProcess.getProtocols())
                 .usingElementComparatorOnFields("id")
@@ -120,13 +121,14 @@ class ProcessControllerTest {
 
     @Test
     public void testLinkProtocolsToProcessUsingPostMethodWithOneProtocolInPayload() throws Exception {
+        // when
         webApp.perform(post("/processes/{processId}/protocols/", process.getId())
                 .contentType("text/uri-list")
                 .content(uriBuilder.build().toUriString() + "/protocols/" + protocol.getId()))
                 .andExpect(status().isOk());
 
-        verifyMetadataValidationStateInDraft(process, protocol);
-
+        // then
+        verifyThatValidationStateChangedToDraft(process, protocol);
         Process updatedProcess = processRepository.findById(process.getId()).get();
         assertThat(updatedProcess.getProtocols())
                 .usingElementComparatorOnFields("id")
@@ -144,7 +146,7 @@ class ProcessControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verifyMetadataValidationStateInDraft(process, protocol);
+        verifyThatValidationStateChangedToDraft(process, protocol);
 
         Process updatedProcess = processRepository.findById(process.getId()).get();
         assertThat(updatedProcess.getProtocols()).doesNotContain(protocol);
@@ -168,7 +170,7 @@ class ProcessControllerTest {
         verify(validationStateChangeService, times(0)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
     }
 
-    private void verifyMetadataValidationStateInDraft(MetadataDocument... values) {
+    private void verifyThatValidationStateChangedToDraft(MetadataDocument... values) {
         Arrays.stream(values).forEach(value -> {
             verify(validationStateChangeService, times(1)).changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT);
         });

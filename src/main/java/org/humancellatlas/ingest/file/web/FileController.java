@@ -4,14 +4,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.service.MetadataLinkingService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.core.service.UriToEntityConversionService;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.file.*;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
-import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -27,8 +26,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.List;
 
 import static org.springframework.data.rest.webmvc.RestMediaTypes.TEXT_URI_LIST_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -67,6 +67,9 @@ public class FileController {
 
     private @Autowired
     UriToEntityConversionService uriToEntityConversionService;
+
+    private @Autowired
+    MetadataLinkingService metadataLinkingService;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
             method = RequestMethod.POST,
@@ -108,30 +111,10 @@ public class FileController {
     HttpEntity<?> linkFileAsInputToProcesses(@PathVariable("id") File file,
                                              @RequestBody Resources<Object> incoming,
                                              HttpMethod requestMethod,
-                                             PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+                                             PersistentEntityResourceAssembler assembler) throws URISyntaxException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
         List<Process> processes = uriToEntityConversionService.convertLinks(incoming.getLinks(), Process.class);
-        List<Process> unlinkedProcesses = new ArrayList<>();
-
-        if (requestMethod.equals(HttpMethod.POST)) {
-            processes.forEach(process -> {
-                file.addAsInputToProcess(process);
-            });
-        } else if (requestMethod.equals(HttpMethod.PUT)) {
-            unlinkedProcesses = new ArrayList(Arrays.asList(file.getInputToProcesses().toArray()));
-            file.getInputToProcesses().clear();
-            file.getInputToProcesses().addAll(processes);
-        }
-
-        fileRepository.save(file);
-
-        List<MetadataDocument> metadataToSetToDraft = new ArrayList<>();
-        metadataToSetToDraft.addAll(unlinkedProcesses);
-        metadataToSetToDraft.addAll(processes);
-        metadataToSetToDraft.add(file);
-        metadataToSetToDraft.forEach(metadataDocument -> {
-            validationStateChangeService.changeValidationState(metadataDocument.getType(), metadataDocument.getId(), ValidationState.DRAFT);
-        });
+        metadataLinkingService.updateLinks(file, processes, "inputToProcesses", requestMethod.equals(HttpMethod.PUT));
 
         return ResponseEntity.ok().build();
     }
@@ -140,29 +123,10 @@ public class FileController {
     HttpEntity<?> linkFileAsDerivedByProcesses(@PathVariable("id") File file,
                                                @RequestBody Resources<Object> incoming,
                                                HttpMethod requestMethod,
-                                               PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+                                               PersistentEntityResourceAssembler assembler) throws URISyntaxException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
         List<Process> processes = uriToEntityConversionService.convertLinks(incoming.getLinks(), Process.class);
-        List<Process> unlinkedProcesses = new ArrayList<>();
-        if (requestMethod.equals(HttpMethod.POST)) {
-            processes.forEach(process -> {
-                file.addAsDerivedByProcess(process);
-            });
-        } else if (requestMethod.equals(HttpMethod.PUT)) {
-            unlinkedProcesses = new ArrayList(Arrays.asList(file.getDerivedByProcesses().toArray()));
-            file.getDerivedByProcesses().clear();
-            file.getDerivedByProcesses().addAll(processes);
-        }
-
-        fileRepository.save(file);
-
-        List<MetadataDocument> metadataToSetToDraft = new ArrayList<>();
-        metadataToSetToDraft.addAll(unlinkedProcesses);
-        metadataToSetToDraft.addAll(processes);
-        metadataToSetToDraft.add(file);
-        metadataToSetToDraft.forEach(metadataDocument -> {
-            validationStateChangeService.changeValidationState(metadataDocument.getType(), metadataDocument.getId(), ValidationState.DRAFT);
-        });
+        metadataLinkingService.updateLinks(file, processes, "derivedByProcesses", requestMethod.equals(HttpMethod.PUT));
 
         return ResponseEntity.ok().build();
     }
@@ -171,26 +135,16 @@ public class FileController {
     @DeleteMapping(path = "/files/{id}/inputToProcesses/{processId}")
     HttpEntity<?> unlinkFileAsInputToProcesses(@PathVariable("id") File file,
                                                @PathVariable("processId") Process process,
-                                               PersistentEntityResourceAssembler assembler) {
-        file.removeAsInputToProcess(process);
-        fileRepository.save(file);
-
-        validationStateChangeService.changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
-        validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-
+                                               PersistentEntityResourceAssembler assembler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        metadataLinkingService.removeLink(file, process, "inputToProcesses");
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping(path = "/files/{id}/derivedByProcesses/{processId}")
     HttpEntity<?> unlinkFileAsDerivedByProcesses(@PathVariable("id") File file,
                                                  @PathVariable("processId") Process process,
-                                                 PersistentEntityResourceAssembler assembler) {
-        file.removeAsDerivedByProcess(process);
-        fileRepository.save(file);
-
-        validationStateChangeService.changeValidationState(file.getType(), file.getId(), ValidationState.DRAFT);
-        validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-
+                                                 PersistentEntityResourceAssembler assembler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        metadataLinkingService.removeLink(file, process, "derivedByProcesses");
         return ResponseEntity.noContent().build();
     }
 }

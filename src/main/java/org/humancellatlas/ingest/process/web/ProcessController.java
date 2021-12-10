@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.MetadataLinkingService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.core.service.UriToEntityConversionService;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
@@ -14,7 +15,6 @@ import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.*;
 import org.humancellatlas.ingest.protocol.Protocol;
-import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,8 +32,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.springframework.data.rest.webmvc.RestMediaTypes.TEXT_URI_LIST_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -54,8 +57,12 @@ public class ProcessController {
 
     private @Autowired
     ValidationStateChangeService validationStateChangeService;
+
     private @Autowired
     UriToEntityConversionService uriToEntityConversionService;
+
+    private @Autowired
+    MetadataLinkingService metadataLinkingService;
 
     @RequestMapping(path = "processes/{proc_id}/inputBiomaterials", method = RequestMethod.GET)
     ResponseEntity<?> getProcessInputBiomaterials(@PathVariable("proc_id") Process process,
@@ -187,46 +194,19 @@ public class ProcessController {
     HttpEntity<?> linkProtocolsToProcess(@PathVariable("id") Process process,
                                          @RequestBody Resources<Object> incoming,
                                          HttpMethod requestMethod,
-                                         PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+                                         PersistentEntityResourceAssembler assembler) throws URISyntaxException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
         List<Protocol> protocols = uriToEntityConversionService.convertLinks(incoming.getLinks(), Protocol.class);
-        List<Protocol> unlinkedProtocols = new ArrayList<>();
-        if (requestMethod.equals(HttpMethod.POST)) {
-            protocols.forEach(protocol -> {
-                process.addProtocol(protocol);
-            });
-        } else if (requestMethod.equals(HttpMethod.PUT)) {
-            unlinkedProtocols = new ArrayList(Arrays.asList(process.getProtocols().toArray()));
-            process.getProtocols().clear();
-            process.getProtocols().addAll(protocols);
-        }
-
-        processRepository.save(process);
-
-        unlinkedProtocols.forEach(unlinkedProtocol -> {
-            validationStateChangeService.changeValidationState(unlinkedProtocol.getType(), unlinkedProtocol.getId(), ValidationState.DRAFT);
-        });
-        
-        protocols.forEach(protocol -> {
-            validationStateChangeService.changeValidationState(protocol.getType(), protocol.getId(), ValidationState.DRAFT);
-        });
-
-        validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-
+        metadataLinkingService.updateLinks(process, protocols, "protocols", requestMethod.equals(HttpMethod.PUT));
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping(path = "/processes/{id}/protocols/{protocolId}")
     HttpEntity<?> unlinkProtocolFromProcess(@PathVariable("id") Process process,
                                             @PathVariable("protocolId") Protocol protocol,
-                                            PersistentEntityResourceAssembler assembler) {
+                                            PersistentEntityResourceAssembler assembler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
-        process.removeProtocol(protocol);
-        processRepository.save(process);
-
-        validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-        validationStateChangeService.changeValidationState(protocol.getType(), protocol.getId(), ValidationState.DRAFT);
-
+        metadataLinkingService.removeLink(process, protocol, "protocols");
         return ResponseEntity.noContent().build();
     }
 }

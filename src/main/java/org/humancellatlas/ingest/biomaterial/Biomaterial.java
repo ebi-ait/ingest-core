@@ -10,16 +10,13 @@ import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.project.Project;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
@@ -69,7 +66,6 @@ public class Biomaterial extends MetadataDocument {
      */
     public Biomaterial addAsInputToProcess(Process process) {
         this.inputToProcesses.add(process);
-
         return this;
     }
 
@@ -81,7 +77,6 @@ public class Biomaterial extends MetadataDocument {
      */
     public Biomaterial addAsDerivedByProcess(Process process) {
         this.derivedByProcesses.add(process);
-
         return this;
     }
 

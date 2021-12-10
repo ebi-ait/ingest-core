@@ -7,14 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.biomaterial.BiomaterialService;
-import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.MetadataLinkingService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.core.service.UriToEntityConversionService;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
-import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
@@ -29,8 +28,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.springframework.data.rest.webmvc.RestMediaTypes.TEXT_URI_LIST_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -60,6 +62,9 @@ public class BiomaterialController {
 
     private @Autowired
     UriToEntityConversionService uriToEntityConversionService;
+
+    private @Autowired
+    MetadataLinkingService metadataLinkingService;
 
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -96,32 +101,13 @@ public class BiomaterialController {
     }
 
     @RequestMapping(path = "/biomaterials/{id}/inputToProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
-    HttpEntity<?> overrideLinkBiomaterialAsInputToProcessesDefaultEndpoint(@PathVariable("id") Biomaterial biomaterial,
-                                                                           @RequestBody Resources<Object> incoming,
-                                                                           HttpMethod requestMethod,
-                                                                           PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+    HttpEntity<?> linkBiomaterialAsInputToProcesses(@PathVariable("id") Biomaterial biomaterial,
+                                                    @RequestBody Resources<Object> incoming,
+                                                    HttpMethod requestMethod,
+                                                    PersistentEntityResourceAssembler assembler) throws URISyntaxException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
         List<Process> processes = uriToEntityConversionService.convertLinks(incoming.getLinks(), Process.class);
-        List<Process> unlinkedProcesses = new ArrayList<>();
-        if (requestMethod.equals(HttpMethod.POST)) {
-            processes.forEach(process -> {
-                biomaterial.addAsInputToProcess(process);
-            });
-        } else if (requestMethod.equals(HttpMethod.PUT)) {
-            unlinkedProcesses = new ArrayList(Arrays.asList(biomaterial.getInputToProcesses().toArray()));
-            biomaterial.getInputToProcesses().clear();
-            biomaterial.getInputToProcesses().addAll(processes);
-        }
-
-        biomaterialRepository.save(biomaterial);
-
-        List<MetadataDocument> metadataToSetToDraft = new ArrayList<>();
-        metadataToSetToDraft.addAll(unlinkedProcesses);
-        metadataToSetToDraft.addAll(processes);
-        metadataToSetToDraft.add(biomaterial);
-        metadataToSetToDraft.forEach(metadataDocument -> {
-            validationStateChangeService.changeValidationState(metadataDocument.getType(), metadataDocument.getId(), ValidationState.DRAFT);
-        });
+        metadataLinkingService.updateLinks(biomaterial, processes, "inputToProcesses", requestMethod.equals(HttpMethod.PUT));
 
         return ResponseEntity.ok().build();
     }
@@ -130,30 +116,10 @@ public class BiomaterialController {
     HttpEntity<?> linkBiomaterialAsDerivedByProcesses(@PathVariable("id") Biomaterial biomaterial,
                                                       @RequestBody Resources<Object> incoming,
                                                       HttpMethod requestMethod,
-                                                      PersistentEntityResourceAssembler assembler) throws URISyntaxException {
+                                                      PersistentEntityResourceAssembler assembler) throws URISyntaxException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
         List<Process> processes = uriToEntityConversionService.convertLinks(incoming.getLinks(), Process.class);
-        List<Process> unlinkedProcesses = new ArrayList<>();
-        if (requestMethod.equals(HttpMethod.POST)) {
-            processes.forEach(process -> {
-                biomaterial.addAsDerivedByProcess(process);
-            });
-        } else if (requestMethod.equals(HttpMethod.PUT)) {
-            unlinkedProcesses = new ArrayList(Arrays.asList(biomaterial.getDerivedByProcesses().toArray()));
-            biomaterial.getDerivedByProcesses().clear();
-            biomaterial.getDerivedByProcesses().addAll(processes);
-        }
-
-        biomaterialRepository.save(biomaterial);
-
-        List<MetadataDocument> metadataToSetToDraft = new ArrayList<>();
-        metadataToSetToDraft.addAll(unlinkedProcesses);
-        metadataToSetToDraft.addAll(processes);
-        metadataToSetToDraft.add(biomaterial);
-        metadataToSetToDraft.forEach(metadataDocument -> {
-            validationStateChangeService.changeValidationState(metadataDocument.getType(), metadataDocument.getId(), ValidationState.DRAFT);
-        });
-
+        metadataLinkingService.updateLinks(biomaterial, processes, "derivedByProcesses", requestMethod.equals(HttpMethod.PUT));
         return ResponseEntity.ok().build();
     }
 
@@ -161,26 +127,16 @@ public class BiomaterialController {
     @DeleteMapping(path = "/biomaterials/{id}/inputToProcesses/{processId}")
     HttpEntity<?> unlinkBiomaterialAsInputToProcesses(@PathVariable("id") Biomaterial biomaterial,
                                                       @PathVariable("processId") Process process,
-                                                      PersistentEntityResourceAssembler assembler) {
-        biomaterial.removeAsInputToProcess(process);
-        biomaterialRepository.save(biomaterial);
-
-        validationStateChangeService.changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
-        validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-
+                                                      PersistentEntityResourceAssembler assembler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        metadataLinkingService.removeLink(biomaterial, process, "inputToProcesses");
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping(path = "/biomaterials/{id}/derivedByProcesses/{processId}")
     HttpEntity<?> unlinkBiomaterialAsDerivedProcesses(@PathVariable("id") Biomaterial biomaterial,
                                                       @PathVariable("processId") Process process,
-                                                      PersistentEntityResourceAssembler assembler) {
-        biomaterial.removeAsDerivedByProcess(process);
-        biomaterialRepository.save(biomaterial);
-
-        validationStateChangeService.changeValidationState(biomaterial.getType(), biomaterial.getId(), ValidationState.DRAFT);
-        validationStateChangeService.changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
-
+                                                      PersistentEntityResourceAssembler assembler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        metadataLinkingService.removeLink(biomaterial, process, "derivedByProcesses");
         return ResponseEntity.noContent().build();
     }
 }

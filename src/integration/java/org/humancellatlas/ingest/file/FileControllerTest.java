@@ -18,11 +18,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Arrays;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -49,14 +48,20 @@ public class FileControllerTest {
 
     Process process;
 
+    Process process2;
+
+    Process process3;
+
     File file;
 
     UriComponentsBuilder uriBuilder;
 
     @BeforeEach
     void setUp() {
-        process = new Process(UUID.randomUUID());
-        processRepository.save(process);
+        process = new Process();
+        process2 = new Process();
+        process3 = new Process();
+        processRepository.saveAll(Arrays.asList(process, process2, process3));
 
         file = new File();
         fileRepository.save(file);
@@ -68,18 +73,13 @@ public class FileControllerTest {
         file.addAsInputToProcess(process);
         fileRepository.save(file);
 
-        Process process2 = new Process();
-        Process process3 = new Process();
-        processRepository.save(process2);
-        processRepository.save(process3);
-
         webApp.perform(put("/files/{fileId}/inputToProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(uriBuilder.build().toUriString() + "/processes/" + process2.getId() + '\n'
                         + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
 
-        verifyMetadataValidationStateInDraft(file, process, process2, process3);
+        verifyThatValidationStateChangedToDraft(file, process, process2, process3);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses())
@@ -89,17 +89,15 @@ public class FileControllerTest {
 
     @Test
     public void testLinkFileAsInputToMultipleProcessesUsingPostMethodWithManyProcessesInPayload() throws Exception {
-        Process process2 = new Process();
-        processRepository.save(process2);
-
+        // when
         webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()
                         + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
 
-        verifyMetadataValidationStateInDraft(file, process, process2);
-
+        // then
+        verifyThatValidationStateChangedToDraft(file, process, process2);
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses())
                 .usingElementComparatorOnFields("id")
@@ -108,13 +106,14 @@ public class FileControllerTest {
 
     @Test
     public void testLinkFileAsInputToProcessesUsingPostMethodWithOneProcessInPayload() throws Exception {
+        // when
         webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isOk());
 
-        verifyMetadataValidationStateInDraft(file, process);
-
+        // then
+        verifyThatValidationStateChangedToDraft(file, process);
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses())
                 .usingElementComparatorOnFields("id")
@@ -123,13 +122,14 @@ public class FileControllerTest {
 
     @Test
     public void testLinkFileAsDerivedByProcessesUsingPostMethodWithOneProcessInPayload() throws Exception {
+        // when
         webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isOk());
 
-        verifyMetadataValidationStateInDraft(file, process);
-
+        // then
+        verifyThatValidationStateChangedToDraft(file, process);
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses())
                 .usingElementComparatorOnFields("id")
@@ -138,17 +138,15 @@ public class FileControllerTest {
 
     @Test
     public void testLinkFileAsDerivedByProcessesUsingPostMethodWithManyProcessesInPayload() throws Exception {
-        Process process2 = new Process();
-        processRepository.save(process2);
-
+        // when
         webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()
                         + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
 
-        verifyMetadataValidationStateInDraft(file, process, process2);
-
+        // then
+        verifyThatValidationStateChangedToDraft(file, process, process2);
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses())
                 .usingElementComparatorOnFields("id")
@@ -157,22 +155,19 @@ public class FileControllerTest {
 
     @Test
     public void testLinkFileAsDerivedByProcessesUsingPutMethodWithManyProcessesInPayload() throws Exception {
+        // given
         file.addAsDerivedByProcess(process);
         fileRepository.save(file);
 
-        Process process2 = new Process();
-        Process process3 = new Process();
-        processRepository.save(process2);
-        processRepository.save(process3);
-
+        // when
         webApp.perform(put("/files/{fileId}/derivedByProcesses/", file.getId())
                 .contentType("text/uri-list")
                 .content(uriBuilder.build().toUriString() + "/processes/" + process2.getId() + '\n'
                         + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
 
-        verifyMetadataValidationStateInDraft(file, process, process2, process3);
-
+        // then
+        verifyThatValidationStateChangedToDraft(file, process, process2, process3);
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses())
                 .usingElementComparatorOnFields("id")
@@ -190,8 +185,7 @@ public class FileControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verifyMetadataValidationStateInDraft(file, process);
-
+        verifyThatValidationStateChangedToDraft(file, process);
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses()).doesNotContain(process);
     }
@@ -207,13 +201,13 @@ public class FileControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verifyMetadataValidationStateInDraft(file, process);
+        verifyThatValidationStateChangedToDraft(file, process);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses()).doesNotContain(process);
     }
 
-    private void verifyMetadataValidationStateInDraft(MetadataDocument... values) {
+    private void verifyThatValidationStateChangedToDraft(MetadataDocument... values) {
         Arrays.stream(values).forEach(value -> {
             verify(validationStateChangeService, times(1)).changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT);
         });
