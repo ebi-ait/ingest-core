@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.humancellatlas.ingest.core.AbstractEntity;
 import org.humancellatlas.ingest.core.EntityType;
-import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
 import org.slf4j.Logger;
@@ -28,7 +27,6 @@ public class SubmissionEnvelope extends AbstractEntity {
     private @Setter
     StagingDetails stagingDetails;
     private SubmissionState submissionState;
-    private SubmissionGraphValidationState graphValidationState;
     private @Setter
     Boolean triggersAnalysis;
     private @Setter
@@ -39,7 +37,6 @@ public class SubmissionEnvelope extends AbstractEntity {
     public SubmissionEnvelope() {
         super(EntityType.SUBMISSION);
         this.submissionState = SubmissionState.PENDING;
-        this.graphValidationState = SubmissionGraphValidationState.PENDING;
         this.triggersAnalysis = true;
         this.isUpdate = false;
         this.submitActions = new HashSet<>();
@@ -61,21 +58,38 @@ public class SubmissionEnvelope extends AbstractEntity {
                 allowedStates.add(SubmissionState.DRAFT);
                 break;
             case DRAFT:
-                allowedStates.add(SubmissionState.VALIDATING);
+                allowedStates.add(SubmissionState.METADATA_VALIDATING);
                 break;
-            case VALIDATING:
+            case METADATA_VALIDATING:
                 allowedStates.add(SubmissionState.DRAFT);
-                allowedStates.add(SubmissionState.VALID);
-                allowedStates.add(SubmissionState.INVALID);
+                allowedStates.add(SubmissionState.METADATA_VALID);
+                allowedStates.add(SubmissionState.METADATA_INVALID);
                 break;
-            case VALID:
+            case METADATA_VALID:
                 allowedStates.add(SubmissionState.DRAFT);
+                allowedStates.add(SubmissionState.GRAPH_VALIDATION_REQUESTED);
+                break;
+            case METADATA_INVALID:
+                allowedStates.add(SubmissionState.DRAFT);
+                allowedStates.add(SubmissionState.METADATA_VALIDATING);
+                allowedStates.add(SubmissionState.GRAPH_VALIDATION_REQUESTED);
+                break;
+            case GRAPH_VALIDATION_REQUESTED:
+                allowedStates.add(SubmissionState.GRAPH_VALIDATING);
+                allowedStates.add(SubmissionState.DRAFT);
+                break;
+            case GRAPH_VALIDATING:
+                allowedStates.add(SubmissionState.GRAPH_VALID);
+                allowedStates.add(SubmissionState.GRAPH_INVALID);
+                // Maybe not this one
+                allowedStates.add(SubmissionState.DRAFT);
+                break;
+            case GRAPH_INVALID:
+                allowedStates.add(SubmissionState.GRAPH_VALIDATION_REQUESTED);
+                allowedStates.add(SubmissionState.DRAFT);
+            case GRAPH_VALID:
                 allowedStates.add(SubmissionState.SUBMITTED);
-                break;
-            case INVALID:
                 allowedStates.add(SubmissionState.DRAFT);
-                allowedStates.add(SubmissionState.VALIDATING);
-                break;
             case SUBMITTED:
                 allowedStates.add(SubmissionState.PROCESSING);
                 allowedStates.add(SubmissionState.EXPORTING);
@@ -105,45 +119,9 @@ public class SubmissionEnvelope extends AbstractEntity {
         return allowedSubmissionStateTransitions(getSubmissionState());
     }
 
-    public static List<SubmissionGraphValidationState> allowedGraphValidationStateTransitions(SubmissionGraphValidationState fromState) {
-        List<SubmissionGraphValidationState> allowedStates = new ArrayList<>();
-        switch (fromState) {
-            case PENDING:
-                allowedStates.add(SubmissionGraphValidationState.REQUESTED);
-                break;
-            case REQUESTED:
-                allowedStates.add(SubmissionGraphValidationState.PENDING);
-                allowedStates.add(SubmissionGraphValidationState.VALIDATING);
-            case VALIDATING:
-                allowedStates.add(SubmissionGraphValidationState.PENDING);
-                allowedStates.add(SubmissionGraphValidationState.VALID);
-                allowedStates.add(SubmissionGraphValidationState.INVALID);
-                break;
-            case VALID:
-            case INVALID:
-                allowedStates.add(SubmissionGraphValidationState.PENDING);
-                allowedStates.add(SubmissionGraphValidationState.REQUESTED);
-                break;
-            default:
-                break;
-        }
-        return allowedStates;
-    }
-
-    public List<SubmissionGraphValidationState> allowedGraphValidationStateTransitions() {
-        return allowedGraphValidationStateTransitions(getGraphValidationState());
-    }
-
-
     public void enactStateTransition(SubmissionState targetState) {
         if (this.submissionState != targetState) {
             this.submissionState = targetState;
-        }
-    }
-
-    public void enactGraphValidationStateTransition(SubmissionGraphValidationState targetState) {
-        if (this.graphValidationState != targetState) {
-            this.graphValidationState = targetState;
         }
     }
 

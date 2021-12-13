@@ -47,7 +47,7 @@ public class MetadataController {
         return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
     }
 
-    @RequestMapping(path = "/{metadataType}/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
+    @RequestMapping(path = "/{metadataType}/{id}" + Links.METADATA_VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> validatingEvent(@PathVariable("metadataType") String metadataType,
                                         @PathVariable("id") String metadataId,
                                         PersistentEntityResourceAssembler assembler) {
@@ -57,7 +57,7 @@ public class MetadataController {
         return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
     }
 
-    @RequestMapping(path = "/{metadataType}/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
+    @RequestMapping(path = "/{metadataType}/{id}" + Links.METADATA_VALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> validEvent(@PathVariable("metadataType") String metadataType,
                                       @PathVariable("id") String metadataId,
                                       PersistentEntityResourceAssembler assembler) {

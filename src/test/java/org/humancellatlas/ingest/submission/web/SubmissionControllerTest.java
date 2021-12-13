@@ -10,7 +10,6 @@ import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.protocol.ProtocolService;
-import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
@@ -123,8 +122,8 @@ public class SubmissionControllerTest {
     public void testDraftStateTransition() {
         //given:
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        submissionEnvelope.enactGraphValidationStateTransition(SubmissionGraphValidationState.VALID);
-        assertThat(submissionEnvelope.getGraphValidationState()).isEqualTo(SubmissionGraphValidationState.VALID);
+        submissionEnvelope.enactStateTransition(GRAPH_VALID);
+        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(GRAPH_VALID);
 
         //and:
         PersistentEntityResourceAssembler resourceAssembler =
@@ -137,10 +136,62 @@ public class SubmissionControllerTest {
         //then:
         assertThat(response).isNotNull();
         assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(DRAFT);
-
-        // This will handle the validation state update and deleting of graph validation errors on entities
-        verify(submissionEnvelopeService).handleGraphValidationStateUpdateRequest(submissionEnvelope, SubmissionGraphValidationState.PENDING);
     }
+
+    @Test
+    public void testHappyValidationPath() {
+        //given:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        submissionEnvelope.enactStateTransition(DRAFT);
+        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(DRAFT);
+
+        //and:
+        PersistentEntityResourceAssembler resourceAssembler =
+                mock(PersistentEntityResourceAssembler.class);
+
+        // Test metadata validation happy path
+        // Metadata validation is triggered when documents are added to the submission
+        // so no endpoints fro requesting the state tracker to change the submission state
+
+        // draft -> metadata validating
+        HttpEntity<?> response = controller.enactValidatingEnvelope(submissionEnvelope, resourceAssembler);
+        assertThat(response).isNotNull();
+        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(METADATA_VALIDATING);
+
+        // metadata validating -> metadata valid
+        response = controller.enactValidEnvelope(submissionEnvelope, resourceAssembler);
+        assertThat(response).isNotNull();
+        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(METADATA_VALID);
+
+
+        // Test graph validation happy path
+        // endpoints for requesting the state tracker to change the submission state are used here
+
+        // metadata valid -> graph validation requested
+        HttpEntity<?> requestResponse = controller.requestGraphValidation(submissionEnvelope, resourceAssembler);
+        assertThat(requestResponse).isNotNull();
+        verify(submissionEnvelopeService).handleEnvelopeStateUpdateRequest(submissionEnvelope, GRAPH_VALIDATION_REQUESTED);
+        HttpEntity<?> enactResponse = controller.enactGraphValidationRequested(submissionEnvelope, resourceAssembler);
+        assertThat(enactResponse).isNotNull();
+        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(GRAPH_VALIDATION_REQUESTED);
+
+        // graph validation requested -> graph validating
+        requestResponse = controller.requestGraphValidating(submissionEnvelope, resourceAssembler);
+        assertThat(requestResponse).isNotNull();
+        verify(submissionEnvelopeService).handleEnvelopeStateUpdateRequest(submissionEnvelope, GRAPH_VALIDATING);
+        enactResponse = controller.enactGraphValidating(submissionEnvelope, resourceAssembler);
+        assertThat(enactResponse).isNotNull();
+        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(GRAPH_VALIDATING);
+
+        // graph validating -> graph valid
+        requestResponse = controller.requestGraphValid(submissionEnvelope, resourceAssembler);
+        assertThat(requestResponse).isNotNull();
+        verify(submissionEnvelopeService).handleEnvelopeStateUpdateRequest(submissionEnvelope, GRAPH_VALID);
+        enactResponse = controller.enactGraphValid(submissionEnvelope, resourceAssembler);
+        assertThat(enactResponse).isNotNull();
+        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(GRAPH_VALID);
+    }
+
     @Configuration
     static class TestConfiguration {}
 

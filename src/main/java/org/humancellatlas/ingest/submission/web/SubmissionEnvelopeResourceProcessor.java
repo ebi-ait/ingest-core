@@ -136,6 +136,14 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
 
     private Optional<String> getRelNameForRequestSubmissionState(SubmissionState submissionState) {
         switch (submissionState) {
+            case GRAPH_VALIDATION_REQUESTED:
+                return Optional.of(Links.GRAPH_VALIDATION_REQUESTED_REL);
+            case GRAPH_VALIDATING:
+                return Optional.of(Links.GRAPH_VALIDATING_REL);
+            case GRAPH_VALID:
+                return Optional.of(Links.GRAPH_VALID_REL);
+            case GRAPH_INVALID:
+                return Optional.of(Links.GRAPH_INVALID_REL);
             case SUBMITTED:
                 return Optional.of(Links.SUBMIT_REL);
             case ARCHIVED:
@@ -186,12 +194,20 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         switch (submissionState) {
             case DRAFT:
                 return Optional.of(Links.COMMIT_DRAFT_REL);
-            case VALIDATING:
-                return Optional.of(Links.COMMIT_VALIDATING_REL);
-            case INVALID:
-                return Optional.of(Links.COMMIT_INVALID_REL);
-            case VALID:
-                return Optional.of(Links.COMMIT_VALID_REL);
+            case METADATA_VALIDATING:
+                return Optional.of(Links.COMMIT_METADATA_VALIDATING_REL);
+            case METADATA_INVALID:
+                return Optional.of(Links.COMMIT_METADATA_INVALID_REL);
+            case METADATA_VALID:
+                return Optional.of(Links.COMMIT_METADATA_VALID_REL);
+            case GRAPH_VALIDATION_REQUESTED:
+                return Optional.of(Links.COMMIT_GRAPH_VALIDATION_REQUESTED_REL);
+            case GRAPH_VALIDATING:
+                return Optional.of(Links.COMMIT_GRAPH_VALIDATING_REL);
+            case GRAPH_VALID:
+                return Optional.of(Links.COMMIT_GRAPH_VALID_REL);
+            case GRAPH_INVALID:
+                return Optional.of(Links.COMMIT_GRAPH_INVALID_REL);
             case SUBMITTED:
                 return Optional.of(Links.COMMIT_SUBMIT_REL);
             case PROCESSING:
@@ -218,12 +234,20 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         switch (submissionState) {
             case DRAFT:
                 return Optional.of(Links.COMMIT_DRAFT_URL);
-            case VALIDATING:
-                return Optional.of(Links.COMMIT_VALIDATING_URL);
-            case INVALID:
-                return Optional.of(Links.COMMIT_INVALID_URL);
-            case VALID:
-                return Optional.of(Links.COMMIT_VALID_URL);
+            case METADATA_VALIDATING:
+                return Optional.of(Links.COMMIT_METADATA_VALIDATING_URL);
+            case METADATA_INVALID:
+                return Optional.of(Links.COMMIT_METADATA_INVALID_URL);
+            case METADATA_VALID:
+                return Optional.of(Links.COMMIT_METADATA_VALID_URL);
+            case GRAPH_VALIDATION_REQUESTED:
+                return Optional.of(Links.COMMIT_GRAPH_VALIDATION_REQUESTED_URL);
+            case GRAPH_VALIDATING:
+                return Optional.of(Links.COMMIT_GRAPH_VALIDATING_URL);
+            case GRAPH_VALID:
+                return Optional.of(Links.COMMIT_GRAPH_VALID_URL);
+            case GRAPH_INVALID:
+                return Optional.of(Links.COMMIT_GRAPH_INVALID_URL);
             case SUBMITTED:
                 return Optional.of(Links.COMMIT_SUBMIT_URL);
             case PROCESSING:

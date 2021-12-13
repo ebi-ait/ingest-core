@@ -20,7 +20,6 @@ import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.protocol.ProtocolService;
-import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
 import org.humancellatlas.ingest.state.ValidationState;
@@ -220,136 +219,130 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
+    private HttpEntity<?> enactStateTransition(SubmissionState state, SubmissionEnvelope envelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        envelope.enactStateTransition(state);
+        getSubmissionEnvelopeRepository().save(envelope);
+        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(envelope));
+    }
+
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_DRAFT_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactDraftEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.DRAFT);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        submissionEnvelopeService.handleGraphValidationStateUpdateRequest(submissionEnvelope, SubmissionGraphValidationState.PENDING);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+        return this.enactStateTransition(SubmissionState.DRAFT, submissionEnvelope, resourceAssembler);
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_VALIDATING_URL, method = RequestMethod.PUT)
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_METADATA_VALIDATING_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactValidatingEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.VALIDATING);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+        return this.enactStateTransition(SubmissionState.METADATA_VALIDATING, submissionEnvelope, resourceAssembler);
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_INVALID_URL, method = RequestMethod.PUT)
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_METADATA_INVALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactInvalidEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.INVALID);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+        return this.enactStateTransition(SubmissionState.METADATA_INVALID, submissionEnvelope, resourceAssembler);
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_VALID_URL, method = RequestMethod.PUT)
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_METADATA_VALID_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactValidEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.VALID);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+        return this.enactStateTransition(SubmissionState.METADATA_VALID, submissionEnvelope, resourceAssembler);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_SUBMIT_URL,
             method = RequestMethod.PUT)
     HttpEntity<?> enactSubmitEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                       final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.SUBMITTED);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        HttpEntity<?> response = this.enactStateTransition(SubmissionState.SUBMITTED, submissionEnvelope, resourceAssembler);
         log.info(String.format("Submission envelope with ID %s was submitted.", submissionEnvelope.getId()));
         submissionEnvelopeService.handleCommitSubmit(submissionEnvelope);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+        return response;
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_PROCESSING_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactProcessEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.PROCESSING);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+        return this.enactStateTransition(SubmissionState.PROCESSING, submissionEnvelope, resourceAssembler);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_ARCHIVING_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactArchivingEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.ARCHIVING);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+        return this.enactStateTransition(SubmissionState.ARCHIVING, submissionEnvelope, resourceAssembler);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_ARCHIVED_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactArchivedEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.ARCHIVED);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        HttpEntity<?> response = this.enactStateTransition(SubmissionState.ARCHIVED, submissionEnvelope, resourceAssembler);
         log.info(String.format("Submission envelope with ID %s was archived.", submissionEnvelope.getId()));
         submissionEnvelopeService.handleCommitArchived(submissionEnvelope);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+        return response;
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_EXPORTING_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactExportingEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.EXPORTING);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+        return this.enactStateTransition(SubmissionState.EXPORTING, submissionEnvelope, resourceAssembler);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_EXPORTED_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactExportedEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.EXPORTED);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
+        HttpEntity<?> response = this.enactStateTransition(SubmissionState.EXPORTED, submissionEnvelope, resourceAssembler);
         log.info(String.format("Submission envelope with ID %s was exported.", submissionEnvelope.getId()));
         submissionEnvelopeService.handleCommitExported(submissionEnvelope);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+        return response;
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_CLEANUP_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactCleanupEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.CLEANUP);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+        return this.enactStateTransition(SubmissionState.CLEANUP, submissionEnvelope, resourceAssembler);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_COMPLETE_URL, method = RequestMethod.PUT)
     HttpEntity<?> enactCompleteEnvelope(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelope.enactStateTransition(SubmissionState.COMPLETE);
-        getSubmissionEnvelopeRepository().save(submissionEnvelope);
-        return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
+        return this.enactStateTransition(SubmissionState.COMPLETE, submissionEnvelope, resourceAssembler);
     }
 
-    private HttpEntity<?> performGraphRequest(SubmissionGraphValidationState state, SubmissionEnvelope envelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelopeService.handleGraphValidationStateUpdateRequest(envelope, state);
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_GRAPH_VALIDATION_REQUESTED_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactGraphValidationRequested(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        HttpEntity<?> response = this.enactStateTransition(SubmissionState.GRAPH_VALIDATION_REQUESTED, submissionEnvelope, resourceAssembler);
+        messageRouter.routeGraphValidationMessageFor(submissionEnvelope);
+        return response;
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_GRAPH_VALIDATING_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactGraphValidating(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        return this.enactStateTransition(SubmissionState.GRAPH_VALIDATING, submissionEnvelope, resourceAssembler);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_GRAPH_VALID_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactGraphValid(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        return this.enactStateTransition(SubmissionState.GRAPH_VALID, submissionEnvelope, resourceAssembler);
+    }
+
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.COMMIT_GRAPH_INVALID_URL, method = RequestMethod.PUT)
+    HttpEntity<?> enactGraphInvalid(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        return this.enactStateTransition(SubmissionState.GRAPH_INVALID, submissionEnvelope, resourceAssembler);
+    }
+
+    private HttpEntity<?> performStateUpdateRequest(SubmissionState state, SubmissionEnvelope envelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        submissionEnvelopeService.handleEnvelopeStateUpdateRequest(envelope, state);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(envelope));
     }
 
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_PENDING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> graphPendingRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        return this.performGraphRequest(SubmissionGraphValidationState.PENDING, submissionEnvelope, resourceAssembler);
-    }
-
-    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_REQUESTED_URL, method = RequestMethod.PUT)
-    HttpEntity<?> graphRequestedRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        // This method is used for skipping graph validation and manually setting the state if desired to mock the flow
-        return this.performGraphRequest(SubmissionGraphValidationState.REQUESTED, submissionEnvelope, resourceAssembler);
+    @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_VALIDATION_REQUESTED_URL, method = RequestMethod.PUT)
+    HttpEntity<?> requestGraphValidation(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
+                                         final PersistentEntityResourceAssembler resourceAssembler) {
+        return this.performStateUpdateRequest(SubmissionState.GRAPH_VALIDATION_REQUESTED, submissionEnvelope, resourceAssembler);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_VALIDATING_URL, method = RequestMethod.PUT)
-    HttpEntity<?> graphValidatingRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        return this.performGraphRequest(SubmissionGraphValidationState.VALIDATING, submissionEnvelope, resourceAssembler);
+    HttpEntity<?> requestGraphValidating(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
+                                         final PersistentEntityResourceAssembler resourceAssembler) {
+        return this.performStateUpdateRequest(SubmissionState.GRAPH_VALIDATING, submissionEnvelope, resourceAssembler);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_VALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> graphValidRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        return this.performGraphRequest(SubmissionGraphValidationState.VALID, submissionEnvelope, resourceAssembler);
+    HttpEntity<?> requestGraphValid(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        return this.performStateUpdateRequest(SubmissionState.GRAPH_VALID, submissionEnvelope, resourceAssembler);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.GRAPH_INVALID_URL, method = RequestMethod.PUT)
-    HttpEntity<?> graphInvalidRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
-        return this.performGraphRequest(SubmissionGraphValidationState.INVALID, submissionEnvelope, resourceAssembler);
-    }
-
-    @RequestMapping(path = "/submissionEnvelopes/{id}/validateGraph", method = RequestMethod.POST)
-    HttpEntity<?> requestGraphValidation(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
-                                         final PersistentEntityResourceAssembler resourceAssembler) {
-        HttpEntity<?> response = this.performGraphRequest(SubmissionGraphValidationState.REQUESTED, submissionEnvelope, resourceAssembler);
-        messageRouter.routeGraphValidationMessageFor(submissionEnvelope);
-        return response;
+    HttpEntity<?> requestGraphInvalid(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        return this.performStateUpdateRequest(SubmissionState.GRAPH_INVALID, submissionEnvelope, resourceAssembler);
     }
 
     @RequestMapping(path = "/submissionEnvelopes/{id}" + Links.SUBMISSION_DOCUMENTS_SM_URL, method = RequestMethod.GET)
