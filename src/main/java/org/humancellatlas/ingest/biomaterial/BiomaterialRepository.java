@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -46,6 +47,13 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
     public Page<Biomaterial> findBySubmissionEnvelopeAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
                                                                         @Param("state") ValidationState state,
                                                                         Pageable pageable);
+
+    @Query(value = "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }")
+    @RestResource(rel = "findBySubmissionIdWithGraphValidationErrors")
+    public Page<Biomaterial> findBySubmissionIdWithGraphValidationErrors(
+            @Param("envelopeId") String envelopeId,
+            Pageable pageable
+    );
 
     @RestResource(exported = false)
     Stream<Biomaterial> findByInputToProcessesContains(Process process);

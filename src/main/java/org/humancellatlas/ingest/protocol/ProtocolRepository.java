@@ -41,6 +41,13 @@ public interface ProtocolRepository extends MongoRepository<Protocol, String> {
                                                                      @Param("state") ValidationState state,
                                                                      Pageable pageable);
 
+    @Query(value = "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }")
+    @RestResource(rel = "findBySubmissionIdWithGraphValidationErrors")
+    public Page<Protocol> findBySubmissionIdWithGraphValidationErrors(
+            @Param("envelopeId") String envelopeId,
+            Pageable pageable
+    );
+
     @RestResource(exported = false)
     Collection<Protocol> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
