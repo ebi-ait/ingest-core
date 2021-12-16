@@ -165,4 +165,22 @@ public class MongoChangeLog {
         db.getCollection("protocol").updateMany(filter, update);
         db.getCollection("file").updateMany(filter, update);
     }
+
+    @ChangeSet(order = "2021-12-07", id = "Rename submission states", author = "jcbwndsr@ebi.ac.uk", runAlways = true)
+    public void renameSubmissionStates(MongoDatabase db) {
+        Document filter = Document.parse("{ 'submissionState': 'VALID' }");
+        List<Document> update = new ArrayList<>();
+        update.add(new Document("$set", Document.parse("{ 'submissionState': 'METADATA_VALID' }")));
+        db.getCollection("submissionEnvelope").updateMany(filter, update);
+
+        filter = Document.parse("{ 'submissionState': 'VALIDATING' }");
+        update = new ArrayList<>();
+        update.add(new Document("$set", Document.parse("{ 'submissionState': 'METADATA_VALIDATING' }")));
+        db.getCollection("submissionEnvelope").updateMany(filter, update);
+
+        filter = Document.parse("{ 'submissionState': 'INVALID' }");
+        update = new ArrayList<>();
+        update.add(new Document("$set", Document.parse("{ 'submissionState': 'METADATA_INVALID' }")));
+        db.getCollection("submissionEnvelope").updateMany(filter, update);
+    }
 }

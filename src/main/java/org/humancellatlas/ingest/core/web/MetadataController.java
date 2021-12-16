@@ -19,11 +19,7 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -37,53 +33,53 @@ public class MetadataController {
     private final @NonNull MetadataQueryService metadataQueryService;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
 
-    @RequestMapping(path = "/{metadataType}/{id}" + Links.DRAFT_URL, method = RequestMethod.PUT)
+    @PutMapping("/{metadataType}/{id}" + Links.DRAFT_URL)
     HttpEntity<?> draftEvent(@PathVariable("metadataType") String metadataType,
-                                   @PathVariable("id") String metadataId,
-                                   PersistentEntityResourceAssembler assembler) {
+                             @PathVariable("id") String metadataId,
+                             PersistentEntityResourceAssembler assembler) {
         MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(entityTypeForCollection(metadataType),
-                                                                                               metadataId,
-                                                                                               ValidationState.DRAFT);
+                metadataId,
+                ValidationState.DRAFT);
         return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
     }
 
-    @RequestMapping(path = "/{metadataType}/{id}" + Links.VALIDATING_URL, method = RequestMethod.PUT)
+    @PutMapping("/{metadataType}/{id}" + Links.METADATA_VALIDATING_URL)
     HttpEntity<?> validatingEvent(@PathVariable("metadataType") String metadataType,
-                                        @PathVariable("id") String metadataId,
-                                        PersistentEntityResourceAssembler assembler) {
+                                  @PathVariable("id") String metadataId,
+                                  PersistentEntityResourceAssembler assembler) {
         MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(entityTypeForCollection(metadataType),
-                                                                                               metadataId,
-                                                                                               ValidationState.VALIDATING);
+                metadataId,
+                ValidationState.VALIDATING);
         return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
     }
 
-    @RequestMapping(path = "/{metadataType}/{id}" + Links.VALID_URL, method = RequestMethod.PUT)
+    @PutMapping("/{metadataType}/{id}" + Links.METADATA_VALID_URL)
     HttpEntity<?> validEvent(@PathVariable("metadataType") String metadataType,
-                                      @PathVariable("id") String metadataId,
-                                      PersistentEntityResourceAssembler assembler) {
+                             @PathVariable("id") String metadataId,
+                             PersistentEntityResourceAssembler assembler) {
         MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(entityTypeForCollection(metadataType),
-                                                                                               metadataId,
-                                                                                               ValidationState.VALID);
+                metadataId,
+                ValidationState.VALID);
         return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
     }
 
-    @RequestMapping(path = "/{metadataType}/{id}" + Links.INVALID_URL, method = RequestMethod.PUT)
+    @PutMapping("/{metadataType}/{id}" + Links.INVALID_URL)
     HttpEntity<?> invalidEvent(@PathVariable("metadataType") String metadataType,
-                                        @PathVariable("id") String metadataId,
-                                        PersistentEntityResourceAssembler assembler) {
+                               @PathVariable("id") String metadataId,
+                               PersistentEntityResourceAssembler assembler) {
         MetadataDocument metadataDocument = validationStateChangeService.changeValidationState(entityTypeForCollection(metadataType),
-                                                                                               metadataId,
-                                                                                               ValidationState.INVALID);
+                metadataId,
+                ValidationState.INVALID);
         return ResponseEntity.accepted().body(assembler.toFullResource(metadataDocument));
     }
 
-    @RequestMapping(path = "/{metadataType}/query", method = RequestMethod.POST)
+    @PostMapping("/{metadataType}/query")
     ResponseEntity<PagedResources<Resource<?>>> query(
-        @PathVariable("metadataType") String metadataType,
-        @RequestBody List<MetadataCriteria> criteriaList,
-        @RequestParam("operator") Optional<String> operator,
-        Pageable pageable,
-        final PersistentEntityResourceAssembler assembler) {
+            @PathVariable("metadataType") String metadataType,
+            @RequestBody List<MetadataCriteria> criteriaList,
+            @RequestParam("operator") Optional<String> operator,
+            Pageable pageable,
+            final PersistentEntityResourceAssembler assembler) {
         Boolean andCriteria = operator.map("and"::equalsIgnoreCase).orElse(false);
         Page<?> docs = metadataQueryService.findByCriteria(entityTypeForCollection(metadataType), criteriaList, andCriteria, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(docs, assembler));

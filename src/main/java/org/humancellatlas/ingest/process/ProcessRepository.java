@@ -40,6 +40,13 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
                                                                     @Param("state") ValidationState state,
                                                                     Pageable pageable);
 
+    @Query(value = "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }")
+    @RestResource(rel = "findBySubmissionIdWithGraphValidationErrors")
+    public Page<Process> findBySubmissionIdWithGraphValidationErrors(
+            @Param("envelopeId") String envelopeId,
+            Pageable pageable
+    );
+
     @RestResource(exported = false)
     Collection<Process> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 

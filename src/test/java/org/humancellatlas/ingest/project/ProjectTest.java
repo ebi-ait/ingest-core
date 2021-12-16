@@ -17,7 +17,7 @@ public class ProjectTest {
 
         SubmissionEnvelope openSubmissionEnvelope2 = new SubmissionEnvelope();
         openSubmissionEnvelope2.enactStateTransition(SubmissionState.DRAFT);
-        openSubmissionEnvelope2.enactStateTransition(SubmissionState.VALID);
+        openSubmissionEnvelope2.enactStateTransition(SubmissionState.METADATA_VALID);
         openSubmissionEnvelope2.enactStateTransition(SubmissionState.SUBMITTED);
 
 
@@ -37,14 +37,14 @@ public class ProjectTest {
         //given:
         SubmissionEnvelope completeSubmission = new SubmissionEnvelope();
         completeSubmission.enactStateTransition(SubmissionState.DRAFT);
-        completeSubmission.enactStateTransition(SubmissionState.VALID);
+        completeSubmission.enactStateTransition(SubmissionState.METADATA_VALID);
         completeSubmission.enactStateTransition(SubmissionState.SUBMITTED);
         completeSubmission.enactStateTransition(SubmissionState.PROCESSING);
         completeSubmission.enactStateTransition(SubmissionState.COMPLETE);
 
         SubmissionEnvelope submittedSubmission = new SubmissionEnvelope();
         submittedSubmission.enactStateTransition(SubmissionState.DRAFT);
-        submittedSubmission.enactStateTransition(SubmissionState.VALID);
+        submittedSubmission.enactStateTransition(SubmissionState.METADATA_VALID);
         submittedSubmission.enactStateTransition(SubmissionState.SUBMITTED);
 
         Project project = new Project(null);

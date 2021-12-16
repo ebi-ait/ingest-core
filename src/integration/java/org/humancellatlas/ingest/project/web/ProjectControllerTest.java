@@ -131,7 +131,7 @@ class ProjectControllerTest {
             MvcResult result = webApp
                     .perform(patch("/projects/{id}", project.getId())
                             .contentType(APPLICATION_JSON_VALUE)
-                            .content("{\"content\": " + objectMapper.writeValueAsString(content) + ", \"validationState\": \"VALID\"}"))
+                            .content("{\"content\": " + objectMapper.writeValueAsString(content) + ", \"validationState\": \"METADATA_VALID\"}"))
                     .andReturn();
 
             //expect:

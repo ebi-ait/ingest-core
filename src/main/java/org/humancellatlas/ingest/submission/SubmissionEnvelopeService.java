@@ -13,7 +13,6 @@ import org.humancellatlas.ingest.patch.PatchRepository;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
-import org.humancellatlas.ingest.state.SubmissionGraphValidationState;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
@@ -82,9 +81,9 @@ public class SubmissionEnvelopeService {
     private SubmissionErrorRepository submissionErrorRepository;
 
     public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
-        if(envelope.getGraphValidationState() != SubmissionGraphValidationState.VALID) {
+        if(envelope.getSubmissionState() != SubmissionState.GRAPH_VALID) {
             throw new RuntimeException((String.format(
-                    "Envelope with id %s cannot be submitted without a valid graphValidationState",
+                    "Envelope with id %s cannot be submitted without a graph valid state",
                     envelope.getId()
             )));
         }
@@ -108,21 +107,10 @@ public class SubmissionEnvelopeService {
                     envelope.getId(), envelope.getSubmissionState(), state));
         } else {
             messageRouter.routeStateTrackingUpdateMessageForEnvelopeEvent(envelope, state);
-        }
-    }
 
-    public void handleGraphValidationStateUpdateRequest(SubmissionEnvelope envelope,
-                                                        SubmissionGraphValidationState state) {
-        if (!envelope.allowedGraphValidationStateTransitions().contains(state)) {
-            throw new RuntimeException(String.format(
-                    "Envelope with id %s cannot be transitioned from graphValidationState %s to graphValidationState %s",
-                    envelope.getId(), envelope.getGraphValidationState(), state));
-        } else {
-            if(envelope.getGraphValidationState() == SubmissionGraphValidationState.INVALID) {
+            if(state == SubmissionState.GRAPH_VALIDATION_REQUESTED) {
                 removeGraphValidationErrors(envelope);
             }
-            envelope.enactGraphValidationStateTransition(state);
-            submissionEnvelopeRepository.save(envelope);
         }
     }
 
