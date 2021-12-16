@@ -4,6 +4,7 @@ package org.humancellatlas.ingest.file;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -47,6 +48,13 @@ public interface FileRepository extends MongoRepository<File, String> {
     public Page<File> findBySubmissionEnvelopeAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
                                                                  @Param("state") ValidationState state,
                                                                  Pageable pageable);
+
+    @Query(value = "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }")
+    @RestResource(rel = "findBySubmissionIdWithGraphValidationErrors")
+    public Page<File> findBySubmissionIdWithGraphValidationErrors(
+            @Param("envelopeId") String envelopeId,
+            Pageable pageable
+    );
 
     @RestResource(exported = false)
     Collection<File> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
