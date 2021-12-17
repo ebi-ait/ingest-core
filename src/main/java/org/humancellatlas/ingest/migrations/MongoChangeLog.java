@@ -166,7 +166,7 @@ public class MongoChangeLog {
         db.getCollection("file").updateMany(filter, update);
     }
 
-    @ChangeSet(order = "2021-12-07", id = "Rename submission states", author = "jcbwndsr@ebi.ac.uk", runAlways = true)
+    @ChangeSet(order = "2021-12-07", id = "Rename submission states", author = "jcbwndsr@ebi.ac.uk")
     public void renameSubmissionStates(MongoDatabase db) {
         Document filter = Document.parse("{ 'submissionState': 'VALID' }");
         List<Document> update = new ArrayList<>();
