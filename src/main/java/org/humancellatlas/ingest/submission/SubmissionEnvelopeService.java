@@ -11,14 +11,18 @@ import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.patch.PatchRepository;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
@@ -81,7 +85,25 @@ public class SubmissionEnvelopeService {
     private SubmissionErrorRepository submissionErrorRepository;
 
     public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
-        if(envelope.getSubmissionState() != SubmissionState.GRAPH_VALID) {
+        projectRepository.findBySubmissionEnvelopesContains(envelope)
+                .findFirst()
+                .ifPresentOrElse(
+                        project1 -> {
+                            if (!project1.getValidationState().equals(ValidationState.VALID)) {
+                                throw new RuntimeException((String.format(
+                                        "Envelope with id %s cannot be submitted when the project is invalid.",
+                                        envelope.getId()
+                                )));
+                            }
+                        },
+                        () -> {
+                            throw new RuntimeException((String.format(
+                                    "Envelope with id %s cannot be submitted without a project.",
+                                    envelope.getId()
+                            )));
+                        });
+
+        if (envelope.getSubmissionState() != SubmissionState.GRAPH_VALID) {
             throw new RuntimeException((String.format(
                     "Envelope with id %s cannot be submitted without a graph valid state",
                     envelope.getId()
@@ -108,7 +130,7 @@ public class SubmissionEnvelopeService {
         } else {
             messageRouter.routeStateTrackingUpdateMessageForEnvelopeEvent(envelope, state);
 
-            if(state == SubmissionState.GRAPH_VALIDATION_REQUESTED) {
+            if (state == SubmissionState.GRAPH_VALIDATION_REQUESTED) {
                 removeGraphValidationErrors(envelope);
             }
         }
@@ -128,7 +150,7 @@ public class SubmissionEnvelopeService {
     }
 
     private void archiveSubmission(SubmissionEnvelope envelope) {
-            exporter.exportManifests(envelope);
+        exporter.exportManifests(envelope);
     }
 
     public void exportSubmission(SubmissionEnvelope submissionEnvelope) {
