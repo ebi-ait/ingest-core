@@ -88,8 +88,8 @@ public class SubmissionEnvelopeService {
         projectRepository.findBySubmissionEnvelopesContains(envelope)
                 .findFirst()
                 .ifPresentOrElse(
-                        project1 -> {
-                            if (!project1.getValidationState().equals(ValidationState.VALID)) {
+                        project -> {
+                            if (!project.getValidationState().equals(ValidationState.VALID)) {
                                 throw new RuntimeException((String.format(
                                         "Envelope with id %s cannot be submitted when the project is invalid.",
                                         envelope.getId()
