@@ -15,6 +15,7 @@ import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +82,25 @@ public class SubmissionEnvelopeService {
     private SubmissionErrorRepository submissionErrorRepository;
 
     public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
-        if(envelope.getSubmissionState() != SubmissionState.GRAPH_VALID) {
+        projectRepository.findBySubmissionEnvelopesContains(envelope)
+                .findFirst()
+                .ifPresentOrElse(
+                        project -> {
+                            if (!project.getValidationState().equals(ValidationState.VALID)) {
+                                throw new RuntimeException((String.format(
+                                        "Envelope with id %s cannot be submitted when the project is invalid.",
+                                        envelope.getId()
+                                )));
+                            }
+                        },
+                        () -> {
+                            throw new RuntimeException((String.format(
+                                    "Envelope with id %s cannot be submitted without a project.",
+                                    envelope.getId()
+                            )));
+                        });
+
+        if (envelope.getSubmissionState() != SubmissionState.GRAPH_VALID) {
             throw new RuntimeException((String.format(
                     "Envelope with id %s cannot be submitted without a graph valid state",
                     envelope.getId()
@@ -108,7 +127,7 @@ public class SubmissionEnvelopeService {
         } else {
             messageRouter.routeStateTrackingUpdateMessageForEnvelopeEvent(envelope, state);
 
-            if(state == SubmissionState.GRAPH_VALIDATION_REQUESTED) {
+            if (state == SubmissionState.GRAPH_VALIDATION_REQUESTED) {
                 removeGraphValidationErrors(envelope);
             }
         }
@@ -128,7 +147,7 @@ public class SubmissionEnvelopeService {
     }
 
     private void archiveSubmission(SubmissionEnvelope envelope) {
-            exporter.exportManifests(envelope);
+        exporter.exportManifests(envelope);
     }
 
     public void exportSubmission(SubmissionEnvelope submissionEnvelope) {

@@ -19,7 +19,11 @@ import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +45,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes={ SubmissionEnvelopeService.class })
+@SpringBootTest(classes = {SubmissionEnvelopeService.class})
 public class SubmissionEnvelopeServiceTest {
     @Autowired
     private SubmissionEnvelopeService service;
@@ -92,7 +96,8 @@ public class SubmissionEnvelopeServiceTest {
     private SubmissionErrorRepository submissionErrorRepository;
 
     @Configuration
-    static class TestConfiguration {}
+    static class TestConfiguration {
+    }
 
     static class TestProject extends Project {
         Set<File> supplementaryFiles;
@@ -111,6 +116,7 @@ public class SubmissionEnvelopeServiceTest {
             supplementaryFiles.add(file);
         }
     }
+
 
     @Test
     public void testDeleteSubmission() {
@@ -199,76 +205,122 @@ public class SubmissionEnvelopeServiceTest {
         verify(submissionEnvelopeRepository).delete(submissionEnvelope);
     }
 
-    @Test
-    public void testSubmissionBlocked() {
-        //given:
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        submissionEnvelope.enactStateTransition(SubmissionState.METADATA_VALID);
 
-        //when
-        Throwable exception = assertThrows(RuntimeException.class,
-                () -> service.handleSubmitRequest(submissionEnvelope, List.of(SubmitAction.EXPORT))
-        );
+    @Nested
+    @DisplayName("SubmitRequestTests")
+    class SubmitRequestTests {
+        SubmissionEnvelope submissionEnvelope;
+        Project project;
 
-        // then:
-        assertThat(exception.getMessage()).contains("without a graph valid state");
-        verify(submissionEnvelopeRepository, never()).save(submissionEnvelope);
+        @BeforeEach
+        public void setup() {
+            submissionEnvelope = new SubmissionEnvelope();
+            submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
+            project = new Project(null);
+            project.setValidationState(ValidationState.VALID);
+            when(projectRepository.findBySubmissionEnvelopesContains(any()))
+                    .thenReturn(Stream.of(project));
+        }
+
+        @Test
+        public void testSubmissionBlocked() {
+            //given:
+            submissionEnvelope.enactStateTransition(SubmissionState.METADATA_VALID);
+
+            //when
+            Throwable exception = assertThrows(RuntimeException.class,
+                    () -> service.handleSubmitRequest(submissionEnvelope, List.of(SubmitAction.EXPORT))
+            );
+
+            // then:
+            assertErrorMessageContains(exception, "without a graph valid state");
+        }
+
+        @Test
+        public void testSubmissionUnblocked() {
+            //when
+            service.handleSubmitRequest(submissionEnvelope, List.of(SubmitAction.EXPORT));
+
+            // then:
+            verify(submissionEnvelopeRepository).save(submissionEnvelope);
+        }
+
+        @Test
+        public void testGraphValidationErrorsCleared() {
+            //given envelope:
+            submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_INVALID);
+
+            //given metadata within the SubmissionEnvelope
+            Biomaterial testBiomaterial = new Biomaterial(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
+            Protocol testProtocol = new Protocol(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
+            Process testProcess = new Process(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
+            File testFile = new File();
+            testFile.setFileName("testFile.txt");
+
+            testProcess.setSubmissionEnvelope(submissionEnvelope);
+            testProtocol.setSubmissionEnvelope(submissionEnvelope);
+            testBiomaterial.setSubmissionEnvelope(submissionEnvelope);
+            testFile.setSubmissionEnvelope(submissionEnvelope);
+
+            // given graph validation errors on the metadata
+            testBiomaterial.setGraphValidationErrors(Arrays.asList("test1", "test2"));
+            testProcess.setGraphValidationErrors(Arrays.asList("test1", "test2"));
+            testProtocol.setGraphValidationErrors(Arrays.asList("test1", "test2"));
+            testFile.setGraphValidationErrors(Arrays.asList("test1", "test2"));
+
+            // when
+            when(biomaterialRepository.findBySubmissionEnvelope(any()))
+                    .thenReturn(Stream.of(testBiomaterial));
+            when(processRepository.findBySubmissionEnvelope(any()))
+                    .thenReturn(Stream.of(testProcess));
+            when(protocolRepository.findBySubmissionEnvelope(any()))
+                    .thenReturn(Stream.of(testProtocol));
+            when(fileRepository.findBySubmissionEnvelope(any()))
+                    .thenReturn(Stream.of(testFile));
+
+            service.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.GRAPH_VALIDATION_REQUESTED);
+            submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALIDATION_REQUESTED);
+            //then:
+            assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(SubmissionState.GRAPH_VALIDATION_REQUESTED);
+            assertThat(testBiomaterial.getGraphValidationErrors()).isEqualTo(new ArrayList<>());
+            assertThat(testProcess.getGraphValidationErrors()).isEqualTo(new ArrayList<>());
+            assertThat(testProtocol.getGraphValidationErrors()).isEqualTo(new ArrayList<>());
+            assertThat(testFile.getGraphValidationErrors()).isEqualTo(new ArrayList<>());
+        }
+
+        @Test
+        public void testSubmissionInvalidProject() {
+            //given:
+            project.setValidationState(ValidationState.INVALID);
+
+            //when
+            Throwable exception = assertThrows(RuntimeException.class,
+                    () -> service.handleSubmitRequest(submissionEnvelope, List.of(SubmitAction.EXPORT))
+            );
+
+            // then:
+            assertErrorMessageContains(exception, "cannot be submitted when the project is invalid");
+        }
+
+        @Test
+        public void testSubmissionNoProject() {
+            //given:
+            when(projectRepository.findBySubmissionEnvelopesContains(any()))
+                    .thenReturn(Stream.empty());
+
+            //when
+            Throwable exception = assertThrows(RuntimeException.class,
+                    () -> service.handleSubmitRequest(submissionEnvelope, List.of(SubmitAction.EXPORT))
+            );
+
+            // then:
+            assertErrorMessageContains(exception, "cannot be submitted without a project");
+        }
+
+        private void assertErrorMessageContains(Throwable exception, String s) {
+            assertThat(exception.getMessage()).contains(s);
+            verify(submissionEnvelopeRepository, never()).save(submissionEnvelope);
+        }
     }
 
-    @Test
-    public void testSubmissionUnblocked() {
-        //given:
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
-
-        //when
-        service.handleSubmitRequest(submissionEnvelope, List.of(SubmitAction.EXPORT));
-
-        // then:
-        verify(submissionEnvelopeRepository).save(submissionEnvelope);
-    }
-
-    @Test
-    public void testGraphValidationErrorsCleared() {
-        //given envelope:
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_INVALID);
-
-        //given metadata within the SubmissionEnvelope
-        Biomaterial testBiomaterial = new Biomaterial(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
-        Protocol testProtocol = new Protocol(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
-        Process testProcess = new Process(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
-        File testFile = new File();
-        testFile.setFileName("testFile.txt");
-
-        testProcess.setSubmissionEnvelope(submissionEnvelope);
-        testProtocol.setSubmissionEnvelope(submissionEnvelope);
-        testBiomaterial.setSubmissionEnvelope(submissionEnvelope);
-        testFile.setSubmissionEnvelope(submissionEnvelope);
-
-        // given graph validation errors on the metadata
-        testBiomaterial.setGraphValidationErrors(Arrays.asList("test1", "test2"));
-        testProcess.setGraphValidationErrors(Arrays.asList("test1", "test2"));
-        testProtocol.setGraphValidationErrors(Arrays.asList("test1", "test2"));
-        testFile.setGraphValidationErrors(Arrays.asList("test1", "test2"));
-
-        // when
-        when(biomaterialRepository.findBySubmissionEnvelope(any()))
-                .thenReturn(Stream.of(testBiomaterial));
-        when(processRepository.findBySubmissionEnvelope(any()))
-                .thenReturn(Stream.of(testProcess));
-        when(protocolRepository.findBySubmissionEnvelope(any()))
-                .thenReturn(Stream.of(testProtocol));
-        when(fileRepository.findBySubmissionEnvelope(any()))
-                .thenReturn(Stream.of(testFile));
-
-        service.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.GRAPH_VALIDATION_REQUESTED);
-        submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALIDATION_REQUESTED);
-        //then:
-        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(SubmissionState.GRAPH_VALIDATION_REQUESTED);
-        assertThat(testBiomaterial.getGraphValidationErrors()).isEqualTo(new ArrayList<>());
-        assertThat(testProcess.getGraphValidationErrors()).isEqualTo(new ArrayList<>());
-        assertThat(testProtocol.getGraphValidationErrors()).isEqualTo(new ArrayList<>());
-        assertThat(testFile.getGraphValidationErrors()).isEqualTo(new ArrayList<>());
-    }
 }
