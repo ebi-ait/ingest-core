@@ -3,7 +3,9 @@ package org.humancellatlas.ingest.core.service;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import reactor.util.StringUtils;
 
@@ -13,6 +15,9 @@ import java.util.*;
 
 @Service
 public class MetadataLinkingService {
+
+    private static final long RETRY_BACKOFF_MS = 100;
+    private static final int RETRY_MAX_ATTEMPTS = 5;
 
     private ValidationStateChangeService validationStateChangeService;
 
@@ -83,13 +88,24 @@ public class MetadataLinkingService {
 
     private void setValidationStateToDraft(MetadataDocument... entities) {
         Arrays.stream(entities).forEach(entity -> {
-            validationStateChangeService.changeValidationState(entity.getType(), entity.getId(), ValidationState.DRAFT);
+            setToDraft(entity);
         });
     }
 
     private <T extends MetadataDocument> void setValidationStateToDraft(Set<T> entitySet) {
         entitySet.forEach(entity -> {
-            validationStateChangeService.changeValidationState(entity.getType(), entity.getId(), ValidationState.DRAFT);
+            setToDraft(entity);
+        });
+    }
+
+    private void setToDraft(MetadataDocument entity) {
+        RetryTemplate retry = RetryTemplate.builder()
+                .maxAttempts(RETRY_MAX_ATTEMPTS)
+                .fixedBackoff(RETRY_BACKOFF_MS)
+                .retryOn(OptimisticLockingFailureException.class)
+                .build();
+        retry.execute(context -> {
+            return validationStateChangeService.changeValidationState(entity.getType(), entity.getId(), ValidationState.DRAFT);
         });
     }
 }
