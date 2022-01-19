@@ -112,6 +112,8 @@ public class FileService {
         Long size = fileMessage.getSize();
         String contentType = fileMessage.getContentType();
 
+        log.info(String.format("Updating file with cloudUrl %s", newFileUrl));
+
         file.setCloudUrl(newFileUrl);
         file.setChecksums(checksums);
         file.setSize(size);
