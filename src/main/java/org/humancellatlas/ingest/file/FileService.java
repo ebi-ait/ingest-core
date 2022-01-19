@@ -5,12 +5,10 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.core.Checksums;
-import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.exception.CoreEntityNotFoundException;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
-import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.file.web.FileMessage;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
@@ -53,8 +51,6 @@ public class FileService {
     MetadataCrudService metadataCrudService;
     private final @NonNull
     MetadataUpdateService metadataUpdateService;
-    private final @NonNull
-    ValidationStateChangeService validationStateChangeService;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -112,16 +108,12 @@ public class FileService {
         Long size = fileMessage.getSize();
         String contentType = fileMessage.getContentType();
 
-        log.info(String.format("Updating file with cloudUrl %s", newFileUrl));
-
         file.setCloudUrl(newFileUrl);
         file.setChecksums(checksums);
         file.setSize(size);
         file.setFileContentType(contentType);
+        file.enactStateTransition(ValidationState.DRAFT);
         File updatedFile = fileRepository.save(file);
-
-        validationStateChangeService.changeValidationState(EntityType.FILE, updatedFile.getId(), ValidationState.DRAFT);
-
         return updatedFile;
     }
 
