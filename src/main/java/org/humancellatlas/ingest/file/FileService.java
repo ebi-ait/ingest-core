@@ -118,9 +118,8 @@ public class FileService {
         file.setChecksums(checksums);
         file.setSize(size);
         file.setFileContentType(contentType);
+        file.setValidationState(ValidationState.DRAFT);
         File updatedFile = fileRepository.save(file);
-
-        validationStateChangeService.changeValidationState(EntityType.FILE, updatedFile.getId(), ValidationState.DRAFT);
 
         return updatedFile;
     }
