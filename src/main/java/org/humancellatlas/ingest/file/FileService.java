@@ -112,7 +112,7 @@ public class FileService {
         Long size = fileMessage.getSize();
         String contentType = fileMessage.getContentType();
 
-        log.info(String.format("Updating file with cloudUrl %s", newFileUrl));
+        log.info(String.format("Updating file with cloudUrl %s and submission UUID %s", newFileUrl, envelope.getUuid()));
 
         file.setCloudUrl(newFileUrl);
         file.setChecksums(checksums);
@@ -121,6 +121,8 @@ public class FileService {
         file.setValidationState(ValidationState.DRAFT);
         File updatedFile = fileRepository.save(file);
 
+        log.info(String.format("File validation state is %s for file with cloudUrl %s and submission UUID %s ", updatedFile.getValidationState(), file.getCloudUrl(), envelope.getUuid()));
+        
         return updatedFile;
     }
 
