@@ -33,6 +33,8 @@ public class SubmissionEnvelope extends AbstractEntity {
     Boolean isUpdate;
     private @Setter
     Set<SubmitAction> submitActions;
+    private @Setter
+    SpreadsheetDownloadJob lastSpreadsheetDownloadJob;
 
     public SubmissionEnvelope() {
         super(EntityType.SUBMISSION);
