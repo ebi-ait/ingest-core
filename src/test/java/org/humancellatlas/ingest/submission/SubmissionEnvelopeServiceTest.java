@@ -32,10 +32,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
@@ -335,7 +332,6 @@ public class SubmissionEnvelopeServiceTest {
         // given
         SubmissionEnvelope submission = mock(SubmissionEnvelope.class);
         Project project = mock(Project.class);
-        Protocol protocol = mock(Protocol.class);
         Biomaterial biomaterial = mock(Biomaterial.class);
         Process process = mock(Process.class);
         File file =  mock(File.class);
@@ -344,7 +340,7 @@ public class SubmissionEnvelopeServiceTest {
         when(projectRepository.findBySubmissionEnvelope(submission, request))
                 .thenReturn(new PageImpl<>(List.of(project), request, 1));
         when(protocolRepository.findBySubmissionEnvelope(submission, request))
-                .thenReturn(new PageImpl<>(List.of(protocol), request, 1));
+                .thenReturn(Page.empty());
         when(biomaterialRepository.findBySubmissionEnvelope(submission, request))
                 .thenReturn(new PageImpl<>(List.of(biomaterial), request, 1));
         when(processRepository.findBySubmissionEnvelope(submission, request))
@@ -356,7 +352,6 @@ public class SubmissionEnvelopeServiceTest {
         Instant yesterday = now.minus(1, ChronoUnit.DAYS);
         when(project.getUpdateDate()).thenReturn(yesterday);
         when(biomaterial.getUpdateDate()).thenReturn(yesterday);
-        when(protocol.getUpdateDate()).thenReturn(yesterday);
         when(process.getUpdateDate()).thenReturn(yesterday);
         when(file.getUpdateDate()).thenReturn(now);
 

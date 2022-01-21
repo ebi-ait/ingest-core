@@ -341,12 +341,19 @@ public class SubmissionEnvelopeService {
 
     public Instant getSubmissionContentLastUpdated(SubmissionEnvelope submissionEnvelope) {
         PageRequest request = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "updateDate"));
-        Project project = projectRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent().get(0);
-        Biomaterial biomaterial = biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent().get(0);
-        Protocol protocol = protocolRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent().get(0);
-        Process process = processRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent().get(0);
-        File file = fileRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent().get(0);
-        List<MetadataDocument> content = List.of(project, biomaterial, protocol, process, file);
+        List<Project> projects = projectRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
+        List<Biomaterial> biomaterials = biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
+        List<Protocol> protocols = protocolRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
+        List<Process> processes = processRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
+        List<File> files = fileRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
+        List<MetadataDocument> content = new ArrayList<>();
+
+        content.addAll(projects);
+        content.addAll(biomaterials);
+        content.addAll(protocols);
+        content.addAll(processes);
+        content.addAll(files);
+
         Instant lastUpdateDate = content.stream().map(MetadataDocument::getUpdateDate).max(Instant::compareTo).get();
 
         return lastUpdateDate;
