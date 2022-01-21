@@ -2,16 +2,22 @@ package org.humancellatlas.ingest.submission;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.humancellatlas.ingest.errors.SubmissionErrorRepository;
 import org.humancellatlas.ingest.exporter.Exporter;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.patch.PatchRepository;
+import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
@@ -20,10 +26,13 @@ import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -328,5 +337,18 @@ public class SubmissionEnvelopeService {
                         .peek(file -> file.setGraphValidationErrors(new ArrayList<>()))
                         .collect(Collectors.toList())
         );
+    }
+
+    public Instant getSubmissionContentLastUpdated(SubmissionEnvelope submissionEnvelope) {
+        PageRequest request = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "updateDate"));
+        Project project = projectRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent().get(0);
+        Biomaterial biomaterial = biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent().get(0);
+        Protocol protocol = protocolRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent().get(0);
+        Process process = processRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent().get(0);
+        File file = fileRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent().get(0);
+        List<MetadataDocument> content = List.of(project, biomaterial, protocol, process, file);
+        Instant lastUpdateDate = content.stream().map(MetadataDocument::getUpdateDate).max(Instant::compareTo).get();
+
+        return lastUpdateDate;
     }
 }

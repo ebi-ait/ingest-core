@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.submission;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.errors.SubmissionErrorRepository;
@@ -27,13 +28,18 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
@@ -46,6 +52,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {SubmissionEnvelopeService.class})
+@AutoConfigureMockMvc(printOnlyOnFailure = false)
 public class SubmissionEnvelopeServiceTest {
     @Autowired
     private SubmissionEnvelopeService service;
@@ -321,6 +328,43 @@ public class SubmissionEnvelopeServiceTest {
             assertThat(exception.getMessage()).contains(s);
             verify(submissionEnvelopeRepository, never()).save(submissionEnvelope);
         }
+    }
+
+    @Test
+    public void testContentLastUpdated() {
+        // given
+        SubmissionEnvelope submission = mock(SubmissionEnvelope.class);
+        Project project = mock(Project.class);
+        Protocol protocol = mock(Protocol.class);
+        Biomaterial biomaterial = mock(Biomaterial.class);
+        Process process = mock(Process.class);
+        File file =  mock(File.class);
+
+        PageRequest request = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "updateDate"));
+        when(projectRepository.findBySubmissionEnvelope(submission, request))
+                .thenReturn(new PageImpl<>(List.of(project), request, 1));
+        when(protocolRepository.findBySubmissionEnvelope(submission, request))
+                .thenReturn(new PageImpl<>(List.of(protocol), request, 1));
+        when(biomaterialRepository.findBySubmissionEnvelope(submission, request))
+                .thenReturn(new PageImpl<>(List.of(biomaterial), request, 1));
+        when(processRepository.findBySubmissionEnvelope(submission, request))
+                .thenReturn(new PageImpl<>(List.of(process), request, 1));
+        when(fileRepository.findBySubmissionEnvelope(submission, request))
+                .thenReturn(new PageImpl<>(List.of(file), request, 1));
+
+        Instant now = Instant.now();
+        Instant yesterday = now.minus(1, ChronoUnit.DAYS);
+        when(project.getUpdateDate()).thenReturn(yesterday);
+        when(biomaterial.getUpdateDate()).thenReturn(yesterday);
+        when(protocol.getUpdateDate()).thenReturn(yesterday);
+        when(process.getUpdateDate()).thenReturn(yesterday);
+        when(file.getUpdateDate()).thenReturn(now);
+
+        //when
+        Instant lastUpdateDate = service.getSubmissionContentLastUpdated(submission);
+
+        // then:
+        assertThat(lastUpdateDate).isEqualTo(now.toString());
     }
 
 }

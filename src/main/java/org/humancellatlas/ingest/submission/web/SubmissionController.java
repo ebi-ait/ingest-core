@@ -38,6 +38,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -360,5 +361,11 @@ public class SubmissionController {
                                         @RequestParam(name = "force", required = false, defaultValue = "false") boolean forceDelete) {
         getSubmissionEnvelopeService().deleteSubmission(submissionEnvelope, forceDelete);
         return ResponseEntity.accepted().build();
+    }
+
+    @GetMapping("/submissionEnvelopes/{id}/contentLastUpdated")
+    ResponseEntity<?> getContentLastUpdated(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
+        Instant lastUpdateDate = submissionEnvelopeService.getSubmissionContentLastUpdated(submissionEnvelope);
+        return ResponseEntity.ok(lastUpdateDate.toString());
     }
 }
