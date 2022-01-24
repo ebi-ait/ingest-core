@@ -87,21 +87,21 @@ public class SubmissionEnvelopeService {
                 .ifPresentOrElse(
                         project -> {
                             if (!project.getValidationState().equals(ValidationState.VALID)) {
-                                throw new RuntimeException((String.format(
+                                throw new StateTransitionNotAllowed((String.format(
                                         "Envelope with id %s cannot be submitted when the project is invalid.",
                                         envelope.getId()
                                 )));
                             }
                         },
                         () -> {
-                            throw new RuntimeException((String.format(
+                            throw new StateTransitionNotAllowed((String.format(
                                     "Envelope with id %s cannot be submitted without a project.",
                                     envelope.getId()
                             )));
                         });
 
         if (envelope.getSubmissionState() != SubmissionState.GRAPH_VALID) {
-            throw new RuntimeException((String.format(
+            throw new StateTransitionNotAllowed((String.format(
                     "Envelope with id %s cannot be submitted without a graph valid state",
                     envelope.getId()
             )));
@@ -140,7 +140,7 @@ public class SubmissionEnvelopeService {
         } else if (shouldExport(submitActions)) {
             exportSubmission(envelope);
         } else {
-            throw new RuntimeException((String.format(
+            throw new IllegalArgumentException((String.format(
                     "Envelope with id %s is submitted without the required submit actions",
                     envelope.getId(), envelope.getSubmissionState())));
         }
