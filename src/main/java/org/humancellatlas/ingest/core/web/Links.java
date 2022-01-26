@@ -102,8 +102,12 @@ public class Links {
     public static final String SUBMISSION_ERRORS_REL = "submissionEnvelopeErrors";
     public static final String SUBMISSION_SUMMARY_URL = "/summary";
     public static final String SUBMISSION_SUMMARY_REL = "summary";
+    public static final String SUBMISSION_CONTENT_LAST_UPDATED_URL = "/contentLastUpdated";
+    public static final String SUBMISSION_CONTENT_LAST_UPDATED_REL = "contentLastUpdated";
     public static final String SUBMISSION_LINKING_MAP_URL = "/linkingMap";
     public static final String SUBMISSION_LINKING_MAP_REL = "linkingMap";
+    public static final String SUBMISSION_RELATED_PROJECTS_URL = "/relatedProjects";
+    public static final String SUBMISSION_RELATED_PROJECTS_REL = "relatedProjects";
 
     public static final String SUBMISSION_DOCUMENTS_SM_URL = "/documentSmReport";
     public static final String SUBMISSION_DOCUMENTS_SM_REL = "documentSmReport";
