@@ -2,8 +2,6 @@ package org.humancellatlas.ingest.state;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-import javax.validation.Valid;
-
 /**
  * Created by rolando on 07/09/2017.
  */
