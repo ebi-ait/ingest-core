@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.Instant;
 
 @Data
-public class SpreadsheetDownloadJob {
+public class SpreadsheetGenerationJob {
     private Instant finishedDate;
     private Instant createdDate;
 }
