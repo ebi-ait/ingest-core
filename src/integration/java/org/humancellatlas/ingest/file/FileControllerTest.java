@@ -1,11 +1,14 @@
 package org.humancellatlas.ingest.file;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.data.MapEntry;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,15 +16,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,6 +49,9 @@ public class FileControllerTest {
 
     @Autowired
     private FileRepository fileRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private MigrationConfiguration migrationConfiguration;
@@ -211,5 +224,29 @@ public class FileControllerTest {
         Arrays.stream(values).forEach(value -> {
             verify(validationStateChangeService, times(1)).changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT);
         });
+    }
+
+    @Test
+    public void testValidationJobPatch() throws Exception {
+        //given:
+        File file = new File("test");
+        file = fileRepository.save(file);
+
+        //when:
+        String patch = "{ \"validationJob\": { \"validationReport\": { \"validationState\": \"Valid\" }}}";
+
+        MvcResult result = webApp
+                .perform(patch("/files/{id}", file.getId())
+                        .contentType(APPLICATION_JSON_VALUE)
+                        .content(patch))
+                .andReturn();
+
+        //expect:
+        MockHttpServletResponse response = result.getResponse();
+        assertThat(response.getContentType()).containsPattern("application/.*json.*");
+
+        //and:
+        file = fileRepository.findById(file.getId()).get();
+        assertThat(file.getValidationJob().getValidationReport().getValidationState()).isEqualTo(ValidationState.VALID);
     }
 }

@@ -1,5 +1,9 @@
 package org.humancellatlas.ingest.state;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
+
 /**
  * Created by rolando on 07/09/2017.
  */
@@ -9,5 +13,12 @@ public enum ValidationState {
     VALID,
     INVALID,
     PROCESSING,
-    COMPLETE
+    COMPLETE;
+
+    @JsonCreator
+    public static ValidationState fromString(String key) {
+        return key == null
+                ? null
+                : ValidationState.valueOf(key.toUpperCase());
+    }
 }
