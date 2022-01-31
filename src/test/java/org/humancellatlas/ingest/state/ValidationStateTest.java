@@ -34,7 +34,7 @@ public class ValidationStateTest {
 
     @ParameterizedTest
     @MethodSource("provideStatesForTestFromJSON")
-    public void testFromJson(ValidationState expected, String given) throws Exception{
+    public void testFromJSON(ValidationState expected, String given) throws Exception{
         var jsonValue = String.format("{ \"validationState\": \"%s\" }", given);
         assertThat(json.parse(jsonValue).getObject().getValidationState()).isEqualTo(expected);
     }
