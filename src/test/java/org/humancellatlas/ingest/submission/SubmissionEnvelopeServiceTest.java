@@ -355,10 +355,10 @@ public class SubmissionEnvelopeServiceTest {
         when(process.getUpdateDate()).thenReturn(yesterday);
         when(file.getUpdateDate()).thenReturn(now);
 
-        //when
+        // when
         Instant lastUpdateDate = service.getSubmissionContentLastUpdated(submission);
 
-        // then:
+        // then
         assertThat(lastUpdateDate).isEqualTo(now.toString());
     }
 
