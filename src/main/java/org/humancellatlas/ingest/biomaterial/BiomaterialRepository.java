@@ -3,7 +3,6 @@ package org.humancellatlas.ingest.biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.project.Project;
-import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -15,7 +14,6 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -64,7 +62,7 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
     Stream<Biomaterial> findByDerivedByProcessesContains(Process process);
 
     Page<Biomaterial> findByDerivedByProcessesContaining(Process process, Pageable pageable);
-    
+
     long countBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     long countBySubmissionEnvelopeAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState validationState);

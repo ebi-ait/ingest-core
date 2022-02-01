@@ -2,16 +2,22 @@ package org.humancellatlas.ingest.submission;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.humancellatlas.ingest.errors.SubmissionErrorRepository;
 import org.humancellatlas.ingest.exporter.Exporter;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.patch.PatchRepository;
+import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
@@ -20,17 +26,18 @@ import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -328,5 +335,22 @@ public class SubmissionEnvelopeService {
                         .peek(file -> file.setGraphValidationErrors(new ArrayList<>()))
                         .collect(Collectors.toList())
         );
+    }
+
+    public Instant getSubmissionContentLastUpdated(SubmissionEnvelope submissionEnvelope) {
+        PageRequest request = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "updateDate"));
+        List<Project> projects = projectRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
+        List<Biomaterial> biomaterials = biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
+        List<Protocol> protocols = protocolRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
+        List<Process> processes = processRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
+        List<File> files = fileRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
+
+        Instant lastUpdateDate = Stream.of(projects, biomaterials, protocols, processes, files)
+                .flatMap(List::stream)
+                .map(MetadataDocument::getUpdateDate)
+                .max(Instant::compareTo)
+                .get();
+
+        return lastUpdateDate;
     }
 }

@@ -38,6 +38,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -91,7 +92,7 @@ public class SubmissionController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(projects, resourceAssembler));
     }
 
-    @GetMapping("/submissionEnvelopes/{sub_id}/relatedProjects")
+    @GetMapping("/submissionEnvelopes/{sub_id}" + Links.SUBMISSION_RELATED_PROJECTS_URL)
     ResponseEntity<?> getRelatedProjects(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                          Pageable pageable,
                                          final PersistentEntityResourceAssembler resourceAssembler) {
@@ -360,5 +361,11 @@ public class SubmissionController {
                                         @RequestParam(name = "force", required = false, defaultValue = "false") boolean forceDelete) {
         getSubmissionEnvelopeService().deleteSubmission(submissionEnvelope, forceDelete);
         return ResponseEntity.accepted().build();
+    }
+
+    @GetMapping("/submissionEnvelopes/{id}" + Links.SUBMISSION_CONTENT_LAST_UPDATED_URL)
+    ResponseEntity<?> getContentLastUpdated(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
+        Instant lastUpdateDate = submissionEnvelopeService.getSubmissionContentLastUpdated(submissionEnvelope);
+        return ResponseEntity.ok(lastUpdateDate.toString());
     }
 }

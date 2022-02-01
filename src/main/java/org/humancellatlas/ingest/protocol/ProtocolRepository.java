@@ -64,4 +64,5 @@ public interface ProtocolRepository extends MongoRepository<Protocol, String> {
     @Query(value = "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }", count = true)
     long countBySubmissionEnvelopeAndCountWithGraphValidationErrors(String submissionEnvelopeId);
 
+
 }

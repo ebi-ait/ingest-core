@@ -94,6 +94,18 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
             .withRel(Links.SUBMISSION_LINKING_MAP_REL);
     }
 
+    private Link getSubmissionContentLastUpdatedLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                .slash(Links.SUBMISSION_CONTENT_LAST_UPDATED_URL)
+                .withRel(Links.SUBMISSION_CONTENT_LAST_UPDATED_REL);
+    }
+
+    private Link getSubmissionRelatedProjectLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                .slash(Links.SUBMISSION_RELATED_PROJECTS_URL)
+                .withRel(Links.SUBMISSION_RELATED_PROJECTS_REL);
+    }
+
     private Link getSubmissionDocumentStateLink(SubmissionEnvelope submissionEnvelope) {
         return entityLinks.linkForSingleResource(submissionEnvelope)
                           .slash(Links.SUBMISSION_DOCUMENTS_SM_URL)
@@ -287,7 +299,8 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         resource.add(getSubmissionDocumentStateLink(submissionEnvelope));
         resource.add(getSubmissionSummary(submissionEnvelope));
         resource.add(getSubmissionLinkingMap(submissionEnvelope));
-
+        resource.add(getSubmissionContentLastUpdatedLink(submissionEnvelope));
+        resource.add(getSubmissionRelatedProjectLink(submissionEnvelope));
 
         // add subresource links for allowed state transition requests
         submissionEnvelope.allowedSubmissionStateTransitions().stream()
