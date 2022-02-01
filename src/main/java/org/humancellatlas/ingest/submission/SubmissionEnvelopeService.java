@@ -33,13 +33,11 @@ import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -346,15 +344,12 @@ public class SubmissionEnvelopeService {
         List<Protocol> protocols = protocolRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
         List<Process> processes = processRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
         List<File> files = fileRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
-        List<MetadataDocument> content = new ArrayList<>();
 
-        content.addAll(projects);
-        content.addAll(biomaterials);
-        content.addAll(protocols);
-        content.addAll(processes);
-        content.addAll(files);
-
-        Instant lastUpdateDate = content.stream().map(MetadataDocument::getUpdateDate).max(Instant::compareTo).get();
+        Instant lastUpdateDate = Stream.of(projects, biomaterials, protocols, processes, files)
+                .flatMap(List::stream)
+                .map(MetadataDocument::getUpdateDate)
+                .max(Instant::compareTo)
+                .get();
 
         return lastUpdateDate;
     }
