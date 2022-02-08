@@ -31,6 +31,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.util.*;
@@ -337,7 +338,7 @@ public class SubmissionEnvelopeService {
         );
     }
 
-    public Instant getSubmissionContentLastUpdated(SubmissionEnvelope submissionEnvelope) {
+    public Optional<Instant> getSubmissionContentLastUpdated(SubmissionEnvelope submissionEnvelope) {
         PageRequest request = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "updateDate"));
         List<Project> projects = projectRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
         List<Biomaterial> biomaterials = biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
@@ -345,12 +346,11 @@ public class SubmissionEnvelopeService {
         List<Process> processes = processRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
         List<File> files = fileRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
 
-        Instant lastUpdateDate = Stream.of(projects, biomaterials, protocols, processes, files)
+        Optional<Instant> optionalLastUpdateDate = Stream.of(projects, biomaterials, protocols, processes, files)
                 .flatMap(List::stream)
                 .map(MetadataDocument::getUpdateDate)
-                .max(Instant::compareTo)
-                .get();
+                .max(Instant::compareTo);
 
-        return lastUpdateDate;
+        return optionalLastUpdateDate;
     }
 }
