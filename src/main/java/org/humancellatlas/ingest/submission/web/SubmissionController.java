@@ -366,6 +366,6 @@ public class SubmissionController {
     @GetMapping("/submissionEnvelopes/{id}" + Links.SUBMISSION_CONTENT_LAST_UPDATED_URL)
     ResponseEntity<?> getContentLastUpdated(@PathVariable("id") SubmissionEnvelope submissionEnvelope) {
         Optional<Instant> lastUpdateDate = submissionEnvelopeService.getSubmissionContentLastUpdated(submissionEnvelope);
-        return ResponseEntity.ok(lastUpdateDate.isPresent() ? lastUpdateDate.get().toString() : "");
+        return ResponseEntity.ok(lastUpdateDate.isPresent() ? lastUpdateDate.get().toString() : null);
     }
 }
