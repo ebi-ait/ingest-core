@@ -42,7 +42,7 @@ mongorestore --drop "./data/db/dump/${backup_dir}"
 
 `./run_local.sh`
 
-### Populatign the local docker db
+### Populating the local docker db
 
 ```bash
 mkdir -p ~/dev/ait/data/mongodb/
