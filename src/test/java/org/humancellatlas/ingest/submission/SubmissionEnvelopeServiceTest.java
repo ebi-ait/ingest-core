@@ -356,10 +356,35 @@ public class SubmissionEnvelopeServiceTest {
         when(file.getUpdateDate()).thenReturn(now);
 
         // when
-        Instant lastUpdateDate = service.getSubmissionContentLastUpdated(submission);
+        Optional<Instant> lastUpdateDate = service.getSubmissionContentLastUpdated(submission);
 
         // then
-        assertThat(lastUpdateDate).isEqualTo(now.toString());
+        assertThat(lastUpdateDate.isPresent()).isTrue();
+        assertThat(lastUpdateDate.get().toString()).isEqualTo(now.toString());
+    }
+
+    @Test
+    public void testContentLastUpdatedEmptySubmission() {
+        // given
+        SubmissionEnvelope submission = mock(SubmissionEnvelope.class);
+
+        PageRequest request = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "updateDate"));
+        when(projectRepository.findBySubmissionEnvelope(submission, request))
+                .thenReturn(Page.empty());
+        when(protocolRepository.findBySubmissionEnvelope(submission, request))
+                .thenReturn(Page.empty());
+        when(biomaterialRepository.findBySubmissionEnvelope(submission, request))
+                .thenReturn(Page.empty());
+        when(processRepository.findBySubmissionEnvelope(submission, request))
+                .thenReturn(Page.empty());
+        when(fileRepository.findBySubmissionEnvelope(submission, request))
+                .thenReturn(Page.empty());
+
+        // when
+        Optional<Instant> lastUpdateDate = service.getSubmissionContentLastUpdated(submission);
+
+        // then
+        assertThat(lastUpdateDate.isPresent()).isFalse();
     }
 
 }
