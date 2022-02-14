@@ -2,50 +2,64 @@ package org.humancellatlas.ingest.submission.web;
 
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
+import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {SubmissionLinkMapController.class})
+@SpringBootTest
+@AutoConfigureMockMvc(printOnlyOnFailure = false)
 public class SubmissionLinkMapControllerTest {
     @Autowired
     private SubmissionLinkMapController controller;
 
-    @MockBean
+    @Autowired
     BiomaterialRepository biomaterialRepository;
 
-    @MockBean
+    @Autowired
     FileRepository fileRepository;
 
-    @MockBean
+    @Autowired
     ProcessRepository processRepository;
 
-    @MockBean
+    @Autowired
     ProtocolRepository protocolRepository;
 
+    @Autowired
+    SubmissionEnvelopeRepository submissionEnvelopeRepository;
+
+    @MockBean
+    private MigrationConfiguration migrationConfiguration;
+
+    @MockBean
+    private MessageRouter messageRouter;
 
     @Test
     public void testSubmissionLinkMap() {
         //given:
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope("link-map-test");
 
         Biomaterial donor = new Biomaterial("donor");
         Biomaterial specimen = new Biomaterial("specimen");
@@ -62,6 +76,18 @@ public class SubmissionLinkMapControllerTest {
         File sequencingFile = new File("sequenceFile");
         File analysisFile = new File("analysisFile");
 
+        donor.setSubmissionEnvelope(submissionEnvelope);
+        specimen.setSubmissionEnvelope(submissionEnvelope);
+        cellSuspension.setSubmissionEnvelope(submissionEnvelope);
+        process1.setSubmissionEnvelope(submissionEnvelope);
+        process2.setSubmissionEnvelope(submissionEnvelope);
+        process3.setSubmissionEnvelope(submissionEnvelope);
+        collectionProtocol.setSubmissionEnvelope(submissionEnvelope);
+        sequencingProtocol.setSubmissionEnvelope(submissionEnvelope);
+        analysisProtocol.setSubmissionEnvelope(submissionEnvelope);
+        sequencingFile.setSubmissionEnvelope(submissionEnvelope);
+        analysisFile.setSubmissionEnvelope(submissionEnvelope);
+
         specimen.addAsDerivedByProcess(process1);
         sequencingFile.addAsDerivedByProcess(process2);
         analysisFile.addAsDerivedByProcess(process3);
@@ -74,17 +100,11 @@ public class SubmissionLinkMapControllerTest {
         process2.addProtocol(sequencingProtocol);
         process3.addProtocol(analysisProtocol);
 
-        when(processRepository.findBySubmissionEnvelope(submissionEnvelope)).thenReturn(Stream.of(process1, process2, process3));
-        when(biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope)).thenReturn(Stream.of(donor, specimen, cellSuspension));
-        when(fileRepository.findBySubmissionEnvelope(submissionEnvelope)).thenReturn(Stream.of(sequencingFile, analysisFile));
-
-        when(biomaterialRepository.findByInputToProcessesContains(process1)).thenReturn(Stream.of(donor));
-        when(biomaterialRepository.findByInputToProcessesContains(process2)).thenReturn(Stream.of(cellSuspension));
-        when(biomaterialRepository.findByInputToProcessesContains(process3)).thenReturn(Stream.of());
-
-        when(fileRepository.findByInputToProcessesContains(process1)).thenReturn(Stream.of());
-        when(fileRepository.findByInputToProcessesContains(process2)).thenReturn(Stream.of());
-        when(fileRepository.findByInputToProcessesContains(process3)).thenReturn(Stream.of(sequencingFile));
+        submissionEnvelopeRepository.save(submissionEnvelope);
+        biomaterialRepository.saveAll(List.of(donor, specimen, cellSuspension));
+        protocolRepository.saveAll(List.of(collectionProtocol, sequencingProtocol, analysisProtocol));
+        processRepository.saveAll(List.of(process1, process2, process3));
+        fileRepository.saveAll(List.of(sequencingFile, analysisFile));
 
         //when:
         SubmissionLinkMapController.SubmissionLinkingMap submissionLinkMap = controller.getSubmissionLinkMap(submissionEnvelope);
