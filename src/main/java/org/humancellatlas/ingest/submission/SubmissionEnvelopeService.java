@@ -223,6 +223,8 @@ public class SubmissionEnvelopeService {
         submissionManifestRepository.deleteBySubmissionEnvelope(submissionEnvelope);
         submissionErrorRepository.deleteBySubmissionEnvelope(submissionEnvelope);
         submissionEnvelopeRepository.delete(submissionEnvelope);
+
+        this.messageRouter.routeRequestUploadAreaCleanup(submissionEnvelope);
     }
 
 
