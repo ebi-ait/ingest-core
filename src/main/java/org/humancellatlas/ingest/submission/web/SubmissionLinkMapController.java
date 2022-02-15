@@ -62,7 +62,7 @@ public class SubmissionLinkMapController {
         public ProcessLinkingMap(Process process) {
             process.getProtocols().forEach(protocol -> this.protocols.add(protocol.getId()));
             biomaterialRepository.findByInputToProcessesContains(process).forEach(biomaterial -> this.inputBiomaterials.add(biomaterial.getId()));
-            fileRepository.findByInputToProcessesContains(process).forEach(file -> this.inputBiomaterials.add(file.getId()));
+            fileRepository.findByInputToProcessesContains(process).forEach(file -> this.inputFiles.add(file.getId()));
         }
     }
 
