@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Checksums;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -55,6 +54,7 @@ public class File extends MetadataDocument {
     private Checksums lastExportedChecksums;
 
     private ValidationJob validationJob;
+    private FileArchiveResult archiveResult;
     private UUID validationId;
     private UUID dataFileUuid;
     private Long size;
