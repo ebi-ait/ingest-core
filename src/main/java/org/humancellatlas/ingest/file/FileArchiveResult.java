@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.file;
 
+import java.time.Instant;
 import lombok.Data;
 
 @Data
