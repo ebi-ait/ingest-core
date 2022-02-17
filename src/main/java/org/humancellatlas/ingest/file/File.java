@@ -54,7 +54,7 @@ public class File extends MetadataDocument {
     private Checksums lastExportedChecksums;
 
     private ValidationJob validationJob;
-    private FileArchiveResult archiveResult;
+    private FileArchiveResult fileArchiveResult;
     private UUID validationId;
     private UUID dataFileUuid;
     private Long size;

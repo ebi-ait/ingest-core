@@ -9,7 +9,6 @@ public class FileArchiveResult {
     private Boolean compressed;
     private String md5;
     private String enaUploadPath;
-    private Boolean success;
     private String error;
 
     protected FileArchiveResult() {}
