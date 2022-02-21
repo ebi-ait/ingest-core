@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 public class Project extends MetadataDocument {
     @RestResource
     @DBRef(lazy = true)
+    @JsonIgnore
     private Set<File> supplementaryFiles = new HashSet<>();
 
     // A project may have 1 or more submissions related to it.
