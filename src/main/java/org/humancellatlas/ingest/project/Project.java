@@ -31,10 +31,12 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(callSuper = true)
 public class Project extends MetadataDocument {
     @RestResource
+    @JsonIgnore
     @DBRef(lazy = true)
     private Set<File> supplementaryFiles = new HashSet<>();
 
     // A project may have 1 or more submissions related to it.
+    @JsonIgnore
     private @DBRef(lazy = true)
     Set<SubmissionEnvelope> submissionEnvelopes = new HashSet<>();
 
