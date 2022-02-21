@@ -20,8 +20,8 @@ public class ProjectQueryBuilder {
         addIsCriterionForAttribute(criteriaList, "wranglingState", searchFilter.getWranglingState());
         addIsCriterionForAttribute(criteriaList, "primaryWrangler", searchFilter.getPrimaryWrangler());
         addIsCriterionForAttribute(criteriaList, "wranglingPriority", searchFilter.getWranglingPriority());
-        addLTECriterionForAttribute(criteriaList, "cellCount", searchFilter.getMaxCellCount());
-        addGTECriterionForAttribute(criteriaList, "cellCount", searchFilter.getMinCellCount());
+        addLTECriterionForAttribute(criteriaList, "content.estimated_cell_count", searchFilter.getMaxCellCount());
+        addGTECriterionForAttribute(criteriaList, "content.estimated_cell_count", searchFilter.getMinCellCount());
         addInCriterionForAttribute(criteriaList, "identifyingOrganisms", searchFilter.getIdentifyingOrganism());
         addInCriterionForAttribute(criteriaList, "dcpReleaseNumber", searchFilter.getDcpReleaseNumber());
 
