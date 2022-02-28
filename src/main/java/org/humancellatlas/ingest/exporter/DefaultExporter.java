@@ -2,14 +2,14 @@ package org.humancellatlas.ingest.exporter;
 
 import org.apache.commons.collections4.ListUtils;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
-import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
 import org.humancellatlas.ingest.export.entity.ExportEntityService;
-import org.humancellatlas.ingest.export.entity.web.ExportEntityRequest;
 import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.export.job.ExportJobService;
 import org.humancellatlas.ingest.export.job.web.ExportJobRequest;
 import org.humancellatlas.ingest.messaging.MessageRouter;
+import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
@@ -20,10 +20,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static org.humancellatlas.ingest.export.destination.ExportDestinationName.DCP;
 
@@ -37,6 +40,9 @@ public class DefaultExporter implements Exporter {
 
     @Autowired
     private ProjectRepository projectRepository;
+
+    @Autowired
+    private ProcessRepository processRepository;
 
     @Autowired
     private ExportJobService exportJobService;
@@ -77,7 +83,7 @@ public class DefaultExporter implements Exporter {
                 .stream()
                 .map(processIdBatch -> processService.getProcesses(processIdBatch))
                 .flatMap(Function.identity())
-                .map(process -> new ExperimentProcess(counter.next(), totalCount, process))
+                .map(process -> new ExperimentProcess(counter.next(), totalCount, process, process.getSubmissionEnvelope(), process.getProject()))
                 .forEach(messageRouter::sendManifestForExport);
     }
 
@@ -89,13 +95,18 @@ public class DefaultExporter implements Exporter {
                 assayingProcessIds.size(),
                 envelope.getId()));
 
-        IndexCounter counter = new IndexCounter();
         int totalCount = assayingProcessIds.size();
 
-        int partitionSize = 500;
+        List<String> deletedAssayProcessIds = getDeletedAssayProcessIds(envelope, assayingProcessIds);
+
+        totalCount = totalCount + deletedAssayProcessIds.size();
+
+        int finalTotalCount = totalCount;
+
+        IndexCounter counter = new IndexCounter();
 
         JSONObject context = new JSONObject();
-        context.put("totalAssayCount", totalCount);
+        context.put("totalAssayCount", finalTotalCount);
 
         ExportDestination exportDestination = new ExportDestination(DCP, "v2", null);
 
@@ -103,27 +114,61 @@ public class DefaultExporter implements Exporter {
 
         ExportJob exportJob = exportJobService.createExportJob(envelope, exportJobRequest);
 
+        int partitionSize = 500;
+
         partitionProcessIds(assayingProcessIds, partitionSize)
                 .stream()
-                .map(processIdBatch -> processService.getProcesses(processIdBatch))
-                .flatMap(Function.identity())
-                .map(process -> new ExperimentProcess(counter.next(), totalCount, process))
-                .forEach(exportData -> {
-                    messageRouter.sendExperimentForExport(exportData, exportJob);
-                });
+                .flatMap(processIdBatch -> processService.getProcesses(processIdBatch))
+                .map(process -> (Process) process.setDcpVersion(Instant.now()))
+                .map(p -> processRepository.save(p));
+
+        sendExportEntitytMessagesForExistingAssays(assayingProcessIds, finalTotalCount, counter, exportJob);
+
+        sendExportEntityMessagesForDeletedAssays(deletedAssayProcessIds, finalTotalCount, counter, exportJob, envelope);
 
     }
 
-    private static class IndexCounter {
+    private List<String> getDeletedAssayProcessIds(SubmissionEnvelope envelope, Collection<String> assayingProcessIds) {
+        Optional<ExportJob> lastExportJob = exportJobService.getLastDcpExportJobCompleted(envelope);
+        List<String> deletedAssayProcessIds = new ArrayList<>();
+        Collection<String> lastAssayProcessIds = exportJobService.getAssayProcessIds(lastExportJob.get());
+        if (lastAssayProcessIds.removeAll(assayingProcessIds) && !lastAssayProcessIds.isEmpty()) {
+            deletedAssayProcessIds.addAll(lastAssayProcessIds);
+        }
+        return deletedAssayProcessIds;
+    }
 
+    private void sendExportEntityMessagesForDeletedAssays(List<String> deletedAssayProcessIds, int finalTotalCount, IndexCounter counter, ExportJob exportJob, SubmissionEnvelope envelope) {
+        Optional<Project> optionalProject = projectRepository.findBySubmissionEnvelopesContaining(envelope).findFirst();
+        Project project = optionalProject.orElseThrow();
+        JSONObject exportEntityContext = new JSONObject();
+        exportEntityContext.put("exportEntityType", "delete");
+
+        deletedAssayProcessIds.stream()
+                .map(process -> new ExperimentProcess(counter.next(), finalTotalCount, null, envelope, project))
+                .forEach(exportData -> {
+                    messageRouter.sendExperimentForExport(exportData, exportJob, exportEntityContext);
+                });
+    }
+
+    private void sendExportEntitytMessagesForExistingAssays(Collection<String> assayingProcessIds, int finalTotalCount, IndexCounter counter, ExportJob exportJob) {
+        int partitionSize = 500;
+        partitionProcessIds(assayingProcessIds, partitionSize)
+                .stream()
+                .flatMap(processIdBatch -> processService.getProcesses(processIdBatch))
+                .map(process -> new ExperimentProcess(counter.next(), finalTotalCount, process, process.getSubmissionEnvelope(), process.getProject()))
+                .forEach(exportData -> {
+                    messageRouter.sendExperimentForExport(exportData, exportJob, null);
+                });
+    }
+
+    private static class IndexCounter {
         int base = 0;
 
         int next() {
             return base++;
         }
-
     }
-
 
 
 }

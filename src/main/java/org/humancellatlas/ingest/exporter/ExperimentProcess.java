@@ -7,8 +7,10 @@ import org.humancellatlas.ingest.messaging.model.ManifestMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.project.Project;
+import org.json.simple.JSONObject;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -23,12 +25,12 @@ public class ExperimentProcess {
 
     private final Project project;
 
-    public ExperimentProcess(int index, int totalCount, Process process) {
+    public ExperimentProcess(int index, int totalCount, Process process, SubmissionEnvelope submission, Project project) {
         this.index = index;
         this.totalCount = totalCount;
         this.process = process;
-        this.submissionEnvelope = process.getSubmissionEnvelope();
-        this.project = process.getProject();
+        this.submissionEnvelope = submission;
+        this.project = project;
     }
 
     public Integer getIndex() {
@@ -47,7 +49,7 @@ public class ExperimentProcess {
         return submissionEnvelope;
     }
 
-    public ExportEntityMessage toExportEntityMessage(LinkGenerator linkGenerator, ExportJob exportJob) {
+    public ExportEntityMessage toExportEntityMessage(LinkGenerator linkGenerator, ExportJob exportJob, Map<String, Object> context) {
         String callbackLink = linkGenerator.createCallback(process.getClass(), process.getId());
         return new ExportEntityMessage(
                 exportJob.getId(),
@@ -60,7 +62,8 @@ public class ExperimentProcess {
                 project.getId(),
                 process.getProject().getUuid().toString(),
                 index,
-                totalCount);
+                totalCount,
+                context);
     }
 
     public ManifestMessage toManifestMessage(LinkGenerator linkGenerator) {

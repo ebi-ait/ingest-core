@@ -360,10 +360,4 @@ public class SubmissionEnvelopeService {
 
         return optionalLastUpdateDate;
     }
-
-    public Optional<ExportJob> getLastExportJobOfSubmission(SubmissionEnvelope submissionEnvelope) {
-        PageRequest request = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "createdDate"));
-        List<ExportJob> exportJobs = exportJobRepository.findBySubmission(submissionEnvelope, request).getContent();
-        return exportJobs.stream().findFirst();
-    }
 }

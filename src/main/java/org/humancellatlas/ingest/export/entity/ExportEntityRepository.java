@@ -8,9 +8,13 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.stream.Stream;
+
 @CrossOrigin
 @RestResource(exported = false)
 public interface ExportEntityRepository extends MongoRepository<ExportEntity, String> {
+
+    Stream<ExportEntity> findByExportJob(ExportJob exportJob);
 
     Page<ExportEntity> findByExportJob(ExportJob exportJob, Pageable pageable);
 

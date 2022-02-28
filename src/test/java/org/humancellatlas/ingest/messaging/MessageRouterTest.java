@@ -135,7 +135,7 @@ public class MessageRouterTest {
         process.setSubmissionEnvelope(submissionEnvelope);
 
         //and:
-        ExperimentProcess exporterData = new ExperimentProcess(2, 4, process);
+        ExperimentProcess exporterData = new ExperimentProcess(2, 4, process, null, null, null);
 
         //and:
         String callbackLink = "/processes/78bbd9";

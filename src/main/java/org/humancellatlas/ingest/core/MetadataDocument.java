@@ -122,7 +122,7 @@ public abstract class MetadataDocument extends AbstractEntity {
         }
     }
 
-    public void setDcpVersion(Instant dcpVersion) {
+    public MetadataDocument setDcpVersion(Instant dcpVersion) {
         // DCP version should never be set to null
         if (dcpVersion != null) {
             if (this.dcpVersion == null) {
@@ -130,5 +130,6 @@ public abstract class MetadataDocument extends AbstractEntity {
             }
             this.dcpVersion = dcpVersion;
         }
+        return this;
     }
 }

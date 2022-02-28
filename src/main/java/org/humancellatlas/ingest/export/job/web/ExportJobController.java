@@ -37,15 +37,24 @@ public class ExportJobController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(
-            exportJobRepository.findBySubmission(submission, pageable),
-            resourceAssembler
+                exportJobRepository.findBySubmission(submission, pageable),
+                resourceAssembler
         ));
+    }
+
+    @GetMapping(path = "/submissionEnvelopes/{id}/lastDcpExportJob")
+    ResponseEntity<?> getLastExportJobsForSubmission(@PathVariable("id") SubmissionEnvelope submission,
+                                                     PersistentEntityResourceAssembler resourceAssembler) {
+        if (submission == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(exportJobService.getLastDcpExportJobCompleted(submission));
     }
 
     @PostMapping(path = "/submissionEnvelopes/{id}" + Links.EXPORT_JOBS_URL)
     ResponseEntity<PersistentEntityResource> createExportJob(@PathVariable("id") SubmissionEnvelope submission,
-                                                            @RequestBody ExportJobRequest exportJobRequest,
-                                                            PersistentEntityResourceAssembler resourceAssembler) {
+                                                             @RequestBody ExportJobRequest exportJobRequest,
+                                                             PersistentEntityResourceAssembler resourceAssembler) {
         if (submission == null) {
             return ResponseEntity.notFound().build();
         }
@@ -56,11 +65,11 @@ public class ExportJobController {
 
     @GetMapping(path = Links.EXPORT_JOBS_URL + "/search" + Links.EXPORT_JOB_FIND_URL)
     ResponseEntity<?> findExportJobs(@RequestParam("submissionUuid") UUID submissionUuid,
-                                    @RequestParam("status") ExportState exportState,
-                                    @RequestParam("destination") ExportDestinationName exportDestinationName,
-                                    @RequestParam("version") String destinationVersion,
-                                    Pageable pageable,
-                                    PersistentEntityResourceAssembler resourceAssembler) {
+                                     @RequestParam("status") ExportState exportState,
+                                     @RequestParam("destination") ExportDestinationName exportDestinationName,
+                                     @RequestParam("version") String destinationVersion,
+                                     Pageable pageable,
+                                     PersistentEntityResourceAssembler resourceAssembler) {
         String version = destinationVersion.isEmpty() ? null : destinationVersion;
         Page<ExportJob> searchResults = this.exportJobService.find(submissionUuid, exportState, exportDestinationName, version, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(searchResults, resourceAssembler));

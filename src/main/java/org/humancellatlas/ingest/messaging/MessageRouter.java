@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Map;
 
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.EXPORTER_EXCHANGE;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.*;
@@ -104,9 +105,9 @@ public class MessageRouter {
                 System.currentTimeMillis());
     }
 
-    public void sendExperimentForExport(ExperimentProcess experimentProcess, ExportJob exportJob) {
+    public void sendExperimentForExport(ExperimentProcess experimentProcess, ExportJob exportJob, Map<String, Object> context) {
         messageSender.queueNewExportMessage(EXPORTER_EXCHANGE, EXPERIMENT_SUBMITTED,
-                experimentProcess.toExportEntityMessage(linkGenerator, exportJob),
+                experimentProcess.toExportEntityMessage(linkGenerator, exportJob, context),
                 System.currentTimeMillis());
     }
 
