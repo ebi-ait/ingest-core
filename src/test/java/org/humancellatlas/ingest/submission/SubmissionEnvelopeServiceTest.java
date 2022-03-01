@@ -7,6 +7,7 @@ import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.errors.SubmissionErrorRepository;
+import org.humancellatlas.ingest.export.job.ExportJobRepository;
 import org.humancellatlas.ingest.exporter.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -98,6 +99,10 @@ public class SubmissionEnvelopeServiceTest {
 
     @MockBean
     private SubmissionErrorRepository submissionErrorRepository;
+
+    @MockBean
+    private ExportJobRepository exportJobRepository;
+
 
     @Configuration
     static class TestConfiguration {

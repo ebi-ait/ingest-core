@@ -81,8 +81,7 @@ public class DefaultExporter implements Exporter {
         int partitionSize = 500;
         partitionProcessIds(assayingProcessIds, partitionSize)
                 .stream()
-                .map(processIdBatch -> processService.getProcesses(processIdBatch))
-                .flatMap(Function.identity())
+                .flatMap(processIdBatch -> processService.getProcesses(processIdBatch))
                 .map(process -> new ExperimentProcess(counter.next(), totalCount, process, process.getSubmissionEnvelope(), process.getProject()))
                 .forEach(messageRouter::sendManifestForExport);
     }

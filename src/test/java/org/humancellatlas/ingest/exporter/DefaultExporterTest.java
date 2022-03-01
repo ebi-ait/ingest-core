@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.export.entity.ExportEntityService;
 import org.humancellatlas.ingest.export.job.ExportJobService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.project.ProjectService;
@@ -53,6 +54,9 @@ public class DefaultExporterTest {
 
     @MockBean
     private ProjectRepository projectRepository;
+
+    @MockBean
+    private ProcessRepository processRepository;
 
     @MockBean
     private ExportEntityService exportEntityService;
