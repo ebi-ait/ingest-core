@@ -100,10 +100,6 @@ public class SubmissionEnvelopeServiceTest {
     @MockBean
     private SubmissionErrorRepository submissionErrorRepository;
 
-    @MockBean
-    private ExportJobRepository exportJobRepository;
-
-
     @Configuration
     static class TestConfiguration {
     }

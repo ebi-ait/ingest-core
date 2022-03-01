@@ -42,15 +42,6 @@ public class ExportJobController {
         ));
     }
 
-    @GetMapping(path = "/submissionEnvelopes/{id}/lastDcpExportJob")
-    ResponseEntity<?> getLastExportJobsForSubmission(@PathVariable("id") SubmissionEnvelope submission,
-                                                     PersistentEntityResourceAssembler resourceAssembler) {
-        if (submission == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(exportJobService.getLastDcpExportJobCompleted(submission));
-    }
-
     @PostMapping(path = "/submissionEnvelopes/{id}" + Links.EXPORT_JOBS_URL)
     ResponseEntity<PersistentEntityResource> createExportJob(@PathVariable("id") SubmissionEnvelope submission,
                                                              @RequestBody ExportJobRequest exportJobRequest,

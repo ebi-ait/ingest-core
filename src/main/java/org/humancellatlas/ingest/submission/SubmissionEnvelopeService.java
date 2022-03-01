@@ -8,7 +8,6 @@ import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.humancellatlas.ingest.errors.SubmissionErrorRepository;
-import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.export.job.ExportJobRepository;
 import org.humancellatlas.ingest.exporter.Exporter;
 import org.humancellatlas.ingest.file.File;
@@ -33,7 +32,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.util.*;

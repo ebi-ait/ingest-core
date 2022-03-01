@@ -94,16 +94,10 @@ public class DefaultExporter implements Exporter {
 
         int totalCount = assayingProcessIds.size();
 
-        List<String> deletedAssayProcessIds = getDeletedAssayProcessIds(envelope, assayingProcessIds);
-
-        totalCount = totalCount + deletedAssayProcessIds.size();
-
-        int finalTotalCount = totalCount;
-
         IndexCounter counter = new IndexCounter();
 
         JSONObject context = new JSONObject();
-        context.put("totalAssayCount", finalTotalCount);
+        context.put("totalAssayCount", totalCount);
 
         ExportDestination exportDestination = new ExportDestination(DCP, "v2", null);
 
@@ -113,9 +107,7 @@ public class DefaultExporter implements Exporter {
 
         updateDcpVersion(assayingProcessIds, exportJob.getCreatedDate());
 
-        sendExportEntitytMessagesForExistingAssays(assayingProcessIds, finalTotalCount, counter, exportJob);
-
-        sendExportEntityMessagesForProcessesWhichBecameNonAssay(deletedAssayProcessIds, finalTotalCount, counter, exportJob, envelope);
+        sendExportEntitytMessagesForExistingAssays(assayingProcessIds, totalCount, counter, exportJob);
 
     }
 
@@ -126,31 +118,6 @@ public class DefaultExporter implements Exporter {
                 .flatMap(processIdBatch -> processService.getProcesses(processIdBatch))
                 .map(process -> (Process) process.setDcpVersion(dcpVersion))
                 .map(p -> processRepository.save(p));
-    }
-
-    private List<String> getDeletedAssayProcessIds(SubmissionEnvelope envelope, Collection<String> assayingProcessIds) {
-        Optional<ExportJob> lastExportJob = exportJobService.getLastDcpExportJobCompleted(envelope);
-        List<String> deletedAssayProcessIds = new ArrayList<>();
-        Collection<String> lastAssayProcessIds = exportJobService.getAssayProcessIds(lastExportJob.get());
-        if (lastAssayProcessIds.removeAll(assayingProcessIds) && !lastAssayProcessIds.isEmpty()) {
-            deletedAssayProcessIds.addAll(lastAssayProcessIds);
-        }
-        return deletedAssayProcessIds;
-    }
-
-    private void sendExportEntityMessagesForProcessesWhichBecameNonAssay(List<String> deletedAssayProcessIds, int finalTotalCount, IndexCounter counter, ExportJob exportJob, SubmissionEnvelope envelope) {
-        Optional<Project> optionalProject = projectRepository.findBySubmissionEnvelopesContaining(envelope).findFirst();
-        Project project = optionalProject.orElseThrow();
-        JSONObject exportEntityContext = new JSONObject();
-        exportEntityContext.put("exportEntityType", "delete");
-
-        int partitionSize = 500;
-        partitionProcessIds(deletedAssayProcessIds, partitionSize).stream()
-                .flatMap(processId -> processService.getProcesses(deletedAssayProcessIds))
-                .map(process -> new ExperimentProcess(counter.next(), finalTotalCount, process, envelope, project))
-                .forEach(exportData -> {
-                    messageRouter.sendExperimentForExport(exportData, exportJob, exportEntityContext);
-                });
     }
 
     private void sendExportEntitytMessagesForExistingAssays(Collection<String> assayingProcessIds, int finalTotalCount, IndexCounter counter, ExportJob exportJob) {
