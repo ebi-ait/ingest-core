@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static org.humancellatlas.ingest.export.destination.ExportDestinationName.DCP;
 
@@ -117,7 +115,7 @@ public class DefaultExporter implements Exporter {
 
         sendExportEntitytMessagesForExistingAssays(assayingProcessIds, finalTotalCount, counter, exportJob);
 
-        sendExportEntityMessagesForDeletedAssays(deletedAssayProcessIds, finalTotalCount, counter, exportJob, envelope);
+        sendExportEntityMessagesForProcessesWhichBecameNonAssay(deletedAssayProcessIds, finalTotalCount, counter, exportJob, envelope);
 
     }
 
@@ -140,7 +138,7 @@ public class DefaultExporter implements Exporter {
         return deletedAssayProcessIds;
     }
 
-    private void sendExportEntityMessagesForDeletedAssays(List<String> deletedAssayProcessIds, int finalTotalCount, IndexCounter counter, ExportJob exportJob, SubmissionEnvelope envelope) {
+    private void sendExportEntityMessagesForProcessesWhichBecameNonAssay(List<String> deletedAssayProcessIds, int finalTotalCount, IndexCounter counter, ExportJob exportJob, SubmissionEnvelope envelope) {
         Optional<Project> optionalProject = projectRepository.findBySubmissionEnvelopesContaining(envelope).findFirst();
         Project project = optionalProject.orElseThrow();
         JSONObject exportEntityContext = new JSONObject();
@@ -149,7 +147,7 @@ public class DefaultExporter implements Exporter {
         int partitionSize = 500;
         partitionProcessIds(deletedAssayProcessIds, partitionSize).stream()
                 .flatMap(processId -> processService.getProcesses(deletedAssayProcessIds))
-                .map(process -> new ExperimentProcess(counter.next(), finalTotalCount, null, envelope, project))
+                .map(process -> new ExperimentProcess(counter.next(), finalTotalCount, process, envelope, project))
                 .forEach(exportData -> {
                     messageRouter.sendExperimentForExport(exportData, exportJob, exportEntityContext);
                 });
