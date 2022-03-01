@@ -113,18 +113,21 @@ public class DefaultExporter implements Exporter {
 
         ExportJob exportJob = exportJobService.createExportJob(envelope, exportJobRequest);
 
-        int partitionSize = 500;
-
-        partitionProcessIds(assayingProcessIds, partitionSize)
-                .stream()
-                .flatMap(processIdBatch -> processService.getProcesses(processIdBatch))
-                .map(process -> (Process) process.setDcpVersion(Instant.now()))
-                .map(p -> processRepository.save(p));
+        updateDcpVersion(assayingProcessIds, exportJob.getCreatedDate());
 
         sendExportEntitytMessagesForExistingAssays(assayingProcessIds, finalTotalCount, counter, exportJob);
 
         sendExportEntityMessagesForDeletedAssays(deletedAssayProcessIds, finalTotalCount, counter, exportJob, envelope);
 
+    }
+
+    private void updateDcpVersion(Collection<String> assayingProcessIds, Instant dcpVersion) {
+        int partitionSize = 500;
+        partitionProcessIds(assayingProcessIds, partitionSize)
+                .stream()
+                .flatMap(processIdBatch -> processService.getProcesses(processIdBatch))
+                .map(process -> (Process) process.setDcpVersion(dcpVersion))
+                .map(p -> processRepository.save(p));
     }
 
     private List<String> getDeletedAssayProcessIds(SubmissionEnvelope envelope, Collection<String> assayingProcessIds) {
@@ -143,7 +146,9 @@ public class DefaultExporter implements Exporter {
         JSONObject exportEntityContext = new JSONObject();
         exportEntityContext.put("exportEntityType", "delete");
 
-        deletedAssayProcessIds.stream()
+        int partitionSize = 500;
+        partitionProcessIds(deletedAssayProcessIds, partitionSize).stream()
+                .flatMap(processId -> processService.getProcesses(deletedAssayProcessIds))
                 .map(process -> new ExperimentProcess(counter.next(), finalTotalCount, null, envelope, project))
                 .forEach(exportData -> {
                     messageRouter.sendExperimentForExport(exportData, exportJob, exportEntityContext);
