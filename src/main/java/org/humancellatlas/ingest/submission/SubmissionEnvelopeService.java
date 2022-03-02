@@ -8,7 +8,6 @@ import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.humancellatlas.ingest.errors.SubmissionErrorRepository;
-import org.humancellatlas.ingest.export.job.ExportJobRepository;
 import org.humancellatlas.ingest.exporter.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -88,9 +87,6 @@ public class SubmissionEnvelopeService {
 
     @NonNull
     private SubmissionErrorRepository submissionErrorRepository;
-
-    @NonNull
-    private ExportJobRepository exportJobRepository;
 
     public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
         projectRepository.findBySubmissionEnvelopesContains(envelope)
