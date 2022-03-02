@@ -33,6 +33,24 @@ public class ExperimentProcess {
         this.project = project;
     }
 
+    public static ExperimentProcess from(Process process, IndexCounter counter) {
+        return new ExperimentProcess(counter.next(), counter.totalCount, process, process.getSubmissionEnvelope(), process.getProject());
+    }
+
+    public static class IndexCounter {
+        int base;
+        int totalCount;
+
+        IndexCounter(int totalCount) {
+            this.base = 0;
+            this.totalCount = totalCount;
+        }
+
+        int next() {
+            return base++;
+        }
+    }
+
     public Integer getIndex() {
         return index;
     }

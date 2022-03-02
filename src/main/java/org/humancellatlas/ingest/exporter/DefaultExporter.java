@@ -70,14 +70,14 @@ public class DefaultExporter implements Exporter {
                 assayingProcessIds.size(),
                 envelope.getId()));
 
-        IndexCounter counter = new IndexCounter();
         int totalCount = assayingProcessIds.size();
+        ExperimentProcess.IndexCounter counter = new ExperimentProcess.IndexCounter(totalCount);
 
         int partitionSize = 500;
         partitionProcessIds(assayingProcessIds, partitionSize)
                 .stream()
                 .flatMap(processIdBatch -> processService.getProcesses(processIdBatch))
-                .map(process -> new ExperimentProcess(counter.next(), totalCount, process, process.getSubmissionEnvelope(), process.getProject()))
+                .map(process -> ExperimentProcess.from(process, counter))
                 .forEach(messageRouter::sendManifestForExport);
     }
 
@@ -106,7 +106,7 @@ public class DefaultExporter implements Exporter {
 
     private void updateDcpVersionAndSendMessageForEachProcess(Collection<String> assayingProcessIds, ExportJob exportJob) {
         int totalCount = assayingProcessIds.size();
-        IndexCounter counter = new IndexCounter();
+        ExperimentProcess.IndexCounter counter = new ExperimentProcess.IndexCounter(totalCount);
 
         int partitionSize = 500;
         partitionProcessIds(assayingProcessIds, partitionSize)
@@ -116,14 +116,6 @@ public class DefaultExporter implements Exporter {
                 .map(process -> processRepository.save(process))
                 .map(p -> new ExperimentProcess(counter.next(), totalCount, p, p.getSubmissionEnvelope(), p.getProject()))
                 .forEach(exportData -> messageRouter.sendExperimentForExport(exportData, exportJob, null));
-    }
-
-    private static class IndexCounter {
-        int base = 0;
-
-        int next() {
-            return base++;
-        }
     }
 
 
