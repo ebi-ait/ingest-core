@@ -1,7 +1,5 @@
 package org.humancellatlas.ingest.export.job;
 
-import org.humancellatlas.ingest.export.ExportState;
-import org.humancellatlas.ingest.export.destination.ExportDestination;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

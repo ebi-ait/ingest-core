@@ -37,7 +37,6 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.export.destination.ExportDestinationName.DCP;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)

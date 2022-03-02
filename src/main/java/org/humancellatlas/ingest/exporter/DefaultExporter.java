@@ -91,8 +91,6 @@ public class DefaultExporter implements Exporter {
 
         int totalCount = assayingProcessIds.size();
 
-        IndexCounter counter = new IndexCounter();
-
         JSONObject context = new JSONObject();
         context.put("totalAssayCount", totalCount);
 
