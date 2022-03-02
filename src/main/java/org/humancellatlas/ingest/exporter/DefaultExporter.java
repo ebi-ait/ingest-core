@@ -114,7 +114,7 @@ public class DefaultExporter implements Exporter {
                 .flatMap(processIdBatch -> processService.getProcesses(processIdBatch))
                 .map(process -> (Process) process.setDcpVersion(exportJob.getCreatedDate()))
                 .map(process -> processRepository.save(process))
-                .map(p -> new ExperimentProcess(counter.next(), totalCount, p, p.getSubmissionEnvelope(), p.getProject()))
+                .map(process -> ExperimentProcess.from(process, counter))
                 .forEach(exportData -> messageRouter.sendExperimentForExport(exportData, exportJob, null));
     }
 
