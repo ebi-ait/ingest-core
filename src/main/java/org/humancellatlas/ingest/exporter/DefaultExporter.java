@@ -11,7 +11,6 @@ import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
-import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.json.simple.JSONObject;
@@ -20,11 +19,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import static org.humancellatlas.ingest.export.destination.ExportDestinationName.DCP;
 
@@ -105,26 +102,17 @@ public class DefaultExporter implements Exporter {
 
         ExportJob exportJob = exportJobService.createExportJob(envelope, exportJobRequest);
 
-        updateDcpVersion(assayingProcessIds, exportJob.getCreatedDate());
-
-        sendExportEntitytMessagesForExistingAssays(assayingProcessIds, totalCount, counter, exportJob);
+        updateDcpVersionAndSendMessageForEachProcess(assayingProcessIds, totalCount, counter, exportJob);
 
     }
 
-    private void updateDcpVersion(Collection<String> assayingProcessIds, Instant dcpVersion) {
+    private void updateDcpVersionAndSendMessageForEachProcess(Collection<String> assayingProcessIds, int finalTotalCount, IndexCounter counter, ExportJob exportJob) {
         int partitionSize = 500;
         partitionProcessIds(assayingProcessIds, partitionSize)
                 .stream()
                 .flatMap(processIdBatch -> processService.getProcesses(processIdBatch))
-                .map(process -> (Process) process.setDcpVersion(dcpVersion))
-                .map(p -> processRepository.save(p));
-    }
-
-    private void sendExportEntitytMessagesForExistingAssays(Collection<String> assayingProcessIds, int finalTotalCount, IndexCounter counter, ExportJob exportJob) {
-        int partitionSize = 500;
-        partitionProcessIds(assayingProcessIds, partitionSize)
-                .stream()
-                .flatMap(processIdBatch -> processService.getProcesses(processIdBatch))
+                .map(process -> (Process) process.setDcpVersion(exportJob.getCreatedDate()))
+                .map(process -> processRepository.save(process))
                 .map(process -> new ExperimentProcess(counter.next(), finalTotalCount, process, process.getSubmissionEnvelope(), process.getProject()))
                 .forEach(exportData -> {
                     messageRouter.sendExperimentForExport(exportData, exportJob, null);
