@@ -102,21 +102,22 @@ public class DefaultExporter implements Exporter {
 
         ExportJob exportJob = exportJobService.createExportJob(envelope, exportJobRequest);
 
-        updateDcpVersionAndSendMessageForEachProcess(assayingProcessIds, totalCount, counter, exportJob);
+        updateDcpVersionAndSendMessageForEachProcess(assayingProcessIds, exportJob);
 
     }
 
-    private void updateDcpVersionAndSendMessageForEachProcess(Collection<String> assayingProcessIds, int finalTotalCount, IndexCounter counter, ExportJob exportJob) {
+    private void updateDcpVersionAndSendMessageForEachProcess(Collection<String> assayingProcessIds, ExportJob exportJob) {
+        int totalCount = assayingProcessIds.size();
+        IndexCounter counter = new IndexCounter();
+
         int partitionSize = 500;
         partitionProcessIds(assayingProcessIds, partitionSize)
                 .stream()
                 .flatMap(processIdBatch -> processService.getProcesses(processIdBatch))
                 .map(process -> (Process) process.setDcpVersion(exportJob.getCreatedDate()))
                 .map(process -> processRepository.save(process))
-                .map(process -> new ExperimentProcess(counter.next(), finalTotalCount, process, process.getSubmissionEnvelope(), process.getProject()))
-                .forEach(exportData -> {
-                    messageRouter.sendExperimentForExport(exportData, exportJob, null);
-                });
+                .map(p -> new ExperimentProcess(counter.next(), totalCount, p, p.getSubmissionEnvelope(), p.getProject()))
+                .forEach(exportData -> messageRouter.sendExperimentForExport(exportData, exportJob, null));
     }
 
     private static class IndexCounter {
