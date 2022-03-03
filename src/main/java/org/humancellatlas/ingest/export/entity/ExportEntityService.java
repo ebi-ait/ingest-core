@@ -12,11 +12,11 @@ public class ExportEntityService {
 
     public ExportEntity createExportEntity(ExportJob exportJob, ExportEntityRequest exportEntityRequest) {
         ExportEntity newExportEntity = ExportEntity.builder()
-            .exportJob(exportJob)
-            .status(exportEntityRequest.getStatus())
-            .context(exportEntityRequest.getContext())
-            .errors(exportEntityRequest.getErrors())
-            .build();
+                .exportJob(exportJob)
+                .status(exportEntityRequest.getStatus())
+                .context(exportEntityRequest.getContext())
+                .errors(exportEntityRequest.getErrors())
+                .build();
         return exportEntityRepository.insert(newExportEntity);
     }
 

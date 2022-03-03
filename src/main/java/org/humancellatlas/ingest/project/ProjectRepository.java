@@ -45,6 +45,8 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
 
     Page<Project> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
+    Stream<Project> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope);
+
     @RestResource(exported = false)
     Stream<Project> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 

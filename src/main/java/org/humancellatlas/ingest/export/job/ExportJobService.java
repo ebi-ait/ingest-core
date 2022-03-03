@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.export.job;
 
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
@@ -14,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
@@ -23,12 +23,12 @@ public class ExportJobService {
 
     public ExportJob createExportJob(SubmissionEnvelope submissionEnvelope, ExportJobRequest exportJobRequest) {
         ExportJob newExportJob = ExportJob.builder()
-            .status(ExportState.EXPORTING)
-            .errors(new ArrayList<>())
-            .submission(submissionEnvelope)
-            .destination(exportJobRequest.getDestination())
-            .context(exportJobRequest.getContext())
-            .build();
+                .status(ExportState.EXPORTING)
+                .errors(new ArrayList<>())
+                .submission(submissionEnvelope)
+                .destination(exportJobRequest.getDestination())
+                .context(exportJobRequest.getContext())
+                .build();
         return exportJobRepository.insert(newExportJob);
     }
 
@@ -39,13 +39,12 @@ public class ExportJobService {
                                 Pageable pageable) {
         SubmissionEnvelope submissionEnvelope = submissionEnvelopeRepository.findByUuidUuid(submissionUuid);
         ExportJob exportJobProbe = ExportJob.builder()
-                                            .submission(submissionEnvelope)
-                                            .status(exportState)
-                                            .destination(new ExportDestination(destinationName, version, null))
-                                            .build();
+                .submission(submissionEnvelope)
+                .status(exportState)
+                .destination(new ExportDestination(destinationName, version, null))
+                .build();
         return this.exportJobRepository.findAll(Example.of(exportJobProbe), pageable);
 
 
     }
-
 }

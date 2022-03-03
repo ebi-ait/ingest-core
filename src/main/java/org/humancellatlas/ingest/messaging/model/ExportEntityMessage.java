@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.messaging.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Getter
@@ -19,4 +20,5 @@ public class ExportEntityMessage {
     private final String projectUuid;
     private final int index;
     private final int total;
+    private final Map<String, Object> context;
 }
