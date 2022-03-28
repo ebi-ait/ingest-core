@@ -48,4 +48,11 @@ public class FileCrudStrategy implements MetadataCrudStrategy<File> {
     public Collection<File> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
         return fileRepository.findAllBySubmissionEnvelope(submissionEnvelope);
     }
+
+    @Override
+    public void unlinkAndDeleteDocument(File document) {
+        // set valid
+        // remove from project.supplementaryFiles
+        // delete
+    }
 }

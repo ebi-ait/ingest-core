@@ -12,4 +12,5 @@ public interface MetadataCrudStrategy <T extends MetadataDocument> {
     T findOriginalByUuid(String uuid);
     Stream<T> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
     Collection<T> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+    void unlinkAndDeleteDocument(T document);
 }

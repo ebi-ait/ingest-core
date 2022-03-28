@@ -49,4 +49,14 @@ public class ProjectCrudStrategy implements MetadataCrudStrategy<Project> {
     public Collection<Project> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
         return projectRepository.findAllBySubmissionEnvelope(submissionEnvelope);
     }
+
+    @Override
+    public void unlinkAndDeleteDocument(Project document) {
+        //set valid?
+        // remove from biomaterial.projects
+        // remove from file.projects
+        // remove from process.projects
+        // remove from protocol.projects
+        // delete
+    }
 }

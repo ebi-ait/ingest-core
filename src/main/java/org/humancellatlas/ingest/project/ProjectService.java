@@ -152,7 +152,7 @@ public class ProjectService {
         ProjectBag projectBag = gather(project);
         if (projectBag.submissionEnvelopes.isEmpty()) {
             projectBag.projects.forEach(_project -> {
-                projectRepository.delete(_project);
+                metadataCrudService.unlinkAndDeleteDocument(_project);
                 projectEventHandler.deletedProject(_project);
             });
         } else {

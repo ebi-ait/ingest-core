@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataLinkingService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.core.service.UriToEntityConversionService;
@@ -53,6 +54,7 @@ public class ProcessController {
     private final @NonNull ProcessService processService;
     private final @NonNull ProcessRepository processRepository;
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
+    private final @NonNull MetadataCrudService metadataCrudService;
     private final @NonNull MetadataUpdateService metadataUpdateService;
 
     private @Autowired
@@ -207,6 +209,12 @@ public class ProcessController {
                                             PersistentEntityResourceAssembler assembler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
         metadataLinkingService.removeLink(process, protocol, "protocols");
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(path = "/processes/{id}")
+    ResponseEntity<?> deleteProcess(@PathVariable("id") Process process) {
+        metadataCrudService.unlinkAndDeleteDocument(process);
         return ResponseEntity.noContent().build();
     }
 }

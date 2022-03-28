@@ -48,4 +48,15 @@ public class ProcessCrudStrategy implements MetadataCrudStrategy<Process> {
     public Collection<Process> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
         return processRepository.findAllBySubmissionEnvelope(submissionEnvelope);
     }
+
+    @Override
+    public void unlinkAndDeleteDocument(Process document) {
+        // set valid
+        // remove from any biomaterial.inputToProcesses
+        // remove from any biomaterial derivedByProcesses
+        // remove from any file.inputToProcesses
+        // remove from any file.derivedByProcesses
+        // remove from any other process.chainedProcesses
+        // delete
+    }
 }

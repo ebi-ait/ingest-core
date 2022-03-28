@@ -49,4 +49,11 @@ public class BiomaterialCrudStrategy implements MetadataCrudStrategy<Biomaterial
     public Collection<Biomaterial> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
         return biomaterialRepository.findAllBySubmissionEnvelope(submissionEnvelope);
     }
+
+    @Override
+    public void unlinkAndDeleteDocument(Biomaterial document) {
+        // set valid
+        // delete
+    }
+
 }

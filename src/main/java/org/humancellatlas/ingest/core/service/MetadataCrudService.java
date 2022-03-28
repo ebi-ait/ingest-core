@@ -66,4 +66,9 @@ public class MetadataCrudService {
     public <T extends MetadataDocument> Collection<T> findAllBySubmission(SubmissionEnvelope submissionEnvelope, EntityType entityType) {
         return crudStrategyForMetadataType(entityType).findAllBySubmissionEnvelope(submissionEnvelope);
     }
+
+    public <T extends MetadataDocument> void unlinkAndDeleteDocument(T metadataDocument) {
+        crudStrategyForMetadataType(metadataDocument.getType()).unlinkAndDeleteDocument(metadataDocument);
+
+    }
 }

@@ -48,4 +48,11 @@ public class ProtocolCrudStrategy implements MetadataCrudStrategy<Protocol> {
     public Collection<Protocol> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
         return protocolRepository.findAllBySubmissionEnvelope(submissionEnvelope);
     }
+
+    @Override
+    public void unlinkAndDeleteDocument(Protocol document) {
+        // set valid
+        // remove from processes
+        // delete
+    }
 }
