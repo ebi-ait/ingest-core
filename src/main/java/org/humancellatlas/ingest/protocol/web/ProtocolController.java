@@ -83,7 +83,7 @@ public class ProtocolController {
 
     @DeleteMapping(path = "/protocols/{id}")
     ResponseEntity<?> deleteProtocol(@PathVariable("id") Protocol protocol) {
-        metadataCrudService.unlinkAndDeleteDocument(protocol);
+        metadataCrudService.deleteDocument(protocol);
         return ResponseEntity.noContent().build();
     }
 }

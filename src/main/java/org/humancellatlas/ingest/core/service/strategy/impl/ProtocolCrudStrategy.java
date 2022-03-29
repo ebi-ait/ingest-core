@@ -6,7 +6,6 @@ import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
-import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
@@ -53,12 +52,17 @@ public class ProtocolCrudStrategy implements MetadataCrudStrategy<Protocol> {
     }
 
     @Override
-    public void unlinkAndDeleteDocument(Protocol document) {
-        document.setValidationState(ValidationState.VALID);
+    public void removeLinksToDocument(Protocol document) {
+        // ToDo: Tell state tracker to remove this document
         processRepository.findByProtocolsContains(document).forEach(process -> {
             process.getProtocols().remove(document);
             processRepository.save(process);
         });
+    }
+
+    @Override
+    public void deleteDocument(Protocol document) {
+        removeLinksToDocument(document);
         protocolRepository.delete(document);
     }
 }

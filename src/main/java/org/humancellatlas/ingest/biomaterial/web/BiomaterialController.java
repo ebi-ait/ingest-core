@@ -145,7 +145,7 @@ public class BiomaterialController {
 
     @DeleteMapping(path = "/biomaterials/{id}")
     ResponseEntity<?> deleteBiomaterial(@PathVariable("id") Biomaterial biomaterial) {
-        metadataCrudService.unlinkAndDeleteDocument(biomaterial);
+        metadataCrudService.deleteDocument(biomaterial);
         return ResponseEntity.noContent().build();
     }
 }

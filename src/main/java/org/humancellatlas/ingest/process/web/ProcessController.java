@@ -214,7 +214,7 @@ public class ProcessController {
 
     @DeleteMapping(path = "/processes/{id}")
     ResponseEntity<?> deleteProcess(@PathVariable("id") Process process) {
-        metadataCrudService.unlinkAndDeleteDocument(process);
+        metadataCrudService.deleteDocument(process);
         return ResponseEntity.noContent().build();
     }
 }

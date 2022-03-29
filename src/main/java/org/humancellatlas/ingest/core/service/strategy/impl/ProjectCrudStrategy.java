@@ -9,7 +9,6 @@ import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
-import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
@@ -59,8 +58,8 @@ public class ProjectCrudStrategy implements MetadataCrudStrategy<Project> {
     }
 
     @Override
-    public void unlinkAndDeleteDocument(Project document) {
-        document.setValidationState(ValidationState.VALID);
+    public void removeLinksToDocument(Project document) {
+        // ToDo: Tell state tracker to remove this document
         biomaterialRepository.findByProject(document).forEach(biomaterial -> {
             biomaterial.setProject(null);
             biomaterialRepository.save(biomaterial);
@@ -77,6 +76,12 @@ public class ProjectCrudStrategy implements MetadataCrudStrategy<Project> {
             protocol.setProject(null);
             protocolRepository.save(protocol);
         });
+
+    }
+
+    @Override
+    public void deleteDocument(Project document) {
+        removeLinksToDocument(document);
         projectRepository.delete(document);
     }
 }

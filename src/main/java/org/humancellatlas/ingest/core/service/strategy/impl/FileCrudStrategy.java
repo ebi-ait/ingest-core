@@ -6,7 +6,6 @@ import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.project.ProjectRepository;
-import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
@@ -53,12 +52,17 @@ public class FileCrudStrategy implements MetadataCrudStrategy<File> {
     }
 
     @Override
-    public void unlinkAndDeleteDocument(File document) {
-        document.setValidationState(ValidationState.VALID);
+    public void removeLinksToDocument(File document) {
+        // ToDo: Tell state tracker to remove this document
         projectRepository.findBySupplementaryFilesContains(document).forEach(project -> {
             project.getSupplementaryFiles().remove(document);
             projectRepository.save(project);
         });
+    }
+
+    @Override
+    public void deleteDocument(File document) {
+        removeLinksToDocument(document);
         fileRepository.delete(document);
     }
 }

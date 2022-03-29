@@ -154,7 +154,7 @@ public class FileController {
 
     @DeleteMapping(path = "/files/{id}")
     ResponseEntity<?> deleteFile(@PathVariable("id") File file) {
-        metadataCrudService.unlinkAndDeleteDocument(file);
+        metadataCrudService.deleteDocument(file);
         return ResponseEntity.noContent().build();
     }
 }

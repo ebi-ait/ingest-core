@@ -7,7 +7,6 @@ import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
-import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
@@ -55,8 +54,8 @@ public class ProcessCrudStrategy implements MetadataCrudStrategy<Process> {
     }
 
     @Override
-    public void unlinkAndDeleteDocument(Process document) {
-        document.setValidationState(ValidationState.VALID);
+    public void removeLinksToDocument(Process document) {
+        // ToDo: Tell state tracker to remove this document
         fileRepository.findByInputToProcessesContains(document).forEach(file -> {
             file.getInputToProcesses().remove(document);
             fileRepository.save(file);
@@ -73,6 +72,12 @@ public class ProcessCrudStrategy implements MetadataCrudStrategy<Process> {
             biomaterial.getDerivedByProcesses().remove(document);
             biomaterialRepository.save(biomaterial);
         });
+
+    }
+
+    @Override
+    public void deleteDocument(Process document) {
+        removeLinksToDocument(document);
         processRepository.delete(document);
     }
 }
