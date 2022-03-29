@@ -31,6 +31,9 @@ public interface ProtocolRepository extends MongoRepository<Protocol, String> {
     public Page<Protocol> findByProject(Project project, Pageable pageable);
 
     @RestResource(exported = false)
+    Stream<Protocol> findByProject(Project project);
+
+    @RestResource(exported = false)
     public Stream<Protocol> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(exported = false)

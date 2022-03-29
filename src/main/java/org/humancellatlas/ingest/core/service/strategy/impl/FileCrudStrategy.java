@@ -5,6 +5,8 @@ import lombok.NonNull;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,7 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class FileCrudStrategy implements MetadataCrudStrategy<File> {
     private final @NonNull FileRepository fileRepository;
+    private final @NonNull ProjectRepository projectRepository;
 
     @Override
     public File saveMetadataDocument(File document) {
@@ -51,8 +54,11 @@ public class FileCrudStrategy implements MetadataCrudStrategy<File> {
 
     @Override
     public void unlinkAndDeleteDocument(File document) {
-        // set valid
-        // remove from project.supplementaryFiles
-        // delete
+        document.setValidationState(ValidationState.VALID);
+        projectRepository.findBySupplementaryFilesContains(document).forEach(project -> {
+            project.getSupplementaryFiles().remove(document);
+            projectRepository.save(project);
+        });
+        fileRepository.delete(document);
     }
 }

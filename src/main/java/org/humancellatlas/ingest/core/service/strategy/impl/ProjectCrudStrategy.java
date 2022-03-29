@@ -2,9 +2,14 @@ package org.humancellatlas.ingest.core.service.strategy.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
+import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.protocol.ProtocolRepository;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
@@ -16,8 +21,11 @@ import java.util.stream.Stream;
 @Component
 @AllArgsConstructor
 public class ProjectCrudStrategy implements MetadataCrudStrategy<Project> {
-    private final @NonNull
-    ProjectRepository projectRepository;
+    private final @NonNull ProjectRepository projectRepository;
+    private final @NonNull ProtocolRepository protocolRepository;
+    private final @NonNull ProcessRepository processRepository;
+    private final @NonNull FileRepository fileRepository;
+    private final @NonNull BiomaterialRepository biomaterialRepository;
 
     @Override
     public Project saveMetadataDocument(Project document) {
@@ -52,11 +60,23 @@ public class ProjectCrudStrategy implements MetadataCrudStrategy<Project> {
 
     @Override
     public void unlinkAndDeleteDocument(Project document) {
-        //set valid?
-        // remove from biomaterial.projects
-        // remove from file.projects
-        // remove from process.projects
-        // remove from protocol.projects
-        // delete
+        document.setValidationState(ValidationState.VALID);
+        biomaterialRepository.findByProject(document).forEach(biomaterial -> {
+            biomaterial.setProject(null);
+            biomaterialRepository.save(biomaterial);
+        });
+        fileRepository.findByProject(document).forEach(file -> {
+            file.setProject(null);
+            fileRepository.save(file);
+        });
+        processRepository.findByProject(document).forEach(process -> {
+            process.setProject(null);
+            processRepository.save(process);
+        });
+        protocolRepository.findByProject(document).forEach(protocol -> {
+            protocol.setProject(null);
+            protocolRepository.save(protocol);
+        });
+        projectRepository.delete(document);
     }
 }

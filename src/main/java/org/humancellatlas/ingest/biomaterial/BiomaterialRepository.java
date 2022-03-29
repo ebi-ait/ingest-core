@@ -33,6 +33,9 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
     Page<Biomaterial> findByProject(Project project, Pageable pageable);
 
     @RestResource(exported = false)
+    Stream<Biomaterial> findByProject(Project project);
+
+    @RestResource(exported = false)
     Stream<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     @RestResource(exported = false)

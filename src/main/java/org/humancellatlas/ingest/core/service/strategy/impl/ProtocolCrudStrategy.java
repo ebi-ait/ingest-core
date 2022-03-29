@@ -3,8 +3,10 @@ package org.humancellatlas.ingest.core.service.strategy.impl;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
+import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,7 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class ProtocolCrudStrategy implements MetadataCrudStrategy<Protocol> {
     private final @NonNull ProtocolRepository protocolRepository;
+    private final @NonNull ProcessRepository processRepository;
 
     @Override
     public Protocol saveMetadataDocument(Protocol document) {
@@ -51,8 +54,11 @@ public class ProtocolCrudStrategy implements MetadataCrudStrategy<Protocol> {
 
     @Override
     public void unlinkAndDeleteDocument(Protocol document) {
-        // set valid
-        // remove from processes
-        // delete
+        document.setValidationState(ValidationState.VALID);
+        processRepository.findByProtocolsContains(document).forEach(process -> {
+            process.getProtocols().remove(document);
+            processRepository.save(process);
+        });
+        protocolRepository.delete(document);
     }
 }

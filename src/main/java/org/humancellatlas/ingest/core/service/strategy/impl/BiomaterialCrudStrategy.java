@@ -5,6 +5,7 @@ import lombok.NonNull;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
@@ -52,8 +53,8 @@ public class BiomaterialCrudStrategy implements MetadataCrudStrategy<Biomaterial
 
     @Override
     public void unlinkAndDeleteDocument(Biomaterial document) {
-        // set valid
-        // delete
+        document.setValidationState(ValidationState.VALID);
+        biomaterialRepository.delete(document);
     }
 
 }
