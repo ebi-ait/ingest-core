@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.core.service.strategy.impl;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
+import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
@@ -19,6 +20,7 @@ import java.util.stream.Stream;
 public class ProtocolCrudStrategy implements MetadataCrudStrategy<Protocol> {
     private final @NonNull ProtocolRepository protocolRepository;
     private final @NonNull ProcessRepository processRepository;
+    private final @NonNull MessageRouter messageRouter;
 
     @Override
     public Protocol saveMetadataDocument(Protocol document) {
@@ -53,7 +55,7 @@ public class ProtocolCrudStrategy implements MetadataCrudStrategy<Protocol> {
 
     @Override
     public void removeLinksToDocument(Protocol document) {
-        // ToDo: Tell state tracker to remove this document
+        messageRouter.routeStateTrackingDeleteMessageFor(document);
         processRepository.findByProtocolsContains(document).forEach(process -> {
             process.getProtocols().remove(document);
             processRepository.save(process);

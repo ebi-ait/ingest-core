@@ -20,6 +20,8 @@ public class ConfigurationService implements InitializingBean {
     private String documentStatesPathString;
     @Value("${STATE_TRACKER_DOCUMENT_STATES_UPDATE_PATH:state-updates/metadata-documents}")
     private String documentStatesUpdatePathString;
+    @Value("${STATE_TRACKER_DOCUMENT_PARAM:document-id}")
+    private String documentIdParamNameString;
 
     @Getter
     private String stateTrackerScheme;
@@ -31,6 +33,8 @@ public class ConfigurationService implements InitializingBean {
     private String documentStatesPath;
     @Getter
     private String documentStatesUpdatePath;
+    @Getter
+    private String documentIdParamName;
 
     private void init(){
         this.stateTrackerScheme = this.stateTrackerSchemeString;
@@ -38,6 +42,7 @@ public class ConfigurationService implements InitializingBean {
         this.stateTrackerPort = Integer.parseInt(this.stateTrackerPortString);
         this.documentStatesPath = this.documentStatesPathString;
         this.documentStatesUpdatePath = this.documentStatesUpdatePathString;
+        this.documentIdParamName = this.documentIdParamNameString;
     }
 
     @Override

@@ -80,6 +80,21 @@ public class MessageRouter {
         return true;
     }
 
+    public boolean routeStateTrackingDeleteMessageFor(MetadataDocument document) {
+        URI documentDeleteUri = UriComponentsBuilder.newInstance()
+            .scheme(configurationService.getStateTrackerScheme())
+            .host(configurationService.getStateTrackerHost())
+            .port(configurationService.getStateTrackerPort())
+            .pathSegment(configurationService.getDocumentStatesUpdatePath())
+            .queryParam(configurationService.getDocumentIdParamName(), document.getId())
+            .build().toUri();
+        this.messageSender.queueDocumentStateDeleteMessage(
+            documentDeleteUri,
+            document.getUpdateDate().toEpochMilli()
+        );
+        return true;
+    }
+
     public boolean routeStateTrackingUpdateMessageForEnvelopeEvent(SubmissionEnvelope envelope, SubmissionState state) {
         // TODO: call this when a user requests a state change on an envelope
         this.messageSender.queueStateTrackingMessage(Constants.Exchanges.STATE_TRACKING_EXCHANGE,

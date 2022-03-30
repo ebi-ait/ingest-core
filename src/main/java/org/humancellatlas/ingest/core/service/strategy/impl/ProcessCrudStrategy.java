@@ -5,6 +5,7 @@ import lombok.NonNull;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -21,6 +22,7 @@ public class ProcessCrudStrategy implements MetadataCrudStrategy<Process> {
     private final @NonNull ProcessRepository processRepository;
     private final @NonNull FileRepository fileRepository;
     private final @NonNull BiomaterialRepository biomaterialRepository;
+    private final @NonNull MessageRouter messageRouter;
 
     @Override
     public Process saveMetadataDocument(Process document) {
@@ -55,7 +57,7 @@ public class ProcessCrudStrategy implements MetadataCrudStrategy<Process> {
 
     @Override
     public void removeLinksToDocument(Process document) {
-        // ToDo: Tell state tracker to remove this document
+        messageRouter.routeStateTrackingDeleteMessageFor(document);
         fileRepository.findByInputToProcessesContains(document).forEach(file -> {
             file.getInputToProcesses().remove(document);
             fileRepository.save(file);

@@ -5,6 +5,7 @@ import lombok.NonNull;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
+import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 @Component
 public class BiomaterialCrudStrategy implements MetadataCrudStrategy<Biomaterial> {
     private final @NonNull BiomaterialRepository biomaterialRepository;
+    private final @NonNull MessageRouter messageRouter;
 
     @Override
     public Biomaterial saveMetadataDocument(Biomaterial document) {
@@ -52,7 +54,7 @@ public class BiomaterialCrudStrategy implements MetadataCrudStrategy<Biomaterial
 
     @Override
     public void removeLinksToDocument(Biomaterial document) {
-        // ToDo: Tell state tracker to remove this document
+        messageRouter.routeStateTrackingDeleteMessageFor(document);
     }
 
     @Override
