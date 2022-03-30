@@ -20,7 +20,7 @@ public class ConfigurationService implements InitializingBean {
     private String documentStatesPathString;
     @Value("${STATE_TRACKER_DOCUMENT_STATES_UPDATE_PATH:state-updates/metadata-documents}")
     private String documentStatesUpdatePathString;
-    @Value("${STATE_TRACKER_DOCUMENT_PARAM:document-id}")
+    @Value("${STATE_TRACKER_DOCUMENT_PARAM:metadataDocumentId}")
     private String documentIdParamNameString;
 
     @Getter
