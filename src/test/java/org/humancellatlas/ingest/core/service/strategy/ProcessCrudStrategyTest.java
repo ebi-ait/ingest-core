@@ -35,21 +35,21 @@ public class ProcessCrudStrategyTest {
 
     @BeforeEach
     void setUp() {
-        testProcess = new Process("processId");
+        testProcess = new Process(null);
     }
 
     @Test
     public void testRemoveLinksProcess() {
         //given
-        File inputFile = new File("inputFile");
-        File derivedFile = new File("derivedFile");
+        File inputFile = spy(new File(null, "inputFile"));
+        File derivedFile = spy(new File(null, "derivedFile"));
         inputFile.getInputToProcesses().add(testProcess);
         derivedFile.getDerivedByProcesses().add(testProcess);
         when(fileRepository.findByInputToProcessesContains(testProcess)).thenReturn(Stream.of(inputFile));
         when(fileRepository.findByDerivedByProcessesContains(testProcess)).thenReturn(Stream.of(derivedFile));
 
-        Biomaterial inputBio = new Biomaterial("inputBio");
-        Biomaterial derivedBio = new Biomaterial("derivedBio");
+        Biomaterial inputBio = spy(new Biomaterial(null));
+        Biomaterial derivedBio = spy(new Biomaterial(null));
         inputBio.getInputToProcesses().add(testProcess);
         derivedBio.getDerivedByProcesses().add(testProcess);
         when(biomaterialRepository.findByInputToProcessesContains(testProcess)).thenReturn(Stream.of(inputBio));

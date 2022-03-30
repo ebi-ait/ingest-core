@@ -41,29 +41,29 @@ public class ProjectCrudStrategyTest {
 
     @BeforeEach
     void setUp() {
-        testProject = new Project(new Object());
+        testProject = spy(new Project(null));
     }
 
     @Test
     public void testRemoveLinksProject() {
         // Given
-        Biomaterial biomaterialWithProject = new Biomaterial("biomaterial");
+        Biomaterial biomaterialWithProject = new Biomaterial(null);
         biomaterialWithProject.setProject(testProject);
         biomaterialWithProject.getProjects().add(testProject);
         when(biomaterialRepository.findByProject(testProject)).thenReturn(Stream.of(biomaterialWithProject));
         when(biomaterialRepository.findByProjectsContaining(testProject)).thenReturn(Stream.of(biomaterialWithProject));
 
-        File fileWithProject = new File("file");
+        File fileWithProject = new File(null, "fileWithProject");
         fileWithProject.setProject(testProject);
         when(fileRepository.findByProject(testProject)).thenReturn(Stream.of(fileWithProject));
 
-        Process processWithProject = new Process("process");
+        Process processWithProject = new Process(null);
         processWithProject.setProject(testProject);
         processWithProject.getProjects().add(testProject);
         when(processRepository.findByProject(testProject)).thenReturn(Stream.of(processWithProject));
         when(processRepository.findByProjectsContaining(testProject)).thenReturn(Stream.of(processWithProject));
 
-        Protocol protocolWithProject = new Protocol("protocol");
+        Protocol protocolWithProject = new Protocol(null);
         protocolWithProject.setProject(testProject);
         when(protocolRepository.findByProject(testProject)).thenReturn(Stream.of(protocolWithProject));
 

@@ -46,6 +46,7 @@ public class SubmissionEnvelope extends AbstractEntity {
 
     public SubmissionEnvelope(String id) {
         this();
+        // ToDo: Get rid of this?
         this.id = id;
     }
 

@@ -81,7 +81,7 @@ public class FileServiceTest {
 
         submissionEnvelope = new SubmissionEnvelope("submission1");
 
-        file = new File();
+        file = new File(null, filename);
         List<File> files = new ArrayList<>();
         files.add(file);
 

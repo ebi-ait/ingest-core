@@ -29,8 +29,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -81,12 +80,12 @@ public class FileControllerTest {
         submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
         submissionEnvelopeRepository.save(submissionEnvelope);
 
-        process = new Process();
-        process2 = new Process();
-        process3 = new Process();
+        process = new Process(null);
+        process2 = new Process(null);
+        process3 = new Process(null);
         processRepository.saveAll(Arrays.asList(process, process2, process3));
 
-        file = new File(UUID.randomUUID().toString());
+        file = new File(null, "fileName");
         file.setSubmissionEnvelope(submissionEnvelope);
         fileRepository.save(file);
         uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
@@ -247,7 +246,7 @@ public class FileControllerTest {
     @Test
     public void testValidationJobPatch() throws Exception {
         //given:
-        File file = new File("test");
+        File file = new File(null, "test");
         file = fileRepository.save(file);
 
         //when:

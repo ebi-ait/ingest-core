@@ -32,13 +32,13 @@ public class ProtocolCrudStrategyTest {
 
     @BeforeEach
     void setUp() {
-        testProtocol = new Protocol("protocolId");
+        testProtocol = new Protocol(null);
     }
 
     @Test
     public void testRemoveLinksProject() {
         // given
-        Process processWithProtocol = new Process("process");
+        Process processWithProtocol = new Process(null);
         processWithProtocol.getProtocols().add(testProtocol);
         when(processRepository.findByProtocolsContains(testProtocol)).thenReturn(Stream.of(processWithProtocol));
 

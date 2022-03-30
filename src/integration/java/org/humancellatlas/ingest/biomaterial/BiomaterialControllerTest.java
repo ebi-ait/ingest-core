@@ -79,9 +79,9 @@ public class BiomaterialControllerTest {
         submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
         submissionEnvelopeRepository.save(submissionEnvelope);
 
-        process = new Process();
-        process2 = new Process();
-        process3 = new Process();
+        process = new Process(null);
+        process2 = new Process(null);
+        process3 = new Process(null);
         processRepository.saveAll(Arrays.asList(process, process2, process3));
 
         biomaterial = new Biomaterial();

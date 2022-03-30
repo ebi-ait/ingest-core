@@ -162,7 +162,8 @@ public class DefaultExporterTest {
                 (Answer<Stream<Process>>) invocation -> {
                     List<String> ids = invocation.getArgument(0);
                     return ids.stream().map(id -> {
-                        Process process = new Process(id);
+                        Process process = spy(new Process(null));
+                        doReturn(id).when(process).getId();
                         process.setSubmissionEnvelope(submissionEnvelope);
                         return process;
                     });

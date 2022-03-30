@@ -120,7 +120,9 @@ public class MessageRouterTest {
     private void doTestSendForExport(String routingKey) {
         //given:
         String processId = "78bbd9";
-        Process process = new Process(processId);
+        Process process = spy(new Process(null));
+        doReturn(processId).when(process).getId();
+
         Uuid processUuid = Uuid.newUuid();
         process.setUuid(processUuid);
         Instant version = Instant.now();
@@ -155,7 +157,7 @@ public class MessageRouterTest {
                 .extracting("documentId", "documentUuid", "callbackLink", "documentType",
                         "envelopeId", "envelopeUuid", "index", "total")
                 .containsExactly(processId, processUuid.getUuid().toString(), callbackLink,
-                        Process.class.getSimpleName(), envelopeId, envelopeUuid.getUuid().toString(), 2, 4);
+                    process.getClass().getSimpleName(), envelopeId, envelopeUuid.getUuid().toString(), 2, 4);
     }
 
     @Configuration

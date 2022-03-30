@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.file;
 
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -9,13 +10,18 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
 public class FileTest {
+    Process process;
+    File file;
+
+    @BeforeEach
+    void setUp() {
+        //given:
+        process = spy(new Process(null));
+        file = spy(new File(null, "fileName"));
+    }
 
     @Test
     public void testAddAsDerivedByProcess() {
-        //given:
-        Process process = createTestProcess();
-        File file = new File();
-
         //when:
         file.addAsDerivedByProcess(process);
 
@@ -25,13 +31,11 @@ public class FileTest {
 
     @Test
     public void testAddDerivedByProcessdNoDuplication() {
-        //given:
-        Process process = createTestProcess();
-        File file = new File();
+        // given:
+        doReturn("fe89a0").when(process).getId();
 
-        //when:
+        // when:
         file.addAsDerivedByProcess(process);
-        //and: add twice
         file.addAsDerivedByProcess(process);
 
         //then:
@@ -41,42 +45,29 @@ public class FileTest {
     @Test
     public void testAddToAnalysis() {
         //given:
-        Process analysis = createTestProcess();
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        analysis.setSubmissionEnvelope(submissionEnvelope);
+        process.setSubmissionEnvelope(submissionEnvelope);
 
         //when:
-        File file = new File();
-        file.addToAnalysis(analysis);
+        file.addToAnalysis(process);
 
         //then:
-        assertThat(file.getDerivedByProcesses()).contains(analysis);
+        assertThat(file.getDerivedByProcesses()).contains(process);
         assertThat(file.getSubmissionEnvelope()).isEqualTo(submissionEnvelope);
     }
 
     @Test
     public void testAddToAnalysisWhenFileAlreadyLinkedToSubmissionEnvelope() {
         //given:
-        Process analysis = createTestProcess();
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        analysis.setSubmissionEnvelope(submissionEnvelope);
-
-        //and:
-        File file = new File();
+        process.setSubmissionEnvelope(submissionEnvelope);
         file.setSubmissionEnvelope(submissionEnvelope);
 
         //when:
-        file.addToAnalysis(analysis);
+        file.addToAnalysis(process);
 
         //then:
-        assertThat(file.getDerivedByProcesses()).contains(analysis);
+        assertThat(file.getDerivedByProcesses()).contains(process);
         assertThat(file.getSubmissionEnvelope()).isEqualTo(submissionEnvelope);
     }
-
-    private Process createTestProcess() {
-        Process process = spy(new Process());
-        doReturn("fe89a0").when(process).getId();
-        return process;
-    }
-
 }

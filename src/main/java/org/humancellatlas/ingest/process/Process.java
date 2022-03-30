@@ -48,18 +48,9 @@ public class Process extends MetadataDocument {
     private @DBRef
     Set<Process> chainedProcesses = new HashSet<>();
 
-    public Process() {
-        super(EntityType.PROCESS, null);
-    }
-
     @JsonCreator
     public Process(@JsonProperty("content") Object content) {
         super(EntityType.PROCESS, content);
-    }
-
-    public Process(String id) {
-        super(EntityType.PROCESS, null);
-        this.id = id;
     }
 
     public Process addInputBundleManifest(BundleManifest bundleManifest) {

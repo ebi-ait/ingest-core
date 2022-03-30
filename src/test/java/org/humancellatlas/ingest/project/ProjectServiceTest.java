@@ -90,7 +90,7 @@ public class ProjectServiceTest {
         @DisplayName("get all submissions")
         void getFromAllCopiesOfProjects() {
             //given:
-            var project1 = new Project("project");
+            var project1 = new Project(null);
             var submissionSet1 = IntStream.range(0, 3)
                     .mapToObj(Integer::toString)
                     .map(SubmissionEnvelope::new)
@@ -99,7 +99,7 @@ public class ProjectServiceTest {
             submissionSet1.forEach(project1::addToSubmissionEnvelopes);
 
             //and:
-            var project2 = new Project("project2");
+            var project2 = new Project(null);
             BeanUtils.copyProperties(project1, project2);
             var submissionSet2 = IntStream.range(10, 15)
                     .mapToObj(Integer::toString)
@@ -124,7 +124,7 @@ public class ProjectServiceTest {
         @DisplayName("no duplicate submissions")
         void getFromAllCopiesOfProjectsNoDuplicates() {
             //given:
-            var project1 = new Project("project1");
+            var project1 = new Project(null);
             var submissionSet1 = IntStream.range(0, 3)
                 .mapToObj(Integer::toString)
                 .map(SubmissionEnvelope::new)
@@ -132,7 +132,7 @@ public class ProjectServiceTest {
             submissionSet1.forEach(project1::addToSubmissionEnvelopes);
 
             //and:
-            var project2 = new Project("project2");
+            var project2 = new Project(null);
             BeanUtils.copyProperties(project1, project2);
             var submissionSet2 = IntStream.range(10, 15)
                 .mapToObj(Integer::toString)
@@ -224,14 +224,14 @@ public class ProjectServiceTest {
         @DisplayName("fails for non-empty Project")
         void failForProjectWithSubmissions() {
             //given:
-            var project = new Project("test project");
+            var project = new Project(null);
 
             //and: copy of project with no submissions
-            var persistentEmptyProject = new Project("project");
+            var persistentEmptyProject = new Project(null);
             BeanUtils.copyProperties(project, persistentEmptyProject);
 
             //and: copy of project with submissions
-            var persistentNonEmptyProject = new Project("project");
+            var persistentNonEmptyProject = new Project(null);
             BeanUtils.copyProperties(project, persistentNonEmptyProject);
             IntStream.range(0, 3)
                     .mapToObj(Integer::toString).map(SubmissionEnvelope::new)
