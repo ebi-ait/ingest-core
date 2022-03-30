@@ -336,7 +336,7 @@ class ProjectFilterTest {
                 .hasSize(2)
                 .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
                 .usingElementComparatorIgnoringFields("supplementaryFiles", "submissionEnvelopes")
-                .containsExactly(project1, project2);
+                .containsExactlyInAnyOrder(project1, project2);
     }
     @Test
     void query_exact_phrase__correct_order(){

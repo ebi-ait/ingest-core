@@ -49,6 +49,7 @@ public class Process extends MetadataDocument {
     Set<Process> chainedProcesses = new HashSet<>();
 
     public Process() {
+        super(EntityType.PROCESS, null);
     }
 
     @JsonCreator
@@ -57,6 +58,7 @@ public class Process extends MetadataDocument {
     }
 
     public Process(String id) {
+        super(EntityType.PROCESS, null);
         this.id = id;
     }
 

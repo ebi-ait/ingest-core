@@ -214,9 +214,10 @@ public class ProjectServiceTest {
             projectService.delete(project);
 
             //then:
-            persistentProjects.forEach(persistentProject ->
-                verify(projectRepository).delete(persistentProject)
-            );
+            persistentProjects.forEach(persistentProject -> {
+                verify(metadataCrudService).deleteDocument(persistentProject);
+                verify(projectEventHandler).deletedProject(persistentProject);
+            });
         }
 
         @Test

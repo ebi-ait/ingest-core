@@ -29,6 +29,7 @@ public class Protocol extends MetadataDocument {
     }
 
     public Protocol(String id) {
+        super(EntityType.PROTOCOL, null);
         this.id = id;
     }
 

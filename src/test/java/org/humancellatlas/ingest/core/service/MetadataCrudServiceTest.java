@@ -1,0 +1,81 @@
+package org.humancellatlas.ingest.core.service;
+
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
+import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
+import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.service.strategy.impl.*;
+import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.messaging.MessageRouter;
+import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.protocol.Protocol;
+import org.humancellatlas.ingest.protocol.ProtocolRepository;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.stream.Stream;
+
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = {
+    MetadataCrudService.class,
+    BiomaterialCrudStrategy.class,
+    FileCrudStrategy.class,
+    ProcessCrudStrategy.class,
+    ProjectCrudStrategy.class,
+    ProtocolCrudStrategy.class
+})
+public class MetadataCrudServiceTest {
+    @Autowired private MetadataCrudService crudService;
+    @Autowired private BiomaterialCrudStrategy biomaterialCrudStrategy;
+    @Autowired private FileCrudStrategy fileCrudStrategy;
+    @Autowired private ProcessCrudStrategy processCrudStrategy;
+    @Autowired private ProjectCrudStrategy projectCrudStrategy;
+    @Autowired private ProtocolCrudStrategy protocolCrudStrategy;
+
+    @MockBean private MessageRouter messageRouter;
+    @MockBean private BiomaterialRepository biomaterialRepository;
+    @MockBean private FileRepository fileRepository;
+    @MockBean private ProcessRepository processRepository;
+    @MockBean private ProjectRepository projectRepository;
+    @MockBean private ProtocolRepository protocolRepository;
+
+    private static Stream<Arguments> providedTestDocuments() {
+        return Stream.of(
+            Arguments.of(new Biomaterial("biomaterialId")),
+            Arguments.of(new File("fileId")),
+            Arguments.of(new Process("processId")),
+            Arguments.of(new Project(new Object())),
+            Arguments.of(new Protocol("protocolId"))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("providedTestDocuments")
+    public void removeLinksSendsMessageToStateTracker(MetadataDocument document) {
+        // when
+        crudService.removeLinksToDocument(document);
+        // then
+        verify(messageRouter, times(1)).routeStateTrackingDeleteMessageFor(document);
+    }
+
+    @ParameterizedTest
+    @MethodSource("providedTestDocuments")
+    public void deleteSendsMessageToStateTracker(MetadataDocument document) {
+        // when
+        crudService.deleteDocument(document);
+        // then
+        verify(messageRouter, times(1)).routeStateTrackingDeleteMessageFor(document);
+    }
+}

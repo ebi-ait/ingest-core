@@ -66,12 +66,20 @@ public class ProjectCrudStrategy implements MetadataCrudStrategy<Project> {
             biomaterial.setProject(null);
             biomaterialRepository.save(biomaterial);
         });
+        biomaterialRepository.findByProjectsContaining(document).forEach(biomaterial -> {
+            biomaterial.getProjects().remove(document);
+            biomaterialRepository.save(biomaterial);
+        });
         fileRepository.findByProject(document).forEach(file -> {
             file.setProject(null);
             fileRepository.save(file);
         });
         processRepository.findByProject(document).forEach(process -> {
             process.setProject(null);
+            processRepository.save(process);
+        });
+        processRepository.findByProjectsContaining(document).forEach(process -> {
+            process.getProjects().remove(document);
             processRepository.save(process);
         });
         protocolRepository.findByProject(document).forEach(protocol -> {
