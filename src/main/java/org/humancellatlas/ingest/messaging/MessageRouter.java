@@ -81,17 +81,23 @@ public class MessageRouter {
     }
 
     public boolean routeStateTrackingDeleteMessageFor(MetadataDocument document) {
+        if (document.getSubmissionEnvelope() == null) {
+            throw new RuntimeException("The metadata document should have a link to a submission envelope.");
+        }
+
         URI documentDeleteUri = UriComponentsBuilder.newInstance()
             .scheme(configurationService.getStateTrackerScheme())
             .host(configurationService.getStateTrackerHost())
             .port(configurationService.getStateTrackerPort())
             .pathSegment(configurationService.getDocumentStatesUpdatePath())
             .queryParam(configurationService.getDocumentIdParamName(), document.getId())
+            .queryParam(configurationService.getEnvelopeIdParamName(), document.getSubmissionEnvelope().getId())
             .build().toUri();
         this.messageSender.queueDocumentStateDeleteMessage(
             documentDeleteUri,
             document.getUpdateDate().toEpochMilli()
         );
+        System.out.println("ROuted message");
         return true;
     }
 

@@ -22,6 +22,8 @@ public class ConfigurationService implements InitializingBean {
     private String documentStatesUpdatePathString;
     @Value("${STATE_TRACKER_DOCUMENT_PARAM:metadataDocumentId}")
     private String documentIdParamNameString;
+    @Value("${STATE_TRACKER_DOCUMENT_PARAM:envelopeId}")
+    private String envelopeIdParamNameString;
 
     @Getter
     private String stateTrackerScheme;
@@ -35,6 +37,8 @@ public class ConfigurationService implements InitializingBean {
     private String documentStatesUpdatePath;
     @Getter
     private String documentIdParamName;
+    @Getter
+    private String envelopeIdParamName;
 
     private void init(){
         this.stateTrackerScheme = this.stateTrackerSchemeString;
@@ -43,6 +47,7 @@ public class ConfigurationService implements InitializingBean {
         this.documentStatesPath = this.documentStatesPathString;
         this.documentStatesUpdatePath = this.documentStatesUpdatePathString;
         this.documentIdParamName = this.documentIdParamNameString;
+        this.envelopeIdParamName = this.envelopeIdParamNameString;
     }
 
     @Override
