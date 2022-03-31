@@ -58,6 +58,7 @@ public class SubmissionLinkMapControllerTest {
 
     @Test
     public void testSubmissionLinkMap() {
+        // ToDo: This test runs against a real mongo database and can fail if it is not empty.
         //given:
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope("link-map-test");
 
