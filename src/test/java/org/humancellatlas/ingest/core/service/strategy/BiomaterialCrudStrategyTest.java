@@ -26,7 +26,6 @@ public class BiomaterialCrudStrategyTest {
 
     @BeforeEach
     void setUp() {
-        // ToDo: Extract the test constructors into test classes
         testBiomaterial = new Biomaterial("biomaterialId");
     }
 
