@@ -1,7 +1,9 @@
 package org.humancellatlas.ingest.core.service;
 
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -46,8 +48,7 @@ public class MetadataLinkingService {
         });
         mongoTemplate.save(targetEntity);
 
-        setValidationStateToDraft(linkedEntities);
-        setValidationStateToDraft(targetEntity);
+        setValidationStateToDraftIfGraphValid(targetEntity);
 
         return targetEntity;
     }
@@ -55,14 +56,11 @@ public class MetadataLinkingService {
     public <S extends MetadataDocument, T extends MetadataDocument> T replaceLinks(T targetEntity, List<S> entitiesToLink, String linkProperty) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Method method = getGetterMethod(targetEntity, entitiesToLink.get(0).getClass(), linkProperty);
         Set<S> linkedEntities = (Set<S>) invoke(targetEntity, method);
-        Set<S> unlinkedEntities = new HashSet(linkedEntities);
         linkedEntities.clear();
         linkedEntities.addAll(entitiesToLink);
         mongoTemplate.save(targetEntity);
 
-        setValidationStateToDraft(linkedEntities);
-        setValidationStateToDraft(unlinkedEntities);
-        setValidationStateToDraft(targetEntity);
+        setValidationStateToDraftIfGraphValid(targetEntity);
 
         return targetEntity;
     }
@@ -73,7 +71,7 @@ public class MetadataLinkingService {
         linkedEntities.remove(entityToUnlink);
         mongoTemplate.save(targetEntity);
 
-        setValidationStateToDraft(targetEntity, entityToUnlink);
+        setValidationStateToDraftIfGraphValid(targetEntity);
 
         return targetEntity;
     }
@@ -86,15 +84,12 @@ public class MetadataLinkingService {
         return method.invoke(metadataDocument);
     }
 
-    private void setValidationStateToDraft(MetadataDocument... entities) {
+    private void setValidationStateToDraftIfGraphValid(MetadataDocument... entities) {
         Arrays.stream(entities).forEach(entity -> {
-            setToDraft(entity);
-        });
-    }
-
-    private <T extends MetadataDocument> void setValidationStateToDraft(Set<T> entitySet) {
-        entitySet.forEach(entity -> {
-            setToDraft(entity);
+            SubmissionEnvelope submission = entity.getSubmissionEnvelope();
+            if (submission != null && submission.getSubmissionState().equals(SubmissionState.GRAPH_VALID)) {
+                setToDraft(entity);
+            }
         });
     }
 
