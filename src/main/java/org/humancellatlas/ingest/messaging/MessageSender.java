@@ -19,6 +19,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.util.*;
@@ -68,7 +69,7 @@ public class MessageSender {
     }
 
     public void queueDocumentStateDeleteMessage(URI uri, long intendedSendTime) {
-        MessageBuffer.STATE_TRACKING.queueHttpMessage(uri, HttpMethod.DELETE, new Object(), intendedSendTime);
+        MessageBuffer.STATE_TRACKING.queueHttpMessage(uri, HttpMethod.DELETE, null, intendedSendTime);
     }
 
     public void queueUploadManagerMessage(String exchange, String routingKey,
@@ -112,7 +113,7 @@ public class MessageSender {
             this.intendedStartTime = intendedStartTime;
         }
 
-        public QueuedMessage(URI uri, HttpMethod method, Object payload, long intendedStartTime) {
+        public QueuedMessage(URI uri, HttpMethod method, @Nullable Object payload, long intendedStartTime) {
             this.messageProtocol = MessageProtocol.HTTP;
             this.method = method;
             this.uri = uri;
@@ -170,7 +171,7 @@ public class MessageSender {
             }
         }
 
-        void queueHttpMessage(URI uri, HttpMethod method, Object payload, long intendedStartTime) {
+        void queueHttpMessage(URI uri, HttpMethod method, @Nullable Object payload, long intendedStartTime) {
             QueuedMessage message = new QueuedMessage(uri, method, payload, intendedStartTime + delayMillis);
             try {
                 messageQueue.add(message);
