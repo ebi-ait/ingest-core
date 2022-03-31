@@ -2,12 +2,16 @@ package org.humancellatlas.ingest.biomaterial;
 
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +23,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
@@ -45,6 +50,9 @@ public class BiomaterialControllerTest {
     @Autowired
     private ProjectRepository projectRepository;
 
+    @Autowired
+    private SubmissionEnvelopeRepository submissionEnvelopeRepository;
+
     @MockBean
     private MigrationConfiguration migrationConfiguration;
 
@@ -61,14 +69,22 @@ public class BiomaterialControllerTest {
 
     UriComponentsBuilder uriBuilder;
 
+    SubmissionEnvelope submissionEnvelope;
+
     @BeforeEach
     void setUp() {
+        submissionEnvelope = new SubmissionEnvelope(UUID.randomUUID().toString());
+        submissionEnvelope.setUuid(Uuid.newUuid());
+        submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
+        submissionEnvelopeRepository.save(submissionEnvelope);
+
         process = new Process();
         process2 = new Process();
         process3 = new Process();
         processRepository.saveAll(Arrays.asList(process, process2, process3));
 
         biomaterial = new Biomaterial();
+        biomaterial.setSubmissionEnvelope(submissionEnvelope);
         biomaterialRepository.save(biomaterial);
 
         uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
@@ -84,7 +100,7 @@ public class BiomaterialControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        verifyThatValidationStateChangedToDraft(biomaterial, process, process2);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getInputToProcesses())
                 .usingElementComparatorOnFields("id")
@@ -105,7 +121,7 @@ public class BiomaterialControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        verifyThatValidationStateChangedToDraft(biomaterial, process, process2, process3);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getInputToProcesses())
                 .usingElementComparatorOnFields("id")
@@ -122,7 +138,7 @@ public class BiomaterialControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        verifyThatValidationStateChangedToDraft(biomaterial, process);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getInputToProcesses())
                 .usingElementComparatorOnFields("id")
@@ -139,7 +155,7 @@ public class BiomaterialControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        verifyThatValidationStateChangedToDraft(biomaterial, process, process2);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getDerivedByProcesses())
                 .usingElementComparatorOnFields("id")
@@ -160,7 +176,7 @@ public class BiomaterialControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        verifyThatValidationStateChangedToDraft(biomaterial, process, process2, process3);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getDerivedByProcesses())
                 .usingElementComparatorOnFields("id")
@@ -175,7 +191,7 @@ public class BiomaterialControllerTest {
                 .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()))
                 .andExpect(status().isOk());
 
-        verifyThatValidationStateChangedToDraft(biomaterial, process);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
 
         // then
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
@@ -195,7 +211,7 @@ public class BiomaterialControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verifyThatValidationStateChangedToDraft(biomaterial, process);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
 
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getInputToProcesses()).doesNotContain(process);
@@ -212,12 +228,12 @@ public class BiomaterialControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verifyThatValidationStateChangedToDraft(biomaterial, process);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getDerivedByProcesses()).doesNotContain(process);
     }
 
-    private void verifyThatValidationStateChangedToDraft(MetadataDocument... values) {
+    private void verifyThatValidationStateChangedToDraftWhenGraphValid(MetadataDocument... values) {
         Arrays.stream(values).forEach(value -> {
             verify(validationStateChangeService, times(1)).changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT);
         });

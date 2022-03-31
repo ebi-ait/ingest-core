@@ -69,6 +69,25 @@ public class MetadataLinkingServiceTest {
     }
 
     @Test
+    public void testReplaceLinkNotGraphValid() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        process.addProtocol(protocol);
+        submission.enactStateTransition(SubmissionState.METADATA_VALID);
+
+        // when
+        service.replaceLinks(process, List.of(protocol2), "protocols");
+
+        // then
+        assertThat(process.getProtocols().size()).isEqualTo(1);
+        assertThat(process.getProtocols().contains(protocol2)).isTrue();
+
+        verify(validationStateChangeService, times(0)).changeValidationState(protocol.getType(), protocol.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(0)).changeValidationState(protocol2.getType(), protocol2.getId(), ValidationState.DRAFT);
+        verify(validationStateChangeService, times(0)).changeValidationState(process.getType(), process.getId(), ValidationState.DRAFT);
+        verify(mongoTemplate).save(process);
+
+    }
+
+    @Test
     public void testAddLink() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
         // when
@@ -85,9 +104,9 @@ public class MetadataLinkingServiceTest {
 
     @Test
     public void testAddLinkNotGraphValid() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        submission.enactStateTransition(SubmissionState.METADATA_VALID);
 
         // when
-        submission.enactStateTransition(SubmissionState.METADATA_VALID);
         service.addLinks(process, List.of(protocol), "protocols");
 
         // then
@@ -98,6 +117,8 @@ public class MetadataLinkingServiceTest {
         verify(mongoTemplate).save(process);
 
     }
+
+
 
     @Test
     public void testRetry() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {

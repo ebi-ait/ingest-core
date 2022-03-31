@@ -2,13 +2,17 @@ package org.humancellatlas.ingest.process;
 
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
+import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +57,9 @@ class ProcessControllerTest {
     @Autowired
     private ProjectRepository projectRepository;
 
+    @Autowired
+    private SubmissionEnvelopeRepository submissionEnvelopeRepository;
+
     Protocol protocol;
 
     Protocol protocol2;
@@ -65,8 +72,15 @@ class ProcessControllerTest {
 
     UriComponentsBuilder uriBuilder;
 
+    SubmissionEnvelope submissionEnvelope;
+
     @BeforeEach
     void setUp() {
+        submissionEnvelope = new SubmissionEnvelope(UUID.randomUUID().toString());
+        submissionEnvelope.setUuid(Uuid.newUuid());
+        submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
+        submissionEnvelopeRepository.save(submissionEnvelope);
+
         protocol = new Protocol();
         protocol2 = new Protocol();
         protocol3 = new Protocol();
@@ -76,6 +90,7 @@ class ProcessControllerTest {
         projectRepository.save(project);
 
         process = new Process();
+        process.setSubmissionEnvelope(submissionEnvelope);
         processRepository.save(process);
 
         uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
@@ -95,7 +110,7 @@ class ProcessControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        verifyThatValidationStateChangedToDraft(process, protocol, protocol2, protocol3);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(process);
         Process updatedProcess = processRepository.findById(process.getId()).get();
         assertThat(updatedProcess.getProtocols())
                 .usingElementComparatorOnFields("id")
@@ -112,7 +127,7 @@ class ProcessControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        verifyThatValidationStateChangedToDraft(process, protocol, protocol2);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(process);
         Process updatedProcess = processRepository.findById(process.getId()).get();
         assertThat(updatedProcess.getProtocols())
                 .usingElementComparatorOnFields("id")
@@ -128,7 +143,7 @@ class ProcessControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        verifyThatValidationStateChangedToDraft(process, protocol);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(process);
         Process updatedProcess = processRepository.findById(process.getId()).get();
         assertThat(updatedProcess.getProtocols())
                 .usingElementComparatorOnFields("id")
@@ -146,7 +161,7 @@ class ProcessControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verifyThatValidationStateChangedToDraft(process, protocol);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(process);
 
         Process updatedProcess = processRepository.findById(process.getId()).get();
         assertThat(updatedProcess.getProtocols()).doesNotContain(protocol);
@@ -170,7 +185,7 @@ class ProcessControllerTest {
         verify(validationStateChangeService, times(0)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
     }
 
-    private void verifyThatValidationStateChangedToDraft(MetadataDocument... values) {
+    private void verifyThatValidationStateChangedToDraftWhenGraphValid(MetadataDocument... values) {
         Arrays.stream(values).forEach(value -> {
             verify(validationStateChangeService, times(1)).changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT);
         });
