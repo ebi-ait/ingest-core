@@ -12,6 +12,7 @@ import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,6 +90,13 @@ public class FileControllerTest {
         file.setSubmissionEnvelope(submissionEnvelope);
         fileRepository.save(file);
         uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
+    }
+
+    @AfterEach
+    private void tearDown() {
+        processRepository.deleteAll();
+        fileRepository.deleteAll();
+        submissionEnvelopeRepository.deleteAll();
     }
 
     @Test
@@ -238,7 +246,6 @@ public class FileControllerTest {
 
     @Test
     public void testValidationJobPatch() throws Exception {
-        // ToDo: This test runs against a real mongo database and can fail if it is not empty.
         //given:
         File file = new File("test");
         file = fileRepository.save(file);

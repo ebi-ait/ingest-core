@@ -12,6 +12,7 @@ import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,9 +57,17 @@ public class SubmissionLinkMapControllerTest {
     @MockBean
     private MessageRouter messageRouter;
 
+    @AfterEach
+    private void tearDown() {
+        biomaterialRepository.deleteAll();
+        fileRepository.deleteAll();
+        processRepository.deleteAll();
+        protocolRepository.deleteAll();
+        submissionEnvelopeRepository.deleteAll();
+    }
+
     @Test
     public void testSubmissionLinkMap() {
-        // ToDo: This test runs against a real mongo database and can fail if it is not empty.
         //given:
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope("link-map-test");
 

@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +32,12 @@ public class ProcessRepositoryTest {
 
     @MockBean
     private MessageRouter messageRouter;
+
+    @AfterEach
+    private void tearDown() {
+        processRepository.deleteAll();
+        protocolRepository.deleteAll();
+    }
 
     @Test
     public void findFirstByProtocolNonUnique() {

@@ -12,6 +12,7 @@ import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +89,14 @@ public class BiomaterialControllerTest {
         biomaterialRepository.save(biomaterial);
 
         uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
+    }
+
+    @AfterEach
+    private void tearDown() {
+        processRepository.deleteAll();
+        biomaterialRepository.deleteAll();
+        projectRepository.deleteAll();
+        submissionEnvelopeRepository.deleteAll();
     }
 
     @Test

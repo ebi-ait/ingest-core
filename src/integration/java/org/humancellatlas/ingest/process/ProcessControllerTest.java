@@ -13,6 +13,7 @@ import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +95,14 @@ class ProcessControllerTest {
         processRepository.save(process);
 
         uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
+    }
+
+    @AfterEach
+    private void tearDown() {
+        submissionEnvelopeRepository.deleteAll();
+        processRepository.deleteAll();
+        protocolRepository.deleteAll();
+        projectRepository.deleteAll();
     }
 
     @Test
