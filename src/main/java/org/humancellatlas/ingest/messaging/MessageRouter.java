@@ -97,7 +97,6 @@ public class MessageRouter {
             documentDeleteUri,
             document.getUpdateDate().toEpochMilli()
         );
-        System.out.println("ROuted message");
         return true;
     }
 
