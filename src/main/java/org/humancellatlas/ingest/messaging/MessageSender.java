@@ -19,6 +19,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.util.*;
@@ -64,7 +65,11 @@ public class MessageSender {
     }
 
     public void queueDocumentStateUpdateMessage(URI uri, Object payload, long intendedSendTime) {
-        MessageBuffer.STATE_TRACKING.queueHttpMessage(uri, payload, intendedSendTime);
+        MessageBuffer.STATE_TRACKING.queueHttpMessage(uri, HttpMethod.POST, payload, intendedSendTime);
+    }
+
+    public void queueDocumentStateDeleteMessage(URI uri, long intendedSendTime) {
+        MessageBuffer.STATE_TRACKING.queueHttpMessage(uri, HttpMethod.DELETE, null, intendedSendTime);
     }
 
     public void queueUploadManagerMessage(String exchange, String routingKey,
@@ -91,12 +96,12 @@ public class MessageSender {
 
     @Data
     static class QueuedMessage implements Delayed {
-
         private final MessageProtocol messageProtocol;
+        private final Object payload;
         private String exchange;
         private String routingKey;
         private URI uri;
-        private final Object payload;
+        private HttpMethod method;
 
         private final long intendedStartTime;
 
@@ -108,8 +113,9 @@ public class MessageSender {
             this.intendedStartTime = intendedStartTime;
         }
 
-        public QueuedMessage(URI uri, Object payload, long intendedStartTime) {
+        public QueuedMessage(URI uri, HttpMethod method, @Nullable Object payload, long intendedStartTime) {
             this.messageProtocol = MessageProtocol.HTTP;
+            this.method = method;
             this.uri = uri;
             this.payload = payload;
             this.intendedStartTime = intendedStartTime;
@@ -165,8 +171,8 @@ public class MessageSender {
             }
         }
 
-        void queueHttpMessage(URI uri, Object payload, long intendedStartTime) {
-            QueuedMessage message = new QueuedMessage(uri, payload, intendedStartTime + delayMillis);
+        void queueHttpMessage(URI uri, HttpMethod method, @Nullable Object payload, long intendedStartTime) {
+            QueuedMessage message = new QueuedMessage(uri, method, payload, intendedStartTime + delayMillis);
             try {
                 messageQueue.add(message);
             } catch (IllegalStateException e) {
@@ -212,7 +218,7 @@ public class MessageSender {
                     messagingTemplate.convertAndSend(message.exchange, message.routingKey, message.payload);
                 } else {
                     try {
-                        restTemplate.exchange(message.getUri(), HttpMethod.POST, new HttpEntity<>(message.getPayload(), headers), Object.class);
+                        restTemplate.exchange(message.getUri(), message.method, new HttpEntity<>(message.getPayload(), headers), Object.class);
                     } catch (Exception e) {
                         log.error("", e);
                     }

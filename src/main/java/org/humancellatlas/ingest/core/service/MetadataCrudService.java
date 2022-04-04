@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
 import org.humancellatlas.ingest.core.service.strategy.impl.*;
 import org.humancellatlas.ingest.state.ValidationState;
@@ -12,8 +11,6 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -65,5 +62,14 @@ public class MetadataCrudService {
 
     public <T extends MetadataDocument> Collection<T> findAllBySubmission(SubmissionEnvelope submissionEnvelope, EntityType entityType) {
         return crudStrategyForMetadataType(entityType).findAllBySubmissionEnvelope(submissionEnvelope);
+    }
+
+    public <T extends MetadataDocument> void removeLinksToDocument(T metadataDocument) {
+        crudStrategyForMetadataType(metadataDocument.getType()).removeLinksToDocument(metadataDocument);
+    }
+
+    public <T extends MetadataDocument> void deleteDocument(T metadataDocument) {
+        crudStrategyForMetadataType(metadataDocument.getType()).deleteDocument(metadataDocument);
+
     }
 }

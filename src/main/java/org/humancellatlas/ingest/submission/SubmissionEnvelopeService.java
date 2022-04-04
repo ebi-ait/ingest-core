@@ -7,6 +7,7 @@ import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
+import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.errors.SubmissionErrorRepository;
 import org.humancellatlas.ingest.exporter.Exporter;
 import org.humancellatlas.ingest.file.File;
@@ -85,15 +86,17 @@ public class SubmissionEnvelopeService {
     @NonNull
     private PatchRepository patchRepository;
 
+    private final @NonNull MetadataCrudService metadataCrudService;
+
     @NonNull
     private SubmissionErrorRepository submissionErrorRepository;
 
     public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
         projectRepository.findBySubmissionEnvelopesContains(envelope)
-                .findFirst()
-                .ifPresentOrElse(
-                        project -> {
-                            if (!project.getValidationState().equals(ValidationState.VALID)) {
+            .findFirst()
+            .ifPresentOrElse(
+                project -> {
+                    if (!project.getValidationState().equals(ValidationState.VALID)) {
                                 throw new StateTransitionNotAllowed((String.format(
                                         "Envelope with id %s cannot be submitted when the project is invalid.",
                                         envelope.getId()
@@ -236,38 +239,10 @@ public class SubmissionEnvelopeService {
         long startTime = System.currentTimeMillis();
 
         processRepository.findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(p -> {
-                    fileRepository.findByInputToProcessesContains(p)
-                            .forEach(file -> {
-                                file.getInputToProcesses().remove(p);
-                                fileRepository.save(file);
-                            });
-
-                    fileRepository.findByDerivedByProcessesContains(p)
-                            .forEach(file -> {
-                                file.getDerivedByProcesses().remove(p);
-                                fileRepository.save(file);
-                            });
-
-                    biomaterialRepository.findByInputToProcessesContains(p)
-                            .forEach(biomaterial -> {
-                                biomaterial.getInputToProcesses().remove(p);
-                                biomaterialRepository.save(biomaterial);
-                            });
-
-                    biomaterialRepository.findByDerivedByProcessesContains(p)
-                            .forEach(biomaterial -> {
-                                biomaterial.getDerivedByProcesses().remove(p);
-                                biomaterialRepository.save(biomaterial);
-                            });
-                });
+            .forEach(metadataCrudService::removeLinksToDocument);
 
         protocolRepository.findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(protocol -> processRepository.findByProtocolsContains(protocol)
-                        .forEach(process -> {
-                            process.getProtocols().remove(protocol);
-                            processRepository.save(process);
-                        }));
+            .forEach(metadataCrudService::removeLinksToDocument);
 
         bundleManifestRepository.findByEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString())
                 .forEach(bundleManifest -> processRepository.findByInputBundleManifestsContains(bundleManifest)
@@ -277,14 +252,9 @@ public class SubmissionEnvelopeService {
                         }));
 
         fileRepository.findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(file -> projectRepository.findBySupplementaryFilesContains(file)
-                        .forEach(project -> {
-                            project.getSupplementaryFiles().remove(file);
-                            projectRepository.save(project);
-                        }));
+            .forEach(metadataCrudService::removeLinksToDocument);
 
         // project cleanup
-
         projectRepository.findBySubmissionEnvelope(submissionEnvelope)
                 .forEach(project -> {
                     project.setSubmissionEnvelope(null); // TODO: address this; we should implement project containers that aren't deleted as part of deleteSubmission()

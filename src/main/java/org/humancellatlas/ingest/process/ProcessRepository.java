@@ -30,6 +30,12 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
 
     Page<Process> findByProject(Project project, Pageable pageable);
 
+    @RestResource(exported = false)
+    Stream<Process> findByProject(Project project);
+
+    @RestResource(exported = false)
+    Stream<Process> findByProjectsContaining(Project project);
+    
     Page<Process> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
     @RestResource(exported = false)

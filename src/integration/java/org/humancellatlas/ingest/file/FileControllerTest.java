@@ -3,11 +3,15 @@ package org.humancellatlas.ingest.file;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +25,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
@@ -40,6 +45,9 @@ public class FileControllerTest {
 
     @Autowired
     private ProcessRepository processRepository;
+
+    @Autowired
+    private SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
     @Autowired
     private FileRepository fileRepository;
@@ -63,14 +71,22 @@ public class FileControllerTest {
 
     UriComponentsBuilder uriBuilder;
 
+    SubmissionEnvelope submissionEnvelope;
+
     @BeforeEach
     void setUp() {
+        submissionEnvelope = new SubmissionEnvelope(UUID.randomUUID().toString());
+        submissionEnvelope.setUuid(Uuid.newUuid());
+        submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
+        submissionEnvelopeRepository.save(submissionEnvelope);
+
         process = new Process();
         process2 = new Process();
         process3 = new Process();
         processRepository.saveAll(Arrays.asList(process, process2, process3));
 
-        file = new File();
+        file = new File(UUID.randomUUID().toString());
+        file.setSubmissionEnvelope(submissionEnvelope);
         fileRepository.save(file);
         uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
     }
@@ -86,7 +102,7 @@ public class FileControllerTest {
                         + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
 
-        verifyThatValidationStateChangedToDraft(file, process, process2, process3);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(file);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses())
@@ -104,7 +120,7 @@ public class FileControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        verifyThatValidationStateChangedToDraft(file, process, process2);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(file);
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses())
                 .usingElementComparatorOnFields("id")
@@ -120,7 +136,7 @@ public class FileControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        verifyThatValidationStateChangedToDraft(file, process);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(file);
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses())
                 .usingElementComparatorOnFields("id")
@@ -136,7 +152,7 @@ public class FileControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        verifyThatValidationStateChangedToDraft(file, process);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(file);
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses())
                 .usingElementComparatorOnFields("id")
@@ -153,7 +169,7 @@ public class FileControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        verifyThatValidationStateChangedToDraft(file, process, process2);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(file);
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses())
                 .usingElementComparatorOnFields("id")
@@ -174,7 +190,7 @@ public class FileControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        verifyThatValidationStateChangedToDraft(file, process, process2, process3);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(file);
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses())
                 .usingElementComparatorOnFields("id")
@@ -192,7 +208,7 @@ public class FileControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verifyThatValidationStateChangedToDraft(file, process);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(file);
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getDerivedByProcesses()).doesNotContain(process);
     }
@@ -208,13 +224,13 @@ public class FileControllerTest {
                 .andExpect(status().isNoContent());
 
         // then
-        verifyThatValidationStateChangedToDraft(file, process);
+        verifyThatValidationStateChangedToDraftWhenGraphValid(file);
 
         File updatedFile = fileRepository.findById(file.getId()).get();
         assertThat(updatedFile.getInputToProcesses()).doesNotContain(process);
     }
 
-    private void verifyThatValidationStateChangedToDraft(MetadataDocument... values) {
+    private void verifyThatValidationStateChangedToDraftWhenGraphValid(MetadataDocument... values) {
         Arrays.stream(values).forEach(value -> {
             verify(validationStateChangeService, times(1)).changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT);
         });
@@ -222,6 +238,7 @@ public class FileControllerTest {
 
     @Test
     public void testValidationJobPatch() throws Exception {
+        // ToDo: This test runs against a real mongo database and can fail if it is not empty.
         //given:
         File file = new File("test");
         file = fileRepository.save(file);

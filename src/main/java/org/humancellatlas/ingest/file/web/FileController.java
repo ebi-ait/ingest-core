@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataLinkingService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.core.service.UriToEntityConversionService;
@@ -58,6 +59,9 @@ public class FileController {
 
     @NonNull
     private final PagedResourcesAssembler pagedResourcesAssembler;
+
+    @NonNull
+    private final MetadataCrudService metadataCrudService;
 
     @NonNull
     private final MetadataUpdateService metadataUpdateService;
@@ -145,6 +149,12 @@ public class FileController {
                                                  @PathVariable("processId") Process process,
                                                  PersistentEntityResourceAssembler assembler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         metadataLinkingService.removeLink(file, process, "derivedByProcesses");
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(path = "/files/{id}")
+    ResponseEntity<?> deleteFile(@PathVariable("id") File file) {
+        metadataCrudService.deleteDocument(file);
         return ResponseEntity.noContent().build();
     }
 }

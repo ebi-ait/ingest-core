@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.project.Project;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -30,6 +29,7 @@ public class Protocol extends MetadataDocument {
     }
 
     public Protocol(String id) {
+        super(EntityType.PROTOCOL, null);
         this.id = id;
     }
 
