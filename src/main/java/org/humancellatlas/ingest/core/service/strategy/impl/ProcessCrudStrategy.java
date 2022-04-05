@@ -2,7 +2,10 @@ package org.humancellatlas.ingest.core.service.strategy.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
+import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -17,6 +20,9 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class ProcessCrudStrategy implements MetadataCrudStrategy<Process> {
     private final @NonNull ProcessRepository processRepository;
+    private final @NonNull FileRepository fileRepository;
+    private final @NonNull BiomaterialRepository biomaterialRepository;
+    private final @NonNull MessageRouter messageRouter;
 
     @Override
     public Process saveMetadataDocument(Process document) {
@@ -47,5 +53,33 @@ public class ProcessCrudStrategy implements MetadataCrudStrategy<Process> {
     @Override
     public Collection<Process> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
         return processRepository.findAllBySubmissionEnvelope(submissionEnvelope);
+    }
+
+    @Override
+    public void removeLinksToDocument(Process document) {
+        messageRouter.routeStateTrackingDeleteMessageFor(document);
+        fileRepository.findByInputToProcessesContains(document).forEach(file -> {
+            file.getInputToProcesses().remove(document);
+            fileRepository.save(file);
+        });
+        fileRepository.findByDerivedByProcessesContains(document).forEach(file -> {
+            file.getDerivedByProcesses().remove(document);
+            fileRepository.save(file);
+        });
+        biomaterialRepository.findByInputToProcessesContains(document).forEach(biomaterial -> {
+            biomaterial.getInputToProcesses().remove(document);
+            biomaterialRepository.save(biomaterial);
+        });
+        biomaterialRepository.findByDerivedByProcessesContains(document).forEach(biomaterial -> {
+            biomaterial.getDerivedByProcesses().remove(document);
+            biomaterialRepository.save(biomaterial);
+        });
+
+    }
+
+    @Override
+    public void deleteDocument(Process document) {
+        removeLinksToDocument(document);
+        processRepository.delete(document);
     }
 }

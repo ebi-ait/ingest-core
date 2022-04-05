@@ -4,6 +4,7 @@ import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.errors.SubmissionErrorRepository;
 import org.humancellatlas.ingest.exporter.Exporter;
@@ -57,6 +58,9 @@ public class SubmissionEnvelopeServiceTest {
 
     @MockBean
     private Exporter exporter;
+
+    @MockBean
+    private MetadataCrudService metadataCrudService;
 
     @MockBean
     private MetadataUpdateService metadataUpdateService;
@@ -187,9 +191,9 @@ public class SubmissionEnvelopeServiceTest {
         service.deleteSubmission(submissionEnvelope, false);
 
         //then:
-        assertThat(testOutsideBiomaterial.getInputToProcesses()).doesNotContain(testProcess);
-        assertThat(testOutsideFile.getDerivedByProcesses()).doesNotContain(testProcess);
-        assertThat(testOutsideProcess.getProtocols()).doesNotContain(testProtocol);
+        verify(metadataCrudService).removeLinksToDocument(testProcess);
+        verify(metadataCrudService).removeLinksToDocument(testProtocol);
+        verify(metadataCrudService).removeLinksToDocument(file);
 
         verify(biomaterialRepository).deleteBySubmissionEnvelope(submissionEnvelope);
         verify(processRepository).deleteBySubmissionEnvelope(submissionEnvelope);
@@ -202,7 +206,6 @@ public class SubmissionEnvelopeServiceTest {
 
         verify(projectRepository).findBySubmissionEnvelope(submissionEnvelope);
         assertThat(project.getSubmissionEnvelopes()).isEmpty();
-        assertThat(project.getSupplementaryFiles()).isEmpty();
         verify(projectRepository, atLeastOnce()).save(project);
         verify(submissionEnvelopeRepository).delete(submissionEnvelope);
     }

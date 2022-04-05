@@ -35,6 +35,9 @@ public interface FileRepository extends MongoRepository<File, String> {
 
     Page<File> findByProject(Project project, Pageable pageable);
 
+    @RestResource(exported = false)
+    Stream<File> findByProject(Project project);
+
     @RestResource(rel = "findBySubmissionEnvelope")
     Page<File> findBySubmissionEnvelope(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope, Pageable pageable);
 

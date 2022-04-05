@@ -56,6 +56,7 @@ public class Biomaterial extends MetadataDocument {
     }
 
     public Biomaterial(String id) {
+        super(EntityType.BIOMATERIAL, null);
         this.id = id;
     }
     /**

@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.biomaterial.BiomaterialService;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataLinkingService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.core.service.UriToEntityConversionService;
@@ -54,6 +55,8 @@ public class BiomaterialController {
     private final @NonNull BiomaterialRepository biomaterialRepository;
 
     private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
+
+    private final @NonNull MetadataCrudService metadataCrudService;
 
     private final @NonNull MetadataUpdateService metadataUpdateService;
 
@@ -137,6 +140,12 @@ public class BiomaterialController {
                                                       @PathVariable("processId") Process process,
                                                       PersistentEntityResourceAssembler assembler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         metadataLinkingService.removeLink(biomaterial, process, "derivedByProcesses");
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(path = "/biomaterials/{id}")
+    ResponseEntity<?> deleteBiomaterial(@PathVariable("id") Biomaterial biomaterial) {
+        metadataCrudService.deleteDocument(biomaterial);
         return ResponseEntity.noContent().build();
     }
 }

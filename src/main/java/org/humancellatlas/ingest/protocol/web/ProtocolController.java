@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.patch.JsonPatcher;
 import org.humancellatlas.ingest.protocol.Protocol;
@@ -43,6 +44,7 @@ public class ProtocolController {
 
     private final @NonNull JsonPatcher jsonPatcher;
 
+    private final @NonNull MetadataCrudService metadataCrudService;
     private final @NonNull MetadataUpdateService metadataUpdateService;
 
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols", method = RequestMethod.POST)
@@ -77,5 +79,11 @@ public class ProtocolController {
         Protocol updatedProtocol = metadataUpdateService.update(protocol, validPatch);
         PersistentEntityResource resource = assembler.toFullResource(updatedProtocol);
         return ResponseEntity.accepted().body(resource);
+    }
+
+    @DeleteMapping(path = "/protocols/{id}")
+    ResponseEntity<?> deleteProtocol(@PathVariable("id") Protocol protocol) {
+        metadataCrudService.deleteDocument(protocol);
+        return ResponseEntity.noContent().build();
     }
 }

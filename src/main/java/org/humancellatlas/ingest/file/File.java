@@ -66,6 +66,7 @@ public class File extends MetadataDocument {
     }
 
     public File(String id) {
+        super(EntityType.FILE, null);
         this.id = id;
     }
 

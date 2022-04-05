@@ -152,7 +152,7 @@ public class ProjectService {
         ProjectBag projectBag = gather(project);
         if (projectBag.submissionEnvelopes.isEmpty()) {
             projectBag.projects.forEach(_project -> {
-                projectRepository.delete(_project);
+                metadataCrudService.deleteDocument(_project);
                 projectEventHandler.deletedProject(_project);
             });
         } else {
@@ -184,7 +184,7 @@ public class ProjectService {
 
     public Page<Project> filterProjects(SearchFilter searchFilter, Pageable pageable) {
         Query query = ProjectQueryBuilder.buildProjectsQuery(searchFilter);
-        log.debug("Project Search query: " + query.toString());
+        log.debug("Project Search query: " + query);
 
         List<Project> projects = mongoTemplate.find(query.with(pageable), Project.class);
         long count = mongoTemplate.count(query, Project.class);
