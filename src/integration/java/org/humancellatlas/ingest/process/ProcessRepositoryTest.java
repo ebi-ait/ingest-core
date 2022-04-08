@@ -1,7 +1,6 @@
 package org.humancellatlas.ingest.process;
 
 import org.humancellatlas.ingest.config.MigrationConfiguration;
-import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
@@ -16,8 +15,6 @@ import java.util.Optional;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 
 @DataMongoTest
 public class ProcessRepositoryTest {
@@ -43,19 +40,14 @@ public class ProcessRepositoryTest {
     @Test
     public void findFirstByProtocolNonUnique() {
         //given:
-        Protocol protocol = new Protocol(null);
+        Protocol protocol = protocolRepository.save(new Protocol(null));
+
         Process process1 = new Process(null);
-        Process process2 = new Process(null);
-
-        protocol.setUuid(Uuid.newUuid());
-        process1.setUuid(Uuid.newUuid());
-        process2.setUuid(Uuid.newUuid());
-
         process1.addProtocol(protocol);
-        process2.addProtocol(protocol);
-
-        protocol = protocolRepository.save(protocol);
         process1 = processRepository.save(process1);
+
+        Process process2 = new Process(null);
+        process2.addProtocol(protocol);
         process2 = processRepository.save(process2);
 
         //and:
@@ -63,7 +55,9 @@ public class ProcessRepositoryTest {
 
         //when:
         Optional<Process> first = processRepository.findFirstByProtocolsContains(protocol);
+
+        // then
         assertThat(first.isPresent()).isTrue();
-        assertThat(first.get().getUuid()).isIn(asList(process1.getUuid(), process2.getUuid()));
+        assertThat(first.get().getId()).isIn(asList(process1.getId(), process2.getId()));
     }
 }
