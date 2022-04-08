@@ -41,7 +41,7 @@ public class ProjectCrudStrategyTest {
 
     @BeforeEach
     void setUp() {
-        testProject = spy(new Project(null));
+        testProject = new Project(null);
     }
 
     @Test

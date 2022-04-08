@@ -32,13 +32,13 @@ public class FileCrudStrategyTest {
 
     @BeforeEach
     void setUp() {
-        testFile = spy(new File(null, "fileName"));
+        testFile = new File(null, "fileName");
     }
 
     @Test
     public void testRemoveLinksFile() {
         //given
-        Project projectWithFile = spy(new Project(null));
+        Project projectWithFile = new Project(null);
         projectWithFile.getSupplementaryFiles().add(testFile);
         when(projectRepository.findBySupplementaryFilesContains(testFile)).thenReturn(Stream.of(projectWithFile));
 

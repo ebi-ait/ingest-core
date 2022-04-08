@@ -16,8 +16,10 @@ public class FileTest {
     @BeforeEach
     void setUp() {
         //given:
+        file = new File(null, "fileName");
+
         process = spy(new Process(null));
-        file = spy(new File(null, "fileName"));
+        doReturn("fe89a0").when(process).getId();
     }
 
     @Test
@@ -31,9 +33,6 @@ public class FileTest {
 
     @Test
     public void testAddDerivedByProcessdNoDuplication() {
-        // given:
-        doReturn("fe89a0").when(process).getId();
-
         // when:
         file.addAsDerivedByProcess(process);
         file.addAsDerivedByProcess(process);
