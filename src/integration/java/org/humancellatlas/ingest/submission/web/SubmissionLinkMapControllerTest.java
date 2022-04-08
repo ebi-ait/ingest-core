@@ -63,7 +63,7 @@ public class SubmissionLinkMapControllerTest {
     @Test
     public void testSubmissionLinkMap() {
         //given:
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope("link-map-test");
+        SubmissionEnvelope submissionEnvelope = submissionEnvelopeRepository.save(new SubmissionEnvelope());
 
         Biomaterial donor = biomaterialRepository.save(new Biomaterial(null));
         Biomaterial specimen = biomaterialRepository.save(new Biomaterial(null));

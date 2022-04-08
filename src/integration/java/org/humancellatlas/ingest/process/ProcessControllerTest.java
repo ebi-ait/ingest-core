@@ -26,7 +26,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Arrays;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -79,22 +78,16 @@ class ProcessControllerTest {
 
     @BeforeEach
     void setUp() {
-        submissionEnvelope = new SubmissionEnvelope(UUID.randomUUID().toString());
+        submissionEnvelope = new SubmissionEnvelope();
         submissionEnvelope.setUuid(Uuid.newUuid());
         submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
-        submissionEnvelopeRepository.save(submissionEnvelope);
+        submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
 
-        protocol1 = new Protocol(null);
-        protocol2 = new Protocol(null);
-        protocol3 = new Protocol(null);
+        protocol1 = protocolRepository.save(new Protocol(null));
+        protocol2 = protocolRepository.save(new Protocol(null));
+        protocol3 = protocolRepository.save(new Protocol(null));
 
-        protocol1 = protocolRepository.save(protocol1);
-        protocol2 = protocolRepository.save(protocol2);
-        protocol3 = protocolRepository.save(protocol3);
-
-
-        project = new Project(null);
-        project = projectRepository.save(project);
+        project = projectRepository.save(new Project(null));
 
         process = new Process(null);
         process.setSubmissionEnvelope(submissionEnvelope);

@@ -49,7 +49,7 @@ public class ProtocolServiceTest {
         @Test
         void determineLinking() {
             //given:
-            SubmissionEnvelope submission = new SubmissionEnvelope("89bcba7");
+            SubmissionEnvelope submission = new SubmissionEnvelope();
 
             //and:
             Protocol linked = new Protocol("linked");

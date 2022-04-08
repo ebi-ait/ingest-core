@@ -42,7 +42,7 @@ public class MetadataLinkingServiceTest {
 
     @BeforeEach
     void setUp() {
-        submission = new SubmissionEnvelope(UUID.randomUUID().toString());
+        submission = new SubmissionEnvelope();
         submission.enactStateTransition(SubmissionState.GRAPH_VALID);
         protocol = spy(new Protocol(null));
         doReturn("protocol1").when(protocol).getId();

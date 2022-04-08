@@ -79,7 +79,7 @@ public class FileServiceTest {
         String filename = "filename";
         fileMessage = new FileMessage("cloudUrl", filename, submissionUuid, "content_type", checksums, 123);
 
-        submissionEnvelope = new SubmissionEnvelope("submission1");
+        submissionEnvelope = new SubmissionEnvelope();
 
         file = new File(null, filename);
         List<File> files = new ArrayList<>();

@@ -70,7 +70,7 @@ public class MessageRouterTest {
     public void testRouteStateTrackingUpdateMessageFor() {
         // given:
         Project project = mock(Project.class);
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope("sub-1");
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         doReturn(Instant.now()).when(project).getUpdateDate();
         doReturn(submissionEnvelope).when(project).getSubmissionEnvelope();
 
@@ -84,7 +84,7 @@ public class MessageRouterTest {
     public void testRouteStateTrackingUpdateMessageForBiomaterial() {
         // given:
         Biomaterial project = mock(Biomaterial.class);
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope("sub-1");
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         doReturn(Instant.now()).when(project).getUpdateDate();
         doReturn(submissionEnvelope).when(project).getSubmissionEnvelope();
 
@@ -130,7 +130,8 @@ public class MessageRouterTest {
 
         //and:
         String envelopeId = "87bcf3";
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope(envelopeId);
+        SubmissionEnvelope submissionEnvelope = spy(new SubmissionEnvelope());
+        doReturn(envelopeId).when(submissionEnvelope).getId();
         Uuid envelopeUuid = Uuid.newUuid();
         submissionEnvelope.setUuid(envelopeUuid);
 

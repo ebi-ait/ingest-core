@@ -16,6 +16,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -24,7 +25,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Arrays;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
@@ -33,6 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureDataMongo()
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
 public class BiomaterialControllerTest {
 
@@ -60,7 +61,7 @@ public class BiomaterialControllerTest {
     @MockBean
     private MessageRouter messageRouter;
 
-    Process process;
+    Process process1;
 
     Process process2;
 
@@ -74,15 +75,14 @@ public class BiomaterialControllerTest {
 
     @BeforeEach
     void setUp() {
-        submissionEnvelope = new SubmissionEnvelope(UUID.randomUUID().toString());
+        submissionEnvelope = new SubmissionEnvelope();
         submissionEnvelope.setUuid(Uuid.newUuid());
         submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
-        submissionEnvelopeRepository.save(submissionEnvelope);
+        submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
 
-        process = new Process(null);
-        process2 = new Process(null);
-        process3 = new Process(null);
-        processRepository.saveAll(Arrays.asList(process, process2, process3));
+        process1 = processRepository.save(new Process(null));
+        process2 = processRepository.save(new Process(null));
+        process3 = processRepository.save(new Process(null));
 
         biomaterial = new Biomaterial();
         biomaterial.setSubmissionEnvelope(submissionEnvelope);
@@ -104,7 +104,7 @@ public class BiomaterialControllerTest {
         // when
         webApp.perform(post("/biomaterials/{id}/inputToProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
-                .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()
+                .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()
                         + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
 
@@ -113,13 +113,13 @@ public class BiomaterialControllerTest {
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getInputToProcesses())
                 .usingElementComparatorOnFields("id")
-                .containsExactly(process, process2);
+                .containsExactly(process1, process2);
     }
 
     @Test
     public void testLinkBiomaterialAsInputToProcessesUsingPutMethodWithManyProcessesInPayload() throws Exception {
         // given
-        biomaterial.addAsInputToProcess(process);
+        biomaterial.addAsInputToProcess(process1);
         biomaterialRepository.save(biomaterial);
 
         // when
@@ -143,7 +143,7 @@ public class BiomaterialControllerTest {
         //when
         webApp.perform(post("/biomaterials/{id}/inputToProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
-                .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()))
+                .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()))
                 .andExpect(status().isOk());
 
         // then
@@ -151,7 +151,7 @@ public class BiomaterialControllerTest {
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getInputToProcesses())
                 .usingElementComparatorOnFields("id")
-                .containsExactly(process);
+                .containsExactly(process1);
     }
 
     @Test
@@ -159,7 +159,7 @@ public class BiomaterialControllerTest {
         // when
         webApp.perform(post("/biomaterials/{id}/derivedByProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
-                .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()
+                .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()
                         + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
 
@@ -168,13 +168,13 @@ public class BiomaterialControllerTest {
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getDerivedByProcesses())
                 .usingElementComparatorOnFields("id")
-                .containsExactly(process, process2);
+                .containsExactly(process1, process2);
     }
 
     @Test
     public void testLinkBiomaterialAsDerivedByProcessesUsingPutMethodWithManyProcessesInPayload() throws Exception {
         // given
-        biomaterial.addAsDerivedByProcess(process);
+        biomaterial.addAsDerivedByProcess(process1);
         biomaterialRepository.save(biomaterial);
 
         // when
@@ -197,7 +197,7 @@ public class BiomaterialControllerTest {
         // when
         webApp.perform(post("/biomaterials/{id}/derivedByProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
-                .content(uriBuilder.build().toUriString() + "/processes/" + process.getId()))
+                .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()))
                 .andExpect(status().isOk());
 
         verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
@@ -206,40 +206,40 @@ public class BiomaterialControllerTest {
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
         assertThat(updatedBiomaterial.getDerivedByProcesses())
                 .usingElementComparatorOnFields("id")
-                .containsExactly(process);
+                .containsExactly(process1);
     }
 
     @Test
     public void testUnlinkBiomaterialAsInputToProcesses() throws Exception {
         // given
-        biomaterial.addAsInputToProcess(process);
+        biomaterial.addAsInputToProcess(process1);
         biomaterialRepository.save(biomaterial);
 
         // when
-        webApp.perform(delete("/biomaterials/{id}/inputToProcesses/{processId}", biomaterial.getId(), process.getId()))
+        webApp.perform(delete("/biomaterials/{id}/inputToProcesses/{processId}", biomaterial.getId(), process1.getId()))
                 .andExpect(status().isNoContent());
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
 
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
-        assertThat(updatedBiomaterial.getInputToProcesses()).doesNotContain(process);
+        assertThat(updatedBiomaterial.getInputToProcesses()).doesNotContain(process1);
     }
 
     @Test
     public void testUnlinkBiomaterialAsDerivedByProcesses() throws Exception {
         // given
-        biomaterial.addAsDerivedByProcess(process);
+        biomaterial.addAsDerivedByProcess(process1);
         biomaterialRepository.save(biomaterial);
 
         // when
-        webApp.perform(delete("/biomaterials/{id}/derivedByProcesses/{processId}", biomaterial.getId(), process.getId()))
+        webApp.perform(delete("/biomaterials/{id}/derivedByProcesses/{processId}", biomaterial.getId(), process1.getId()))
                 .andExpect(status().isNoContent());
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
         Biomaterial updatedBiomaterial = biomaterialRepository.findById(biomaterial.getId()).get();
-        assertThat(updatedBiomaterial.getDerivedByProcesses()).doesNotContain(process);
+        assertThat(updatedBiomaterial.getDerivedByProcesses()).doesNotContain(process1);
     }
 
     private void verifyThatValidationStateChangedToDraftWhenGraphValid(MetadataDocument... values) {
