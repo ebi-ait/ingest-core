@@ -132,4 +132,19 @@ public class SubmissionEnvelope extends AbstractEntity {
         List<SubmissionState> states = Arrays.asList(SubmissionState.values());
         return states.indexOf(this.getSubmissionState()) < states.indexOf(SubmissionState.SUBMITTED);
     }
+
+    public boolean isInEditableState() {
+        List<SubmissionState> nonEditableStates = Arrays.asList(
+                SubmissionState.PENDING,
+                SubmissionState.METADATA_VALIDATING,
+                SubmissionState.GRAPH_VALIDATION_REQUESTED,
+                SubmissionState.GRAPH_VALIDATING,
+                SubmissionState.EXPORTING,
+                SubmissionState.PROCESSING,
+                SubmissionState.ARCHIVING,
+                SubmissionState.CLEANUP
+        );
+
+        return !nonEditableStates.contains(this.submissionState);
+    }
 }
