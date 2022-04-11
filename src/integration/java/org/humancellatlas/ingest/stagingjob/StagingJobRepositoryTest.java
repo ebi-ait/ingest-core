@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.stagingjob;
 
 import org.assertj.core.api.Assertions;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,12 @@ public class StagingJobRepositoryTest {
 
     @Autowired
     StagingJobRepository stagingJobRepository;
+
+
+    @AfterEach
+    private void tearDown() {
+        stagingJobRepository.deleteAll();
+    }
 
     @Test
     public void testJpaExceptionWhenInsertingMultipleCompoundKey() {

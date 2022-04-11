@@ -49,7 +49,7 @@ public class ProtocolServiceTest {
         @Test
         void determineLinking() {
             //given:
-            SubmissionEnvelope submission = new SubmissionEnvelope("89bcba7");
+            SubmissionEnvelope submission = new SubmissionEnvelope();
 
             //and:
             Protocol linked = new Protocol("linked");
@@ -59,7 +59,7 @@ public class ProtocolServiceTest {
                     .findBySubmissionEnvelope(submission, pageable);
 
             //and:
-            doReturn(Optional.of(new Process())).when(processRepository).findFirstByProtocolsContains(linked);
+            doReturn(Optional.of(new Process(null))).when(processRepository).findFirstByProtocolsContains(linked);
             doReturn(Optional.empty()).when(processRepository).findFirstByProtocolsContains(notLinked);
 
             //when:

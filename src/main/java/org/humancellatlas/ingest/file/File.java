@@ -60,16 +60,6 @@ public class File extends MetadataDocument {
     private Long size;
     private String fileContentType;
 
-    public File() {
-        super(EntityType.FILE, null);
-        setDataFileUuid(UUID.randomUUID());
-    }
-
-    public File(String id) {
-        super(EntityType.FILE, null);
-        this.id = id;
-    }
-
     @JsonCreator
     public File(@JsonProperty("content") Object content,
                 @JsonProperty("fileName") String fileName) {

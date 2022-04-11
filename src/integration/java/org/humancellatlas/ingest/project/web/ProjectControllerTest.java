@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -62,6 +63,11 @@ class ProjectControllerTest {
 
     @MockBean
     private SchemaService schemaService;
+
+    @AfterEach
+    private void tearDown() {
+        repository.deleteAll();
+    }
 
     @Nested
     class Update {

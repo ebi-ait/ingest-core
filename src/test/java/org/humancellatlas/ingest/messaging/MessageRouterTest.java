@@ -70,7 +70,7 @@ public class MessageRouterTest {
     public void testRouteStateTrackingUpdateMessageFor() {
         // given:
         Project project = mock(Project.class);
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope("sub-1");
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         doReturn(Instant.now()).when(project).getUpdateDate();
         doReturn(submissionEnvelope).when(project).getSubmissionEnvelope();
 
@@ -84,7 +84,7 @@ public class MessageRouterTest {
     public void testRouteStateTrackingUpdateMessageForBiomaterial() {
         // given:
         Biomaterial project = mock(Biomaterial.class);
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope("sub-1");
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         doReturn(Instant.now()).when(project).getUpdateDate();
         doReturn(submissionEnvelope).when(project).getSubmissionEnvelope();
 
@@ -120,7 +120,9 @@ public class MessageRouterTest {
     private void doTestSendForExport(String routingKey) {
         //given:
         String processId = "78bbd9";
-        Process process = new Process(processId);
+        Process process = spy(new Process(null));
+        doReturn(processId).when(process).getId();
+
         Uuid processUuid = Uuid.newUuid();
         process.setUuid(processUuid);
         Instant version = Instant.now();
@@ -128,7 +130,8 @@ public class MessageRouterTest {
 
         //and:
         String envelopeId = "87bcf3";
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope(envelopeId);
+        SubmissionEnvelope submissionEnvelope = spy(new SubmissionEnvelope());
+        doReturn(envelopeId).when(submissionEnvelope).getId();
         Uuid envelopeUuid = Uuid.newUuid();
         submissionEnvelope.setUuid(envelopeUuid);
 
@@ -155,7 +158,7 @@ public class MessageRouterTest {
                 .extracting("documentId", "documentUuid", "callbackLink", "documentType",
                         "envelopeId", "envelopeUuid", "index", "total")
                 .containsExactly(processId, processUuid.getUuid().toString(), callbackLink,
-                        Process.class.getSimpleName(), envelopeId, envelopeUuid.getUuid().toString(), 2, 4);
+                    process.getClass().getSimpleName(), envelopeId, envelopeUuid.getUuid().toString(), 2, 4);
     }
 
     @Configuration
