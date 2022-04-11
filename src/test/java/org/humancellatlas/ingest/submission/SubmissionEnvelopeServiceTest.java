@@ -105,25 +105,6 @@ public class SubmissionEnvelopeServiceTest {
     static class TestConfiguration {
     }
 
-    static class TestProject extends Project {
-        Set<File> supplementaryFiles;
-
-        TestProject(Object content) {
-            super(content);
-            supplementaryFiles = super.getSupplementaryFiles();
-        }
-
-        @Override
-        public Set<File> getSupplementaryFiles() {
-            return supplementaryFiles;
-        }
-
-        public void addToSupplementaryFiles(File file) {
-            supplementaryFiles.add(file);
-        }
-    }
-
-
     @Test
     public void testDeleteSubmission() {
         //given SubmissionEnvelope
@@ -150,12 +131,11 @@ public class SubmissionEnvelopeServiceTest {
         testOutsideProcess.getProtocols().add(testProtocol);
 
         //given File
-        File file = new File();
-        file.setFileName("testFile.txt");
+        File file = new File(null, "testFile.txt");
         file.setSubmissionEnvelope(submissionEnvelope);
 
         //given Project
-        TestProject project = new TestProject(new Object());
+        Project project = new Project(new Object());
         project.setUuid(Uuid.newUuid());
         project.setSubmissionEnvelope(submissionEnvelope);
         project.addToSubmissionEnvelopes(submissionEnvelope);
@@ -163,7 +143,7 @@ public class SubmissionEnvelopeServiceTest {
         assertThat(project.getSubmissionEnvelope()).isEqualTo(submissionEnvelope);
 
         //given SupplementaryFile
-        project.addToSupplementaryFiles(file);
+        project.getSupplementaryFiles().add(file);
         assertThat(project.getSupplementaryFiles()).contains(file);
 
         //given ProjectRepository
@@ -259,8 +239,7 @@ public class SubmissionEnvelopeServiceTest {
             Biomaterial testBiomaterial = new Biomaterial(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
             Protocol testProtocol = new Protocol(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
             Process testProcess = new Process(Map.ofEntries(Map.entry("key", UUID.randomUUID())));
-            File testFile = new File();
-            testFile.setFileName("testFile.txt");
+            File testFile = new File(null, "testFile.txt");
 
             testProcess.setSubmissionEnvelope(submissionEnvelope);
             testProtocol.setSubmissionEnvelope(submissionEnvelope);

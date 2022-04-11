@@ -134,7 +134,7 @@ public class MetadataUpdateServiceTest {
         JsonNode content = ProjectJson.fromTitle("Project with supplementary file").toObjectNode().get("content");
         Project project = new Project(content);
 
-        File supplementaryFile = new File();
+        File supplementaryFile = new File(null, "fileName");
         supplementaryFile.setProject(project);
         project.getSupplementaryFiles().add(supplementaryFile);
 

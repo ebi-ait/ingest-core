@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.project;
 
-import org.humancellatlas.ingest.ProjectJson;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
@@ -102,7 +101,6 @@ class ProjectFilterTest {
 
     @Test
     void filter_by_state() {
-        // ToDo: This test runs against a real mongo database and can fail if it is not empty.
         Project project4 = makeProject("project4");
         project4.setWranglingState(WranglingState.IN_PROGRESS);
         this.mongoTemplate.save(project4);
