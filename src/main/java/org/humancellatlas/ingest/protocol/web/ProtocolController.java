@@ -20,6 +20,7 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,6 +48,7 @@ public class ProtocolController {
     private final @NonNull MetadataCrudService metadataCrudService;
     private final @NonNull MetadataUpdateService metadataUpdateService;
 
+    @PreAuthorize("#submissionEnvelope.inEditableState")
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProtocolToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                       @RequestBody Protocol protocol,
@@ -61,6 +63,7 @@ public class ProtocolController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @PreAuthorize("#submissionEnvelope.inEditableState")
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols/{protocol_id}", method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> linkProtocolToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                        @PathVariable("id") Protocol protocol,
@@ -70,6 +73,7 @@ public class ProtocolController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @PreAuthorize("#protocol.submissionEnvelope.inEditableState")
     @RequestMapping(path = "/protocols/{id}", method = RequestMethod.PATCH)
     HttpEntity<?> patchProtocol(@PathVariable("id") Protocol protocol,
                                 @RequestBody final ObjectNode patch,
@@ -81,6 +85,7 @@ public class ProtocolController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @PreAuthorize("#protocol.submissionEnvelope.inEditableState")
     @DeleteMapping(path = "/protocols/{id}")
     ResponseEntity<?> deleteProtocol(@PathVariable("id") Protocol protocol) {
         metadataCrudService.deleteDocument(protocol);

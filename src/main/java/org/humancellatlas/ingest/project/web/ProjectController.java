@@ -37,6 +37,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -84,6 +85,7 @@ public class ProjectController {
         return ResponseEntity.ok().body(assembler.toFullResource(suggestedProject));
     }
 
+    @PreAuthorize("#project.submissionEnvelope.inEditableState")
     @PatchMapping("/projects/{id}")
     ResponseEntity<Resource<?>> update(@PathVariable("id") final Project project,
                                        @RequestParam(value = "partial", defaultValue = "false") Boolean partial,
@@ -114,6 +116,7 @@ public class ProjectController {
         return ResponseEntity.ok().body(assembler.toFullResource(updatedProject));
     }
 
+    @PreAuthorize("#submissionEnvelope.inEditableState")
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
     ResponseEntity<Resource<?>> addProjectToEnvelope(
             @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -180,6 +183,7 @@ public class ProjectController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
     }
 
+    @PreAuthorize("#submissionEnvelope.inEditableState")
     @PutMapping(path = "projects/{proj_id}/submissionEnvelopes/{sub_id}")
     ResponseEntity<Resource<?>> linkSubmissionToProject(
             @PathVariable("proj_id") Project project,
@@ -190,6 +194,7 @@ public class ProjectController {
         return ResponseEntity.accepted().body(projectResource);
     }
 
+    @PreAuthorize("#project.submissionEnvelope.inEditableState")
     @DeleteMapping(path = "projects/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Project project) {
         try {

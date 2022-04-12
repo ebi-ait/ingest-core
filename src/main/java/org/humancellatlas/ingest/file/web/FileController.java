@@ -25,6 +25,7 @@ import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.InvocationTargetException;
@@ -75,6 +76,7 @@ public class FileController {
     private @Autowired
     MetadataLinkingService metadataLinkingService;
 
+    @PreAuthorize("#submissionEnvelope.inEditableState")
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
             method = RequestMethod.POST,
             produces = MediaTypes.HAL_JSON_VALUE)
@@ -100,6 +102,7 @@ public class FileController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @PreAuthorize("#file.submissionEnvelope.inEditableState")
     @PatchMapping(path = "/files/{id}")
     HttpEntity<?> patchFile(@PathVariable("id") File file,
                             @RequestBody final ObjectNode patch,
@@ -111,6 +114,7 @@ public class FileController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @PreAuthorize("#file.submissionEnvelope.inEditableState")
     @RequestMapping(path = "/files/{id}/inputToProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkFileAsInputToProcesses(@PathVariable("id") File file,
                                              @RequestBody Resources<Object> incoming,
@@ -123,6 +127,7 @@ public class FileController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("#file.submissionEnvelope.inEditableState")
     @RequestMapping(path = "/files/{id}/derivedByProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkFileAsDerivedByProcesses(@PathVariable("id") File file,
                                                @RequestBody Resources<Object> incoming,
@@ -135,7 +140,7 @@ public class FileController {
         return ResponseEntity.ok().build();
     }
 
-
+    @PreAuthorize("#file.submissionEnvelope.inEditableState")
     @DeleteMapping(path = "/files/{id}/inputToProcesses/{processId}")
     HttpEntity<?> unlinkFileAsInputToProcesses(@PathVariable("id") File file,
                                                @PathVariable("processId") Process process,
@@ -144,6 +149,7 @@ public class FileController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("#file.submissionEnvelope.inEditableState")
     @DeleteMapping(path = "/files/{id}/derivedByProcesses/{processId}")
     HttpEntity<?> unlinkFileAsDerivedByProcesses(@PathVariable("id") File file,
                                                  @PathVariable("processId") Process process,
@@ -152,6 +158,7 @@ public class FileController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("#file.submissionEnvelope.inEditableState")
     @DeleteMapping(path = "/files/{id}")
     ResponseEntity<?> deleteFile(@PathVariable("id") File file) {
         metadataCrudService.deleteDocument(file);
