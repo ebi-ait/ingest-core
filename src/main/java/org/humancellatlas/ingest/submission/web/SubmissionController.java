@@ -23,7 +23,10 @@ import org.humancellatlas.ingest.protocol.ProtocolService;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
 import org.humancellatlas.ingest.state.ValidationState;
-import org.humancellatlas.ingest.submission.*;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
+import org.humancellatlas.ingest.submission.SubmissionStateMachineService;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.slf4j.Logger;
@@ -36,6 +39,7 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -181,6 +185,7 @@ public class SubmissionController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
     }
 
+    @PreAuthorize("#submissionEnvelope.isInEditableState()")
     @PutMapping("/submissionEnvelopes/{id}" + Links.SUBMIT_URL)
     HttpEntity<?> submitEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                         @RequestBody(required = false) List<String> submitActionParam,
@@ -195,12 +200,14 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
+    @PreAuthorize("#submissionEnvelope.isInEditableState()")
     @PutMapping("/submissionEnvelopes/{id}" + Links.ARCHIVED_URL)
     HttpEntity<?> completeArchivingEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.ARCHIVED);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
+    @PreAuthorize("#submissionEnvelope.isInEditableState()")
     @PutMapping("/submissionEnvelopes/{id}" + Links.EXPORT_URL)
     HttpEntity<?> exportEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                         final PersistentEntityResourceAssembler resourceAssembler) {
@@ -208,12 +215,14 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
+    @PreAuthorize("#submissionEnvelope.isInEditableState()")
     @PutMapping("/submissionEnvelopes/{id}" + Links.CLEANUP_URL)
     HttpEntity<?> cleanupEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.CLEANUP);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
+    @PreAuthorize("#submissionEnvelope.isInEditableState()")
     @PutMapping("/submissionEnvelopes/{id}" + Links.COMPLETE_URL)
     HttpEntity<?> completeEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.COMPLETE);
@@ -323,25 +332,30 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(envelope));
     }
 
+    @PreAuthorize("#submissionEnvelope.isInEditableState()")
     @PutMapping("/submissionEnvelopes/{id}" + Links.GRAPH_VALIDATION_REQUESTED_URL)
     HttpEntity<?> requestGraphValidation(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                          final PersistentEntityResourceAssembler resourceAssembler) {
+        // Used by the user (UI) to start the validation process
         return this.performStateUpdateRequest(SubmissionState.GRAPH_VALIDATION_REQUESTED, submissionEnvelope, resourceAssembler);
     }
 
     @PutMapping("/submissionEnvelopes/{id}" + Links.GRAPH_VALIDATING_URL)
     HttpEntity<?> requestGraphValidating(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                          final PersistentEntityResourceAssembler resourceAssembler) {
+        // Used by ingest-graph-validator to notify that the graph is validating
         return this.performStateUpdateRequest(SubmissionState.GRAPH_VALIDATING, submissionEnvelope, resourceAssembler);
     }
 
     @PutMapping("/submissionEnvelopes/{id}" + Links.GRAPH_VALID_URL)
     HttpEntity<?> requestGraphValid(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        // used by ingest-graph-validator to notify that graph is valid
         return this.performStateUpdateRequest(SubmissionState.GRAPH_VALID, submissionEnvelope, resourceAssembler);
     }
 
     @PutMapping("/submissionEnvelopes/{id}" + Links.GRAPH_INVALID_URL)
     HttpEntity<?> requestGraphInvalid(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
+        // used by ingest-graph-validator to notify that graph is invalid
         return this.performStateUpdateRequest(SubmissionState.GRAPH_INVALID, submissionEnvelope, resourceAssembler);
     }
 
