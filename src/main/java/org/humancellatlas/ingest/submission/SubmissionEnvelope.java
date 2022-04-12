@@ -143,7 +143,9 @@ public class SubmissionEnvelope extends AbstractEntity {
                 SubmissionState.EXPORTING,
                 SubmissionState.PROCESSING,
                 SubmissionState.ARCHIVING,
-                SubmissionState.CLEANUP
+                SubmissionState.CLEANUP,
+                SubmissionState.ARCHIVED,
+                SubmissionState.SUBMITTED
         );
 
         return !nonEditableStates.contains(this.submissionState);
