@@ -121,7 +121,9 @@ public class SubmissionEnvelopeTest {
                 SubmissionState.EXPORTING,
                 SubmissionState.PROCESSING,
                 SubmissionState.ARCHIVING,
-                SubmissionState.CLEANUP
+                SubmissionState.CLEANUP,
+                SubmissionState.ARCHIVED,
+                SubmissionState.SUBMITTED
         ).forEach(state -> {
             //given:
             SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
@@ -139,8 +141,6 @@ public class SubmissionEnvelopeTest {
                 SubmissionState.EXPORTED,
                 SubmissionState.GRAPH_VALID,
                 SubmissionState.GRAPH_INVALID,
-                SubmissionState.SUBMITTED,
-                SubmissionState.ARCHIVED,
                 SubmissionState.COMPLETE,
                 SubmissionState.DRAFT
         ).forEach(state -> {
