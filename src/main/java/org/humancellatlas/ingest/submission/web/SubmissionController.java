@@ -185,7 +185,7 @@ public class SubmissionController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
     }
 
-    @PreAuthorize("#submissionEnvelope.isInEditableState()")
+    @PreAuthorize("#submissionEnvelope.inEditableState")
     @PutMapping("/submissionEnvelopes/{id}" + Links.SUBMIT_URL)
     HttpEntity<?> submitEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                         @RequestBody(required = false) List<String> submitActionParam,
@@ -200,14 +200,14 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
-    @PreAuthorize("#submissionEnvelope.isInEditableState()")
+    @PreAuthorize("#submissionEnvelope.inEditableState")
     @PutMapping("/submissionEnvelopes/{id}" + Links.ARCHIVED_URL)
     HttpEntity<?> completeArchivingEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.ARCHIVED);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
-    @PreAuthorize("#submissionEnvelope.isInEditableState()")
+    @PreAuthorize("#submissionEnvelope.inEditableState")
     @PutMapping("/submissionEnvelopes/{id}" + Links.EXPORT_URL)
     HttpEntity<?> exportEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                         final PersistentEntityResourceAssembler resourceAssembler) {
@@ -215,14 +215,14 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
-    @PreAuthorize("#submissionEnvelope.isInEditableState()")
+    @PreAuthorize("#submissionEnvelope.inEditableState")
     @PutMapping("/submissionEnvelopes/{id}" + Links.CLEANUP_URL)
     HttpEntity<?> cleanupEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.CLEANUP);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
-    @PreAuthorize("#submissionEnvelope.isInEditableState()")
+    @PreAuthorize("#submissionEnvelope.inEditableState")
     @PutMapping("/submissionEnvelopes/{id}" + Links.COMPLETE_URL)
     HttpEntity<?> completeEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.COMPLETE);
@@ -332,7 +332,7 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(envelope));
     }
 
-    @PreAuthorize("#submissionEnvelope.isInEditableState()")
+    @PreAuthorize("#submissionEnvelope.inEditableState")
     @PutMapping("/submissionEnvelopes/{id}" + Links.GRAPH_VALIDATION_REQUESTED_URL)
     HttpEntity<?> requestGraphValidation(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                          final PersistentEntityResourceAssembler resourceAssembler) {
