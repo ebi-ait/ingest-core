@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.submission;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -133,6 +134,7 @@ public class SubmissionEnvelope extends AbstractEntity {
         return states.indexOf(this.getSubmissionState()) < states.indexOf(SubmissionState.SUBMITTED);
     }
 
+    @JsonIgnore()
     public boolean isInEditableState() {
         List<SubmissionState> nonEditableStates = Arrays.asList(
                 SubmissionState.PENDING,
