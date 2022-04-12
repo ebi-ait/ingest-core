@@ -3,10 +3,14 @@ package org.humancellatlas.ingest.submission;
 
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
+import org.springframework.http.HttpEntity;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class SubmissionEnvelopeTest {
 
@@ -105,6 +109,49 @@ public class SubmissionEnvelopeTest {
     public void testAllowedSubmissionStateTransitionsForComplete() {
         List<SubmissionState> states = getAllowedStates(SubmissionState.COMPLETE);
         assertThat(states).isEmpty();
+    }
+
+
+    @Test
+    public void testIsInEditableState() {
+        Arrays.asList(
+                SubmissionState.METADATA_VALIDATING,
+                SubmissionState.GRAPH_VALIDATION_REQUESTED,
+                SubmissionState.GRAPH_VALIDATING,
+                SubmissionState.EXPORTING,
+                SubmissionState.PROCESSING,
+                SubmissionState.ARCHIVING,
+                SubmissionState.CLEANUP
+        ).forEach(state -> {
+            //given:
+            SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+            submissionEnvelope.enactStateTransition(state);
+            assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
+
+            //then:
+            assertThat(submissionEnvelope.isInEditableState()).isFalse();
+        });
+
+        Arrays.asList(
+                SubmissionState.PENDING,
+                SubmissionState.METADATA_VALID,
+                SubmissionState.METADATA_INVALID,
+                SubmissionState.EXPORTED,
+                SubmissionState.GRAPH_VALID,
+                SubmissionState.GRAPH_INVALID,
+                SubmissionState.SUBMITTED,
+                SubmissionState.ARCHIVED,
+                SubmissionState.COMPLETE,
+                SubmissionState.DRAFT
+        ).forEach(state -> {
+            //given:
+            SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+            submissionEnvelope.enactStateTransition(state);
+            assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
+
+            //then:
+            assertThat(submissionEnvelope.isInEditableState()).isTrue();
+        });
     }
 
     private List<SubmissionState> getAllowedStates(SubmissionState state) {
