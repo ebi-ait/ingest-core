@@ -57,4 +57,28 @@ public class ProjectTest {
         //then:
         assertThat(openSubmissionEnvelopes).hasSize(0);
     }
+
+    @Test
+    public void testIsEditable() {
+        Project project = new Project(null);
+        assertThat(project.isEditable()).isTrue();
+
+        SubmissionEnvelope submissionOne = new SubmissionEnvelope();
+        submissionOne.enactStateTransition(SubmissionState.METADATA_VALID);
+        SubmissionEnvelope submissionTwo = new SubmissionEnvelope();
+        submissionTwo.enactStateTransition(SubmissionState.METADATA_INVALID);
+        project.addToSubmissionEnvelopes(submissionOne);
+        project.addToSubmissionEnvelopes(submissionTwo);
+
+        assertThat(project.isEditable()).isTrue();
+
+        submissionOne.enactStateTransition(SubmissionState.GRAPH_VALIDATION_REQUESTED);
+        assertThat(project.isEditable()).isFalse();
+
+        submissionOne.enactStateTransition(SubmissionState.GRAPH_VALID);
+        assertThat(project.isEditable()).isTrue();
+
+        submissionTwo.enactStateTransition(SubmissionState.GRAPH_VALIDATION_REQUESTED);
+        assertThat(project.isEditable()).isFalse();
+    }
 }

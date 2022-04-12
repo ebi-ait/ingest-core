@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -109,6 +110,13 @@ public class Project extends MetadataDocument {
 
     public Boolean getHasOpenSubmission() {
         return !getOpenSubmissionEnvelopes().isEmpty();
+    }
+
+    @JsonIgnore
+    public Boolean isEditable() {
+        return this.submissionEnvelopes.stream()
+                .filter(Objects::nonNull)
+                .allMatch(SubmissionEnvelope::isEditable);
     }
 
 }

@@ -85,7 +85,7 @@ public class ProjectController {
         return ResponseEntity.ok().body(assembler.toFullResource(suggestedProject));
     }
 
-    @PreAuthorize("#project.submissionEnvelope == null || #project.submissionEnvelope.editable")
+    @PreAuthorize("#project.isEditable()")
     @PatchMapping("/projects/{id}")
     ResponseEntity<Resource<?>> update(@PathVariable("id") final Project project,
                                        @RequestParam(value = "partial", defaultValue = "false") Boolean partial,
@@ -194,7 +194,7 @@ public class ProjectController {
         return ResponseEntity.accepted().body(projectResource);
     }
 
-    @PreAuthorize("#project.submissionEnvelope == null || #project.submissionEnvelope.editable")
+    @PreAuthorize("#project.isEditable()")
     @DeleteMapping(path = "projects/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Project project) {
         try {
