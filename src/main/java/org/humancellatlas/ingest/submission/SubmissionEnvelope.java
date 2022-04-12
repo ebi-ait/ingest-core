@@ -137,7 +137,6 @@ public class SubmissionEnvelope extends AbstractEntity {
                 SubmissionState.GRAPH_VALIDATING,
                 SubmissionState.EXPORTING,
                 SubmissionState.PROCESSING,
-                SubmissionState.ARCHIVING,
                 SubmissionState.CLEANUP,
                 SubmissionState.ARCHIVED,
                 SubmissionState.SUBMITTED
