@@ -241,6 +241,7 @@ public class FileControllerTest {
         // ToDo: This test runs against a real mongo database and can fail if it is not empty.
         //given:
         File file = new File("test");
+        file.setSubmissionEnvelope(submissionEnvelope);
         file = fileRepository.save(file);
 
         //when:
