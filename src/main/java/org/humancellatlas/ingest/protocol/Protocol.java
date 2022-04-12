@@ -28,11 +28,6 @@ public class Protocol extends MetadataDocument {
         super(EntityType.PROTOCOL, content);
     }
 
-    public Protocol(String id) {
-        super(EntityType.PROTOCOL, null);
-        this.id = id;
-    }
-
     public boolean isLinked() {
         return linked;
     }

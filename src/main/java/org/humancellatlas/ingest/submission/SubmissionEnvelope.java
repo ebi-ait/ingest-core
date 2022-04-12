@@ -45,11 +45,6 @@ public class SubmissionEnvelope extends AbstractEntity {
         this.submitActions = new HashSet<>();
     }
 
-    public SubmissionEnvelope(String id) {
-        this();
-        this.id = id;
-    }
-
     private static Logger getLog() {
         return log;
     }

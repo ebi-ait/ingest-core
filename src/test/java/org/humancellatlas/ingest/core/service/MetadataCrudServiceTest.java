@@ -24,8 +24,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {
@@ -53,11 +52,11 @@ public class MetadataCrudServiceTest {
 
     private static Stream<Arguments> providedTestDocuments() {
         return Stream.of(
-            Arguments.of(new Biomaterial("biomaterialId")),
-            Arguments.of(new File("fileId")),
-            Arguments.of(new Process("processId")),
-            Arguments.of(new Project(new Object())),
-            Arguments.of(new Protocol("protocolId"))
+            Arguments.of(new Biomaterial(null)),
+            Arguments.of(new File(null, "fileName")),
+            Arguments.of(new Process(null)),
+            Arguments.of(new Project(null)),
+            Arguments.of(new Protocol(null))
         );
     }
 

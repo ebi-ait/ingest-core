@@ -10,6 +10,7 @@ import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,21 +50,26 @@ public class ProcessServiceTest {
     @MockBean
     private MetadataUpdateService metadataUpdateService;
 
+    String fileName = "ERR1630013.fastq.gz";
+    File file;
+    Process analysis;
+    SubmissionEnvelope submissionEnvelope;
+
+    @BeforeEach
+    void setUp() {
+        // Given:
+        file = spy(new File(null, fileName));
+        analysis = new Process(null);
+        submissionEnvelope = new SubmissionEnvelope();
+        analysis.setSubmissionEnvelope(submissionEnvelope);
+    }
+
     @Test
     public void testAddFileToAnalysisProcess() {
         //given:
-        Process analysis = new Process();
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        analysis.setSubmissionEnvelope(submissionEnvelope);
-
-        //and:
-        File file = new File();
-        file.setFileName("ERR1630013.fastq.gz");
-        file = spy(file);
-
-        //and:
-        doReturn(Collections.emptyList()).when(fileRepository)
-                .findBySubmissionEnvelopeAndFileName(any(SubmissionEnvelope.class), anyString());
+        doReturn(Collections.emptyList())
+            .when(fileRepository)
+            .findBySubmissionEnvelopeAndFileName(any(SubmissionEnvelope.class), anyString());
 
         //when:
         Process result = service.addOutputFileToAnalysisProcess(analysis, file);
@@ -77,18 +83,7 @@ public class ProcessServiceTest {
     @Test
     public void testAddFileToAnalysisProcessWhenFileAlreadyExists() {
         //given:
-        Process analysis = new Process();
-        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        analysis.setSubmissionEnvelope(submissionEnvelope);
-
-        //and:
-        File file = new File();
-        String fileName = "ERR1630013.fastq.gz";
-        file.setFileName(fileName);
-
-        //and:
-        File persistentFile = spy(new File());
-        List<File> persistentFiles = Arrays.asList(persistentFile);
+        List<File> persistentFiles = Arrays.asList(file);
         doReturn(persistentFiles).when(fileRepository)
                 .findBySubmissionEnvelopeAndFileName(submissionEnvelope, fileName);
 
@@ -99,8 +94,8 @@ public class ProcessServiceTest {
         assertThat(result).isEqualTo(analysis);
 
         //and:
-        verify(persistentFile).addToAnalysis(analysis);
-        verify(fileRepository).save(persistentFile);
+        verify(file).addToAnalysis(analysis);
+        verify(fileRepository).save(file);
     }
 
     @Configuration

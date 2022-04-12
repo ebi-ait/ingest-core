@@ -26,7 +26,7 @@ public class BiomaterialCrudStrategyTest {
 
     @BeforeEach
     void setUp() {
-        testBiomaterial = new Biomaterial("biomaterialId");
+        testBiomaterial = new Biomaterial(null);
     }
 
     @Test

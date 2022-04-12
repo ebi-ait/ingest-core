@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.assertj.core.api.Assertions;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
-import org.humancellatlas.ingest.project.web.SearchFilter;
 import org.humancellatlas.ingest.schemas.Schema;
 import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -24,8 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.*;
@@ -33,12 +31,9 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {
@@ -85,33 +80,47 @@ public class ProjectServiceTest {
 
     @Nested
     class SubmissionEnvelopes {
+        Project project1;
+        Project project2;
+        Set<SubmissionEnvelope> submissionSet1;
+        Set<SubmissionEnvelope> submissionSet2;
+
+        @BeforeEach
+        void setup(){
+            // given
+            project1 = spy(new Project(null));
+            doReturn("project1").when(project1).getId();
+            project1.setUuid(Uuid.newUuid());
+
+            submissionSet1 = new HashSet<>();
+            IntStream.range(0, 3).mapToObj(Integer::toString).forEach(id -> {
+                var sub = spy(new SubmissionEnvelope());
+                doReturn(id).when(sub).getId();
+                submissionSet1.add(sub);
+            });
+            submissionSet1.forEach(project1::addToSubmissionEnvelopes);
+
+            //and:
+            project2 = spy(new Project(null));
+            doReturn("project2").when(project2).getId();
+            project2.setUuid(project1.getUuid());
+
+            submissionSet2 = new HashSet<>();
+            IntStream.range(10, 15).mapToObj(Integer::toString).forEach(id -> {
+                var sub = spy(new SubmissionEnvelope());
+                doReturn(id).when(sub).getId();
+                submissionSet2.add(sub);
+            });
+            submissionSet2.forEach(project2::addToSubmissionEnvelopes);
+        }
 
         @Test
         @DisplayName("get all submissions")
         void getFromAllCopiesOfProjects() {
-            //given:
-            var project1 = new Project("project");
-            var submissionSet1 = IntStream.range(0, 3)
-                    .mapToObj(Integer::toString)
-                    .map(SubmissionEnvelope::new)
-                    .collect(toSet());
+            // given
+            when(projectRepository.findByUuid(project1.getUuid())).thenReturn(Stream.of(project1, project2));
 
-            submissionSet1.forEach(project1::addToSubmissionEnvelopes);
-
-            //and:
-            var project2 = new Project("project2");
-            BeanUtils.copyProperties(project1, project2);
-            var submissionSet2 = IntStream.range(10, 15)
-                    .mapToObj(Integer::toString)
-                    .map(SubmissionEnvelope::new)
-                    .collect(toSet());
-            submissionSet2.forEach(project2::addToSubmissionEnvelopes);
-
-            //and:
-            doReturn(Stream.of(project1, project2))
-                    .when(projectRepository).findByUuid(project1.getUuid());
-
-            //when:
+            // when:
             var submissionEnvelopes = projectService.getSubmissionEnvelopes(project1);
 
             //then:
@@ -123,45 +132,28 @@ public class ProjectServiceTest {
         @Test
         @DisplayName("no duplicate submissions")
         void getFromAllCopiesOfProjectsNoDuplicates() {
-            //given:
-            var project1 = new Project("project1");
-            var submissionSet1 = IntStream.range(0, 3)
-                .mapToObj(Integer::toString)
-                .map(SubmissionEnvelope::new)
-                .collect(toSet());
-            submissionSet1.forEach(project1::addToSubmissionEnvelopes);
+            // given
+            var project3 = spy(new Project(null));
+            doReturn("project3").when(project3).getId();
+            project3.setUuid(project1.getUuid());
 
-            //and:
-            var project2 = new Project("project2");
-            BeanUtils.copyProperties(project1, project2);
-            var submissionSet2 = IntStream.range(10, 15)
-                .mapToObj(Integer::toString)
-                .map(SubmissionEnvelope::new)
-                .collect(toSet());
-            submissionSet2.forEach(project2::addToSubmissionEnvelopes);
-
-            var project3 = new Project(null);
-            BeanUtils.copyProperties(project1, project3);
-            submissionSet1.forEach(submission ->
-                project3.addToSubmissionEnvelopes(new SubmissionEnvelope(submission.getId()))
-            );
+            submissionSet1.forEach(project3::addToSubmissionEnvelopes);
 
             var documentIds = new ArrayList<String>();
             submissionSet1.forEach(submission -> documentIds.add(submission.getId()));
             submissionSet2.forEach(submission -> documentIds.add(submission.getId()));
 
             //and:
-            doReturn(Stream.of(project1, project2, project3))
-                .when(projectRepository).findByUuid(project1.getUuid());
+            when(projectRepository.findByUuid(project1.getUuid())).thenReturn(Stream.of(project1, project2, project3));
 
             //when:
             var submissionEnvelopes = projectService.getSubmissionEnvelopes(project1);
+
+            //then:
             var returnDocumentIds = new ArrayList<String>();
             submissionEnvelopes.forEach(submission -> returnDocumentIds.add(submission.getId()));
 
-            //then:
-            assertThat(returnDocumentIds)
-                .containsExactlyInAnyOrderElementsOf(documentIds);
+            assertThat(returnDocumentIds).containsExactlyInAnyOrderElementsOf(documentIds);
         }
 
     }
@@ -224,18 +216,22 @@ public class ProjectServiceTest {
         @DisplayName("fails for non-empty Project")
         void failForProjectWithSubmissions() {
             //given:
-            var project = new Project("test project");
+            var project = new Project(null);
 
             //and: copy of project with no submissions
-            var persistentEmptyProject = new Project("project");
+            var persistentEmptyProject = new Project(null);
             BeanUtils.copyProperties(project, persistentEmptyProject);
 
             //and: copy of project with submissions
-            var persistentNonEmptyProject = new Project("project");
+            var persistentNonEmptyProject = new Project(null);
             BeanUtils.copyProperties(project, persistentNonEmptyProject);
             IntStream.range(0, 3)
-                    .mapToObj(Integer::toString).map(SubmissionEnvelope::new)
-                    .forEach(persistentNonEmptyProject::addToSubmissionEnvelopes);
+                    .mapToObj(Integer::toString)
+                    .forEach(id -> {
+                        SubmissionEnvelope sub = spy(new SubmissionEnvelope());
+                        doReturn(id).when(sub).getId();
+                        persistentNonEmptyProject.addToSubmissionEnvelopes(sub);
+                    });
 
             //and:
             doReturn(Stream.of(persistentEmptyProject, persistentNonEmptyProject))

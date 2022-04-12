@@ -2,15 +2,21 @@ package org.humancellatlas.ingest.messaging;
 
 import lombok.NoArgsConstructor;
 import org.humancellatlas.ingest.config.ConfigurationService;
-import org.humancellatlas.ingest.core.*;
+import org.humancellatlas.ingest.core.EntityType;
+import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.exporter.ExperimentProcess;
-import org.humancellatlas.ingest.messaging.model.*;
+import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
+import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
+import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeStateUpdateMessage;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessageBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -19,7 +25,8 @@ import java.net.URI;
 import java.util.Map;
 
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.EXPORTER_EXCHANGE;
-import static org.humancellatlas.ingest.messaging.Constants.Routing.*;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.EXPERIMENT_SUBMITTED;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.MANIFEST_SUBMITTED;
 
 
 @Component
@@ -34,6 +41,8 @@ public class MessageRouter {
 
     @Autowired
     private LinkGenerator linkGenerator;
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /* messages to validator */
     public boolean routeValidationMessageFor(MetadataDocument document) {
@@ -81,23 +90,26 @@ public class MessageRouter {
     }
 
     public boolean routeStateTrackingDeleteMessageFor(MetadataDocument document) {
-        if (document.getSubmissionEnvelope() == null) {
-            throw new RuntimeException("The metadata document should have a link to a submission envelope.");
+        if (document.getSubmissionEnvelope() != null) {
+            URI documentDeleteUri = UriComponentsBuilder.newInstance()
+                    .scheme(configurationService.getStateTrackerScheme())
+                    .host(configurationService.getStateTrackerHost())
+                    .port(configurationService.getStateTrackerPort())
+                    .pathSegment(configurationService.getDocumentStatesUpdatePath())
+                    .queryParam(configurationService.getDocumentIdParamName(), document.getId())
+                    .queryParam(configurationService.getEnvelopeIdParamName(), document.getSubmissionEnvelope().getId())
+                    .build().toUri();
+            this.messageSender.queueDocumentStateDeleteMessage(
+                    documentDeleteUri,
+                    document.getUpdateDate().toEpochMilli()
+            );
+            return true;
+        } else {
+            log.warn(String.format("The metadata document '%s' is not linked to a submission envelope", document.getId()));
+            return false;
         }
 
-        URI documentDeleteUri = UriComponentsBuilder.newInstance()
-            .scheme(configurationService.getStateTrackerScheme())
-            .host(configurationService.getStateTrackerHost())
-            .port(configurationService.getStateTrackerPort())
-            .pathSegment(configurationService.getDocumentStatesUpdatePath())
-            .queryParam(configurationService.getDocumentIdParamName(), document.getId())
-            .queryParam(configurationService.getEnvelopeIdParamName(), document.getSubmissionEnvelope().getId())
-            .build().toUri();
-        this.messageSender.queueDocumentStateDeleteMessage(
-            documentDeleteUri,
-            document.getUpdateDate().toEpochMilli()
-        );
-        return true;
+
     }
 
     public boolean routeStateTrackingUpdateMessageForEnvelopeEvent(SubmissionEnvelope envelope, SubmissionState state) {
