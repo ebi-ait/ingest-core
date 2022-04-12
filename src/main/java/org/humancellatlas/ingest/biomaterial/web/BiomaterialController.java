@@ -70,7 +70,7 @@ public class BiomaterialController {
     private @Autowired
     MetadataLinkingService metadataLinkingService;
 
-    @PreAuthorize("#submissionEnvelope.inEditableState")
+    @PreAuthorize("#submissionEnvelope.editable")
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                          @RequestBody Biomaterial biomaterial,
@@ -85,7 +85,7 @@ public class BiomaterialController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @PreAuthorize("#submissionEnvelope.inEditableState")
+    @PreAuthorize("#submissionEnvelope.editable")
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials/{id}", method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> linkBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                           @PathVariable("id") Biomaterial biomaterial,
@@ -95,7 +95,7 @@ public class BiomaterialController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @PreAuthorize("#biomaterial.submissionEnvelope.inEditableState")
+    @PreAuthorize("#biomaterial.submissionEnvelope.editable")
     @PatchMapping(path = "/biomaterials/{id}")
     HttpEntity<?> patchBiomaterial(@PathVariable("id") Biomaterial biomaterial,
                                    @RequestBody final ObjectNode patch,
@@ -107,7 +107,7 @@ public class BiomaterialController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @PreAuthorize("#biomaterial.submissionEnvelope.inEditableState")
+    @PreAuthorize("#biomaterial.submissionEnvelope.editable")
     @RequestMapping(path = "/biomaterials/{id}/inputToProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkBiomaterialAsInputToProcesses(@PathVariable("id") Biomaterial biomaterial,
                                                     @RequestBody Resources<Object> incoming,
@@ -120,7 +120,7 @@ public class BiomaterialController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("#biomaterial.submissionEnvelope.inEditableState")
+    @PreAuthorize("#biomaterial.submissionEnvelope.editable")
     @RequestMapping(path = "/biomaterials/{id}/derivedByProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkBiomaterialAsDerivedByProcesses(@PathVariable("id") Biomaterial biomaterial,
                                                       @RequestBody Resources<Object> incoming,
@@ -132,7 +132,7 @@ public class BiomaterialController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("#biomaterial.submissionEnvelope.inEditableState")
+    @PreAuthorize("#biomaterial.submissionEnvelope.editable")
     @DeleteMapping(path = "/biomaterials/{id}/inputToProcesses/{processId}")
     HttpEntity<?> unlinkBiomaterialAsInputToProcesses(@PathVariable("id") Biomaterial biomaterial,
                                                       @PathVariable("processId") Process process,
@@ -141,7 +141,7 @@ public class BiomaterialController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("#biomaterial.submissionEnvelope.inEditableState")
+    @PreAuthorize("#biomaterial.submissionEnvelope.editable")
     @DeleteMapping(path = "/biomaterials/{id}/derivedByProcesses/{processId}")
     HttpEntity<?> unlinkBiomaterialAsDerivedProcesses(@PathVariable("id") Biomaterial biomaterial,
                                                       @PathVariable("processId") Process process,
@@ -150,7 +150,7 @@ public class BiomaterialController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("#biomaterial.submissionEnvelope.inEditableState")
+    @PreAuthorize("#biomaterial.submissionEnvelope.editable")
     @DeleteMapping(path = "/biomaterials/{id}")
     ResponseEntity<?> deleteBiomaterial(@PathVariable("id") Biomaterial biomaterial) {
         metadataCrudService.deleteDocument(biomaterial);

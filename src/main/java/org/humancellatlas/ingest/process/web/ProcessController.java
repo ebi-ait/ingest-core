@@ -100,7 +100,7 @@ public class ProcessController {
     }
 
 
-    @PreAuthorize("#submissionEnvelope.inEditableState")
+    @PreAuthorize("#submissionEnvelope.editable")
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                      @RequestBody Process process,
@@ -115,7 +115,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @PreAuthorize("#submissionEnvelope.inEditableState")
+    @PreAuthorize("#submissionEnvelope.editable")
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes/{id}", method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> linkProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                       @PathVariable("id") Process process,
@@ -131,7 +131,7 @@ public class ProcessController {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
-    @PreAuthorize("#analysis.submissionEnvelope.inEditableState")
+    @PreAuthorize("#analysis.submissionEnvelope.editable")
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL,
             method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> oldAddBundleReference(@PathVariable("analysis_id") Process analysis,
@@ -142,7 +142,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @PreAuthorize("#analysis.submissionEnvelope.inEditableState")
+    @PreAuthorize("#analysis.submissionEnvelope.editable")
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL,
             method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addBundleReference(@PathVariable("analysis_id") Process analysis,
@@ -158,7 +158,7 @@ public class ProcessController {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
-    @PreAuthorize("#analysis.submissionEnvelope.inEditableState")
+    @PreAuthorize("#analysis.submissionEnvelope.editable")
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL,
             method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> addOutputFileReference(@PathVariable("analysis_id") Process analysis,
@@ -169,7 +169,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @PreAuthorize("#analysis.submissionEnvelope.inEditableState")
+    @PreAuthorize("#analysis.submissionEnvelope.editable")
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.INPUT_FILES_URL,
             method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addInputFileReference(@PathVariable("analysis_id") Process analysis,
@@ -188,7 +188,7 @@ public class ProcessController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
     }
 
-    @PreAuthorize("#process.submissionEnvelope.inEditableState")
+    @PreAuthorize("#process.submissionEnvelope.editable")
     @PatchMapping(path = "/processes/{id}")
     HttpEntity<?> patchProcess(@PathVariable("id") Process process,
                                @RequestBody final ObjectNode patch,
@@ -200,7 +200,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @PreAuthorize("#process.submissionEnvelope.inEditableState")
+    @PreAuthorize("#process.submissionEnvelope.editable")
     @RequestMapping(path = "/processes/{id}/protocols", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkProtocolsToProcess(@PathVariable("id") Process process,
                                          @RequestBody Resources<Object> incoming,
@@ -212,7 +212,7 @@ public class ProcessController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("#process.submissionEnvelope.inEditableState")
+    @PreAuthorize("#process.submissionEnvelope.editable")
     @DeleteMapping(path = "/processes/{id}/protocols/{protocolId}")
     HttpEntity<?> unlinkProtocolFromProcess(@PathVariable("id") Process process,
                                             @PathVariable("protocolId") Protocol protocol,
@@ -222,7 +222,7 @@ public class ProcessController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("#process.submissionEnvelope.inEditableState")
+    @PreAuthorize("#process.submissionEnvelope.editable")
     @DeleteMapping(path = "/processes/{id}")
     ResponseEntity<?> deleteProcess(@PathVariable("id") Process process) {
         metadataCrudService.deleteDocument(process);

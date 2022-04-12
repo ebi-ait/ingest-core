@@ -3,8 +3,6 @@ package org.humancellatlas.ingest.submission;
 
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
-import org.springframework.http.HttpEntity;
 
 import java.util.Arrays;
 import java.util.List;
@@ -113,7 +111,7 @@ public class SubmissionEnvelopeTest {
 
 
     @Test
-    public void testIsInEditableState() {
+    public void testIsEditable() {
         Arrays.asList(
                 SubmissionState.METADATA_VALIDATING,
                 SubmissionState.GRAPH_VALIDATION_REQUESTED,
@@ -131,7 +129,7 @@ public class SubmissionEnvelopeTest {
             assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
 
             //then:
-            assertThat(submissionEnvelope.isInEditableState()).isFalse();
+            assertThat(submissionEnvelope.isEditable()).isFalse();
         });
 
         Arrays.asList(
@@ -150,7 +148,7 @@ public class SubmissionEnvelopeTest {
             assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
 
             //then:
-            assertThat(submissionEnvelope.isInEditableState()).isTrue();
+            assertThat(submissionEnvelope.isEditable()).isTrue();
         });
     }
 

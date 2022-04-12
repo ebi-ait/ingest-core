@@ -130,7 +130,7 @@ public class SubmissionEnvelope extends AbstractEntity {
     }
 
     @JsonIgnore()
-    public boolean isInEditableState() {
+    public boolean isEditable() {
         List<SubmissionState> nonEditableStates = Arrays.asList(
                 SubmissionState.METADATA_VALIDATING,
                 SubmissionState.GRAPH_VALIDATION_REQUESTED,
