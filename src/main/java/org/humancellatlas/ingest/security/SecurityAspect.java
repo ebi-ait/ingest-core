@@ -4,7 +4,6 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.aspectj.weaver.ast.Not;
 import org.humancellatlas.ingest.security.exception.NotAllowedException;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -17,14 +16,14 @@ import java.lang.reflect.Method;
 @Component
 public class SecurityAspect {
     @Before("@annotation(org.humancellatlas.ingest.security.CheckAllowed) && execution(* *(..))")
-    public void checkAllowed(JoinPoint joinPoint) throws NotAllowedException {
+    public void checkAllowed(JoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
         CheckAllowed annotation = method.getAnnotation(CheckAllowed.class);
         Boolean isAllowed = parseExpression(signature.getParameterNames(), joinPoint.getArgs(), annotation.value());
-
+        Class<? extends NotAllowedException> exceptionClass = annotation.exception();
         if (!isAllowed) {
-            throw new NotAllowedException();
+            throw exceptionClass.getDeclaredConstructor().newInstance();
         }
     }
 
