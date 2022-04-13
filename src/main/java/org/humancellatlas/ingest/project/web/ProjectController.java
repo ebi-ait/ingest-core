@@ -20,6 +20,7 @@ import org.humancellatlas.ingest.project.ProjectEventHandler;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
+import org.humancellatlas.ingest.project.exception.NotAllowedWithSubmissionInStateException;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.security.CheckAllowed;
@@ -86,7 +87,7 @@ public class ProjectController {
         return ResponseEntity.ok().body(assembler.toFullResource(suggestedProject));
     }
 
-    @CheckAllowed(value = "#project.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#project.isEditable()", exception = NotAllowedWithSubmissionInStateException.class)
     @PatchMapping("/projects/{id}")
     ResponseEntity<Resource<?>> update(@PathVariable("id") final Project project,
                                        @RequestParam(value = "partial", defaultValue = "false") Boolean partial,
@@ -195,7 +196,7 @@ public class ProjectController {
         return ResponseEntity.accepted().body(projectResource);
     }
 
-    @CheckAllowed(value = "#project.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#project.isEditable()", exception = NotAllowedWithSubmissionInStateException.class)
     @DeleteMapping(path = "projects/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Project project) {
         try {
