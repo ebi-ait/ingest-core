@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
@@ -43,6 +44,8 @@ public class ProcessServiceTest {
     private BiomaterialRepository biomaterialRepository;
     @MockBean
     private BundleManifestRepository bundleManifestRepository;
+    @MockBean
+    private ProjectRepository projectRepository;
     @MockBean
     private MetadataDocumentEventHandler metadataDocumentEventHandler;
     @MockBean
