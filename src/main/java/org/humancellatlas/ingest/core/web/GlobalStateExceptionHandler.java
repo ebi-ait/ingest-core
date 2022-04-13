@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.core.web;
 import org.humancellatlas.ingest.core.exception.MultipleOpenSubmissionsException;
 import org.humancellatlas.ingest.core.exception.RedundantUpdateException;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
+import org.humancellatlas.ingest.security.exception.NotAllowedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -94,6 +95,16 @@ public class GlobalStateExceptionHandler {
                 request.getRequestURL().toString()), e);
         getLog().debug("Handling RuntimeException and returning INTERNAL_SERVER_ERROR response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), "Unexpected server error");
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(NotAllowedException.class)
+    public @ResponseBody
+    ExceptionInfo handNotAllowedException(HttpServletRequest request, Exception e) {
+        getLog().error(String.format("Not allowed exception encountered on %s request to resource %s ", request.getMethod(),
+                request.getRequestURL().toString()), e);
+        getLog().debug("Handling NotAllowedException and returning FORBIDDEN response", e);
+        return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
