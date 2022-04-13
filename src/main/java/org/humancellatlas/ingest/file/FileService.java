@@ -11,6 +11,7 @@ import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.file.web.FileMessage;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -46,6 +47,8 @@ public class FileService {
     private final @NonNull
     ProcessRepository processRepository;
     private final @NonNull
+    ProjectRepository projectRepository;
+    private final @NonNull
     MetadataDocumentEventHandler metadataDocumentEventHandler;
     private final @NonNull
     MetadataCrudService metadataCrudService;
@@ -58,6 +61,7 @@ public class FileService {
         if (!fileRepository.findBySubmissionEnvelopeAndFileName(submissionEnvelope, file.getFileName()).isEmpty()) {
             throw new FileAlreadyExistsException(String.format("File with name %s already exists in envelope %s", file.getFileName(), submissionEnvelope.getId()));
         } else {
+            projectRepository.findBySubmissionEnvelopesContains(submissionEnvelope).findFirst().ifPresent(file::setProject);
             File createdFile = metadataCrudService.addToSubmissionEnvelopeAndSave(file, submissionEnvelope);
             metadataDocumentEventHandler.handleMetadataDocumentCreate(createdFile);
             return createdFile;
