@@ -129,7 +129,6 @@ public class SubmissionEnvelope extends AbstractEntity {
         return states.indexOf(this.getSubmissionState()) < states.indexOf(SubmissionState.SUBMITTED);
     }
 
-    @JsonIgnore()
     public boolean isEditable() {
         List<SubmissionState> nonEditableStates = Arrays.asList(
                 SubmissionState.METADATA_VALIDATING,
