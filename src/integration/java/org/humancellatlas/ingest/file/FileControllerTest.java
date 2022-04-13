@@ -29,7 +29,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -87,7 +88,7 @@ public class FileControllerTest {
 
         file = new File(null, "fileName");
         file.setSubmissionEnvelope(submissionEnvelope);
-        fileRepository.save(file);
+        file = fileRepository.save(file);
 
         uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
     }

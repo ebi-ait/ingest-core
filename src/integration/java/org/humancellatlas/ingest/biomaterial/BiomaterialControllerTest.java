@@ -7,7 +7,6 @@ import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
-import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -50,9 +49,6 @@ public class BiomaterialControllerTest {
     private BiomaterialRepository biomaterialRepository;
 
     @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
     private SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
     @MockBean
@@ -86,7 +82,7 @@ public class BiomaterialControllerTest {
 
         biomaterial = new Biomaterial();
         biomaterial.setSubmissionEnvelope(submissionEnvelope);
-        biomaterialRepository.save(biomaterial);
+        biomaterial = biomaterialRepository.save(biomaterial);
 
         uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
     }
@@ -95,7 +91,6 @@ public class BiomaterialControllerTest {
     private void tearDown() {
         processRepository.deleteAll();
         biomaterialRepository.deleteAll();
-        projectRepository.deleteAll();
         submissionEnvelopeRepository.deleteAll();
     }
 
