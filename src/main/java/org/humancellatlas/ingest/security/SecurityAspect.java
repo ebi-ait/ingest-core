@@ -15,6 +15,13 @@ import java.lang.reflect.Method;
 @Aspect
 @Component
 public class SecurityAspect {
+    /**
+     * Advice that runs before any method with the CheckAllowed annotation.
+     * Parses the given SpEL in the annotation and throws error if the result returns False.
+     *
+     * @param joinPoint
+     * @throws Throwable
+     */
     @Before("@annotation(org.humancellatlas.ingest.security.CheckAllowed) && execution(* *(..))")
     public void checkAllowed(JoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
