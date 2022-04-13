@@ -22,7 +22,9 @@ import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
+import org.humancellatlas.ingest.security.CheckAllowed;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.exception.NotAllowedDuringSubmissionStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -37,7 +39,6 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -85,7 +86,7 @@ public class ProjectController {
         return ResponseEntity.ok().body(assembler.toFullResource(suggestedProject));
     }
 
-    @PreAuthorize("#project.isEditable()")
+    @CheckAllowed(value = "#project.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PatchMapping("/projects/{id}")
     ResponseEntity<Resource<?>> update(@PathVariable("id") final Project project,
                                        @RequestParam(value = "partial", defaultValue = "false") Boolean partial,
@@ -116,7 +117,7 @@ public class ProjectController {
         return ResponseEntity.ok().body(assembler.toFullResource(updatedProject));
     }
 
-    @PreAuthorize("#submissionEnvelope.editable")
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
     ResponseEntity<Resource<?>> addProjectToEnvelope(
             @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -183,7 +184,7 @@ public class ProjectController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
     }
 
-    @PreAuthorize("#submissionEnvelope.editable")
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PutMapping(path = "projects/{proj_id}/submissionEnvelopes/{sub_id}")
     ResponseEntity<Resource<?>> linkSubmissionToProject(
             @PathVariable("proj_id") Project project,
@@ -194,7 +195,7 @@ public class ProjectController {
         return ResponseEntity.accepted().body(projectResource);
     }
 
-    @PreAuthorize("#project.isEditable()")
+    @CheckAllowed(value = "#project.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @DeleteMapping(path = "projects/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Project project) {
         try {

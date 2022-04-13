@@ -6,17 +6,15 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
-import org.humancellatlas.ingest.core.service.MetadataCrudService;
-import org.humancellatlas.ingest.core.service.MetadataLinkingService;
-import org.humancellatlas.ingest.core.service.MetadataUpdateService;
-import org.humancellatlas.ingest.core.service.UriToEntityConversionService;
-import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
+import org.humancellatlas.ingest.core.service.*;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.*;
 import org.humancellatlas.ingest.protocol.Protocol;
+import org.humancellatlas.ingest.security.CheckAllowed;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.exception.NotAllowedDuringSubmissionStateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +29,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.InvocationTargetException;
@@ -100,7 +97,7 @@ public class ProcessController {
     }
 
 
-    @PreAuthorize("#submissionEnvelope.editable")
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                      @RequestBody Process process,
@@ -115,7 +112,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @PreAuthorize("#submissionEnvelope.editable")
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes/{id}", method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> linkProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                       @PathVariable("id") Process process,
@@ -131,7 +128,7 @@ public class ProcessController {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
-    @PreAuthorize("#analysis.submissionEnvelope.editable")
+    @CheckAllowed(value = "#analysis.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL,
             method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> oldAddBundleReference(@PathVariable("analysis_id") Process analysis,
@@ -142,7 +139,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @PreAuthorize("#analysis.submissionEnvelope.editable")
+    @CheckAllowed(value = "#analysis.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL,
             method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addBundleReference(@PathVariable("analysis_id") Process analysis,
@@ -158,7 +155,7 @@ public class ProcessController {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
-    @PreAuthorize("#analysis.submissionEnvelope.editable")
+    @CheckAllowed(value = "#analysis.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL,
             method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> addOutputFileReference(@PathVariable("analysis_id") Process analysis,
@@ -169,7 +166,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @PreAuthorize("#analysis.submissionEnvelope.editable")
+    @CheckAllowed(value = "#analysis.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.INPUT_FILES_URL,
             method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addInputFileReference(@PathVariable("analysis_id") Process analysis,
@@ -188,7 +185,7 @@ public class ProcessController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
     }
 
-    @PreAuthorize("#process.submissionEnvelope.editable")
+    @CheckAllowed(value = "#process.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PatchMapping(path = "/processes/{id}")
     HttpEntity<?> patchProcess(@PathVariable("id") Process process,
                                @RequestBody final ObjectNode patch,
@@ -200,7 +197,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @PreAuthorize("#process.submissionEnvelope.editable")
+    @CheckAllowed(value = "#process.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/processes/{id}/protocols", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkProtocolsToProcess(@PathVariable("id") Process process,
                                          @RequestBody Resources<Object> incoming,
@@ -212,7 +209,7 @@ public class ProcessController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("#process.submissionEnvelope.editable")
+    @CheckAllowed(value = "#process.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @DeleteMapping(path = "/processes/{id}/protocols/{protocolId}")
     HttpEntity<?> unlinkProtocolFromProcess(@PathVariable("id") Process process,
                                             @PathVariable("protocolId") Protocol protocol,
@@ -222,7 +219,7 @@ public class ProcessController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("#process.submissionEnvelope.editable")
+    @CheckAllowed(value = "#process.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @DeleteMapping(path = "/processes/{id}")
     ResponseEntity<?> deleteProcess(@PathVariable("id") Process process) {
         metadataCrudService.deleteDocument(process);

@@ -20,6 +20,7 @@ import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.protocol.ProtocolService;
+import org.humancellatlas.ingest.security.CheckAllowed;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
 import org.humancellatlas.ingest.state.ValidationState;
@@ -27,6 +28,7 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
 import org.humancellatlas.ingest.submission.SubmissionStateMachineService;
+import org.humancellatlas.ingest.submission.exception.NotAllowedDuringSubmissionStateException;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifest;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.slf4j.Logger;
@@ -39,7 +41,6 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -185,7 +186,7 @@ public class SubmissionController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
     }
 
-    @PreAuthorize("#submissionEnvelope.editable")
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PutMapping("/submissionEnvelopes/{id}" + Links.SUBMIT_URL)
     HttpEntity<?> submitEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                         @RequestBody(required = false) List<String> submitActionParam,
@@ -200,14 +201,14 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
-    @PreAuthorize("#submissionEnvelope.editable")
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PutMapping("/submissionEnvelopes/{id}" + Links.ARCHIVED_URL)
     HttpEntity<?> completeArchivingEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.ARCHIVED);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
-    @PreAuthorize("#submissionEnvelope.editable")
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PutMapping("/submissionEnvelopes/{id}" + Links.EXPORT_URL)
     HttpEntity<?> exportEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                         final PersistentEntityResourceAssembler resourceAssembler) {
@@ -215,14 +216,14 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
-    @PreAuthorize("#submissionEnvelope.editable")
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PutMapping("/submissionEnvelopes/{id}" + Links.CLEANUP_URL)
     HttpEntity<?> cleanupEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.CLEANUP);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 
-    @PreAuthorize("#submissionEnvelope.editable")
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PutMapping("/submissionEnvelopes/{id}" + Links.COMPLETE_URL)
     HttpEntity<?> completeEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope, final PersistentEntityResourceAssembler resourceAssembler) {
         submissionEnvelopeService.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.COMPLETE);
@@ -332,7 +333,7 @@ public class SubmissionController {
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(envelope));
     }
 
-    @PreAuthorize("#submissionEnvelope.editable")
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PutMapping("/submissionEnvelopes/{id}" + Links.GRAPH_VALIDATION_REQUESTED_URL)
     HttpEntity<?> requestGraphValidation(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                          final PersistentEntityResourceAssembler resourceAssembler) {

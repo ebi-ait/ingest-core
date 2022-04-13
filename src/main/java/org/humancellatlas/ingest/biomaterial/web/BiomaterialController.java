@@ -8,14 +8,12 @@ import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.biomaterial.BiomaterialService;
 import org.humancellatlas.ingest.core.Uuid;
-import org.humancellatlas.ingest.core.service.MetadataCrudService;
-import org.humancellatlas.ingest.core.service.MetadataLinkingService;
-import org.humancellatlas.ingest.core.service.MetadataUpdateService;
-import org.humancellatlas.ingest.core.service.UriToEntityConversionService;
-import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
+import org.humancellatlas.ingest.core.service.*;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.security.CheckAllowed;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.exception.NotAllowedDuringSubmissionStateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -27,7 +25,6 @@ import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.InvocationTargetException;
@@ -70,7 +67,7 @@ public class BiomaterialController {
     private @Autowired
     MetadataLinkingService metadataLinkingService;
 
-    @PreAuthorize("#submissionEnvelope.editable")
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                          @RequestBody Biomaterial biomaterial,
@@ -85,7 +82,7 @@ public class BiomaterialController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @PreAuthorize("#submissionEnvelope.editable")
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials/{id}", method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> linkBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                           @PathVariable("id") Biomaterial biomaterial,
@@ -95,7 +92,7 @@ public class BiomaterialController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @PreAuthorize("#biomaterial.submissionEnvelope.editable")
+    @CheckAllowed(value = "#biomaterial.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PatchMapping(path = "/biomaterials/{id}")
     HttpEntity<?> patchBiomaterial(@PathVariable("id") Biomaterial biomaterial,
                                    @RequestBody final ObjectNode patch,
@@ -107,7 +104,7 @@ public class BiomaterialController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @PreAuthorize("#biomaterial.submissionEnvelope.editable")
+    @CheckAllowed(value = "#biomaterial.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/biomaterials/{id}/inputToProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkBiomaterialAsInputToProcesses(@PathVariable("id") Biomaterial biomaterial,
                                                     @RequestBody Resources<Object> incoming,
@@ -120,7 +117,7 @@ public class BiomaterialController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("#biomaterial.submissionEnvelope.editable")
+    @CheckAllowed(value = "#biomaterial.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/biomaterials/{id}/derivedByProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkBiomaterialAsDerivedByProcesses(@PathVariable("id") Biomaterial biomaterial,
                                                       @RequestBody Resources<Object> incoming,
@@ -132,7 +129,7 @@ public class BiomaterialController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("#biomaterial.submissionEnvelope.editable")
+    @CheckAllowed(value = "#biomaterial.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @DeleteMapping(path = "/biomaterials/{id}/inputToProcesses/{processId}")
     HttpEntity<?> unlinkBiomaterialAsInputToProcesses(@PathVariable("id") Biomaterial biomaterial,
                                                       @PathVariable("processId") Process process,
@@ -141,7 +138,7 @@ public class BiomaterialController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("#biomaterial.submissionEnvelope.editable")
+    @CheckAllowed(value = "#biomaterial.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @DeleteMapping(path = "/biomaterials/{id}/derivedByProcesses/{processId}")
     HttpEntity<?> unlinkBiomaterialAsDerivedProcesses(@PathVariable("id") Biomaterial biomaterial,
                                                       @PathVariable("processId") Process process,
@@ -150,8 +147,8 @@ public class BiomaterialController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("#biomaterial.submissionEnvelope.editable")
     @DeleteMapping(path = "/biomaterials/{id}")
+    @CheckAllowed(value = "#biomaterial.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     ResponseEntity<?> deleteBiomaterial(@PathVariable("id") Biomaterial biomaterial) {
         metadataCrudService.deleteDocument(biomaterial);
         return ResponseEntity.noContent().build();
