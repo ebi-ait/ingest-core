@@ -20,6 +20,9 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -289,5 +292,48 @@ public class SubmissionControllerTest {
         var newFile = fileRepository.findAll().get(0);
         assertThat(newFile.getSubmissionEnvelope()).isNotNull();
         assertThat(newFile.getProject()).isNull();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "biomaterials",
+        "processes",
+        "protocols",
+        "files"
+    })
+    public void testAdditionToNonEditableSubmissionThrowsErrorForAllEntityTypes(String endpoint) throws Exception {
+        // given
+        submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALIDATION_REQUESTED);
+        submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
+
+        // when
+        webApp.perform(
+            post("/submissionEnvelopes/{id}/" + endpoint, submissionEnvelope.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"content\": {}}")
+        ).andExpect(status().isForbidden());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = SubmissionState.class, names = {
+        "GRAPH_VALIDATION_REQUESTED",
+        "GRAPH_VALIDATING",
+        "EXPORTING",
+        "PROCESSING",
+        "CLEANUP",
+        "ARCHIVED",
+        "SUBMITTED"
+    })
+    public void testAdditionToNonEditableSubmissionThrowsErrorinAllStates(SubmissionState state) throws Exception {
+        // given
+        submissionEnvelope.enactStateTransition(state);
+        submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
+
+        // when
+        webApp.perform(
+            post("/submissionEnvelopes/{id}/biomaterials", submissionEnvelope.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"content\": {}}")
+        ).andExpect(status().isForbidden());
     }
 }
