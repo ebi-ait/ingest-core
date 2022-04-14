@@ -248,6 +248,7 @@ public class FileControllerTest {
     public void testValidationJobPatch() throws Exception {
         //given:
         File file = new File(null, "test");
+        file.setSubmissionEnvelope(submissionEnvelope);
         file = fileRepository.save(file);
 
         //when:

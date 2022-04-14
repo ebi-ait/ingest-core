@@ -4,15 +4,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.core.service.MetadataCrudService;
-import org.humancellatlas.ingest.core.service.MetadataLinkingService;
-import org.humancellatlas.ingest.core.service.MetadataUpdateService;
-import org.humancellatlas.ingest.core.service.UriToEntityConversionService;
-import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
+import org.humancellatlas.ingest.core.service.*;
 import org.humancellatlas.ingest.file.*;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.security.CheckAllowed;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.exception.NotAllowedDuringSubmissionStateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -75,6 +73,7 @@ public class FileController {
     private @Autowired
     MetadataLinkingService metadataLinkingService;
 
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
             method = RequestMethod.POST,
             produces = MediaTypes.HAL_JSON_VALUE)
@@ -100,6 +99,7 @@ public class FileController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @CheckAllowed(value = "#file.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PatchMapping(path = "/files/{id}")
     HttpEntity<?> patchFile(@PathVariable("id") File file,
                             @RequestBody final ObjectNode patch,
@@ -111,6 +111,7 @@ public class FileController {
         return ResponseEntity.accepted().body(resource);
     }
 
+    @CheckAllowed(value = "#file.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/files/{id}/inputToProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkFileAsInputToProcesses(@PathVariable("id") File file,
                                              @RequestBody Resources<Object> incoming,
@@ -123,6 +124,7 @@ public class FileController {
         return ResponseEntity.ok().build();
     }
 
+    @CheckAllowed(value = "#file.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/files/{id}/derivedByProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkFileAsDerivedByProcesses(@PathVariable("id") File file,
                                                @RequestBody Resources<Object> incoming,
@@ -135,7 +137,7 @@ public class FileController {
         return ResponseEntity.ok().build();
     }
 
-
+    @CheckAllowed(value = "#file.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @DeleteMapping(path = "/files/{id}/inputToProcesses/{processId}")
     HttpEntity<?> unlinkFileAsInputToProcesses(@PathVariable("id") File file,
                                                @PathVariable("processId") Process process,
@@ -144,6 +146,7 @@ public class FileController {
         return ResponseEntity.noContent().build();
     }
 
+    @CheckAllowed(value = "#file.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @DeleteMapping(path = "/files/{id}/derivedByProcesses/{processId}")
     HttpEntity<?> unlinkFileAsDerivedByProcesses(@PathVariable("id") File file,
                                                  @PathVariable("processId") Process process,
@@ -152,6 +155,7 @@ public class FileController {
         return ResponseEntity.noContent().build();
     }
 
+    @CheckAllowed(value = "#file.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @DeleteMapping(path = "/files/{id}")
     ResponseEntity<?> deleteFile(@PathVariable("id") File file) {
         metadataCrudService.deleteDocument(file);

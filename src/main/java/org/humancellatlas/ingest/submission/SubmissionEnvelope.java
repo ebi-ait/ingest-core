@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.submission;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -126,5 +127,20 @@ public class SubmissionEnvelope extends AbstractEntity {
     public boolean isOpen() {
         List<SubmissionState> states = Arrays.asList(SubmissionState.values());
         return states.indexOf(this.getSubmissionState()) < states.indexOf(SubmissionState.SUBMITTED);
+    }
+
+    public boolean isEditable() {
+        List<SubmissionState> nonEditableStates = Arrays.asList(
+                SubmissionState.METADATA_VALIDATING,
+                SubmissionState.GRAPH_VALIDATION_REQUESTED,
+                SubmissionState.GRAPH_VALIDATING,
+                SubmissionState.EXPORTING,
+                SubmissionState.PROCESSING,
+                SubmissionState.CLEANUP,
+                SubmissionState.ARCHIVED,
+                SubmissionState.SUBMITTED
+        );
+
+        return !nonEditableStates.contains(this.submissionState);
     }
 }

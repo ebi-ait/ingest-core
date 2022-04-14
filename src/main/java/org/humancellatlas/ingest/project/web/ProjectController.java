@@ -20,9 +20,12 @@ import org.humancellatlas.ingest.project.ProjectEventHandler;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
+import org.humancellatlas.ingest.project.exception.NotAllowedWithSubmissionInStateException;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
+import org.humancellatlas.ingest.security.CheckAllowed;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.exception.NotAllowedDuringSubmissionStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -84,6 +87,7 @@ public class ProjectController {
         return ResponseEntity.ok().body(assembler.toFullResource(suggestedProject));
     }
 
+    @CheckAllowed(value = "#project.isEditable()", exception = NotAllowedWithSubmissionInStateException.class)
     @PatchMapping("/projects/{id}")
     ResponseEntity<Resource<?>> update(@PathVariable("id") final Project project,
                                        @RequestParam(value = "partial", defaultValue = "false") Boolean partial,
@@ -114,6 +118,7 @@ public class ProjectController {
         return ResponseEntity.ok().body(assembler.toFullResource(updatedProject));
     }
 
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
     ResponseEntity<Resource<?>> addProjectToEnvelope(
             @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -180,6 +185,7 @@ public class ProjectController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
     }
 
+    @CheckAllowed(value = "#submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PutMapping(path = "projects/{proj_id}/submissionEnvelopes/{sub_id}")
     ResponseEntity<Resource<?>> linkSubmissionToProject(
             @PathVariable("proj_id") Project project,
@@ -190,6 +196,7 @@ public class ProjectController {
         return ResponseEntity.accepted().body(projectResource);
     }
 
+    @CheckAllowed(value = "#project.isEditable()", exception = NotAllowedWithSubmissionInStateException.class)
     @DeleteMapping(path = "projects/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Project project) {
         try {
