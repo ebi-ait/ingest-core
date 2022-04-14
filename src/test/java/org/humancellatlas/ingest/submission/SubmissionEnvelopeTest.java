@@ -3,12 +3,12 @@ package org.humancellatlas.ingest.submission;
 
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 public class SubmissionEnvelopeTest {
 
@@ -110,88 +110,90 @@ public class SubmissionEnvelopeTest {
     }
 
 
-    @Test
-    public void testIsEditable() {
-        Arrays.asList(
-                SubmissionState.PENDING,
-                SubmissionState.METADATA_VALIDATING,
-                SubmissionState.GRAPH_VALIDATION_REQUESTED,
-                SubmissionState.GRAPH_VALIDATING,
-                SubmissionState.EXPORTING,
-                SubmissionState.PROCESSING,
-                SubmissionState.CLEANUP,
-                SubmissionState.ARCHIVED,
-                SubmissionState.SUBMITTED
-        ).forEach(state -> {
-            //given:
-            SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-            submissionEnvelope.enactStateTransition(state);
-            assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
+    @ParameterizedTest
+    @EnumSource(value = SubmissionState.class, names = {
+        "PENDING",
+        "METADATA_VALIDATING",
+        "GRAPH_VALIDATION_REQUESTED",
+        "GRAPH_VALIDATING",
+        "EXPORTING",
+        "PROCESSING",
+        "CLEANUP",
+        "ARCHIVED",
+        "SUBMITTED"
+    })
+    public void testIsNotEditable(SubmissionState state) {
+        //given:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        submissionEnvelope.enactStateTransition(state);
+        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
 
-            //then:
-            assertThat(submissionEnvelope.isEditable()).isFalse();
-        });
-
-        Arrays.asList(
-                SubmissionState.METADATA_VALID,
-                SubmissionState.METADATA_INVALID,
-                SubmissionState.EXPORTED,
-                SubmissionState.GRAPH_VALID,
-                SubmissionState.GRAPH_INVALID,
-                SubmissionState.COMPLETE,
-                SubmissionState.DRAFT,
-                SubmissionState.ARCHIVING
-        ).forEach(state -> {
-            //given:
-            SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-            submissionEnvelope.enactStateTransition(state);
-            assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
-
-            //then:
-            assertThat(submissionEnvelope.isEditable()).isTrue();
-        });
+        //then:
+        assertThat(submissionEnvelope.isEditable()).isFalse();
     }
 
-    @Test
-    public void testCanAddTo() {
-        Arrays.asList(
-                SubmissionState.GRAPH_VALIDATION_REQUESTED,
-                SubmissionState.GRAPH_VALIDATING,
-                SubmissionState.EXPORTING,
-                SubmissionState.PROCESSING,
-                SubmissionState.CLEANUP,
-                SubmissionState.ARCHIVED,
-                SubmissionState.SUBMITTED
-        ).forEach(state -> {
-            //given:
-            SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-            submissionEnvelope.enactStateTransition(state);
-            assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
+    @ParameterizedTest
+    @EnumSource(value = SubmissionState.class, names = {
+        "METADATA_VALID",
+        "METADATA_INVALID",
+        "EXPORTED",
+        "GRAPH_VALID",
+        "GRAPH_INVALID",
+        "COMPLETE",
+        "DRAFT",
+        "ARCHIVING"
+    })
+    public void testIsEditable(SubmissionState state) {
+        //given:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        submissionEnvelope.enactStateTransition(state);
+        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
 
-            //then:
-            assertThat(submissionEnvelope.canAddTo()).isFalse();
-        });
+        //then:
+        assertThat(submissionEnvelope.isEditable()).isTrue();
+    }
 
-        Arrays.asList(
-                SubmissionState.METADATA_VALIDATING,
-                SubmissionState.PENDING,
-                SubmissionState.METADATA_VALID,
-                SubmissionState.METADATA_INVALID,
-                SubmissionState.EXPORTED,
-                SubmissionState.GRAPH_VALID,
-                SubmissionState.GRAPH_INVALID,
-                SubmissionState.COMPLETE,
-                SubmissionState.DRAFT,
-                SubmissionState.ARCHIVING
-        ).forEach(state -> {
-            //given:
-            SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-            submissionEnvelope.enactStateTransition(state);
-            assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
+    @ParameterizedTest
+    @EnumSource(value = SubmissionState.class, names = {
+        "GRAPH_VALIDATION_REQUESTED",
+        "GRAPH_VALIDATING",
+        "EXPORTING",
+        "PROCESSING",
+        "CLEANUP",
+        "ARCHIVED",
+        "SUBMITTED"
+    })
+    public void testCannotAddTo(SubmissionState state) {
+        //given:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        submissionEnvelope.enactStateTransition(state);
+        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
 
-            //then:
-            assertThat(submissionEnvelope.canAddTo()).isTrue();
-        });
+        //then:
+        assertThat(submissionEnvelope.canAddTo()).isFalse();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = SubmissionState.class, names = {
+        "METADATA_VALIDATING",
+        "PENDING",
+        "METADATA_VALID",
+        "METADATA_INVALID",
+        "EXPORTED",
+        "GRAPH_VALID",
+        "GRAPH_INVALID",
+        "COMPLETE",
+        "DRAFT",
+        "ARCHIVING"
+    })
+    public void testCanAddTo(SubmissionState state) {
+        //given:
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        submissionEnvelope.enactStateTransition(state);
+        assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
+
+        //then:
+        assertThat(submissionEnvelope.canAddTo()).isTrue();
     }
 
     private List<SubmissionState> getAllowedStates(SubmissionState state) {
