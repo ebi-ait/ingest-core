@@ -4,6 +4,7 @@ import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.Nested;
@@ -39,6 +40,9 @@ public class ProtocolServiceTest {
 
     @MockBean
     private ProcessRepository processRepository;
+
+    @MockBean
+    private ProjectRepository projectRepository;
 
     @MockBean
     private SubmissionEnvelopeRepository submissionEnvelopeRepository;

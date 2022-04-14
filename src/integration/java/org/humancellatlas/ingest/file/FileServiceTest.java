@@ -9,6 +9,8 @@ import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.file.web.FileMessage;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -22,12 +24,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.OptimisticLockingFailureException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -50,6 +51,9 @@ public class FileServiceTest {
     ProcessRepository processRepository;
 
     @MockBean
+    ProjectRepository projectRepository;
+
+    @MockBean
     MetadataDocumentEventHandler metadataDocumentEventHandler;
 
     @MockBean
@@ -70,6 +74,8 @@ public class FileServiceTest {
 
     File file;
 
+    Project project;
+
     @BeforeEach
     void setUp() {
         applicationContext.getBeansWithAnnotation(MockBean.class).forEach(Mockito::reset);
@@ -81,11 +87,15 @@ public class FileServiceTest {
 
         submissionEnvelope = new SubmissionEnvelope();
 
+        project = spy(new Project(null));
+        when(project.getId()).thenReturn("projectId");
+
         file = new File(null, filename);
-        List<File> files = new ArrayList<>();
+        var files = new ArrayList<File>();
         files.add(file);
 
         when(submissionEnvelopeRepository.findByUuid(any(Uuid.class))).thenReturn(submissionEnvelope);
+        when(projectRepository.findBySubmissionEnvelopesContains(submissionEnvelope)).thenReturn(Stream.of(project));
         when(fileRepository.findBySubmissionEnvelopeAndFileName(submissionEnvelope, fileMessage.getFileName())).thenReturn(files);
         when(fileRepository.save(file)).thenReturn(file);
     }

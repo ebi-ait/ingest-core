@@ -10,7 +10,7 @@ import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
-import org.humancellatlas.ingest.query.MetadataCriteria;
+import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.state.MetadataDocumentEventHandler;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
@@ -40,6 +40,8 @@ public class ProcessService {
     private BiomaterialRepository biomaterialRepository;
     @Autowired
     private BundleManifestRepository bundleManifestRepository;
+    @Autowired
+    private ProjectRepository projectRepository;
     @Autowired
     private MetadataCrudService metadataCrudService;
     @Autowired
@@ -74,6 +76,7 @@ public class ProcessService {
     public Process addProcessToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
                                                   Process process) {
         if(! process.getIsUpdate()) {
+            projectRepository.findBySubmissionEnvelopesContains(submissionEnvelope).findFirst().ifPresent(process::setProject);
             return metadataCrudService.addToSubmissionEnvelopeAndSave(process, submissionEnvelope);
         } else {
             return metadataUpdateService.acceptUpdate(process, submissionEnvelope);
