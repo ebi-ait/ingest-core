@@ -131,7 +131,6 @@ public class SubmissionEnvelope extends AbstractEntity {
 
     public boolean isEditable() {
         List<SubmissionState> nonEditableStates = Arrays.asList(
-                SubmissionState.METADATA_VALIDATING,
                 SubmissionState.GRAPH_VALIDATION_REQUESTED,
                 SubmissionState.GRAPH_VALIDATING,
                 SubmissionState.EXPORTING,

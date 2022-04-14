@@ -113,7 +113,6 @@ public class SubmissionEnvelopeTest {
     @Test
     public void testIsEditable() {
         Arrays.asList(
-                SubmissionState.METADATA_VALIDATING,
                 SubmissionState.GRAPH_VALIDATION_REQUESTED,
                 SubmissionState.GRAPH_VALIDATING,
                 SubmissionState.EXPORTING,
@@ -133,6 +132,10 @@ public class SubmissionEnvelopeTest {
 
         Arrays.asList(
                 SubmissionState.PENDING,
+                // METADATA_VALIDATING should not be allowed but it's needed at the moment because of the way
+                // spreadsheet importing works. Submissions flip rapidly between pending and validating during
+                // import.
+                SubmissionState.METADATA_VALIDATING,
                 SubmissionState.METADATA_VALID,
                 SubmissionState.METADATA_INVALID,
                 SubmissionState.EXPORTED,
