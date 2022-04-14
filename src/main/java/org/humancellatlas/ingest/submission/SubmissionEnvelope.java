@@ -129,8 +129,10 @@ public class SubmissionEnvelope extends AbstractEntity {
         return states.indexOf(this.getSubmissionState()) < states.indexOf(SubmissionState.SUBMITTED);
     }
 
-    public boolean isEditable() {
-        List<SubmissionState> nonEditableStates = Arrays.asList(
+    private List<SubmissionState> getNonEditableStates() {
+        return Arrays.asList(
+                SubmissionState.PENDING,
+                SubmissionState.METADATA_VALIDATING,
                 SubmissionState.GRAPH_VALIDATION_REQUESTED,
                 SubmissionState.GRAPH_VALIDATING,
                 SubmissionState.EXPORTING,
@@ -139,7 +141,18 @@ public class SubmissionEnvelope extends AbstractEntity {
                 SubmissionState.ARCHIVED,
                 SubmissionState.SUBMITTED
         );
+    }
 
-        return !nonEditableStates.contains(this.submissionState);
+    public boolean isEditable() {
+        return !this.getNonEditableStates().contains(this.submissionState);
+    }
+
+    public boolean canAddTo () {
+        // The importer has to add metadata and perform linking while the submission may be in METADATA_VALIDATING
+        // So, this is used for the special case of allowing the importer to function
+        return this.getNonEditableStates().stream()
+                .filter(state -> state != SubmissionState.PENDING)
+                .filter(state -> state != SubmissionState.METADATA_VALIDATING)
+                .noneMatch(state -> state == this.submissionState);
     }
 }

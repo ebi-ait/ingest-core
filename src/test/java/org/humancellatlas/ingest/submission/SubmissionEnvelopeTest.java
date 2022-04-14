@@ -113,6 +113,8 @@ public class SubmissionEnvelopeTest {
     @Test
     public void testIsEditable() {
         Arrays.asList(
+                SubmissionState.PENDING,
+                SubmissionState.METADATA_VALIDATING,
                 SubmissionState.GRAPH_VALIDATION_REQUESTED,
                 SubmissionState.GRAPH_VALIDATING,
                 SubmissionState.EXPORTING,
@@ -131,11 +133,6 @@ public class SubmissionEnvelopeTest {
         });
 
         Arrays.asList(
-                SubmissionState.PENDING,
-                // METADATA_VALIDATING should not be allowed but it's needed at the moment because of the way
-                // spreadsheet importing works. Submissions flip rapidly between pending and validating during
-                // import.
-                SubmissionState.METADATA_VALIDATING,
                 SubmissionState.METADATA_VALID,
                 SubmissionState.METADATA_INVALID,
                 SubmissionState.EXPORTED,
@@ -152,6 +149,48 @@ public class SubmissionEnvelopeTest {
 
             //then:
             assertThat(submissionEnvelope.isEditable()).isTrue();
+        });
+    }
+
+    @Test
+    public void testCanAddTo() {
+        Arrays.asList(
+                SubmissionState.GRAPH_VALIDATION_REQUESTED,
+                SubmissionState.GRAPH_VALIDATING,
+                SubmissionState.EXPORTING,
+                SubmissionState.PROCESSING,
+                SubmissionState.CLEANUP,
+                SubmissionState.ARCHIVED,
+                SubmissionState.SUBMITTED
+        ).forEach(state -> {
+            //given:
+            SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+            submissionEnvelope.enactStateTransition(state);
+            assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
+
+            //then:
+            assertThat(submissionEnvelope.canAddTo()).isFalse();
+        });
+
+        Arrays.asList(
+                SubmissionState.METADATA_VALIDATING,
+                SubmissionState.PENDING,
+                SubmissionState.METADATA_VALID,
+                SubmissionState.METADATA_INVALID,
+                SubmissionState.EXPORTED,
+                SubmissionState.GRAPH_VALID,
+                SubmissionState.GRAPH_INVALID,
+                SubmissionState.COMPLETE,
+                SubmissionState.DRAFT,
+                SubmissionState.ARCHIVING
+        ).forEach(state -> {
+            //given:
+            SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+            submissionEnvelope.enactStateTransition(state);
+            assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
+
+            //then:
+            assertThat(submissionEnvelope.canAddTo()).isTrue();
         });
     }
 
