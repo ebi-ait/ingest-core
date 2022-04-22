@@ -1,16 +1,19 @@
 package org.humancellatlas.ingest.archiving.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Data
 @Document
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ArchiveJob {
 
-    private UUID uuid;
+    protected @Id @JsonIgnore String id;
     private String submissionUuid;
     private Instant createdDate;
     private Instant responseDate;

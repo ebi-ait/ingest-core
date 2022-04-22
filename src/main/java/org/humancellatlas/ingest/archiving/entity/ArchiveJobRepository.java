@@ -7,9 +7,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 @CrossOrigin
-public interface ArchiveJobRepository extends MongoRepository<ArchiveJob, Uuid> {
-
-    Page<ArchiveJob> findByUuid(Uuid uuid, Pageable pageable);
+public interface ArchiveJobRepository extends MongoRepository<ArchiveJob, String> {
 
     Page<ArchiveJob> findBySubmissionUuid(String submissionUuid, Pageable pageable);
 }
