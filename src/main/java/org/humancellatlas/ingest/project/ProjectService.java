@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.audit.AuditLog;
 import org.humancellatlas.ingest.audit.AuditLogService;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
@@ -208,5 +209,9 @@ public class ProjectService {
         List<Project> projects = mongoTemplate.find(query.with(pageable), Project.class);
         long count = mongoTemplate.count(query, Project.class);
         return new PageImpl<>(projects, pageable, count);
+    }
+
+    public List<AuditLog> getProjectAuditLog(Project project) {
+        return auditLogService.getAuditLogOf(project);
     }
 }

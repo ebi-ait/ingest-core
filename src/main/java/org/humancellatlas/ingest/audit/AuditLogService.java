@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.AbstractEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -15,4 +17,7 @@ public class AuditLogService {
         auditLogRepository.save(new AuditLog(event, entity));
     }
 
+    public List<AuditLog> getAuditLogOf(AbstractEntity entity) {
+        return auditLogRepository.findByEntityEqualsOrderByDateDesc(entity);
+    }
 }
