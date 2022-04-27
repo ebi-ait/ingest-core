@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.audit.AuditLogService;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.bundle.BundleType;
@@ -25,6 +26,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.util.*;
@@ -60,6 +62,7 @@ public class ProjectService {
     private final @NonNull MetadataUpdateService metadataUpdateService;
     private final @NonNull SchemaService schemaService;
     private final @NonNull BundleManifestRepository bundleManifestRepository;
+    private final @NonNull AuditLogService auditLogService;
 
     private final @NonNull ProjectEventHandler projectEventHandler;
 
@@ -101,14 +104,30 @@ public class ProjectService {
             project.setCataloguedDate(Instant.now());
         }
 
+        String wranglingStateUpdate = wranglingStateUpdate(project, patch);
         Project updatedProject = metadataUpdateService.update(project, patch);
 
         if (sendNotification) {
             projectEventHandler.editedProjectMetadata(updatedProject);
         }
+
+        if (StringUtils.hasText(wranglingStateUpdate)) {
+            auditLogService.addAuditLog(wranglingStateUpdate, project);
+        }
+
         return updatedProject;
     }
 
+    private String wranglingStateUpdate(Project project, ObjectNode patch) {
+        WranglingState newWranglingState = patch.has("wranglingState") ?
+                WranglingState.getName(patch.get("wranglingState").asText()) : null;
+
+        if(project.getWranglingState() != (newWranglingState)) {
+            return String.format( "Wrangling State updated from %s to %s", project.getWranglingState(), newWranglingState);
+        }
+
+        return null;
+}
 
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
         if (!project.getIsUpdate()) {
