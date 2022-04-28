@@ -98,7 +98,7 @@ public class ArchiveJobControllerTest {
     @Test
     public void when_existing_archiving_job_in_completed_status_returns_valid_response() throws Exception {
         final ArchiveJob anArchiveJob = createAnArchiveJob(ARCHIVE_JOB_ID, SUBMISSION_UUID, COMPLETED_STATUS);
-        setRArchiveResult(anArchiveJob);
+        setArchiveResult(anArchiveJob);
 
         given(this.archiveJobRepository.findById(ARCHIVE_JOB_ID))
                 .willReturn(Optional.of(anArchiveJob));
@@ -124,7 +124,7 @@ public class ArchiveJobControllerTest {
         return archiveJob;
     }
 
-    private void setRArchiveResult(ArchiveJob anArchiveJob) {
+    private void setArchiveResult(ArchiveJob anArchiveJob) {
         Map<String, Object> resultByArchive = new HashMap<>();
         Map<String, List<Map<String, String>>> experimentsResult = new HashMap<>();
         experimentsResult.put("experiments", List.of(Map.of("accession", "1234"), Map.of("uuid", "1-2-3-4")));
