@@ -97,7 +97,7 @@ public class ProcessController {
     }
 
 
-    @CheckAllowed(value = "#submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                      @RequestBody Process process,
@@ -112,7 +112,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @CheckAllowed(value = "#submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes/{id}", method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> linkProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                       @PathVariable("id") Process process,
@@ -128,7 +128,7 @@ public class ProcessController {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
-    @CheckAllowed(value = "#analysis.submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#analysis.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL,
             method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> oldAddBundleReference(@PathVariable("analysis_id") Process analysis,
@@ -139,7 +139,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @CheckAllowed(value = "#analysis.submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#analysis.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL,
             method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addBundleReference(@PathVariable("analysis_id") Process analysis,
@@ -155,7 +155,7 @@ public class ProcessController {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
-    @CheckAllowed(value = "#analysis.submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#analysis.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL,
             method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> addOutputFileReference(@PathVariable("analysis_id") Process analysis,
@@ -166,7 +166,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @CheckAllowed(value = "#analysis.submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#analysis.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/processes/{analysis_id}/" + Links.INPUT_FILES_URL,
             method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addInputFileReference(@PathVariable("analysis_id") Process analysis,
@@ -185,7 +185,7 @@ public class ProcessController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
     }
 
-    @CheckAllowed(value = "#process.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#process.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PatchMapping(path = "/processes/{id}")
     HttpEntity<?> patchProcess(@PathVariable("id") Process process,
                                @RequestBody final ObjectNode patch,
@@ -197,7 +197,7 @@ public class ProcessController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @CheckAllowed(value = "#process.submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#process.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/processes/{id}/protocols", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkProtocolsToProcess(@PathVariable("id") Process process,
                                          @RequestBody Resources<Object> incoming,

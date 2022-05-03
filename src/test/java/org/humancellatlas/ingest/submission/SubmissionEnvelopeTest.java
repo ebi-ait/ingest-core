@@ -170,7 +170,7 @@ public class SubmissionEnvelopeTest {
         assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
 
         //then:
-        assertThat(submissionEnvelope.canAddTo()).isFalse();
+        assertThat(submissionEnvelope.isSystemEditable()).isFalse();
     }
 
     @ParameterizedTest
@@ -193,7 +193,7 @@ public class SubmissionEnvelopeTest {
         assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(state);
 
         //then:
-        assertThat(submissionEnvelope.canAddTo()).isTrue();
+        assertThat(submissionEnvelope.isSystemEditable()).isTrue();
     }
 
     private List<SubmissionState> getAllowedStates(SubmissionState state) {

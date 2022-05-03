@@ -67,7 +67,7 @@ public class BiomaterialController {
     private @Autowired
     MetadataLinkingService metadataLinkingService;
 
-    @CheckAllowed(value = "#submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                          @RequestBody Biomaterial biomaterial,
@@ -82,7 +82,7 @@ public class BiomaterialController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @CheckAllowed(value = "#submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials/{id}", method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> linkBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                           @PathVariable("id") Biomaterial biomaterial,
@@ -92,7 +92,7 @@ public class BiomaterialController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @CheckAllowed(value = "#biomaterial.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#biomaterial.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PatchMapping(path = "/biomaterials/{id}")
     HttpEntity<?> patchBiomaterial(@PathVariable("id") Biomaterial biomaterial,
                                    @RequestBody final ObjectNode patch,
@@ -104,7 +104,7 @@ public class BiomaterialController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @CheckAllowed(value = "#biomaterial.submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#biomaterial.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/biomaterials/{id}/inputToProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkBiomaterialAsInputToProcesses(@PathVariable("id") Biomaterial biomaterial,
                                                     @RequestBody Resources<Object> incoming,
@@ -117,7 +117,7 @@ public class BiomaterialController {
         return ResponseEntity.ok().build();
     }
 
-    @CheckAllowed(value = "#biomaterial.submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#biomaterial.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/biomaterials/{id}/derivedByProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkBiomaterialAsDerivedByProcesses(@PathVariable("id") Biomaterial biomaterial,
                                                       @RequestBody Resources<Object> incoming,

@@ -118,7 +118,7 @@ public class ProjectController {
         return ResponseEntity.ok().body(assembler.toFullResource(updatedProject));
     }
 
-    @CheckAllowed(value = "#submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
     ResponseEntity<Resource<?>> addProjectToEnvelope(
             @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
@@ -185,7 +185,7 @@ public class ProjectController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
     }
 
-    @CheckAllowed(value = "#submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PutMapping(path = "projects/{proj_id}/submissionEnvelopes/{sub_id}")
     ResponseEntity<Resource<?>> linkSubmissionToProject(
             @PathVariable("proj_id") Project project,
