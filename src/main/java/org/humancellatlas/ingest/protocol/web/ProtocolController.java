@@ -74,7 +74,7 @@ public class ProtocolController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @CheckAllowed(value = "#protocol.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#protocol.submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/protocols/{id}", method = RequestMethod.PATCH)
     HttpEntity<?> patchProtocol(@PathVariable("id") Protocol protocol,
                                 @RequestBody final ObjectNode patch,

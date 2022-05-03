@@ -92,7 +92,7 @@ public class BiomaterialController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @CheckAllowed(value = "#biomaterial.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#biomaterial.submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
     @PatchMapping(path = "/biomaterials/{id}")
     HttpEntity<?> patchBiomaterial(@PathVariable("id") Biomaterial biomaterial,
                                    @RequestBody final ObjectNode patch,

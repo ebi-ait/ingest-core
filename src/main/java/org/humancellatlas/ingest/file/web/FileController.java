@@ -99,7 +99,7 @@ public class FileController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @CheckAllowed(value = "#file.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#file.submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
     @PatchMapping(path = "/files/{id}")
     HttpEntity<?> patchFile(@PathVariable("id") File file,
                             @RequestBody final ObjectNode patch,
