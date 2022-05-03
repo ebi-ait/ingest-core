@@ -49,7 +49,7 @@ public class ProtocolController {
     private final @NonNull MetadataCrudService metadataCrudService;
     private final @NonNull MetadataUpdateService metadataUpdateService;
 
-    @CheckAllowed(value = "#submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols", method = RequestMethod.POST)
     ResponseEntity<Resource<?>> addProtocolToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                       @RequestBody Protocol protocol,
@@ -64,7 +64,7 @@ public class ProtocolController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @CheckAllowed(value = "#submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/protocols/{protocol_id}", method = RequestMethod.PUT)
     ResponseEntity<Resource<?>> linkProtocolToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                        @PathVariable("id") Protocol protocol,
@@ -74,7 +74,7 @@ public class ProtocolController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @CheckAllowed(value = "#protocol.submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#protocol.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/protocols/{id}", method = RequestMethod.PATCH)
     HttpEntity<?> patchProtocol(@PathVariable("id") Protocol protocol,
                                 @RequestBody final ObjectNode patch,

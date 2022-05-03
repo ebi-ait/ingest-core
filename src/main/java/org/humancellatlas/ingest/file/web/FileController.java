@@ -73,7 +73,7 @@ public class FileController {
     private @Autowired
     MetadataLinkingService metadataLinkingService;
 
-    @CheckAllowed(value = "#submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
             method = RequestMethod.POST,
             produces = MediaTypes.HAL_JSON_VALUE)
@@ -99,7 +99,7 @@ public class FileController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @CheckAllowed(value = "#file.submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#file.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PatchMapping(path = "/files/{id}")
     HttpEntity<?> patchFile(@PathVariable("id") File file,
                             @RequestBody final ObjectNode patch,
@@ -111,7 +111,7 @@ public class FileController {
         return ResponseEntity.accepted().body(resource);
     }
 
-    @CheckAllowed(value = "#file.submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#file.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/files/{id}/inputToProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkFileAsInputToProcesses(@PathVariable("id") File file,
                                              @RequestBody Resources<Object> incoming,
@@ -124,7 +124,7 @@ public class FileController {
         return ResponseEntity.ok().build();
     }
 
-    @CheckAllowed(value = "#file.submissionEnvelope.canAddTo()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#file.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/files/{id}/derivedByProcesses", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkFileAsDerivedByProcesses(@PathVariable("id") File file,
                                                @RequestBody Resources<Object> incoming,

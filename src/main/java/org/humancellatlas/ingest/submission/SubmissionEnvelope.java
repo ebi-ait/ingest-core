@@ -147,9 +147,12 @@ public class SubmissionEnvelope extends AbstractEntity {
         return !this.getNonEditableStates().contains(this.submissionState);
     }
 
-    public boolean canAddTo () {
-        // The importer has to add metadata and perform linking while the submission may be in METADATA_VALIDATING
-        // So, this is used for the special case of allowing the importer to function
+    public boolean isSystemEditable() {
+        // The importer and validator have to add and edit metadata and perform linking while the submission
+        // may be in METADATA_VALIDATING
+        // So, this is used for the special case of allowing ingest components to function
+        // If anything, this highlights problems with the system design - we have many dependencies across domain
+        // boundaries
         return this.getNonEditableStates().stream()
                 .filter(state -> state != SubmissionState.PENDING)
                 .filter(state -> state != SubmissionState.METADATA_VALIDATING)
