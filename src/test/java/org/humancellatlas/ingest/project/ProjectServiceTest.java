@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.project;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.assertj.core.api.Assertions;
+import org.humancellatlas.ingest.audit.AuditLogService;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
@@ -72,6 +73,9 @@ public class ProjectServiceTest {
 
     @MockBean
     private ProjectEventHandler projectEventHandler;
+
+    @MockBean
+    private AuditLogService auditLogService;
 
     @BeforeEach
     void setUp() {
