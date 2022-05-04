@@ -11,6 +11,8 @@ import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.security.CheckAllowed;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.exception.NotAllowedDuringSubmissionStateException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -73,6 +75,8 @@ public class FileController {
     private @Autowired
     MetadataLinkingService metadataLinkingService;
 
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
             method = RequestMethod.POST,
@@ -82,10 +86,20 @@ public class FileController {
                                            final PersistentEntityResourceAssembler assembler) {
         try {
             File createdFile = fileService.addFileToSubmissionEnvelope(submissionEnvelope, file);
+            logFileDetails(submissionEnvelope, createdFile);
             return ResponseEntity.accepted().body(assembler.toFullResource(createdFile));
         } catch (FileAlreadyExistsException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private void logFileDetails(SubmissionEnvelope submissionEnvelope, File createdFile) {
+        logger.info("submission uuid {}: created File: id {} uuid {} name {} dataFileUuid {}",
+                submissionEnvelope.getUuid(),
+                createdFile.getId(),
+                createdFile.getUuid(),
+                createdFile.getFileName(),
+                createdFile.getDataFileUuid());
     }
 
     @RequestMapping(path = "/files/{id}/validationJob",
