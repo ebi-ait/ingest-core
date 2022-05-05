@@ -77,7 +77,7 @@ public class FileController {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-//    @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
             method = RequestMethod.POST,
             produces = MediaTypes.HAL_JSON_VALUE)
@@ -113,7 +113,7 @@ public class FileController {
         return ResponseEntity.accepted().body(resource);
     }
 
-//    @CheckAllowed(value = "#file.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    @CheckAllowed(value = "#file.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PatchMapping(path = "/files/{id}")
     HttpEntity<?> patchFile(@PathVariable("id") File file,
                             @RequestBody final ObjectNode patch,
