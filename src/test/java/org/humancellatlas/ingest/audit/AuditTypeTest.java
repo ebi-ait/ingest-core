@@ -17,7 +17,6 @@ public class AuditTypeTest {
 
     @Test
     public void testDeserialize() throws IOException {
-        //"\"New\""
         assertEquals(objectMapper.readValue("\"Status updated\"", AuditType.class), AuditType.STATUS_UPDATED);
     }
 
