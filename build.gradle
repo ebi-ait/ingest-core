@@ -58,6 +58,8 @@ dependencies {
     ['actuator', 'data-rest', 'hateoas', 'security', 'web', 'webflux'].forEach {
         implementation "org.springframework.boot:spring-boot-starter-${it}"
     }
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
     implementation('org.springframework.boot:spring-boot-starter-amqp') {
         exclude group: 'org.springframework.retry', module: 'spring-retry'
     }
