@@ -65,6 +65,7 @@ public class File extends MetadataDocument {
                 @JsonProperty("fileName") String fileName) {
         super(EntityType.FILE, content);
         this.setFileName(fileName);
+        this.setDataFileUuid(UUID.randomUUID());
     }
 
     /**
