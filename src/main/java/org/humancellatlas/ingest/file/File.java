@@ -18,6 +18,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.rest.core.annotation.RestResource;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
@@ -56,15 +57,21 @@ public class File extends MetadataDocument {
     private ValidationJob validationJob;
     private FileArchiveResult fileArchiveResult;
     private UUID validationId;
+    @NotNull
     private UUID dataFileUuid;
     private Long size;
     private String fileContentType;
+
+    public File() {
+        this(EntityType.FILE, null);
+    }
 
     @JsonCreator
     public File(@JsonProperty("content") Object content,
                 @JsonProperty("fileName") String fileName) {
         super(EntityType.FILE, content);
         this.setFileName(fileName);
+        setDataFileUuid(UUID.randomUUID());
     }
 
     /**

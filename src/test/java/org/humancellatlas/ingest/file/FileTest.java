@@ -4,6 +4,10 @@ import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
@@ -68,5 +72,20 @@ public class FileTest {
         //then:
         assertThat(file.getDerivedByProcesses()).contains(process);
         assertThat(file.getSubmissionEnvelope()).isEqualTo(submissionEnvelope);
+    }
+
+    @ParameterizedTest
+    @MethodSource("testFiles")
+    public void newFileHasDataFileUuidNotNull(File file) {
+        assertThat(file)
+                .extracting("dataFileUuid")
+                .doesNotContainNull();
+    }
+
+    private static Stream<File> testFiles() {
+        return Stream.of(
+                new File(),
+                new File(null, "test-File")
+        );
     }
 }

@@ -24,9 +24,13 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -45,7 +49,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 @ExposesResourceFor(File.class)
 @RequiredArgsConstructor
 @Getter
-
+@Validated
 public class FileController {
 
     @NonNull
@@ -77,12 +81,18 @@ public class FileController {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
+        return new ResponseEntity<>("not valid due to validation error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/submissionEnvelopes/{sub_id}/files",
             method = RequestMethod.POST,
             produces = MediaTypes.HAL_JSON_VALUE)
     ResponseEntity<Resource<?>> createFile(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                           @RequestBody File file,
+                                           @RequestBody @Valid File file,
                                            final PersistentEntityResourceAssembler assembler) {
         try {
             File createdFile = fileService.addFileToSubmissionEnvelope(submissionEnvelope, file);

@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
@@ -20,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataM
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -27,13 +29,14 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureDataMongo()
@@ -106,9 +109,9 @@ public class FileControllerTest {
         fileRepository.save(file);
 
         webApp.perform(put("/files/{fileId}/inputToProcesses/", file.getId())
-                .contentType("text/uri-list")
-                .content(uriBuilder.build().toUriString() + "/processes/" + process2.getId() + '\n'
-                        + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
+                        .contentType("text/uri-list")
+                        .content(uriBuilder.build().toUriString() + "/processes/" + process2.getId() + '\n'
+                                + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
 
         verifyThatValidationStateChangedToDraftWhenGraphValid(file);
@@ -123,9 +126,9 @@ public class FileControllerTest {
     public void testLinkFileAsInputToMultipleProcessesUsingPostMethodWithManyProcessesInPayload() throws Exception {
         // when
         webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
-                .contentType("text/uri-list")
-                .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()
-                        + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
+                        .contentType("text/uri-list")
+                        .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()
+                                + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
 
         // then
@@ -140,8 +143,8 @@ public class FileControllerTest {
     public void testLinkFileAsInputToProcessesUsingPostMethodWithOneProcessInPayload() throws Exception {
         // when
         webApp.perform(post("/files/{fileId}/inputToProcesses/", file.getId())
-                .contentType("text/uri-list")
-                .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()))
+                        .contentType("text/uri-list")
+                        .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()))
                 .andExpect(status().isOk());
 
         // then
@@ -156,8 +159,8 @@ public class FileControllerTest {
     public void testLinkFileAsDerivedByProcessesUsingPostMethodWithOneProcessInPayload() throws Exception {
         // when
         webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
-                .contentType("text/uri-list")
-                .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()))
+                        .contentType("text/uri-list")
+                        .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()))
                 .andExpect(status().isOk());
 
         // then
@@ -172,9 +175,9 @@ public class FileControllerTest {
     public void testLinkFileAsDerivedByProcessesUsingPostMethodWithManyProcessesInPayload() throws Exception {
         // when
         webApp.perform(post("/files/{fileId}/derivedByProcesses/", file.getId())
-                .contentType("text/uri-list")
-                .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()
-                        + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
+                        .contentType("text/uri-list")
+                        .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()
+                                + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
 
         // then
@@ -193,9 +196,9 @@ public class FileControllerTest {
 
         // when
         webApp.perform(put("/files/{fileId}/derivedByProcesses/", file.getId())
-                .contentType("text/uri-list")
-                .content(uriBuilder.build().toUriString() + "/processes/" + process2.getId() + '\n'
-                        + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
+                        .contentType("text/uri-list")
+                        .content(uriBuilder.build().toUriString() + "/processes/" + process2.getId() + '\n'
+                                + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
 
         // then
@@ -268,5 +271,59 @@ public class FileControllerTest {
         //and:
         file = fileRepository.findById(file.getId()).get();
         assertThat(file.getValidationJob().getValidationReport().getValidationState()).isEqualTo(ValidationState.VALID);
+    }
+
+
+    @Test
+    public void when_new_File_ctor__pass() throws Exception {
+        String filePayload = objectMapper.writeValueAsString(new File());
+        webApp.perform(
+                post("/submissionEnvelopes/{id}/files", submissionEnvelope.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(filePayload)
+        ).andExpect(status().isAccepted());
+    }
+
+    @Test
+    public void when_DataFileUuid_is_null__accepted_with_random() throws Exception {
+        ObjectNode patch = createPayloadhNoDataFileUuid();
+        webApp.perform(
+                        post("/submissionEnvelopes/{id}/files", submissionEnvelope.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(patch))
+                ).andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.dataFileUuid").isNotEmpty());
+    }
+
+    @Test
+    public void when_payload_is_good__pass() throws Exception {
+        ObjectNode patch = createValidFilePayload();
+        webApp.perform(
+                post("/submissionEnvelopes/{id}/files", submissionEnvelope.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(patch))
+        ).andExpect(status().isAccepted());
+    }
+
+
+    private ObjectNode createValidFilePayload() {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode newFilePayload = mapper.createObjectNode();
+
+        newFilePayload
+                .put("dataFileUuid", UUID.randomUUID().toString())
+                .put("fileName", "test-file")
+                .put("fileContentType", "text/plain");
+        return newFilePayload;
+    }
+
+    private ObjectNode createPayloadhNoDataFileUuid() {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode newFilePayload = mapper.createObjectNode();
+
+        newFilePayload
+                .put("fileName", "test-file")
+                .put("fileContentType", "text/plain");
+        return newFilePayload;
     }
 }
