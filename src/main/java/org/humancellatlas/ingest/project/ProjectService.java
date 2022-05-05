@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.audit.AuditLog;
 import org.humancellatlas.ingest.audit.AuditLogService;
+import org.humancellatlas.ingest.audit.AuditType;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.bundle.BundleType;
@@ -27,7 +28,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.util.*;
@@ -105,26 +105,26 @@ public class ProjectService {
             project.setCataloguedDate(Instant.now());
         }
 
-        String wranglingStateUpdate = wranglingStateUpdate(project, patch);
+        AuditLog wranglingStateUpdate = wranglingStateUpdate(project, patch);
         Project updatedProject = metadataUpdateService.update(project, patch);
 
         if (sendNotification) {
             projectEventHandler.editedProjectMetadata(updatedProject);
         }
 
-        if (StringUtils.hasText(wranglingStateUpdate)) {
-            auditLogService.addAuditLog(wranglingStateUpdate, project);
+        if (wranglingStateUpdate != null) {
+            auditLogService.addAuditLog(wranglingStateUpdate);
         }
 
         return updatedProject;
     }
 
-    private String wranglingStateUpdate(Project project, ObjectNode patch) {
+    private AuditLog wranglingStateUpdate(Project project, ObjectNode patch) {
         WranglingState newWranglingState = patch.has("wranglingState") ?
                 WranglingState.getName(patch.get("wranglingState").asText()) : null;
 
         if(project.getWranglingState() != (newWranglingState)) {
-            return String.format( "Wrangling State updated from %s to %s", project.getWranglingState(), newWranglingState);
+            return new AuditLog(AuditType.STATUS_UPDATED, project.getWranglingState(), newWranglingState, project);
         }
 
         return null;

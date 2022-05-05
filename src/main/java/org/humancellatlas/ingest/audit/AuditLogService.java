@@ -13,8 +13,8 @@ public class AuditLogService {
 
     private final AuditLogRepository auditLogRepository;
 
-    public void addAuditLog(String event, AbstractEntity entity) {
-        auditLogRepository.save(new AuditLog(event, entity));
+    public void addAuditLog(AuditLog auditLog) {
+        auditLogRepository.save(auditLog);
     }
 
     public List<AuditLog> getAuditLogOf(AbstractEntity entity) {

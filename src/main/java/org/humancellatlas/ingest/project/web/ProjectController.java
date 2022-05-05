@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.audit.AuditLog;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
@@ -222,7 +221,6 @@ public class ProjectController {
 
     @GetMapping(path="projects/{id}/audit-logs")
     public ResponseEntity<?> projectAuditLog(@PathVariable("id") Project project) {
-        List<AuditLog> projectAuditLog = projectService.getProjectAuditLog(project);
-        return ResponseEntity.ok(projectAuditLog);
+        return ResponseEntity.ok(projectService.getProjectAuditLog(project));
     }
 }
