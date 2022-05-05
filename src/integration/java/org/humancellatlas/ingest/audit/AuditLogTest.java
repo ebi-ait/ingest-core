@@ -16,9 +16,6 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -80,11 +77,10 @@ public class AuditLogTest {
 
         // then
         AuditLog actual = projectService.getProjectAuditLog(project).get(0);
-        AuditLog expected = new AuditLog(AuditType.STATUS_UPDATED, initialWranglingState, updatedWranglingState, project);
-        assertThat(actual)
-                .usingComparatorForFields((x,y)->0 )
-                .isEqualToComparingOnlyGivenFields(expected, "auditType", "before", "after");
 
+        assertThat(actual.getAuditType()).isEqualTo(AuditType.STATUS_UPDATED);
+        assertThat(actual.getBefore()).isEqualTo(initialWranglingState.name());
+        assertThat(actual.getAfter()).isEqualTo(updatedWranglingState.name());
     }
 
     private void initAuditLogService() {
