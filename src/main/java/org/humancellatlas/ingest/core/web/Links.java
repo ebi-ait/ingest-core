@@ -113,7 +113,7 @@ public class Links {
     public static final String SUBMISSION_DOCUMENTS_SM_REL = "documentSmReport";
 
     // Links to entities for projects
-    public static final String AUDIT_LOGS_URL = "/audit-logs";
+    public static final String AUDIT_LOGS_URL = "/auditLogs";
     public static final String AUDIT_LOGS_REL = "auditLogs";
 
     // Links for analyses
