@@ -57,8 +57,6 @@ public class AuditLogTest {
     private ProjectEventHandler projectEventHandler;
 
 
-    Comparator<Instant> upToMillies = Comparator.comparing(d -> d.truncatedTo(ChronoUnit.MILLIS));
-
     @BeforeEach
     private void setup() {
         initAuditLogService();
