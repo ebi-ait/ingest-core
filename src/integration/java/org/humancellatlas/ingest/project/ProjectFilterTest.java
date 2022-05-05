@@ -1,6 +1,6 @@
 package org.humancellatlas.ingest.project;
 
-import org.humancellatlas.ingest.audit.AuditLogService;
+import org.humancellatlas.ingest.audit.AuditEntryService;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
@@ -64,7 +64,7 @@ class ProjectFilterTest {
     private ProjectEventHandler projectEventHandler;
 
     @MockBean
-    private AuditLogService auditLogService;
+    private AuditEntryService auditEntryService;
 
     private Project project1;
     private Project project2;
@@ -476,7 +476,7 @@ class ProjectFilterTest {
                 metadataUpdateService,
                 schemaService,
                 bundleManifestRepository,
-                auditLogService,
+                auditEntryService,
                 projectEventHandler
                 );
         assertThat(this.mongoTemplate.findAll(Project.class)).hasSize(0);

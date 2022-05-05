@@ -20,17 +20,17 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
-public class AuditLogTest {
+public class AuditEntryTest {
 
     private ProjectService projectService;
 
-    private AuditLogService auditLogService;
+    private AuditEntryService auditEntryService;
 
     @Autowired
     private MongoTemplate mongoTemplate;
 
     @Autowired
-    private AuditLogRepository auditLogRepository;
+    private AuditEntryRepository auditEntryRepository;
 
     @MockBean
     private SubmissionEnvelopeRepository submissionEnvelopeRepository;
@@ -56,13 +56,13 @@ public class AuditLogTest {
 
     @BeforeEach
     private void setup() {
-        initAuditLogService();
+        initAuditEntryService();
         initProjectService();
     }
 
 
     @Test
-    void testAuditLogGenerationOnProjectStateUpdate() {
+    void testAuditEntryGenerationOnProjectStateUpdate() {
         //given
         WranglingState initialWranglingState = WranglingState.NEW;
         Project project = new Project("{\"name\": \"Project 1\"}");
@@ -76,15 +76,15 @@ public class AuditLogTest {
         projectService.update(project, patchUpdate, false);
 
         // then
-        AuditLog actual = projectService.getProjectAuditLog(project).get(0);
+        AuditEntry actual = projectService.getProjectAuditEntry(project).get(0);
 
         assertThat(actual.getAuditType()).isEqualTo(AuditType.STATUS_UPDATED);
         assertThat(actual.getBefore()).isEqualTo(initialWranglingState.name());
         assertThat(actual.getAfter()).isEqualTo(updatedWranglingState.name());
     }
 
-    private void initAuditLogService() {
-        this.auditLogService = new AuditLogService(auditLogRepository);
+    private void initAuditEntryService() {
+        this.auditEntryService = new AuditEntryService(auditEntryRepository);
     }
 
     private void initProjectService() {
@@ -96,7 +96,7 @@ public class AuditLogTest {
                 metadataUpdateService,
                 schemaService,
                 bundleManifestRepository,
-                auditLogService,
+                auditEntryService,
                 projectEventHandler
         );
     }
@@ -104,7 +104,7 @@ public class AuditLogTest {
     @AfterEach
     private void tearDown() {
         this.mongoTemplate.dropCollection(Project.class);
-        this.mongoTemplate.dropCollection(AuditLog.class);
+        this.mongoTemplate.dropCollection(AuditEntry.class);
 
     }
 }

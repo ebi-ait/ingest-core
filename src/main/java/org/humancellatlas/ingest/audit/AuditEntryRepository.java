@@ -10,8 +10,8 @@ import java.util.List;
 
 @Repository
 @RestResource(exported=false)
-public interface AuditLogRepository extends MongoRepository<AuditLog, String> {
+public interface AuditEntryRepository extends MongoRepository<AuditEntry, String> {
 
-    List<AuditLog> findByEntityEqualsOrderByDateDesc(AbstractEntity entity);
+    List<AuditEntry> findByEntityEqualsOrderByDateDesc(AbstractEntity entity);
 }
 

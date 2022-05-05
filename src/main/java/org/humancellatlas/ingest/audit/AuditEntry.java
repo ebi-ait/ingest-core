@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import java.time.Instant;
 
 @Getter
-public class AuditLog {
+public class AuditEntry {
     protected @Id @JsonIgnore String id;
     @NonNull private AuditType auditType;
     private Object before;
@@ -22,7 +22,7 @@ public class AuditLog {
     private @CreatedBy String user;
     @DBRef(lazy = true) @JsonIgnore @NonNull private AbstractEntity entity;
 
-    public AuditLog(AuditType auditType, Object before, Object after, AbstractEntity entity) {
+    public AuditEntry(AuditType auditType, Object before, Object after, AbstractEntity entity) {
         this.auditType = auditType;
         this.before = before;
         this.after = after;

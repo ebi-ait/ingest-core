@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.humancellatlas.ingest.audit.AuditLog;
-import org.humancellatlas.ingest.audit.AuditLogService;
+import org.humancellatlas.ingest.audit.AuditEntry;
+import org.humancellatlas.ingest.audit.AuditEntryService;
 import org.humancellatlas.ingest.audit.AuditType;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
@@ -63,7 +63,7 @@ public class ProjectService {
     private final @NonNull MetadataUpdateService metadataUpdateService;
     private final @NonNull SchemaService schemaService;
     private final @NonNull BundleManifestRepository bundleManifestRepository;
-    private final @NonNull AuditLogService auditLogService;
+    private final @NonNull AuditEntryService auditEntryService;
 
     private final @NonNull ProjectEventHandler projectEventHandler;
 
@@ -105,7 +105,7 @@ public class ProjectService {
             project.setCataloguedDate(Instant.now());
         }
 
-        AuditLog wranglingStateUpdate = wranglingStateUpdate(project, patch);
+        AuditEntry wranglingStateUpdate = wranglingStateUpdate(project, patch);
         Project updatedProject = metadataUpdateService.update(project, patch);
 
         if (sendNotification) {
@@ -113,18 +113,18 @@ public class ProjectService {
         }
 
         if (wranglingStateUpdate != null) {
-            auditLogService.addAuditLog(wranglingStateUpdate);
+            auditEntryService.addAuditEntry(wranglingStateUpdate);
         }
 
         return updatedProject;
     }
 
-    private AuditLog wranglingStateUpdate(Project project, ObjectNode patch) {
+    private AuditEntry wranglingStateUpdate(Project project, ObjectNode patch) {
         WranglingState newWranglingState = patch.has("wranglingState") ?
                 WranglingState.getName(patch.get("wranglingState").asText()) : null;
 
         if(project.getWranglingState() != (newWranglingState)) {
-            return new AuditLog(AuditType.STATUS_UPDATED, project.getWranglingState(), newWranglingState, project);
+            return new AuditEntry(AuditType.STATUS_UPDATED, project.getWranglingState(), newWranglingState, project);
         }
 
         return null;
@@ -211,7 +211,7 @@ public class ProjectService {
         return new PageImpl<>(projects, pageable, count);
     }
 
-    public List<AuditLog> getProjectAuditLog(Project project) {
-        return auditLogService.getAuditLogOf(project);
+    public List<AuditEntry> getProjectAuditEntry(Project project) {
+        return auditEntryService.getAuditEntryFor(project);
     }
 }
