@@ -219,7 +219,7 @@ public class ProjectController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
     }
 
-    @GetMapping(path="projects/{id}/audit-logs")
+    @GetMapping(path="projects/{id}/auditLogs")
     public ResponseEntity<?> projectAuditLog(@PathVariable("id") Project project) {
         return ResponseEntity.ok(projectService.getProjectAuditEntry(project));
     }

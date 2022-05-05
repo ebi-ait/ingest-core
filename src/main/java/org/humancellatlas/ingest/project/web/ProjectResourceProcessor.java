@@ -4,7 +4,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.project.Project;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
