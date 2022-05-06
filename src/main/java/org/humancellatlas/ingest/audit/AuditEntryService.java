@@ -17,7 +17,7 @@ public class AuditEntryService {
         auditEntryRepository.save(auditEntry);
     }
 
-    public List<AuditEntry> getAuditEntryFor(AbstractEntity entity) {
+    public List<AuditEntry> getAuditEntriesForAbstractEntity(AbstractEntity entity) {
         return auditEntryRepository.findByEntityEqualsOrderByDateDesc(entity);
     }
 }

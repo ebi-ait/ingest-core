@@ -211,7 +211,7 @@ public class ProjectService {
         return new PageImpl<>(projects, pageable, count);
     }
 
-    public List<AuditEntry> getProjectAuditEntry(Project project) {
-        return auditEntryService.getAuditEntryFor(project);
+    public List<AuditEntry> getProjectAuditEntries(Project project) {
+        return auditEntryService.getAuditEntriesForAbstractEntity(project);
     }
 }

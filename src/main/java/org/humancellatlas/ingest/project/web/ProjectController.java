@@ -220,7 +220,7 @@ public class ProjectController {
     }
 
     @GetMapping(path="projects/{id}/auditLogs")
-    public ResponseEntity<?> projectAuditLog(@PathVariable("id") Project project) {
-        return ResponseEntity.ok(projectService.getProjectAuditEntry(project));
+    public ResponseEntity<?> getProjectAuditLogs(@PathVariable("id") Project project) {
+        return ResponseEntity.ok(projectService.getProjectAuditEntries(project));
     }
 }

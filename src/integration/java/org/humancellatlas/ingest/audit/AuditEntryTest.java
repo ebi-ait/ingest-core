@@ -76,7 +76,7 @@ public class AuditEntryTest {
         projectService.update(project, patchUpdate, false);
 
         // then
-        AuditEntry actual = projectService.getProjectAuditEntry(project).get(0);
+        AuditEntry actual = projectService.getProjectAuditEntries(project).get(0);
 
         assertThat(actual.getAuditType()).isEqualTo(AuditType.STATUS_UPDATED);
         assertThat(actual.getBefore()).isEqualTo(initialWranglingState.name());
