@@ -20,13 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Javadocs go here!
@@ -37,6 +37,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Getter
+@Validated
 public class FileService {
     private final @NonNull
     SubmissionEnvelopeRepository submissionEnvelopeRepository;
@@ -57,7 +58,8 @@ public class FileService {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, File file) {
+    public File addFileToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
+                                            @Valid File file) {
         if (!fileRepository.findBySubmissionEnvelopeAndFileName(submissionEnvelope, file.getFileName()).isEmpty()) {
             throw new FileAlreadyExistsException(String.format("File with name %s already exists in envelope %s", file.getFileName(), submissionEnvelope.getId()));
         } else {
