@@ -63,7 +63,8 @@ public class File extends MetadataDocument {
     private String fileContentType;
 
     public File() {
-        this(EntityType.FILE, null);
+        super(EntityType.FILE, null);
+        initFile();
     }
 
     @JsonCreator
@@ -71,6 +72,10 @@ public class File extends MetadataDocument {
                 @JsonProperty("fileName") String fileName) {
         super(EntityType.FILE, content);
         this.setFileName(fileName);
+        initFile();
+    }
+
+    private void initFile() {
         setDataFileUuid(UUID.randomUUID());
     }
 
