@@ -2,14 +2,22 @@ package org.humancellatlas.ingest.migrations;
 
 import com.github.mongobee.changeset.ChangeLog;
 import com.github.mongobee.changeset.ChangeSet;
+import com.mongodb.Block;
 import com.mongodb.MongoCommandException;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
+
+import static com.mongodb.client.model.Filters.eq;
 
 @ChangeLog
 public class MongoChangeLog {
@@ -182,5 +190,17 @@ public class MongoChangeLog {
         update = new ArrayList<>();
         update.add(new Document("$set", Document.parse("{ 'submissionState': 'METADATA_INVALID' }")));
         db.getCollection("submissionEnvelope").updateMany(filter, update);
+    }
+
+    @ChangeSet(order = "2022-05-06",
+               id = "add missing dataFileUuid for File documents with a unique uuid. dcp-764",
+               author = "amnon@ebi.ac.uk")
+    public void addMissingDataFileUuidToFiles(MongoDatabase db) {
+        MongoCollection<Document> files = db.getCollection("file");
+        files.find(eq("dataFileUuid", null))
+             .forEach((Consumer<? super Document>) (Document file) ->
+                files
+                    .updateOne(eq("_id", file.get("_id")),
+                               Updates.set("dataFileUuid", UUID.randomUUID())));
     }
 }
