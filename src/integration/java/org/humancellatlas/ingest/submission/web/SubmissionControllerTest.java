@@ -320,7 +320,6 @@ public class SubmissionControllerTest {
         "GRAPH_VALIDATING",
         "EXPORTING",
         "PROCESSING",
-        "CLEANUP",
         "ARCHIVED",
         "SUBMITTED"
     })
