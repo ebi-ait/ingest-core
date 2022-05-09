@@ -154,6 +154,7 @@ public class SubmissionEnvelope extends AbstractEntity {
         // If anything, this highlights problems with the system design - we have many dependencies across domain
         // boundaries
         return this.getNonEditableStates().stream()
+                .filter(state -> state != SubmissionState.CLEANUP)
                 .filter(state -> state != SubmissionState.PENDING)
                 .filter(state -> state != SubmissionState.METADATA_VALIDATING)
                 .noneMatch(state -> state == this.submissionState);
