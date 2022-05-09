@@ -159,7 +159,6 @@ public class SubmissionEnvelopeTest {
         "GRAPH_VALIDATING",
         "EXPORTING",
         "PROCESSING",
-        "CLEANUP",
         "ARCHIVED",
         "SUBMITTED"
     })
@@ -184,7 +183,8 @@ public class SubmissionEnvelopeTest {
         "GRAPH_INVALID",
         "COMPLETE",
         "DRAFT",
-        "ARCHIVING"
+        "ARCHIVING",
+        "CLEANUP"
     })
     public void testCanAddTo(SubmissionState state) {
         //given:
