@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.audit.AuditEntry;
+import org.humancellatlas.ingest.audit.AuditEntryService;
+import org.humancellatlas.ingest.audit.AuditType;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.bundle.BundleType;
@@ -60,6 +63,7 @@ public class ProjectService {
     private final @NonNull MetadataUpdateService metadataUpdateService;
     private final @NonNull SchemaService schemaService;
     private final @NonNull BundleManifestRepository bundleManifestRepository;
+    private final @NonNull AuditEntryService auditEntryService;
 
     private final @NonNull ProjectEventHandler projectEventHandler;
 
@@ -101,14 +105,30 @@ public class ProjectService {
             project.setCataloguedDate(Instant.now());
         }
 
+        AuditEntry wranglingStateUpdate = wranglingStateUpdate(project, patch);
         Project updatedProject = metadataUpdateService.update(project, patch);
 
         if (sendNotification) {
             projectEventHandler.editedProjectMetadata(updatedProject);
         }
+
+        if (wranglingStateUpdate != null) {
+            auditEntryService.addAuditEntry(wranglingStateUpdate);
+        }
+
         return updatedProject;
     }
 
+    private AuditEntry wranglingStateUpdate(Project project, ObjectNode patch) {
+        WranglingState newWranglingState = patch.has("wranglingState") ?
+                WranglingState.getName(patch.get("wranglingState").asText()) : null;
+
+        if(project.getWranglingState() != (newWranglingState)) {
+            return new AuditEntry(AuditType.STATUS_UPDATED, project.getWranglingState(), newWranglingState, project);
+        }
+
+        return null;
+}
 
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
         if (!project.getIsUpdate()) {
@@ -189,5 +209,9 @@ public class ProjectService {
         List<Project> projects = mongoTemplate.find(query.with(pageable), Project.class);
         long count = mongoTemplate.count(query, Project.class);
         return new PageImpl<>(projects, pageable, count);
+    }
+
+    public List<AuditEntry> getProjectAuditEntries(Project project) {
+        return auditEntryService.getAuditEntriesForAbstractEntity(project);
     }
 }
