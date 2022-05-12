@@ -23,7 +23,7 @@ public class SearchFilter {
     @Getter Integer maxCellCount;
     @Getter Integer dcpReleaseNumber;
     @Getter DataAccessTypes dataAccess;
-    @Getter String wranglingLabels;
+    @Getter String labels;
 
     @Builder.Default
     @Getter SearchType searchType = SearchType.AllKeywords;

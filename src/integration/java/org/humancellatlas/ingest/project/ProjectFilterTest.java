@@ -418,10 +418,10 @@ class ProjectFilterTest {
     void filter_by_wrangling_labels() {
         //given
         Project project4 = makeProject("project4");
-        project4.setWranglingLabels(List.of("CellxGene"));
+        project4.setLabels(List.of("CellxGene"));
         this.mongoTemplate.save(project4);
         //when
-        SearchFilter searchFilter = SearchFilter.builder().wranglingLabels("CellxGene").build();
+        SearchFilter searchFilter = SearchFilter.builder().labels("CellxGene").build();
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
