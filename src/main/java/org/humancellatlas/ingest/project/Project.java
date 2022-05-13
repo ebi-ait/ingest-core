@@ -89,7 +89,7 @@ public class Project extends MetadataDocument {
     private Integer dcpReleaseNumber;
 
     @Setter
-    private List<String> labels;
+    private List<String> projectLabels;
 
 
     @JsonCreator

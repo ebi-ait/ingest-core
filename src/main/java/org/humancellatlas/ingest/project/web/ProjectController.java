@@ -112,7 +112,7 @@ public class ProjectController {
                 "wranglingPriority",
                 "wranglingNotes",
                 "dcpReleaseNumber",
-                "labels"
+                "projectLabels"
         );
 
         ObjectNode validPatch = patch.retain(allowedFields);

@@ -415,13 +415,13 @@ class ProjectFilterTest {
     }
 
     @Test
-    void filter_by_wrangling_labels() {
+    void filter_by_project_labels() {
         //given
         Project project4 = makeProject("project4");
-        project4.setLabels(List.of("CellxGene"));
+        project4.setProjectLabels(List.of("CellxGene"));
         this.mongoTemplate.save(project4);
         //when
-        SearchFilter searchFilter = SearchFilter.builder().labels("CellxGene").build();
+        SearchFilter searchFilter = SearchFilter.builder().projectLabels("CellxGene").build();
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
@@ -449,7 +449,7 @@ class ProjectFilterTest {
                 10000,
                 1,
                 DataAccessTypes.MANAGED,
-                "a  wrangling label",
+                "a label",
                 SearchType.AllKeywords
         );
     }
