@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.ToString;
 import org.humancellatlas.ingest.project.DataAccessTypes;
 
+import java.util.List;
+
 @AllArgsConstructor
 @Builder
 @ToString
@@ -21,6 +23,7 @@ public class SearchFilter {
     @Getter Integer maxCellCount;
     @Getter Integer dcpReleaseNumber;
     @Getter DataAccessTypes dataAccess;
+    @Getter String projectLabels;
 
     @Builder.Default
     @Getter SearchType searchType = SearchType.AllKeywords;

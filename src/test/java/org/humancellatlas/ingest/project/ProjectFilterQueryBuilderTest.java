@@ -22,6 +22,8 @@ public class ProjectFilterQueryBuilderTest {
                 .organOntology(null)
                 .minCellCount(null)
                 .maxCellCount(null)
+                .projectLabels(null)
+                .dcpReleaseNumber(null)
                 .dataAccess(null)
                 .searchType(null)
                 .build();

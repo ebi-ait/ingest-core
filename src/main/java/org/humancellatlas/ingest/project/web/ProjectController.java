@@ -111,7 +111,8 @@ public class ProjectController {
                 "wranglingState",
                 "wranglingPriority",
                 "wranglingNotes",
-                "dcpReleaseNumber"
+                "dcpReleaseNumber",
+                "projectLabels"
         );
 
         ObjectNode validPatch = patch.retain(allowedFields);

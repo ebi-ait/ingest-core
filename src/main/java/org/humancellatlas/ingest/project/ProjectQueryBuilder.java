@@ -24,6 +24,7 @@ public class ProjectQueryBuilder {
         addGTECriterionForAttribute(criteriaList, "cellCount", searchFilter.getMinCellCount());
         addInCriterionForAttribute(criteriaList, "identifyingOrganisms", searchFilter.getIdentifyingOrganism());
         addInCriterionForAttribute(criteriaList, "dcpReleaseNumber", searchFilter.getDcpReleaseNumber());
+        addInCriterionForAttribute(criteriaList, "projectLabels", searchFilter.getProjectLabels());
 
         if(searchFilter.getDataAccess() != null){
             addIsCriterionForAttribute(criteriaList, "dataAccess.type", searchFilter.getDataAccess().getLabel());
