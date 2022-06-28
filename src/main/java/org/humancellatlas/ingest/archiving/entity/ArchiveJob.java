@@ -31,5 +31,10 @@ public class ArchiveJob {
         ArchiveJobStatus(String status) {
             this.status = status;
         }
+
+        @Override
+        public String toString() {
+            return status;
+        }
     }
 }

@@ -151,7 +151,7 @@ class ProjectControllerTest {
             assertThat(updated.get("content")).isInstanceOf(Map.class);
             MapEntry<String, String> updatedDescription = entry("description", "test updated");
             assertThat((Map) updated.get("content")).containsOnly(updatedDescription);
-            assertThat(updated.get("validationState")).isEqualTo("DRAFT");
+            assertThat(updated.get("validationState")).isEqualTo("Draft");
 
             //and:
             project = repository.findById(project.getId()).get();

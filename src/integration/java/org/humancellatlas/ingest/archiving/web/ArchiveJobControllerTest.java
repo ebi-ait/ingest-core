@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.archiving.web;
 
 import org.humancellatlas.ingest.archiving.entity.ArchiveJob;
+import org.humancellatlas.ingest.archiving.entity.ArchiveJob.ArchiveJobStatus;
 import org.humancellatlas.ingest.archiving.entity.ArchiveJobRepository;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.junit.jupiter.api.Test;
@@ -37,9 +38,6 @@ public class ArchiveJobControllerTest {
     @MockBean
     private ArchiveJobRepository archiveJobRepository;
 
-    private static final ArchiveJob.ArchiveJobStatus PENDING_STATUS = ArchiveJob.ArchiveJobStatus.PENDING;
-    private static final ArchiveJob.ArchiveJobStatus COMPLETED_STATUS = ArchiveJob.ArchiveJobStatus.COMPLETED;
-
     private UUID uuid;
 
     private static final String ARCHIVE_JOB_ID = "1";
@@ -48,7 +46,7 @@ public class ArchiveJobControllerTest {
 
     @Test
     public void when_request_archive_job_creation_returns_successful_response() throws Exception {
-        final ArchiveJob anArchiveJobById = createAnArchiveJob(ARCHIVE_JOB_ID, SUBMISSION_UUID, PENDING_STATUS);
+        final ArchiveJob anArchiveJobById = createAnArchiveJob(ARCHIVE_JOB_ID, SUBMISSION_UUID, ArchiveJobStatus.PENDING);
 
         given(this.archiveJobRepository.save(any()))
                 .willReturn(anArchiveJobById);
@@ -60,7 +58,7 @@ public class ArchiveJobControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.submissionUuid", is(SUBMISSION_UUID)))
-                .andExpect(jsonPath("$.overallStatus", is(PENDING_STATUS.toString())))
+                .andExpect(jsonPath("$.overallStatus", is(ArchiveJobStatus.PENDING.toString())))
                 .andExpect(jsonPath("$.createdDate").isNotEmpty())
                 .andReturn();
     }
@@ -79,7 +77,7 @@ public class ArchiveJobControllerTest {
 
     @Test
     public void when_existing_archiving_job_in_pending_status_returns_valid_response() throws Exception {
-        final ArchiveJob anArchiveJob = createAnArchiveJob(ARCHIVE_JOB_ID, SUBMISSION_UUID, PENDING_STATUS);
+        final ArchiveJob anArchiveJob = createAnArchiveJob(ARCHIVE_JOB_ID, SUBMISSION_UUID, ArchiveJobStatus.PENDING);
 
         given(this.archiveJobRepository.findById(ARCHIVE_JOB_ID))
                 .willReturn(Optional.of(anArchiveJob));
@@ -89,7 +87,7 @@ public class ArchiveJobControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.submissionUuid", is(SUBMISSION_UUID)))
-                .andExpect(jsonPath("$.overallStatus", is(PENDING_STATUS.toString())))
+                .andExpect(jsonPath("$.overallStatus", is(ArchiveJobStatus.PENDING.toString())))
                 .andExpect(jsonPath("$.createdDate").isNotEmpty())
                 .andExpect(jsonPath("$.resultsFromArchives").doesNotExist())
                 .andReturn();
@@ -97,7 +95,7 @@ public class ArchiveJobControllerTest {
 
     @Test
     public void when_existing_archiving_job_in_completed_status_returns_valid_response() throws Exception {
-        final ArchiveJob anArchiveJob = createAnArchiveJob(ARCHIVE_JOB_ID, SUBMISSION_UUID, COMPLETED_STATUS);
+        final ArchiveJob anArchiveJob = createAnArchiveJob(ARCHIVE_JOB_ID, SUBMISSION_UUID, ArchiveJobStatus.COMPLETED);
         setArchiveResult(anArchiveJob);
 
         given(this.archiveJobRepository.findById(ARCHIVE_JOB_ID))
@@ -108,7 +106,7 @@ public class ArchiveJobControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.submissionUuid", is(SUBMISSION_UUID)))
-                .andExpect(jsonPath("$.overallStatus", is(COMPLETED_STATUS.toString())))
+                .andExpect(jsonPath("$.overallStatus", is(ArchiveJobStatus.COMPLETED.toString())))
                 .andExpect(jsonPath("$.createdDate").isNotEmpty())
                 .andExpect(jsonPath("$.resultsFromArchives").isNotEmpty())
                 .andReturn();

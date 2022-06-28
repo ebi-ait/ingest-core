@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.archiving.submission.web;
 
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.archiving.entity.ArchiveJob;
+import org.humancellatlas.ingest.archiving.entity.ArchiveJob.ArchiveJobStatus;
 import org.humancellatlas.ingest.archiving.entity.ArchiveJobRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class ArchiveJobController {
 
     private void initResource(ArchiveJob archiveJob) {
         archiveJob.setCreatedDate(Instant.now());
-        archiveJob.setOverallStatus(ArchiveJob.ArchiveJobStatus.PENDING);
+        archiveJob.setOverallStatus(ArchiveJobStatus.PENDING);
     }
 
     @GetMapping("/archiveJobs/{id}")
