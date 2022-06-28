@@ -52,6 +52,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/protocols"));
 
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/projects"));
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/projects/search/findByIsInCatalogue"));
         antPathMatchers.addAll(defineAntPathMatchers(PUT, "/**"));
         antPathMatchers.addAll(defineAntPathMatchers(PATCH, "/**"));
         antPathMatchers.addAll(defineAntPathMatchers(DELETE, "/**"));
