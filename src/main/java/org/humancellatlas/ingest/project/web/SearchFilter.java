@@ -24,6 +24,7 @@ public class SearchFilter {
     @Getter Integer dcpReleaseNumber;
     @Getter DataAccessTypes dataAccess;
     @Getter String projectLabels;
+    @Getter Boolean hcaCatalogue;
 
     @Builder.Default
     @Getter SearchType searchType = SearchType.AllKeywords;
