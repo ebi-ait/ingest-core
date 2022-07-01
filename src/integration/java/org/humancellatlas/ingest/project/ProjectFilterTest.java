@@ -450,6 +450,7 @@ class ProjectFilterTest {
                 1,
                 DataAccessTypes.MANAGED,
                 "a label",
+                false,
                 SearchType.AllKeywords
         );
     }
