@@ -139,7 +139,6 @@ public class SubmissionEnvelopeServiceTest {
         project.setUuid(Uuid.newUuid());
         project.addToSubmissionEnvelopes(submissionEnvelope);
         assertThat(project.getSubmissionEnvelopes()).contains(submissionEnvelope);
-        assertThat(project.getSubmissionEnvelope()).isEqualTo(submissionEnvelope);
 
         //given SupplementaryFile
         project.getSupplementaryFiles().add(file);
