@@ -145,6 +145,7 @@ public class SubmissionControllerTest {
         var newBiomaterial = biomaterialRepository.findAll().get(0);
         assertThat(newBiomaterial.getSubmissionEnvelope()).isNotNull();
         assertThat(newBiomaterial.getProject()).isNotNull();
+        assertThat(newBiomaterial.getProjects()).containsOnly(project);
     }
 
     @Test
@@ -166,6 +167,7 @@ public class SubmissionControllerTest {
         var newBiomaterial = biomaterialRepository.findAll().get(0);
         assertThat(newBiomaterial.getSubmissionEnvelope()).isNotNull();
         assertThat(newBiomaterial.getProject()).isNull();
+        assertThat(newBiomaterial.getProjects()).isEmpty();
     }
 
     @Test
@@ -187,6 +189,7 @@ public class SubmissionControllerTest {
         var newProcess = processRepository.findAll().get(0);
         assertThat(newProcess.getSubmissionEnvelope()).isNotNull();
         assertThat(newProcess.getProject()).isNotNull();
+        assertThat(newProcess.getProjects()).containsOnly(project);
     }
 
     @Test
@@ -208,6 +211,7 @@ public class SubmissionControllerTest {
         var newProcess = processRepository.findAll().get(0);
         assertThat(newProcess.getSubmissionEnvelope()).isNotNull();
         assertThat(newProcess.getProject()).isNull();
+        assertThat(newProcess.getProjects()).isEmpty();
     }
 
     @Test
