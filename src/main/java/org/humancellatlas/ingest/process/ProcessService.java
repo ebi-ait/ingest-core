@@ -73,10 +73,14 @@ public class ProcessService {
         return fileRepository.findByDerivedByProcessesContaining(process, pageable);
     }
 
-    public Process addProcessToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
-                                                  Process process) {
-        if(! process.getIsUpdate()) {
-            projectRepository.findBySubmissionEnvelopesContains(submissionEnvelope).findFirst().ifPresent(process::setProject);
+    public Process addProcessToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Process process) {
+        if(!process.getIsUpdate()) {
+            projectRepository
+                .findBySubmissionEnvelopesContains(submissionEnvelope)
+                .findFirst().ifPresent(project -> {
+                    process.setProject(project);
+                    process.getProjects().add(project);
+                });
             return metadataCrudService.addToSubmissionEnvelopeAndSave(process, submissionEnvelope);
         } else {
             return metadataUpdateService.acceptUpdate(process, submissionEnvelope);

@@ -35,7 +35,12 @@ public class BiomaterialService {
 
     public Biomaterial addBiomaterialToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Biomaterial biomaterial) {
         if (!biomaterial.getIsUpdate()) {
-            projectRepository.findBySubmissionEnvelopesContains(submissionEnvelope).findFirst().ifPresent(biomaterial::setProject);
+            projectRepository
+                .findBySubmissionEnvelopesContains(submissionEnvelope)
+                .findFirst().ifPresent(project -> {
+                    biomaterial.setProject(project);
+                    biomaterial.getProjects().add(project);
+                });
             return metadataCrudService.addToSubmissionEnvelopeAndSave(biomaterial, submissionEnvelope);
         } else {
             return metadataUpdateService.acceptUpdate(biomaterial, submissionEnvelope);
