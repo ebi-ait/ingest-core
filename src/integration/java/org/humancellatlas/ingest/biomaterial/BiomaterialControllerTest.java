@@ -7,6 +7,8 @@ import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -19,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataM
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -51,6 +54,9 @@ public class BiomaterialControllerTest {
     @Autowired
     private SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
+    @Autowired
+    private ProjectRepository projectRepository;
+
     @MockBean
     private MigrationConfiguration migrationConfiguration;
 
@@ -69,12 +75,18 @@ public class BiomaterialControllerTest {
 
     SubmissionEnvelope submissionEnvelope;
 
+    Project project;
+
     @BeforeEach
     void setUp() {
         submissionEnvelope = new SubmissionEnvelope();
         submissionEnvelope.setUuid(Uuid.newUuid());
         submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
         submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
+
+        project = new Project(null);
+        project.getSubmissionEnvelopes().add(submissionEnvelope);
+        project = projectRepository.save(project);
 
         process1 = processRepository.save(new Process(null));
         process2 = processRepository.save(new Process(null));
@@ -88,10 +100,57 @@ public class BiomaterialControllerTest {
     }
 
     @AfterEach
-    private void tearDown() {
+    void tearDown() {
         processRepository.deleteAll();
         biomaterialRepository.deleteAll();
         submissionEnvelopeRepository.deleteAll();
+        projectRepository.deleteAll();
+    }
+
+    @Test
+    public void newBiomaterialInSubmissionLinksToSubmissionAndProject() throws Exception {
+        //given
+        biomaterialRepository.deleteAll();
+        processRepository.deleteAll();
+
+        // when
+        webApp.perform(
+            post("/submissionEnvelopes/{id}/biomaterials", submissionEnvelope.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"content\": {}}")
+        ).andExpect(status().isAccepted());
+
+        //then
+        assertThat(biomaterialRepository.findAll()).hasSize(1);
+        assertThat(biomaterialRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
+        assertThat(biomaterialRepository.findByProject(project)).hasSize(1);
+        var newBiomaterial = biomaterialRepository.findAll().get(0);
+        assertThat(newBiomaterial.getSubmissionEnvelope()).isNotNull();
+        assertThat(newBiomaterial.getProject()).isNotNull();
+        assertThat(newBiomaterial.getProjects()).containsOnly(project);
+    }
+
+    @Test
+    public void newBiomaterialInSubmissionDoesNotFailIfSubmissionHasNoProject() throws Exception {
+        //given
+        biomaterialRepository.deleteAll();
+        processRepository.deleteAll();
+        projectRepository.deleteAll();
+
+        // when
+        webApp.perform(
+            post("/submissionEnvelopes/{id}/biomaterials", submissionEnvelope.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"content\": {}}")
+        ).andExpect(status().isAccepted());
+
+        //then
+        assertThat(biomaterialRepository.findAll()).hasSize(1);
+        assertThat(biomaterialRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
+        var newBiomaterial = biomaterialRepository.findAll().get(0);
+        assertThat(newBiomaterial.getSubmissionEnvelope()).isNotNull();
+        assertThat(newBiomaterial.getProject()).isNull();
+        assertThat(newBiomaterial.getProjects()).isEmpty();
     }
 
     @Test
@@ -238,8 +297,9 @@ public class BiomaterialControllerTest {
     }
 
     private void verifyThatValidationStateChangedToDraftWhenGraphValid(MetadataDocument... values) {
-        Arrays.stream(values).forEach(value -> {
-            verify(validationStateChangeService, times(1)).changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT);
-        });
+        Arrays.stream(values).forEach(
+            value -> verify(validationStateChangeService, times(1))
+                .changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT)
+        );
     }
 }
