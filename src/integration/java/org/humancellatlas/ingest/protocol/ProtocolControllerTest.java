@@ -92,9 +92,10 @@ public class ProtocolControllerTest {
         assertThat(protocolRepository.findAll()).hasSize(1);
         assertThat(protocolRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
         assertThat(protocolRepository.findByProject(project)).hasSize(1);
+
         var newProtocol = protocolRepository.findAll().get(0);
-        assertThat(newProtocol.getSubmissionEnvelope()).isNotNull();
-        assertThat(newProtocol.getProject()).isNotNull();
+        assertThat(newProtocol.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
+        assertThat(newProtocol.getProject().getId()).isEqualTo(project.getId());
     }
 
     @Test
@@ -112,8 +113,9 @@ public class ProtocolControllerTest {
         //then
         assertThat(protocolRepository.findAll()).hasSize(1);
         assertThat(protocolRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
+
         var newProtocol = protocolRepository.findAll().get(0);
-        assertThat(newProtocol.getSubmissionEnvelope()).isNotNull();
+        assertThat(newProtocol.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
         assertThat(newProtocol.getProject()).isNull();
     }
 }

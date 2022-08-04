@@ -124,10 +124,12 @@ public class BiomaterialControllerTest {
         assertThat(biomaterialRepository.findAll()).hasSize(1);
         assertThat(biomaterialRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
         assertThat(biomaterialRepository.findByProject(project)).hasSize(1);
+
         var newBiomaterial = biomaterialRepository.findAll().get(0);
-        assertThat(newBiomaterial.getSubmissionEnvelope()).isNotNull();
-        assertThat(newBiomaterial.getProject()).isNotNull();
-        assertThat(newBiomaterial.getProjects()).containsOnly(project);
+        assertThat(newBiomaterial.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
+        assertThat(newBiomaterial.getProject().getId()).isEqualTo(project.getId());
+        assertThat(newBiomaterial.getProjects()).hasSize(1);
+        assertThat(newBiomaterial.getProjects().stream().findFirst().get().getId()).isEqualTo(project.getId());
     }
 
     @Test
@@ -147,8 +149,9 @@ public class BiomaterialControllerTest {
         //then
         assertThat(biomaterialRepository.findAll()).hasSize(1);
         assertThat(biomaterialRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
+
         var newBiomaterial = biomaterialRepository.findAll().get(0);
-        assertThat(newBiomaterial.getSubmissionEnvelope()).isNotNull();
+        assertThat(newBiomaterial.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
         assertThat(newBiomaterial.getProject()).isNull();
         assertThat(newBiomaterial.getProjects()).isEmpty();
     }

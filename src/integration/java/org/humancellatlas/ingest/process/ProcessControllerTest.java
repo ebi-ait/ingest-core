@@ -125,10 +125,12 @@ class ProcessControllerTest {
         assertThat(processRepository.findAll()).hasSize(1);
         assertThat(processRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
         assertThat(processRepository.findByProject(project)).hasSize(1);
+
         var newProcess = processRepository.findAll().get(0);
-        assertThat(newProcess.getSubmissionEnvelope()).isNotNull();
-        assertThat(newProcess.getProject()).isNotNull();
-        assertThat(newProcess.getProjects()).containsOnly(project);
+        assertThat(newProcess.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
+        assertThat(newProcess.getProject().getId()).isEqualTo(project.getId());
+        assertThat(newProcess.getProjects()).hasSize(1);
+        assertThat(newProcess.getProjects().stream().findFirst().get().getId()).isEqualTo(project.getId());
     }
 
     @Test
@@ -147,8 +149,9 @@ class ProcessControllerTest {
         //then
         assertThat(processRepository.findAll()).hasSize(1);
         assertThat(processRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
+
         var newProcess = processRepository.findAll().get(0);
-        assertThat(newProcess.getSubmissionEnvelope()).isNotNull();
+        assertThat(newProcess.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
         assertThat(newProcess.getProject()).isNull();
         assertThat(newProcess.getProjects()).isEmpty();
     }

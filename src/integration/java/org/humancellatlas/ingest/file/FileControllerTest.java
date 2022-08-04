@@ -131,9 +131,10 @@ public class FileControllerTest {
         assertThat(fileRepository.findAll()).hasSize(1);
         assertThat(fileRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
         assertThat(fileRepository.findByProject(project)).hasSize(1);
+
         var newFile = fileRepository.findAll().get(0);
-        assertThat(newFile.getSubmissionEnvelope()).isNotNull();
-        assertThat(newFile.getProject()).isNotNull();
+        assertThat(newFile.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
+        assertThat(newFile.getProject().getId()).isEqualTo(project.getId());
     }
 
     @Test
@@ -152,8 +153,9 @@ public class FileControllerTest {
         //then
         assertThat(fileRepository.findAll()).hasSize(1);
         assertThat(fileRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
+
         var newFile = fileRepository.findAll().get(0);
-        assertThat(newFile.getSubmissionEnvelope()).isNotNull();
+        assertThat(newFile.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
         assertThat(newFile.getProject()).isNull();
     }
 
