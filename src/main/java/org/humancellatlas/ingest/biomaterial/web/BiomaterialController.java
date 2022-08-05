@@ -68,7 +68,7 @@ public class BiomaterialController {
     MetadataLinkingService metadataLinkingService;
 
     @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/biomaterials", method = RequestMethod.POST)
+    @PostMapping(path = "submissionEnvelopes/{sub_id}/biomaterials")
     ResponseEntity<Resource<?>> addBiomaterialToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                          @RequestBody Biomaterial biomaterial,
                                                          @RequestParam("updatingUuid") Optional<UUID> updatingUuid,

@@ -9,6 +9,8 @@ import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -58,6 +60,9 @@ public class FileControllerTest {
     private FileRepository fileRepository;
 
     @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @MockBean
@@ -78,12 +83,19 @@ public class FileControllerTest {
 
     SubmissionEnvelope submissionEnvelope;
 
+    Project project;
+
     @BeforeEach
     void setUp() {
         submissionEnvelope = new SubmissionEnvelope();
         submissionEnvelope.setUuid(Uuid.newUuid());
         submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
         submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
+
+        project = new Project(null);
+        project.setSubmissionEnvelope(submissionEnvelope);
+        project.getSubmissionEnvelopes().add(submissionEnvelope);
+        project = projectRepository.save(project);
 
         process1 = processRepository.save(new Process(null));
         process2 = processRepository.save(new Process(null));
@@ -97,10 +109,54 @@ public class FileControllerTest {
     }
 
     @AfterEach
-    private void tearDown() {
+    void tearDown() {
         processRepository.deleteAll();
         fileRepository.deleteAll();
         submissionEnvelopeRepository.deleteAll();
+    }
+
+    @Test
+    public void newFileInSubmissionLinksToSubmissionAndProject() throws Exception {
+        //given
+        fileRepository.deleteAll();
+
+        // when
+        webApp.perform(
+            post("/submissionEnvelopes/{id}/files", submissionEnvelope.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"content\": {}}")
+        ).andExpect(status().isAccepted());
+
+        //then
+        assertThat(fileRepository.findAll()).hasSize(1);
+        assertThat(fileRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
+        assertThat(fileRepository.findByProject(project)).hasSize(1);
+
+        var newFile = fileRepository.findAll().get(0);
+        assertThat(newFile.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
+        assertThat(newFile.getProject().getId()).isEqualTo(project.getId());
+    }
+
+    @Test
+    public void newFileInSubmissionDoesNotFailIfSubmissionHasNoProject() throws Exception {
+        //given
+        fileRepository.deleteAll();
+        projectRepository.deleteAll();
+
+        // when
+        webApp.perform(
+            post("/submissionEnvelopes/{id}/files", submissionEnvelope.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"content\": {}}")
+        ).andExpect(status().isAccepted());
+
+        //then
+        assertThat(fileRepository.findAll()).hasSize(1);
+        assertThat(fileRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
+
+        var newFile = fileRepository.findAll().get(0);
+        assertThat(newFile.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
+        assertThat(newFile.getProject()).isNull();
     }
 
     @Test
@@ -272,7 +328,6 @@ public class FileControllerTest {
         file = fileRepository.findById(file.getId()).get();
         assertThat(file.getValidationJob().getValidationReport().getValidationState()).isEqualTo(ValidationState.VALID);
     }
-
 
     @Test
     public void when_new_File_ctor__pass() throws Exception {
