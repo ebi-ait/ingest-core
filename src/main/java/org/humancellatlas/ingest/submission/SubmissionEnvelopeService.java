@@ -324,4 +324,8 @@ public class SubmissionEnvelopeService {
 
         return optionalLastUpdateDate;
     }
+
+    public Optional<Project> getProject(SubmissionEnvelope submissionEnvelope) {
+        return projectRepository.findBySubmissionEnvelopesContains(submissionEnvelope).findFirst();
+    }
 }
