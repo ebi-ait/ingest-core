@@ -41,8 +41,6 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
                                                 @Param(value = "primaryWrangler") String primaryWrangler, 
                                                 Pageable pageable);
 
-    Page<Project> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
-
     Page<Project> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
     @RestResource(exported = false)

@@ -147,7 +147,7 @@ public class SubmissionEnvelopeServiceTest {
         //given ProjectRepository
         List<Project> projectList = new ArrayList<>();
         projectList.add(project);
-        when(projectRepository.findBySubmissionEnvelope(any(), any()))
+        when(projectRepository.findBySubmissionEnvelopesContaining(any(), any()))
                 .thenReturn(new PageImpl<>(projectList, Pageable.unpaged(), 1));
 
         when(projectRepository.findBySubmissionEnvelopesContains(any()))
@@ -182,7 +182,7 @@ public class SubmissionEnvelopeServiceTest {
         verify(submissionManifestRepository).deleteBySubmissionEnvelope(submissionEnvelope);
         verify(submissionErrorRepository).deleteBySubmissionEnvelope(submissionEnvelope);
 
-        verify(projectRepository).findBySubmissionEnvelope(submissionEnvelope);
+        verify(projectRepository).findBySubmissionEnvelopesContains(submissionEnvelope);
         assertThat(project.getSubmissionEnvelopes()).isEmpty();
         verify(projectRepository, atLeastOnce()).save(project);
         verify(submissionEnvelopeRepository).delete(submissionEnvelope);
@@ -315,7 +315,7 @@ public class SubmissionEnvelopeServiceTest {
         File file =  mock(File.class);
 
         PageRequest request = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "updateDate"));
-        when(projectRepository.findBySubmissionEnvelope(submission, request))
+        when(projectRepository.findBySubmissionEnvelopesContaining(submission, request))
                 .thenReturn(new PageImpl<>(List.of(project), request, 1));
         when(protocolRepository.findBySubmissionEnvelope(submission, request))
                 .thenReturn(Page.empty());
@@ -347,7 +347,7 @@ public class SubmissionEnvelopeServiceTest {
         SubmissionEnvelope submission = mock(SubmissionEnvelope.class);
 
         PageRequest request = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "updateDate"));
-        when(projectRepository.findBySubmissionEnvelope(submission, request))
+        when(projectRepository.findBySubmissionEnvelopesContaining(submission, request))
                 .thenReturn(Page.empty());
         when(protocolRepository.findBySubmissionEnvelope(submission, request))
                 .thenReturn(Page.empty());

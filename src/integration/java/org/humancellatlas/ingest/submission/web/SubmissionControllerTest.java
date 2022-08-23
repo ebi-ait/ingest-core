@@ -174,7 +174,7 @@ public class SubmissionControllerTest {
         "/submissionEnvelopes/{id}/projects",
         "/submissionEnvelopes/{id}/relatedProjects"
     })
-    public void testProjectsAreReturnedWHenTheyIncludeTheSubmissionEnvelope(String endpoint) throws Exception {
+    public void testProjectsAreReturnedWhenTheyIncludeTheSubmissionInTheirEnvelopes(String endpoint) throws Exception {
         webApp.perform(
             // when
             get(endpoint, submissionEnvelope.getId())
