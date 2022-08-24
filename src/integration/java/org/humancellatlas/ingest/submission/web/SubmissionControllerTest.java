@@ -32,7 +32,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -91,7 +95,6 @@ public class SubmissionControllerTest {
         submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
 
         project = new Project(null);
-        project.setSubmissionEnvelope(submissionEnvelope);
         project.getSubmissionEnvelopes().add(submissionEnvelope);
         project = projectRepository.save(project);
 
@@ -164,5 +167,21 @@ public class SubmissionControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"content\": {}}")
         ).andExpect(status().isForbidden());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "/submissionEnvelopes/{id}/projects",
+        "/submissionEnvelopes/{id}/relatedProjects"
+    })
+    public void testProjectsAreReturnedWhenTheyIncludeTheSubmissionInTheirEnvelopes(String endpoint) throws Exception {
+        webApp.perform(
+            // when
+            get(endpoint, submissionEnvelope.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+        )   // then
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.projects", hasSize(1)))
+            .andExpect(jsonPath("$._embedded.projects[0].uuid.uuid", is(project.getUuid().getUuid().toString())));
     }
 }

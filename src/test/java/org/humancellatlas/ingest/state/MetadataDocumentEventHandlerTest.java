@@ -27,7 +27,7 @@ public class MetadataDocumentEventHandlerTest {
     public void testHandleCreateDocumentsWithSubmissionEnvelope() {
         Project project = new Project(null);
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-        project.setSubmissionEnvelope(submissionEnvelope);
+        project.getSubmissionEnvelopes().add(submissionEnvelope);
         handler.handleMetadataDocumentCreate(project);
         Mockito.verify(messageRouter, times(1)).routeValidationMessageFor(project);
         Mockito.verify(messageRouter, times(1)).routeStateTrackingUpdateMessageFor(project);

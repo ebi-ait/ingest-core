@@ -311,7 +311,7 @@ public class SubmissionEnvelopeService {
 
     public Optional<Instant> getSubmissionContentLastUpdated(SubmissionEnvelope submissionEnvelope) {
         PageRequest request = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "updateDate"));
-        List<Project> projects = projectRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
+        List<Project> projects = projectRepository.findBySubmissionEnvelopesContaining(submissionEnvelope, request).getContent();
         List<Biomaterial> biomaterials = biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
         List<Protocol> protocols = protocolRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
         List<Process> processes = processRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
@@ -323,5 +323,9 @@ public class SubmissionEnvelopeService {
                 .max(Instant::compareTo);
 
         return optionalLastUpdateDate;
+    }
+
+    public Optional<Project> getProject(SubmissionEnvelope submissionEnvelope) {
+        return projectRepository.findBySubmissionEnvelopesContains(submissionEnvelope).findFirst();
     }
 }
