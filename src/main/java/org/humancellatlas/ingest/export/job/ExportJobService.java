@@ -32,11 +32,6 @@ public class ExportJobService {
         return exportJobRepository.insert(newExportJob);
     }
 
-    public ExportJob updateAssayCount(ExportJob exportJob, int totalCount) {
-        exportJob.getContext().put("totalAssayCount", totalCount);
-        return exportJobRepository.save(exportJob);
-    }
-
     public Page<ExportJob> find(UUID submissionUuid,
                                 ExportState exportState,
                                 ExportDestinationName destinationName,

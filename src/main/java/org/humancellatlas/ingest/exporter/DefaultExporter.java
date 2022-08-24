@@ -1,9 +1,10 @@
 package org.humancellatlas.ingest.exporter;
 
 import org.apache.commons.collections4.ListUtils;
+import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
 import org.humancellatlas.ingest.export.job.ExportJob;
-import org.humancellatlas.ingest.export.job.ExportJobService;
+import org.humancellatlas.ingest.export.job.ExportJobRepository;
 import org.humancellatlas.ingest.export.job.web.ExportJobRequest;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
@@ -35,7 +36,7 @@ public class DefaultExporter implements Exporter {
     private ProcessRepository processRepository;
 
     @Autowired
-    private ExportJobService exportJobService;
+    private ExportJobRepository exportJobRepository;
 
     @Autowired
     private MessageRouter messageRouter;
@@ -93,15 +94,22 @@ public class DefaultExporter implements Exporter {
     public void exportMetadata(ExportJob exportJob) {
         var submission = exportJob.getSubmission();
         Collection<String> assayingProcessIds = processService.findAssays(submission);
-        exportJob = exportJobService.updateAssayCount(exportJob, assayingProcessIds.size());
-
+        exportJob.getContext().put("totalAssayCount", assayingProcessIds.size());
+        exportJobRepository.save(exportJob);
         updateDcpVersionAndSendMessageForEachProcess(assayingProcessIds, exportJob);
     }
 
-    private ExportJob createDcpExportJob(SubmissionEnvelope envelope, JSONObject destinationContext, JSONObject exportJobContext) {
+    private ExportJob createDcpExportJob(SubmissionEnvelope submissionEnvelope, JSONObject destinationContext, JSONObject exportJobContext) {
         ExportDestination exportDestination = new ExportDestination(DCP, "v2", destinationContext);
         ExportJobRequest exportJobRequest = new ExportJobRequest(exportDestination, exportJobContext);
-        return exportJobService.createExportJob(envelope, exportJobRequest);
+        ExportJob newExportJob = ExportJob.builder()
+            .status(ExportState.EXPORTING)
+            .errors(new ArrayList<>())
+            .submission(submissionEnvelope)
+            .destination(exportJobRequest.getDestination())
+            .context(exportJobRequest.getContext())
+            .build();
+        return exportJobRepository.insert(newExportJob);
     }
 
     private void updateDcpVersionAndSendMessageForEachProcess(Collection<String> assayingProcessIds, ExportJob exportJob) {

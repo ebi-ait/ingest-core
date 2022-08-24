@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
 import org.humancellatlas.ingest.export.entity.ExportEntityService;
 import org.humancellatlas.ingest.export.job.ExportJob;
+import org.humancellatlas.ingest.export.job.ExportJobRepository;
 import org.humancellatlas.ingest.export.job.ExportJobService;
 import org.humancellatlas.ingest.export.job.web.ExportJobRequest;
 import org.humancellatlas.ingest.messaging.MessageRouter;
@@ -58,6 +59,9 @@ public class DefaultExporterTest {
 
     @MockBean
     private ExportJobService exportJobService;
+
+    @MockBean
+    private ExportJobRepository exportJobRepository;
 
     @MockBean
     private ProcessRepository processRepository;
@@ -116,8 +120,8 @@ public class DefaultExporterTest {
         exporter.exportData(submissionEnvelope, project);
 
         // then
-        var argumentCaptor = ArgumentCaptor.forClass(ExportJobRequest.class);
-        verify(exportJobService).createExportJob(any(SubmissionEnvelope.class), argumentCaptor.capture());
+        var argumentCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        verify(exportJobRepository).insert(argumentCaptor.capture());
         verify(messageRouter).sendSubmissionForDataExport(any(ExportJob.class), any());
 
         var capturedArgument = argumentCaptor.getValue();
@@ -126,7 +130,7 @@ public class DefaultExporterTest {
     }
 
     @Test
-    public void testExportMetadata() {
+    public void testExportMetadataFromExportJob() {
         //given:
         mockProcessSave();
         ExportJob newExportJob = mockCreateExportJob(project.getUuid().getUuid().toString());
@@ -141,6 +145,23 @@ public class DefaultExporterTest {
         verify(processRepository, times(assayIds.size())).save(any(Process.class));
         verify(messageRouter, times(assayIds.size()))
                 .sendExperimentForExport(any(ExperimentProcess.class), any(ExportJob.class), any());
+    }
+
+    @Test
+    public void testExportMetadataFromSubmission() {
+        //given:
+        mockProcessSave();
+        mockCreateExportJob(project.getUuid().getUuid().toString());
+        Set<ExperimentProcess> receivedData = mockSendingProcessThroughMessageRouter();
+
+        //when:
+        exporter.exportMetadata(submissionEnvelope);
+
+        //then:
+        assertAllProcessIdsProcessed(submissionEnvelope, assayIds, receivedData);
+        verify(processRepository, times(assayIds.size())).save(any(Process.class));
+        verify(messageRouter, times(assayIds.size()))
+            .sendExperimentForExport(any(ExperimentProcess.class), any(ExportJob.class), any());
     }
 
     private ExportJob mockCreateExportJob(String projectUuidUuid) {
@@ -159,7 +180,7 @@ public class DefaultExporterTest {
                 .createdDate(Instant.now())
                 .build();
         doReturn(newExportJob).when(exportJobService).createExportJob(any(SubmissionEnvelope.class), any(ExportJobRequest.class));
-        doReturn(newExportJob).when(exportJobService).updateAssayCount(any(ExportJob.class), anyInt());
+        doReturn(newExportJob).when(exportJobRepository).insert(any(ExportJob.class));
         return newExportJob;
     }
 
