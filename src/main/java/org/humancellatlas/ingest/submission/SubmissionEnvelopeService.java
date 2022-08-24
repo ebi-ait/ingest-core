@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.errors.SubmissionErrorRepository;
+import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.exporter.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -147,8 +148,10 @@ public class SubmissionEnvelopeService {
         Set<SubmitAction> submitActions = envelope.getSubmitActions();
         if (submitActions.contains(SubmitAction.ARCHIVE)) {
             archiveSubmission(envelope);
-        } else if (shouldExport(submitActions)) {
-            exportSubmission(envelope);
+        } else if (submitActions.contains(SubmitAction.EXPORT)) {
+            exportData(envelope);
+        } else if (submitActions.contains(SubmitAction.EXPORT_METADATA)) {
+            exportMetadata(envelope);
         } else {
             throw new IllegalArgumentException((String.format(
                     "Envelope with id %s is submitted without the required submit actions",
@@ -160,19 +163,39 @@ public class SubmissionEnvelopeService {
         exporter.exportManifests(envelope);
     }
 
-    public void exportSubmission(SubmissionEnvelope submissionEnvelope) {
+    public void exportData(SubmissionEnvelope submissionEnvelope) {
         executorService.submit(() -> {
             try {
-                exporter.exportProcesses(submissionEnvelope);
+                exporter.exportData(submissionEnvelope, this.getProject(submissionEnvelope).orElseThrow());
             } catch (Exception e) {
-                log.error("Uncaught Exception exporting Bundles", e);
+                log.error("Uncaught Exception sending message to export Submission Data", e);
+            }
+        });
+    }
+
+    public void exportMetadata(SubmissionEnvelope submissionEnvelope) {
+        executorService.submit(() -> {
+            try {
+                exporter.exportMetadata(submissionEnvelope);
+            } catch (Exception e) {
+                log.error("Uncaught Exception sending message to export Metadata for submission", e);
+            }
+        });
+    }
+
+    public void exportMetadata(ExportJob exportJob) {
+        executorService.submit(() -> {
+            try {
+                exporter.exportMetadata(exportJob);
+            } catch (Exception e) {
+                log.error("Uncaught Exception sending message to export Metadata for Export Job", e);
             }
         });
     }
 
     public void handleCommitArchived(SubmissionEnvelope envelope) {
         if (envelope.getSubmitActions().contains(SubmitAction.EXPORT)) {
-            exportSubmission(envelope);
+            exportData(envelope);
         }
     }
 
@@ -277,10 +300,6 @@ public class SubmissionEnvelopeService {
         return submitActions.contains(SubmitAction.ARCHIVE)
                 || submitActions.contains(SubmitAction.EXPORT)
                 || submitActions.contains(SubmitAction.EXPORT_METADATA);
-    }
-
-    private boolean shouldExport(Set<SubmitAction> submitActions) {
-        return submitActions.contains(SubmitAction.EXPORT) || submitActions.contains(SubmitAction.EXPORT_METADATA);
     }
 
     private void removeGraphValidationErrors(SubmissionEnvelope submissionEnvelope) {

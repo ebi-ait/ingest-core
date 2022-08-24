@@ -207,7 +207,7 @@ public class SubmissionController {
     @PutMapping("/submissionEnvelopes/{id}" + Links.EXPORT_URL)
     HttpEntity<?> exportEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                         final PersistentEntityResourceAssembler resourceAssembler) {
-        submissionEnvelopeService.exportSubmission(submissionEnvelope);
+        submissionEnvelopeService.exportData(submissionEnvelope);
         return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
     }
 

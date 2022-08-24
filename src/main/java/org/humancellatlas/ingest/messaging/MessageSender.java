@@ -2,13 +2,14 @@ package org.humancellatlas.ingest.messaging;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.config.ConfigurationService;
-import org.humancellatlas.ingest.messaging.model.*;
+import org.humancellatlas.ingest.messaging.model.MessageProtocol;
+import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
+import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
@@ -53,10 +54,6 @@ public class MessageSender {
     }
 
     public void queueNewExportMessage(String exchange, String routingKey, Object payload, long intendedSendTime){
-        MessageBuffer.EXPORT.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
-    }
-
-    public void queueNewExportJob(String exchange, String routingKey, Object payload, long intendedSendTime){
         MessageBuffer.EXPORT.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
 

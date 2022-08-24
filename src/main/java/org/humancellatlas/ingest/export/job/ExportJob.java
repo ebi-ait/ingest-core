@@ -1,11 +1,13 @@
 package org.humancellatlas.ingest.export.job;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
+import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportError;
 import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
+import org.humancellatlas.ingest.messaging.model.ExportSubmissionMessage;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -54,5 +56,16 @@ public class ExportJob implements Identifiable<String> {
     private Map<String, Object> context;
 
     private List<ExportError> errors;
+
+    public ExportSubmissionMessage toExportSubmissionMessage(LinkGenerator linkGenerator, Map<String, Object> context) {
+        String callbackLink = linkGenerator.createCallback(getClass(), getId());
+        return new ExportSubmissionMessage(
+            getId(),
+            submission.getUuid().getUuid().toString(),
+            destination.getContext().get("projectUuid").toString(),
+            callbackLink,
+            context
+        );
+    }
 
 }

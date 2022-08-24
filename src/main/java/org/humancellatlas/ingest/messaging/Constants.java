@@ -25,6 +25,8 @@ public class Constants {
         public static final String MANIFEST_SUBMITTED = "ingest.exporter.manifest.submitted";
         public static final String EXPERIMENT_SUBMITTED = "ingest.exporter.experiment.submitted";
 
+        public static final String EXPORT_JOB_SUBMITTED = "ingest.exporter.export_job.submitted";
+
         public static final String UPLOAD_AREA_CREATE = "ingest.upload.area.create";
         public static final String UPLOAD_AREA_CLEANUP = "ingest.upload.area.cleanup";
 

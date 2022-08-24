@@ -25,8 +25,7 @@ import java.net.URI;
 import java.util.Map;
 
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.EXPORTER_EXCHANGE;
-import static org.humancellatlas.ingest.messaging.Constants.Routing.EXPERIMENT_SUBMITTED;
-import static org.humancellatlas.ingest.messaging.Constants.Routing.MANIFEST_SUBMITTED;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.*;
 
 
 @Component
@@ -143,6 +142,14 @@ public class MessageRouter {
                 System.currentTimeMillis());
     }
 
+    public void sendSubmissionForDataExport(ExportJob exportJob, Map<String, Object> context) {
+        messageSender.queueNewExportMessage(
+            EXPORTER_EXCHANGE,
+            EXPORT_JOB_SUBMITTED,
+            exportJob.toExportSubmissionMessage(linkGenerator, context),
+            System.currentTimeMillis()
+        );
+    }
     /* messages to the upload/staging area manager */
 
     public boolean routeRequestUploadAreaCredentials(SubmissionEnvelope envelope) {
