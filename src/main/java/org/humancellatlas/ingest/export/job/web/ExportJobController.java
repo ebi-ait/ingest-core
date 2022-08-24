@@ -15,6 +15,7 @@ import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,14 +56,27 @@ public class ExportJobController {
     }
 
     @GetMapping(path = Links.EXPORT_JOBS_URL + "/search" + Links.EXPORT_JOB_FIND_URL)
-    ResponseEntity<?> findExportJobs(@RequestParam("submissionUuid") UUID submissionUuid,
-                                     @RequestParam("status") ExportState exportState,
-                                     @RequestParam("destination") ExportDestinationName exportDestinationName,
-                                     @RequestParam("version") String destinationVersion,
-                                     Pageable pageable,
-                                     PersistentEntityResourceAssembler resourceAssembler) {
+    ResponseEntity<PagedResources<ExportJob>> findExportJobs(
+        @RequestParam("submissionUuid") UUID submissionUuid,
+        @RequestParam("status") ExportState exportState,
+        @RequestParam("destination") ExportDestinationName exportDestinationName,
+        @RequestParam("version") String destinationVersion,
+        Pageable pageable,
+        PersistentEntityResourceAssembler resourceAssembler
+    ) {
         String version = destinationVersion.isEmpty() ? null : destinationVersion;
-        Page<ExportJob> searchResults = this.exportJobService.find(submissionUuid, exportState, exportDestinationName, version, pageable);
+        Page<ExportJob> searchResults = exportJobService.find(submissionUuid, exportState, exportDestinationName, version, pageable);
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(searchResults, resourceAssembler));
+    }
+
+    @PatchMapping(Links.EXPORT_JOBS_URL + "/{id}" + Links.EXPORT_JOB_DATA_TRANSFER_URL)
+    ResponseEntity<PersistentEntityResource> updateTransferStatus(
+        @PathVariable("id") ExportJob exportJob,
+        @RequestBody final String transferStatus,
+        PersistentEntityResourceAssembler assembler
+    ) {
+        ExportJob updatedExportJob = exportJobService.updateTransferStatus(exportJob, transferStatus);
+        PersistentEntityResource resource = assembler.toFullResource(updatedExportJob);
+        return ResponseEntity.accepted().body(resource);
     }
 }

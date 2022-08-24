@@ -9,7 +9,6 @@ import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.errors.SubmissionErrorRepository;
-import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.exporter.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -179,16 +178,6 @@ public class SubmissionEnvelopeService {
                 exporter.exportMetadata(submissionEnvelope);
             } catch (Exception e) {
                 log.error("Uncaught Exception sending message to export Metadata for submission", e);
-            }
-        });
-    }
-
-    public void exportMetadata(ExportJob exportJob) {
-        executorService.submit(() -> {
-            try {
-                exporter.exportMetadata(exportJob);
-            } catch (Exception e) {
-                log.error("Uncaught Exception sending message to export Metadata for Export Job", e);
             }
         });
     }
