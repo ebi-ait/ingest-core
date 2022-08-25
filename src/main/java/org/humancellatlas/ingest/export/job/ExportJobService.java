@@ -57,7 +57,7 @@ public class ExportJobService {
     }
 
     public ExportJob updateTransferStatus(ExportJob exportJob, String transferStatus) {
-        exportJob.getContext().put("dataTransfer", transferStatus);
+        exportJob.getContext().put("dataFileTransfer", transferStatus);
         var savedJob = exportJobRepository.save(exportJob);
         if (Objects.equals(transferStatus, "COMPLETE")) {
             executorService.submit(() -> {

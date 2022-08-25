@@ -32,19 +32,12 @@ public class ExportJobResourceProcessor implements ResourceProcessor<Resource<Ex
         return entityLinks.linkForSingleResource(submission).withRel("submission");
     }
 
-    private Link getDataTransferLink(ExportJob exportJob) {
-        return entityLinks.linkForSingleResource(exportJob)
-            .slash(Links.EXPORT_JOB_DATA_TRANSFER_URL)
-            .withRel(Links.EXPORT_JOB_DATA_TRANSFER_REL);
-    }
-
     @Override
     public Resource<ExportJob> process(Resource<ExportJob> resource) {
         ExportJob exportJob = resource.getContent();
         resource.add(getEntitiesLink(exportJob));
         resource.add(getEntitiesStatusLink(exportJob));
         resource.add(getSubmissionLink(exportJob.getSubmission()));
-        resource.add(getDataTransferLink(exportJob));
         return resource;
     }
 }

@@ -69,10 +69,10 @@ public class ExportJobController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(searchResults, resourceAssembler));
     }
 
-    @PatchMapping(Links.EXPORT_JOBS_URL + "/{id}" + Links.EXPORT_JOB_DATA_TRANSFER_URL)
+    @PatchMapping(Links.EXPORT_JOBS_URL + "/{id}")
     ResponseEntity<PersistentEntityResource> updateTransferStatus(
         @PathVariable("id") ExportJob exportJob,
-        @RequestBody final String transferStatus,
+        @RequestParam("dataFileTransfer") String transferStatus,
         PersistentEntityResourceAssembler assembler
     ) {
         ExportJob updatedExportJob = exportJobService.updateTransferStatus(exportJob, transferStatus);
