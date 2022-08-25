@@ -147,55 +147,71 @@ public class SubmissionEnvelopeService {
         Set<SubmitAction> submitActions = envelope.getSubmitActions();
         if (submitActions.contains(SubmitAction.ARCHIVE)) {
             archiveSubmission(envelope);
-        } else if (submitActions.contains(SubmitAction.EXPORT)) {
+        } else {
+            handleCommitArchived(envelope);
+        }
+    }
+
+    public void handleCommitArchived(SubmissionEnvelope envelope) {
+        Set<SubmitAction> submitActions = envelope.getSubmitActions();
+        if (submitActions.contains(SubmitAction.EXPORT)) {
             exportData(envelope);
         } else if (submitActions.contains(SubmitAction.EXPORT_METADATA)) {
             exportMetadata(envelope);
         } else {
-            throw new IllegalArgumentException((String.format(
-                    "Envelope with id %s is submitted without the required submit actions",
-                    envelope.getId(), envelope.getSubmissionState())));
+            handleCommitExported(envelope);
+        }
+    }
+
+    public void handleCommitExported(SubmissionEnvelope envelope) {
+        if (envelope.getSubmitActions().contains(SubmitAction.CLEANUP)) {
+            cleanupSubmission(envelope);
+        } else {
+            log.info(String.format(
+                "No Action to take for submission: %s in state: %s with submitActions: %s",
+                envelope.getId(),
+                envelope.getSubmissionState(),
+                envelope.getSubmitActions()
+            ));
         }
     }
 
     private void archiveSubmission(SubmissionEnvelope envelope) {
-        exporter.exportManifests(envelope);
-    }
-
-    public void exportData(SubmissionEnvelope submissionEnvelope) {
         executorService.submit(() -> {
             try {
-                exporter.exportData(submissionEnvelope, this.getProject(submissionEnvelope).orElseThrow());
+                exporter.exportManifests(envelope);
+            } catch (Exception e) {
+                log.error("Uncaught Exception sending message to Archive Submission", e);
+            }
+        });
+    }
+
+    public void exportData(SubmissionEnvelope envelope) {
+        executorService.submit(() -> {
+            try {
+                exporter.exportData(envelope, this.getProject(envelope).orElseThrow());
             } catch (Exception e) {
                 log.error("Uncaught Exception sending message to export Submission Data", e);
             }
         });
     }
 
-    public void exportMetadata(SubmissionEnvelope submissionEnvelope) {
+    public void exportMetadata(SubmissionEnvelope envelope) {
         executorService.submit(() -> {
             try {
-                exporter.exportMetadata(submissionEnvelope);
+                exporter.exportMetadata(envelope);
             } catch (Exception e) {
                 log.error("Uncaught Exception sending message to export Metadata for submission", e);
             }
         });
     }
 
-    public void handleCommitArchived(SubmissionEnvelope envelope) {
-        if (envelope.getSubmitActions().contains(SubmitAction.EXPORT)) {
-            exportData(envelope);
-        }
-    }
-
-    public void handleCommitExported(SubmissionEnvelope submissionEnvelope) {
+    public void cleanupSubmission(SubmissionEnvelope envelope) {
         executorService.submit(() -> {
             try {
-                if (submissionEnvelope.getSubmitActions().contains(SubmitAction.CLEANUP)) {
-                    handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.CLEANUP);
-                }
+                handleEnvelopeStateUpdateRequest(envelope, SubmissionState.CLEANUP);
             } catch (Exception e) {
-                log.error("Uncaught Exception exporting Bundles", e);
+                log.error("Uncaught Exception sending message to cleanup upload area for submission", e);
             }
         });
     }
