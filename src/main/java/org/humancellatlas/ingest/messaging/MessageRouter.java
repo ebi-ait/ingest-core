@@ -89,8 +89,24 @@ public class MessageRouter {
     }
 
     public boolean routeStateTrackingDeleteMessageFor(MetadataDocument document) {
-        log.warn("State Tracking Disabled");
-        return false;
+        if (document.getSubmissionEnvelope() != null) {
+            URI documentDeleteUri = UriComponentsBuilder.newInstance()
+                    .scheme(configurationService.getStateTrackerScheme())
+                    .host(configurationService.getStateTrackerHost())
+                    .port(configurationService.getStateTrackerPort())
+                    .pathSegment(configurationService.getDocumentStatesUpdatePath())
+                    .queryParam(configurationService.getDocumentIdParamName(), document.getId())
+                    .queryParam(configurationService.getEnvelopeIdParamName(), document.getSubmissionEnvelope().getId())
+                    .build().toUri();
+            this.messageSender.queueDocumentStateDeleteMessage(
+                    documentDeleteUri,
+                    document.getUpdateDate().toEpochMilli()
+            );
+            return true;
+        } else {
+            log.warn(String.format("The metadata document '%s' is not linked to a submission envelope", document.getId()));
+            return false;
+        }
     }
 
     public boolean routeStateTrackingUpdateMessageForEnvelopeEvent(SubmissionEnvelope envelope, SubmissionState state) {
