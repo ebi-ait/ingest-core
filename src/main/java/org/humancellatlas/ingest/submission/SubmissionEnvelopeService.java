@@ -92,38 +92,34 @@ public class SubmissionEnvelopeService {
     private SubmissionErrorRepository submissionErrorRepository;
 
     public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
-        projectRepository.findBySubmissionEnvelopesContains(envelope)
-            .findFirst()
-            .ifPresentOrElse(
-                project -> {
-                    if (!project.getValidationState().equals(ValidationState.VALID)) {
-                                throw new StateTransitionNotAllowed((String.format(
-                                        "Envelope with id %s cannot be submitted when the project is invalid.",
-                                        envelope.getId()
-                                )));
-                            }
-                        },
-                        () -> {
-                            throw new StateTransitionNotAllowed((String.format(
-                                    "Envelope with id %s cannot be submitted without a project.",
-                                    envelope.getId()
-                            )));
-                        });
+        getProject(envelope).ifPresentOrElse(
+            project -> {
+                if (!project.getValidationState().equals(ValidationState.VALID)) {
+                    throw new StateTransitionNotAllowed(
+                        String.format("Envelope with id %s cannot be submitted when the project is invalid.", envelope.getId())
+                    );
+                }
+            },
+            () -> {
+                throw new StateTransitionNotAllowed(
+                    String.format("Envelope with id %s cannot be submitted without a project.", envelope.getId())
+                );
+            }
+        );
 
         if (envelope.getSubmissionState() != SubmissionState.GRAPH_VALID) {
-            throw new StateTransitionNotAllowed((String.format(
-                    "Envelope with id %s cannot be submitted without a graph valid state",
-                    envelope.getId()
-            )));
+            throw new StateTransitionNotAllowed(
+                String.format("Envelope with id %s cannot be submitted without a graph valid state", envelope.getId())
+            );
         }
 
         if (isSubmitAction(submitActions)) {
             envelope.setSubmitActions(new HashSet<>(submitActions));
             submissionEnvelopeRepository.save(envelope);
         } else {
-            throw new IllegalArgumentException((String.format(
-                    "Envelope with id %s is submitted without the required submit actions",
-                    envelope.getId(), envelope.getSubmissionState())));
+            throw new IllegalArgumentException(
+                String.format("Envelope with id %s is submitted without the required submit actions", envelope.getId())
+            );
         }
         handleEnvelopeStateUpdateRequest(envelope, SubmissionState.SUBMITTED);
     }
@@ -220,8 +216,7 @@ public class SubmissionEnvelopeService {
         SubmissionEnvelope updateSubmissionEnvelope = new SubmissionEnvelope();
         submissionEnvelopeCreateHandler.setUuid(updateSubmissionEnvelope);
         updateSubmissionEnvelope.setIsUpdate(true);
-        SubmissionEnvelope insertedUpdateSubmissionEnvelope = createSubmissionEnvelope(updateSubmissionEnvelope);
-        return insertedUpdateSubmissionEnvelope;
+        return createSubmissionEnvelope(updateSubmissionEnvelope);
     }
 
     public SubmissionEnvelope createSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
@@ -341,12 +336,10 @@ public class SubmissionEnvelopeService {
         List<Process> processes = processRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
         List<File> files = fileRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
 
-        Optional<Instant> optionalLastUpdateDate = Stream.of(projects, biomaterials, protocols, processes, files)
+        return Stream.of(projects, biomaterials, protocols, processes, files)
                 .flatMap(List::stream)
                 .map(MetadataDocument::getUpdateDate)
                 .max(Instant::compareTo);
-
-        return optionalLastUpdateDate;
     }
 
     public Optional<Project> getProject(SubmissionEnvelope submissionEnvelope) {
