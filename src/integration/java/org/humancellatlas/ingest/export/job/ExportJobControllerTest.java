@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.export.destination.ExportDestinationName.DCP;
 import static org.mockito.Mockito.verify;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -92,7 +93,9 @@ public class ExportJobControllerTest {
 
         webApp.perform(
                 // when
-                patch("/exportJobs/{id}?dataFileTransfer={dataFileTransfer}", exportJob.getId(), patch_value)
+                patch("/exportJobs/{id}/context", exportJob.getId())
+                    .contentType(APPLICATION_JSON_VALUE)
+                    .content("{\"dataFileTransfer\": \"" + patch_value + "\"}")
             )   // then
             .andExpect(status().isAccepted());
         var argumentCaptor = ArgumentCaptor.forClass(ExportJob.class);

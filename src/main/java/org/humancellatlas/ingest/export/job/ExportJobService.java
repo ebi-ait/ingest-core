@@ -17,7 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Objects;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,10 +56,10 @@ public class ExportJobService {
         return this.exportJobRepository.findAll(Example.of(exportJobProbe), pageable);
     }
 
-    public ExportJob updateTransferStatus(ExportJob exportJob, String transferStatus) {
-        exportJob.getContext().put("dataFileTransfer", transferStatus);
+    public ExportJob updateContext(ExportJob exportJob, Map<String, Object> context) {
+        exportJob.getContext().putAll(context);
         var savedJob = exportJobRepository.save(exportJob);
-        if (Objects.equals(transferStatus, "COMPLETE")) {
+        if (context.getOrDefault("dataFileTransfer", "").equals("COMPLETE")) {
             executorService.submit(() -> {
                 try {
                     exporter.exportMetadata(exportJob);

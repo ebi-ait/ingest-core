@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.UUID;
 
 @RepositoryRestController
@@ -69,13 +70,13 @@ public class ExportJobController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(searchResults, resourceAssembler));
     }
 
-    @PatchMapping(Links.EXPORT_JOBS_URL + "/{id}")
+    @PatchMapping(Links.EXPORT_JOBS_URL + "/{id}/context")
     ResponseEntity<PersistentEntityResource> updateTransferStatus(
         @PathVariable("id") ExportJob exportJob,
-        @RequestParam("dataFileTransfer") String transferStatus,
+        @RequestBody Map<String, Object> context,
         PersistentEntityResourceAssembler assembler
     ) {
-        ExportJob updatedExportJob = exportJobService.updateTransferStatus(exportJob, transferStatus);
+        ExportJob updatedExportJob = exportJobService.updateContext(exportJob, context);
         PersistentEntityResource resource = assembler.toFullResource(updatedExportJob);
         return ResponseEntity.accepted().body(resource);
     }
