@@ -52,10 +52,10 @@ public class ProjectStatusUpdateTest {
         verifyProjectStatus(project, WranglingState.IN_PROGRESS);
     }
 
-    private void verifyProjectStatus(Project project) {
+    private void verifyProjectStatus(Project project, WranglingState wranglingState) {
         Project projectFromRepo = projectRepository.findById(project.getId()).get();
         Assertions.assertThat(projectFromRepo.getWranglingState())
-                .isEqualTo(WranglingState.IN_PROGRESS);
+                .isEqualTo(wranglingState);
     }
 
     private void connectSubmissionToProject(Project project, String submissionUrl) throws Exception {
