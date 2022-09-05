@@ -49,7 +49,7 @@ public class ProjectStatusUpdateTest {
         Project project = createProject();
         String submissionUrl = createSubmission();
         connectSubmissionToProject(project, submissionUrl);
-        verifyProjectStatus(project);
+        verifyProjectStatus(project, WranglingState.IN_PROGRESS);
     }
 
     private void verifyProjectStatus(Project project) {
