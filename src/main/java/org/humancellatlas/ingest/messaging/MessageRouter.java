@@ -143,7 +143,7 @@ public class MessageRouter {
     public void sendSubmissionForDataExport(ExportJob exportJob, Map<String, Object> context) {
         messageSender.queueNewExportMessage(
             EXPORTER_EXCHANGE,
-            EXPORT_JOB_SUBMITTED,
+            SUBMISSION_SUBMITTED,
             exportJob.toExportSubmissionMessage(linkGenerator, context),
             System.currentTimeMillis()
         );

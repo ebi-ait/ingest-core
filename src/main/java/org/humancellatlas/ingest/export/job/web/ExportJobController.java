@@ -71,7 +71,7 @@ public class ExportJobController {
     }
 
     @PatchMapping(Links.EXPORT_JOBS_URL + "/{id}/context")
-    ResponseEntity<PersistentEntityResource> updateTransferStatus(
+    ResponseEntity<PersistentEntityResource> patchExportJobContext(
         @PathVariable("id") ExportJob exportJob,
         @RequestBody Map<String, Object> context,
         PersistentEntityResourceAssembler assembler
