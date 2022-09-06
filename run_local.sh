@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 docker-compose up -d mongo rabbitmq
 
