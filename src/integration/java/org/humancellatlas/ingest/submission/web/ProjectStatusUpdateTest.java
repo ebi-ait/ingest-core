@@ -1,7 +1,10 @@
 package org.humancellatlas.ingest.submission.web;
 
-import org.assertj.core.api.Assertions;
+import org.humancellatlas.ingest.audit.AuditEntry;
+import org.humancellatlas.ingest.audit.AuditEntryRepository;
+import org.humancellatlas.ingest.audit.AuditType;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
+import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.project.WranglingState;
@@ -20,7 +23,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.humancellatlas.ingest.project.WranglingState.IN_PROGRESS;
+import static org.humancellatlas.ingest.project.WranglingState.SUBMITTED;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -32,6 +41,9 @@ public class ProjectStatusUpdateTest {
 
     @Autowired
     private ProjectRepository projectRepository;
+
+    @Autowired
+    AuditEntryRepository auditEntryRepository;
 
     // NOTE: Adding MigrationConfiguration as a MockBean is needed as otherwise MigrationConfiguration won't be
     //       initialised. This is very un-elegant and should be fixed.
@@ -49,13 +61,44 @@ public class ProjectStatusUpdateTest {
         Project project = createProject();
         String submissionUrl = createSubmission();
         connectSubmissionToProject(project, submissionUrl);
-        verifyProjectStatus(project);
+        verifyProjectStatus(project, IN_PROGRESS);
+        verifyAuditHistory(project, IN_PROGRESS);
     }
 
-    private void verifyProjectStatus(Project project) {
+    private void verifyAuditHistory(Project project, WranglingState wranglingState) {
+        List<AuditEntry> auditEntryList = auditEntryRepository.findByEntityEqualsOrderByDateDesc(project);
+        assertThat(auditEntryList)
+                .describedAs("audit history updated")
+
+                .hasSize(1);
+        auditEntryList.stream()
+                .forEach(auditEntry ->
+                    assertThat(auditEntry)
+                            .hasFieldOrPropertyWithValue("auditType", AuditType.STATUS_UPDATED)
+                            .hasFieldOrPropertyWithValue("after", wranglingState.toString())
+                );
+    }
+
+    @Test
+    public void test_statusIsSubmitted_afterSubmissionIsExported() throws Exception {
+        Project project = createProject();
+        String submissionUrl = createSubmission();
+        connectSubmissionToProject(project, submissionUrl);
+        setSubmissionToExported(submissionUrl);
+        verifyProjectStatus(project, SUBMITTED);
+        verifyAuditHistory(project, SUBMITTED);
+    }
+
+    private void setSubmissionToExported(String submissionUrl) throws Exception {
+        webApp.perform(
+                put(submissionUrl + Links.COMMIT_EXPORTED_URL)
+        ).andExpect(status().isAccepted());
+    }
+
+    private void verifyProjectStatus(Project project, WranglingState wranglingState) {
         Project projectFromRepo = projectRepository.findById(project.getId()).get();
-        Assertions.assertThat(projectFromRepo.getWranglingState())
-                .isEqualTo(WranglingState.IN_PROGRESS);
+        assertThat(projectFromRepo.getWranglingState())
+                .isEqualTo(wranglingState);
     }
 
     private void connectSubmissionToProject(Project project, String submissionUrl) throws Exception {
