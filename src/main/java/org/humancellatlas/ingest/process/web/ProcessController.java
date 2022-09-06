@@ -98,7 +98,7 @@ public class ProcessController {
 
 
     @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes", method = RequestMethod.POST)
+    @PostMapping(path = "submissionEnvelopes/{sub_id}/processes")
     ResponseEntity<Resource<?>> addProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                                      @RequestBody Process process,
                                                      @RequestParam("updatingUuid") Optional<UUID> updatingUuid,

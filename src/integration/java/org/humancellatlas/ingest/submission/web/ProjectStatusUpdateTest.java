@@ -66,6 +66,16 @@ public class ProjectStatusUpdateTest {
         verifyAuditHistory(project, IN_PROGRESS);
     }
 
+    @Test
+    public void test_statusIsSubmitted_afterSubmissionIsExported() throws Exception {
+        Project project = createProject();
+        String submissionUrl = createSubmission();
+        connectSubmissionToProject(project, submissionUrl);
+        setSubmissionToExported(submissionUrl);
+        verifyProjectStatus(project, SUBMITTED);
+        verifyAuditHistory(project, SUBMITTED);
+    }
+
     private void verifyAuditHistory(Project project, WranglingState wranglingState) {
         List<AuditEntry> auditEntryList = auditEntryRepository.findByEntityEqualsOrderByDateDesc(project);
 
@@ -78,16 +88,6 @@ public class ProjectStatusUpdateTest {
                             .hasFieldOrPropertyWithValue("auditType", AuditType.STATUS_UPDATED)
                             .hasFieldOrPropertyWithValue("after", wranglingState.toString())
                 );
-    }
-
-    @Test
-    public void test_statusIsSubmitted_afterSubmissionIsExported() throws Exception {
-        Project project = createProject();
-        String submissionUrl = createSubmission();
-        connectSubmissionToProject(project, submissionUrl);
-        setSubmissionToExported(submissionUrl);
-        verifyProjectStatus(project, SUBMITTED);
-        verifyAuditHistory(project, SUBMITTED);
     }
 
     private void setSubmissionToExported(String submissionUrl) throws Exception {

@@ -89,18 +89,13 @@ public class SubmissionController {
         return ResponseEntity.ok(resourceAssembler.toFullResource(updateSubmission));
     }
 
-    @GetMapping("/submissionEnvelopes/{sub_id}/projects")
+    @GetMapping({
+        "/submissionEnvelopes/{sub_id}" + Links.PROJECTS_URL,
+        "/submissionEnvelopes/{sub_id}" + Links.SUBMISSION_RELATED_PROJECTS_URL
+    })
     ResponseEntity<?> getProjects(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                   Pageable pageable,
                                   final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Project> projects = getProjectRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
-        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(projects, resourceAssembler));
-    }
-
-    @GetMapping("/submissionEnvelopes/{sub_id}" + Links.SUBMISSION_RELATED_PROJECTS_URL)
-    ResponseEntity<?> getRelatedProjects(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                         Pageable pageable,
-                                         final PersistentEntityResourceAssembler resourceAssembler) {
         Page<Project> projects = getProjectRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(projects, resourceAssembler));
     }

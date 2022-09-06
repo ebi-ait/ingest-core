@@ -19,7 +19,6 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -33,8 +32,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -93,7 +95,6 @@ public class SubmissionControllerTest {
         submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
 
         project = new Project(null);
-        project.setSubmissionEnvelope(submissionEnvelope);
         project.getSubmissionEnvelopes().add(submissionEnvelope);
         project = projectRepository.save(project);
 
@@ -126,174 +127,6 @@ public class SubmissionControllerTest {
         fileRepository.deleteAll();
     }
 
-    @Test
-    public void newBiomaterialInSubmissionLinksToSubmissionAndProject() throws Exception {
-        //given
-        biomaterialRepository.deleteAll();
-
-        // when
-        webApp.perform(
-            post("/submissionEnvelopes/{id}/biomaterials", submissionEnvelope.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"content\": {}}")
-        ).andExpect(status().isAccepted());
-
-        //then
-        assertThat(biomaterialRepository.findAll()).hasSize(1);
-        assertThat(biomaterialRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
-        assertThat(biomaterialRepository.findByProject(project)).hasSize(1);
-        var newBiomaterial = biomaterialRepository.findAll().get(0);
-        assertThat(newBiomaterial.getSubmissionEnvelope()).isNotNull();
-        assertThat(newBiomaterial.getProject()).isNotNull();
-    }
-
-    @Test
-    public void newBiomaterialInSubmissionDoesNotFailIfSubmissionHasNoProject() throws Exception {
-        //given
-        biomaterialRepository.deleteAll();
-        projectRepository.deleteAll();
-
-        // when
-        webApp.perform(
-            post("/submissionEnvelopes/{id}/biomaterials", submissionEnvelope.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"content\": {}}")
-        ).andExpect(status().isAccepted());
-
-        //then
-        assertThat(biomaterialRepository.findAll()).hasSize(1);
-        assertThat(biomaterialRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
-        var newBiomaterial = biomaterialRepository.findAll().get(0);
-        assertThat(newBiomaterial.getSubmissionEnvelope()).isNotNull();
-        assertThat(newBiomaterial.getProject()).isNull();
-    }
-
-    @Test
-    public void newProcessInSubmissionLinksToSubmissionAndProject() throws Exception {
-        //given
-        processRepository.deleteAll();
-
-        // when
-        webApp.perform(
-            post("/submissionEnvelopes/{id}/processes", submissionEnvelope.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"content\": {}}")
-        ).andExpect(status().isAccepted());
-
-        //then
-        assertThat(processRepository.findAll()).hasSize(1);
-        assertThat(processRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
-        assertThat(processRepository.findByProject(project)).hasSize(1);
-        var newProcess = processRepository.findAll().get(0);
-        assertThat(newProcess.getSubmissionEnvelope()).isNotNull();
-        assertThat(newProcess.getProject()).isNotNull();
-    }
-
-    @Test
-    public void newProcessInSubmissionDoesNotFailIfSubmissionHasNoProject() throws Exception {
-        //given
-        processRepository.deleteAll();
-        projectRepository.deleteAll();
-
-        // when
-        webApp.perform(
-            post("/submissionEnvelopes/{id}/processes", submissionEnvelope.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"content\": {}}")
-        ).andExpect(status().isAccepted());
-
-        //then
-        assertThat(processRepository.findAll()).hasSize(1);
-        assertThat(processRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
-        var newProcess = processRepository.findAll().get(0);
-        assertThat(newProcess.getSubmissionEnvelope()).isNotNull();
-        assertThat(newProcess.getProject()).isNull();
-    }
-
-    @Test
-    public void newProtocolInSubmissionLinksToSubmissionAndProject() throws Exception {
-        //given
-        protocolRepository.deleteAll();
-
-        // when
-        webApp.perform(
-            post("/submissionEnvelopes/{id}/protocols", submissionEnvelope.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"content\": {}}")
-        ).andExpect(status().isAccepted());
-
-        //then
-        assertThat(protocolRepository.findAll()).hasSize(1);
-        assertThat(protocolRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
-        assertThat(protocolRepository.findByProject(project)).hasSize(1);
-        var newProtocol = protocolRepository.findAll().get(0);
-        assertThat(newProtocol.getSubmissionEnvelope()).isNotNull();
-        assertThat(newProtocol.getProject()).isNotNull();
-    }
-
-    @Test
-    public void newProtocolInSubmissionDoesNotFailIfSubmissionHasNoProject() throws Exception {
-        //given
-        protocolRepository.deleteAll();
-        projectRepository.deleteAll();
-
-        // when
-        webApp.perform(
-            post("/submissionEnvelopes/{id}/protocols", submissionEnvelope.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"content\": {}}")
-        ).andExpect(status().isAccepted());
-
-        //then
-        assertThat(protocolRepository.findAll()).hasSize(1);
-        assertThat(protocolRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
-        var newProtocol = protocolRepository.findAll().get(0);
-        assertThat(newProtocol.getSubmissionEnvelope()).isNotNull();
-        assertThat(newProtocol.getProject()).isNull();
-    }
-
-    @Test
-    public void newFileInSubmissionLinksToSubmissionAndProject() throws Exception {
-        //given
-        fileRepository.deleteAll();
-
-        // when
-        webApp.perform(
-            post("/submissionEnvelopes/{id}/files", submissionEnvelope.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"content\": {}}")
-        ).andExpect(status().isAccepted());
-
-        //then
-        assertThat(fileRepository.findAll()).hasSize(1);
-        assertThat(fileRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
-        assertThat(fileRepository.findByProject(project)).hasSize(1);
-        var newFile = fileRepository.findAll().get(0);
-        assertThat(newFile.getSubmissionEnvelope()).isNotNull();
-        assertThat(newFile.getProject()).isNotNull();
-    }
-
-    @Test
-    public void newFileInSubmissionDoesNotFailIfSubmissionHasNoProject() throws Exception {
-        //given
-        fileRepository.deleteAll();
-        projectRepository.deleteAll();
-
-        // when
-        webApp.perform(
-            post("/submissionEnvelopes/{id}/files", submissionEnvelope.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"content\": {}}")
-        ).andExpect(status().isAccepted());
-
-        //then
-        assertThat(fileRepository.findAll()).hasSize(1);
-        assertThat(fileRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
-        var newFile = fileRepository.findAll().get(0);
-        assertThat(newFile.getSubmissionEnvelope()).isNotNull();
-        assertThat(newFile.getProject()).isNull();
-    }
-
     @ParameterizedTest
     @ValueSource(strings = {
         "biomaterials",
@@ -323,7 +156,7 @@ public class SubmissionControllerTest {
         "ARCHIVED",
         "SUBMITTED"
     })
-    public void testAdditionToNonEditableSubmissionThrowsErrorinAllStates(SubmissionState state) throws Exception {
+    public void testAdditionToNonEditableSubmissionThrowsErrorInAllStates(SubmissionState state) throws Exception {
         // given
         submissionEnvelope.enactStateTransition(state);
         submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
@@ -334,5 +167,21 @@ public class SubmissionControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"content\": {}}")
         ).andExpect(status().isForbidden());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "/submissionEnvelopes/{id}/projects",
+        "/submissionEnvelopes/{id}/relatedProjects"
+    })
+    public void testProjectsAreReturnedWhenTheyIncludeTheSubmissionInTheirEnvelopes(String endpoint) throws Exception {
+        webApp.perform(
+            // when
+            get(endpoint, submissionEnvelope.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+        )   // then
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.projects", hasSize(1)))
+            .andExpect(jsonPath("$._embedded.projects[0].uuid.uuid", is(project.getUuid().getUuid().toString())));
     }
 }

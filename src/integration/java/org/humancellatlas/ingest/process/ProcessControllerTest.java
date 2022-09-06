@@ -21,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataM
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -88,7 +89,10 @@ class ProcessControllerTest {
         protocol2 = protocolRepository.save(new Protocol(null));
         protocol3 = protocolRepository.save(new Protocol(null));
 
-        project = projectRepository.save(new Project(null));
+        project = new Project(null);
+        project.setSubmissionEnvelope(submissionEnvelope);
+        project.getSubmissionEnvelopes().add(submissionEnvelope);
+        project = projectRepository.save(project);
 
         process = new Process(null);
         process.setSubmissionEnvelope(submissionEnvelope);
@@ -98,11 +102,58 @@ class ProcessControllerTest {
     }
 
     @AfterEach
-    private void tearDown() {
+    void tearDown() {
         submissionEnvelopeRepository.deleteAll();
         processRepository.deleteAll();
         protocolRepository.deleteAll();
         projectRepository.deleteAll();
+    }
+
+    @Test
+    public void newProcessInSubmissionLinksToSubmissionAndProject() throws Exception {
+        //given
+        processRepository.deleteAll();
+
+        // when
+        webApp.perform(
+            post("/submissionEnvelopes/{id}/processes", submissionEnvelope.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"content\": {}}")
+        ).andExpect(status().isAccepted());
+
+        //then
+        assertThat(processRepository.findAll()).hasSize(1);
+        assertThat(processRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
+        assertThat(processRepository.findByProject(project)).hasSize(1);
+
+        var newProcess = processRepository.findAll().get(0);
+        assertThat(newProcess.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
+        assertThat(newProcess.getProject().getId()).isEqualTo(project.getId());
+        assertThat(newProcess.getProjects()).hasSize(1);
+        assertThat(newProcess.getProjects().stream().findFirst().get().getId()).isEqualTo(project.getId());
+    }
+
+    @Test
+    public void newProcessInSubmissionDoesNotFailIfSubmissionHasNoProject() throws Exception {
+        //given
+        processRepository.deleteAll();
+        projectRepository.deleteAll();
+
+        // when
+        webApp.perform(
+            post("/submissionEnvelopes/{id}/processes", submissionEnvelope.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"content\": {}}")
+        ).andExpect(status().isAccepted());
+
+        //then
+        assertThat(processRepository.findAll()).hasSize(1);
+        assertThat(processRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
+
+        var newProcess = processRepository.findAll().get(0);
+        assertThat(newProcess.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
+        assertThat(newProcess.getProject()).isNull();
+        assertThat(newProcess.getProjects()).isEmpty();
     }
 
     @Test
@@ -195,8 +246,9 @@ class ProcessControllerTest {
     }
 
     private void verifyThatValidationStateChangedToDraftWhenGraphValid(MetadataDocument... values) {
-        Arrays.stream(values).forEach(value -> {
-            verify(validationStateChangeService, times(1)).changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT);
-        });
+        Arrays.stream(values).forEach(
+            value -> verify(validationStateChangeService, times(1))
+                .changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT)
+        );
     }
 }
