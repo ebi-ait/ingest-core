@@ -124,6 +124,7 @@ public class ProjectService {
     public void updateWranglingState(Project project, WranglingState newWranglingState) {
         if(project.getWranglingState() != newWranglingState) {
             project.setWranglingState(newWranglingState);
+            projectRepository.save(project);
             AuditEntry wranglingStateUpdate = new AuditEntry(AuditType.STATUS_UPDATED, project.getWranglingState(), newWranglingState, project);
                 auditEntryService.addAuditEntry(wranglingStateUpdate);
         }

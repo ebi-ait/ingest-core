@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,13 +68,13 @@ public class ProjectStatusUpdateTest {
 
     private void verifyAuditHistory(Project project, WranglingState wranglingState) {
         List<AuditEntry> auditEntryList = auditEntryRepository.findByEntityEqualsOrderByDateDesc(project);
-        assertThat(auditEntryList)
-                .describedAs("audit history updated")
 
-                .hasSize(1);
         auditEntryList.stream()
+                .sorted(Comparator.comparing(AuditEntry::getDate).reversed())
+                .limit(1)
                 .forEach(auditEntry ->
                     assertThat(auditEntry)
+                            .describedAs("audit history updated")
                             .hasFieldOrPropertyWithValue("auditType", AuditType.STATUS_UPDATED)
                             .hasFieldOrPropertyWithValue("after", wranglingState.toString())
                 );
