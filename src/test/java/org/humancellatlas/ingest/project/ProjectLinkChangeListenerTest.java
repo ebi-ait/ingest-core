@@ -1,0 +1,41 @@
+package org.humancellatlas.ingest.project;
+
+import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = ProjectLinkChangeListener.class)
+class ProjectLinkChangeListenerTest {
+    @MockBean
+    ProjectService projectService;
+    @Autowired
+    ProjectLinkChangeListener projectLinkChangeListener;
+
+
+    @Test
+    void test_usingProjectService() {
+        Project project = new Project(null);
+        project.setUuid(Uuid.newUuid());
+        SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
+        project.addToSubmissionEnvelopes(submissionEnvelope);
+
+        List<SubmissionEnvelope> submissions = List.of(submissionEnvelope);
+        projectLinkChangeListener.beforeLinkSaved(project, submissions);
+        verify(projectService).updateWranglingState(eq(project), any());
+
+    }
+}
