@@ -37,7 +37,8 @@ public class ProjectLinkChangeListener {
             Collection<?> linkedCollection = (Collection<?>) linked;
             if (isSubmissionEnvelopeCollection(linkedCollection)) {
                 log.info("setting project {} to IN_PROGRESS", project.getUuid().getUuid().toString());
-                projectService.updateWranglingState(project, WranglingState.IN_PROGRESS);
+                project.setWranglingState(WranglingState.IN_PROGRESS);
+//                projectService.updateWranglingState(project, WranglingState.IN_PROGRESS);
             }
 
         }

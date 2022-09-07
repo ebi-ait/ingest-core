@@ -43,8 +43,6 @@ public class ProjectStatusUpdateTest {
     @Autowired
     private ProjectRepository projectRepository;
 
-    @Autowired
-    AuditEntryRepository auditEntryRepository;
 
     // NOTE: Adding MigrationConfiguration as a MockBean is needed as otherwise MigrationConfiguration won't be
     //       initialised. This is very un-elegant and should be fixed.
@@ -63,7 +61,6 @@ public class ProjectStatusUpdateTest {
         String submissionUrl = createSubmission();
         connectSubmissionToProject(project, submissionUrl);
         verifyProjectStatus(project, IN_PROGRESS);
-        verifyAuditHistory(project, IN_PROGRESS);
     }
 
     @Test
@@ -73,22 +70,9 @@ public class ProjectStatusUpdateTest {
         connectSubmissionToProject(project, submissionUrl);
         setSubmissionToExported(submissionUrl);
         verifyProjectStatus(project, SUBMITTED);
-        verifyAuditHistory(project, SUBMITTED);
     }
 
-    private void verifyAuditHistory(Project project, WranglingState wranglingState) {
-        List<AuditEntry> auditEntryList = auditEntryRepository.findByEntityEqualsOrderByDateDesc(project);
 
-        auditEntryList.stream()
-                .sorted(Comparator.comparing(AuditEntry::getDate).reversed())
-                .limit(1)
-                .forEach(auditEntry ->
-                    assertThat(auditEntry)
-                            .describedAs("audit history updated")
-                            .hasFieldOrPropertyWithValue("auditType", AuditType.STATUS_UPDATED)
-                            .hasFieldOrPropertyWithValue("after", wranglingState.toString())
-                );
-    }
 
     private void setSubmissionToExported(String submissionUrl) throws Exception {
         webApp.perform(

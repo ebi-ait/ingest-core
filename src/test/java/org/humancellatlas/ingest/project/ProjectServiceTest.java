@@ -3,7 +3,9 @@ package org.humancellatlas.ingest.project;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.assertj.core.api.Assertions;
+import org.humancellatlas.ingest.audit.AuditEntry;
 import org.humancellatlas.ingest.audit.AuditEntryService;
+import org.humancellatlas.ingest.audit.AuditType;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
@@ -33,6 +35,8 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.humancellatlas.ingest.audit.AuditType.STATUS_UPDATED;
+import static org.humancellatlas.ingest.project.WranglingState.ELIGIBLE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -40,7 +44,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(classes = {
         ProjectService.class,
         ProjectRepository.class,
-        SubmissionEnvelopeRepository.class
+        SubmissionEnvelopeRepository.class,
 })
 public class ProjectServiceTest {
 
@@ -295,4 +299,19 @@ public class ProjectServiceTest {
         }
     }
 
+    @Nested
+    class ProjectUpdate {
+
+        @Test
+        @DisplayName("state update adds a history entry")
+        void statusUpdatesAddsHistoryRecord() {
+            Project project = new Project(null);
+            projectService.updateWranglingState(project, ELIGIBLE);
+            verify(auditEntryService)
+                    .addAuditEntry(new AuditEntry(STATUS_UPDATED,
+                            any(),
+                            ELIGIBLE,
+                            project));
+        }
+    }
 }

@@ -16,6 +16,8 @@ import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.project.ProjectService;
+import org.humancellatlas.ingest.project.WranglingState;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
@@ -33,6 +35,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.*;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
@@ -47,7 +50,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {SubmissionEnvelopeService.class})
+@SpringBootTest(classes = {SubmissionEnvelopeService.class, ProjectService.class})
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
 public class SubmissionEnvelopeServiceTest {
     @Autowired
@@ -100,6 +103,9 @@ public class SubmissionEnvelopeServiceTest {
 
     @MockBean
     private SubmissionErrorRepository submissionErrorRepository;
+
+    @MockBean
+    ProjectService projectService;
 
     @Configuration
     static class TestConfiguration {
@@ -299,6 +305,10 @@ public class SubmissionEnvelopeServiceTest {
             assertErrorMessageContains(exception, "cannot be submitted without a project");
         }
 
+        @Test void testExportedEventUpdatesHistory() {
+            service.handleCommitExported(submissionEnvelope);
+            verify(projectService).updateWranglingState(project, WranglingState.SUBMITTED);
+        }
         private void assertErrorMessageContains(Throwable exception, String s) {
             assertThat(exception.getMessage()).contains(s);
             verify(submissionEnvelopeRepository, never()).save(submissionEnvelope);
