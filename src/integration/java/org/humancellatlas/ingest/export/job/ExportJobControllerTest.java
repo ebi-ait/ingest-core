@@ -49,6 +49,7 @@ public class ExportJobControllerTest {
     @MockBean
     private Exporter exporter;
 
+    // Adding MigrationConfiguration as a MockBean is needed as otherwise MigrationConfiguration won't be initialised.
     @MockBean
     private MigrationConfiguration migrationConfiguration;
 
