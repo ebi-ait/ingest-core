@@ -177,7 +177,7 @@ public class SubmissionEnvelopeService {
             try {
                 exporter.exportManifests(envelope);
             } catch (Exception e) {
-                log.error("Uncaught Exception sending message to Archive Submission", e);
+                log.error(String.format("Uncaught Exception sending message to Archive Submission %s", envelope.getId()), e);
             }
         });
     }
@@ -187,7 +187,7 @@ public class SubmissionEnvelopeService {
             try {
                 exporter.exportData(envelope, this.getProject(envelope).orElseThrow());
             } catch (Exception e) {
-                log.error("Uncaught Exception sending message to export Submission Data", e);
+                log.error(String.format("Uncaught Exception sending message to export Submission Data %s", envelope.getId()), e);
             }
         });
     }
@@ -197,7 +197,7 @@ public class SubmissionEnvelopeService {
             try {
                 exporter.exportMetadata(envelope);
             } catch (Exception e) {
-                log.error("Uncaught Exception sending message to export Metadata for submission", e);
+                log.error(String.format("Uncaught Exception sending message to export Metadata for submission %s", envelope.getId()), e);
             }
         });
     }
@@ -207,7 +207,7 @@ public class SubmissionEnvelopeService {
             try {
                 handleEnvelopeStateUpdateRequest(envelope, SubmissionState.CLEANUP);
             } catch (Exception e) {
-                log.error("Uncaught Exception sending message to cleanup upload area for submission", e);
+                log.error(String.format("Uncaught Exception sending message to cleanup upload area for submission %s", envelope.getId()), e);
             }
         });
     }

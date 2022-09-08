@@ -64,7 +64,7 @@ public class ExportJobService {
                 try {
                     exporter.exportMetadata(exportJob);
                 } catch (Exception e) {
-                    log.error("Uncaught Exception sending message to export Metadata for Export Job", e);
+                    log.error(String.format("Uncaught Exception sending message to export Metadata for Export Job %s", exportJob.getId()), e);
                 }
             });
         }
