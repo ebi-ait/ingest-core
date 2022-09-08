@@ -101,8 +101,6 @@ public class MessageRouterTest {
         exportJobContext.put("dataFileTransfer", false);
         return ExportJob.builder()
             .id("testExportJobId")
-            .status(ExportState.EXPORTING)
-            .errors(new ArrayList<>())
             .submission(submissionEnvelope)
             .destination(new ExportDestination(DCP, "v2", destinationContext))
             .context(exportJobContext)

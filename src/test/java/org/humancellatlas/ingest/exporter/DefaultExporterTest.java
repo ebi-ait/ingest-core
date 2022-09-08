@@ -172,12 +172,9 @@ public class DefaultExporterTest {
         exportJobContext.put("totalAssayCount", assayIds.size());
         exportJobContext.put("dataFileTransfer", false);
         ExportJob newExportJob = ExportJob.builder()
-                .status(ExportState.EXPORTING)
-                .errors(new ArrayList<>())
                 .submission(submissionEnvelope)
                 .destination(new ExportDestination(DCP, "v2", destinationContext))
                 .context(exportJobContext)
-                .createdDate(Instant.now())
                 .build();
         doReturn(newExportJob).when(exportJobService).createExportJob(any(SubmissionEnvelope.class), any(ExportJobRequest.class));
         doReturn(newExportJob).when(exportJobRepository).insert(any(ExportJob.class));

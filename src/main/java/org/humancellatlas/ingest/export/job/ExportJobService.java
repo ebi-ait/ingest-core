@@ -33,8 +33,6 @@ public class ExportJobService {
 
     public ExportJob createExportJob(SubmissionEnvelope submissionEnvelope, ExportJobRequest exportJobRequest) {
         ExportJob newExportJob = ExportJob.builder()
-                .status(ExportState.EXPORTING)
-                .errors(new ArrayList<>())
                 .submission(submissionEnvelope)
                 .destination(exportJobRequest.getDestination())
                 .context(exportJobRequest.getContext())

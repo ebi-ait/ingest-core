@@ -73,10 +73,7 @@ public class ExportJobControllerTest {
             .id("export-job-id")
             .submission(submissionEnvelope)
             .destination(new ExportDestination(DCP, "v2", destinationContext))
-            .status(ExportState.EXPORTING)
-            .createdDate(Instant.now())
             .context(exportJobContext)
-            .errors(new ArrayList<>())
             .build();
         exportJob = exportJobRepository.save(exportJob);
     }

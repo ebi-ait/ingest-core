@@ -103,8 +103,6 @@ public class DefaultExporter implements Exporter {
         ExportDestination exportDestination = new ExportDestination(DCP, "v2", destinationContext);
         ExportJobRequest exportJobRequest = new ExportJobRequest(exportDestination, exportJobContext);
         ExportJob newExportJob = ExportJob.builder()
-            .status(ExportState.EXPORTING)
-            .errors(new ArrayList<>())
             .submission(submissionEnvelope)
             .destination(exportJobRequest.getDestination())
             .context(exportJobRequest.getContext())
