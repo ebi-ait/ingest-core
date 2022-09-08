@@ -1,11 +1,13 @@
 package org.humancellatlas.ingest.export.job;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
+import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportError;
 import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
+import org.humancellatlas.ingest.messaging.model.ExportSubmissionMessage;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -19,6 +21,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.hateoas.Identifiable;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +38,8 @@ public class ExportJob implements Identifiable<String> {
     private String id;
 
     @CreatedDate
-    private Instant createdDate;
+    @Builder.Default
+    private Instant createdDate = Instant.now();
 
     @Indexed
     @DBRef(lazy = true)
@@ -46,13 +50,26 @@ public class ExportJob implements Identifiable<String> {
     private final ExportDestination destination;
 
     @Indexed
-    private ExportState status;
+    @Builder.Default
+    private ExportState status = ExportState.EXPORTING;
 
     @LastModifiedDate
     private Instant updatedDate;
 
     private Map<String, Object> context;
 
-    private List<ExportError> errors;
+    @Builder.Default
+    private List<ExportError> errors = new ArrayList<>();
+
+    public ExportSubmissionMessage toExportSubmissionMessage(LinkGenerator linkGenerator, Map<String, Object> context) {
+        String callbackLink = linkGenerator.createCallback(getClass(), getId());
+        return new ExportSubmissionMessage(
+            getId(),
+            submission.getUuid().getUuid().toString(),
+            destination.getContext().get("projectUuid").toString(),
+            callbackLink,
+            context
+        );
+    }
 
 }

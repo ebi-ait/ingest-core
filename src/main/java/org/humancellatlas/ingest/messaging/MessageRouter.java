@@ -27,6 +27,7 @@ import java.util.Map;
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.EXPORTER_EXCHANGE;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.EXPERIMENT_SUBMITTED;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.MANIFEST_SUBMITTED;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.SUBMISSION_SUBMITTED;
 
 
 @Component
@@ -108,8 +109,6 @@ public class MessageRouter {
             log.warn(String.format("The metadata document '%s' is not linked to a submission envelope", document.getId()));
             return false;
         }
-
-
     }
 
     public boolean routeStateTrackingUpdateMessageForEnvelopeEvent(SubmissionEnvelope envelope, SubmissionState state) {
@@ -143,6 +142,14 @@ public class MessageRouter {
                 System.currentTimeMillis());
     }
 
+    public void sendSubmissionForDataExport(ExportJob exportJob, Map<String, Object> context) {
+        messageSender.queueNewExportMessage(
+            EXPORTER_EXCHANGE,
+            SUBMISSION_SUBMITTED,
+            exportJob.toExportSubmissionMessage(linkGenerator, context),
+            System.currentTimeMillis()
+        );
+    }
     /* messages to the upload/staging area manager */
 
     public boolean routeRequestUploadAreaCredentials(SubmissionEnvelope envelope) {

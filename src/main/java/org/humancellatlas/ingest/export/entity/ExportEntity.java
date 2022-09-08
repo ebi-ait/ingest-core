@@ -15,6 +15,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.hateoas.Identifiable;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,7 @@ public class ExportEntity implements Identifiable<String> {
 
     private Map<String, Object> context;
 
-    private List<ExportError> errors;
+    @Builder.Default
+    private List<ExportError> errors = new ArrayList<>();
 
 }
