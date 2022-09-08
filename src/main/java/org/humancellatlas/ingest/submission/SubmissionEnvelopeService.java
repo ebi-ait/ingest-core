@@ -92,38 +92,34 @@ public class SubmissionEnvelopeService {
     private SubmissionErrorRepository submissionErrorRepository;
 
     public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
-        projectRepository.findBySubmissionEnvelopesContains(envelope)
-            .findFirst()
-            .ifPresentOrElse(
-                project -> {
-                    if (!project.getValidationState().equals(ValidationState.VALID)) {
-                                throw new StateTransitionNotAllowed((String.format(
-                                        "Envelope with id %s cannot be submitted when the project is invalid.",
-                                        envelope.getId()
-                                )));
-                            }
-                        },
-                        () -> {
-                            throw new StateTransitionNotAllowed((String.format(
-                                    "Envelope with id %s cannot be submitted without a project.",
-                                    envelope.getId()
-                            )));
-                        });
+        getProject(envelope).ifPresentOrElse(
+            project -> {
+                if (!project.getValidationState().equals(ValidationState.VALID)) {
+                    throw new StateTransitionNotAllowed(
+                        String.format("Envelope with id %s cannot be submitted when the project is invalid.", envelope.getId())
+                    );
+                }
+            },
+            () -> {
+                throw new StateTransitionNotAllowed(
+                    String.format("Envelope with id %s cannot be submitted without a project.", envelope.getId())
+                );
+            }
+        );
 
         if (envelope.getSubmissionState() != SubmissionState.GRAPH_VALID) {
-            throw new StateTransitionNotAllowed((String.format(
-                    "Envelope with id %s cannot be submitted without a graph valid state",
-                    envelope.getId()
-            )));
+            throw new StateTransitionNotAllowed(
+                String.format("Envelope with id %s cannot be submitted without a graph valid state", envelope.getId())
+            );
         }
 
         if (isSubmitAction(submitActions)) {
             envelope.setSubmitActions(new HashSet<>(submitActions));
             submissionEnvelopeRepository.save(envelope);
         } else {
-            throw new IllegalArgumentException((String.format(
-                    "Envelope with id %s is submitted without the required submit actions",
-                    envelope.getId(), envelope.getSubmissionState())));
+            throw new IllegalArgumentException(
+                String.format("Envelope with id %s is submitted without the required submit actions", envelope.getId())
+            );
         }
         handleEnvelopeStateUpdateRequest(envelope, SubmissionState.SUBMITTED);
     }
@@ -147,43 +143,71 @@ public class SubmissionEnvelopeService {
         Set<SubmitAction> submitActions = envelope.getSubmitActions();
         if (submitActions.contains(SubmitAction.ARCHIVE)) {
             archiveSubmission(envelope);
-        } else if (shouldExport(submitActions)) {
-            exportSubmission(envelope);
         } else {
-            throw new IllegalArgumentException((String.format(
-                    "Envelope with id %s is submitted without the required submit actions",
-                    envelope.getId(), envelope.getSubmissionState())));
+            handleCommitArchived(envelope);
+        }
+    }
+
+    public void handleCommitArchived(SubmissionEnvelope envelope) {
+        Set<SubmitAction> submitActions = envelope.getSubmitActions();
+        if (submitActions.contains(SubmitAction.EXPORT)) {
+            exportData(envelope);
+        } else if (submitActions.contains(SubmitAction.EXPORT_METADATA)) {
+            exportMetadata(envelope);
+        } else {
+            handleCommitExported(envelope);
+        }
+    }
+
+    public void handleCommitExported(SubmissionEnvelope envelope) {
+        if (envelope.getSubmitActions().contains(SubmitAction.CLEANUP)) {
+            cleanupSubmission(envelope);
+        } else {
+            log.info(String.format(
+                "No Action to take for submission: %s in state: %s with submitActions: %s",
+                envelope.getId(),
+                envelope.getSubmissionState(),
+                envelope.getSubmitActions()
+            ));
         }
     }
 
     private void archiveSubmission(SubmissionEnvelope envelope) {
-        exporter.exportManifests(envelope);
-    }
-
-    public void exportSubmission(SubmissionEnvelope submissionEnvelope) {
         executorService.submit(() -> {
             try {
-                exporter.exportProcesses(submissionEnvelope);
+                exporter.exportManifests(envelope);
             } catch (Exception e) {
-                log.error("Uncaught Exception exporting Bundles", e);
+                log.error(String.format("Uncaught Exception sending message to Archive Submission %s", envelope.getId()), e);
             }
         });
     }
 
-    public void handleCommitArchived(SubmissionEnvelope envelope) {
-        if (envelope.getSubmitActions().contains(SubmitAction.EXPORT)) {
-            exportSubmission(envelope);
-        }
-    }
-
-    public void handleCommitExported(SubmissionEnvelope submissionEnvelope) {
+    public void exportData(SubmissionEnvelope envelope) {
         executorService.submit(() -> {
             try {
-                if (submissionEnvelope.getSubmitActions().contains(SubmitAction.CLEANUP)) {
-                    handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.CLEANUP);
-                }
+                exporter.exportData(envelope, this.getProject(envelope).orElseThrow());
             } catch (Exception e) {
-                log.error("Uncaught Exception exporting Bundles", e);
+                log.error(String.format("Uncaught Exception sending message to export Submission Data %s", envelope.getId()), e);
+            }
+        });
+    }
+
+    public void exportMetadata(SubmissionEnvelope envelope) {
+        executorService.submit(() -> {
+            try {
+                exporter.exportMetadata(envelope);
+            } catch (Exception e) {
+                log.error(String.format("Uncaught Exception sending message to export Metadata for submission %s", envelope.getId()), e);
+            }
+        });
+    }
+
+    public void cleanupSubmission(SubmissionEnvelope envelope) {
+        executorService.submit(() -> {
+            try {
+                handleEnvelopeStateUpdateRequest(envelope, SubmissionState.CLEANUP);
+            } catch (Exception e) {
+                log.error(String.format("Uncaught Exception sending message to cleanup upload area for submission %s", envelope.getId()), e);
             }
         });
     }
@@ -192,8 +216,7 @@ public class SubmissionEnvelopeService {
         SubmissionEnvelope updateSubmissionEnvelope = new SubmissionEnvelope();
         submissionEnvelopeCreateHandler.setUuid(updateSubmissionEnvelope);
         updateSubmissionEnvelope.setIsUpdate(true);
-        SubmissionEnvelope insertedUpdateSubmissionEnvelope = createSubmissionEnvelope(updateSubmissionEnvelope);
-        return insertedUpdateSubmissionEnvelope;
+        return createSubmissionEnvelope(updateSubmissionEnvelope);
     }
 
     public SubmissionEnvelope createSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
@@ -279,10 +302,6 @@ public class SubmissionEnvelopeService {
                 || submitActions.contains(SubmitAction.EXPORT_METADATA);
     }
 
-    private boolean shouldExport(Set<SubmitAction> submitActions) {
-        return submitActions.contains(SubmitAction.EXPORT) || submitActions.contains(SubmitAction.EXPORT_METADATA);
-    }
-
     private void removeGraphValidationErrors(SubmissionEnvelope submissionEnvelope) {
         biomaterialRepository.saveAll(
                 biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope)
@@ -317,12 +336,10 @@ public class SubmissionEnvelopeService {
         List<Process> processes = processRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
         List<File> files = fileRepository.findBySubmissionEnvelope(submissionEnvelope, request).getContent();
 
-        Optional<Instant> optionalLastUpdateDate = Stream.of(projects, biomaterials, protocols, processes, files)
+        return Stream.of(projects, biomaterials, protocols, processes, files)
                 .flatMap(List::stream)
                 .map(MetadataDocument::getUpdateDate)
                 .max(Instant::compareTo);
-
-        return optionalLastUpdateDate;
     }
 
     public Optional<Project> getProject(SubmissionEnvelope submissionEnvelope) {

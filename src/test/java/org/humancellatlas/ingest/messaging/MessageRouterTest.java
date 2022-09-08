@@ -5,12 +5,15 @@ import org.humancellatlas.ingest.config.ConfigurationService;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportState;
+import org.humancellatlas.ingest.export.destination.ExportDestination;
 import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.exporter.ExperimentProcess;
+import org.humancellatlas.ingest.messaging.model.ExportSubmissionMessage;
 import org.humancellatlas.ingest.messaging.model.ManifestMessage;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +27,10 @@ import org.springframework.data.rest.core.mapping.ResourceMappings;
 import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.humancellatlas.ingest.export.destination.ExportDestinationName.DCP;
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.EXPORTER_EXCHANGE;
-import static org.humancellatlas.ingest.messaging.Constants.Routing.EXPERIMENT_SUBMITTED;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.MANIFEST_SUBMITTED;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.any;
@@ -65,6 +67,45 @@ public class MessageRouterTest {
         doTestSendForExport(MANIFEST_SUBMITTED);
     }
 
+    @Test
+    public void testSendSubmissionForDataExport() {
+        // given
+        var submissionEnvelope = new SubmissionEnvelope();
+        submissionEnvelope.setUuid(Uuid.newUuid());
+        var project = new Project(null);
+        project.setUuid(Uuid.newUuid());
+        project.getSubmissionEnvelopes().add(submissionEnvelope);
+        var exportJob = exportJob(submissionEnvelope, project);
+        var context = new JSONObject();
+
+        // when
+        messageRouter.sendSubmissionForDataExport(exportJob, context);
+
+        // then
+        var argumentCaptor = ArgumentCaptor.forClass(ExportSubmissionMessage.class);
+        verify(messageSender).queueNewExportMessage(anyString(), anyString(), argumentCaptor.capture(), anyLong());
+        verify(linkGenerator).createCallback(any(), anyString());
+
+        var capturedArgument = argumentCaptor.getValue();
+        assertThat(capturedArgument.getExportJobId()).isEqualTo(exportJob.getId());
+        assertThat(capturedArgument.getSubmissionUuid()).isEqualTo(submissionEnvelope.getUuid().getUuid().toString());
+        assertThat(capturedArgument.getProjectUuid()).isEqualTo(project.getUuid().getUuid().toString());
+        assertThat(capturedArgument.getContext()).isEqualTo(context);
+    }
+
+    private ExportJob exportJob(SubmissionEnvelope submissionEnvelope, Project project) {
+        var destinationContext = new JSONObject();
+        destinationContext.put("projectUuid", project.getUuid().getUuid().toString());
+
+        var exportJobContext = new JSONObject();
+        exportJobContext.put("dataFileTransfer", false);
+        return ExportJob.builder()
+            .id("testExportJobId")
+            .submission(submissionEnvelope)
+            .destination(new ExportDestination(DCP, "v2", destinationContext))
+            .context(exportJobContext)
+            .build();
+    }
 
     @Test
     public void testRouteStateTrackingUpdateMessageFor() {

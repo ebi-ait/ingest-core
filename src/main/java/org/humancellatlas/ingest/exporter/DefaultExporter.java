@@ -1,17 +1,16 @@
 package org.humancellatlas.ingest.exporter;
 
 import org.apache.commons.collections4.ListUtils;
-import org.humancellatlas.ingest.core.web.LinkGenerator;
+import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
-import org.humancellatlas.ingest.export.entity.ExportEntityService;
 import org.humancellatlas.ingest.export.job.ExportJob;
-import org.humancellatlas.ingest.export.job.ExportJobService;
+import org.humancellatlas.ingest.export.job.ExportJobRepository;
 import org.humancellatlas.ingest.export.job.web.ExportJobRequest;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
-import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -34,22 +33,13 @@ public class DefaultExporter implements Exporter {
     private ProcessService processService;
 
     @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
     private ProcessRepository processRepository;
 
     @Autowired
-    private ExportJobService exportJobService;
-
-    @Autowired
-    private ExportEntityService exportEntityService;
+    private ExportJobRepository exportJobRepository;
 
     @Autowired
     private MessageRouter messageRouter;
-
-    @Autowired
-    private LinkGenerator linkGenerator;
 
     /**
      * Divides a set of process IDs into lists of size partitionSize
@@ -82,26 +72,42 @@ public class DefaultExporter implements Exporter {
     }
 
     @Override
-    public void exportProcesses(SubmissionEnvelope envelope) {
-        Collection<String> assayingProcessIds = processService.findAssays(envelope);
+    public void exportData(SubmissionEnvelope envelope, Project project) {
+        var destinationContext = new JSONObject();
+        destinationContext.put("projectUuid", project.getUuid().getUuid().toString());
 
-        log.info(String.format("Found %s assays processes for envelope with ID %s",
-                assayingProcessIds.size(),
-                envelope.getId()));
+        var exportJobContext = new JSONObject();
+        exportJobContext.put("dataFileTransfer", false);
+        ExportJob exportJob = createDcpExportJob(envelope, destinationContext, exportJobContext);
 
-        int totalCount = assayingProcessIds.size();
+        var messageContext = new JSONObject();
+        messageRouter.sendSubmissionForDataExport(exportJob, messageContext);
+    }
 
-        JSONObject context = new JSONObject();
-        context.put("totalAssayCount", totalCount);
+    @Override
+    public void exportMetadata(SubmissionEnvelope submissionEnvelope) {
+        var exportJob = createDcpExportJob(submissionEnvelope, new JSONObject(), new JSONObject());
+        exportMetadata(exportJob);
+    }
 
-        ExportDestination exportDestination = new ExportDestination(DCP, "v2", null);
-
-        ExportJobRequest exportJobRequest = new ExportJobRequest(exportDestination, context);
-
-        ExportJob exportJob = exportJobService.createExportJob(envelope, exportJobRequest);
-
+    @Override
+    public void exportMetadata(ExportJob exportJob) {
+        var submission = exportJob.getSubmission();
+        Collection<String> assayingProcessIds = processService.findAssays(submission);
+        exportJob.getContext().put("totalAssayCount", assayingProcessIds.size());
+        exportJobRepository.save(exportJob);
         updateDcpVersionAndSendMessageForEachProcess(assayingProcessIds, exportJob);
+    }
 
+    private ExportJob createDcpExportJob(SubmissionEnvelope submissionEnvelope, JSONObject destinationContext, JSONObject exportJobContext) {
+        ExportDestination exportDestination = new ExportDestination(DCP, "v2", destinationContext);
+        ExportJobRequest exportJobRequest = new ExportJobRequest(exportDestination, exportJobContext);
+        ExportJob newExportJob = ExportJob.builder()
+            .submission(submissionEnvelope)
+            .destination(exportJobRequest.getDestination())
+            .context(exportJobRequest.getContext())
+            .build();
+        return exportJobRepository.insert(newExportJob);
     }
 
     private void updateDcpVersionAndSendMessageForEachProcess(Collection<String> assayingProcessIds, ExportJob exportJob) {
