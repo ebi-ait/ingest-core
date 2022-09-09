@@ -27,14 +27,18 @@ class ProjectLinkChangeListenerTest {
 
 
     @Test
-    void test_usingProjectService() {
+    void test_whenUpdatingStatus_usingProjectService() {
+        // given
         Project project = new Project(null);
         project.setUuid(Uuid.newUuid());
         SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
         project.addToSubmissionEnvelopes(submissionEnvelope);
-
         List<SubmissionEnvelope> submissions = List.of(submissionEnvelope);
+
+        // then
         projectLinkChangeListener.beforeLinkSaved(project, submissions);
+
+        // then
         verify(projectService).updateWranglingState(eq(project), any());
 
     }

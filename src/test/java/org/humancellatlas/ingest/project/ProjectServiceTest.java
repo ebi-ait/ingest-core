@@ -304,8 +304,13 @@ public class ProjectServiceTest {
         @Test
         @DisplayName("state update adds a history entry")
         void statusUpdatesAddsHistoryRecord() {
+            // given
             Project project = new Project(null);
+
+            // when
             projectService.updateWranglingState(project, ELIGIBLE);
+
+            // then
             verify(auditEntryService)
                     .addAuditEntry(new AuditEntry(STATUS_UPDATED,
                             any(),

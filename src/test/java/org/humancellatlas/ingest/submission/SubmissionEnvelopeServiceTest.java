@@ -306,7 +306,12 @@ public class SubmissionEnvelopeServiceTest {
         }
 
         @Test void testExportedEventUpdatesHistory() {
+            // given
+            // submission from setUp()
+            // when
             service.handleCommitExported(submissionEnvelope);
+
+            // then
             verify(projectService).updateWranglingState(project, WranglingState.SUBMITTED);
         }
         private void assertErrorMessageContains(Throwable exception, String s) {

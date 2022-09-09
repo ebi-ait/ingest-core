@@ -1,8 +1,5 @@
 package org.humancellatlas.ingest.submission.web;
 
-import org.humancellatlas.ingest.audit.AuditEntry;
-import org.humancellatlas.ingest.audit.AuditEntryRepository;
-import org.humancellatlas.ingest.audit.AuditType;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.project.Project;
@@ -22,9 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.Comparator;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.project.WranglingState.IN_PROGRESS;
@@ -57,19 +51,29 @@ public class ProjectStatusUpdateTest {
 
     @Test
     public void test_statusIsInProgress_afterSubmissionCreation() throws Exception {
+        // given
         Project project = createProject();
+
+        // when
         String submissionUrl = createSubmission();
         connectSubmissionToProject(project, submissionUrl);
-        verifyProjectStatus(project, IN_PROGRESS);
+
+        // then
+        assertProjectStatus(project, IN_PROGRESS);
     }
 
     @Test
     public void test_statusIsSubmitted_afterSubmissionIsExported() throws Exception {
+        // given
         Project project = createProject();
         String submissionUrl = createSubmission();
         connectSubmissionToProject(project, submissionUrl);
+
+        // when
         setSubmissionToExported(submissionUrl);
-        verifyProjectStatus(project, SUBMITTED);
+
+        // then
+        assertProjectStatus(project, SUBMITTED);
     }
 
 
@@ -80,7 +84,7 @@ public class ProjectStatusUpdateTest {
         ).andExpect(status().isAccepted());
     }
 
-    private void verifyProjectStatus(Project project, WranglingState wranglingState) {
+    private void assertProjectStatus(Project project, WranglingState wranglingState) {
         Project projectFromRepo = projectRepository.findById(project.getId()).get();
         assertThat(projectFromRepo.getWranglingState())
                 .isEqualTo(wranglingState);
