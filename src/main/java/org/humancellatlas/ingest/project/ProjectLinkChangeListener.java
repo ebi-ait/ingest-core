@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.HandleBeforeLinkSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ProjectLinkChangeListener {
 
+    @Autowired
+    ProjectService projectService;
     private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
 
     /**
@@ -34,7 +37,7 @@ public class ProjectLinkChangeListener {
             Collection<?> linkedCollection = (Collection<?>) linked;
             if (isSubmissionEnvelopeCollection(linkedCollection)) {
                 log.info("setting project {} to IN_PROGRESS", project.getUuid().getUuid().toString());
-                project.setWranglingState(WranglingState.IN_PROGRESS);
+                projectService.updateWranglingState(project, WranglingState.IN_PROGRESS);
             }
 
         }

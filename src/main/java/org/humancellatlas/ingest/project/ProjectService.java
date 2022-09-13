@@ -105,30 +105,31 @@ public class ProjectService {
             project.setCataloguedDate(Instant.now());
         }
 
-        AuditEntry wranglingStateUpdate = wranglingStateUpdate(project, patch);
+        updateWranglingState(project, patch);
         Project updatedProject = metadataUpdateService.update(project, patch);
 
         if (sendNotification) {
             projectEventHandler.editedProjectMetadata(updatedProject);
         }
 
-        if (wranglingStateUpdate != null) {
-            auditEntryService.addAuditEntry(wranglingStateUpdate);
-        }
-
         return updatedProject;
     }
 
-    private AuditEntry wranglingStateUpdate(Project project, ObjectNode patch) {
+    private void updateWranglingState(Project project, ObjectNode patch) {
         WranglingState newWranglingState = patch.has("wranglingState") ?
                 WranglingState.getName(patch.get("wranglingState").asText()) : null;
+         updateWranglingState(project, newWranglingState);
+    }
 
-        if(project.getWranglingState() != (newWranglingState)) {
-            return new AuditEntry(AuditType.STATUS_UPDATED, project.getWranglingState(), newWranglingState, project);
+    public void updateWranglingState(Project project, WranglingState newWranglingState) {
+        WranglingState currentWranglingState = project.getWranglingState();
+        if(currentWranglingState != newWranglingState) {
+            project.setWranglingState(newWranglingState);
+            projectRepository.save(project);
+            AuditEntry wranglingStateUpdate = new AuditEntry(AuditType.STATUS_UPDATED, currentWranglingState, newWranglingState, project);
+            auditEntryService.addAuditEntry(wranglingStateUpdate);
         }
-
-        return null;
-}
+    }
 
     public Project addProjectToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Project project) {
         if (!project.getIsUpdate()) {

@@ -18,6 +18,8 @@ import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.project.ProjectService;
+import org.humancellatlas.ingest.project.WranglingState;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
@@ -26,6 +28,7 @@ import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -70,6 +73,9 @@ public class SubmissionEnvelopeService {
 
     @NonNull
     private ProjectRepository projectRepository;
+
+    @NonNull
+    private ProjectService projectService;
 
     @NonNull
     private ProcessRepository processRepository;
@@ -118,7 +124,11 @@ public class SubmissionEnvelopeService {
             submissionEnvelopeRepository.save(envelope);
         } else {
             throw new IllegalArgumentException(
-                String.format("Envelope with id %s is submitted without the required submit actions", envelope.getId())
+                String.format(
+                    "Envelope with id %s and state %s is submitted without the required submit actions",
+                    envelope.getId(),
+                    envelope.getSubmissionState()
+                )
             );
         }
         handleEnvelopeStateUpdateRequest(envelope, SubmissionState.SUBMITTED);
@@ -160,6 +170,7 @@ public class SubmissionEnvelopeService {
     }
 
     public void handleCommitExported(SubmissionEnvelope envelope) {
+        getProject(envelope).ifPresent(project -> projectService.updateWranglingState(project, WranglingState.SUBMITTED));
         if (envelope.getSubmitActions().contains(SubmitAction.CLEANUP)) {
             cleanupSubmission(envelope);
         } else {

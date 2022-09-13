@@ -1,7 +1,7 @@
 package org.humancellatlas.ingest.submission.web;
 
-import org.assertj.core.api.Assertions;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
+import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.project.WranglingState;
@@ -20,7 +20,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.humancellatlas.ingest.project.WranglingState.IN_PROGRESS;
+import static org.humancellatlas.ingest.project.WranglingState.SUBMITTED;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -32,6 +36,7 @@ public class ProjectStatusUpdateTest {
 
     @Autowired
     private ProjectRepository projectRepository;
+
 
     // NOTE: Adding MigrationConfiguration as a MockBean is needed as otherwise MigrationConfiguration won't be
     //       initialised. This is very un-elegant and should be fixed.
@@ -46,15 +51,42 @@ public class ProjectStatusUpdateTest {
 
     @Test
     public void test_statusIsInProgress_afterSubmissionCreation() throws Exception {
+        // given
+        Project project = createProject();
+
+        // when
+        String submissionUrl = createSubmission();
+        connectSubmissionToProject(project, submissionUrl);
+
+        // then
+        assertProjectStatus(project, IN_PROGRESS);
+    }
+
+    @Test
+    public void test_statusIsSubmitted_afterSubmissionIsExported() throws Exception {
+        // given
         Project project = createProject();
         String submissionUrl = createSubmission();
         connectSubmissionToProject(project, submissionUrl);
-        verifyProjectStatus(project, WranglingState.IN_PROGRESS);
+
+        // when
+        setSubmissionToExported(submissionUrl);
+
+        // then
+        assertProjectStatus(project, SUBMITTED);
     }
 
-    private void verifyProjectStatus(Project project, WranglingState wranglingState) {
+
+
+    private void setSubmissionToExported(String submissionUrl) throws Exception {
+        webApp.perform(
+                put(submissionUrl + Links.COMMIT_EXPORTED_URL)
+        ).andExpect(status().isAccepted());
+    }
+
+    private void assertProjectStatus(Project project, WranglingState wranglingState) {
         Project projectFromRepo = projectRepository.findById(project.getId()).get();
-        Assertions.assertThat(projectFromRepo.getWranglingState())
+        assertThat(projectFromRepo.getWranglingState())
                 .isEqualTo(wranglingState);
     }
 
