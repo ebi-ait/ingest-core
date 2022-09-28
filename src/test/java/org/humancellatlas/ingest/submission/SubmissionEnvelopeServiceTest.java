@@ -29,6 +29,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -253,6 +255,37 @@ public class SubmissionEnvelopeServiceTest {
         verify(submissionEnvelopeRepository).delete(submissionEnvelope);
     }
 
+    @ParameterizedTest
+    @EnumSource(value = SubmissionState.class, names = {
+        "PENDING",
+        "DRAFT",
+        "METADATA_VALIDATING",
+        "METADATA_VALID",
+        "METADATA_INVALID",
+        "GRAPH_VALIDATION_REQUESTED",
+        "GRAPH_VALIDATING",
+        "GRAPH_VALID",
+        "GRAPH_INVALID",
+        "SUBMITTED",
+        "PROCESSING",
+        "ARCHIVING",
+        "ARCHIVED",
+        "EXPORTING",
+        "EXPORTED",
+        "CLEANUP",
+        "COMPLETE"
+    })
+    public void testRedundantHandleEnvelopeStateUpdateRequest(SubmissionState state) {
+        // Given
+        var submissionEnvelope = new SubmissionEnvelope();
+        submissionEnvelope.enactStateTransition(state);
+
+        // When
+        service.handleEnvelopeStateUpdateRequest(submissionEnvelope, state);
+
+        // Then
+        // no errors
+    }
 
     @Nested
     @DisplayName("SubmitRequestTests")
