@@ -45,11 +45,4 @@ public class ProjectLinkChangeListener {
                     projectService.updateWranglingState(project, WranglingState.IN_PROGRESS);
                 });
     }
-
-    private boolean isSubmissionEnvelopeCollection(Collection collection) {
-        return collection.stream()
-                .filter(Objects::nonNull)
-                .anyMatch(SubmissionEnvelope.class::isInstance);
-    }
-
 }
