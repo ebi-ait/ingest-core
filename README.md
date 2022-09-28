@@ -49,10 +49,11 @@ mkdir -p ~/dev/ait/data/mongodb/
 cd ~/dev/ait/data/mongodb/
 latest_backup=$(aws s3 ls s3://ingest-db-backup/prod/ | awk '{print $4}' | sort | tail -n 1)
 aws s3 cp "s3://ingest-db-backup/prod/${latest_backup}" ${latest_backup}
-docker cp $latest_backup ingest-core_mongo_1:/$latest_backup
-docker exec -i ingest-core_mongo_1 tar -xzvf $latest_backup
+mongo_container_name=data-cube-mongodb-1
+docker cp $latest_backup $mongo_container_name:/$latest_backup
+docker exec -i $mongo_container_name tar -xzvf $latest_backup
 backup_dir=$(echo "$latest_backup" | sed "s/\.tar\.gz//g")
-docker exec -i ingest-core_mongo_1 /usr/bin/mongorestore /data/db/dump/$backup_dir --drop
+docker exec -i $mongo_container_name /usr/bin/mongorestore /data/db/dump/$backup_dir --drop
 ```
 
 ## Privacy
