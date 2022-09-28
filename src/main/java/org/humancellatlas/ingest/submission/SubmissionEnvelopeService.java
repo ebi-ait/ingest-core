@@ -136,7 +136,13 @@ public class SubmissionEnvelopeService {
 
     public void handleEnvelopeStateUpdateRequest(SubmissionEnvelope envelope,
                                                  SubmissionState state) {
-        if (!envelope.allowedSubmissionStateTransitions().contains(state)) {
+        if (envelope.getSubmissionState() == state) {
+            log.info(String.format(
+                "No Need to transition submissionEnvelope: %s already in state: %s",
+                envelope.getId(),
+                envelope.getSubmissionState()
+            ));
+        } else if (!envelope.allowedSubmissionStateTransitions().contains(state)) {
             throw new StateTransitionNotAllowed(String.format(
                     "Envelope with id %s cannot be transitioned from state %s to state %s",
                     envelope.getId(), envelope.getSubmissionState(), state));
