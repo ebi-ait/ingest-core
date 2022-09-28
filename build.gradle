@@ -47,6 +47,16 @@ task verify {
     integrationTest.mustRunAfter test
 }
 
+configure(verify) {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = 'unit & integration tests'
+}
+
+configure(integrationTest) {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = 'integration tests for ingest-core'
+}
+
 tasks.withType(Test) {
     testLogging {
         showStackTraces = true

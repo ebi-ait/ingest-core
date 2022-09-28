@@ -36,10 +36,9 @@ class ProjectLinkChangeListenerTest {
         List<SubmissionEnvelope> submissions = List.of(submissionEnvelope);
 
         // then
-        projectLinkChangeListener.beforeLinkSaved(project, submissions);
+        projectLinkChangeListener.beforeLinkSave(project, submissions);
 
         // then
         verify(projectService).updateWranglingState(eq(project), any());
-
     }
 }

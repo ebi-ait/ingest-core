@@ -5,6 +5,8 @@ import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.project.WranglingState;
+import org.humancellatlas.ingest.security.Role;
+import org.humancellatlas.ingest.state.ValidationState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -23,20 +26,18 @@ import org.springframework.web.util.UriComponentsBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.project.WranglingState.IN_PROGRESS;
 import static org.humancellatlas.ingest.project.WranglingState.SUBMITTED;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureDataMongo()
-@AutoConfigureMockMvc()
+@AutoConfigureDataMongo
+@AutoConfigureMockMvc
+@WithMockUser(username = "test_user", authorities={"WRANGLER"})
 public class ProjectStatusUpdateTest {
     @Autowired
     private MockMvc webApp;
-
     @Autowired
     private ProjectRepository projectRepository;
-
 
     // NOTE: Adding MigrationConfiguration as a MockBean is needed as otherwise MigrationConfiguration won't be
     //       initialised. This is very un-elegant and should be fixed.
@@ -76,6 +77,25 @@ public class ProjectStatusUpdateTest {
         assertProjectStatus(project, SUBMITTED);
     }
 
+    @Test
+    public void test_deleteSubmissionWorks() throws Exception {
+        // given
+        Project project = createProject();
+        String submissionUrl = createSubmission();
+        connectSubmissionToProject(project, submissionUrl);
+
+        // when
+        deleteSubmissionFromProject(submissionUrl);
+        String submissionUrl2 = createSubmission();
+        connectSubmissionToProject(project, submissionUrl2);
+
+        // then
+        // no errors
+    }
+
+    private void deleteSubmissionFromProject(String submissionUrl) throws Exception {
+        webApp.perform(delete(submissionUrl)).andExpect(status().isAccepted());
+    }
 
 
     private void setSubmissionToExported(String submissionUrl) throws Exception {
@@ -114,7 +134,6 @@ public class ProjectStatusUpdateTest {
     private Project createProject() {
         Project project = new Project(null);
         project.setWranglingState(WranglingState.ELIGIBLE);
-        project = projectRepository.save(project);
-        return project;
+        return projectRepository.save(project);
     }
 }
