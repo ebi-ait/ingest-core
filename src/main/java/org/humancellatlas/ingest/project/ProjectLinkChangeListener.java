@@ -41,7 +41,6 @@ public class ProjectLinkChangeListener {
                 .filter(SubmissionEnvelope.class::isInstance)
                 .findAny()
                 .ifPresent(o -> {
-                    log.info("setting project {} to IN_PROGRESS", project.getUuid().getUuid().toString());
                     projectService.updateWranglingState(project, WranglingState.IN_PROGRESS);
                 });
     }
