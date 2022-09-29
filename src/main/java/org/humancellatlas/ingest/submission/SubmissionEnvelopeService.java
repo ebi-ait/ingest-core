@@ -136,7 +136,13 @@ public class SubmissionEnvelopeService {
 
     public void handleEnvelopeStateUpdateRequest(SubmissionEnvelope envelope,
                                                  SubmissionState state) {
-        if (!envelope.allowedSubmissionStateTransitions().contains(state)) {
+        if (envelope.getSubmissionState() == state) {
+            log.info(String.format(
+                "No Need to transition submissionEnvelope: %s already in state: %s",
+                envelope.getId(),
+                envelope.getSubmissionState()
+            ));
+        } else if (!envelope.allowedSubmissionStateTransitions().contains(state)) {
             throw new StateTransitionNotAllowed(String.format(
                     "Envelope with id %s cannot be transitioned from state %s to state %s",
                     envelope.getId(), envelope.getSubmissionState(), state));
@@ -151,7 +157,14 @@ public class SubmissionEnvelopeService {
 
     public void handleCommitSubmit(SubmissionEnvelope envelope) {
         Set<SubmitAction> submitActions = envelope.getSubmitActions();
-        if (submitActions.contains(SubmitAction.ARCHIVE)) {
+        if (submitActions.isEmpty()) {
+            log.info(String.format(
+                "No Submit Actions for submission: %s in state: %s",
+                envelope.getId(),
+                envelope.getSubmissionState()
+            ));
+        } else if (submitActions.contains(SubmitAction.ARCHIVE)) {
+            handleEnvelopeStateUpdateRequest(envelope, SubmissionState.PROCESSING);
             archiveSubmission(envelope);
         } else {
             handleCommitArchived(envelope);
@@ -161,8 +174,10 @@ public class SubmissionEnvelopeService {
     public void handleCommitArchived(SubmissionEnvelope envelope) {
         Set<SubmitAction> submitActions = envelope.getSubmitActions();
         if (submitActions.contains(SubmitAction.EXPORT)) {
+            handleEnvelopeStateUpdateRequest(envelope, SubmissionState.EXPORTING);
             exportData(envelope);
         } else if (submitActions.contains(SubmitAction.EXPORT_METADATA)) {
+            handleEnvelopeStateUpdateRequest(envelope, SubmissionState.EXPORTING);
             exportMetadata(envelope);
         } else {
             handleCommitExported(envelope);
@@ -173,13 +188,6 @@ public class SubmissionEnvelopeService {
         getProject(envelope).ifPresent(project -> projectService.updateWranglingState(project, WranglingState.SUBMITTED));
         if (envelope.getSubmitActions().contains(SubmitAction.CLEANUP)) {
             cleanupSubmission(envelope);
-        } else {
-            log.info(String.format(
-                "No Action to take for submission: %s in state: %s with submitActions: %s",
-                envelope.getId(),
-                envelope.getSubmissionState(),
-                envelope.getSubmitActions()
-            ));
         }
     }
 
@@ -214,13 +222,11 @@ public class SubmissionEnvelopeService {
     }
 
     public void cleanupSubmission(SubmissionEnvelope envelope) {
-        executorService.submit(() -> {
-            try {
-                handleEnvelopeStateUpdateRequest(envelope, SubmissionState.CLEANUP);
-            } catch (Exception e) {
-                log.error(String.format("Uncaught Exception sending message to cleanup upload area for submission %s", envelope.getId()), e);
-            }
-        });
+        try {
+            handleEnvelopeStateUpdateRequest(envelope, SubmissionState.CLEANUP);
+        } catch (Exception e) {
+            log.error(String.format("Uncaught Exception sending message to cleanup upload area for submission %s", envelope.getId()), e);
+        }
     }
 
     public SubmissionEnvelope createUpdateSubmissionEnvelope() {

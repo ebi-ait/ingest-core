@@ -29,13 +29,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.*;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
@@ -109,6 +110,66 @@ public class SubmissionEnvelopeServiceTest {
 
     @Configuration
     static class TestConfiguration {
+    }
+
+    @Test
+    public void testContentLastUpdated() {
+        // given
+        SubmissionEnvelope submission = mock(SubmissionEnvelope.class);
+        Project project = mock(Project.class);
+        Biomaterial biomaterial = mock(Biomaterial.class);
+        Process process = mock(Process.class);
+        File file =  mock(File.class);
+
+        PageRequest request = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "updateDate"));
+        when(projectRepository.findBySubmissionEnvelopesContaining(submission, request))
+            .thenReturn(new PageImpl<>(List.of(project), request, 1));
+        when(protocolRepository.findBySubmissionEnvelope(submission, request))
+            .thenReturn(Page.empty());
+        when(biomaterialRepository.findBySubmissionEnvelope(submission, request))
+            .thenReturn(new PageImpl<>(List.of(biomaterial), request, 1));
+        when(processRepository.findBySubmissionEnvelope(submission, request))
+            .thenReturn(new PageImpl<>(List.of(process), request, 1));
+        when(fileRepository.findBySubmissionEnvelope(submission, request))
+            .thenReturn(new PageImpl<>(List.of(file), request, 1));
+
+        Instant now = Instant.now();
+        Instant yesterday = now.minus(1, ChronoUnit.DAYS);
+        when(project.getUpdateDate()).thenReturn(yesterday);
+        when(biomaterial.getUpdateDate()).thenReturn(yesterday);
+        when(process.getUpdateDate()).thenReturn(yesterday);
+        when(file.getUpdateDate()).thenReturn(now);
+
+        // when
+        Optional<Instant> lastUpdateDate = service.getSubmissionContentLastUpdated(submission);
+
+        // then
+        assertThat(lastUpdateDate.isPresent()).isTrue();
+        assertThat(lastUpdateDate.get().toString()).isEqualTo(now.toString());
+    }
+
+    @Test
+    public void testContentLastUpdatedEmptySubmission() {
+        // given
+        SubmissionEnvelope submission = mock(SubmissionEnvelope.class);
+
+        PageRequest request = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "updateDate"));
+        when(projectRepository.findBySubmissionEnvelopesContaining(submission, request))
+            .thenReturn(Page.empty());
+        when(protocolRepository.findBySubmissionEnvelope(submission, request))
+            .thenReturn(Page.empty());
+        when(biomaterialRepository.findBySubmissionEnvelope(submission, request))
+            .thenReturn(Page.empty());
+        when(processRepository.findBySubmissionEnvelope(submission, request))
+            .thenReturn(Page.empty());
+        when(fileRepository.findBySubmissionEnvelope(submission, request))
+            .thenReturn(Page.empty());
+
+        // when
+        Optional<Instant> lastUpdateDate = service.getSubmissionContentLastUpdated(submission);
+
+        // then
+        assertThat(lastUpdateDate.isPresent()).isFalse();
     }
 
     @Test
@@ -194,6 +255,37 @@ public class SubmissionEnvelopeServiceTest {
         verify(submissionEnvelopeRepository).delete(submissionEnvelope);
     }
 
+    @ParameterizedTest
+    @EnumSource(value = SubmissionState.class, names = {
+        "PENDING",
+        "DRAFT",
+        "METADATA_VALIDATING",
+        "METADATA_VALID",
+        "METADATA_INVALID",
+        "GRAPH_VALIDATION_REQUESTED",
+        "GRAPH_VALIDATING",
+        "GRAPH_VALID",
+        "GRAPH_INVALID",
+        "SUBMITTED",
+        "PROCESSING",
+        "ARCHIVING",
+        "ARCHIVED",
+        "EXPORTING",
+        "EXPORTED",
+        "CLEANUP",
+        "COMPLETE"
+    })
+    public void testRedundantHandleEnvelopeStateUpdateRequest(SubmissionState state) {
+        // Given
+        var submissionEnvelope = new SubmissionEnvelope();
+        submissionEnvelope.enactStateTransition(state);
+
+        // When
+        service.handleEnvelopeStateUpdateRequest(submissionEnvelope, state);
+
+        // Then
+        // no errors
+    }
 
     @Nested
     @DisplayName("SubmitRequestTests")
@@ -320,64 +412,67 @@ public class SubmissionEnvelopeServiceTest {
         }
     }
 
-    @Test
-    public void testContentLastUpdated() {
-        // given
-        SubmissionEnvelope submission = mock(SubmissionEnvelope.class);
-        Project project = mock(Project.class);
-        Biomaterial biomaterial = mock(Biomaterial.class);
-        Process process = mock(Process.class);
-        File file =  mock(File.class);
+    @Nested
+    @DisplayName("StateUpdateRequestTests")
+    class StateUpdateRequestTests {
+        SubmissionEnvelope submissionEnvelope;
+        HashSet<SubmitAction> submitActions;
 
-        PageRequest request = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "updateDate"));
-        when(projectRepository.findBySubmissionEnvelopesContaining(submission, request))
-                .thenReturn(new PageImpl<>(List.of(project), request, 1));
-        when(protocolRepository.findBySubmissionEnvelope(submission, request))
-                .thenReturn(Page.empty());
-        when(biomaterialRepository.findBySubmissionEnvelope(submission, request))
-                .thenReturn(new PageImpl<>(List.of(biomaterial), request, 1));
-        when(processRepository.findBySubmissionEnvelope(submission, request))
-                .thenReturn(new PageImpl<>(List.of(process), request, 1));
-        when(fileRepository.findBySubmissionEnvelope(submission, request))
-                .thenReturn(new PageImpl<>(List.of(file), request, 1));
+        @BeforeEach
+        public void setup() {
+            submissionEnvelope = new SubmissionEnvelope();
+            submissionEnvelope.enactStateTransition(SubmissionState.SUBMITTED);
+            submitActions = new HashSet<>();
+            submissionEnvelope.setSubmitActions(submitActions);
+        }
 
-        Instant now = Instant.now();
-        Instant yesterday = now.minus(1, ChronoUnit.DAYS);
-        when(project.getUpdateDate()).thenReturn(yesterday);
-        when(biomaterial.getUpdateDate()).thenReturn(yesterday);
-        when(process.getUpdateDate()).thenReturn(yesterday);
-        when(file.getUpdateDate()).thenReturn(now);
+        @Test
+        public void testHandleEnvelopeArchivingRequest(){
+            // given
+            submitActions.add(SubmitAction.ARCHIVE);
 
-        // when
-        Optional<Instant> lastUpdateDate = service.getSubmissionContentLastUpdated(submission);
+            // when
+            service.handleCommitSubmit(submissionEnvelope);
 
-        // then
-        assertThat(lastUpdateDate.isPresent()).isTrue();
-        assertThat(lastUpdateDate.get().toString()).isEqualTo(now.toString());
+            // then
+            verify(messageRouter).routeStateTrackingUpdateMessageForEnvelopeEvent(submissionEnvelope, SubmissionState.PROCESSING);
+        }
+
+        @Test
+        public void testHandleEnvelopeExportingDataRequest(){
+            // given
+            submitActions.add(SubmitAction.EXPORT);
+
+            // when
+            service.handleCommitSubmit(submissionEnvelope);
+
+            // then
+            verify(messageRouter).routeStateTrackingUpdateMessageForEnvelopeEvent(submissionEnvelope, SubmissionState.EXPORTING);
+        }
+
+        @Test
+        public void testHandleEnvelopeExportingMetadataRequest(){
+            // given
+            submitActions.add(SubmitAction.EXPORT_METADATA);
+
+            // when
+            service.handleCommitSubmit(submissionEnvelope);
+
+            // then
+            verify(messageRouter).routeStateTrackingUpdateMessageForEnvelopeEvent(submissionEnvelope, SubmissionState.EXPORTING);
+        }
+
+        @Test
+        public void testHandleEnvelopeCleanupRequest(){
+            // given
+            submissionEnvelope.enactStateTransition(SubmissionState.EXPORTED);
+            submitActions.add(SubmitAction.CLEANUP);
+
+            // when
+            service.handleCommitSubmit(submissionEnvelope);
+
+            // then
+            verify(messageRouter).routeStateTrackingUpdateMessageForEnvelopeEvent(submissionEnvelope, SubmissionState.CLEANUP);
+        }
     }
-
-    @Test
-    public void testContentLastUpdatedEmptySubmission() {
-        // given
-        SubmissionEnvelope submission = mock(SubmissionEnvelope.class);
-
-        PageRequest request = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "updateDate"));
-        when(projectRepository.findBySubmissionEnvelopesContaining(submission, request))
-                .thenReturn(Page.empty());
-        when(protocolRepository.findBySubmissionEnvelope(submission, request))
-                .thenReturn(Page.empty());
-        when(biomaterialRepository.findBySubmissionEnvelope(submission, request))
-                .thenReturn(Page.empty());
-        when(processRepository.findBySubmissionEnvelope(submission, request))
-                .thenReturn(Page.empty());
-        when(fileRepository.findBySubmissionEnvelope(submission, request))
-                .thenReturn(Page.empty());
-
-        // when
-        Optional<Instant> lastUpdateDate = service.getSubmissionContentLastUpdated(submission);
-
-        // then
-        assertThat(lastUpdateDate.isPresent()).isFalse();
-    }
-
 }
