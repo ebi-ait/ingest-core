@@ -23,10 +23,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.project.WranglingState.IN_PROGRESS;
 import static org.humancellatlas.ingest.project.WranglingState.SUBMITTED;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -104,10 +104,12 @@ public class ProjectStatusUpdateTest {
         ).andExpect(status().isAccepted());
     }
 
-    private void assertProjectStatus(Project project, WranglingState wranglingState) {
-        Project projectFromRepo = projectRepository.findById(project.getId()).get();
-        assertThat(projectFromRepo.getWranglingState())
-                .isEqualTo(wranglingState);
+    private void assertProjectStatus(Project project, WranglingState wranglingState) throws Exception {
+        webApp.perform(
+                get("/projects/{id}",project.getId())
+        ).andExpect(status().isOk())
+                .andExpect(jsonPath("$.wranglingState")
+                                .value(wranglingState.getValue()));
     }
 
     private void connectSubmissionToProject(Project project, String submissionUrl) throws Exception {
