@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.project;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
@@ -116,15 +117,17 @@ public class ProjectService {
     }
 
     private void updateWranglingState(Project project, ObjectNode patch) {
-        WranglingState newWranglingState = patch.has("wranglingState") ?
-                WranglingState.getName(patch.get("wranglingState").asText()) : null;
-         updateWranglingState(project, newWranglingState);
+        Optional.ofNullable(patch.get("wranglingState"))
+                .map(JsonNode::asText)
+                .map(WranglingState::getName)
+                .ifPresent(newWranglingState->updateWranglingState(project, newWranglingState));
     }
 
-    public void updateWranglingState(Project project, WranglingState newWranglingState) {
+    public void updateWranglingState(Project project,
+                                     @NonNull WranglingState newWranglingState) {
         WranglingState currentWranglingState = project.getWranglingState();
         if(currentWranglingState != newWranglingState) {
-            log.info("setting project {} to {}", project.getId(), newWranglingState);
+            log.info("setting project {} from {} to {}", project.getId(), currentWranglingState, newWranglingState);
             project.setWranglingState(newWranglingState);
             projectRepository.save(project);
             AuditEntry wranglingStateUpdate = new AuditEntry(AuditType.STATUS_UPDATED, currentWranglingState, newWranglingState, project);
