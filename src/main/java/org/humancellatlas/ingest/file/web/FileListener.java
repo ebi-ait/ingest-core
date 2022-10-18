@@ -11,7 +11,9 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.ImmediateRequeueAmqpException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -38,6 +40,9 @@ public class FileListener {
             } catch (CoreEntityNotFoundException e) {
                 log.warn(e.getMessage());
                 throw new AmqpRejectAndDontRequeueException(e.getMessage());
+            } catch (OptimisticLockingFailureException e){
+                log.warn("Putting file back on queue: " + e.getMessage());
+                throw new ImmediateRequeueAmqpException(e);
             } catch (RuntimeException e) {
                 log.error(e.getMessage());
                 throw new AmqpRejectAndDontRequeueException(e.getMessage());
