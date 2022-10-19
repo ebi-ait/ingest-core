@@ -29,6 +29,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -147,6 +148,21 @@ public class FileServiceTest {
 
         //then:
         verify(fileRepository, times(2)).save(file);
+    }
+
+    @Test
+    public void testUpdateFileFromFileMessageMaxRetries() throws CoreEntityNotFoundException {
+        //given:
+        when(fileRepository.save(file))
+            .thenThrow(new OptimisticLockingFailureException("Error"));
+
+        //when:
+        assertThatExceptionOfType(OptimisticLockingFailureException.class).isThrownBy(() -> {
+            fileService.updateFileFromFileMessage(fileMessage);
+        });
+
+        //then:
+        verify(fileRepository, times(5)).save(file);
     }
 
 }

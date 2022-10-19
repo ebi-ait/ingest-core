@@ -97,12 +97,11 @@ public class FileService {
     @Retryable(
             value = OptimisticLockingFailureException.class,
             maxAttempts = 5,
-            backoff = @Backoff(delay = 500))
+            backoff = @Backoff(delay = 500, maxDelay = 60000, multiplier = 2))
     public File updateFileFromFileMessage(FileMessage fileMessage) throws CoreEntityNotFoundException {
         String envelopeUuid = fileMessage.getStagingAreaId();
         SubmissionEnvelope envelope = findEnvelope(envelopeUuid);
-        File updatedFile = findAndUpdateFile(fileMessage, envelope);
-        return updatedFile;
+        return findAndUpdateFile(fileMessage, envelope);
     }
 
     private File findAndUpdateFile(FileMessage fileMessage, SubmissionEnvelope envelope) {
