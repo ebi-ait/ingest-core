@@ -90,7 +90,11 @@ public class DefaultExporter implements Exporter {
 
     @Override
     public void generateSpreadsheet(SubmissionEnvelope submissionEnvelope) {
-        var exportJob = createDcpExportJob(submissionEnvelope, new JSONObject(), new JSONObject());
+        Project project = projectRepository.findBySubmissionEnvelopesContains(submissionEnvelope).findFirst().orElseThrow();
+        var destinationContext = new JSONObject();
+        destinationContext.put("projectUuid", project.getUuid().getUuid().toString());
+
+        var exportJob = createDcpExportJob(submissionEnvelope, destinationContext, new JSONObject());
         generateSpreadsheet(exportJob);
     }
 

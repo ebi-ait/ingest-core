@@ -99,6 +99,10 @@ public class DefaultExporterTest {
         Set<ExperimentProcess> receivedData = mockSendingManifestThroughMessageRouter();
     }
 
+    private String projectUuid() {
+        return project.getUuid().getUuid().toString();
+    }
+
     @Test
     public void testExportManifests() {
         //when:
@@ -117,26 +121,28 @@ public class DefaultExporterTest {
     @Test
     public void testExportDataSetsContextsAndCallsMessageRouter() {
         // given
-        mockCreateExportJob(project.getUuid().getUuid().toString());
+        mockCreateExportJob(projectUuid());
 
         // when
         exporter.exportData(submissionEnvelope);
 
         // then
-        var argumentCaptor = ArgumentCaptor.forClass(ExportJob.class);
-        verify(exportJobRepository).insert(argumentCaptor.capture());
-        verify(messageRouter).sendSubmissionForDataExport(any(ExportJob.class), any());
+        var insertCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        var sendCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        verify(exportJobRepository).insert(insertCaptor.capture());
+        verify(messageRouter).sendSubmissionForDataExport(sendCaptor.capture(), any());
 
-        var capturedArgument = argumentCaptor.getValue();
-        assertThat(capturedArgument.getDestination().getContext().get("projectUuid")).isEqualTo(project.getUuid().getUuid().toString());
-        assertThat(capturedArgument.getContext().get("dataFileTransfer")).isEqualTo(false);
+        assertThat(insertCaptor.getValue().getDestination().getContext().get("projectUuid")).isEqualTo(projectUuid());
+        assertThat(insertCaptor.getValue().getContext().get("dataFileTransfer")).isEqualTo(false);
+        assertThat(sendCaptor.getValue().getDestination().getContext().get("projectUuid")).isEqualTo(projectUuid());
+        assertThat(sendCaptor.getValue().getContext().get("dataFileTransfer")).isEqualTo(false);
     }
 
     @Test
     public void testExportMetadataFromExportJob() {
         //given:
         mockProcessSave();
-        ExportJob newExportJob = mockCreateExportJob(project.getUuid().getUuid().toString());
+        ExportJob newExportJob = mockCreateExportJob(projectUuid());
         Set<ExperimentProcess> receivedData = mockSendingProcessThroughMessageRouter();
 
         //when:
@@ -153,34 +159,42 @@ public class DefaultExporterTest {
     @Test
     public void testGenerateSpreadsheetFromSubmission() {
         // given
-        mockCreateExportJob(project.getUuid().getUuid().toString());
+        mockCreateExportJob(projectUuid());
 
         //when:
         exporter.generateSpreadsheet(submissionEnvelope);
 
         // then
-        var argumentCaptor = ArgumentCaptor.forClass(ExportJob.class);
-        verify(messageRouter).sendGenerateSpreadsheet(argumentCaptor.capture(), any());
+        var insertCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        var saveCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        var sendCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        verify(exportJobRepository).insert(insertCaptor.capture());
+        verify(exportJobRepository).save(saveCaptor.capture());
+        verify(messageRouter).sendGenerateSpreadsheet(sendCaptor.capture(), any());
 
-        var capturedArgument = argumentCaptor.getValue();
-        assertThat(capturedArgument.getContext().get("spreadsheetGeneration")).isEqualTo(false);
+        assertThat(insertCaptor.getValue().getDestination().getContext().get("projectUuid")).isEqualTo(projectUuid());
+        assertThat(saveCaptor.getValue().getContext().get("spreadsheetGeneration")).isEqualTo(false);
+        assertThat(sendCaptor.getValue().getDestination().getContext().get("projectUuid")).isEqualTo(projectUuid());
+        assertThat(sendCaptor.getValue().getContext().get("spreadsheetGeneration")).isEqualTo(false);
     }
 
     @Test
     public void testGenerateSpreadsheetSetsContextsAndCallsMessageRouter() {
         // given
-        ExportJob newExportJob = mockCreateExportJob(project.getUuid().getUuid().toString());
+        ExportJob newExportJob = mockCreateExportJob(projectUuid());
 
         //when:
         exporter.generateSpreadsheet(newExportJob);
 
         // then
-        var argumentCaptor = ArgumentCaptor.forClass(ExportJob.class);
-        verify(messageRouter).sendGenerateSpreadsheet(argumentCaptor.capture(), any());
+        var saveCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        var sendCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        verify(exportJobRepository).save(saveCaptor.capture());
+        verify(messageRouter).sendGenerateSpreadsheet(sendCaptor.capture(), any());
 
-        var capturedArgument = argumentCaptor.getValue();
-        assertThat(capturedArgument.getContext().get("spreadsheetGeneration")).isEqualTo(false);
-
+        assertThat(saveCaptor.getValue().getContext().get("spreadsheetGeneration")).isEqualTo(false);
+        assertThat(sendCaptor.getValue().getDestination().getContext().get("projectUuid")).isEqualTo(projectUuid());
+        assertThat(sendCaptor.getValue().getContext().get("spreadsheetGeneration")).isEqualTo(false);
     }
 
     private ExportJob mockCreateExportJob(String projectUuidUuid) {
