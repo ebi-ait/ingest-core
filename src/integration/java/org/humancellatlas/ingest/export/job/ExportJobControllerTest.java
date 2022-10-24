@@ -85,7 +85,7 @@ public class ExportJobControllerTest {
     }
 
     @Test
-    void testCallbackEndpoint() throws Exception {
+    void testDataTransferCallbackEndpoint() throws Exception {
         // given
         String patch_value = "COMPLETE";
 
@@ -97,11 +97,36 @@ public class ExportJobControllerTest {
             )   // then
             .andExpect(status().isAccepted());
         var argumentCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        verify(exporter).generateSpreadsheet(argumentCaptor.capture());
+
+        var capturedArgument = argumentCaptor.getValue();
+        assertThat(capturedArgument.getId()).isEqualTo(exportJob.getId());
+        assertThat(capturedArgument.getDestination().getContext().get("projectUuid")).isEqualTo("project-uuid-uuid");
+        assertThat(capturedArgument.getContext().get("dataFileTransfer")).isEqualTo(patch_value);
+    }
+
+    @Test
+    void testSpreadsheetGenerationCallbackEndpoint() throws Exception {
+        // given
+        String patch_value = "COMPLETE";
+        exportJob.getContext().put("dataFileTransfer", patch_value);
+        exportJob.getContext().put("spreadsheetGeneration", "STARTED");
+        exportJob = exportJobRepository.save(exportJob);
+
+        webApp.perform(
+                // when
+                patch("/exportJobs/{id}/context", exportJob.getId())
+                    .contentType(APPLICATION_JSON_VALUE)
+                    .content("{\"spreadsheetGeneration\": \"" + patch_value + "\"}")
+            )   // then
+            .andExpect(status().isAccepted());
+        var argumentCaptor = ArgumentCaptor.forClass(ExportJob.class);
         verify(exporter).exportMetadata(argumentCaptor.capture());
 
         var capturedArgument = argumentCaptor.getValue();
         assertThat(capturedArgument.getId()).isEqualTo(exportJob.getId());
         assertThat(capturedArgument.getDestination().getContext().get("projectUuid")).isEqualTo("project-uuid-uuid");
         assertThat(capturedArgument.getContext().get("dataFileTransfer")).isEqualTo(patch_value);
+        assertThat(capturedArgument.getContext().get("spreadsheetGeneration")).isEqualTo(patch_value);
     }
 }
