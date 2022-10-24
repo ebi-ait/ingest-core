@@ -25,6 +25,8 @@ import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.export.destination.ExportDestinationName.DCP;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -85,6 +87,24 @@ public class ExportJobControllerTest {
     }
 
     @Test
+    void testDataTransferCallbackOnlyProgressesOnComplete() throws Exception {
+        // given
+        String patch_value = "STARTED";
+
+        webApp.perform(
+                // when
+                patch("/exportJobs/{id}/context", exportJob.getId())
+                    .contentType(APPLICATION_JSON_VALUE)
+                    .content("{\"dataFileTransfer\": \"" + patch_value + "\"}")
+            )   // then
+            .andExpect(status().isAccepted());
+        verify(exporter, never()).generateSpreadsheet(any(ExportJob.class));
+
+        var savedJob = exportJobRepository.findById(exportJob.getId()).orElseThrow();
+        assertThat(savedJob.getContext().get("dataFileTransfer")).isEqualTo(patch_value);
+    }
+
+    @Test
     void testDataTransferCallbackEndpoint() throws Exception {
         // given
         String patch_value = "COMPLETE";
@@ -103,6 +123,27 @@ public class ExportJobControllerTest {
         assertThat(capturedArgument.getId()).isEqualTo(exportJob.getId());
         assertThat(capturedArgument.getDestination().getContext().get("projectUuid")).isEqualTo("project-uuid-uuid");
         assertThat(capturedArgument.getContext().get("dataFileTransfer")).isEqualTo(patch_value);
+    }
+
+    @Test
+    void testSpreadsheetGenerationCallbackOnlyProgressesOnComplete() throws Exception {
+        // given
+        String patch_value = "STARTED";
+        exportJob.getContext().put("dataFileTransfer", "COMPLETE");
+        exportJob = exportJobRepository.save(exportJob);
+
+        webApp.perform(
+                // when
+                patch("/exportJobs/{id}/context", exportJob.getId())
+                    .contentType(APPLICATION_JSON_VALUE)
+                    .content("{\"spreadsheetGeneration\": \"" + patch_value + "\"}")
+            )   // then
+            .andExpect(status().isAccepted());
+        verify(exporter, never()).exportMetadata(any(ExportJob.class));
+
+        var savedJob = exportJobRepository.findById(exportJob.getId()).orElseThrow();
+        assertThat(savedJob.getContext().get("dataFileTransfer")).isEqualTo("COMPLETE");
+        assertThat(savedJob.getContext().get("spreadsheetGeneration")).isEqualTo(patch_value);
     }
 
     @Test
