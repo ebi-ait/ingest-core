@@ -32,7 +32,7 @@ public class Constants {
         public static final String UPLOAD_AREA_CLEANUP = "ingest.upload.area.cleanup";
 
         public static final String NOTIFICATION_NEW = "ingest.notifications.new";
-        public static final String SPREADSHEET_GENERATION = "ingest.spreadsheet.generate";
+        public static final String SPREADSHEET_GENERATION = "ingest.exporter.spreadsheet.requested";
     }
 
 }
