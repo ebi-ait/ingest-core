@@ -128,6 +128,7 @@ public class DefaultExporter implements Exporter {
         var submission = exportJob.getSubmission();
         exportJob.getContext().put("spreadsheet", "STARTED");
         exportJobRepository.save(exportJob);
-        messageRouter.sendGenerateSpreadsheet(exportJob);
+        var messageContext = new JSONObject();
+        messageRouter.sendGenerateSpreadsheet(exportJob, messageContext);
     }
 }
