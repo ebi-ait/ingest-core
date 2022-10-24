@@ -1,7 +1,6 @@
 package org.humancellatlas.ingest.exporter;
 
 import org.apache.commons.collections4.ListUtils;
-import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
 import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.export.job.ExportJobRepository;
@@ -124,5 +123,11 @@ public class DefaultExporter implements Exporter {
                 .forEach(exportData -> messageRouter.sendExperimentForExport(exportData, exportJob, null));
     }
 
-
+    @Override
+    public void generateSpreadsheet(ExportJob exportJob) {
+        var submission = exportJob.getSubmission();
+        exportJob.getContext().put("spreadsheet", "STARTED");
+        exportJobRepository.save(exportJob);
+        messageRouter.sendGenerateSpreadsheet(exportJob);
+    }
 }

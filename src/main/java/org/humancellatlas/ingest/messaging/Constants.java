@@ -16,6 +16,7 @@ public class Constants {
         public static final String EXPORTER_EXCHANGE = "ingest.exporter.exchange";
         public static final String UPLOAD_AREA_EXCHANGE = "ingest.upload.area.exchange";
         public static final String NOTIFICATIONS_EXCHANGE = "ingest.notifications.exchange";
+        public static final String SPREADSHEET_EXCHANGE = "ingest.spreadsheet.exchange";
     }
 
     public class Routing {
@@ -31,6 +32,7 @@ public class Constants {
         public static final String UPLOAD_AREA_CLEANUP = "ingest.upload.area.cleanup";
 
         public static final String NOTIFICATION_NEW = "ingest.notifications.new";
+        public static final String SPREADSHEET_GENERATION = "ingest.spreadsheet.generate";
     }
 
 }

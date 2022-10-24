@@ -14,4 +14,5 @@ public interface Exporter {
 
     void exportData(SubmissionEnvelope submissionEnvelope, Project project);
 
+    void generateSpreadsheet(ExportJob exportJob);
 }

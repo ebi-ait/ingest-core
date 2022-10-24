@@ -167,7 +167,13 @@ public class MessageRouter {
                 envelope.getUpdateDate().toEpochMilli());
         return true;
     }
-
+    public void sendGenerateSpreadsheet(ExportJob exportJob, Map<String, Object> context) {
+        SubmissionEnvelope submission = exportJob.getSubmission();
+        this.messageSender.queueSpreadsheetGenerationMessage(Constants.Exchanges.SPREADSHEET_EXCHANGE,
+                Constants.Routing.SPREADSHEET_GENERATION,
+                exportJob.toGenerateSubmissionMessage(linkGenerator, context),
+                submission.getUpdateDate().toEpochMilli());
+    }
     private MetadataDocumentMessage messageFor(MetadataDocument document) {
         return MetadataDocumentMessageBuilder.using(linkGenerator)
                 .messageFor(document)
@@ -200,5 +206,6 @@ public class MessageRouter {
         message.setRequestedState(state);
         return message;
     }
+
 
 }
