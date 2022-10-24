@@ -10,7 +10,7 @@ public interface Exporter {
 
     void exportMetadata(ExportJob exportJob);
 
-    void exportMetadata(SubmissionEnvelope envelope);
+    void generateSpreadsheet(SubmissionEnvelope envelope);
 
     void exportData(SubmissionEnvelope submissionEnvelope, Project project);
 

@@ -84,9 +84,9 @@ public class DefaultExporter implements Exporter {
     }
 
     @Override
-    public void exportMetadata(SubmissionEnvelope submissionEnvelope) {
+    public void generateSpreadsheet(SubmissionEnvelope submissionEnvelope) {
         var exportJob = createDcpExportJob(submissionEnvelope, new JSONObject(), new JSONObject());
-        exportMetadata(exportJob);
+        generateSpreadsheet(exportJob);
     }
 
     @Override

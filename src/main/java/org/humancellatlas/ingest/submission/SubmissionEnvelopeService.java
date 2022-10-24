@@ -28,7 +28,6 @@ import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -214,9 +213,9 @@ public class SubmissionEnvelopeService {
     public void exportMetadata(SubmissionEnvelope envelope) {
         executorService.submit(() -> {
             try {
-                exporter.exportMetadata(envelope);
+                exporter.generateSpreadsheet(envelope);
             } catch (Exception e) {
-                log.error(String.format("Uncaught Exception sending message to export Metadata for submission %s", envelope.getId()), e);
+                log.error(String.format("Uncaught Exception sending message to Generate Spreadsheet for submission %s", envelope.getId()), e);
             }
         });
     }

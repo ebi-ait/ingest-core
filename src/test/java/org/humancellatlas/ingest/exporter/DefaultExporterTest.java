@@ -4,7 +4,6 @@ import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestService;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
-import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
 import org.humancellatlas.ingest.export.entity.ExportEntityService;
 import org.humancellatlas.ingest.export.job.ExportJob;
@@ -148,20 +147,36 @@ public class DefaultExporterTest {
     }
 
     @Test
-    public void testExportMetadataFromSubmission() {
-        //given:
-        mockProcessSave();
+    public void testGenerateSpreadsheetFromSubmission() {
+        // given
         mockCreateExportJob(project.getUuid().getUuid().toString());
-        Set<ExperimentProcess> receivedData = mockSendingProcessThroughMessageRouter();
 
         //when:
-        exporter.exportMetadata(submissionEnvelope);
+        exporter.generateSpreadsheet(submissionEnvelope);
 
-        //then:
-        assertAllProcessIdsProcessed(submissionEnvelope, assayIds, receivedData);
-        verify(processRepository, times(assayIds.size())).save(any(Process.class));
-        verify(messageRouter, times(assayIds.size()))
-            .sendExperimentForExport(any(ExperimentProcess.class), any(ExportJob.class), any());
+        // then
+        var argumentCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        verify(messageRouter).sendGenerateSpreadsheet(argumentCaptor.capture(), any());
+
+        var capturedArgument = argumentCaptor.getValue();
+        assertThat(capturedArgument.getContext().get("spreadsheetGeneration")).isEqualTo(false);
+    }
+
+    @Test
+    public void testGenerateSpreadsheetSetsContextsAndCallsMessageRouter() {
+        // given
+        ExportJob newExportJob = mockCreateExportJob(project.getUuid().getUuid().toString());
+
+        //when:
+        exporter.generateSpreadsheet(newExportJob);
+
+        // then
+        var argumentCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        verify(messageRouter).sendGenerateSpreadsheet(argumentCaptor.capture(), any());
+
+        var capturedArgument = argumentCaptor.getValue();
+        assertThat(capturedArgument.getContext().get("spreadsheetGeneration")).isEqualTo(false);
+
     }
 
     private ExportJob mockCreateExportJob(String projectUuidUuid) {
