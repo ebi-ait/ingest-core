@@ -25,8 +25,10 @@ import java.net.URI;
 import java.util.Map;
 
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.EXPORTER_EXCHANGE;
+import static org.humancellatlas.ingest.messaging.Constants.Exchanges.SPREADSHEET_EXCHANGE;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.EXPERIMENT_SUBMITTED;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.MANIFEST_SUBMITTED;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.SPREADSHEET_GENERATION;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.SUBMISSION_SUBMITTED;
 
 
@@ -168,11 +170,12 @@ public class MessageRouter {
         return true;
     }
     public void sendGenerateSpreadsheet(ExportJob exportJob, Map<String, Object> context) {
-        SubmissionEnvelope submission = exportJob.getSubmission();
-        this.messageSender.queueSpreadsheetGenerationMessage(Constants.Exchanges.SPREADSHEET_EXCHANGE,
-                Constants.Routing.SPREADSHEET_GENERATION,
-                exportJob.toGenerateSubmissionMessage(linkGenerator, context),
-                submission.getUpdateDate().toEpochMilli());
+        this.messageSender.queueSpreadsheetGenerationMessage(
+            SPREADSHEET_EXCHANGE,
+            SPREADSHEET_GENERATION,
+            exportJob.toGenerateSubmissionMessage(linkGenerator, context),
+            System.currentTimeMillis()
+        );
     }
     private MetadataDocumentMessage messageFor(MetadataDocument document) {
         return MetadataDocumentMessageBuilder.using(linkGenerator)
