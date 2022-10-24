@@ -125,8 +125,7 @@ public class DefaultExporter implements Exporter {
 
     @Override
     public void generateSpreadsheet(ExportJob exportJob) {
-        var submission = exportJob.getSubmission();
-        exportJob.getContext().put("spreadsheet", "STARTED");
+        exportJob.getContext().put("spreadsheetGeneration", false);
         exportJobRepository.save(exportJob);
         var messageContext = new JSONObject();
         messageRouter.sendGenerateSpreadsheet(exportJob, messageContext);
