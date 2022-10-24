@@ -10,6 +10,7 @@ import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -36,6 +37,9 @@ public class DefaultExporter implements Exporter {
 
     @Autowired
     private ExportJobRepository exportJobRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
 
     @Autowired
     private MessageRouter messageRouter;
@@ -71,7 +75,8 @@ public class DefaultExporter implements Exporter {
     }
 
     @Override
-    public void exportData(SubmissionEnvelope envelope, Project project) {
+    public void exportData(SubmissionEnvelope envelope) {
+        Project project = projectRepository.findBySubmissionEnvelopesContains(envelope).findFirst().orElseThrow();
         var destinationContext = new JSONObject();
         destinationContext.put("projectUuid", project.getUuid().getUuid().toString());
 

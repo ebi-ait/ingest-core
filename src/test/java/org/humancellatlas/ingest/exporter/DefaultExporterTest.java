@@ -15,6 +15,7 @@ import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,6 +65,9 @@ public class DefaultExporterTest {
 
     @MockBean
     private ProcessRepository processRepository;
+
+    @MockBean
+    private ProjectRepository projectRepository;
 
     @MockBean
     private ExportEntityService exportEntityService;
@@ -116,7 +120,7 @@ public class DefaultExporterTest {
         mockCreateExportJob(project.getUuid().getUuid().toString());
 
         // when
-        exporter.exportData(submissionEnvelope, project);
+        exporter.exportData(submissionEnvelope);
 
         // then
         var argumentCaptor = ArgumentCaptor.forClass(ExportJob.class);
@@ -193,6 +197,7 @@ public class DefaultExporterTest {
                 .build();
         doReturn(newExportJob).when(exportJobService).createExportJob(any(SubmissionEnvelope.class), any(ExportJobRequest.class));
         doReturn(newExportJob).when(exportJobRepository).insert(any(ExportJob.class));
+        doReturn(Stream.of(project)).when(projectRepository).findBySubmissionEnvelopesContains(any(SubmissionEnvelope.class));
         return newExportJob;
     }
 

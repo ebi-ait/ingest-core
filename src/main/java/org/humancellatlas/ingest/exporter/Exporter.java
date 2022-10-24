@@ -12,7 +12,7 @@ public interface Exporter {
 
     void generateSpreadsheet(SubmissionEnvelope envelope);
 
-    void exportData(SubmissionEnvelope submissionEnvelope, Project project);
+    void exportData(SubmissionEnvelope submissionEnvelope);
 
     void generateSpreadsheet(ExportJob exportJob);
 }
