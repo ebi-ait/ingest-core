@@ -146,10 +146,10 @@ public class MessageRouter {
 
     public void sendSubmissionForDataExport(ExportJob exportJob, Map<String, Object> context) {
         messageSender.queueNewExportMessage(
-            EXPORTER_EXCHANGE,
-            SUBMISSION_SUBMITTED,
-            exportJob.toExportSubmissionMessage(linkGenerator, context),
-            System.currentTimeMillis()
+                EXPORTER_EXCHANGE,
+                SUBMISSION_SUBMITTED,
+                exportJob.toExportSubmissionMessage(linkGenerator, context),
+                System.currentTimeMillis()
         );
     }
     /* messages to the upload/staging area manager */
@@ -169,14 +169,16 @@ public class MessageRouter {
                 envelope.getUpdateDate().toEpochMilli());
         return true;
     }
+
     public void sendGenerateSpreadsheet(ExportJob exportJob, Map<String, Object> context) {
         this.messageSender.queueSpreadsheetGenerationMessage(
-            SPREADSHEET_EXCHANGE,
-            SPREADSHEET_GENERATION,
-            exportJob.toGenerateSubmissionMessage(linkGenerator, context),
-            System.currentTimeMillis()
+                EXPORTER_EXCHANGE,
+                SPREADSHEET_GENERATION,
+                exportJob.toGenerateSubmissionMessage(linkGenerator, context),
+                System.currentTimeMillis()
         );
     }
+
     private MetadataDocumentMessage messageFor(MetadataDocument document) {
         return MetadataDocumentMessageBuilder.using(linkGenerator)
                 .messageFor(document)

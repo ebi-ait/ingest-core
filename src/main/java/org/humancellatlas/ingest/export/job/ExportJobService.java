@@ -66,12 +66,17 @@ public class ExportJobService {
     }
 
     private void submit(Consumer<ExportJob> exportAction, ExportJob exportJob, String actionName) {
+        String submissionUuid = exportJob.getSubmission().getUuid().getUuid().toString();
         executorService.submit(() -> {
             try {
+                log.info("submitting export action {} for export job {} for submission {}",
+                        actionName,
+                        exportJob.getId(),
+                        submissionUuid);
                 exportAction.accept(exportJob);
             } catch (Exception e) {
-                log.error(String.format("Uncaught Exception sending message %s for Export Job %s",
-                        actionName, exportJob.getId()), e);
+                log.error(String.format("Uncaught Exception sending message %s for Export Job %s for submission %s",
+                        actionName, exportJob.getId(), submissionUuid), e);
             }
         });
     }
