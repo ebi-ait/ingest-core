@@ -28,7 +28,6 @@ import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submissionmanifest.SubmissionManifestRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -40,6 +39,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -178,7 +178,7 @@ public class SubmissionEnvelopeService {
             exportData(envelope);
         } else if (submitActions.contains(SubmitAction.EXPORT_METADATA)) {
             handleEnvelopeStateUpdateRequest(envelope, SubmissionState.EXPORTING);
-            exportMetadata(envelope);
+            generateSpreadsheet(envelope);
         } else {
             handleCommitExported(envelope);
         }
@@ -192,33 +192,15 @@ public class SubmissionEnvelopeService {
     }
 
     private void archiveSubmission(SubmissionEnvelope envelope) {
-        executorService.submit(() -> {
-            try {
-                exporter.exportManifests(envelope);
-            } catch (Exception e) {
-                log.error(String.format("Uncaught Exception sending message to Archive Submission %s", envelope.getId()), e);
-            }
-        });
+        submit(exporter::exportManifests, envelope, "Archive Submission");
+    }
+
+    public void generateSpreadsheet(SubmissionEnvelope envelope) {
+        submit(exporter::generateSpreadsheet, envelope, "Generate Spreadsheet");
     }
 
     public void exportData(SubmissionEnvelope envelope) {
-        executorService.submit(() -> {
-            try {
-                exporter.exportData(envelope, this.getProject(envelope).orElseThrow());
-            } catch (Exception e) {
-                log.error(String.format("Uncaught Exception sending message to export Submission Data %s", envelope.getId()), e);
-            }
-        });
-    }
-
-    public void exportMetadata(SubmissionEnvelope envelope) {
-        executorService.submit(() -> {
-            try {
-                exporter.exportMetadata(envelope);
-            } catch (Exception e) {
-                log.error(String.format("Uncaught Exception sending message to export Metadata for submission %s", envelope.getId()), e);
-            }
-        });
+        submit(exporter::exportData, envelope, "Export Data");
     }
 
     public void cleanupSubmission(SubmissionEnvelope envelope) {
@@ -361,5 +343,16 @@ public class SubmissionEnvelopeService {
 
     public Optional<Project> getProject(SubmissionEnvelope submissionEnvelope) {
         return projectRepository.findBySubmissionEnvelopesContains(submissionEnvelope).findFirst();
+    }
+
+    private void submit(Consumer<SubmissionEnvelope> submissionAction, SubmissionEnvelope submission, String actionName) {
+        executorService.submit(() -> {
+            try {
+                submissionAction.accept(submission);
+            } catch (Exception e) {
+                log.error(String.format("Uncaught Exception sending message %s for Submission %s",
+                    actionName, submission.getId()), e);
+            }
+        });
     }
 }

@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.export.ExportError;
 import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
 import org.humancellatlas.ingest.messaging.model.ExportSubmissionMessage;
+import org.humancellatlas.ingest.messaging.model.SpreadsheetGenerationMessage;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -72,4 +73,13 @@ public class ExportJob implements Identifiable<String> {
         );
     }
 
+    public SpreadsheetGenerationMessage toGenerateSubmissionMessage(LinkGenerator linkGenerator, Map<String, Object> context) {
+        // TODO: unify with toExportSubmissionMessage
+        String callbackLink = linkGenerator.createCallback(getClass(), getId());
+        return new SpreadsheetGenerationMessage(getId(),
+                submission.getUuid().getUuid().toString(),
+                destination.getContext().get("projectUuid").toString(),
+                callbackLink,
+                context);
+    }
 }

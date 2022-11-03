@@ -16,11 +16,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 @Component
 @AllArgsConstructor
@@ -58,14 +58,26 @@ public class ExportJobService {
         exportJob.getContext().putAll(context);
         var savedJob = exportJobRepository.save(exportJob);
         if (context.getOrDefault("dataFileTransfer", "").equals("COMPLETE")) {
-            executorService.submit(() -> {
-                try {
-                    exporter.exportMetadata(exportJob);
-                } catch (Exception e) {
-                    log.error(String.format("Uncaught Exception sending message to export Metadata for Export Job %s", exportJob.getId()), e);
-                }
-            });
+            submit(exporter::generateSpreadsheet, exportJob, "spreadsheetGeneration");
+        } else if (context.getOrDefault("spreadsheetGeneration", "").equals("COMPLETE")) {
+            submit(exporter::exportMetadata, exportJob, "exportMetadata");
         }
         return savedJob;
+    }
+
+    private void submit(Consumer<ExportJob> exportAction, ExportJob exportJob, String actionName) {
+        String submissionUuid = exportJob.getSubmission().getUuid().getUuid().toString();
+        executorService.submit(() -> {
+            try {
+                log.info("submitting export action {} for export job {} for submission {}",
+                        actionName,
+                        exportJob.getId(),
+                        submissionUuid);
+                exportAction.accept(exportJob);
+            } catch (Exception e) {
+                log.error(String.format("Uncaught Exception sending message %s for Export Job %s for submission %s",
+                        actionName, exportJob.getId(), submissionUuid), e);
+            }
+        });
     }
 }

@@ -1,7 +1,6 @@
 package org.humancellatlas.ingest.exporter;
 
 import org.apache.commons.collections4.ListUtils;
-import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
 import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.export.job.ExportJobRepository;
@@ -11,6 +10,7 @@ import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -37,6 +37,9 @@ public class DefaultExporter implements Exporter {
 
     @Autowired
     private ExportJobRepository exportJobRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
 
     @Autowired
     private MessageRouter messageRouter;
@@ -72,7 +75,8 @@ public class DefaultExporter implements Exporter {
     }
 
     @Override
-    public void exportData(SubmissionEnvelope envelope, Project project) {
+    public void exportData(SubmissionEnvelope envelope) {
+        Project project = projectRepository.findBySubmissionEnvelopesContains(envelope).findFirst().orElseThrow();
         var destinationContext = new JSONObject();
         destinationContext.put("projectUuid", project.getUuid().getUuid().toString());
 
@@ -85,9 +89,13 @@ public class DefaultExporter implements Exporter {
     }
 
     @Override
-    public void exportMetadata(SubmissionEnvelope submissionEnvelope) {
-        var exportJob = createDcpExportJob(submissionEnvelope, new JSONObject(), new JSONObject());
-        exportMetadata(exportJob);
+    public void generateSpreadsheet(SubmissionEnvelope submissionEnvelope) {
+        Project project = projectRepository.findBySubmissionEnvelopesContains(submissionEnvelope).findFirst().orElseThrow();
+        var destinationContext = new JSONObject();
+        destinationContext.put("projectUuid", project.getUuid().getUuid().toString());
+
+        var exportJob = createDcpExportJob(submissionEnvelope, destinationContext, new JSONObject());
+        generateSpreadsheet(exportJob);
     }
 
     @Override
@@ -124,5 +132,11 @@ public class DefaultExporter implements Exporter {
                 .forEach(exportData -> messageRouter.sendExperimentForExport(exportData, exportJob, null));
     }
 
-
+    @Override
+    public void generateSpreadsheet(ExportJob exportJob) {
+        exportJob.getContext().put("spreadsheetGeneration", false);
+        exportJobRepository.save(exportJob);
+        var messageContext = new JSONObject();
+        messageRouter.sendGenerateSpreadsheet(exportJob, messageContext);
+    }
 }

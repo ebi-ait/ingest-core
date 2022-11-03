@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.stream.Collectors;
 
 /**
  * Javadocs go here!
@@ -57,8 +59,9 @@ public class GlobalStateExceptionHandler {
     @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class, RedundantUpdateException.class, MultipleOpenSubmissionsException.class})
     public @ResponseBody
     ExceptionInfo handleIllegalArgument(HttpServletRequest request, Exception e) {
-        getLog().warn(String.format("Caught an illegal argument at '%s'; " +
+        getLog().warn(String.format("Caught an illegal argument at '%s %s'; " +
                         "this will generate a BAD_REQUEST RESPONSE",
+                request.getMethod(),
                 request.getRequestURL().toString()));
         getLog().debug("Handling IllegalArgumentException and returning BAD_REQUEST response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());

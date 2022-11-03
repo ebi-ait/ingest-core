@@ -9,6 +9,7 @@ import lombok.NonNull;
 import org.humancellatlas.ingest.config.ConfigurationService;
 import org.humancellatlas.ingest.messaging.model.MessageProtocol;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
+import org.humancellatlas.ingest.messaging.model.SpreadsheetGenerationMessage;
 import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +75,10 @@ public class MessageSender {
         MessageBuffer.UPLOAD_MANAGER.queueAmqpMessage(exchange, routingKey, payload ,intendedSendTime);
     }
 
+    public void queueSpreadsheetGenerationMessage(String exchange, String routingKey, SpreadsheetGenerationMessage payload, long intendedSendTime) {
+        MessageBuffer.SPREADSHEET_GENERATION.queueAmqpMessage(exchange, routingKey, payload ,intendedSendTime);
+    }
+
     @PostConstruct
     private void initiateSending(){
         List<MessageBuffer> amqpMessageBuffers = Arrays.asList(
@@ -82,7 +87,8 @@ public class MessageSender {
                 MessageBuffer.UPLOAD_MANAGER,
                 MessageBuffer.VALIDATION,
                 MessageBuffer.STATE_TRACKING,
-                MessageBuffer.GRAPH_VALIDATION);
+                MessageBuffer.GRAPH_VALIDATION,
+                MessageBuffer.SPREADSHEET_GENERATION);
 
         amqpMessageBuffers
                 .forEach(buffer -> scheduler.scheduleWithFixedDelay(new AmqpHttpMixinBufferSender(buffer, new RestTemplate(), rabbitMessagingTemplate),
@@ -139,7 +145,8 @@ public class MessageSender {
         UPLOAD_MANAGER(SECONDS.toMillis(1)),
         ACCESSIONER(SECONDS.toMillis(2)),
         STATE_TRACKING(500L),
-        GRAPH_VALIDATION(SECONDS.toMillis(5));
+        GRAPH_VALIDATION(SECONDS.toMillis(5)),
+        SPREADSHEET_GENERATION(SECONDS.toMillis(5));
 
         @Getter
         private final Long delayMillis;
@@ -217,7 +224,10 @@ public class MessageSender {
                     try {
                         restTemplate.exchange(message.getUri(), message.method, new HttpEntity<>(message.getPayload(), headers), Object.class);
                     } catch (Exception e) {
-                        log.error("", e);
+                        log.error(String.format("error sending HTTP %s message to uri %s with payload %s",
+                                message.method,
+                                message.uri,
+                                message.payload), e);
                     }
                 }
             });

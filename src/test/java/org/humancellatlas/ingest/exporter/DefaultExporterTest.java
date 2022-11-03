@@ -4,7 +4,6 @@ import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestService;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
-import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.destination.ExportDestination;
 import org.humancellatlas.ingest.export.entity.ExportEntityService;
 import org.humancellatlas.ingest.export.job.ExportJob;
@@ -16,6 +15,7 @@ import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,6 +67,9 @@ public class DefaultExporterTest {
     private ProcessRepository processRepository;
 
     @MockBean
+    private ProjectRepository projectRepository;
+
+    @MockBean
     private ExportEntityService exportEntityService;
 
     @MockBean
@@ -96,6 +99,10 @@ public class DefaultExporterTest {
         Set<ExperimentProcess> receivedData = mockSendingManifestThroughMessageRouter();
     }
 
+    private String projectUuid() {
+        return project.getUuid().getUuid().toString();
+    }
+
     @Test
     public void testExportManifests() {
         //when:
@@ -114,26 +121,28 @@ public class DefaultExporterTest {
     @Test
     public void testExportDataSetsContextsAndCallsMessageRouter() {
         // given
-        mockCreateExportJob(project.getUuid().getUuid().toString());
+        mockCreateExportJob(projectUuid());
 
         // when
-        exporter.exportData(submissionEnvelope, project);
+        exporter.exportData(submissionEnvelope);
 
         // then
-        var argumentCaptor = ArgumentCaptor.forClass(ExportJob.class);
-        verify(exportJobRepository).insert(argumentCaptor.capture());
-        verify(messageRouter).sendSubmissionForDataExport(any(ExportJob.class), any());
+        var insertCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        var sendCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        verify(exportJobRepository).insert(insertCaptor.capture());
+        verify(messageRouter).sendSubmissionForDataExport(sendCaptor.capture(), any());
 
-        var capturedArgument = argumentCaptor.getValue();
-        assertThat(capturedArgument.getDestination().getContext().get("projectUuid")).isEqualTo(project.getUuid().getUuid().toString());
-        assertThat(capturedArgument.getContext().get("dataFileTransfer")).isEqualTo(false);
+        assertThat(insertCaptor.getValue().getDestination().getContext().get("projectUuid")).isEqualTo(projectUuid());
+        assertThat(insertCaptor.getValue().getContext().get("dataFileTransfer")).isEqualTo(false);
+        assertThat(sendCaptor.getValue().getDestination().getContext().get("projectUuid")).isEqualTo(projectUuid());
+        assertThat(sendCaptor.getValue().getContext().get("dataFileTransfer")).isEqualTo(false);
     }
 
     @Test
     public void testExportMetadataFromExportJob() {
         //given:
         mockProcessSave();
-        ExportJob newExportJob = mockCreateExportJob(project.getUuid().getUuid().toString());
+        ExportJob newExportJob = mockCreateExportJob(projectUuid());
         Set<ExperimentProcess> receivedData = mockSendingProcessThroughMessageRouter();
 
         //when:
@@ -148,20 +157,44 @@ public class DefaultExporterTest {
     }
 
     @Test
-    public void testExportMetadataFromSubmission() {
-        //given:
-        mockProcessSave();
-        mockCreateExportJob(project.getUuid().getUuid().toString());
-        Set<ExperimentProcess> receivedData = mockSendingProcessThroughMessageRouter();
+    public void testGenerateSpreadsheetFromSubmission() {
+        // given
+        mockCreateExportJob(projectUuid());
 
         //when:
-        exporter.exportMetadata(submissionEnvelope);
+        exporter.generateSpreadsheet(submissionEnvelope);
 
-        //then:
-        assertAllProcessIdsProcessed(submissionEnvelope, assayIds, receivedData);
-        verify(processRepository, times(assayIds.size())).save(any(Process.class));
-        verify(messageRouter, times(assayIds.size()))
-            .sendExperimentForExport(any(ExperimentProcess.class), any(ExportJob.class), any());
+        // then
+        var insertCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        var saveCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        var sendCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        verify(exportJobRepository).insert(insertCaptor.capture());
+        verify(exportJobRepository).save(saveCaptor.capture());
+        verify(messageRouter).sendGenerateSpreadsheet(sendCaptor.capture(), any());
+
+        assertThat(insertCaptor.getValue().getDestination().getContext().get("projectUuid")).isEqualTo(projectUuid());
+        assertThat(saveCaptor.getValue().getContext().get("spreadsheetGeneration")).isEqualTo(false);
+        assertThat(sendCaptor.getValue().getDestination().getContext().get("projectUuid")).isEqualTo(projectUuid());
+        assertThat(sendCaptor.getValue().getContext().get("spreadsheetGeneration")).isEqualTo(false);
+    }
+
+    @Test
+    public void testGenerateSpreadsheetSetsContextsAndCallsMessageRouter() {
+        // given
+        ExportJob newExportJob = mockCreateExportJob(projectUuid());
+
+        //when:
+        exporter.generateSpreadsheet(newExportJob);
+
+        // then
+        var saveCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        var sendCaptor = ArgumentCaptor.forClass(ExportJob.class);
+        verify(exportJobRepository).save(saveCaptor.capture());
+        verify(messageRouter).sendGenerateSpreadsheet(sendCaptor.capture(), any());
+
+        assertThat(saveCaptor.getValue().getContext().get("spreadsheetGeneration")).isEqualTo(false);
+        assertThat(sendCaptor.getValue().getDestination().getContext().get("projectUuid")).isEqualTo(projectUuid());
+        assertThat(sendCaptor.getValue().getContext().get("spreadsheetGeneration")).isEqualTo(false);
     }
 
     private ExportJob mockCreateExportJob(String projectUuidUuid) {
@@ -178,6 +211,7 @@ public class DefaultExporterTest {
                 .build();
         doReturn(newExportJob).when(exportJobService).createExportJob(any(SubmissionEnvelope.class), any(ExportJobRequest.class));
         doReturn(newExportJob).when(exportJobRepository).insert(any(ExportJob.class));
+        doReturn(Stream.of(project)).when(projectRepository).findBySubmissionEnvelopesContains(any(SubmissionEnvelope.class));
         return newExportJob;
     }
 
