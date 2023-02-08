@@ -436,6 +436,11 @@ class ProjectFilterTest {
     }
 
     @Test
+    void filter_by_project_networks() {
+
+    }
+
+    @Test
     void all_args_constructor() {
         new SearchFilter(
                 "a",
@@ -450,6 +455,7 @@ class ProjectFilterTest {
                 1,
                 DataAccessTypes.MANAGED,
                 "a label",
+                "",
                 false,
                 SearchType.AllKeywords
         );

@@ -91,6 +91,9 @@ public class Project extends MetadataDocument {
     @Setter
     private List<String> projectLabels;
 
+    @Setter
+    private String projectNetwork;
+
 
     @JsonCreator
     public Project(@JsonProperty("content") Object content) {
