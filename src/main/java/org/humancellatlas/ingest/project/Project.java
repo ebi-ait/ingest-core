@@ -92,7 +92,7 @@ public class Project extends MetadataDocument {
     private List<String> projectLabels;
 
     @Setter
-    private String projectNetwork;
+    private List<String> projectNetworks;
 
 
     @JsonCreator
