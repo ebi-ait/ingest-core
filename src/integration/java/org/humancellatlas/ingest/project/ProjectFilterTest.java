@@ -442,7 +442,7 @@ class ProjectFilterTest {
         project5.setProjectNetworks(List.of("Blood Network"));
         this.mongoTemplate.save(project5);
         //when
-        SearchFilter searchFilter = SearchFilter.builder().projectLabels("Blood Network").build();
+        SearchFilter searchFilter = SearchFilter.builder().projectNetworks("Blood Network").build();
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
