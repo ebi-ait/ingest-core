@@ -439,10 +439,10 @@ class ProjectFilterTest {
     void filter_by_project_networks() {
         //given
         Project project5 = makeProject("project5");
-        project5.setProjectNetworks(List.of("Blood Network"));
+        project5.setProjectNetworks(List.of("Lung"));
         this.mongoTemplate.save(project5);
         //when
-        SearchFilter searchFilter = SearchFilter.builder().projectNetworks("Blood Network").build();
+        SearchFilter searchFilter = SearchFilter.builder().projectNetworks("Lung").build();
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
@@ -471,7 +471,7 @@ class ProjectFilterTest {
                 1,
                 DataAccessTypes.MANAGED,
                 "a label",
-                "",
+                "a network",
                 false,
                 SearchType.AllKeywords
         );
