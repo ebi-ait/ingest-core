@@ -436,6 +436,27 @@ class ProjectFilterTest {
     }
 
     @Test
+    void filter_by_project_networks() {
+        //given
+        Project project5 = makeProject("project5");
+        project5.setProjectNetworks(List.of("Lung"));
+        this.mongoTemplate.save(project5);
+        //when
+        SearchFilter searchFilter = SearchFilter.builder().projectNetworks("Lung").build();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Project> result = projectService.filterProjects(searchFilter, pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent())
+                .hasSize(1)
+                .usingComparatorForElementFieldsWithType(upToMillies, Instant.class)
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactlyInAnyOrder(project5);
+    }
+
+    @Test
     void all_args_constructor() {
         new SearchFilter(
                 "a",
@@ -450,6 +471,7 @@ class ProjectFilterTest {
                 1,
                 DataAccessTypes.MANAGED,
                 "a label",
+                "a network",
                 false,
                 SearchType.AllKeywords
         );

@@ -26,6 +26,7 @@ public class ProjectQueryBuilder {
         addInCriterionForAttribute(criteriaList, "identifyingOrganisms", searchFilter.getIdentifyingOrganism());
         addInCriterionForAttribute(criteriaList, "dcpReleaseNumber", searchFilter.getDcpReleaseNumber());
         addInCriterionForAttribute(criteriaList, "projectLabels", searchFilter.getProjectLabels());
+        addInCriterionForAttribute(criteriaList, "projectNetworks", searchFilter.getProjectNetworks());
 
         if(searchFilter.getDataAccess() != null){
             addIsCriterionForAttribute(criteriaList, "dataAccess.type", searchFilter.getDataAccess().getLabel());
