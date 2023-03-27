@@ -24,7 +24,14 @@ An example of the process of making a submission is in [docs/primary-submission-
 You will need a mongo database running on localhost with default ports to run the tests
 
 ## Running locally
-You can run ingest-core on your local system with the script
+You can run ingest-core on your local system by using the `local` Spring profile. You would need to have a local mongodb 
+and rabbitmq running, which you can run using docker-compose.
+
+```shell
+export SPRING_PROFILES_ACTIVE=local
+./gradlew bootRun
+
+```
 
 ### populating the local DB
 
