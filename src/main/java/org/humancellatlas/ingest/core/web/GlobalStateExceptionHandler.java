@@ -56,14 +56,21 @@ public class GlobalStateExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class, RedundantUpdateException.class, MultipleOpenSubmissionsException.class})
+    @ExceptionHandler({
+            IllegalArgumentException.class,
+            HttpMessageNotReadableException.class,
+            RedundantUpdateException.class,
+            MultipleOpenSubmissionsException.class
+    })
     public @ResponseBody
     ExceptionInfo handleIllegalArgument(HttpServletRequest request, Exception e) {
-        getLog().warn(String.format("Caught an illegal argument at '%s %s'; " +
+        getLog().warn(String.format("Caught an illegal argument at '%s %s'. error: %s; " +
                         "this will generate a BAD_REQUEST RESPONSE",
                 request.getMethod(),
-                request.getRequestURL().toString()));
-        getLog().debug("Handling IllegalArgumentException and returning BAD_REQUEST response", e);
+                request.getRequestURL().toString(),
+                e.getLocalizedMessage()
+                ));
+        getLog().error("Handling IllegalArgumentException and returning BAD_REQUEST response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 
@@ -74,7 +81,7 @@ public class GlobalStateExceptionHandler {
         getLog().warn(String.format("Caught a resource not found exception argument at '%s'; " +
                         "this will generate a NOT_FOUND RESPONSE",
                 request.getRequestURL().toString()));
-        getLog().debug("Handling ResourceNotFoundException and returning NOT_FOUND response", e);
+        getLog().warn("Handling ResourceNotFoundException and returning NOT_FOUND response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 
@@ -96,7 +103,7 @@ public class GlobalStateExceptionHandler {
     ExceptionInfo handleRuntimeException(HttpServletRequest request, Exception e) {
         getLog().error(String.format("Runtime exception encountered on %s request to resource %s ", request.getMethod(),
                 request.getRequestURL().toString()), e);
-        getLog().debug("Handling RuntimeException and returning INTERNAL_SERVER_ERROR response", e);
+        getLog().error("Handling RuntimeException and returning INTERNAL_SERVER_ERROR response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), "Unexpected server error");
     }
 

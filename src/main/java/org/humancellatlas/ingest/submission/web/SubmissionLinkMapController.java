@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.submission.web;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
@@ -9,6 +10,7 @@ import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
@@ -33,6 +35,9 @@ public class SubmissionLinkMapController {
     @Autowired
     ProtocolRepository protocolRepository;
 
+    @Autowired
+    SubmissionLinkMapRepository submissionLinkMapRepository;
+
     @NonNull
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -45,14 +50,14 @@ public class SubmissionLinkMapController {
 
     @Getter
     public class SubmissionLinkingMap {
-        final Dictionary<String, ProcessLinkingMap> processes = new Hashtable<>();
-        final Dictionary<String, UUID> protocols = new Hashtable<>();
-        final Dictionary<String, BiomaterialLinkingMap> biomaterials = new Hashtable<>();
-        final Dictionary<String, FileLinkingMap> files = new Hashtable<>();
+        final Map<String, ProcessLinkingMap> processes = new Hashtable<>();
+        final Map<String, UUID> protocols = new Hashtable<>();
+        final Map<String, BiomaterialLinkingMap> biomaterials = new Hashtable<>();
+        final Map<String, FileLinkingMap> files = new Hashtable<>();
 
         public SubmissionLinkingMap(SubmissionEnvelope submissionEnvelope){
             log.info("before processes");
-            oldImplementation(submissionEnvelope);
+            getProcessLinksUsingAggregation(submissionEnvelope);
             log.info("found {} processes", processes.size());
             log.info("before biomaterials");
             biomaterialRepository
@@ -66,45 +71,87 @@ public class SubmissionLinkMapController {
             log.info("found {} files", files.size());
         }
 
-        private void oldImplementation(SubmissionEnvelope submissionEnvelope) {
-            processRepository
-                .findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(process -> this.processes.put(process.getId(), new ProcessLinkingMap(process)));
+        private void getProcessLinksUsingAggregation(SubmissionEnvelope submissionEnvelope) {
+            submissionLinkMapRepository.findProcessLinkings(submissionEnvelope);
         }
 
-        void newImplementation(SubmissionEnvelope submissionEnvelope) {
-            /// each is grouped by process
-            /// TODO merge by process ID
+        /**
+         * original implementation.\
+         * Very slow due to repeated calls to db
+         * @param submissionEnvelope
+         */
+        private void processLinkingByProcess(SubmissionEnvelope submissionEnvelope) {
+            processRepository
+                .findBySubmissionEnvelope(submissionEnvelope)
+                .forEach(process -> this.processes.put(process.getId(), new ProcessLinkingMap().fromProcess(process)));
+        }
+
+        /**
+         * gets process linking map by traversing from the targets,anmely biomaterials and files.
+         * This is inefficient becuae each biomaterial or file causes another call to the db to fetch the related processes.
+         * @param submissionEnvelope
+         */
+        void getProcessLinkingFromTargets(SubmissionEnvelope submissionEnvelope) {
+            log.info("processes: before biomaterials");
             biomaterialRepository.findBySubmissionEnvelope(submissionEnvelope)
-                    .flatMap(biomaterial->biomaterial.getInputToProcesses()
-                                                        .stream()
-                                                        .map(process->Pair.of(biomaterial.getId(), process.getId())))
-                    .collect(groupingBy(Pair::getSecond, mapping(Pair::getFirst, toSet())));
-            fileRepository.findBySubmissionEnvelope(submissionEnvelope)
-                    .flatMap(file->file.getInputToProcesses()
+                    .flatMap(biomaterial -> biomaterial.getInputToProcesses()
                             .stream()
-                            .map(process->Pair.of(file.getId(), process.getId())))
-                    .collect(groupingBy(Pair::getSecond, mapping(Pair::getFirst, toSet())));
+                            .map(process -> Pair.of(biomaterial.getId(), process.getId())))
+                            .collect(groupingBy(Pair::getSecond, mapping(Pair::getFirst, toSet())))
+                    .forEach((processId, biomaterials)->{
+                        this.processes.compute(processId,
+                                (_processId, plm)-> {
+                                    ProcessLinkingMap processLinkingMap = Optional.ofNullable(plm)
+                                            .orElse(new ProcessLinkingMap());
+                                    processLinkingMap.inputBiomaterials.addAll(biomaterials);
+                                    return processLinkingMap;
+                                });
+                    });
+            log.info("processes: before files");
+            fileRepository.findBySubmissionEnvelope(submissionEnvelope)
+                    .flatMap(file -> file.getInputToProcesses()
+                            .stream()
+                            .map(process -> Pair.of(file.getId(), process.getId())))
+                    .collect(groupingBy(Pair::getSecond, mapping(Pair::getFirst, toSet())))
+                    .forEach((processId, files)->{
+                        this.processes.compute(processId,
+                                (_processId, plm)-> {
+                                    ProcessLinkingMap processLinkingMap = Optional.ofNullable(plm)
+                                            .orElse(new ProcessLinkingMap());
+                                    processLinkingMap.inputFiles.addAll(files);
+                                    return processLinkingMap;
+                                });
+                    });
+            log.info("processes: before protocols");
+            // TODO: add index by submissionEnvelope
             processRepository
                     .findBySubmissionEnvelope(submissionEnvelope)
-                    .map(process -> Pair.of(process.getId(), process.getProtocols()))
-                    .collect(groupingBy(Pair::getFirst, mapping(Pair::getSecond, toSet())));
-
+                    .forEach(process->{
+                        this.processes.compute(process.getId(),
+                                (_processId, plm)-> {
+                                    ProcessLinkingMap processLinkingMap = Optional.ofNullable(plm)
+                                            .orElse(new ProcessLinkingMap());
+                                    processLinkingMap.protocols.addAll(process.getProtocols().stream().map(Protocol::getId).collect(toSet()));
+                                    return processLinkingMap;
+                                });
+                    });
 
         }
 
     }
 
     @Getter
+    @AllArgsConstructor
     public class ProcessLinkingMap {
         final Collection<String> protocols = new HashSet<>();
         final Collection<String> inputBiomaterials = new HashSet<>();
         final Collection<String> inputFiles = new HashSet<>();
 
-        public ProcessLinkingMap(Process process) {
+        ProcessLinkingMap fromProcess(Process process) {
             process.getProtocols().forEach(protocol -> this.protocols.add(protocol.getId()));
             biomaterialRepository.findByInputToProcessesContains(process).forEach(biomaterial -> this.inputBiomaterials.add(biomaterial.getId()));
             fileRepository.findByInputToProcessesContains(process).forEach(file -> this.inputFiles.add(file.getId()));
+            return this;
         }
     }
 
