@@ -5,6 +5,7 @@ import com.github.mongobee.changeset.ChangeSet;
 import com.mongodb.MongoCommandException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -200,5 +201,11 @@ public class MongoChangeLog {
                 files
                     .updateOne(eq("_id", file.get("_id")),
                                Updates.set("dataFileUuid", UUID.randomUUID())));
+    }
+
+    public void addSubmissionEnvelopeIndexToProcess(MongoDatabase db) {
+        db.getCollection("process").createIndex(
+                Document.parse("{ \"submissionEnvelope\": 1 }")
+        );
     }
 }
