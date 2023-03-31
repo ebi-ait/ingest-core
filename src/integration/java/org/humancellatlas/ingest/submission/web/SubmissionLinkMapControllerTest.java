@@ -26,6 +26,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Ignore("ignoring because $toString mongo aggregation operator is not supported by the in memory mongo version we use. See dcp-936")
 @SpringBootTest
 @AutoConfigureDataMongo()
 public class SubmissionLinkMapControllerTest {
@@ -64,8 +65,9 @@ public class SubmissionLinkMapControllerTest {
         ).forEach(MongoRepository::deleteAll);
     }
 
-    @Test
-    @Ignore("ignoring becuase $toString mongo aggregation operator is not supported by the in memory mongo version we use")
+    /**
+     * @Ignore("ignoring because $toString mongo aggregation operator is not supported by the in memory mongo version we use. See dcp-936")
+     */
     public void testSubmissionLinkMap() {
         //given:
         SubmissionEnvelope submissionEnvelope = submissionEnvelopeRepository.save(new SubmissionEnvelope());
@@ -133,7 +135,6 @@ public class SubmissionLinkMapControllerTest {
         assertThat(submissionLinkMap.biomaterials.get(cellSuspension.getId()).inputToProcesses).isEqualTo(new HashSet<>(List.of(cellSuspensionSequenceFile.getId())));
         assertThat(submissionLinkMap.files.get(sequencingFile.getId()).inputToProcesses).isEqualTo(new HashSet<>(List.of(sequenceFileAnalysisFile.getId())));
     }
-
 
 
 }
