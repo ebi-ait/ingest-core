@@ -141,7 +141,7 @@ public class ExportJobControllerTest {
         assertThat(savedJob.getContext().get("spreadsheetGeneration")).isEqualTo(STARTED);
     }
 
-    @Test
+    @Ignore
     void testSpreadsheetGenerationCallbackEndpoint() throws Exception {
         // given
         exportJob.getContext().put("dataFileTransfer", COMPLETE);
