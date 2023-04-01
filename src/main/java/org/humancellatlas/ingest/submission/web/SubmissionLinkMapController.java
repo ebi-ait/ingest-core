@@ -1,14 +1,17 @@
 package org.humancellatlas.ingest.submission.web;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.humancellatlas.ingest.biomaterial.Biomaterial;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
-import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.FileRepository;
-import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,8 +29,14 @@ public class SubmissionLinkMapController {
     @Autowired
     ProtocolRepository protocolRepository;
 
+    @Autowired
+    SubmissionLinkMapRepository submissionLinkMapRepository;
 
-    @RequestMapping(path = "/submissionEnvelopes/{sub_id}/linkingMap", method = RequestMethod.GET)
+    @NonNull
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
+    @RequestMapping(path = "/submissionEnvelopes/{sub_id}" + Links.SUBMISSION_LINKING_MAP_URL,
+            method = RequestMethod.GET)
     @ResponseBody
     public SubmissionLinkingMap getSubmissionLinkMap(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope) {
         return new SubmissionLinkingMap(submissionEnvelope);
@@ -35,56 +44,98 @@ public class SubmissionLinkMapController {
 
     @Getter
     public class SubmissionLinkingMap {
-        final Dictionary<String, ProcessLinkingMap> processes = new Hashtable<>();
-        final Dictionary<String, UUID> protocols = new Hashtable<>();
-        final Dictionary<String, BiomaterialLinkingMap> biomaterials = new Hashtable<>();
-        final Dictionary<String, FileLinkingMap> files = new Hashtable<>();
+        final Map<String, ProcessLinkingMap> processes = new Hashtable<>();
+        final Map<String, UUID> protocols = new Hashtable<>();
+        final Map<String, BiomaterialLinkingMap> biomaterials = new Hashtable<>();
+        final Map<String, FileLinkingMap> files = new Hashtable<>();
 
-        public SubmissionLinkingMap(SubmissionEnvelope submissionEnvelope){
-            processRepository
-                .findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(process -> this.processes.put(process.getId(), new ProcessLinkingMap(process)));
-            biomaterialRepository
-                .findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(biomaterial -> this.biomaterials.put(biomaterial.getId(), new BiomaterialLinkingMap(biomaterial)));
-            fileRepository
-                .findBySubmissionEnvelope(submissionEnvelope)
-                .forEach(file -> this.files.put(file.getId(), new FileLinkingMap(file)));
+        public SubmissionLinkingMap(SubmissionEnvelope submissionEnvelope) {
+            log.info("before processes");
+            getProcessLinksUsingAggregation(submissionEnvelope);
+            log.info("found {} processes", processes.size());
+            log.info("before biomaterials");
+            findBiomaterialsLinkedProcessesForSubmission(submissionEnvelope);
+            log.info("found {} biomaterials", biomaterials.size());
+            log.info("before files");
+            findFilesLinkedProcessesForSubmission(submissionEnvelope);
+            log.info("found {} files", files.size());
         }
+
+        private void findBiomaterialsLinkedProcessesForSubmission(SubmissionEnvelope submissionEnvelope) {
+            submissionLinkMapRepository.findLinkedProcessesByEntityTypeAndSubmission(submissionEnvelope, "biomaterial")
+                    .forEach(bioMaterialsAndProcesses -> this.biomaterials.compute(bioMaterialsAndProcesses.entityId,
+                            (_processId, plm) -> {
+                                BiomaterialLinkingMap biomaterialLinkingMap = Optional.ofNullable(plm)
+                                        .orElse(new BiomaterialLinkingMap());
+                                biomaterialLinkingMap.inputToProcesses.addAll(bioMaterialsAndProcesses.inputToProcesses);
+                                biomaterialLinkingMap.derivedByProcesses.addAll(bioMaterialsAndProcesses.derivedByProcesses);
+                                return biomaterialLinkingMap;
+                            }));
+        }
+
+        private void findFilesLinkedProcessesForSubmission(SubmissionEnvelope submissionEnvelope) {
+            submissionLinkMapRepository.findLinkedProcessesByEntityTypeAndSubmission(submissionEnvelope, "file")
+                    .forEach(filesAndProcesses -> this.files.compute(filesAndProcesses.entityId,
+                            (_processId, plm) -> {
+                                FileLinkingMap fileLinkingMap = Optional.ofNullable(plm)
+                                        .orElse(new FileLinkingMap());
+                                fileLinkingMap.inputToProcesses.addAll(filesAndProcesses.inputToProcesses);
+                                fileLinkingMap.derivedByProcesses.addAll(filesAndProcesses.derivedByProcesses);
+                                return fileLinkingMap;
+                            }));
+        }
+
+        private void getProcessLinksUsingAggregation(SubmissionEnvelope submissionEnvelope) {
+            submissionLinkMapRepository.findProcessInputBiomaterials(submissionEnvelope)
+                    .forEach(processAndInputBiomaterials -> this.processes.compute(processAndInputBiomaterials.processId,
+                            (_processId, plm) -> {
+                                ProcessLinkingMap processLinkingMap = Optional.ofNullable(plm)
+                                        .orElse(new ProcessLinkingMap());
+                                processLinkingMap.inputBiomaterials.addAll(processAndInputBiomaterials.inputBiomaterials);
+                                return processLinkingMap;
+                            }));
+            submissionLinkMapRepository.findProcessInputFiles(submissionEnvelope)
+                    .forEach((ProcessAndInputFiles processAndInputFiles) -> this.processes.compute(processAndInputFiles.processId,
+                            (_processId, plm) -> {
+                                ProcessLinkingMap processLinkingMap = Optional.ofNullable(plm)
+                                        .orElse(new ProcessLinkingMap());
+                                processLinkingMap.inputFiles.addAll(processAndInputFiles.inputFiles);
+                                return processLinkingMap;
+                            }));
+            log.info("processes: before protocols");
+            submissionLinkMapRepository.findProcessProtocols(submissionEnvelope)
+                    .forEach(process -> this.processes.compute(process.entityId,
+                            (_processId, plm) -> {
+                                ProcessLinkingMap processLinkingMap = Optional.ofNullable(plm)
+                                        .orElse(new ProcessLinkingMap());
+                                processLinkingMap.protocols.addAll(process.protocols);
+                                return processLinkingMap;
+                            }));
+            log.info("processes: finished protocols");
+
+        }
+
     }
 
     @Getter
-    public class ProcessLinkingMap {
+    @AllArgsConstructor
+    public static class ProcessLinkingMap {
         final Collection<String> protocols = new HashSet<>();
         final Collection<String> inputBiomaterials = new HashSet<>();
         final Collection<String> inputFiles = new HashSet<>();
-
-        public ProcessLinkingMap(Process process) {
-            process.getProtocols().forEach(protocol -> this.protocols.add(protocol.getId()));
-            biomaterialRepository.findByInputToProcessesContains(process).forEach(biomaterial -> this.inputBiomaterials.add(biomaterial.getId()));
-            fileRepository.findByInputToProcessesContains(process).forEach(file -> this.inputFiles.add(file.getId()));
-        }
     }
 
     @Getter
+    @NoArgsConstructor
     public static class BiomaterialLinkingMap {
         final Collection<String> derivedByProcesses = new HashSet<>();
         final Collection<String> inputToProcesses = new HashSet<>();
-
-        public BiomaterialLinkingMap(Biomaterial biomaterial) {
-            biomaterial.getDerivedByProcesses().forEach(process -> this.derivedByProcesses.add(process.getId()));
-            biomaterial.getInputToProcesses().forEach(process -> this.inputToProcesses.add(process.getId()));
-        }
     }
 
     @Getter
+    @NoArgsConstructor
     public static class FileLinkingMap {
         final Collection<String> derivedByProcesses = new HashSet<>();
         final Collection<String> inputToProcesses = new HashSet<>();
-
-        public FileLinkingMap(File file) {
-            file.getDerivedByProcesses().forEach(process -> this.derivedByProcesses.add(process.getId()));
-            file.getInputToProcesses().forEach(process -> this.inputToProcesses.add(process.getId()));
-        }
     }
 }

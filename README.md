@@ -19,12 +19,19 @@ See [this document](https://github.com/HumanCellAtlas/metadata-schema/blob/maste
 An example of the process of making a submission is in [docs/primary-submission-walkthrough.md](docs/primary-submission-walkthrough.md).
 
 ## Tests
-`./gradlew test`
+`./gradlew verify`
 
 You will need a mongo database running on localhost with default ports to run the tests
 
 ## Running locally
-You can run ingest-core on your local system with the script
+You can run ingest-core on your local system by using the `local` Spring profile. You would need to have a local mongodb 
+and rabbitmq running, which you can run using docker-compose.
+
+```shell
+export SPRING_PROFILES_ACTIVE=local
+./gradlew bootRun
+
+```
 
 ### populating the local DB
 
@@ -49,7 +56,7 @@ mkdir -p ~/dev/ait/data/mongodb/
 cd ~/dev/ait/data/mongodb/
 latest_backup=$(aws s3 ls s3://ingest-db-backup/prod/ | awk '{print $4}' | sort | tail -n 1)
 aws s3 cp "s3://ingest-db-backup/prod/${latest_backup}" ${latest_backup}
-mongo_container_name=data-cube-mongodb-1
+mongo_container_name=ingest-core-mongo-1
 docker cp $latest_backup $mongo_container_name:/$latest_backup
 docker exec -i $mongo_container_name tar -xzvf $latest_backup
 backup_dir=$(echo "$latest_backup" | sed "s/\.tar\.gz//g")
