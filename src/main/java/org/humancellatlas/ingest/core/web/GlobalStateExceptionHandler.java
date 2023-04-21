@@ -79,9 +79,9 @@ public class GlobalStateExceptionHandler {
     public @ResponseBody
     ExceptionInfo handleResourceNotFound(HttpServletRequest request, Exception e) {
         getLog().warn(String.format("Caught a resource not found exception argument at '%s'; " +
-                        "this will generate a NOT_FOUND RESPONSE",
-                request.getRequestURL().toString()));
-        getLog().warn("Handling ResourceNotFoundException and returning NOT_FOUND response", e);
+                        "this will generate a NOT_FOUND RESPONSE. Error message: %s",
+                request.getRequestURL().toString(), e.getLocalizedMessage()));
+        getLog().warn("Handling ResourceNotFoundException and returning NOT_FOUND response");
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 
