@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * @date 30/08/17
  */
 @Getter
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"supplementaryFiles", "submissionEnvelopes"})
 public class Project extends MetadataDocument {
     @RestResource
     @JsonIgnore

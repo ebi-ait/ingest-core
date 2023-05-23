@@ -24,7 +24,7 @@ import java.util.Set;
  * Created by rolando on 16/02/2018.
  */
 @Getter
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"project", "projects", "protocols", "inputBundleManifests", "chainedProcesses"})
 public class Process extends MetadataDocument {
 
     @Indexed

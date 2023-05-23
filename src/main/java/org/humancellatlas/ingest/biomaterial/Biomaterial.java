@@ -27,7 +27,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 @CrossOrigin
 @Getter
 @Document
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"project", "projects", "inputToProcesses", "derivedByProcesses"})
 @NoArgsConstructor
 public class Biomaterial extends MetadataDocument {
 
