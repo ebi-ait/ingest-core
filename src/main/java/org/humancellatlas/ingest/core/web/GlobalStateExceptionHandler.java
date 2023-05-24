@@ -7,6 +7,7 @@ import org.humancellatlas.ingest.security.exception.NotAllowedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.data.repository.support.QueryMethodParameterConversionException;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -60,7 +61,8 @@ public class GlobalStateExceptionHandler {
             IllegalArgumentException.class,
             HttpMessageNotReadableException.class,
             RedundantUpdateException.class,
-            MultipleOpenSubmissionsException.class
+            MultipleOpenSubmissionsException.class,
+            QueryMethodParameterConversionException.class
     })
     public @ResponseBody
     ExceptionInfo handleIllegalArgument(HttpServletRequest request, Exception e) {
@@ -103,7 +105,7 @@ public class GlobalStateExceptionHandler {
     ExceptionInfo handleRuntimeException(HttpServletRequest request, Exception e) {
         getLog().error(String.format("Runtime exception encountered on %s request to resource %s ", request.getMethod(),
                 request.getRequestURL().toString()), e);
-        getLog().error("Handling RuntimeException and returning INTERNAL_SERVER_ERROR response", e);
+        getLog().error("Handling RuntimeException and returning INTERNAL_SERVER_ERROR response");
         return new ExceptionInfo(request.getRequestURL().toString(), "Unexpected server error");
     }
 

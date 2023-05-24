@@ -29,7 +29,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 @CompoundIndexes({
         @CompoundIndex(name = "validationId", def = "{ 'validationJob.validationId': 1 }")
 })
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"project", "inputToProcesses", "derivedByProcesses"})
 public class File extends MetadataDocument {
 
     @Indexed
