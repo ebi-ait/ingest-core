@@ -66,17 +66,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private final AuthenticationProvider gcpAuthenticationProvider;
-    private final AuthenticationProvider elixirAuthenticationPovider;
+    private final AuthenticationProvider elixirAuthenticationProvider;
 
     public SecurityConfig(@Qualifier(GCP) AuthenticationProvider gcp,
                           @Qualifier(ELIXIR) AuthenticationProvider elixir) {
         this.gcpAuthenticationProvider = gcp;
-        this.elixirAuthenticationPovider = elixir;
+        this.elixirAuthenticationProvider = elixir;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authenticationProvider(elixirAuthenticationPovider)
+        http.authenticationProvider(elixirAuthenticationProvider)
                 .authenticationProvider(gcpAuthenticationProvider)
                 .securityContext().securityContextRepository(new BearerSecurityContextRepository())
                 .and()
@@ -90,12 +90,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(POST, "/submissionEnvelopes").authenticated()
                 .antMatchers(POST, "/projects").authenticated()
                 .antMatchers(POST, "/projects/suggestion").permitAll()
+                .antMatchers(POST, "/projects/catalogue").permitAll()
                 .antMatchers(GET, "/user/**").authenticated()
                 .antMatchers(GET, "/auth/account").authenticated()
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
                 .requestMatchers(SecurityConfig::isSecuredEndpointFromOutside).authenticated()
-                .requestMatchers(SecurityConfig::isSecuredWranglerEndpointFromOutside).hasAnyAuthority(WRANGLER.name(), SERVICE.name())
-                .antMatchers(GET, "/**").permitAll();
+                .requestMatchers(SecurityConfig::isSecuredWranglerEndpointFromOutside)
+                    .hasAnyAuthority(WRANGLER.name(), SERVICE.name())
+                .antMatchers(GET, "/**").authenticated();
     }
 
     private static Boolean isSecuredEndpointFromOutside(HttpServletRequest request) {

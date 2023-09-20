@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
@@ -66,6 +67,7 @@ public class ArchiveJobControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void when_requesting_non_existing_archiving_job_returns_not_found_response() throws Exception {
         given(this.archiveJobRepository.findById(ARCHIVE_JOB_ID))
                 .willReturn(Optional.empty());
@@ -78,6 +80,7 @@ public class ArchiveJobControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void when_existing_archiving_job_in_pending_status_returns_valid_response() throws Exception {
         final ArchiveJob anArchiveJob = createAnArchiveJob(ARCHIVE_JOB_ID, SUBMISSION_UUID, PENDING_STATUS);
 
@@ -96,6 +99,7 @@ public class ArchiveJobControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void when_existing_archiving_job_in_completed_status_returns_valid_response() throws Exception {
         final ArchiveJob anArchiveJob = createAnArchiveJob(ARCHIVE_JOB_ID, SUBMISSION_UUID, COMPLETED_STATUS);
         setArchiveResult(anArchiveJob);

@@ -41,6 +41,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -214,6 +215,7 @@ public class ProjectController {
     }
 
     @GetMapping(path = "projects/filter")
+    @Secured({"ROLE_WRANGLER", "ROLE_SERVICE"})
     public ResponseEntity<PagedResources<Resource<Project>>> filterProjects(
             @ModelAttribute SearchFilter searchFilter,
             Pageable pageable,

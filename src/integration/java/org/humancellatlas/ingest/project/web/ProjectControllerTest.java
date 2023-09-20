@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.project.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.data.MapEntry;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.project.Project;
@@ -23,6 +24,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -91,17 +94,18 @@ class ProjectControllerTest {
 
         private void doTestUpdate(String patchUrl, Consumer<Project> postCondition) throws Exception {
             //given:
-            var content = new HashMap<String, Object>();
-            content.put("description", "test");
-            Project project = new Project(content);
-            project = repository.save(project);
+            var content = Map.of(
+                "description", "test",
+                "attr2", "should be deleted after patch");
+            Project originalProject = repository.save(new Project(content));
 
             //when:
-            content.put("description", "test updated");
+
+            Map<String, String> patch = Map.of("description", "test updated");
             MvcResult result = webApp
-                    .perform(patch(patchUrl, project.getId())
+                    .perform(patch(patchUrl, originalProject.getId())
                             .contentType(APPLICATION_JSON_VALUE)
-                            .content("{\"content\": " + objectMapper.writeValueAsString(content) + "}"))
+                            .content("{\"content\": " + objectMapper.writeValueAsString(patch) + "}"))
                     .andReturn();
 
             //expect:
@@ -110,18 +114,19 @@ class ProjectControllerTest {
             assertThat(response.getContentType()).containsPattern("application/.*json.*");
 
             //and:
-            //Using Map here because reading directly to Project converts the entire JSON to Project.content.
-            Map<String, Object> updated = objectMapper.readValue(response.getContentAsString(), Map.class);
-            assertThat(updated.get("content")).isInstanceOf(Map.class);
+            Project updated = objectMapper.readValue(response.getContentAsString(), Project.class);
+            assertThat(updated.getContent()).isInstanceOf(Map.class);
             MapEntry<String, String> updatedDescription = entry("description", "test updated");
-            assertThat((Map) updated.get("content")).containsOnly(updatedDescription);
+            assertThat((Map) updated.getContent()).containsOnly(updatedDescription);
 
             //and:
-            project = repository.findById(project.getId()).get();
-            assertThat((Map) project.getContent()).containsOnly(updatedDescription);
+            repository.findById(originalProject.getId())
+                            .ifPresentOrElse(project -> {
+                                assertThat((Map) project.getContent()).containsOnly(updatedDescription);
+                                postCondition.accept(project);
+                            }, () -> Assertions.fail("project {} not found", originalProject.getId()));
 
             //and:
-            postCondition.accept(project);
         }
 
         @Test
@@ -162,6 +167,7 @@ class ProjectControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = "WRNAGLER")
     class Filter {
         @BeforeEach
         public void setup(){
@@ -186,6 +192,7 @@ class ProjectControllerTest {
                 "kw1,null,null,UnsuppportedSearchType",
                 "kw1,null,null,null",
         })
+        @WithMockUser
         public void allValuesSetSomeNull(String search, String wrangler, String wranglingState, String searchType) throws Exception {
             //given:
             var content = Map.of(
@@ -217,6 +224,7 @@ class ProjectControllerTest {
                 "null,null,Unsupported,null",
                 "null,null,null,null",
         })
+        @WithMockUser
         public void nullsAreMissingFromPayload(String search, String wrangler, String wranglingState, String searchType) throws Exception {
             var content = new HashMap<String,String>();
             putIfNotNull(content, search, "search");
