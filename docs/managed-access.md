@@ -21,17 +21,29 @@ sequenceDiagram
         
         api ->> operation_service: perform operation
 ```
-
+## ACL update
 ```mermaid
 sequenceDiagram
 
-        participant authorization_update_service
-        participant dac
-        
-        note left of dac: periodic update job<br>interface not clear yet
+    participant contributor
+    participant hca_data_portal
+    participant dac
+    participant authorization_update_service
+
+
+    par application for access
+        contributor ->> hca_data_portal: apply for access to dataset
+        hca_data_portal ->> dac: submit access request
+        dac ->> dac: assess & approve    
+    end 
+    par get ACL data into ingest
+        note right of dac: periodic update job<br>interface not clear yet
         authorization_update_service ->> dac: snapshot access lists
-        authorization_update_service ->> authorization_update_service: update records
+        authorization_update_service ->> ingest_db: update records
+    end
 ```
+
+
 
 
 
