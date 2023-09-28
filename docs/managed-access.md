@@ -21,6 +21,7 @@ sequenceDiagram
         
         api ->> operation_service: perform operation
 ```
+
 ## ACL update
 ```mermaid
 sequenceDiagram
@@ -43,7 +44,37 @@ sequenceDiagram
     end
 ```
 
+## Representing ACLs in ingest
 
+Options to consider and choose one:
+1. Store a list of allowed datasets for each user, in addition to the
+   wrangler or contributor roles
 
+```mermaid
+classDiagram
+    direction LR
+    class User {
+        username
+    }
+    class Role {
+        name
+    }
+    User  --> "1..*" Role : roles
+    note for Role "Wrangler, Contrbutor, Dataset A, Dataset B"
+```
+2. Store a list of allowed users for each dataset.
+
+```mermaid
+classDiagram
+    direction LR
+    class Project {
+        content
+    }
+    class User {
+        name
+        roles
+    }
+    Project  --> "1..*" User : allowed_users
+```
 
 

@@ -11,6 +11,7 @@ import org.springframework.data.repository.support.QueryMethodParameterConversio
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -129,4 +130,11 @@ public class GlobalStateExceptionHandler {
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AccessDeniedException.class)
+    public @ResponseBody
+    ExceptionInfo handleAccessDeniedException(HttpServletRequest request, Exception e) {
+        getLog().info("access denied %s", request.getRequestURL());
+        return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
+    }
 }

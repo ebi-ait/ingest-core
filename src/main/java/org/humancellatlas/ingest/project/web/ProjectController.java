@@ -42,6 +42,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -181,6 +182,7 @@ public class ProjectController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
     }
 
+    @PreAuthorize("hasRole('access_'+#project.uuid)")
     @RequestMapping(path = "/projects/{project_id}/files", method = RequestMethod.GET)
     ResponseEntity<?> getFiles(@PathVariable("project_id") Project project,
                                Pageable pageable,

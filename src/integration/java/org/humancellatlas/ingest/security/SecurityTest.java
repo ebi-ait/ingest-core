@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.security;
 
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -73,6 +74,7 @@ public class SecurityTest {
             checkGetUrlIsUnauthorized("/" + metadataTypePlural);
         }
     }
+
 
     private void checkGetUrlIsUnauthorized(String url) throws Exception {
         webApp.perform(
