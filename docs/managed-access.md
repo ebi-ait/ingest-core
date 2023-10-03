@@ -21,10 +21,11 @@ sequenceDiagram
     
         client ->> api: api operation
         note over authorization_service: new service, query <br>snapshot of DAC
-        api ->> authorization_service: operation allowed for<br> user and document?
-        
-        authorization_service -->> api: true
-        api ->> audit_service: record operation
+        par new
+           api ->> authorization_service: operation allowed for<br> user and document?
+           authorization_service -->> api: true
+           api ->> audit_service: record operation
+        end 
         api ->> operation_service: perform operation
 ```
 
