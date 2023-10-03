@@ -34,18 +34,17 @@ sequenceDiagram
 sequenceDiagram
 
     participant contributor
-    participant hca_exec_office
-    participant dac
+    participant DACO
     participant authorization_update_service
 
     par application for access
-        contributor ->> hca_exec_office: apply for upload <br> permissions to dataset
-        hca_exec_office ->> dac: submit access request
-        dac ->> dac: assess & approve
+        contributor ->> DACO: apply for upload <br> permissions to                         dataset
+        note left of DACO: name, email, project
+        DACO ->> DACO: assess, compare <br>to signed docs, <br> approve
     end 
     par get ACL data into ingest
-        note right of dac: periodic update job<br>interface not clear yet
-        hca_exec_office ->> authorization_update_service: update ACL for project
+        note right of DACO: periodic updates <br>interface not clear yet,<br> initially email
+         DACO ->> authorization_update_service: update ACL for project
         authorization_update_service ->> ingest_db: update records
         note over ingest_db: update roles list, <br> ACL audit table
     end
