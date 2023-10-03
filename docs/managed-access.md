@@ -3,6 +3,11 @@
 ## Links
 - [ticket 967](https://app.zenhub.com/workspaces/dcp-ingest-product-development-5f71ca62a3cb47326bdc1b5c/issues/gh/ebi-ait/dcp-ingest-central/967)
 
+## Terms
+
+* ACL - Access Control List
+* DAC - Data Access Committee
+
 ```mermaid
 sequenceDiagram
 
@@ -10,6 +15,7 @@ sequenceDiagram
         participant api
         participant authorization_service
         participant operation_service
+        participant audit_service
 
         autonumber
     
@@ -18,7 +24,7 @@ sequenceDiagram
         api ->> authorization_service: operation allowed for<br> user and document?
         
         authorization_service -->> api: true
-        
+        api ->> audit_service: record operation
         api ->> operation_service: perform operation
 ```
 
@@ -27,26 +33,27 @@ sequenceDiagram
 sequenceDiagram
 
     participant contributor
-    participant hca_data_portal
+    participant hca_exec_office
     participant dac
     participant authorization_update_service
 
-
     par application for access
-        contributor ->> hca_data_portal: apply for access to dataset
-        hca_data_portal ->> dac: submit access request
-        dac ->> dac: assess & approve    
+        contributor ->> hca_exec_office: apply for upload <br> permissions to dataset
+        hca_exec_office ->> dac: submit access request
+        dac ->> dac: assess & approve
     end 
     par get ACL data into ingest
         note right of dac: periodic update job<br>interface not clear yet
-        authorization_update_service ->> dac: snapshot access lists
+        hca_exec_office ->> authorization_update_service: update ACL for project
         authorization_update_service ->> ingest_db: update records
+        note over ingest_db: update roles list, <br> ACL audit table
     end
 ```
 
 ## Representing ACLs in ingest
 
-Options to consider and choose one:
+There are 2 options to consider. We will proceed with option 1.
+
 1. Store a list of allowed datasets for each user, in addition to the
    wrangler or contributor roles
 
