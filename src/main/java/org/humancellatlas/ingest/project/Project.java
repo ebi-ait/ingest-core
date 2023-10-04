@@ -3,8 +3,6 @@ package org.humancellatlas.ingest.project;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.EqualsAndHashCode;
@@ -12,21 +10,15 @@ import lombok.Getter;
 import lombok.Setter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 import javax.validation.constraints.NotNull;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Javadocs go here!
@@ -138,93 +130,4 @@ public class Project extends MetadataDocument {
         return new ProjectBuilder();
     }
 
-    /**
-     * generic builder that uses reflection.
-     * Might not be suitable for production due to slower performance.
-     * Currently used only for testing.
-     */
-    public static class ProjectBuilder {
-        Object dataAccess;
-        Map<String, Map> content = new HashMap<String, Map>();
-
-        Uuid uuid = Uuid.newUuid();
-
-        public ProjectBuilder emptyProject() {
-            return this;
-        }
-
-        public ProjectBuilder withManagedAccess() {
-            dataAccess = DataAccessTypes.MANAGED;
-            return this;
-        }
-
-        public ProjectBuilder withOpenAccess() {
-            dataAccess = DataAccessTypes.OPEN;
-            return this;
-        }
-
-        public ProjectBuilder withUuid(String uuid) {
-            this.uuid = new Uuid(uuid);
-            return this;
-        }
-
-        public ProjectBuilder withShortName(String shortName) {
-            Map<String, Object> projectCore =
-                    content.computeIfAbsent("project_core", k -> new HashMap<String, Object>());
-            projectCore.put("project_short_name", shortName);
-            return this;
-        }
-
-        public Project build() {
-            Project project = new Project(content);
-            copyFieldsFromBuilder(project);
-            return project;
-        }
-
-        private void copyFieldsFromBuilder(Project project) {
-            List<String> constructorFields = List.of("content");
-            Map<String, Field> fieldsMap = Stream.iterate((Class) project.getClass(),
-                            c -> c.getSuperclass() != null,
-                            c -> c.getSuperclass())
-                    .map(Class::getDeclaredFields)
-                    .flatMap(Arrays::stream)
-                    .filter(f->!constructorFields.contains(f.getName()))
-                    .collect(Collectors.toMap(Field::getName, Function.identity()));
-            Arrays.stream(ProjectBuilder.class.getDeclaredFields())
-                    .filter(f->!constructorFields.contains(f.getName()))
-                    .forEach(builderField -> {
-                        try {
-                            Field projectField = fieldsMap.get(builderField.getName());
-                            String fieldName = projectField.getName();
-                            Method setter = setterForField(project, fieldName, projectField);
-                            setter.invoke(project, builderField.get(this));
-                        } catch (IllegalAccessException e) {
-                            throw new RuntimeException(e);
-                        } catch (NoSuchMethodException e) {
-                            throw new RuntimeException(e);
-                        } catch (InvocationTargetException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-        }
-
-        private static Method setterForField(Project project, String fieldName, Field projectField) throws NoSuchMethodException {
-            return project.getClass().getMethod(toSetterName(fieldName), projectField.getType());
-        }
-
-        private static String toSetterName(String fieldName) {
-            return "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-        }
-
-        public Map<String, Object> asMap() {
-            ObjectMapper objectMapper = new ObjectMapper();
-            Project project = this.build();
-            Map<String, Object> projectAsMap = objectMapper.convertValue(project,
-                    new TypeReference<Map<String, Object>>() {
-                    });
-            // TODO amnon: needed because of serialization problem. Not sure why.
-            projectAsMap.remove("contentLastModified");
-            return projectAsMap;
-        }
-    }
 }

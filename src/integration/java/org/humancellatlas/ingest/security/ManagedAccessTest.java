@@ -23,8 +23,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
 import java.util.Map;
@@ -78,6 +76,7 @@ public class ManagedAccessTest {
     }
 
     private static void createOpenAccessProjects(List<Map<String, Object>> projects) {
+        // TODO amnon: exclusion of contentLastModified needed because of serialization problem. Not sure why.\n"
         projects.add(Project.builder()
                 .withOpenAccess()
                 .withShortName("dataset C open")
