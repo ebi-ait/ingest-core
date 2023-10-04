@@ -28,11 +28,16 @@ public class SecurityTest {
 
     public static Stream<Arguments> metadataTypes() {
         return Stream.of(
-                Arguments.of("projects"),
                 Arguments.of("files"),
                 Arguments.of("biomaterials"),
                 Arguments.of("protocols"),
                 Arguments.of("processes")
+        );
+    }
+    public static Stream<Arguments> metadataTypesWithProject() {
+        return Stream.concat(
+                metadataTypes(),
+                Stream.of(Arguments.of("projects" ))
         );
     }
 

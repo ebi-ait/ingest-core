@@ -37,6 +37,9 @@ sequenceDiagram
     participant DACO
     participant authorization_update_service
 
+    
+    
+
     par application for access
         contributor ->> DACO: apply for upload <br> permissions to                         dataset
         note left of DACO: name, email, project
@@ -74,6 +77,7 @@ classDiagram
 ```mermaid
 classDiagram
     direction LR
+    
     class Project {
         content
     }
@@ -84,4 +88,11 @@ classDiagram
     Project  --> "1..*" User : allowed_users
 ```
 
+```mermaid
+graph RL
 
+   A:::someclass --> B
+   classDef someclass fill:#f96;
+   linkStyle default fill:none,stroke-width:3px,stroke:red
+
+```

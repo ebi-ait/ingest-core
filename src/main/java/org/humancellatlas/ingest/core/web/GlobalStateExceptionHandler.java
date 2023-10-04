@@ -134,7 +134,7 @@ public class GlobalStateExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public @ResponseBody
     ExceptionInfo handleAccessDeniedException(HttpServletRequest request, Exception e) {
-        getLog().info("access denied %s", request.getRequestURL());
+        getLog().info("access denied {}", request.getRequestURL());
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 }

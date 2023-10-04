@@ -34,7 +34,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
@@ -46,6 +45,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+
 /**
  * Javadocs go here!
  *
@@ -85,7 +85,7 @@ public class ProjectController {
 
     @PostMapping("/projects/suggestion")
     ResponseEntity<Resource<?>> suggest(@RequestBody final ObjectNode suggestion,
-                                         final PersistentEntityResourceAssembler assembler) {
+                                        final PersistentEntityResourceAssembler assembler) {
         Project suggestedProject = projectService.createSuggestedProject(suggestion);
         return ResponseEntity.ok().body(assembler.toFullResource(suggestedProject));
     }
@@ -123,6 +123,7 @@ public class ProjectController {
         return ResponseEntity.ok().body(assembler.toFullResource(updatedProject));
     }
 
+    @PreAuthorize("hasRole('access_'+#project.uuid)")
     @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
     ResponseEntity<Resource<?>> addProjectToEnvelope(
@@ -149,6 +150,8 @@ public class ProjectController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
     }
 
+    @PreAuthorize("hasRole('access_'+#project.uuid)"
+            + "or #project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN")
     @GetMapping(path = "/projects/{id}/submissionEnvelopes")
     ResponseEntity<PagedResources<Resource<SubmissionEnvelope>>> getProjectSubmissionEnvelopes(
             @PathVariable("id") Project project, Pageable pageable,
@@ -158,6 +161,8 @@ public class ProjectController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(resultPage, resourceAssembler));
     }
 
+    @PreAuthorize("hasRole('access_'+#project.uuid)"
+            + "or #project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN")
     @RequestMapping(path = "/projects/{project_id}/biomaterials", method = RequestMethod.GET)
     ResponseEntity<?> getBiomaterials(@PathVariable("project_id") Project project,
                                       Pageable pageable,
@@ -166,6 +171,8 @@ public class ProjectController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(biomaterials, resourceAssembler));
     }
 
+    @PreAuthorize("hasRole('access_'+#project.uuid)"
+            + "or #project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN")
     @RequestMapping(path = "/projects/{project_id}/processes", method = RequestMethod.GET)
     ResponseEntity<?> getProcesses(@PathVariable("project_id") Project project,
                                    Pageable pageable,
@@ -174,6 +181,8 @@ public class ProjectController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
     }
 
+    @PreAuthorize("hasRole('access_'+#project.uuid)"
+            + "or #project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN")
     @RequestMapping(path = "/projects/{project_id}/protocols", method = RequestMethod.GET)
     ResponseEntity<?> getProtocols(@PathVariable("project_id") Project project,
                                    Pageable pageable,
@@ -182,7 +191,9 @@ public class ProjectController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
     }
 
-    @PreAuthorize("hasRole('access_'+#project.uuid)")
+    //    @CheckAllowed("#project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN")
+    @PreAuthorize("hasRole('access_'+#project.uuid) "
+            + "or #project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN")
     @RequestMapping(path = "/projects/{project_id}/files", method = RequestMethod.GET)
     ResponseEntity<?> getFiles(@PathVariable("project_id") Project project,
                                Pageable pageable,
@@ -226,7 +237,7 @@ public class ProjectController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
     }
 
-    @GetMapping(path="projects/{id}/auditLogs")
+    @GetMapping(path = "projects/{id}/auditLogs")
     public ResponseEntity<?> getProjectAuditLogs(@PathVariable("id") Project project) {
         if (project == null) {
             return ResponseEntity.notFound().build();

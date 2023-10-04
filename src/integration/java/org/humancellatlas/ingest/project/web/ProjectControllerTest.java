@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.data.MapEntry;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
+import org.humancellatlas.ingest.project.DataAccessTypes;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectEventHandler;
 import org.humancellatlas.ingest.project.ProjectRepository;
@@ -180,6 +181,7 @@ class ProjectControllerTest {
             var content = new HashMap<String, Object>();
             content.put("description", "test kw1");
             Project project = new Project(content);
+            project.setDataAccess(DataAccessTypes.OPEN);
             return project;
         }
 
