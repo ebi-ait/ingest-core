@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -61,6 +63,8 @@ public class Project extends MetadataDocument {
     private Integer cellCount;
 
     @Setter
+    @JsonSerialize(using= DataAccessTypesJsonSerializer.class)
+    @JsonDeserialize(using= DataAccessTypesJsonDeserializer.class)
     private Object dataAccess;
 
     @Setter
@@ -140,7 +144,7 @@ public class Project extends MetadataDocument {
      * Currently used only for testing.
      */
     public static class ProjectBuilder {
-        Map<String, String> dataAccess;
+        Object dataAccess;
         Map<String, Map> content = new HashMap<String, Map>();
 
         Uuid uuid = Uuid.newUuid();
@@ -150,12 +154,12 @@ public class Project extends MetadataDocument {
         }
 
         public ProjectBuilder withManagedAccess() {
-            dataAccess = Map.of("type", DataAccessTypes.OPEN.getLabel());
+            dataAccess = DataAccessTypes.MANAGED;
             return this;
         }
 
         public ProjectBuilder withOpenAccess() {
-            dataAccess = Map.of("type", DataAccessTypes.OPEN.getLabel());
+            dataAccess = DataAccessTypes.OPEN;
             return this;
         }
 
