@@ -8,6 +8,7 @@
 * ACL - Access Control List
 * DAC - Data Access Committee
 
+## API Access Control Flow
 ```mermaid
 sequenceDiagram
 
@@ -29,7 +30,38 @@ sequenceDiagram
         api ->> operation_service: perform operation
 ```
 
-## ACL update
+## API Access Control - Details
+There are 2 options here:
+1. return all records from db & filter the output to keep the allowed records
+2. instrument the query and add a criteria to return only allowed records
+
+For 1st iteration, we'll go with option 1, which is easier to implement, but might 
+perform worse for large collections.
+
+```mermaid
+sequenceDiagram
+    title 1. filter db result
+    participant client
+    participant Controller
+    participant Repository
+    participant RowLevelSecurity
+    participant DB
+    
+    autonumber
+    
+    client ->> Controller: api resource
+    note over Controller: GET /files
+    Controller ->> Repository: repo op
+    note over Repository: findAll()
+    Repository ->> DB: execute query
+    DB -->> RowLevelSecurity: db result (collection)
+    RowLevelSecurity ->> RowLevelSecurity: filter, keep allowed
+    RowLevelSecurity -->> Repository: filtered result
+    Repository -->> Controller: filtered result
+    Controller -->> client: api response
+```
+
+## ACL Update Flow
 ```mermaid
 sequenceDiagram
 

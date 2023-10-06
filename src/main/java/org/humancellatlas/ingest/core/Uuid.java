@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.core;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.UUID;
 
@@ -12,6 +13,7 @@ import java.util.UUID;
  * @date 31/08/17
  */
 @Data
+@EqualsAndHashCode
 public class Uuid {
     private UUID uuid;
 

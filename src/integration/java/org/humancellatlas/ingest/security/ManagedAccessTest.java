@@ -1,14 +1,15 @@
 package org.humancellatlas.ingest.security;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.project.BuilderHelper;
 import org.humancellatlas.ingest.project.DataAccessTypes;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
-import org.jetbrains.annotations.NotNull;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -20,15 +21,18 @@ import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataM
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.humancellatlas.ingest.security.TestDataHelper.makeUuid;
+import static org.humancellatlas.ingest.security.TestDataHelper.mapAsJsonString;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -43,7 +47,9 @@ public class ManagedAccessTest {
     @Autowired
     private ProjectRepository projectRepository;
     @Autowired
-    private ObjectMapper objectMapper;
+    FileRepository fileRepository;
+    @Autowired
+    SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
     @MockBean
     // NOTE: Adding MigrationConfiguration as a MockBean is needed
@@ -54,12 +60,12 @@ public class ManagedAccessTest {
     public void setupTestData() throws Exception {
 
         // dataset A - managed access
-        List<Map<String, Object>> projects = createManagedAccessProjects();
+        List<Map<String, Object>> projects = TestDataHelper.createManagedAccessProjects();
         // dataset C - open access
-        createOpenAccessProjects(projects);
+        projects.add(TestDataHelper.createOpenAccessProjects());
 
         projects.stream()
-                .map(ManagedAccessTest::mapAsJsonString)
+                .map(TestDataHelper::mapAsJsonString)
                 .forEach(p -> {
                     try {
                         webApp.perform(post("/projects")
@@ -70,59 +76,39 @@ public class ManagedAccessTest {
                         throw new RuntimeException(e);
                     }
                 });
-        projectRepository.findByUuid(new Uuid(makeUuid("a")))
-                .forEach(p-> Assertions.assertThat(p.getDataAccess())
-                        .isEqualTo(DataAccessTypes.MANAGED));
-    }
 
-    private static void createOpenAccessProjects(List<Map<String, Object>> projects) {
-        // TODO amnon: exclusion of contentLastModified needed because of serialization problem. Not sure why.\n"
-        projects.add(Project.builder()
-                .withOpenAccess()
-                .withShortName("dataset C open")
-                .withUuid(makeUuid("C"))
-                .asMap());
-    }
-
-    @NotNull
-    private static List<Map<String, Object>> createManagedAccessProjects() {
-        List<Map<String, Object>> projects = Stream.of("A", "B")
-                .map(s -> Project.builder()
-                        .withManagedAccess()
-                        .withShortName("dataset " + s + " managed")
-                        .withUuid(makeUuid(s))
-                        .asMap())
-                .collect(Collectors.toList());
-        return projects;
-    }
-
-    private static String mapAsJsonString(Map<String, Object> value) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @NotNull
-    private static String makeUuid(String s) {
-        if (s.length() != 1) {
-            throw new IllegalArgumentException("use a single character");
-        }
-        return s.repeat(8) + "-" + s.repeat(4) + "-" + s.repeat(4) + "-" + s.repeat(4) + "-" + s.repeat(12);
+        Stream.of("a", "b", "c")
+                .map(TestDataHelper::makeUuid)
+                .forEach(this::addFileToProjectByProjectUuid);
     }
 
     @AfterEach
     public void tearDown() {
+        Stream.builder()
+                        .add(projectRepository)
+                        .add(fileRepository)
+                        .add(submissionEnvelopeRepository)
+                                .build()
+                                        .forEach(r->((CrudRepository)r).deleteAll());
         projectRepository.deleteAll();
     }
 
+    @Test
+    @WithMockUser(
+            username = "alice",
+            roles = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
+    public void testDataAccessTypeFieldDeserialization() {
+        projectRepository.findByUuid(new Uuid(makeUuid("a")))
+                .forEach(p -> Assertions.assertThat(p.getDataAccess())
+                        .isEqualTo(DataAccessTypes.MANAGED));
+    }
 
 
-
+    /**
+     * checks access to sub resources of a project, `/projects/{id}/{metadata-type}`
+     */
     @Nested
-    class MetadataAccessControl {
+    class MetadataFromProjectAccessControl {
 
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
@@ -139,6 +125,7 @@ public class ManagedAccessTest {
             webApp.perform(get(projectMetadataUrl))
                     .andExpect(status().isOk());
         }
+
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
         @WithMockUser(
@@ -154,6 +141,7 @@ public class ManagedAccessTest {
             webApp.perform(get(projectMetadataUrl).contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());
         }
+
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
         @WithMockUser(
@@ -183,6 +171,7 @@ public class ManagedAccessTest {
             webApp.perform(get("/projects"))
                     .andExpect(jsonPath("$.page.totalElements").value("3"));
         }
+
         @Test
         @WithMockUser(
                 username = "bob",
@@ -193,5 +182,54 @@ public class ManagedAccessTest {
         }
     }
 
+    private void addFileToProjectByProjectUuid(String uuidString) {
+        Project project = projectRepository.findByUuid(new Uuid(uuidString))
+                .findFirst().get();
+        String submissionUrl = null;
+        try {
+            submissionUrl = webApp.perform(post("/submissionEnvelopes")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{}"))
+                    .andExpect(status().isCreated())
+                    .andReturn()
+                    .getResponse()
+                    .getHeader("Location");
+
+            // link submission to project
+            webApp.perform(post("/projects/{id}/submissionEnvelopes", project.getId())
+                            .contentType("text/uri-list")
+                            .content(submissionUrl))
+                    .andExpect(status().isNoContent());
+
+            File file = new File();
+
+            file.setFileName("file 01 project " + uuidString);
+
+            String submissionFilesUrl = submissionUrl + "/files";
+            webApp.perform(post(submissionFilesUrl)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(mapAsJsonString(BuilderHelper.asMap(file, List.of("contentLastModified")))))
+                    .andExpect(status().isAccepted());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @Nested
+    class MetadataRepositoryAccessControl {
+
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
+        @WithMockUser(
+                username = "alice",
+                roles = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
+        public void userOnProjectAList_CanSeeOnlyOpenAndProjectAMetadata(String metadataTypePlural) throws Exception {
+            String metadataCollectionUrl = "/" + metadataTypePlural;
+            webApp.perform(get(metadataCollectionUrl))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.page.totalElements").value("2"));
+            // TODO expect to see only open access and project A files
+            fail("TODO expect to see only open access and project A files");
+        }
+    }
 }
 
