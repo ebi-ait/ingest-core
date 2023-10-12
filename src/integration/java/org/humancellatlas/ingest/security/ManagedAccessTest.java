@@ -57,6 +57,7 @@ public class ManagedAccessTest {
     private MigrationConfiguration migrationConfiguration;
 
     @BeforeEach
+    @WithMockUser(roles = "WRANGLER")
     public void setupTestData() throws Exception {
 
         // dataset A - managed access
@@ -83,6 +84,7 @@ public class ManagedAccessTest {
     }
 
     @AfterEach
+    @WithMockUser(roles = "WRANGLER")
     public void tearDown() {
         Stream.builder()
                         .add(projectRepository)

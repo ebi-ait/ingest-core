@@ -32,7 +32,7 @@ sequenceDiagram
 
 ## API Access Control - Details
 There are 2 options here:
-1. return all records from db & filter the output to keep the allowed records
+1. return all records from DB & filter the output to keep the allowed records
 2. instrument the query and add a criteria to return only allowed records
 
 For 1st iteration, we'll go with option 1, which is easier to implement, but might 
@@ -40,23 +40,28 @@ perform worse for large collections.
 
 ```mermaid
 sequenceDiagram
-    title 1. filter db result
+    title 1. filter DB result
     participant client
     participant Controller
     participant Repository
-    participant RowLevelSecurity
+    participant RowLevelSecurityAspect
     participant DB
+    participant Authentication
+    participant MetadataDocument
     
     autonumber
     
     client ->> Controller: api resource
     note over Controller: GET /files
-    Controller ->> Repository: repo op
-    note over Repository: findAll()
+    Controller ->> Repository: findAll()
+    note over Repository: anotated with @RowLevelSecurity
     Repository ->> DB: execute query
-    DB -->> RowLevelSecurity: db result (collection)
-    RowLevelSecurity ->> RowLevelSecurity: filter, keep allowed
-    RowLevelSecurity -->> Repository: filtered result
+    DB -->> RowLevelSecurityAspect: db result (collection)
+    note over RowLevelSecurityAspect: implement as an AOP Advice<br> to the Repository
+    RowLevelSecurityAspect ->> Authentication: get user roles
+    RowLevelSecurityAspect ->> MetadataDocument: get project uuid
+    RowLevelSecurityAspect ->> RowLevelSecurityAspect: filter, keep allowed
+    RowLevelSecurityAspect -->> Repository: filtered result
     Repository -->> Controller: filtered result
     Controller -->> client: api response
 ```
@@ -68,9 +73,6 @@ sequenceDiagram
     participant contributor
     participant DACO
     participant authorization_update_service
-
-    
-    
 
     par application for access
         contributor ->> DACO: apply for upload <br> permissions to                         dataset
