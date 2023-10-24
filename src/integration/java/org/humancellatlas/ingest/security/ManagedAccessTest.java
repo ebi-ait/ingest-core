@@ -196,9 +196,11 @@ public class ManagedAccessTest {
             submissionUrl = createSubmissionAndGetUrl();
             linkSubmissionToProject(project, submissionUrl);
             MetadataDocument metadataDocument = metadataType.getConstructor().newInstance();
-            metadataDocument.setContent(metadataDocument.getType() + " 01 in project " + uuidString);
-            String submissionFilesUrl = String.format("%s/%ss", submissionUrl, metadataDocument.getType());
-            webApp.perform(post(submissionFilesUrl)
+            String lowerCaseMetadataType = metadataDocument.getType().toString().toLowerCase();
+            metadataDocument.setContent(lowerCaseMetadataType + " in project " + uuidString);
+            metadataDocument.setUuid(Uuid.newUuid());
+            String submissionMetadataDocumentsUrl = String.format("%s/%ss", submissionUrl, lowerCaseMetadataType);
+            webApp.perform(post(submissionMetadataDocumentsUrl)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(mapAsJsonString(BuilderHelper.asMap(metadataDocument, List.of("contentLastModified")))))
                     .andExpect(status().isAccepted());
