@@ -25,8 +25,8 @@ import java.util.stream.Stream;
  * Created by rolando on 06/09/2017.
  */
 @CrossOrigin
-@RowLevelFilterSecurity(value="#authentication.authorities.contains('ROLE_access_' +#filterObject.project.uuid.toString())",
-                        ignoreClasses = Project.class)
+@RowLevelFilterSecurity(expression ="#authentication.authorities.contains('ROLE_access_' +#filterObject.project.uuid.toString())",
+        ignoreClasses = {Project.class})
 public interface FileRepository extends MongoRepository<File, String> {
 
 

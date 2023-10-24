@@ -27,7 +27,7 @@ class RowLevelFilterSecurityAspectTest {
     private MigrationConfiguration migrationConfiguration;
 
     @Test
-    public void testAdviseDeclaredMethod() throws Throwable {
+    public void testAdviceOnRepositoryDeclaredMethod() throws Throwable {
         try {
             fileRepository.findByProject(Project.builder().emptyProject().build());
         } catch (Exception e) {
@@ -39,7 +39,7 @@ class RowLevelFilterSecurityAspectTest {
     }
 
     @Test
-    public void testAdviseInheritedMethod() throws Throwable {
+    public void testAdviceOnRepositoryInheritedMethod() throws Throwable {
         fileRepository.findAll();
 
         Mockito.verify(rowLevelFilterSecurityAspect)
