@@ -25,7 +25,10 @@ import java.util.stream.Stream;
  * Created by rolando on 06/09/2017.
  */
 @CrossOrigin
-@RowLevelFilterSecurity(expression ="#authentication.authorities.contains('ROLE_access_' +#filterObject.project.uuid.toString())",
+@RowLevelFilterSecurity(expression ="#authentication.authorities.contains(" +
+        "new org.springframework.security.core.authority.SimpleGrantedAuthority(" +
+        "'ROLE_access_' +#filterObject.project.uuid.toString())) " +
+        "or #filterObject.project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN",
         ignoreClasses = {Project.class})
 public interface FileRepository extends MongoRepository<File, String> {
 

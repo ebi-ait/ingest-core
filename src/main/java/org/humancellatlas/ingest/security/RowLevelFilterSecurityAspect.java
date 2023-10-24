@@ -32,9 +32,16 @@ public class RowLevelFilterSecurityAspect {
     @Pointcut("execution(* org.springframework.data.repository.PagingAndSortingRepository.find*(..)) ")
     public void repositoryInheritedFindFunctions(){}
 
+    @Pointcut("target(org.humancellatlas.ingest.file.FileRepository) " +
+              "|| target(org.humancellatlas.ingest.biomaterial.BiomaterialRepository)")
+    public void ingestRepositoriesAreTheTarget(){}
 
 
-    @Around  ("repositoryInheritedFindFunctions() || repositoryFindFunctions()")
+// this Pointcut definition works but not ideal
+//    @Around  ("repositoryInheritedFindFunctions() || repositoryFindFunctions()")
+
+    @Around("ingestRepositoriesAreTheTarget() " +
+            "&& repositoryInheritedFindFunctions()")
     public Object applyRowLevelSecurity(ProceedingJoinPoint joinPoint) throws Throwable {
         Object queryResult = joinPoint.proceed();
         try {
@@ -78,14 +85,14 @@ public class RowLevelFilterSecurityAspect {
             Method method = this.method;
             List<File> retainedDocuments = documentList
                     .stream()
-                    .filter(document -> evaluateDocumentExpression(document, method))
+                    .filter(this::evaluateDocumentExpression)
                     .collect(Collectors.toList());
             int start = (int) pageable.getOffset();
             int end = Math.min(start + pageable.getPageSize(), retainedDocuments.size());
             return new PageImpl<>(retainedDocuments.subList(start, end), pageable, retainedDocuments.size());
         }
 
-        private Boolean evaluateDocumentExpression(File document, Method method) {
+        private Boolean evaluateDocumentExpression(File document) {
             List<String> variableNames = buildVariableNames(method);
             List<Object> variableValues = buildVariableValues(document, authentication);
             String spelExpression = rowLevelFilterSecurity.expression();

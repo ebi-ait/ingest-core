@@ -191,7 +191,6 @@ public class ProjectController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
     }
 
-    //    @CheckAllowed("#project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN")
     @PreAuthorize("hasRole('access_'+#project.uuid) "
             + "or #project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN")
     @RequestMapping(path = "/projects/{project_id}/files", method = RequestMethod.GET)

@@ -2,7 +2,7 @@ package org.humancellatlas.ingest.security;
 
 import org.assertj.core.api.Assertions;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
-import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.project.BuilderHelper;
@@ -10,6 +10,8 @@ import org.humancellatlas.ingest.project.DataAccessTypes;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -25,6 +27,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.List;
 import java.util.Map;
@@ -80,7 +83,7 @@ public class ManagedAccessTest {
 
         Stream.of("a", "b", "c")
                 .map(TestDataHelper::makeUuid)
-                .forEach(this::addFileToProjectByProjectUuid);
+                .forEach(uuidString -> addMetadataToProjectByProjectUuid(uuidString, File.class));
     }
 
     @AfterEach
@@ -184,38 +187,45 @@ public class ManagedAccessTest {
         }
     }
 
-    private void addFileToProjectByProjectUuid(String uuidString) {
+    private void addMetadataToProjectByProjectUuid(String uuidString,
+                                                   Class<? extends MetadataDocument> metadataType) {
         Project project = projectRepository.findByUuid(new Uuid(uuidString))
                 .findFirst().get();
         String submissionUrl = null;
         try {
-            submissionUrl = webApp.perform(post("/submissionEnvelopes")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{}"))
-                    .andExpect(status().isCreated())
-                    .andReturn()
-                    .getResponse()
-                    .getHeader("Location");
-
-            // link submission to project
-            webApp.perform(post("/projects/{id}/submissionEnvelopes", project.getId())
-                            .contentType("text/uri-list")
-                            .content(submissionUrl))
-                    .andExpect(status().isNoContent());
-
-            File file = new File();
-
-            file.setFileName("file 01 project " + uuidString);
-
-            String submissionFilesUrl = submissionUrl + "/files";
+            submissionUrl = createSubmissionAndGetUrl();
+            linkSubmissionToProject(project, submissionUrl);
+            MetadataDocument metadataDocument = metadataType.getConstructor().newInstance();
+            metadataDocument.setContent(metadataDocument.getType() + " 01 in project " + uuidString);
+            String submissionFilesUrl = String.format("%s/%ss", submissionUrl, metadataDocument.getType());
             webApp.perform(post(submissionFilesUrl)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(mapAsJsonString(BuilderHelper.asMap(file, List.of("contentLastModified")))))
+                            .content(mapAsJsonString(BuilderHelper.asMap(metadataDocument, List.of("contentLastModified")))))
                     .andExpect(status().isAccepted());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
+    @NotNull
+    private ResultActions linkSubmissionToProject(Project project, String submissionUrl) throws Exception {
+        return webApp.perform(post("/projects/{id}/submissionEnvelopes", project.getId())
+                        .contentType("text/uri-list")
+                        .content(submissionUrl))
+                .andExpect(status().isNoContent());
+    }
+
+    @Nullable
+    private String createSubmissionAndGetUrl() throws Exception {
+        return webApp.perform(post("/submissionEnvelopes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getHeader("Location");
+    }
+
     @Nested
     class MetadataRepositoryAccessControl {
 
@@ -229,8 +239,6 @@ public class ManagedAccessTest {
             webApp.perform(get(metadataCollectionUrl))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.page.totalElements").value("2"));
-            // TODO expect to see only open access and project A files
-            fail("TODO expect to see only open access and project A files");
         }
     }
 }

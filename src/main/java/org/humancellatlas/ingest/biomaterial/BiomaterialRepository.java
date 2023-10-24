@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.security.RowLevelFilterSecurity;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,11 @@ import java.util.stream.Stream;
 
 
 @CrossOrigin
+@RowLevelFilterSecurity(expression ="#authentication.authorities.contains(" +
+        "new org.springframework.security.core.authority.SimpleGrantedAuthority(" +
+        "'ROLE_access_' +#filterObject.project.uuid.toString())) " +
+        "or #filterObject.project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN",
+        ignoreClasses = {Project.class})
 public interface BiomaterialRepository extends MongoRepository<Biomaterial, String> {
 
     @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
@@ -37,7 +43,7 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
 
     @RestResource(exported = false)
     Stream<Biomaterial> findByProjectsContaining(Project project);
-    
+
     @RestResource(exported = false)
     Stream<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
