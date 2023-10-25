@@ -65,9 +65,9 @@ class RowLevelFilterSecurityAspectTest {
     }
 
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} {1}")
     @MethodSource("repositoryBeans")
-    public void testAdviceOnRepositoryInheritedMethod(MongoRepository repository) throws Throwable {
+    public void testAdviceOnRepositoryInheritedMethod(MongoRepository repository, String metadataType) throws Throwable {
         repository.findAll();
 
         Mockito.verify(rowLevelFilterSecurityAspect, atLeast(1))
@@ -76,10 +76,10 @@ class RowLevelFilterSecurityAspectTest {
 
     private Stream<Arguments> repositoryBeans() {
         return Stream.of(
-                Arguments.of(fileRepository),
-                Arguments.of(biomaterialRepository),
-                Arguments.of(protocolRepository),
-                Arguments.of(processRepository)
+                Arguments.of(fileRepository, "file"),
+                Arguments.of(biomaterialRepository, "biomaterial"),
+                Arguments.of(protocolRepository, "protocol"),
+                Arguments.of(processRepository, "process")
         );
     }
 }

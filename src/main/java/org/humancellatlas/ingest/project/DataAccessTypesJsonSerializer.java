@@ -7,7 +7,8 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 
 /**
- * Serialises {@link DataAccessTypes} enum to a JSON value. Used when writing a response as json.
+ * Serialises {@link DataAccessTypes} enum to a JSON value. Used when converting an
+ * object to JSON using {@link com.fasterxml.jackson.databind.ObjectMapper}
  */
 public class DataAccessTypesJsonSerializer extends StdSerializer<DataAccessTypes> {
     public DataAccessTypesJsonSerializer() {

@@ -1,14 +1,18 @@
 package org.humancellatlas.ingest.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
+import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.*;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
-import org.humancellatlas.ingest.project.BuilderHelper;
-import org.humancellatlas.ingest.project.DataAccessTypes;
-import org.humancellatlas.ingest.project.Project;
-import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.process.Process;
+import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.*;
+import org.humancellatlas.ingest.protocol.Protocol;
+import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,13 +33,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.humancellatlas.ingest.security.TestDataHelper.makeUuid;
 import static org.humancellatlas.ingest.security.TestDataHelper.mapAsJsonString;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -51,9 +55,21 @@ public class ManagedAccessTest {
     private ProjectRepository projectRepository;
     @Autowired
     FileRepository fileRepository;
+
+    @Autowired
+    BiomaterialRepository biomaterialRepository;
+
+    @Autowired
+    ProtocolRepository protocolRepository;
+
+    @Autowired
+    ProcessRepository processRepository;
+
     @Autowired
     SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
+    @Autowired
+    ObjectMapper objectMapper;
     @MockBean
     // NOTE: Adding MigrationConfiguration as a MockBean is needed
     // as otherwise MigrationConfiguration won't be initialised.
@@ -83,7 +99,8 @@ public class ManagedAccessTest {
 
         Stream.of("a", "b", "c")
                 .map(TestDataHelper::makeUuid)
-                .forEach(uuidString -> addMetadataToProjectByProjectUuid(uuidString, File.class));
+                .forEach(uuidString -> addMetadataToProjectByProjectUuid(uuidString,
+                        List.of(File.class, Biomaterial.class, Protocol.class, Process.class)));
     }
 
     @AfterEach
@@ -92,10 +109,12 @@ public class ManagedAccessTest {
         Stream.builder()
                         .add(projectRepository)
                         .add(fileRepository)
+                        .add(biomaterialRepository)
+                        .add(protocolRepository)
+                        .add(processRepository)
                         .add(submissionEnvelopeRepository)
                                 .build()
                                         .forEach(r->((CrudRepository)r).deleteAll());
-        projectRepository.deleteAll();
     }
 
     @Test
@@ -188,25 +207,59 @@ public class ManagedAccessTest {
     }
 
     private void addMetadataToProjectByProjectUuid(String uuidString,
-                                                   Class<? extends MetadataDocument> metadataType) {
+                                                   List<Class<? extends MetadataDocument>> metadataTypes) {
         Project project = projectRepository.findByUuid(new Uuid(uuidString))
                 .findFirst().get();
-        String submissionUrl = null;
         try {
-            submissionUrl = createSubmissionAndGetUrl();
+            final String submissionUrl = createSubmissionAndGetUrl();
             linkSubmissionToProject(project, submissionUrl);
-            MetadataDocument metadataDocument = metadataType.getConstructor().newInstance();
-            String lowerCaseMetadataType = metadataDocument.getType().toString().toLowerCase();
-            metadataDocument.setContent(lowerCaseMetadataType + " in project " + uuidString);
-            metadataDocument.setUuid(Uuid.newUuid());
-            String submissionMetadataDocumentsUrl = String.format("%s/%ss", submissionUrl, lowerCaseMetadataType);
-            webApp.perform(post(submissionMetadataDocumentsUrl)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(mapAsJsonString(BuilderHelper.asMap(metadataDocument, List.of("contentLastModified")))))
-                    .andExpect(status().isAccepted());
+            metadataTypes.forEach(metadataType -> {
+                try {
+                    MetadataDocument metadataDocument = newMetadataInstance(metadataType);
+                    String lowerCaseMetadataType = metadataDocument.getType().toString().toLowerCase();
+                    setDocumentProperties(uuidString, metadataDocument);
+
+                    String submissionMetadataDocumentsUrl = buildSubmissionMetadataUrl(submissionUrl, lowerCaseMetadataType);
+                    Map documentAsMap = new ObjectToMapConverter(objectMapper)
+                            .asMap(metadataDocument, List.of("contentLastModified"));
+                    webApp.perform(post(submissionMetadataDocumentsUrl)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(mapAsJsonString(documentAsMap)))
+                            .andExpect(status().isAccepted());
+                } catch (Exception e) {
+                    throw new RuntimeException("problem crating metadata document " + metadataType.getSimpleName(), e);
+                }
+            });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static String buildSubmissionMetadataUrl(String submissionUrl, String lowerCaseMetadataType) {
+        return submissionUrl + "/" + lowerCaseMetadataType + (lowerCaseMetadataType.endsWith("s")?"es":"s");
+    }
+
+    @NotNull
+    private static void setDocumentProperties(String uuidString, MetadataDocument metadataDocument) {
+        String lowerCaseMetadataType = metadataDocument.getType().toString().toLowerCase();
+        Map<String, Map<String, Map<String, String>>> content = Map.of("content", Map.of(lowerCaseMetadataType + "_core", Map.of(lowerCaseMetadataType + "_name", lowerCaseMetadataType + " in project " + uuidString)));
+        metadataDocument.setContent(content);
+        metadataDocument.setUuid(Uuid.newUuid());
+    }
+
+    @NotNull
+    private static MetadataDocument newMetadataInstance(Class<? extends MetadataDocument> metadataType) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        MetadataDocument metadataDocument;
+        try {
+            // try the single arg ctor with null content arg
+            // content will be set later
+            metadataDocument = metadataType.getConstructor(Object.class).newInstance(new Object[]{ null });
+        } catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException |
+                 SecurityException e) {
+            // fallback to no-args ctor
+            metadataDocument = metadataType.getConstructor().newInstance();
+        }
+        return metadataDocument;
     }
 
     @NotNull
@@ -244,4 +297,3 @@ public class ManagedAccessTest {
         }
     }
 }
-

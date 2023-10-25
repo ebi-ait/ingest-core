@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.protocol;
 
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.project.Project;
+import org.humancellatlas.ingest.security.RowLevelFilterSecurity;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,11 @@ import java.util.stream.Stream;
  * @date 31/08/17
  */
 @CrossOrigin
+@RowLevelFilterSecurity(expression ="#authentication.authorities.contains(" +
+        "new org.springframework.security.core.authority.SimpleGrantedAuthority(" +
+        "'ROLE_access_' +#filterObject.project.uuid.toString())) " +
+        "or #filterObject.project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN",
+        ignoreClasses = {Project.class})
 public interface ProtocolRepository extends MongoRepository<Protocol, String> {
 
     public Page<Protocol> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);

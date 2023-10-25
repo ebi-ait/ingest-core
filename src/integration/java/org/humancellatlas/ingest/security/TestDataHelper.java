@@ -30,14 +30,13 @@ public class TestDataHelper {
 
     @NotNull
     static List<Map<String, Object>> createManagedAccessProjects() {
-        List<Map<String, Object>> projects = Stream.of("A", "B")
+        return Stream.of("A", "B")
                 .map(s -> Project.builder()
                         .withManagedAccess()
                         .withShortName("dataset " + s + " managed")
                         .withUuid(makeUuid(s))
                         .asMap())
                 .collect(Collectors.toList());
-        return projects;
     }
 
     static String mapAsJsonString(Map<String, Object> value) {

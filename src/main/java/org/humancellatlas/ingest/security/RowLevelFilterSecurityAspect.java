@@ -5,6 +5,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.file.File;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,18 +28,17 @@ import java.util.stream.Collectors;
 public class RowLevelFilterSecurityAspect {
 
     // TODO: implement "Before" protection for data modification functions
-    @Pointcut("execution(* org.humancellatlas.ingest.file.*Repository.find*(..))")
+    @Pointcut("execution(* org.humancellatlas.ingest.*.*Repository.find*(..))")
     public void repositoryFindFunctions(){}
     @Pointcut("execution(* org.springframework.data.repository.PagingAndSortingRepository.find*(..)) ")
     public void repositoryInheritedFindFunctions(){}
 
     @Pointcut("target(org.humancellatlas.ingest.file.FileRepository) " +
-              "|| target(org.humancellatlas.ingest.biomaterial.BiomaterialRepository)")
+              "|| target(org.humancellatlas.ingest.biomaterial.BiomaterialRepository)" +
+              "|| target(org.humancellatlas.ingest.process.ProcessRepository)" +
+              "|| target(org.humancellatlas.ingest.protocol.ProtocolRepository)")
     public void ingestRepositoriesAreTheTarget(){}
 
-
-// this Pointcut definition works but not ideal
-//    @Around  ("repositoryInheritedFindFunctions() || repositoryFindFunctions()")
 
     @Around("ingestRepositoriesAreTheTarget() " +
             "&& repositoryInheritedFindFunctions()")
@@ -81,9 +81,9 @@ public class RowLevelFilterSecurityAspect {
                     .get();
         }
 
-        private Object filterDocumentList(Pageable pageable, List<File> documentList) {
+        private Object filterDocumentList(Pageable pageable, List<? extends MetadataDocument> documentList) {
             Method method = this.method;
-            List<File> retainedDocuments = documentList
+            List<? extends MetadataDocument> retainedDocuments = documentList
                     .stream()
                     .filter(this::evaluateDocumentExpression)
                     .collect(Collectors.toList());
@@ -92,14 +92,14 @@ public class RowLevelFilterSecurityAspect {
             return new PageImpl<>(retainedDocuments.subList(start, end), pageable, retainedDocuments.size());
         }
 
-        private Boolean evaluateDocumentExpression(File document) {
+        private Boolean evaluateDocumentExpression(MetadataDocument document) {
             List<String> variableNames = buildVariableNames(method);
             List<Object> variableValues = buildVariableValues(document, authentication);
             String spelExpression = rowLevelFilterSecurity.expression();
             return spelHelper.parseExpression(variableNames, variableValues, spelExpression);
         }
 
-        private List<Object> buildVariableValues(File document, Authentication authentication) {
+        private List<Object> buildVariableValues(MetadataDocument document, Authentication authentication) {
             List<Object> variableValues = new ArrayList<>();
             variableValues.add(document);
             variableValues.add(authentication);
@@ -118,7 +118,7 @@ public class RowLevelFilterSecurityAspect {
         public Object filterResult(Object queryResult) {
             Object result;
             if (queryResult instanceof Page) {
-                result = filterPage((Page<File>) queryResult);
+                result = filterPage((Page) queryResult);
             } else if (queryResult instanceof List) {
                 result = filterList((List<?>) queryResult);
             } else if (queryResult instanceof Optional) {
@@ -160,10 +160,10 @@ public class RowLevelFilterSecurityAspect {
             return result;
         }
 
-        private Object filterPage(Page<File> queryResult) {
-            Page<File> page = queryResult;
+        private Object filterPage(Page<? extends MetadataDocument> queryResult) {
+            Page<? extends MetadataDocument> page = queryResult;
             Pageable pageable = page.getPageable();
-            List<File> documentList = page.getContent();
+            List<? extends MetadataDocument> documentList = page.getContent();
             return filterDocumentList(pageable, documentList);
         }
     }

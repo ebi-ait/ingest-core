@@ -60,24 +60,15 @@ public class BuilderHelper<T, B> {
         T target = null;
         try {
             Method buildMethod = this.builderInstance.getClass().getMethod("build");
-            target = ((T) buildMethod.invoke(this.builderInstance));
+            target = (T) buildMethod.invoke(this.builderInstance);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
-        Map<String, Object> projectAsMap = asMap(target, excludeList);
-        return projectAsMap;
+        return new ObjectToMapConverter<T>().asMap(target, excludeList);
     }
 
-    public static <T> Map<String, Object> asMap(T target, List<String> excludeList) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Object> projectAsMap = objectMapper.convertValue(target,
-                new TypeReference<Map<String, Object>>() {
-                });
-        excludeList.forEach(projectAsMap::remove);
-        return projectAsMap;
-    }
 
     public static <T> Map<String, Object> asMap(T target) {
-        return asMap(target, List.of());
+        return new ObjectToMapConverter<T>().asMap(target);
     }
 }

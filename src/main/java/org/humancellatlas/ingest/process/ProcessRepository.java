@@ -4,6 +4,7 @@ import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.protocol.Protocol;
+import org.humancellatlas.ingest.security.RowLevelFilterSecurity;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,11 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @CrossOrigin
+@RowLevelFilterSecurity(expression ="#authentication.authorities.contains(" +
+        "new org.springframework.security.core.authority.SimpleGrantedAuthority(" +
+        "'ROLE_access_' +#filterObject.project.uuid.toString())) " +
+        "or #filterObject.project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN",
+        ignoreClasses = {Project.class})
 public interface ProcessRepository extends MongoRepository<Process, String> {
 
     @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
@@ -35,7 +41,7 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
 
     @RestResource(exported = false)
     Stream<Process> findByProjectsContaining(Project project);
-    
+
     Page<Process> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
     @RestResource(exported = false)
@@ -72,7 +78,7 @@ public interface ProcessRepository extends MongoRepository<Process, String> {
 
     @RestResource(exported = false)
     Optional<Process> findFirstByProtocolsContains(Protocol protocol);
-    
+
     long countBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
     long countBySubmissionEnvelopeAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState validationState);
