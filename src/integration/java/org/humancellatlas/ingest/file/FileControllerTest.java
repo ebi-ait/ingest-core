@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.humancellatlas.ingest.TestingHelper;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
@@ -9,6 +10,7 @@ import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.DataAccessTypes;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
@@ -25,6 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -43,6 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureDataMongo()
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
+@WithMockUser(username = "alice", roles = {"WRANGLER"})
 public class FileControllerTest {
     @MockBean
     ValidationStateChangeService validationStateChangeService;
@@ -93,6 +97,8 @@ public class FileControllerTest {
         submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
 
         project = new Project(null);
+        project.setUuid(Uuid.newUuid());
+        project.setDataAccess(DataAccessTypes.OPEN);
         project.setSubmissionEnvelope(submissionEnvelope);
         project.getSubmissionEnvelopes().add(submissionEnvelope);
         project = projectRepository.save(project);
@@ -127,6 +133,7 @@ public class FileControllerTest {
                 .content("{\"content\": {}}")
         ).andExpect(status().isAccepted());
 
+        TestingHelper.resetTestingSecurityContext();
         //then
         assertThat(fileRepository.findAll()).hasSize(1);
         assertThat(fileRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
@@ -149,6 +156,7 @@ public class FileControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"content\": {}}")
         ).andExpect(status().isAccepted());
+        TestingHelper.resetTestingSecurityContext();
 
         //then
         assertThat(fileRepository.findAll()).hasSize(1);
@@ -169,6 +177,7 @@ public class FileControllerTest {
                         .content(uriBuilder.build().toUriString() + "/processes/" + process2.getId() + '\n'
                                 + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
+        TestingHelper.resetTestingSecurityContext();
 
         verifyThatValidationStateChangedToDraftWhenGraphValid(file);
 
@@ -186,6 +195,7 @@ public class FileControllerTest {
                         .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()
                                 + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(file);
@@ -202,6 +212,7 @@ public class FileControllerTest {
                         .contentType("text/uri-list")
                         .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()))
                 .andExpect(status().isOk());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(file);
@@ -218,6 +229,7 @@ public class FileControllerTest {
                         .contentType("text/uri-list")
                         .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()))
                 .andExpect(status().isOk());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(file);
@@ -235,6 +247,7 @@ public class FileControllerTest {
                         .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()
                                 + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(file);
@@ -257,6 +270,7 @@ public class FileControllerTest {
                                 + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
 
+        TestingHelper.resetTestingSecurityContext();
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(file);
         File updatedFile = fileRepository.findById(file.getId()).get();
@@ -274,6 +288,7 @@ public class FileControllerTest {
         // when
         webApp.perform(delete("/files/{fileId}/derivedByProcesses/{processId}", file.getId(), process1.getId()))
                 .andExpect(status().isNoContent());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(file);
@@ -290,6 +305,7 @@ public class FileControllerTest {
         // when
         webApp.perform(delete("/files/{fileId}/inputToProcesses/{processId}", file.getId(), process1.getId()))
                 .andExpect(status().isNoContent());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(file);
@@ -319,6 +335,7 @@ public class FileControllerTest {
                         .contentType(APPLICATION_JSON_VALUE)
                         .content(patch))
                 .andReturn();
+        TestingHelper.resetTestingSecurityContext();
 
         //expect:
         MockHttpServletResponse response = result.getResponse();

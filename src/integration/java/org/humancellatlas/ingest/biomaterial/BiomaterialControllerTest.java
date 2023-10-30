@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.biomaterial;
 
+import org.humancellatlas.ingest.TestingHelper;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
@@ -7,6 +8,7 @@ import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.DataAccessTypes;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
@@ -22,6 +24,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -37,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureDataMongo()
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
+@WithMockUser(username = "alice", roles = {"WRANGLER"})
 public class BiomaterialControllerTest {
 
     @MockBean
@@ -79,12 +83,19 @@ public class BiomaterialControllerTest {
 
     @BeforeEach
     void setUp() {
-        submissionEnvelope = new SubmissionEnvelope();
+        //@WithMockUser did not affect spring repository calls in the test, so
+        // this
+//        Authentication auth = new UsernamePasswordAuthenticationToken("alice", "password", List.of(new SimpleGrantedAuthority("WRANGLER")));
+//        SecurityContextHolder.getContext().setAuthentication(auth);
+
+                submissionEnvelope = new SubmissionEnvelope();
         submissionEnvelope.setUuid(Uuid.newUuid());
         submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
         submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
 
         project = new Project(null);
+        project.setDataAccess(DataAccessTypes.OPEN);
+        project.setUuid(Uuid.newUuid());
         project.getSubmissionEnvelopes().add(submissionEnvelope);
         project = projectRepository.save(project);
 
@@ -119,6 +130,7 @@ public class BiomaterialControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"content\": {}}")
         ).andExpect(status().isAccepted());
+        TestingHelper.resetTestingSecurityContext();
 
         //then
         assertThat(biomaterialRepository.findAll()).hasSize(1);
@@ -145,6 +157,7 @@ public class BiomaterialControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"content\": {}}")
         ).andExpect(status().isAccepted());
+        TestingHelper.resetTestingSecurityContext();
 
         //then
         assertThat(biomaterialRepository.findAll()).hasSize(1);
@@ -164,6 +177,7 @@ public class BiomaterialControllerTest {
                 .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()
                         + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
@@ -178,6 +192,7 @@ public class BiomaterialControllerTest {
         // given
         biomaterial.addAsInputToProcess(process1);
         biomaterialRepository.save(biomaterial);
+        TestingHelper.resetTestingSecurityContext();
 
         // when
         webApp.perform(put("/biomaterials/{id}/inputToProcesses/", biomaterial.getId())
@@ -185,6 +200,7 @@ public class BiomaterialControllerTest {
                 .content(uriBuilder.build().toUriString() + "/processes/" + process2.getId()
                         + '\n' + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
@@ -202,6 +218,7 @@ public class BiomaterialControllerTest {
                 .contentType("text/uri-list")
                 .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()))
                 .andExpect(status().isOk());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
@@ -219,6 +236,7 @@ public class BiomaterialControllerTest {
                 .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()
                         + '\n' + uriBuilder.build().toUriString() + "/processes/" + process2.getId()))
                 .andExpect(status().isOk());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
@@ -240,6 +258,7 @@ public class BiomaterialControllerTest {
                 .content(uriBuilder.build().toUriString() + "/processes/" + process2.getId()
                         + '\n' + uriBuilder.build().toUriString() + "/processes/" + process3.getId()))
                 .andExpect(status().isOk());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
@@ -250,12 +269,15 @@ public class BiomaterialControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "alice", roles = {"WRANGLER"})
     public void testLinkBiomaterialAsDerivedByProcessesUsingPostMethodWithOneProcessInPayload() throws Exception {
         // when
         webApp.perform(post("/biomaterials/{id}/derivedByProcesses/", biomaterial.getId())
                 .contentType("text/uri-list")
                 .content(uriBuilder.build().toUriString() + "/processes/" + process1.getId()))
                 .andExpect(status().isOk());
+
+        TestingHelper.resetTestingSecurityContext();
 
         verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
 
@@ -275,6 +297,7 @@ public class BiomaterialControllerTest {
         // when
         webApp.perform(delete("/biomaterials/{id}/inputToProcesses/{processId}", biomaterial.getId(), process1.getId()))
                 .andExpect(status().isNoContent());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
@@ -292,6 +315,7 @@ public class BiomaterialControllerTest {
         // when
         webApp.perform(delete("/biomaterials/{id}/derivedByProcesses/{processId}", biomaterial.getId(), process1.getId()))
                 .andExpect(status().isNoContent());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(biomaterial);
@@ -305,4 +329,5 @@ public class BiomaterialControllerTest {
                 .changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT)
         );
     }
+
 }

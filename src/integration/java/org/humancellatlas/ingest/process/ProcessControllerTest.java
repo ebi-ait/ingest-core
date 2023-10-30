@@ -1,10 +1,12 @@
 package org.humancellatlas.ingest.process;
 
+import org.humancellatlas.ingest.TestingHelper;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
+import org.humancellatlas.ingest.project.DataAccessTypes;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
@@ -22,6 +24,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -39,6 +42,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureDataMongo()
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
+@WithMockUser(username = "alice", roles = {"WRANGLER"})
+
 class ProcessControllerTest {
     @MockBean
     ValidationStateChangeService validationStateChangeService;
@@ -90,6 +95,7 @@ class ProcessControllerTest {
         protocol3 = protocolRepository.save(new Protocol(null));
 
         project = new Project(null);
+        project.setDataAccess(DataAccessTypes.OPEN);
         project.setSubmissionEnvelope(submissionEnvelope);
         project.getSubmissionEnvelopes().add(submissionEnvelope);
         project = projectRepository.save(project);
@@ -120,6 +126,7 @@ class ProcessControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"content\": {}}")
         ).andExpect(status().isAccepted());
+        TestingHelper.resetTestingSecurityContext();
 
         //then
         assertThat(processRepository.findAll()).hasSize(1);
@@ -145,6 +152,7 @@ class ProcessControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"content\": {}}")
         ).andExpect(status().isAccepted());
+        TestingHelper.resetTestingSecurityContext();
 
         //then
         assertThat(processRepository.findAll()).hasSize(1);
@@ -168,6 +176,7 @@ class ProcessControllerTest {
                 .content(uriBuilder.build().toUriString() + "/protocols/" + protocol2.getId()
                     + '\n' + uriBuilder.build().toUriString() + "/protocols/" + protocol3.getId()))
             .andExpect(status().isOk());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(process);
@@ -185,6 +194,7 @@ class ProcessControllerTest {
                 .content(uriBuilder.build().toUriString() + "/protocols/" + protocol1.getId()
                     + '\n' + uriBuilder.build().toUriString() + "/protocols/" + protocol2.getId()))
             .andExpect(status().isOk());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(process);
@@ -201,6 +211,7 @@ class ProcessControllerTest {
                 .contentType("text/uri-list")
                 .content(uriBuilder.build().toUriString() + "/protocols/" + protocol1.getId()))
             .andExpect(status().isOk());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(process);
@@ -219,6 +230,7 @@ class ProcessControllerTest {
         // when
         webApp.perform(delete("/processes/{processId}/protocols/{protocolId}", process.getId(), protocol1.getId()))
             .andExpect(status().isNoContent());
+        TestingHelper.resetTestingSecurityContext();
 
         // then
         verifyThatValidationStateChangedToDraftWhenGraphValid(process);
