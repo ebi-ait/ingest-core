@@ -23,6 +23,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.security.test.context.support.WithMockUser;
 import wiremock.com.fasterxml.jackson.databind.util.Named;
 
 import java.util.stream.Stream;
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.reset;
 
 @SpringBootTest
 @TestInstance(PER_CLASS)
+@WithMockUser
 class RowLevelFilterSecurityAspectTest {
     @Autowired FileRepository fileRepository;
     @Autowired BiomaterialRepository biomaterialRepository;
@@ -66,7 +68,7 @@ class RowLevelFilterSecurityAspectTest {
 
 
     @ParameterizedTest(name = "{index} {1}")
-    @MethodSource("repositoryBeans")
+     @MethodSource("repositoryBeans")
     public void testAdviceOnRepositoryInheritedMethod(MongoRepository repository, String metadataType) throws Throwable {
         repository.findAll();
 

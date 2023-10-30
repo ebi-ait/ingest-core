@@ -6,10 +6,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.file.File;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -17,7 +14,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -34,9 +34,9 @@ public class RowLevelFilterSecurityAspect {
     public void repositoryInheritedFindFunctions(){}
 
     @Pointcut("target(org.humancellatlas.ingest.file.FileRepository) " +
-              "|| target(org.humancellatlas.ingest.biomaterial.BiomaterialRepository)" +
-              "|| target(org.humancellatlas.ingest.process.ProcessRepository)" +
-              "|| target(org.humancellatlas.ingest.protocol.ProtocolRepository)")
+              "|| target(org.humancellatlas.ingest.biomaterial.BiomaterialRepository) " +
+              "|| target(org.humancellatlas.ingest.process.ProcessRepository) " +
+              "|| target(org.humancellatlas.ingest.protocol.ProtocolRepository) ")
     public void ingestRepositoriesAreTheTarget(){}
 
 
@@ -47,7 +47,9 @@ public class RowLevelFilterSecurityAspect {
         try {
             return new RowlevelSecurityAdviceHelper(joinPoint).filterResult(queryResult);
         } catch (Exception e) {
-            throw new RuntimeException(String.format("problem during advice for %s", joinPoint.getSignature().getName()), e);
+            throw new RuntimeException(String.format("problem during advice for %s: %s",
+                    joinPoint.getSignature().getName(),
+                    e.getMessage()), e);
         }
     }
 
@@ -69,7 +71,8 @@ public class RowLevelFilterSecurityAspect {
                     .orElseGet(()->
                             readAnnotationFromSuperInterface(joinPoint)
                     );
-            this.authentication = SecurityContextHolder.getContext().getAuthentication();
+            this.authentication = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                    .orElseThrow(()->new AccessDeniedException("access denied"));
         }
 
         private RowLevelFilterSecurity readAnnotationFromSuperInterface(ProceedingJoinPoint joinPoint) {
@@ -81,15 +84,13 @@ public class RowLevelFilterSecurityAspect {
                     .get();
         }
 
-        private Object filterDocumentList(Pageable pageable, List<? extends MetadataDocument> documentList) {
+        private Object filterDocumentList( List<? extends MetadataDocument> documentList) {
             Method method = this.method;
             List<? extends MetadataDocument> retainedDocuments = documentList
                     .stream()
                     .filter(this::evaluateDocumentExpression)
                     .collect(Collectors.toList());
-            int start = (int) pageable.getOffset();
-            int end = Math.min(start + pageable.getPageSize(), retainedDocuments.size());
-            return new PageImpl<>(retainedDocuments.subList(start, end), pageable, retainedDocuments.size());
+            return retainedDocuments;
         }
 
         private Boolean evaluateDocumentExpression(MetadataDocument document) {
@@ -136,7 +137,7 @@ public class RowLevelFilterSecurityAspect {
                 return queryResult;
             }
             List<String> variableNames = buildVariableNames(method);
-            List<Object> variableValues = buildVariableValues((File)queryResult.get(), authentication);
+            List<Object> variableValues = buildVariableValues((MetadataDocument) queryResult.get(), authentication);
             if (spelHelper.parseExpression(variableNames, variableValues, rowLevelFilterSecurity.expression())){
                 return queryResult;
             }
@@ -154,8 +155,7 @@ public class RowLevelFilterSecurityAspect {
             if (documentList.size() == 0) {
                 result = documentList;
             } else {
-                Pageable pageable = PageRequest.of(0, documentList.size());
-                result = filterDocumentList(pageable, (List<File>) documentList);
+                result = filterDocumentList((List<MetadataDocument>) documentList);
             }
             return result;
         }
@@ -164,7 +164,7 @@ public class RowLevelFilterSecurityAspect {
             Page<? extends MetadataDocument> page = queryResult;
             Pageable pageable = page.getPageable();
             List<? extends MetadataDocument> documentList = page.getContent();
-            return filterDocumentList(pageable, documentList);
+            return filterDocumentList(documentList);
         }
     }
 }

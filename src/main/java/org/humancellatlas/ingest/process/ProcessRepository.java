@@ -21,10 +21,18 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @CrossOrigin
-@RowLevelFilterSecurity(expression ="#authentication.authorities.contains(" +
-        "new org.springframework.security.core.authority.SimpleGrantedAuthority(" +
-        "'ROLE_access_' +#filterObject.project.uuid.toString())) " +
-        "or #filterObject.project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN",
+@RowLevelFilterSecurity(
+        expression =
+                "(#filterObject.project != null)" +
+                        "? "+
+                        "   (" +
+                        "#authentication.authorities.contains(" +
+                        "         new org.springframework.security.core.authority.SimpleGrantedAuthority(" +
+                        "          'ROLE_access_' +#filterObject.project.uuid.toString())) " +
+                        "or " +
+                        "#filterObject.project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN" +
+                        "   )" +
+                        ":true",
         ignoreClasses = {Project.class})
 public interface ProcessRepository extends MongoRepository<Process, String> {
 

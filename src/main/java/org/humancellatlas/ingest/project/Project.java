@@ -57,7 +57,7 @@ public class Project extends MetadataDocument {
     @Setter
     @JsonSerialize(using= DataAccessTypesJsonSerializer.class)
     @JsonDeserialize(using= DataAccessTypesJsonDeserializer.class)
-    private Object dataAccess;
+    private DataAccessTypes dataAccess;
 
     @Setter
     private Object identifyingOrganisms;
