@@ -40,12 +40,14 @@ public class RowLevelFilterSecurityAspect {
     public void ingestRepositoriesAreTheTarget(){}
 
 
-    @Around("ingestRepositoriesAreTheTarget() " +
-            "&& repositoryInheritedFindFunctions()")
+    @Around("(ingestRepositoriesAreTheTarget() " +
+            "&& repositoryInheritedFindFunctions())"+
+            "|| repositoryFindFunctions()")
     public Object applyRowLevelSecurity(ProceedingJoinPoint joinPoint) throws Throwable {
         Object queryResult = joinPoint.proceed();
         try {
-            return new RowlevelSecurityAdviceHelper(joinPoint).filterResult(queryResult);
+            return new RowlevelSecurityAdviceHelper(joinPoint)
+                    .filterResult(queryResult);
         } catch (Exception e) {
             throw new RuntimeException(String.format("problem during advice for %s: %s",
                     joinPoint.getSignature().getName(),
@@ -85,7 +87,6 @@ public class RowLevelFilterSecurityAspect {
         }
 
         private Object filterDocumentList( List<? extends MetadataDocument> documentList) {
-            Method method = this.method;
             List<? extends MetadataDocument> retainedDocuments = documentList
                     .stream()
                     .filter(this::evaluateDocumentExpression)

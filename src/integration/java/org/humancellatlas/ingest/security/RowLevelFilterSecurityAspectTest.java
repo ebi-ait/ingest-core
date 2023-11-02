@@ -68,7 +68,7 @@ class RowLevelFilterSecurityAspectTest {
 
 
     @ParameterizedTest(name = "{index} {1}")
-     @MethodSource("repositoryBeans")
+    @MethodSource("repositoryBeans")
     public void testAdviceOnRepositoryInheritedMethod(MongoRepository repository, String metadataType) throws Throwable {
         repository.findAll();
 
