@@ -29,7 +29,7 @@ public class ProjectQueryBuilder {
         addInCriterionForAttribute(criteriaList, "projectNetworks", searchFilter.getProjectNetworks());
 
         if(searchFilter.getDataAccess() != null){
-            addIsCriterionForAttribute(criteriaList, "dataAccess.type", searchFilter.getDataAccess().getLabel());
+            addIsCriterionForAttribute(criteriaList, "content.dataAccess.type", searchFilter.getDataAccess().getLabel());
         }
 
         Optional.ofNullable(searchFilter.getHasOfficialHcaPublication())

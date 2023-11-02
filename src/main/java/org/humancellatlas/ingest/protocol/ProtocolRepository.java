@@ -32,9 +32,9 @@ import java.util.stream.Stream;
                         "   (" +
                         "#authentication.authorities.contains(" +
                         "         new org.springframework.security.core.authority.SimpleGrantedAuthority(" +
-                        "          'ROLE_access_' +#filterObject.project.uuid.toString())) " +
+                        "          'ROLE_access_' +#filterObject.project.uuid?.toString())) " +
                         "or " +
-                        "#filterObject.project.dataAccess eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN" +
+                        "#filterObject.project.content['dataAccess']['type'] eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN" +
                         "   )" +
                         ":true",
         ignoreClasses = {Project.class})

@@ -55,9 +55,8 @@ public class Project extends MetadataDocument {
     private Integer cellCount;
 
     @Setter
-    @JsonSerialize(using= DataAccessTypesJsonSerializer.class)
-    @JsonDeserialize(using= DataAccessTypesJsonDeserializer.class)
-    private DataAccessTypes dataAccess;
+    @Deprecated
+    private DataAccess dataAccess;
 
     @Setter
     private Object identifyingOrganisms;

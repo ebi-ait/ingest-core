@@ -21,10 +21,10 @@ public class DataAccessTypesJsonSerializer extends StdSerializer<DataAccessTypes
 
     @Override
     public void serialize(DataAccessTypes value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        gen.writeStartObject();
-        gen.writeFieldName("type");
+//        gen.writeStartObject();
+//        gen.writeFieldName("type");
         gen.writeString(value.getLabel());
-        gen.writeEndObject();
+//        gen.writeEndObject();
     }
 }
 

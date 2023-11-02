@@ -13,8 +13,7 @@ import java.util.Map;
  */
 public class ProjectBuilder {
     public final BuilderHelper builderHelper = new BuilderHelper<Project, ProjectBuilder>(this);
-    Object dataAccess;
-    Map<String, Map> content = new HashMap<String, Map>();
+    Map<String, Object> content = new HashMap<>();
 
     Uuid uuid = Uuid.newUuid();
 
@@ -23,12 +22,15 @@ public class ProjectBuilder {
     }
 
     public ProjectBuilder withManagedAccess() {
-        dataAccess = DataAccessTypes.MANAGED;
-        return this;
+        return withDataAccess(new DataAccess(DataAccessTypes.MANAGED));
     }
 
     public ProjectBuilder withOpenAccess() {
-        dataAccess = DataAccessTypes.OPEN;
+        return withDataAccess(new DataAccess(DataAccessTypes.OPEN));
+    }
+
+    public ProjectBuilder withDataAccess(DataAccess dataAccess) {
+        content.put("dataAccess", dataAccess);
         return this;
     }
 
@@ -39,7 +41,7 @@ public class ProjectBuilder {
 
     public ProjectBuilder withShortName(String shortName) {
         Map<String, Object> projectCore =
-                content.computeIfAbsent("project_core", k -> new HashMap<String, Object>());
+                (Map<String, Object>) content.computeIfAbsent("project_core", k -> new HashMap<String, Object>());
         projectCore.put("project_short_name", shortName);
         return this;
     }

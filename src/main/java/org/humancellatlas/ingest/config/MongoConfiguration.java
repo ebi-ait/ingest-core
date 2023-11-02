@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.config;
 
 import org.humancellatlas.ingest.project.DataAccessTypesReadConverter;
+import org.humancellatlas.ingest.project.DataAccessTypesWriteConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.convert.CustomConversions;
@@ -20,7 +21,8 @@ public class MongoConfiguration {
 
         return new MongoCustomConversions(
                 Arrays.asList(
-                        new DataAccessTypesReadConverter()
+                        new DataAccessTypesReadConverter(),
+                        new DataAccessTypesWriteConverter()
                 )
         );
     }

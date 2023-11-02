@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.data.MapEntry;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
-import org.humancellatlas.ingest.project.DataAccessTypes;
-import org.humancellatlas.ingest.project.Project;
-import org.humancellatlas.ingest.project.ProjectEventHandler;
-import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.project.*;
 import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.jetbrains.annotations.NotNull;
@@ -181,7 +178,8 @@ class ProjectControllerTest {
             var content = new HashMap<String, Object>();
             content.put("description", "test kw1");
             Project project = new Project(content);
-            project.setDataAccess(DataAccessTypes.OPEN);
+            ((Map<String, Object>)project.getContent()).put("dataAccess", new DataAccess(DataAccessTypes.OPEN));
+
             return project;
         }
 

@@ -8,6 +8,7 @@ import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.project.DataAccess;
 import org.humancellatlas.ingest.project.DataAccessTypes;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
@@ -30,6 +31,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
@@ -93,8 +96,8 @@ public class BiomaterialControllerTest {
         submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
         submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
 
-        project = new Project(null);
-        project.setDataAccess(DataAccessTypes.OPEN);
+        project = new Project(new HashMap<>());
+        ((Map<String, Object>)project.getContent()).put("dataAccess", new DataAccess(DataAccessTypes.OPEN));
         project.setUuid(Uuid.newUuid());
         project.getSubmissionEnvelopes().add(submissionEnvelope);
         project = projectRepository.save(project);

@@ -5,6 +5,7 @@ import org.humancellatlas.ingest.TestingHelper;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.messaging.MessageRouter;
+import org.humancellatlas.ingest.project.DataAccess;
 import org.humancellatlas.ingest.project.DataAccessTypes;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectRepository;
@@ -24,6 +25,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -69,10 +73,11 @@ public class ProtocolControllerTest {
         submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
         submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
 
-        project = new Project(null);
+        project = new Project(new HashMap<String, Object>());
         project.setSubmissionEnvelope(submissionEnvelope);
         project.getSubmissionEnvelopes().add(submissionEnvelope);
-        project.setDataAccess(DataAccessTypes.OPEN);
+        ((Map<String, Object>)project.getContent()).put("dataAccess", new DataAccess(DataAccessTypes.OPEN));
+
         project = projectRepository.save(project);
 
         uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();

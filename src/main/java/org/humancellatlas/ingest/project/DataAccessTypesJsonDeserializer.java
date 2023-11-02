@@ -21,8 +21,8 @@ public class DataAccessTypesJsonDeserializer extends StdDeserializer<DataAccessT
 
     @Override
     public DataAccessTypes deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-        p.nextToken();
-        p.nextToken();
+//        p.nextToken();
+//        p.nextToken();
         String source = p.getText();
         return DataAccessTypes.fromLabel(source);
     }
