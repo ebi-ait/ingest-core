@@ -124,7 +124,7 @@ public class ManagedAccessTest {
     public void testDataAccessTypeFieldDeserialization() {
         projectRepository.findByUuid(new Uuid(makeUuid("a")))
                 .forEach(p -> Assertions.assertThat(p.getDataAccess())
-                        .isEqualTo(DataAccessTypes.MANAGED));
+                        .isEqualTo(new DataAccess(DataAccessTypes.MANAGED)));
     }
 
 
