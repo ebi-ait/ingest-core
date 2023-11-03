@@ -50,14 +50,14 @@ public class SecurityTest {
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
         @WithMockUser
-        public void autorizedApiAccessWithTrailingSlashIsPermitted(String metadataTypePlural) throws Exception {
+        public void apiAccessWithTrailingSlashIsPermitted(String metadataTypePlural) throws Exception {
             checkGetUrlIsAuthorized("/" + metadataTypePlural + "/");
         }
 
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
         @WithMockUser
-        public void unautorizedApiAccessNoTrailingSlashIsPermitted(String metadataTypePlural) throws Exception {
+        public void apiAccessNoTrailingSlashIsPermitted(String metadataTypePlural) throws Exception {
             checkGetUrlIsAuthorized("/" + metadataTypePlural);
         }
 
@@ -67,14 +67,14 @@ public class SecurityTest {
 
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
-        public void unautorizedApiAccessWithTrailingSlashIsBlocked(String metadataTypePlural) throws Exception {
+        public void apiAccessWithTrailingSlashIsBlocked(String metadataTypePlural) throws Exception {
             checkGetUrlIsUnauthorized("/" + metadataTypePlural + "/");
         }
 
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
 
-        public void unautorizedApiAccessNoTrailingSlashIsBlocked(String metadataTypePlural) throws Exception {
+        public void apiAccessNoTrailingSlashIsBlocked(String metadataTypePlural) throws Exception {
             checkGetUrlIsUnauthorized("/" + metadataTypePlural);
         }
     }
