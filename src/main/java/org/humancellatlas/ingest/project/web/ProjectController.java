@@ -151,7 +151,7 @@ public class ProjectController {
     }
 
     @PreAuthorize("hasRole('access_'+#project.uuid)"
-            + "or #project['dataAccess']['type'] eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN")
+            + "or #project['content']['dataAccess']['type'] eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label")
     @GetMapping(path = "/projects/{id}/submissionEnvelopes")
     ResponseEntity<PagedResources<Resource<SubmissionEnvelope>>> getProjectSubmissionEnvelopes(
             @PathVariable("id") Project project, Pageable pageable,
@@ -162,7 +162,7 @@ public class ProjectController {
     }
 
     @PreAuthorize("hasRole('access_'+#project.uuid)"
-            + "or #project['dataAccess']['type'] eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN")
+            + "or #project['content']['dataAccess']['type'] eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label")
     @RequestMapping(path = "/projects/{project_id}/biomaterials", method = RequestMethod.GET)
     ResponseEntity<?> getBiomaterials(@PathVariable("project_id") Project project,
                                       Pageable pageable,
@@ -172,7 +172,7 @@ public class ProjectController {
     }
 
     @PreAuthorize("hasRole('access_'+#project.uuid)"
-            + "or #project['dataAccess']['type'] eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN")
+            + "or #project['content']['dataAccess']['type'] eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label")
     @RequestMapping(path = "/projects/{project_id}/processes", method = RequestMethod.GET)
     ResponseEntity<?> getProcesses(@PathVariable("project_id") Project project,
                                    Pageable pageable,
@@ -182,7 +182,8 @@ public class ProjectController {
     }
 
     @PreAuthorize("hasRole('access_'+#project.uuid)"
-            + "or #project['dataAccess']['type'] eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN")
+            + "or #project['content']['dataAccess']['type'] " +
+            "     eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label")
     @RequestMapping(path = "/projects/{project_id}/protocols", method = RequestMethod.GET)
     ResponseEntity<?> getProtocols(@PathVariable("project_id") Project project,
                                    Pageable pageable,
@@ -192,7 +193,8 @@ public class ProjectController {
     }
 
     @PreAuthorize("hasRole('access_'+#project.uuid) "
-            + "or #project['dataAccess']['type'] eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN")
+            + "or #project['content']['dataAccess']['type'] "
+            + "    eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label")
     @RequestMapping(path = "/projects/{project_id}/files", method = RequestMethod.GET)
     ResponseEntity<?> getFiles(@PathVariable("project_id") Project project,
                                Pageable pageable,
