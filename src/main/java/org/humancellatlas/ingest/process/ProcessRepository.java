@@ -26,11 +26,12 @@ import java.util.stream.Stream;
                 "(#filterObject.project != null)" +
                         "? "+
                         "   (" +
-                        "#authentication.authorities.contains(" +
+                        "      #authentication.authorities.contains(" +
                         "         new org.springframework.security.core.authority.SimpleGrantedAuthority(" +
-                        "          'ROLE_access_' +#filterObject.project.uuid.toString())) " +
-                        "or " +
-                        "#filterObject.project.content['dataAccess']['type'] eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN" +
+                        "          'ROLE_access_' +#filterObject.project.uuid?.toString())) " +
+                        "     or " +
+                        "      #filterObject.project.content['dataAccess']['type'] " +
+                        "         eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label" +
                         "   )" +
                         ":true",
         ignoreClasses = {Project.class})

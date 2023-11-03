@@ -7,6 +7,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -40,9 +41,10 @@ public class RowLevelFilterSecurityAspect {
     public void ingestRepositoriesAreTheTarget(){}
 
 
-    @Around("(ingestRepositoriesAreTheTarget() " +
-            "&& repositoryInheritedFindFunctions())"+
-            "|| repositoryFindFunctions()")
+    @Around(
+            "(ingestRepositoriesAreTheTarget() " +
+            "&& repositoryInheritedFindFunctions())"
+    )
     public Object applyRowLevelSecurity(ProceedingJoinPoint joinPoint) throws Throwable {
         Object queryResult = joinPoint.proceed();
         try {
@@ -165,7 +167,8 @@ public class RowLevelFilterSecurityAspect {
             Page<? extends MetadataDocument> page = queryResult;
             Pageable pageable = page.getPageable();
             List<? extends MetadataDocument> documentList = page.getContent();
-            return filterDocumentList(documentList);
+            List filteredDocumentList = (List) filterDocumentList(documentList);
+            return new PageImpl<>(filteredDocumentList, pageable, filteredDocumentList.size());
         }
     }
 }

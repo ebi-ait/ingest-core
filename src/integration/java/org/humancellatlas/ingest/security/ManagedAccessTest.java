@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.hamcrest.Matchers.hasItem;
+import static org.humancellatlas.ingest.TestingHelper.resetTestingSecurityContext;
 import static org.humancellatlas.ingest.security.TestDataHelper.makeUuid;
 import static org.humancellatlas.ingest.security.TestDataHelper.mapAsJsonString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -79,7 +81,7 @@ public class ManagedAccessTest {
     @WithMockUser(roles = "WRANGLER")
     public void setupTestData() throws Exception {
 
-        // dataset A - managed access
+        // datasets A, B - managed access
         List<Map<String, Object>> projects = TestDataHelper.createManagedAccessProjects();
         // dataset C - open access
         projects.add(TestDataHelper.createOpenAccessProjects());
@@ -92,6 +94,7 @@ public class ManagedAccessTest {
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(p))
                                 .andExpect(status().isOk());
+                        resetTestingSecurityContext();
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -156,13 +159,13 @@ public class ManagedAccessTest {
                 username = "alice",
                 roles = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
         public void userOnProjectAList_CanSeeOpenProjectMetadata(String metadataTypePlural) throws Exception {
-            String projectMetadataUrl = projectRepository.findByUuid(new Uuid(makeUuid("c")))
+            String openAccessProjectMetadataUrl = projectRepository.findByUuid(new Uuid(makeUuid("c")))
                     .findFirst()
                     .map(Project::getId)
                     .map(projectId -> String.format("/projects/%s/%s", projectId, metadataTypePlural))
                     .get();
 
-            webApp.perform(get(projectMetadataUrl).contentType(MediaType.APPLICATION_JSON))
+            webApp.perform(get(openAccessProjectMetadataUrl).contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());
         }
 
@@ -226,6 +229,7 @@ public class ManagedAccessTest {
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .content(mapAsJsonString(documentAsMap)))
                             .andExpect(status().isAccepted());
+                    resetTestingSecurityContext();
                 } catch (Exception e) {
                     throw new RuntimeException("problem crating metadata document " + metadataType.getSimpleName(), e);
                 }
@@ -242,7 +246,7 @@ public class ManagedAccessTest {
     @NotNull
     private static void setDocumentProperties(String uuidString, MetadataDocument metadataDocument) {
         String lowerCaseMetadataType = metadataDocument.getType().toString().toLowerCase();
-        Map<String, Map<String, Map<String, String>>> content = Map.of("content", Map.of(lowerCaseMetadataType + "_core", Map.of(lowerCaseMetadataType + "_name", lowerCaseMetadataType + " in project " + uuidString)));
+        Map<String, Map<String, String>> content = Map.of(lowerCaseMetadataType + "_core", Map.of(lowerCaseMetadataType + "_name", lowerCaseMetadataType + " in project " + uuidString));
         metadataDocument.setContent(content);
         metadataDocument.setUuid(Uuid.newUuid());
     }
