@@ -21,8 +21,7 @@ public class ObjectToMapConverter<T> {
         if (objectMapper == null) {
             objectMapper = new ObjectMapper();
         }
-        Map<String, Object> projectAsMap = objectMapper.convertValue(target,
-                new TypeReference<Map<String, Object>>() {});
+        Map<String, Object> projectAsMap = objectMapper.convertValue(target, new TypeReference<>() {});
         excludeList.forEach(projectAsMap::remove);
         return projectAsMap;
     }

@@ -1,15 +1,13 @@
 package org.humancellatlas.ingest.process;
 
+import lombok.NonNull;
 import org.humancellatlas.ingest.TestingHelper;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
-import org.humancellatlas.ingest.project.DataAccess;
-import org.humancellatlas.ingest.project.DataAccessTypes;
-import org.humancellatlas.ingest.project.Project;
-import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.project.*;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
@@ -72,6 +70,8 @@ class ProcessControllerTest {
     @Autowired
     private SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
+    @Autowired
+    private ProjectService projectService;
     Protocol protocol1;
 
     Protocol protocol2;
@@ -98,7 +98,8 @@ class ProcessControllerTest {
         protocol3 = protocolRepository.save(new Protocol(null));
 
         project = new Project(new HashMap<>());
-        ((Map<String, Object>)project.getContent()).put("dataAccess", new DataAccess(DataAccessTypes.OPEN));
+        ((Map<String, Object>)project.getContent()).put("dataAccess", new ObjectToMapConverter().asMap(new DataAccess(DataAccessTypes.OPEN)));
+        projectService.addProjectToSubmissionEnvelope(submissionEnvelope, project);
 
         project.setSubmissionEnvelope(submissionEnvelope);
         project.getSubmissionEnvelopes().add(submissionEnvelope);
@@ -106,6 +107,8 @@ class ProcessControllerTest {
 
         process = new Process(null);
         process.setSubmissionEnvelope(submissionEnvelope);
+        process.setProject(project);
+
         process = processRepository.save(process);
 
         uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();

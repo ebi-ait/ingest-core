@@ -100,7 +100,6 @@ public class ProjectController {
                 "accessionDate",
                 "cellCount",
                 "content",
-                "dataAccess",
                 "identifyingOrganisms",
                 "isInCatalogue",
                 "organ",

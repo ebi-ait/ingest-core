@@ -126,8 +126,9 @@ public class ManagedAccessTest {
             roles = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
     public void testDataAccessTypeFieldDeserialization() {
         projectRepository.findByUuid(new Uuid(makeUuid("a")))
-                .forEach(p -> Assertions.assertThat(p.getDataAccess())
-                        .isEqualTo(new DataAccess(DataAccessTypes.MANAGED)));
+                .forEach(p -> Assertions.assertThat(p.getContent())
+                        .extracting("dataAccess")
+                        .containsExactly(new ObjectToMapConverter().asMap(new DataAccess(DataAccessTypes.MANAGED))));
     }
 
 

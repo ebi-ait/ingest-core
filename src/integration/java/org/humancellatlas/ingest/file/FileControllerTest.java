@@ -10,10 +10,7 @@ import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
 import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
-import org.humancellatlas.ingest.project.DataAccess;
-import org.humancellatlas.ingest.project.DataAccessTypes;
-import org.humancellatlas.ingest.project.Project;
-import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.project.*;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -101,7 +98,7 @@ public class FileControllerTest {
 
         project = new Project(new HashMap<>());
         project.setUuid(Uuid.newUuid());
-        ((Map<String, Object>)project.getContent()).put("dataAccess", new DataAccess(DataAccessTypes.OPEN));
+        ((Map<String, Object>)project.getContent()).put("dataAccess", new ObjectToMapConverter().asMap(new DataAccess(DataAccessTypes.OPEN)));
 
         project.setSubmissionEnvelope(submissionEnvelope);
         project.getSubmissionEnvelopes().add(submissionEnvelope);

@@ -1,5 +1,6 @@
 package org.humancellatlas.ingest.project;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.humancellatlas.ingest.core.Uuid;
 
 import java.util.HashMap;
@@ -30,7 +31,7 @@ public class ProjectBuilder {
     }
 
     public ProjectBuilder withDataAccess(DataAccess dataAccess) {
-        content.put("dataAccess", dataAccess);
+        content.put("dataAccess", new ObjectToMapConverter().asMap(dataAccess));
         return this;
     }
 
