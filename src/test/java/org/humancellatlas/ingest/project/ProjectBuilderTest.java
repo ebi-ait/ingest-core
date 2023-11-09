@@ -21,7 +21,8 @@ public class ProjectBuilderTest {
                 .build();
 
         Project fromCtor = new Project(new HashMap<>());
-        ((Map<String, Object>)fromCtor.getContent()).put("dataAccess", new DataAccess(DataAccessTypes.MANAGED));
+        ((Map<String, Object>)fromCtor.getContent()).put("dataAccess",
+                new ObjectToMapConverter().asMap(new DataAccess(DataAccessTypes.MANAGED)));
 
         assertThat(fromBuilder.getContentLastModified())
                 .isCloseTo(fromCtor.getContentLastModified(), within(1, ChronoUnit.SECONDS));

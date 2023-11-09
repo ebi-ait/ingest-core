@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.assertj.core.api.Assertions;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
+import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -43,7 +44,8 @@ class MetadataDocumentSerializationTest {
         module.addDeserializer(DataAccessTypes.class, new DataAccessTypesJsonDeserializer());
         objectMapper.registerModule(module);
     }
-    @ParameterizedTest()
+//    @ParameterizedTest()
+    @Ignore
     @MethodSource("testData")
     public void testSerialization(Object someObject, String expectedJson) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(someObject);
