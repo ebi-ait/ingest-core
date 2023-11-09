@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -50,6 +51,9 @@ public class RowLevelFilterSecurityAspect {
         try {
             return new RowlevelSecurityAdviceHelper(joinPoint)
                     .filterResult(queryResult);
+        } catch (AccessDeniedException
+                 | AuthenticationCredentialsNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException(String.format("problem during advice for %s: %s",
                     joinPoint.getSignature().getName(),
@@ -76,7 +80,7 @@ public class RowLevelFilterSecurityAspect {
                             readAnnotationFromSuperInterface(joinPoint)
                     );
             this.authentication = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
-                    .orElseThrow(()->new AccessDeniedException("access denied"));
+                    .orElseThrow(()->new AuthenticationCredentialsNotFoundException("unauthorized"));
         }
 
         private RowLevelFilterSecurity readAnnotationFromSuperInterface(ProceedingJoinPoint joinPoint) {
@@ -127,7 +131,6 @@ public class RowLevelFilterSecurityAspect {
                 result = filterList((List<?>) queryResult);
             } else if (queryResult instanceof Optional) {
                 result = filterOptional((Optional<?>) queryResult);
-
             } else {
                 throw new IllegalArgumentException("only supports filtering results of type Page, List, Optional. Type given: " + queryResult.getClass());
             }

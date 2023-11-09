@@ -12,6 +12,7 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -135,6 +136,13 @@ public class GlobalStateExceptionHandler {
     public @ResponseBody
     ExceptionInfo handleAccessDeniedException(HttpServletRequest request, Exception e) {
         getLog().info("access denied {}", request.getRequestURL());
+        return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
+    }
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
+    public @ResponseBody
+    ExceptionInfo handleAccessCredentialsNotFoundException(HttpServletRequest request, Exception e) {
+        getLog().info("unauthorized {}", request.getRequestURL());
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 }
