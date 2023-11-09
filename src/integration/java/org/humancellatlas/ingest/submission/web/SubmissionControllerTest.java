@@ -28,6 +28,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -174,6 +175,7 @@ public class SubmissionControllerTest {
         "/submissionEnvelopes/{id}/projects",
         "/submissionEnvelopes/{id}/relatedProjects"
     })
+    @WithMockUser
     public void testProjectsAreReturnedWhenTheyIncludeTheSubmissionInTheirEnvelopes(String endpoint) throws Exception {
         webApp.perform(
             // when

@@ -2,6 +2,8 @@ package org.humancellatlas.ingest.project;
 
 import org.humancellatlas.ingest.audit.AuditEntryService;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
+import org.humancellatlas.ingest.config.ConvertersConfiguration;
+import org.humancellatlas.ingest.config.MongoConfiguration;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
@@ -14,7 +16,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +26,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.TextIndexDefinition;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -33,6 +38,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
+@WithMockUser(username = "alice", roles = {"WRANGLER"})
+@Import(ConvertersConfiguration.class)
 class ProjectFilterTest {
 
     // class under test
@@ -258,10 +265,12 @@ class ProjectFilterTest {
     void filter_by_data_access() {
         //given
         Project project4 = makeProject("project4");
-        project4.setDataAccess(Map.of("type", DataAccessTypes.OPEN.getLabel()));
+        ((Map<String, Object>)project4.getContent()).put("dataAccess", new DataAccess(DataAccessTypes.MANAGED));
         this.mongoTemplate.save(project4);
         //when
-        SearchFilter searchFilter = SearchFilter.builder().dataAccess(DataAccessTypes.OPEN).build();
+        SearchFilter searchFilter = SearchFilter.builder()
+                .dataAccess(DataAccessTypes.MANAGED)
+                .build();
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Project> result = projectService.filterProjects(searchFilter, pageable);
@@ -469,7 +478,7 @@ class ProjectFilterTest {
                 0,
                 10000,
                 1,
-                DataAccessTypes.MANAGED,
+                DataAccessTypes.OPEN,
                 "a label",
                 "a network",
                 false,
@@ -484,6 +493,7 @@ class ProjectFilterTest {
         project.setPrimaryWrangler("wrangler_" + title);
         project.setWranglingState(WranglingState.NEW);
         project.setUuid(Uuid.newUuid());
+        ((Map<String, Object>)project.getContent()).put("dataAccess", new DataAccess(DataAccessTypes.OPEN));
         project.setCellCount(100);
         project.setWranglingPriority(1);
         project.setDcpReleaseNumber(1);
@@ -491,7 +501,7 @@ class ProjectFilterTest {
     }
 
     @BeforeEach
-    private void setup() {
+    public void setup() {
         initProjectService();
         initTestData();
     }

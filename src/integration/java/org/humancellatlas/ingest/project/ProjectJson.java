@@ -23,7 +23,6 @@ public class ProjectJson {
 
         ObjectNode metadata = mapper.createObjectNode();
         metadata.set("content", content);
-
         return metadata;
     }
 

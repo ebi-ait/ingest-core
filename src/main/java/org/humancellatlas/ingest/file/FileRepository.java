@@ -4,7 +4,7 @@ package org.humancellatlas.ingest.file;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.project.Project;
-import org.humancellatlas.ingest.protocol.Protocol;
+import org.humancellatlas.ingest.security.RowLevelFilterSecurity;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
@@ -25,7 +25,22 @@ import java.util.stream.Stream;
  * Created by rolando on 06/09/2017.
  */
 @CrossOrigin
+@RowLevelFilterSecurity(
+        expression =
+                "(#filterObject.project != null)" +
+                        "? "+
+                        "   (" +
+                        "      #authentication.authorities.contains(" +
+                        "         new org.springframework.security.core.authority.SimpleGrantedAuthority(" +
+                        "          'ROLE_access_' +#filterObject.project.uuid?.toString())) " +
+                        "     or " +
+                        "      #filterObject.project.content['dataAccess']['type'] " +
+                        "         eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label" +
+                        "   )" +
+                        ":true",
+        ignoreClasses = {Project.class})
 public interface FileRepository extends MongoRepository<File, String> {
+
 
     @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
     Page<File> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);

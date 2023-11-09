@@ -5,12 +5,19 @@ import com.auth0.spring.security.api.JwtAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -23,6 +30,7 @@ import static org.humancellatlas.ingest.security.Role.*;
 import static org.springframework.http.HttpMethod.*;
 
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String FORWARDED_HOST = "x-forwarded-host";
@@ -66,17 +74,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private final AuthenticationProvider gcpAuthenticationProvider;
-    private final AuthenticationProvider elixirAuthenticationPovider;
+    private final AuthenticationProvider elixirAuthenticationProvider;
 
     public SecurityConfig(@Qualifier(GCP) AuthenticationProvider gcp,
                           @Qualifier(ELIXIR) AuthenticationProvider elixir) {
         this.gcpAuthenticationProvider = gcp;
-        this.elixirAuthenticationPovider = elixir;
+        this.elixirAuthenticationProvider = elixir;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authenticationProvider(elixirAuthenticationPovider)
+        http.authenticationProvider(elixirAuthenticationProvider)
                 .authenticationProvider(gcpAuthenticationProvider)
                 .securityContext().securityContextRepository(new BearerSecurityContextRepository())
                 .and()
@@ -90,12 +98,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(POST, "/submissionEnvelopes").authenticated()
                 .antMatchers(POST, "/projects").authenticated()
                 .antMatchers(POST, "/projects/suggestion").permitAll()
+                .antMatchers(POST, "/projects/catalogue").permitAll()
                 .antMatchers(GET, "/user/**").authenticated()
                 .antMatchers(GET, "/auth/account").authenticated()
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
                 .requestMatchers(SecurityConfig::isSecuredEndpointFromOutside).authenticated()
-                .requestMatchers(SecurityConfig::isSecuredWranglerEndpointFromOutside).hasAnyAuthority(WRANGLER.name(), SERVICE.name())
-                .antMatchers(GET, "/**").permitAll();
+                .requestMatchers(SecurityConfig::isSecuredWranglerEndpointFromOutside)
+                    .hasAnyAuthority(WRANGLER.name(), SERVICE.name())
+                .antMatchers(GET, "/**").authenticated();
     }
 
     private static Boolean isSecuredEndpointFromOutside(HttpServletRequest request) {

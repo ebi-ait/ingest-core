@@ -3,6 +3,8 @@ package org.humancellatlas.ingest.project;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,10 +17,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -56,17 +55,18 @@ public class Project extends MetadataDocument {
     private Integer cellCount;
 
     @Setter
-    private Object dataAccess;
+    @Deprecated
+    private DataAccess dataAccess;
 
     @Setter
     private Object identifyingOrganisms;
 
     @Setter
     private String primaryWrangler;
-    
+
     @Setter
     private String secondaryWrangler;
-    
+
     @Setter
     private WranglingState wranglingState;
 
@@ -123,6 +123,10 @@ public class Project extends MetadataDocument {
         return this.submissionEnvelopes.stream()
                 .filter(Objects::nonNull)
                 .allMatch(SubmissionEnvelope::isEditable);
+    }
+
+    public static ProjectBuilder builder() {
+        return new ProjectBuilder();
     }
 
 }
