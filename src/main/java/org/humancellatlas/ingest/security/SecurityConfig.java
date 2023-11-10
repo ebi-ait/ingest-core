@@ -95,6 +95,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()
                 .authorizeRequests()
+                .antMatchers(GET, "/").permitAll()
+                .antMatchers(GET, "/browser/**").permitAll()
                 .antMatchers(POST, "/submissionEnvelopes").authenticated()
                 .antMatchers(POST, "/projects").authenticated()
                 .antMatchers(POST, "/projects/suggestion").permitAll()
