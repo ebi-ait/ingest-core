@@ -4,10 +4,15 @@ import org.hamcrest.CoreMatchers;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,13 +21,14 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Arrays;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureDataMongo()
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
 public class SecurityTest {
     @Autowired
@@ -34,12 +40,6 @@ public class SecurityTest {
                 Arguments.of("biomaterials"),
                 Arguments.of("protocols"),
                 Arguments.of("processes")
-        );
-    }
-    public static Stream<Arguments> metadataTypesWithProject() {
-        return Stream.concat(
-                metadataTypes(),
-                Stream.of(Arguments.of("projects" ))
         );
     }
 
@@ -65,6 +65,7 @@ public class SecurityTest {
         }
 
     }
+
     @Nested
     class Unauthorised {
 
@@ -92,6 +93,7 @@ public class SecurityTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("_links").hasJsonPath());
         }
+
         @Test
         public void checkUnauthenticatedHtml_IsAllowed() throws Exception {
             webApp.perform(get("/browser/index.html")
@@ -100,11 +102,23 @@ public class SecurityTest {
                     .andExpect(content().string(CoreMatchers.containsString("The HAL Browser (for Spring Data REST)")));
         }
     }
+
+    @Nested
+    class HealthResource {
+        @ParameterizedTest
+        @ValueSource(strings = {"health","info","prometheus"})
+        public void checkUnauthenticatedJson_IsAllowed(String endpoint) throws Exception {
+            webApp.perform(get("/"+endpoint))
+                    .andExpect(status().isOk());
+        }
+    }
+
     private void checkGetUrlIsUnauthorized(String url) throws Exception {
         webApp.perform(
                 get(url)
         ).andExpect(status().isUnauthorized());
     }
+
     private void checkGetUrlIsOk(String url) throws Exception {
         webApp.perform(
                 get(url)
