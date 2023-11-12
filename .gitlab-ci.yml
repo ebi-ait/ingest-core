@@ -12,7 +12,8 @@ Test:
   script:
     - ./gradlew verify
   artifacts:
+    when: always
     reports:
       junit:
         - build/test-results/**/TEST-*.xml
-
+        - build/reports/tests/**
