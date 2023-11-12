@@ -16,4 +16,3 @@ Test:
     reports:
       junit:
         - build/test-results/**/TEST-*.xml
-        - build/reports/tests/**
