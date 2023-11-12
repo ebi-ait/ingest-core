@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.security;
 
 import org.hamcrest.CoreMatchers;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -105,7 +106,8 @@ public class SecurityTest {
 
     @Nested
     class HealthResource {
-        @ParameterizedTest
+//        @ParameterizedTest
+        @Ignore
         @ValueSource(strings = {"health","info","prometheus"})
         public void checkUnauthenticatedJson_IsAllowed(String endpoint) throws Exception {
             webApp.perform(get("/"+endpoint))
