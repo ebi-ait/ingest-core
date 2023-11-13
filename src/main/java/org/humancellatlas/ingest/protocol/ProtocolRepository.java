@@ -30,9 +30,10 @@ import java.util.stream.Stream;
                 "(#filterObject.project != null)" +
                         "? "+
                         "   (" +
-                        "      #authentication.authorities.contains(" +
-                        "         new org.springframework.security.core.authority.SimpleGrantedAuthority(" +
-                        "          'ROLE_access_' +#filterObject.project.uuid?.toString())) " +
+                        "      #authentication.authorities.![authority].contains(" +
+                        "          'ROLE_access_' +#filterObject.project.uuid?.toString()) " +
+                        "     or " +
+                        "      #authentication.authorities.![authority].contains('ROLE_SERVICE') " +
                         "     or " +
                         "      #filterObject.project.content['dataAccess']['type'] " +
                         "         eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label" +

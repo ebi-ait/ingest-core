@@ -122,7 +122,7 @@ public class ProjectController {
         return ResponseEntity.ok().body(assembler.toFullResource(updatedProject));
     }
 
-    @PreAuthorize("hasRole('access_'+#project.uuid)")
+    @PreAuthorize("hasRole('access_'+#project.uuid) or hasRole('SERVICE')")
     @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PostMapping(path = "submissionEnvelopes/{sub_id}/projects")
     ResponseEntity<Resource<?>> addProjectToEnvelope(
@@ -149,7 +149,7 @@ public class ProjectController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
     }
 
-    @PreAuthorize("hasRole('access_'+#project.uuid)"
+    @PreAuthorize("hasRole('access_'+#project.uuid) or hasRole('SERVICE')"
             + "or #project['content']['dataAccess']['type'] eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label")
     @GetMapping(path = "/projects/{id}/submissionEnvelopes")
     ResponseEntity<PagedResources<Resource<SubmissionEnvelope>>> getProjectSubmissionEnvelopes(
@@ -160,7 +160,7 @@ public class ProjectController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(resultPage, resourceAssembler));
     }
 
-    @PreAuthorize("hasRole('access_'+#project.uuid)"
+    @PreAuthorize("hasRole('access_'+#project.uuid) or hasRole('SERVICE')"
             + "or #project['content']['dataAccess']['type'] eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label")
     @RequestMapping(path = "/projects/{project_id}/biomaterials", method = RequestMethod.GET)
     ResponseEntity<?> getBiomaterials(@PathVariable("project_id") Project project,
@@ -170,7 +170,7 @@ public class ProjectController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(biomaterials, resourceAssembler));
     }
 
-    @PreAuthorize("hasRole('access_'+#project.uuid)"
+    @PreAuthorize("hasRole('access_'+#project.uuid) or hasRole('SERVICE')"
             + "or #project['content']['dataAccess']['type'] eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label")
     @RequestMapping(path = "/projects/{project_id}/processes", method = RequestMethod.GET)
     ResponseEntity<?> getProcesses(@PathVariable("project_id") Project project,
@@ -180,7 +180,7 @@ public class ProjectController {
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
     }
 
-    @PreAuthorize("hasRole('access_'+#project.uuid)"
+    @PreAuthorize("hasRole('access_'+#project.uuid) or hasRole('SERVICE')"
             + "or #project['content']['dataAccess']['type'] " +
             "     eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label")
     @RequestMapping(path = "/projects/{project_id}/protocols", method = RequestMethod.GET)
