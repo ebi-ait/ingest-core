@@ -126,8 +126,13 @@ public class SecurityTest {
 
         @Test
 
-        public void checkUnauthenticatedJson_IsAllowed() throws Exception {
+        public void checkUnauthenticate_IsAllowed() throws Exception {
             webApp.perform(get("/schemas"))
+                    .andExpect(status().isOk());
+        }
+        @Test
+        public void checkUnauthenticatedSubResource_IsAllowed() throws Exception {
+            webApp.perform(get("/schemas/search"))
                     .andExpect(status().isOk());
         }
     }

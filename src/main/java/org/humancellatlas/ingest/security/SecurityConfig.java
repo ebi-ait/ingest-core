@@ -96,7 +96,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .authorizeRequests()
                 .antMatchers(GET, "/").permitAll()
-                .antMatchers(GET, "/schemas").permitAll()
+                .antMatchers(GET, "/schemas/**").permitAll()
                 .antMatchers(GET, "/health").permitAll()
                 .antMatchers(GET, "/info").permitAll()
                 .antMatchers(GET, "/prometheus").permitAll()
