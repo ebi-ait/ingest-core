@@ -43,6 +43,12 @@ public class SecurityTest {
                 Arguments.of("processes")
         );
     }
+    public static Stream<Arguments> metadataTypesWithProject() {
+        return Stream.concat(
+                metadataTypes(),
+                Stream.of(Arguments.of("projects" ))
+        );
+    }
 
     @MockBean
     // NOTE: Adding MigrationConfiguration as a MockBean is needed
@@ -105,12 +111,23 @@ public class SecurityTest {
     }
 
     @Nested
-    class HealthResource {
+    class ManagementResources {
 //        @ParameterizedTest
         @Ignore
         @ValueSource(strings = {"health","info","prometheus"})
         public void checkUnauthenticatedJson_IsAllowed(String endpoint) throws Exception {
             webApp.perform(get("/"+endpoint))
+                    .andExpect(status().isOk());
+        }
+    }
+
+    @Nested
+    class SchemaResource {
+
+        @Test
+
+        public void checkUnauthenticatedJson_IsAllowed() throws Exception {
+            webApp.perform(get("/schemas"))
                     .andExpect(status().isOk());
         }
     }

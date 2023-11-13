@@ -305,7 +305,7 @@ public class ManagedAccessTest {
     @Nested
     class MetadataFromSubmissionAccessControl {
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProject")
         @WithMockUser(
                 username = "alice",
                 roles = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
@@ -333,7 +333,7 @@ public class ManagedAccessTest {
             roles = {"SERVICE"})
     class ServiceUserAccessControl {
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProject")
         public void serviceUser_CanSeeSubmissionMetadata(String metadataTypePlural) throws Exception {
             String submissionMetadataUrl = getSubmissionMetadataUrl(metadataTypePlural, makeUuid("a"));
             webApp.perform(get(submissionMetadataUrl))
