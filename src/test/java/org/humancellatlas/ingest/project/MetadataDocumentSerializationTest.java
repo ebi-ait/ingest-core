@@ -73,6 +73,8 @@ class MetadataDocumentSerializationTest {
     }
 
     private static Stream<Arguments> testData() {
+        // The test objects are created during test execution so that the time fields will be close
+        // to the desrialization target objects. If it were not so, the timestamps would be seconds apart.
         return Stream.of(
                 Arguments.of((Supplier) () -> DataAccessTypes.OPEN, "\"All fully open\""),
                 Arguments.of((Supplier) () -> new DataAccess(DataAccessTypes.OPEN), "{\"type\":\"All fully open\",\"notes\":null}"),
