@@ -98,11 +98,6 @@ public class BiomaterialControllerTest {
 
     @BeforeEach
     void setUp() {
-        //@WithMockUser did not affect spring repository calls in the test, so
-        // this
-//        Authentication auth = new UsernamePasswordAuthenticationToken("alice", "password", List.of(new SimpleGrantedAuthority("WRANGLER")));
-//        SecurityContextHolder.getContext().setAuthentication(auth);
-
         submissionEnvelope = new SubmissionEnvelope();
         submissionEnvelope.setUuid(Uuid.newUuid());
         submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
