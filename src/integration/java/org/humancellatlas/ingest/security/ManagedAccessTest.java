@@ -5,7 +5,9 @@ import org.assertj.core.api.Assertions;
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
-import org.humancellatlas.ingest.core.*;
+import org.humancellatlas.ingest.core.AbstractEntity;
+import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.process.Process;
@@ -34,11 +36,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.hamcrest.Matchers.hasItem;
 import static org.humancellatlas.ingest.TestingHelper.resetTestingSecurityContext;
 import static org.humancellatlas.ingest.security.TestDataHelper.makeUuid;
 import static org.humancellatlas.ingest.security.TestDataHelper.mapAsJsonString;
@@ -144,11 +146,7 @@ public class ManagedAccessTest {
                 username = "alice",
                 roles = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
         public void userOnProjectAList_CanSeeProjectMetadata(String metadataTypePlural) throws Exception {
-            String projectMetadataUrl = projectRepository.findByUuid(new Uuid(makeUuid("a")))
-                    .findFirst()
-                    .map(Project::getId)
-                    .map(projectId -> String.format("/projects/%s/%s", projectId, metadataTypePlural))
-                    .get();
+            String projectMetadataUrl = getProjectMetadataUrl(metadataTypePlural, makeUuid("a"));
 
             webApp.perform(get(projectMetadataUrl))
                     .andExpect(status().isOk());
@@ -160,11 +158,7 @@ public class ManagedAccessTest {
                 username = "alice",
                 roles = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
         public void userOnProjectAList_CanSeeOpenProjectMetadata(String metadataTypePlural) throws Exception {
-            String openAccessProjectMetadataUrl = projectRepository.findByUuid(new Uuid(makeUuid("c")))
-                    .findFirst()
-                    .map(Project::getId)
-                    .map(projectId -> String.format("/projects/%s/%s", projectId, metadataTypePlural))
-                    .get();
+            String openAccessProjectMetadataUrl = getProjectMetadataUrl(metadataTypePlural, makeUuid("c"));
 
             webApp.perform(get(openAccessProjectMetadataUrl).contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());
@@ -176,15 +170,20 @@ public class ManagedAccessTest {
                 username = "bob",
                 roles = {"CONTRIBUTOR", "access_bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"})
         public void userNotOnProjectAList_CannotSeeMetadata(String metadataTypePlural) throws Exception {
-            String projectMetadataUrl = projectRepository.findByUuid(new Uuid(makeUuid("a")))
-                    .findFirst()
-                    .map(Project::getId)
-                    .map(projectId -> String.format("/projects/%s/%s", projectId, metadataTypePlural))
-                    .get();
+            String projectMetadataUrl = getProjectMetadataUrl(metadataTypePlural, makeUuid("a"));
 
             webApp.perform(get(projectMetadataUrl))
                     .andExpect(status().isForbidden());
         }
+    }
+
+    @NotNull
+    private String getProjectMetadataUrl(String metadataTypePlural, String uuid) {
+        return projectRepository.findByUuid(new Uuid(uuid))
+                .findFirst()
+                .map(Project::getId)
+                .map(projectId -> String.format("/projects/%s/%s", projectId, metadataTypePlural))
+                .get();
     }
 
 
@@ -299,6 +298,62 @@ public class ManagedAccessTest {
             webApp.perform(get(metadataCollectionUrl))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.page.totalElements").value("2"));
+        }
+    }
+
+
+    @Nested
+    class MetadataFromSubmissionAccessControl {
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
+        @WithMockUser(
+                username = "alice",
+                roles = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
+        public void userOnProjectAList_CanSeeSubmissionMetadata(String metadataTypePlural) throws Exception {
+            String submissionMetadataUrl = getSubmissionMetadataUrl(metadataTypePlural, makeUuid("a"));
+            webApp.perform(get(submissionMetadataUrl))
+                    .andExpect(status().isOk());
+        }
+    }
+
+    @NotNull
+    private String getSubmissionMetadataUrl(String metadataTypePlural, String uuid) {
+        return projectRepository.findByUuid(new Uuid(uuid))
+                .map(Project::getSubmissionEnvelopes)
+                .flatMap(Collection::stream)
+                .map(AbstractEntity::getId)
+                .map(submissionId -> String.format("/submissionEnvelopes/%s/%s", submissionId, metadataTypePlural))
+                .findFirst()
+                .get();
+    }
+
+    @Nested
+    @WithMockUser(
+            username = "service",
+            roles = {"SERVICE"})
+    class ServiceUserAccessControl {
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
+        public void serviceUser_CanSeeSubmissionMetadata(String metadataTypePlural) throws Exception {
+            String submissionMetadataUrl = getSubmissionMetadataUrl(metadataTypePlural, makeUuid("a"));
+            webApp.perform(get(submissionMetadataUrl))
+                    .andExpect(status().isOk());
+        }
+
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
+        public void serviceUser_CanSeeProjectMetadata(String metadataTypePlural) throws Exception {
+            String projectMetadataUrl = getProjectMetadataUrl(metadataTypePlural, makeUuid("a"));
+            webApp.perform(get(projectMetadataUrl))
+                    .andExpect(status().isOk());
+        }
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
+        public void serviceUser_CanSeeOnlyOpenAndProjectAMetadata(String metadataTypePlural) throws Exception {
+            String metadataCollectionUrl = "/" + metadataTypePlural;
+            webApp.perform(get(metadataCollectionUrl))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.page.totalElements").value("3"));
         }
     }
 }
