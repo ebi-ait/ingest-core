@@ -102,6 +102,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(GET, "/prometheus").permitAll()
                 .antMatchers(GET, "/browser/**").permitAll()
                 .antMatchers(POST, "/submissionEnvelopes").authenticated()
+                .antMatchers(POST, "/submissionEnvelopes/**").authenticated()
                 .antMatchers(POST, "/projects").authenticated()
                 .antMatchers(POST, "/projects/suggestion").permitAll()
                 .antMatchers(POST, "/projects/catalogue").permitAll()

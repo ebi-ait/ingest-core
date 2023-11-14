@@ -334,7 +334,7 @@ public class ManagedAccessTest {
     class ServiceUserAccessControl {
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProject")
-        public void serviceUser_CanSeeSubmissionMetadata(String metadataTypePlural) throws Exception {
+        public void canSeeSubmissionMetadata(String metadataTypePlural) throws Exception {
             String submissionMetadataUrl = getSubmissionMetadataUrl(metadataTypePlural, makeUuid("a"));
             webApp.perform(get(submissionMetadataUrl))
                     .andExpect(status().isOk());
@@ -342,18 +342,28 @@ public class ManagedAccessTest {
 
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
-        public void serviceUser_CanSeeProjectMetadata(String metadataTypePlural) throws Exception {
+        public void canSeeProjectMetadata(String metadataTypePlural) throws Exception {
             String projectMetadataUrl = getProjectMetadataUrl(metadataTypePlural, makeUuid("a"));
             webApp.perform(get(projectMetadataUrl))
                     .andExpect(status().isOk());
         }
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
-        public void serviceUser_CanSeeOnlyOpenAndProjectAMetadata(String metadataTypePlural) throws Exception {
+        public void canSeeOnlyOpenAndProjectAMetadata(String metadataTypePlural) throws Exception {
             String metadataCollectionUrl = "/" + metadataTypePlural;
             webApp.perform(get(metadataCollectionUrl))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.page.totalElements").value("3"));
+        }
+
+        @Test
+        public void canCreateProject() throws Exception {
+            final String submissionUrl = createSubmissionAndGetUrl();
+            webApp.perform(post(submissionUrl+"/projects")
+                            .content("{}")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isAccepted())
+            ;
         }
     }
 }

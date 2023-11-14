@@ -43,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureDataMongo()
 @AutoConfigureMockMvc()
+@WithMockUser
 public class SubmissionControllerTest {
     @Autowired
     private MockMvc webApp;
