@@ -149,7 +149,7 @@ public class ProjectController {
         return ResponseEntity.ok(pagedResourcesAssembler.toResource(bundleManifests, resourceAssembler));
     }
 
-    @PreAuthorize("hasRole('access_'+#project.uuid) or hasRole('SERVICE')"
+    @PreAuthorize("hasAnyRole('ROLE_access_'+#project.uuid, 'ROLE_SERVICE')"
             + "or #project['content']['dataAccess']['type'] eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label")
     @GetMapping(path = "/projects/{id}/submissionEnvelopes")
     ResponseEntity<PagedResources<Resource<SubmissionEnvelope>>> getProjectSubmissionEnvelopes(
