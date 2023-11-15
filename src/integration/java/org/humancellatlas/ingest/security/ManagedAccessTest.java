@@ -365,5 +365,28 @@ public class ManagedAccessTest {
                     .andExpect(status().isAccepted())
             ;
         }
+
+        @Test
+        public void canCreateSubmissionManifest() throws Exception {
+            final String submissionUrl = createSubmissionAndGetUrl();
+            webApp.perform(post(submissionUrl+"/submissionManifest")
+                            .content("{}")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isAccepted())
+            ;
+        }
+        @Test
+        public void canGetSubmissionManifest() throws Exception {
+            final String submissionUrl = createSubmissionAndGetUrl();
+            webApp.perform(post(submissionUrl+"/submissionManifest")
+                            .content("{}")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isAccepted())
+            ;
+            webApp.perform(get(submissionUrl+"/submissionManifest")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+            ;
+        }
     }
 }

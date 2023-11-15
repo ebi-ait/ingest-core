@@ -117,7 +117,8 @@ public class GlobalStateExceptionHandler {
     ExceptionInfo handNotAllowedException(HttpServletRequest request, Exception e) {
         getLog().error(String.format("Not allowed exception encountered on %s request to resource %s ", request.getMethod(),
                 request.getRequestURL().toString()), e);
-        getLog().debug("Handling NotAllowedException and returning FORBIDDEN response", e);
+        getLog().debug(String.format("Handling NotAllowedException and returning FORBIDDEN response during %s request to %s", request.getMethod(),
+                request.getRequestURL().toString()), e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 
@@ -135,14 +136,14 @@ public class GlobalStateExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public @ResponseBody
     ExceptionInfo handleAccessDeniedException(HttpServletRequest request, Exception e) {
-        getLog().info("access denied {}", request.getRequestURL());
+        getLog().info("access denied: {} {}", request.getMethod(), request.getRequestURL());
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
     public @ResponseBody
     ExceptionInfo handleAccessCredentialsNotFoundException(HttpServletRequest request, Exception e) {
-        getLog().info("unauthorized {}", request.getRequestURL());
+        getLog().info("unauthorized {} {}", request.getMethod(), request.getRequestURL());
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 }
