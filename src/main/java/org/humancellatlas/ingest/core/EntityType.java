@@ -12,5 +12,6 @@ public enum EntityType {
     BIOMATERIAL,
     PROCESS,
     PROTOCOL,
-    FILE
+    FILE,
+    STUDY
 }
