@@ -4,12 +4,15 @@ import org.humancellatlas.ingest.core.exception.MultipleOpenSubmissionsException
 import org.humancellatlas.ingest.core.exception.RedundantUpdateException;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.humancellatlas.ingest.security.exception.NotAllowedException;
+import org.humancellatlas.ingest.study.exception.ErrorResponse;
+import org.humancellatlas.ingest.study.exception.StudyNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.repository.support.QueryMethodParameterConversionException;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -145,5 +148,11 @@ public class GlobalStateExceptionHandler {
     ExceptionInfo handleAccessCredentialsNotFoundException(HttpServletRequest request, Exception e) {
         getLog().info("unauthorized {} {}", request.getMethod(), request.getRequestURL());
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
+    }
+
+    @ExceptionHandler(StudyNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleProductNotFoundException(StudyNotFoundException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 }
