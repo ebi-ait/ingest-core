@@ -181,4 +181,46 @@ class StudyControllerTest {
         }
     }
 
+    @Nested
+    class Delete {
+
+        @Test
+        @DisplayName("Delete Study - Success")
+        void deleteSuccess() throws Exception {
+            // given:
+            String content = "{\"name\": \"delete study\"}";
+            Study persistentStudy = new Study(content);
+            repository.save(persistentStudy);
+            String existingStudyId = persistentStudy.getId();
+
+            // when:
+            webApp.perform(delete("/studies/{studyId}", existingStudyId))
+                    .andExpect(status().isNoContent());
+
+            // then:
+            assertThat(repository.findById(existingStudyId)).isEmpty();
+            MetadataDocument document = metadataCrudService.findOriginalByUuid(
+                    String.valueOf(persistentStudy.getUuid()), EntityType.STUDY);
+            assertNull(document);
+            verify(studyEventHandler).deletedStudy(existingStudyId);
+        }
+
+        @Test
+        @DisplayName("Delete Study - Not Found")
+        void deleteStudyNotFound() throws Exception {
+            // given: a non-existent study id
+            String nonExistentStudyId = "nonExistentId";
+            String content = "{\"name\": \"delete study\"}";
+            Study nonExistentStudy = new Study(content);
+
+            // when:
+            MvcResult result = webApp.perform(delete("/studies/{studyId}", nonExistentStudyId))
+                    .andReturn();
+
+            // then:
+            MockHttpServletResponse response = result.getResponse();
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        }
+    }
+
 }
