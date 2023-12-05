@@ -3,12 +3,12 @@ package org.humancellatlas.ingest.study.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.data.MapEntry;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
+import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
-import org.humancellatlas.ingest.schemas.SchemaService;
+import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.study.Study;
 import org.humancellatlas.ingest.study.StudyEventHandler;
 import org.humancellatlas.ingest.study.StudyRepository;
-import org.humancellatlas.ingest.study.StudyService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,16 +27,15 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.mockito.ArgumentMatchers.any;
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
@@ -49,22 +48,16 @@ class StudyControllerTest {
     private StudyRepository repository;
 
     @Autowired
-    private StudyService studyService;
+    private MetadataCrudService metadataCrudService;
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private MetadataCrudService metadataCrudService;
 
     @SpyBean
     private StudyEventHandler studyEventHandler;
 
     @MockBean
     private MigrationConfiguration migrationConfiguration;
-
-    @MockBean
-    private SchemaService schemaService;
 
     @AfterEach
     private void tearDown() {
@@ -76,19 +69,29 @@ class StudyControllerTest {
 
         @Test
         @DisplayName("Register Study - Success")
-        void registerStudySuccess() throws Exception {
-            // given: a study to register
+        void registerSuccess() throws Exception {
+            doTestRegister("/studies", study -> {
+                var studyCaptor = ArgumentCaptor.forClass(Study.class);
+                verify(studyEventHandler).registeredStudy(studyCaptor.capture());
+                Study handledStudy = studyCaptor.getValue();
+                assertThat(handledStudy.getId()).isNotNull();
+            });
+        }
+
+        @Test
+        private void doTestRegister(String registerUrl, Consumer<Study> postCondition) throws Exception {
+            // given:
             var content = new HashMap<String, Object>();
             content.put("name", "Test Study");
 
-            // when: sending a POST request to register the study
+            // when:
             MvcResult result = webApp
-                    .perform(post("/studies")
+                    .perform(post(registerUrl)
                             .contentType(APPLICATION_JSON_VALUE)
                             .content("{\"content\": " + objectMapper.writeValueAsString(content) + "}"))
                     .andReturn();
 
-            // then: verify the response status is OK
+            // then:
             MockHttpServletResponse response = result.getResponse();
             assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
             assertThat(response.getContentType()).containsPattern("application/.*json.*");
@@ -104,6 +107,9 @@ class StudyControllerTest {
             assertThat(studies).hasSize(1);
             Study storedStudy = studies.get(0);
             assertThat((Map) storedStudy.getContent()).containsOnly(nameEntry);
+
+            // and:
+            postCondition.accept(storedStudy);
         }
     }
 
@@ -159,17 +165,17 @@ class StudyControllerTest {
         @Test
         @DisplayName("Update Study - Not Found")
         void updateStudyNotFound() throws Exception {
-            // given: a non-existent study id
+            // given:
             String nonExistentStudyId = "nonExistentId";
 
-            // when: sending a PATCH request to update the study with a non-existent id
+            // when:
             MvcResult result = webApp
                     .perform(patch("/studies/{studyId}", nonExistentStudyId)
                             .contentType(APPLICATION_JSON_VALUE)
                             .content("{\"content\": {\"description\": \"Updated Description\"}}"))
                     .andReturn();
 
-            // then: verify the response status is NOT_FOUND
+            // then:
             MockHttpServletResponse response = result.getResponse();
             assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
         }
