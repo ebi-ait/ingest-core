@@ -151,7 +151,7 @@ public class GlobalStateExceptionHandler {
     }
 
     @ExceptionHandler(StudyNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleProductNotFoundException(StudyNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleStudyNotFoundException(StudyNotFoundException ex) {
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
