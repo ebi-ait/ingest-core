@@ -210,8 +210,6 @@ class StudyControllerTest {
         void deleteStudyNotFound() throws Exception {
             // given: a non-existent study id
             String nonExistentStudyId = "nonExistentId";
-            String content = "{\"name\": \"delete study\"}";
-            Study nonExistentStudy = new Study(content);
 
             // when:
             MvcResult result = webApp.perform(delete("/studies/{studyId}", nonExistentStudyId))
