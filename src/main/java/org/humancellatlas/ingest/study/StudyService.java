@@ -43,12 +43,17 @@ public class StudyService {
         Optional<Study> existingStudyOptional = studyRepository.findById(studyId);
 
         if (existingStudyOptional.isEmpty()) {
-            log.error("Study not found with ID: {}", studyId);
+            log.warn("Study not found with ID: {}", studyId);
             throw new StudyNotFoundException("Study not found with ID: " + studyId);
         }
 
         Study existingStudy = existingStudyOptional.get();
-        Study updatedStudy = metadataUpdateService.update(existingStudy, patch);
+        /*
+         * TODO: have introduced new update method for Study to avoid dependencies with Submission Envelope
+         * - Adding Studies to Submission Envelopes is not required at this moment.
+         * - However, need to make sure whether this approach has to change in the long term.
+         */
+        Study updatedStudy = metadataUpdateService.updateStudy(existingStudy, patch);
         studyEventHandler.updatedStudy(updatedStudy);
         return updatedStudy;
     }
@@ -57,7 +62,7 @@ public class StudyService {
         Optional<Study> deleteStudyOptional = studyRepository.findById(studyId);
 
         if (deleteStudyOptional.isEmpty()) {
-            log.error("Study not found with ID: {}", studyId);
+            log.warn("Study not found with ID: {}", studyId);
             throw new StudyNotFoundException("Study not found with ID: " + studyId);
         }
 
