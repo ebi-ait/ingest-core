@@ -89,22 +89,51 @@ public class StudyServiceTest {
         @DisplayName("Update Study - Success")
         void updateSuccess() {
             // given:
-            String studyId = "testId";
-            ObjectNode patch = new ObjectNode(JsonNodeFactory.instance);
+            String studyId = "studyId";
+            ObjectNode patch = createUpdatePatch("Updated Study Name");
+            Study existingStudy = new Study("{\"name\": \"study\"}");
 
             // and:
-            Study existingStudy = new Study("{\"name\": \"study\"}");
             when(studyRepository.findById(studyId)).thenReturn(Optional.of(existingStudy));
-            when(metadataUpdateService.update(existingStudy, patch)).thenReturn(existingStudy);
+            when(metadataUpdateService.updateStudy(existingStudy, patch)).thenReturn(existingStudy);
 
             // when:
             Study result = studyService.update(studyId, patch);
 
             // then:
             verify(studyRepository).findById(studyId);
-            verify(metadataUpdateService).update(existingStudy, patch);
+            verify(metadataUpdateService).updateStudy(existingStudy, patch);
             verify(studyEventHandler).updatedStudy(existingStudy);
             assertThat(result).isEqualTo(existingStudy);
+        }
+
+        // Helper method to create an update patch
+        private ObjectNode createUpdatePatch(String updatedName) {
+            ObjectNode patch = JsonNodeFactory.instance.objectNode();
+            patch.put("content", JsonNodeFactory.instance.objectNode().put("name", updatedName));
+            return patch;
+        }
+
+        @Test
+        @DisplayName("Update Study - Not Found")
+        void updateStudyNotFound() {
+            // given:
+            String nonExistentStudyId = "nonExistentId";
+            ObjectNode patch = createUpdatePatch("Updated Study Name");
+
+            // and:
+            when(studyRepository.findById(nonExistentStudyId)).thenReturn(Optional.empty());
+
+            // when, then:
+            StudyNotFoundException exception = assertThrows(
+                    StudyNotFoundException.class,
+                    () -> studyService.update(nonExistentStudyId, patch)
+            );
+            assertThat("Study not found with ID: " + nonExistentStudyId).isEqualTo(exception.getMessage());
+
+            // verify that other methods are not called
+            verify(metadataCrudService, never()).deleteDocument(any());
+            verify(studyEventHandler, never()).deletedStudy(any());
         }
     }
 
