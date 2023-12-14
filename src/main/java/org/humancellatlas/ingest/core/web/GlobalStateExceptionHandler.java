@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.stream.Collectors;
 
 /**
  * Javadocs go here!
@@ -128,5 +126,4 @@ public class GlobalStateExceptionHandler {
         getLog().debug("Handling UnsupportedOperationException and returning METHOD_NOT_ALLOWED response", e);
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
-
 }
