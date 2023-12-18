@@ -21,6 +21,8 @@ public class MetadataCrudService {
     private final @NonNull ProjectCrudStrategy projectCrudStrategy;
     private final @NonNull FileCrudStrategy fileCrudStrategy;
 
+    private final @NonNull DatasetCrudStrategy datasetCrudStrategy;
+
     private MetadataCrudStrategy crudStrategyForMetadataType(EntityType metadataType) {
         switch (metadataType) {
             case BIOMATERIAL:
@@ -33,6 +35,8 @@ public class MetadataCrudService {
                 return projectCrudStrategy;
             case FILE:
                 return fileCrudStrategy;
+            case DATASET:
+                return datasetCrudStrategy;
             default:
                 throw new RuntimeException(String.format("No such metadata type: %s", metadataType));
         }
