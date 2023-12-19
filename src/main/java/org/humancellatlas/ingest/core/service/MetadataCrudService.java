@@ -20,6 +20,7 @@ public class MetadataCrudService {
     private final @NonNull ProtocolCrudStrategy protocolCrudStrategy;
     private final @NonNull ProjectCrudStrategy projectCrudStrategy;
     private final @NonNull FileCrudStrategy fileCrudStrategy;
+    private final @NonNull StudyCrudStrategy studyCrudStrategy;
 
     private MetadataCrudStrategy crudStrategyForMetadataType(EntityType metadataType) {
         switch (metadataType) {
@@ -33,6 +34,8 @@ public class MetadataCrudService {
                 return projectCrudStrategy;
             case FILE:
                 return fileCrudStrategy;
+            case STUDY:
+                return studyCrudStrategy;
             default:
                 throw new RuntimeException(String.format("No such metadata type: %s", metadataType));
         }
