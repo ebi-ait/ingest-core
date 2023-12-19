@@ -13,5 +13,6 @@ public enum EntityType {
     PROCESS,
     PROTOCOL,
     FILE,
-    STUDY
+    STUDY,
+    DATASET
 }

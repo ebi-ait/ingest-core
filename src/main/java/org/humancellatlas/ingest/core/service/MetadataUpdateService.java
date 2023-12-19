@@ -34,6 +34,7 @@ public class MetadataUpdateService {
         T patchedMetadata = jsonPatcher.merge(patch, metadataDocument);
         T doc = metadataCrudService.save(patchedMetadata);
 
+        /* Don't do for MorPhic - no need for updateStudy or updateDataset for bypassing this*/
         if (contentChanged) {
             validationStateChangeService.changeValidationState(doc.getType(), doc.getId(), ValidationState.DRAFT);
         }

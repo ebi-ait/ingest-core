@@ -104,6 +104,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(POST, "/submissionEnvelopes").authenticated()
                 .antMatchers(POST, "/submissionEnvelopes/**").authenticated()
                 .antMatchers(POST, "/projects").authenticated()
+                .antMatchers(POST, "/dataset").permitAll()
                 .antMatchers(POST, "/projects/suggestion").permitAll()
                 .antMatchers(POST, "/projects/catalogue").permitAll()
                 .antMatchers(GET, "/user/**").authenticated()
@@ -111,7 +112,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(POST, "/auth/registration").hasAuthority(GUEST.name())
                 .requestMatchers(SecurityConfig::isSecuredEndpointFromOutside).authenticated()
                 .requestMatchers(SecurityConfig::isSecuredWranglerEndpointFromOutside)
-                    .hasAnyAuthority(WRANGLER.name(), SERVICE.name())
+                .hasAnyAuthority(WRANGLER.name(), SERVICE.name())
                 .antMatchers(GET, "/**").authenticated();
     }
 
