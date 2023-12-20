@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.dataset.Dataset;
-import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.dataset.DatasetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

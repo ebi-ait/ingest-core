@@ -6,12 +6,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
-import org.humancellatlas.ingest.study.exception.StudyNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -44,7 +45,7 @@ public class StudyService {
 
         if (existingStudyOptional.isEmpty()) {
             log.warn("Study not found with ID: {}", studyId);
-            throw new StudyNotFoundException("Study not found with ID: " + studyId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Study not found with ID: " + studyId);
         }
 
         Study existingStudy = existingStudyOptional.get();
@@ -63,7 +64,7 @@ public class StudyService {
 
         if (deleteStudyOptional.isEmpty()) {
             log.warn("Study not found with ID: {}", studyId);
-            throw new StudyNotFoundException("Study not found with ID: " + studyId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Study not found with ID: " + studyId);
         }
 
         Study deleteStudy = deleteStudyOptional.get();

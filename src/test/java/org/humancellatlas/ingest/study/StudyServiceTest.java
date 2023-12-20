@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
-import org.humancellatlas.ingest.study.exception.StudyNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -125,8 +125,8 @@ public class StudyServiceTest {
             when(studyRepository.findById(nonExistentStudyId)).thenReturn(Optional.empty());
 
             // when, then:
-            StudyNotFoundException exception = assertThrows(
-                    StudyNotFoundException.class,
+            ResponseStatusException exception = assertThrows(
+                    ResponseStatusException.class,
                     () -> studyService.update(nonExistentStudyId, patch)
             );
             assertThat("Study not found with ID: " + nonExistentStudyId).isEqualTo(exception.getMessage());
@@ -169,8 +169,8 @@ public class StudyServiceTest {
             when(studyRepository.findById(nonExistentStudyId)).thenReturn(Optional.empty());
 
             // when, then:
-            StudyNotFoundException exception = assertThrows(
-                    StudyNotFoundException.class,
+            ResponseStatusException exception = assertThrows(
+                    ResponseStatusException.class,
                     () -> studyService.delete(nonExistentStudyId)
             );
             assertThat("Study not found with ID: " + nonExistentStudyId).isEqualTo(exception.getMessage());

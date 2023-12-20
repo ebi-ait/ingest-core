@@ -4,8 +4,6 @@ import org.humancellatlas.ingest.core.exception.MultipleOpenSubmissionsException
 import org.humancellatlas.ingest.core.exception.RedundantUpdateException;
 import org.humancellatlas.ingest.core.exception.StateTransitionNotAllowed;
 import org.humancellatlas.ingest.security.exception.NotAllowedException;
-import org.humancellatlas.ingest.study.exception.ErrorResponse;
-import org.humancellatlas.ingest.study.exception.StudyNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -20,10 +18,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.stream.Collectors;
 
 /**
  * Javadocs go here!
@@ -150,9 +147,8 @@ public class GlobalStateExceptionHandler {
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
 
-    @ExceptionHandler(StudyNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleStudyNotFoundException(StudyNotFoundException ex) {
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Object> handleResponseStatusException(final ResponseStatusException ex) {
+        return new ResponseEntity<>(ex.getReason(), ex.getStatus());
     }
 }
