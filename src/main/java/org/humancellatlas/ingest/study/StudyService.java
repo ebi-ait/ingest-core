@@ -10,11 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+
+import static java.lang.String.format;
 
 @Service
 @RequiredArgsConstructor
@@ -44,8 +47,8 @@ public class StudyService {
         Optional<Study> existingStudyOptional = studyRepository.findById(studyId);
 
         if (existingStudyOptional.isEmpty()) {
-            log.warn("Study not found with ID: {}", studyId);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Study not found with ID: " + studyId);
+            log.warn("Attempted to update study with ID: {} but not found.", studyId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
         Study existingStudy = existingStudyOptional.get();
@@ -63,8 +66,8 @@ public class StudyService {
         Optional<Study> deleteStudyOptional = studyRepository.findById(studyId);
 
         if (deleteStudyOptional.isEmpty()) {
-            log.warn("Study not found with ID: {}", studyId);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Study not found with ID: " + studyId);
+            log.warn("Attempted to delete study with ID: {} but not found.", studyId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
         Study deleteStudy = deleteStudyOptional.get();

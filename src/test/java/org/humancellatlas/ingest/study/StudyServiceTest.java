@@ -129,7 +129,7 @@ public class StudyServiceTest {
                     ResponseStatusException.class,
                     () -> studyService.update(nonExistentStudyId, patch)
             );
-            assertThat("Study not found with ID: " + nonExistentStudyId).isEqualTo(exception.getMessage());
+            assertThat("404 NOT_FOUND").isEqualTo(exception.getMessage());
 
             // verify that other methods are not called
             verify(metadataCrudService, never()).deleteDocument(any());
@@ -173,7 +173,7 @@ public class StudyServiceTest {
                     ResponseStatusException.class,
                     () -> studyService.delete(nonExistentStudyId)
             );
-            assertThat("Study not found with ID: " + nonExistentStudyId).isEqualTo(exception.getMessage());
+            assertThat("404 NOT_FOUND").isEqualTo(exception.getMessage());
 
             verify(metadataCrudService, never()).deleteDocument(any());
             verify(studyEventHandler, never()).deletedStudy(any());
