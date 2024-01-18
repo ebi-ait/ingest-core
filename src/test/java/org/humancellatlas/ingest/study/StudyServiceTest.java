@@ -55,7 +55,7 @@ public class StudyServiceTest {
     @BeforeEach
     void setUp() {
         applicationContext.getBeansWithAnnotation(MockBean.class).forEach(Mockito::reset);
-        Mockito.reset(metadataCrudService, studyEventHandler);
+        Mockito.reset(metadataCrudService, studyRepository,studyEventHandler);
     }
 
     @Nested
@@ -135,6 +135,54 @@ public class StudyServiceTest {
             verify(metadataCrudService, never()).deleteDocument(any());
             verify(studyEventHandler, never()).deletedStudy(any());
         }
+    }
+
+    @Nested
+    class StudyReplace {
+
+        @Test
+        @DisplayName("Replace Study - Success")
+        void replaceSuccess() {
+            // given:
+            String studyId = "studyId";
+            Study existingStudy = new Study("{\"name\": \"Existing Study Name\"}");
+            Study updatedStudy = new Study("{\"name\": \"Updated Study Name\"}");
+
+            // and:
+            when(studyRepository.findById(studyId)).thenReturn(Optional.of(existingStudy));
+
+            // when:
+            Study result = studyService.replace(studyId, updatedStudy);
+
+            // then:
+            verify(studyRepository).findById(studyId);
+            verify(studyRepository).save(updatedStudy);  // Verify save is called
+            verify(studyEventHandler).updatedStudy(updatedStudy);
+            assertThat(result).isEqualTo(updatedStudy);
+        }
+
+        @Test
+        @DisplayName("Replace Study - Not Found")
+        void replaceStudyNotFound() {
+            // given:
+            String nonExistentStudyId = "nonExistentId";
+            Study updatedStudy = new Study("{\"name\": \"Updated Study Name\"}");
+
+            // and:
+            when(studyRepository.findById(nonExistentStudyId)).thenReturn(Optional.empty());
+
+            // when, then:
+            ResponseStatusException exception = assertThrows(
+                    ResponseStatusException.class,
+                    () -> studyService.replace(nonExistentStudyId, updatedStudy)
+            );
+            assertThat("404 NOT_FOUND").isEqualTo(exception.getMessage());
+
+            // verify that other methods are not called
+            verify(studyRepository, never()).save(any());
+            verify(studyEventHandler, never()).updatedStudy(any());
+        }
+
     }
 
     @Nested

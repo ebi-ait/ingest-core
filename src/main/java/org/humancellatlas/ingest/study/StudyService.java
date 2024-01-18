@@ -57,6 +57,24 @@ public class StudyService {
         return updatedStudy;
     }
 
+    public Study replace(String studyId, Study updatedStudy) {
+        Optional<Study> existingStudyOptional = studyRepository.findById(studyId);
+
+        if (existingStudyOptional.isEmpty()) {
+            log.warn("Study not found with ID: {}", studyId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        // Replace the entire entity with the updatedStudy
+        Study existingStudy = existingStudyOptional.get();
+        existingStudy = updatedStudy; // This line replaces the entire entity
+
+        studyRepository.save(existingStudy);
+        studyEventHandler.updatedStudy(existingStudy);
+
+        return existingStudy;
+    }
+
     public void delete(String studyId) {
         Optional<Study> deleteStudyOptional = studyRepository.findById(studyId);
 

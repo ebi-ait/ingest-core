@@ -56,6 +56,18 @@ public class StudyController {
         }
     }
 
+    @PutMapping("/studies/{studyId}")
+    public ResponseEntity<Resource<?>> replaceStudy(@PathVariable String studyId,
+                                                    @RequestBody final Study updatedStudy,
+                                                    final PersistentEntityResourceAssembler assembler) {
+        if (Arrays.asList(environment.getActiveProfiles()).contains("morphic")) {
+            Study replacedStudy = studyService.replace(studyId, updatedStudy);
+            return ResponseEntity.ok().body(assembler.toFullResource(replacedStudy));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @DeleteMapping("/studies/{studyId}")
     public ResponseEntity<Void> deleteStudy(@PathVariable String studyId) {
         if (Arrays.asList(environment.getActiveProfiles()).contains("morphic")) {
