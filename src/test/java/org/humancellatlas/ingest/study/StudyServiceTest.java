@@ -95,14 +95,14 @@ public class StudyServiceTest {
 
             // and:
             when(studyRepository.findById(studyId)).thenReturn(Optional.of(existingStudy));
-            when(metadataUpdateService.updateStudy(existingStudy, patch)).thenReturn(existingStudy);
+            when(metadataUpdateService.update(existingStudy, patch)).thenReturn(existingStudy);
 
             // when:
             Study result = studyService.update(studyId, patch);
 
             // then:
             verify(studyRepository).findById(studyId);
-            verify(metadataUpdateService).updateStudy(existingStudy, patch);
+            verify(metadataUpdateService).update(existingStudy, patch);
             verify(studyEventHandler).updatedStudy(existingStudy);
             assertThat(result).isEqualTo(existingStudy);
         }

@@ -52,12 +52,7 @@ public class StudyService {
         }
 
         Study existingStudy = existingStudyOptional.get();
-        /*
-         * TODO: have introduced new update method for Study to avoid dependencies with Submission Envelope
-         * - Adding Studies to Submission Envelopes is not required at this moment.
-         * - However, need to make sure whether this approach has to change in the long term.
-         */
-        Study updatedStudy = metadataUpdateService.updateStudy(existingStudy, patch);
+        Study updatedStudy = metadataUpdateService.update(existingStudy, patch);
         studyEventHandler.updatedStudy(updatedStudy);
         return updatedStudy;
     }

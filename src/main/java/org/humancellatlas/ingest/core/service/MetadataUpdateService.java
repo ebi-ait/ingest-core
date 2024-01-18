@@ -10,8 +10,10 @@ import org.humancellatlas.ingest.patch.JsonPatcher;
 import org.humancellatlas.ingest.patch.PatchService;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -24,6 +26,8 @@ public class MetadataUpdateService {
     private final @NonNull ValidationStateChangeService validationStateChangeService;
     private final @NonNull JsonPatcher jsonPatcher;
 
+    private final Environment environment;
+
     public <T extends MetadataDocument> T update(T metadataDocument, ObjectNode patch) {
         ObjectMapper mapper = new ObjectMapper();
 
@@ -35,9 +39,9 @@ public class MetadataUpdateService {
         T doc = metadataCrudService.save(patchedMetadata);
 
         /* Don't do for MorPhic - no need for updateStudy or updateDataset for bypassing this*/
-        /*if (contentChanged) {
+        if (!Arrays.asList(environment.getActiveProfiles()).contains("morphic") && contentChanged) {
             validationStateChangeService.changeValidationState(doc.getType(), doc.getId(), ValidationState.DRAFT);
-        }*/
+        }
 
         return doc;
     }
