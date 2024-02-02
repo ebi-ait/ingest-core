@@ -132,8 +132,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static Boolean isRequestOutsideProxy(HttpServletRequest request) {
         logger.info("header {}: {}", FORWARDED_HOST, request.getHeader(FORWARDED_HOST));
         logger.info("header {}: {}", "x-forwarded-for", request.getHeader("x-forwarded-for"));
-        logger.info("request uri", request.getRequestURI());
-        logger.info("method", request.getMethod());
+        logger.info("request uri: {}", request.getRequestURI());
+        logger.info("method: {}", request.getMethod());
         return Optional.ofNullable(request.getHeader(FORWARDED_HOST)).isPresent();
     }
 
