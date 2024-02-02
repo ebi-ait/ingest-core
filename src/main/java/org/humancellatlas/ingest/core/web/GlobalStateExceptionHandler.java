@@ -136,7 +136,7 @@ public class GlobalStateExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public @ResponseBody
     ExceptionInfo handleAccessDeniedException(HttpServletRequest request, Exception e) {
-        getLog().info("access denied: {} {}", request.getMethod(), request.getRequestURL());
+        getLog().info("access denied: {} {} , X-Forwarded-For: {}", request.getMethod(), request.getRequestURL(), request.getHeader("X-Forwarded-For"));
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
