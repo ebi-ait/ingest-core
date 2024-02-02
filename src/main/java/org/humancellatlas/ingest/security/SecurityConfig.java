@@ -37,7 +37,7 @@ import static org.springframework.http.HttpMethod.*;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String FORWARDED_HOST = "x-forwarded-host";
-    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(ArchiveJobController.class);
 
     private static final List<AntPathRequestMatcher> SECURED_ANT_PATHS = setupSecuredAntPaths();
 
