@@ -2,6 +2,9 @@ package org.humancellatlas.ingest.security;
 
 import com.auth0.spring.security.api.BearerSecurityContextRepository;
 import com.auth0.spring.security.api.JwtAuthenticationEntryPoint;
+import org.humancellatlas.ingest.archiving.submission.web.ArchiveJobController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -34,6 +37,7 @@ import static org.springframework.http.HttpMethod.*;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String FORWARDED_HOST = "x-forwarded-host";
+    private static final Logger logger = LoggerFactory.getLogger(ArchiveJobController.class);
 
     private static final List<AntPathRequestMatcher> SECURED_ANT_PATHS = setupSecuredAntPaths();
 
@@ -126,6 +130,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private static Boolean isRequestOutsideProxy(HttpServletRequest request) {
+        logger.info("header %s: %s", FORWARDED_HOST, request.getHeader(FORWARDED_HOST));
+        logger.info("header %s: %s", "x-forwarded-for", request.getHeader("x-forwarded-for"));
         return Optional.ofNullable(request.getHeader(FORWARDED_HOST)).isPresent();
     }
 
