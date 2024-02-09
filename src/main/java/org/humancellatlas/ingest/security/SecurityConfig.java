@@ -133,6 +133,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         logger.info("header {}: {}", FORWARDED_HOST, request.getHeader(FORWARDED_HOST));
         logger.info("header {}: {}", "x-forwarded-for", request.getHeader("x-forwarded-for"));
         logger.info("request uri: {}", request.getRequestURI());
+        logger.info("remote host: {}", request.getRemoteHost());
+        logger.info("remote addr: {}", request.getRemoteAddr());
         logger.info("method: {}", request.getMethod());
         return Optional.ofNullable(request.getHeader(FORWARDED_HOST)).isPresent();
     }
