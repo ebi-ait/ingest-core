@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.messaging.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 import org.humancellatlas.ingest.state.ValidationState;
 
 
@@ -13,6 +14,7 @@ import org.humancellatlas.ingest.state.ValidationState;
  */
 @Getter
 @AllArgsConstructor
+@ToString
 public class MetadataDocumentMessage {
     private final String documentType;
     private final String documentId;
