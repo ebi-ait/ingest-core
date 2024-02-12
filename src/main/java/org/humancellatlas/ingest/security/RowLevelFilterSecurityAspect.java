@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -150,7 +151,7 @@ public class RowLevelFilterSecurityAspect {
             throw new AccessDeniedException(String.format("access denied: authorities [%s], principal: %s",
                     authentication.getAuthorities()
                                     .stream()
-                                    .map(a->a.getAuthority())
+                                    .map(GrantedAuthority::getAuthority)
                                             .collect(Collectors.joining(", ")),
                     authentication.getName()));
         }

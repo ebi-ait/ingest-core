@@ -13,13 +13,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
+import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -135,12 +140,20 @@ public class GlobalStateExceptionHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(AccessDeniedException.class)
     public @ResponseBody
-    ExceptionInfo handleAccessDeniedException(HttpServletRequest request, Exception e) {
-        getLog().info("access denied: {} {}, X-Forwarded-For: {}, remote host: {}",
+    ExceptionInfo handleAccessDeniedException(HttpServletRequest request, Exception e) {String authName;
+        Optional<Authentication> authentication = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
+
+        getLog().info("access denied: {} {}, X-Forwarded-For: {}, remote host: {}, authorities: [{}], principal: {}",
                 request.getMethod(),
                 request.getRequestURL(),
                 request.getHeader("X-Forwarded-For"),
-                request.getRemoteHost());
+                request.getRemoteHost(),
+                authentication.map(Authentication::getAuthorities)
+                        .orElse(List.of())
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.joining(", ")),
+                authentication.map(Principal::getName).orElse("n/a"));
         return new ExceptionInfo(request.getRequestURL().toString(), e.getLocalizedMessage());
     }
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
