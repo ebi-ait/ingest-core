@@ -147,7 +147,12 @@ public class RowLevelFilterSecurityAspect {
             if (spelHelper.parseExpression(variableNames, variableValues, rowLevelFilterSecurity.expression())){
                 return queryResult;
             }
-            throw new AccessDeniedException("access denied");
+            throw new AccessDeniedException(String.format("access denied: authorities [%s], principal: %s",
+                    authentication.getAuthorities()
+                                    .stream()
+                                    .map(a->a.getAuthority())
+                                            .collect(Collectors.joining(", ")),
+                    authentication.getName()));
         }
 
         private boolean isResultInIgnoreList(Optional<?> queryResult) {
@@ -158,7 +163,7 @@ public class RowLevelFilterSecurityAspect {
         private Object filterList(List<?> queryResult) {
             Object result;
             List<?> documentList = queryResult;
-            if (documentList.size() == 0) {
+            if (documentList.isEmpty()) {
                 result = documentList;
             } else {
                 result = filterDocumentList((List<MetadataDocument>) documentList);
