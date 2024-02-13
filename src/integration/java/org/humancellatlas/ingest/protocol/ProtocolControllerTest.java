@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureDataMongo()
 @AutoConfigureMockMvc()
-@WithMockUser(username = "alice", roles = {"WRANGLER"})
+@WithMockUser(username = "alice", authorities = {"WRANGLER"})
 
 public class ProtocolControllerTest {
     @Autowired

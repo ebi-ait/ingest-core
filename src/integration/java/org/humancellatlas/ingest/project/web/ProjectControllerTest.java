@@ -165,7 +165,7 @@ class ProjectControllerTest {
     }
 
     @Nested
-    @WithMockUser(roles = "WRNAGLER")
+    @WithMockUser(authorities = "WRNAGLER")
     class Filter {
         @BeforeEach
         public void setup(){

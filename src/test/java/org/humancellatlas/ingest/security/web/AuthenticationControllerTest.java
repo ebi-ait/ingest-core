@@ -110,7 +110,7 @@ public class AuthenticationControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {"CONTRIBUTOR"})
+        @WithMockUser(authorities = {"CONTRIBUTOR"})
         void byRegisteredUser() throws Exception {
             // expect:
             webApp

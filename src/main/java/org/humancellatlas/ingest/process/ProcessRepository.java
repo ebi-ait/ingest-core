@@ -26,12 +26,14 @@ import java.util.stream.Stream;
                         "? "+
                         "   (" +
                         "      #authentication.authorities.![authority].contains(" +
-                        "          'ROLE_access_' +#filterObject.project.uuid?.toString()) " +
+                        "          'access_' +#filterObject.project.uuid?.toString()) " +
                         "     or " +
-                        "      #authentication.authorities.![authority].contains('ROLE_SERVICE') " +
+                        "      #authentication.authorities.![authority].contains('SERVICE') " +
                         "     or " +
-                        "      #filterObject.project.content['dataAccess']['type'] " +
+                        "      #filterObject.project.content['dataAccess']?.get('type') " +
                         "         eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label" +
+                        "     or " +
+                        "      #filterObject.project.content['dataAccess'] == null" +
                         "   )" +
                         ":true",
         ignoreClasses = {Project.class})

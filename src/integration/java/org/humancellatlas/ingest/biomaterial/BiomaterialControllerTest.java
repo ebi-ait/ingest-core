@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureDataMongo()
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-@WithMockUser(username = "alice", roles = {"WRANGLER"})
+@WithMockUser(username = "alice", authorities = {"WRANGLER"})
 public class BiomaterialControllerTest {
 
     @MockBean
@@ -310,7 +310,7 @@ public class BiomaterialControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "alice", roles = {"WRANGLER"})
+    @WithMockUser(username = "alice", authorities = {"WRANGLER"})
     public void testLinkBiomaterialAsDerivedByProcessesUsingPostMethodWithOneProcessInPayload() throws Exception {
         // when
         webApp.perform(post("/biomaterials/{id}/derivedByProcesses/", biomaterial.getId())

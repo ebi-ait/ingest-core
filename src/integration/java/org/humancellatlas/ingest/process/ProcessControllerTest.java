@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureDataMongo()
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-@WithMockUser(username = "alice", roles = {"WRANGLER"})
+@WithMockUser(username = "alice", authorities = {"WRANGLER"})
 
 class ProcessControllerTest {
     @MockBean

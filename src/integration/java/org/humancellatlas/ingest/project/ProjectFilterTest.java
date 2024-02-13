@@ -38,7 +38,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
-@WithMockUser(username = "alice", roles = {"WRANGLER"})
+@WithMockUser(username = "alice", authorities = {"WRANGLER"})
 @Import(ConvertersConfiguration.class)
 class ProjectFilterTest {
 

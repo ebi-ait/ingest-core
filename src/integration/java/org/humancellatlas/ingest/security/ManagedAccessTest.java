@@ -80,7 +80,7 @@ public class ManagedAccessTest {
     private MigrationConfiguration migrationConfiguration;
 
     @BeforeEach
-    @WithMockUser(roles = "WRANGLER")
+    @WithMockUser(authorities = "WRANGLER")
     public void setupTestData() throws Exception {
 
         // datasets A, B - managed access
@@ -109,7 +109,7 @@ public class ManagedAccessTest {
     }
 
     @AfterEach
-    @WithMockUser(roles = "WRANGLER")
+    @WithMockUser(authorities = "WRANGLER")
     public void tearDown() {
         Stream.builder()
                         .add(projectRepository)
@@ -125,7 +125,7 @@ public class ManagedAccessTest {
     @Test
     @WithMockUser(
             username = "alice",
-            roles = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
+            authorities = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
     public void testDataAccessTypeFieldDeserialization() {
         projectRepository.findByUuid(new Uuid(makeUuid("a")))
                 .forEach(p -> Assertions.assertThat(p.getContent())
@@ -144,7 +144,7 @@ public class ManagedAccessTest {
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
         @WithMockUser(
                 username = "alice",
-                roles = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
+                authorities = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
         public void userOnProjectAList_CanSeeProjectMetadata(String metadataTypePlural) throws Exception {
             String projectMetadataUrl = getProjectMetadataUrl(metadataTypePlural, makeUuid("a"));
 
@@ -156,7 +156,7 @@ public class ManagedAccessTest {
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
         @WithMockUser(
                 username = "alice",
-                roles = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
+                authorities = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
         public void userOnProjectAList_CanSeeOpenProjectMetadata(String metadataTypePlural) throws Exception {
             String openAccessProjectMetadataUrl = getProjectMetadataUrl(metadataTypePlural, makeUuid("c"));
 
@@ -168,7 +168,7 @@ public class ManagedAccessTest {
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
         @WithMockUser(
                 username = "bob",
-                roles = {"CONTRIBUTOR", "access_bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"})
+                authorities = {"CONTRIBUTOR", "access_bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"})
         public void userNotOnProjectAList_CannotSeeMetadata(String metadataTypePlural) throws Exception {
             String projectMetadataUrl = getProjectMetadataUrl(metadataTypePlural, makeUuid("a"));
 
@@ -192,7 +192,7 @@ public class ManagedAccessTest {
         @Test
         @WithMockUser(
                 username = "alice",
-                roles = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
+                authorities = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
         public void userOnProjectAListCanSeeAllProjects() throws Exception {
 
             webApp.perform(get("/projects"))
@@ -202,7 +202,7 @@ public class ManagedAccessTest {
         @Test
         @WithMockUser(
                 username = "bob",
-                roles = {"CONTRIBUTOR"})
+                authorities = {"CONTRIBUTOR"})
         public void userNotOnProjectAListCanSeeAllProjects() throws Exception {
             webApp.perform(get("/projects"))
                     .andExpect(jsonPath("$.page.totalElements").value("3"));
@@ -292,7 +292,7 @@ public class ManagedAccessTest {
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
         @WithMockUser(
                 username = "alice",
-                roles = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
+                authorities = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
         public void userOnProjectAList_CanSeeOnlyOpenAndProjectAMetadata(String metadataTypePlural) throws Exception {
             String metadataCollectionUrl = "/" + metadataTypePlural;
             webApp.perform(get(metadataCollectionUrl))
@@ -308,7 +308,7 @@ public class ManagedAccessTest {
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProject")
         @WithMockUser(
                 username = "alice",
-                roles = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
+                authorities = {"CONTRIBUTOR", "access_aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"})
         public void userOnProjectAList_CanSeeSubmissionMetadata(String metadataTypePlural) throws Exception {
             String submissionMetadataUrl = getSubmissionMetadataUrl(metadataTypePlural, makeUuid("a"));
             webApp.perform(get(submissionMetadataUrl))
@@ -330,7 +330,7 @@ public class ManagedAccessTest {
     @Nested
     @WithMockUser(
             username = "service",
-            roles = {"SERVICE"})
+            authorities = {"SERVICE"})
     class ServiceUserAccessControl {
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProject")
