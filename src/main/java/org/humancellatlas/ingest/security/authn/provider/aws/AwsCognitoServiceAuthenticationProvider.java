@@ -67,7 +67,7 @@ public class AwsCognitoServiceAuthenticationProvider implements AuthenticationPr
 
     private void verifyIssuer(final String issuer) {
         if (!issuer.contains("cognito")) {
-            throw new UnlistedJwtIssuer(String.format("Not an Cognito issued token: %s", issuer), issuer);
+            throw new UnlistedJwtIssuer(String.format("Not a Cognito issued token: %s", issuer), issuer);
         }
     }
 
