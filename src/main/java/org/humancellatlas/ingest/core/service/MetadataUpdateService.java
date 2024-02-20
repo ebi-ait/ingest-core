@@ -46,19 +46,6 @@ public class MetadataUpdateService {
         return doc;
     }
 
-    public <T extends MetadataDocument> T updateStudy(T metadataDocument, ObjectNode patch) {
-        ObjectMapper mapper = new ObjectMapper();
-
-        Boolean contentChanged = Optional.ofNullable(patch.get("content"))
-                .map(content -> !content.equals(mapper.valueToTree(metadataDocument.getContent())))
-                .orElse(false);
-
-        T patchedMetadata = jsonPatcher.merge(patch, metadataDocument);
-        T doc = metadataCrudService.save(patchedMetadata);
-
-        return doc;
-    }
-
     public <T extends MetadataDocument> T acceptUpdate(T updateDocument, SubmissionEnvelope submissionEnvelope) {
         T originalDocument = metadataCrudService.findOriginalByUuid(updateDocument.getUuid().getUuid().toString(), updateDocument.getType());
 

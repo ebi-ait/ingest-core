@@ -75,17 +75,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final AuthenticationProvider gcpAuthenticationProvider;
     private final AuthenticationProvider elixirAuthenticationProvider;
+    private final AuthenticationProvider awsCognitoAuthenticationProvider;
 
     public SecurityConfig(@Qualifier(GCP) AuthenticationProvider gcp,
-                          @Qualifier(ELIXIR) AuthenticationProvider elixir) {
+                          @Qualifier(ELIXIR) AuthenticationProvider elixir,
+                          @Qualifier("COGNITO") AuthenticationProvider awsCognito) {
         this.gcpAuthenticationProvider = gcp;
         this.elixirAuthenticationProvider = elixir;
+        this.awsCognitoAuthenticationProvider = awsCognito;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authenticationProvider(elixirAuthenticationProvider)
                 .authenticationProvider(gcpAuthenticationProvider)
+                .authenticationProvider(awsCognitoAuthenticationProvider)
                 .securityContext().securityContextRepository(new BearerSecurityContextRepository())
                 .and()
                 .exceptionHandling().authenticationEntryPoint(new JwtAuthenticationEntryPoint())
@@ -104,7 +108,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(POST, "/submissionEnvelopes").authenticated()
                 .antMatchers(POST, "/submissionEnvelopes/**").authenticated()
                 .antMatchers(POST, "/projects").authenticated()
-                .antMatchers(POST, "/dataset").permitAll()
+                .antMatchers(POST, "/datasets").authenticated()
+                .antMatchers(POST, "/studies").authenticated()
                 .antMatchers(POST, "/projects/suggestion").permitAll()
                 .antMatchers(POST, "/projects/catalogue").permitAll()
                 .antMatchers(GET, "/user/**").authenticated()

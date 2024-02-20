@@ -10,10 +10,10 @@ public class MigrationConfiguration {
     @Value("${spring.data.mongodb.uri}")
     private String mongoURI;
 
-    @Bean
+    /*@Bean
     public Mongobee Configure() {
         Mongobee runner = new Mongobee(mongoURI);
         runner.setChangeLogsScanPackage("org.humancellatlas.ingest.migrations");
         return runner;
-    }
+    }*/
 }
