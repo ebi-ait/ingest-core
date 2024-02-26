@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.security.authn.provider.aws;
 import com.auth0.jwt.JWT;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
 import lombok.extern.slf4j.Slf4j;
+import org.humancellatlas.ingest.security.Account;
 import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
 import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
 import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
@@ -47,8 +48,9 @@ public class AwsCognitoServiceAuthenticationProvider implements AuthenticationPr
 
         try {
             // Make a request to Cognito's user info endpoint to retrieve user information
+            final String userInfoUrl = awsCognitoDomainUrl + "/userinfo";
             final UserInfo userInfo = webClient.get()
-                    .uri("/userinfo")
+                    .uri(userInfoUrl)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                     .retrieve()
                     .bodyToMono(UserInfo.class)
@@ -56,7 +58,13 @@ public class AwsCognitoServiceAuthenticationProvider implements AuthenticationPr
 
             // Validate user information as needed
             if (userInfo != null && userInfo.getEmail() != null) {
-                return new OpenIdAuthentication(userInfo.toAccount());
+                final Account account = userInfo.toAccount();
+                account.setName(userInfo.getEmail());
+
+                final OpenIdAuthentication openIdAuth = new OpenIdAuthentication(account);
+                openIdAuth.authenticateWith(userInfo);
+
+                return openIdAuth;
             } else {
                 throw new AuthenticationServiceException("Invalid user information");
             }
