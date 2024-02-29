@@ -4,20 +4,28 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.security.CheckAllowed;
 import org.humancellatlas.ingest.study.Study;
 import org.humancellatlas.ingest.study.StudyRepository;
 import org.humancellatlas.ingest.study.StudyService;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.exception.NotAllowedDuringSubmissionStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
+import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.Optional;
+import java.util.UUID;
 
 @RepositoryRestController
 @ExposesResourceFor(Study.class)
@@ -76,6 +84,34 @@ public class StudyController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+//    @PreAuthorize("hasAnyRole('ROLE_CONTRIBUTOR', 'ROLE_WRANGLER', 'ROLE_SERVICE')")
+    @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    @PostMapping(path = "submissionEnvelopes/{sub_id}/studies")
+    ResponseEntity<Resource<?>> addStudyToEnvelope(
+            @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+            @RequestBody Study study,
+            @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
+            PersistentEntityResourceAssembler assembler) {
+        updatingUuid.ifPresent(uuid -> {
+            study.setUuid(new Uuid(uuid.toString()));
+            study.setIsUpdate(true);
+        });
+        Study entity = getStudyService().addStudyToSubmissionEnvelope(submissionEnvelope, study);
+        PersistentEntityResource resource = assembler.toFullResource(entity);
+        return ResponseEntity.accepted().body(resource);
+    }
+
+    @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    @PutMapping(path = "studies/{stud_id}/submissionEnvelopes/{sub_id}")
+    ResponseEntity<Resource<?>> linkSubmissionToStudy(
+            @PathVariable("stud_id") Study study,
+            @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+            PersistentEntityResourceAssembler assembler) {
+        Study savedStudy = getStudyService().linkStudySubmissionEnvelope(submissionEnvelope, study);
+        PersistentEntityResource projectResource = assembler.toFullResource(savedStudy);
+        return ResponseEntity.accepted().body(projectResource);
     }
 
 }

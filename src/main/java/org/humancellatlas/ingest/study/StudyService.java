@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,5 +87,27 @@ public class StudyService {
         Study deleteStudy = deleteStudyOptional.get();
         metadataCrudService.deleteDocument(deleteStudy);
         studyEventHandler.deletedStudy(studyId);
+    }
+
+    public Study addStudyToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Study study) {
+        if (!study.getIsUpdate()) {
+            return metadataCrudService.addToSubmissionEnvelopeAndSave(study, submissionEnvelope);
+        } else {
+            return metadataUpdateService.acceptUpdate(study, submissionEnvelope);
+        }
+    }
+
+    public Study linkStudySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Study study) {
+        final String studyId = study.getId();
+        study.addToSubmissionEnvelopes(submissionEnvelope);
+        studyRepository.save(study);
+
+        studyRepository.findByUuidUuidAndIsUpdateFalse(study.getUuid().getUuid()).ifPresent(studyByUuid -> {
+            if (!studyByUuid.getId().equals(studyId)) {
+                studyByUuid.addToSubmissionEnvelopes(submissionEnvelope);
+                studyRepository.save(studyByUuid);
+            }
+        });
+        return study;
     }
 }
