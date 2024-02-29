@@ -24,6 +24,8 @@ import org.humancellatlas.ingest.security.CheckAllowed;
 import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.SubmitAction;
 import org.humancellatlas.ingest.state.ValidationState;
+import org.humancellatlas.ingest.study.Study;
+import org.humancellatlas.ingest.study.StudyRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
@@ -70,6 +72,7 @@ public class SubmissionController {
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull FileRepository fileRepository;
     private final @NonNull ProjectRepository projectRepository;
+    private final @NonNull StudyRepository studyRepository;
     private final @NonNull ProtocolRepository protocolRepository;
     private final @NonNull BiomaterialRepository biomaterialRepository;
     private final @NonNull ProcessRepository processRepository;
@@ -98,6 +101,17 @@ public class SubmissionController {
                                   final PersistentEntityResourceAssembler resourceAssembler) {
         Page<Project> projects = getProjectRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(projects, resourceAssembler));
+    }
+
+    @GetMapping({
+            "/submissionEnvelopes/{sub_id}" + Links.STUDIES_URL,
+            "/submissionEnvelopes/{sub_id}" + Links.SUBMISSION_RELATED_STUDIES_URL
+    })
+    ResponseEntity<?> getStudies(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                 Pageable pageable,
+                                 final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Study> studies = getStudyRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(studies, resourceAssembler));
     }
 
     @GetMapping("/submissionEnvelopes/{sub_id}/biomaterials")

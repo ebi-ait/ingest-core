@@ -92,6 +92,9 @@ public class Links {
     public static final String FILES_REL = "files";
     public static final String PROJECTS_URL = "/projects";
     public static final String PROJECTS_REL = "projects";
+
+    public static final String STUDIES_URL = "/studies";
+    public static final String STUDIES_REL = "studies";
     public static final String PROTOCOLS_URL = "/protocols";
     public static final String PROTOCOLS_REL = "protocols";
     public static final String BUNDLE_MANIFESTS_URL = "/bundleManifests";
@@ -108,6 +111,9 @@ public class Links {
     public static final String SUBMISSION_LINKING_MAP_REL = "linkingMap";
     public static final String SUBMISSION_RELATED_PROJECTS_URL = "/relatedProjects";
     public static final String SUBMISSION_RELATED_PROJECTS_REL = "relatedProjects";
+
+    public static final String SUBMISSION_RELATED_STUDIES_URL = "/relatedStudies";
+    public static final String SUBMISSION_RELATED_STUDIES_REL = "relatedStudies";
 
     public static final String SUBMISSION_DOCUMENTS_SM_URL = "/documentSmReport";
     public static final String SUBMISSION_DOCUMENTS_SM_REL = "documentSmReport";
