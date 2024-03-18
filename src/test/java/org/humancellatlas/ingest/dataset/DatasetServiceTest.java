@@ -26,10 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {
-        DatasetService.class,
-        DatasetRepository.class
-})
+@SpringBootTest(classes = {DatasetService.class, DatasetRepository.class})
 public class DatasetServiceTest {
     @Autowired
     private ApplicationContext applicationContext;
@@ -125,10 +122,7 @@ public class DatasetServiceTest {
             when(datasetRepository.findById(nonExistentDatasetId)).thenReturn(Optional.empty());
 
             // when, then:
-            ResponseStatusException exception = assertThrows(
-                    ResponseStatusException.class,
-                    () -> datasetService.update(nonExistentDatasetId, patch)
-            );
+            ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> datasetService.update(nonExistentDatasetId, patch));
             assertThat(Objects.requireNonNull(exception.getMessage()).contains("404 NOT_FOUND"));
 
             // verify that other methods are not called
@@ -172,11 +166,8 @@ public class DatasetServiceTest {
             when(datasetRepository.findById(nonExistentDatasetId)).thenReturn(Optional.empty());
 
             // when, then:
-            ResponseStatusException exception = assertThrows(
-                    ResponseStatusException.class,
-                    () -> datasetService.replace(nonExistentDatasetId, updatedDataset)
-            );
-            assertThat("404 NOT_FOUND").isEqualTo(exception.getMessage());
+            ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> datasetService.replace(nonExistentDatasetId, updatedDataset));
+            assertThat(Objects.requireNonNull(exception.getMessage()).contains("404 NOT_FOUND"));
 
             // verify that other methods are not called
             verify(datasetRepository, never()).save(any());
@@ -205,6 +196,23 @@ public class DatasetServiceTest {
             verify(metadataCrudService).deleteDocument(persistentDataset);
             verify(datasetEventHandler).deletedDataset(datasteId);
 
+        }
+
+        @Test
+        @DisplayName("Delete Dataset - Not Found")
+        void deleteDatasetNotFound() {
+            // given:
+            String nonExistentDatasetId = "nonExistentId";
+
+            // and:
+            when(datasetRepository.findById(nonExistentDatasetId)).thenReturn(Optional.empty());
+
+            // when, then:
+            ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> datasetService.delete(nonExistentDatasetId));
+            assertThat(Objects.requireNonNull(exception.getMessage()).contains("404 NOT_FOUND"));
+
+            verify(metadataCrudService, never()).deleteDocument(any());
+            verify(datasetEventHandler, never()).deletedDataset(any());
         }
     }
 }

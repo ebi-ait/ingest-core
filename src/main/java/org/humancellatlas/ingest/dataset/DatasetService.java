@@ -75,7 +75,7 @@ public class DatasetService {
 
         if (existingDatasetOptional.isEmpty()) {
             log.warn("Dataset not found with ID: {}", datasetId);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Dataset not found with ID: " + datasetId);
         }
 
         // Replace the entire entity with the updatedStudy
