@@ -19,6 +19,7 @@ ENV USR_AUTH_AUDIENCE=https://dev.data.humancellatlas.org/
 ENV GCP_JWK_PROVIDER_BASE_URL=https://www.googleapis.com/service_accounts/v1/jwk/
 ENV GCP_PROJECT_WHITELIST=hca-dcp-production.iam.gserviceaccount.com,human-cell-atlas-travis-test.iam.gserviceaccount.com,broad-dsde-mint-dev.iam.gserviceaccount.com,broad-dsde-mint-test.iam.gserviceaccount.com,broad-dsde-mint-staging.iam.gserviceaccount.com
 ENV SCHEMA_BASE_URI=https://schema.dev.data.humancellatlas.org/
+ENV AWS_COGNITO_DOMAIN=https://morphic-dev.auth.eu-west-2.amazoncognito.com/oauth2
 
 ADD gradle ./gradle
 ADD src ./src

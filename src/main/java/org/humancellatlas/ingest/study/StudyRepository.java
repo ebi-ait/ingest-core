@@ -26,7 +26,4 @@ public interface StudyRepository extends MongoRepository<Study, String> {
 
     Page<Study> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
-//    @RestResource(exported = false)
-//    Optional<Study> findById(String id);
-
 }

@@ -13,16 +13,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class StudyEventHandler {
 
-    private final NotificationService notificationService;
-    private final Environment environment;
-    private final IdentityService identityService;
-
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     public void registeredStudy(Study study) {
         log.info("A new study [" + study.getUuid() + "] was registered.");
-        // TODO: Probably don't need a Notification request at the moment. Might do so in the future.
-        // return this.notificationService.createNotification(notificationRequest);
     }
 
     public void updatedStudy(Study study) {

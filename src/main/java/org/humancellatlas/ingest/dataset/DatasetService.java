@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class DatasetService {
     public Dataset register(final Dataset dataset) {
         final Dataset persistentDataset = datasetRepository.save(dataset);
 
-        datasetEventHandler.registeredDataset(datasetRepository.save(dataset));
+        datasetEventHandler.registeredDataset(persistentDataset);
         return persistentDataset;
     }
 
@@ -67,5 +68,46 @@ public class DatasetService {
 
         metadataCrudService.deleteDocument(deleteDataset);
         datasetEventHandler.deletedDataset(datasetId);
+    }
+
+    public Dataset replace(String datasetId, Dataset updatedDataset) {
+        Optional<Dataset> existingDatasetOptional = datasetRepository.findById(datasetId);
+
+        if (existingDatasetOptional.isEmpty()) {
+            log.warn("Dataset not found with ID: {}", datasetId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        // Replace the entire entity with the updatedStudy
+        Dataset existingDataset = existingDatasetOptional.get();
+        existingDataset = updatedDataset; // This line replaces the entire entity
+
+        datasetRepository.save(existingDataset);
+        datasetEventHandler.updatedDataset(existingDataset);
+
+        return existingDataset;
+    }
+
+    public Dataset addDatasetToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Dataset dataset) {
+        if (!dataset.getIsUpdate()) {
+            return metadataCrudService.addToSubmissionEnvelopeAndSave(dataset, submissionEnvelope);
+        } else {
+            return metadataUpdateService.acceptUpdate(dataset, submissionEnvelope);
+        }
+    }
+
+    public Dataset linkDatasetSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Dataset dataset) {
+        final String datasetId = dataset.getId();
+        dataset.addToSubmissionEnvelopes(submissionEnvelope);
+        datasetRepository.save(dataset);
+
+        datasetRepository.findByUuidUuidAndIsUpdateFalse(dataset.getUuid().getUuid()).ifPresent(datasetByUuid -> {
+            if (!datasetByUuid.getId().equals(datasetId)) {
+                datasetByUuid.addToSubmissionEnvelopes(submissionEnvelope);
+                datasetRepository.save(datasetByUuid);
+            }
+        });
+
+        return dataset;
     }
 }

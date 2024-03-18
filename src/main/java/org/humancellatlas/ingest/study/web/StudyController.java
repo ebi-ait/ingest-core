@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.security.CheckAllowed;
 import org.humancellatlas.ingest.study.Study;
 import org.humancellatlas.ingest.study.StudyRepository;
@@ -86,7 +87,7 @@ public class StudyController {
         }
     }
 
-//    @PreAuthorize("hasAnyRole('ROLE_CONTRIBUTOR', 'ROLE_WRANGLER', 'ROLE_SERVICE')")
+    // @PreAuthorize("hasAnyRole('ROLE_CONTRIBUTOR', 'ROLE_WRANGLER', 'ROLE_SERVICE')")
     @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PostMapping(path = "submissionEnvelopes/{sub_id}/studies")
     ResponseEntity<Resource<?>> addStudyToEnvelope(
@@ -110,8 +111,16 @@ public class StudyController {
             @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
             PersistentEntityResourceAssembler assembler) {
         Study savedStudy = getStudyService().linkStudySubmissionEnvelope(submissionEnvelope, study);
-        PersistentEntityResource projectResource = assembler.toFullResource(savedStudy);
-        return ResponseEntity.accepted().body(projectResource);
+        PersistentEntityResource studyResource = assembler.toFullResource(savedStudy);
+        return ResponseEntity.accepted().body(studyResource);
     }
 
+    @PutMapping(path = "datasets/{dataset_id}/studies/{stud_id}")
+    ResponseEntity<Resource<?>> linkDatasetToStudy(@PathVariable("dataset_id") Dataset dataset,
+                                                   @PathVariable("stud_id") Study study,
+                                                   PersistentEntityResourceAssembler assembler) {
+
+        return ResponseEntity.accepted().body(
+                assembler.toFullResource(getStudyService().linkDatasetToStudy(dataset, study)));
+    }
 }

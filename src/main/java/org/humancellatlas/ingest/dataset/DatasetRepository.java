@@ -1,6 +1,8 @@
 package org.humancellatlas.ingest.dataset;
 
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.study.Study;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -9,6 +11,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Javadocs go here!
@@ -23,4 +26,9 @@ public interface DatasetRepository extends MongoRepository<Dataset, String> {
 
     @RestResource(exported = false)
     Optional<Dataset> findById(String id);
+
+    @RestResource(rel = "findByUuid", path = "findByUuid")
+    Optional<Dataset> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
+
+    Page<Study> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 }

@@ -6,19 +6,17 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
-
-import static java.lang.String.format;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +24,6 @@ import static java.lang.String.format;
 public class StudyService {
     @Autowired
     private final MongoTemplate mongoTemplate;
-
     private final @NonNull StudyRepository studyRepository;
     private final @NonNull MetadataCrudService metadataCrudService;
     private final @NonNull MetadataUpdateService metadataUpdateService;
@@ -109,5 +106,11 @@ public class StudyService {
             }
         });
         return study;
+    }
+
+    public Study linkDatasetToStudy(Dataset dataset, Study study) {
+        study.addDataset(dataset);
+
+        return studyRepository.save(study);
     }
 }
