@@ -9,8 +9,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @CrossOrigin
 public interface StudyRepository extends MongoRepository<Study, String> {
@@ -19,11 +21,17 @@ public interface StudyRepository extends MongoRepository<Study, String> {
     Page<Study> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
 
     @RestResource(exported = false)
-    Optional<Study> findByUuid(Uuid uuid);
+    Stream<Study> findByUuid(Uuid uuid);
 
     @RestResource(rel = "findByUuid", path = "findByUuid")
     Optional<Study> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
     Page<Study> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+
+    @RestResource(exported = false)
+    Stream<Study> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+
+    @RestResource(exported = false)
+    Collection<Study> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
 }
