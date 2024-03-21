@@ -58,6 +58,12 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
                 .withRel(Links.STUDIES_REL);
     }
 
+    private Link getDatasetsLink(SubmissionEnvelope submissionEnvelope) {
+        return entityLinks.linkForSingleResource(submissionEnvelope)
+                .slash(Links.DATASETS_URL)
+                .withRel(Links.DATASETS_REL);
+    }
+
     private Link getProtocolsLink(SubmissionEnvelope submissionEnvelope) {
         return entityLinks.linkForSingleResource(submissionEnvelope)
                 .slash(Links.PROTOCOLS_URL)
@@ -298,6 +304,7 @@ public class SubmissionEnvelopeResourceProcessor implements ResourceProcessor<Re
         resource.add(getFilesLink(submissionEnvelope));
         resource.add(getProjectsLink(submissionEnvelope));
         resource.add(getStudiesLink(submissionEnvelope));
+        resource.add(getDatasetsLink(submissionEnvelope));
         resource.add(getProtocolsLink(submissionEnvelope));
         resource.add(getBundleManifestsLink(submissionEnvelope));
         resource.add(getSubmissionManifestsLink(submissionEnvelope));
