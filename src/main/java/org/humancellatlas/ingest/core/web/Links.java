@@ -95,6 +95,8 @@ public class Links {
 
     public static final String STUDIES_URL = "/studies";
     public static final String STUDIES_REL = "studies";
+    public static final String DATASETS_URL = "/datasets";
+    public static final String DATASETS_REL = "datasets";
     public static final String PROTOCOLS_URL = "/protocols";
     public static final String PROTOCOLS_REL = "protocols";
     public static final String BUNDLE_MANIFESTS_URL = "/bundleManifests";
@@ -114,6 +116,8 @@ public class Links {
 
     public static final String SUBMISSION_RELATED_STUDIES_URL = "/relatedStudies";
     public static final String SUBMISSION_RELATED_STUDIES_REL = "relatedStudies";
+    public static final String SUBMISSION_RELATED_DATASETS_URL = "/relatedDatasets";
+    public static final String SUBMISSION_RELATED_DATASETS_REL = "relatedDatasets";
 
     public static final String SUBMISSION_DOCUMENTS_SM_URL = "/documentSmReport";
     public static final String SUBMISSION_DOCUMENTS_SM_REL = "documentSmReport";

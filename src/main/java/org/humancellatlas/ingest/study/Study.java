@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -19,8 +20,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter
-@JsonIgnoreProperties({"firstDcpVersion", "dcpVersion", "validationState",
-        "validationErrors", "graphValidationErrors", "isUpdate"})
+@EqualsAndHashCode(callSuper = true, exclude = {"submissionEnvelopes"})
+@JsonIgnoreProperties({"firstDcpVersion", "dcpVersion"})
 public class Study extends MetadataDocument {
     // A study may have 1 or more submissions related to it.
     @JsonIgnore

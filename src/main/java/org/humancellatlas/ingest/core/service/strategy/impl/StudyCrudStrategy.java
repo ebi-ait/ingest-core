@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.core.service.strategy.impl;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
+import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.study.Study;
 import org.humancellatlas.ingest.study.StudyRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -10,12 +11,15 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @Component
 @AllArgsConstructor
 public class StudyCrudStrategy implements MetadataCrudStrategy<Study> {
     private final @NonNull StudyRepository studyRepository;
+
+    private final @NonNull MessageRouter messageRouter;
 
     @Override
     public Study saveMetadataDocument(Study document) {
@@ -32,17 +36,20 @@ public class StudyCrudStrategy implements MetadataCrudStrategy<Study> {
 
     @Override
     public Study findOriginalByUuid(String uuid) {
-        return null;
+        return studyRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid))
+                .orElseThrow(() -> {
+                    throw new ResourceNotFoundException();
+                });
     }
 
     @Override
     public Stream<Study> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        return null;
+        return studyRepository.findBySubmissionEnvelope(submissionEnvelope);
     }
 
     @Override
     public Collection<Study> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-        return null;
+        return studyRepository.findAllBySubmissionEnvelope(submissionEnvelope);
     }
 
     @Override

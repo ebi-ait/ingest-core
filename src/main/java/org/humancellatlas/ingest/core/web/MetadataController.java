@@ -93,6 +93,8 @@ public class MetadataController {
                 return EntityType.PROTOCOL;
             case "projects":
                 return EntityType.PROJECT;
+            case "studies":
+                return EntityType.STUDY;
             case "processes":
                 return EntityType.PROCESS;
             case "files":

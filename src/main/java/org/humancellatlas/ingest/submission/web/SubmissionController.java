@@ -8,6 +8,8 @@ import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.web.Links;
+import org.humancellatlas.ingest.dataset.Dataset;
+import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.exporter.Exporter;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -73,6 +75,7 @@ public class SubmissionController {
     private final @NonNull FileRepository fileRepository;
     private final @NonNull ProjectRepository projectRepository;
     private final @NonNull StudyRepository studyRepository;
+    private final @NonNull DatasetRepository datasetRepository;
     private final @NonNull ProtocolRepository protocolRepository;
     private final @NonNull BiomaterialRepository biomaterialRepository;
     private final @NonNull ProcessRepository processRepository;
@@ -112,6 +115,17 @@ public class SubmissionController {
                                  final PersistentEntityResourceAssembler resourceAssembler) {
         Page<Study> studies = getStudyRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(studies, resourceAssembler));
+    }
+
+    @GetMapping({
+            "/submissionEnvelopes/{sub_id}" + Links.DATASETS_URL,
+            "/submissionEnvelopes/{sub_id}" + Links.SUBMISSION_RELATED_DATASETS_URL
+    })
+    ResponseEntity<?> getDatasets(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
+                                 Pageable pageable,
+                                 final PersistentEntityResourceAssembler resourceAssembler) {
+        Page<Dataset> datasets = getDatasetRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(datasets, resourceAssembler));
     }
 
     @GetMapping("/submissionEnvelopes/{sub_id}/biomaterials")

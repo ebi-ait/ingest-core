@@ -24,11 +24,8 @@ public interface DatasetRepository extends MongoRepository<Dataset, String> {
     @RestResource(exported = false)
     Optional<Dataset> findByUuid(Uuid uuid);
 
-    @RestResource(exported = false)
-    Optional<Dataset> findById(String id);
-
     @RestResource(rel = "findByUuid", path = "findByUuid")
     Optional<Dataset> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
-    Page<Study> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+    Page<Dataset> findBySubmissionEnvelopesContaining(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 }
