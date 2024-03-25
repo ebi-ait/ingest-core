@@ -19,14 +19,28 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+
+import static java.util.stream.Collectors.toSet;
 
 @Service
 @RequiredArgsConstructor
 @Getter
 public class StudyService {
+
+    //Helper class for capturing copies of a Study and all Submission Envelopes related to them.
+    private static class StudyBag {
+
+        private final Set<Study> studies;
+        private final Set<SubmissionEnvelope> submissionEnvelopes;
+
+        public StudyBag(Set<Study> studies, Set<SubmissionEnvelope> submissionEnvelopes) {
+            this.studies = studies;
+            this.submissionEnvelopes = submissionEnvelopes;
+        }
+
+    }
+
     @Autowired
     private final MongoTemplate mongoTemplate;
     private final @NonNull StudyRepository studyRepository;
@@ -148,5 +162,22 @@ public class StudyService {
         study.addDataset(dataset);
 
         return studyRepository.save(study);
+    }
+
+    public Set<SubmissionEnvelope> getSubmissionEnvelopes(Study study) {
+        return gather(study).submissionEnvelopes;
+    }
+
+    private StudyService.StudyBag gather(Study study) {
+        Set<SubmissionEnvelope> envelopes = new HashSet<>();
+        Set<Study> studies = this.studyRepository.findByUuid(study.getUuid()).collect(toSet());
+        studies.forEach(copy -> {
+            envelopes.addAll(copy.getSubmissionEnvelopes());
+            envelopes.add(copy.getSubmissionEnvelope());
+        });
+
+        //ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
+        envelopes.removeIf(env -> env == null || env.getSubmissionState() == null);
+        return new StudyService.StudyBag(studies, envelopes);
     }
 }

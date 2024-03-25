@@ -2,8 +2,10 @@ package org.humancellatlas.ingest.study;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,7 +20,12 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -56,6 +63,85 @@ public class StudyServiceTest {
     void setUp() {
         applicationContext.getBeansWithAnnotation(MockBean.class).forEach(Mockito::reset);
         Mockito.reset(metadataCrudService, studyRepository,studyEventHandler);
+    }
+
+    @Nested
+    class SubmissionEnvelopes {
+        Study study1;
+        Study study2;
+        Set<SubmissionEnvelope> submissionSet1;
+        Set<SubmissionEnvelope> submissionSet2;
+
+        @BeforeEach
+        void setup(){
+            // given
+            study1 = spy(new Study(null));
+            doReturn("study1").when(study1).getId();
+            study1.setUuid(Uuid.newUuid());
+
+            submissionSet1 = new HashSet<>();
+            IntStream.range(0, 3).mapToObj(Integer::toString).forEach(id -> {
+                var sub = spy(new SubmissionEnvelope());
+                doReturn(id).when(sub).getId();
+                submissionSet1.add(sub);
+            });
+            submissionSet1.forEach(study1::addToSubmissionEnvelopes);
+
+            //and:
+            study2 = spy(new Study(null));
+            doReturn("study2").when(study2).getId();
+            study2.setUuid(study1.getUuid());
+
+            submissionSet2 = new HashSet<>();
+            IntStream.range(10, 15).mapToObj(Integer::toString).forEach(id -> {
+                var sub = spy(new SubmissionEnvelope());
+                doReturn(id).when(sub).getId();
+                submissionSet2.add(sub);
+            });
+            submissionSet2.forEach(study2::addToSubmissionEnvelopes);
+        }
+
+        @Test
+        @DisplayName("get all submissions")
+        void getFromAllCopiesOfStudies() {
+            // given
+            when(studyRepository.findByUuid(study1.getUuid())).thenReturn(Stream.of(study1, study2));
+
+            // when:
+            var submissionEnvelopes = studyService.getSubmissionEnvelopes(study1);
+
+            //then:
+            assertThat(submissionEnvelopes)
+                    .containsAll(submissionSet1)
+                    .containsAll(submissionSet2);
+        }
+
+        @Test
+        @DisplayName("no duplicate submissions")
+        void getFromAllCopiesOfStudiesNoDuplicates() {
+            // given
+            var study3 = spy(new Study(null));
+            doReturn("study3").when(study3).getId();
+            study3.setUuid(study1.getUuid());
+
+            submissionSet1.forEach(study3::addToSubmissionEnvelopes);
+
+            var documentIds = new ArrayList<String>();
+            submissionSet1.forEach(submission -> documentIds.add(submission.getId()));
+            submissionSet2.forEach(submission -> documentIds.add(submission.getId()));
+
+            //and:
+            when(studyRepository.findByUuid(study1.getUuid())).thenReturn(Stream.of(study1, study2, study3));
+
+            //when:
+            var submissionEnvelopes = studyService.getSubmissionEnvelopes(study1);
+
+            //then:
+            var returnDocumentIds = new ArrayList<String>();
+            submissionEnvelopes.forEach(submission -> returnDocumentIds.add(submission.getId()));
+
+            assertThat(returnDocumentIds).containsExactlyInAnyOrderElementsOf(documentIds);
+        }
     }
 
     @Nested
