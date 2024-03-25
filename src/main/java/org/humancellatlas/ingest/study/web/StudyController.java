@@ -45,46 +45,27 @@ public class StudyController {
     @PostMapping("/studies")
     public ResponseEntity<Resource<?>> registerStudy(@RequestBody final Study study,
                                                      final PersistentEntityResourceAssembler assembler) {
-        if (Arrays.asList(environment.getActiveProfiles()).contains("morphic")) {
-            Study result = studyService.register(study);
-            return ResponseEntity.ok().body(assembler.toFullResource(result));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok().body(assembler.toFullResource(studyService.register(study)));
     }
 
     @PatchMapping("/studies/{studyId}")
     public ResponseEntity<Resource<?>> updateStudy(@PathVariable String studyId,
                                                    @RequestBody final ObjectNode patch,
                                                    final PersistentEntityResourceAssembler assembler) {
-        if (Arrays.asList(environment.getActiveProfiles()).contains("morphic")) {
-            Study updatedStudy = studyService.update(studyId, patch);
-            return ResponseEntity.ok().body(assembler.toFullResource(updatedStudy));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok().body(assembler.toFullResource(studyService.update(studyId, patch)));
     }
 
     @PutMapping("/studies/{studyId}")
     public ResponseEntity<Resource<?>> replaceStudy(@PathVariable String studyId,
                                                     @RequestBody final Study updatedStudy,
                                                     final PersistentEntityResourceAssembler assembler) {
-        if (Arrays.asList(environment.getActiveProfiles()).contains("morphic")) {
-            Study replacedStudy = studyService.replace(studyId, updatedStudy);
-            return ResponseEntity.ok().body(assembler.toFullResource(replacedStudy));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok().body(assembler.toFullResource(studyService.replace(studyId, updatedStudy)));
     }
 
     @DeleteMapping("/studies/{studyId}")
     public ResponseEntity<Void> deleteStudy(@PathVariable String studyId) {
-        if (Arrays.asList(environment.getActiveProfiles()).contains("morphic")) {
-            studyService.delete(studyId);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        studyService.delete(studyId);
+        return ResponseEntity.noContent().build();
     }
 
     // @PreAuthorize("hasAnyRole('ROLE_CONTRIBUTOR', 'ROLE_WRANGLER', 'ROLE_SERVICE')")

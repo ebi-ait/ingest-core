@@ -62,11 +62,7 @@ public class DatasetController {
     public ResponseEntity<Resource<?>> replace(@PathVariable String datasetId,
                                                @RequestBody final Dataset updatedDataset,
                                                final PersistentEntityResourceAssembler assembler) {
-        if (Arrays.asList(environment.getActiveProfiles()).contains("morphic")) {
-            return ResponseEntity.ok().body(assembler.toFullResource(datasetService.replace(datasetId, updatedDataset)));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok().body(assembler.toFullResource(datasetService.replace(datasetId, updatedDataset)));
     }
 
     // @PreAuthorize("hasAnyRole('ROLE_CONTRIBUTOR', 'ROLE_WRANGLER', 'ROLE_SERVICE')")

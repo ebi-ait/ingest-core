@@ -26,8 +26,6 @@ public class MetadataUpdateService {
     private final @NonNull ValidationStateChangeService validationStateChangeService;
     private final @NonNull JsonPatcher jsonPatcher;
 
-    private final Environment environment;
-
     public <T extends MetadataDocument> T update(T metadataDocument, ObjectNode patch) {
         ObjectMapper mapper = new ObjectMapper();
 
@@ -38,8 +36,7 @@ public class MetadataUpdateService {
         T patchedMetadata = jsonPatcher.merge(patch, metadataDocument);
         T doc = metadataCrudService.save(patchedMetadata);
 
-        /* Don't do for MorPhic - no need for updateStudy or updateDataset for bypassing this*/
-        if (!Arrays.asList(environment.getActiveProfiles()).contains("morphic") && contentChanged) {
+        if (contentChanged) {
             validationStateChangeService.changeValidationState(doc.getType(), doc.getId(), ValidationState.DRAFT);
         }
 
