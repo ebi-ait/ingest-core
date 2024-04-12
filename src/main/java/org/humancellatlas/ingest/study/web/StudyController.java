@@ -96,12 +96,12 @@ public class StudyController {
         return ResponseEntity.accepted().body(studyResource);
     }
 
-    @PutMapping(path = "datasets/{dataset_id}/studies/{stud_id}")
-    ResponseEntity<Resource<?>> linkDatasetToStudy(@PathVariable("dataset_id") Dataset dataset,
-                                                   @PathVariable("stud_id") Study study,
+    @PutMapping(path = "studies/{stud_id}/datasets/{dataset_id}")
+    ResponseEntity<Resource<?>> linkDatasetToStudy(@PathVariable("stud_id") Study study,
+                                                   @PathVariable("dataset_id") Dataset dataset,
                                                    PersistentEntityResourceAssembler assembler) {
 
         return ResponseEntity.accepted().body(
-                assembler.toFullResource(getStudyService().linkDatasetToStudy(dataset, study)));
+                assembler.toFullResource(getStudyService().linkDatasetToStudy(study, dataset)));
     }
 }

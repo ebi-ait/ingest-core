@@ -6,6 +6,8 @@ import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.EntityType;
+import org.humancellatlas.ingest.dataset.Dataset;
+import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.study.Study;
 import org.humancellatlas.ingest.study.StudyEventHandler;
 import org.humancellatlas.ingest.study.StudyRepository;
@@ -40,7 +42,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-@ActiveProfiles("morphic")
 class StudyControllerTest {
 
     @Autowired
@@ -48,6 +49,9 @@ class StudyControllerTest {
 
     @Autowired
     private StudyRepository repository;
+
+    @Autowired
+    private DatasetRepository datasetRepository;
 
     @Autowired
     private MetadataCrudService metadataCrudService;
@@ -220,6 +224,29 @@ class StudyControllerTest {
             // then:
             MockHttpServletResponse response = result.getResponse();
             assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        }
+    }
+
+    @Nested
+    class Link {
+
+        @Test
+        @DisplayName("Link dataset to study - Success")
+        void listDatasetToStudySuccess() throws Exception {
+            // given:
+            String studyContent = "{\"name\": \"study\"}";
+            Study persistentStudy = new Study(studyContent);
+            repository.save(persistentStudy);
+            String studyId = persistentStudy.getId();
+
+            String datasetContent = "{\"name\": \"study\"}";
+            Dataset persistentDataset = new Dataset(datasetContent);
+            datasetRepository.save(persistentDataset);
+            String datasetId = persistentDataset.getId();
+
+            // when:
+            webApp.perform(put("/studies/{stud_id}/datasets/{dataset_id}", studyId, datasetId))
+                    .andExpect(status().isAccepted());
         }
     }
 

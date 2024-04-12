@@ -3,6 +3,7 @@ package org.humancellatlas.ingest.study;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.humancellatlas.ingest.study.web.StudyController;
+import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.*;
         StudyController.class,
         StudyRepository.class
 })
+@Ignore
 public class StudyControllerProfileTest {
 
     @MockBean

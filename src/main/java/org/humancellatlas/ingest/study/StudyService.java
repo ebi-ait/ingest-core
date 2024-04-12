@@ -129,7 +129,8 @@ public class StudyService {
             if (contentObject instanceof Map) {
                 return (Map<String, Object>) contentObject;
             } else if (contentObject instanceof String) {
-                return objectMapper.readValue((String) contentObject, new TypeReference<Map<String, Object>>() {});
+                return objectMapper.readValue((String) contentObject, new TypeReference<Map<String, Object>>() {
+                });
             }
             return new HashMap<>();
         } catch (IOException e) {
@@ -158,7 +159,7 @@ public class StudyService {
         return study;
     }
 
-    public Study linkDatasetToStudy(Dataset dataset, Study study) {
+    public Study linkDatasetToStudy(Study study, Dataset dataset) {
         study.addDataset(dataset);
 
         return studyRepository.save(study);
