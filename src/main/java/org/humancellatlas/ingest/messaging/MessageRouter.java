@@ -6,6 +6,7 @@ import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
+import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.export.job.ExportJob;
 import org.humancellatlas.ingest.exporter.ExperimentProcess;
 import org.humancellatlas.ingest.messaging.model.MetadataDocumentMessage;
@@ -159,6 +160,14 @@ public class MessageRouter {
                 Constants.Routing.UPLOAD_AREA_CREATE,
                 messageFor(envelope),
                 envelope.getUpdateDate().toEpochMilli());
+        return true;
+    }
+
+    public boolean routeRequestDatasetUploadArea(Dataset dataset) {
+        this.messageSender.queueUploadManagerMessage(Constants.Exchanges.UPLOAD_AREA_EXCHANGE,
+                Constants.Routing.UPLOAD_AREA_CREATE,
+                messageFor(dataset),
+                dataset.getUpdateDate().toEpochMilli());
         return true;
     }
 

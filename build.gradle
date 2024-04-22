@@ -102,6 +102,9 @@ dependencies {
         exclude group: 'org.mongodb', module: 'mongo-java-driver'
     }
 
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.705'
+    /*implementation 'software.amazon.awssdk:sts:2.17.19'*/
+
     compile 'org.projectreactor:reactor-spring:1.0.1.RELEASE'
     compile 'org.projectlombok:lombok'
 

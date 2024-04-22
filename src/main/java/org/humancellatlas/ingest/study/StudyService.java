@@ -27,57 +27,51 @@ import static java.util.stream.Collectors.toSet;
 @RequiredArgsConstructor
 @Getter
 public class StudyService {
-
-    //Helper class for capturing copies of a Study and all Submission Envelopes related to them.
-    private static class StudyBag {
-
-        private final Set<Study> studies;
-        private final Set<SubmissionEnvelope> submissionEnvelopes;
-
-        public StudyBag(Set<Study> studies, Set<SubmissionEnvelope> submissionEnvelopes) {
-            this.studies = studies;
-            this.submissionEnvelopes = submissionEnvelopes;
-        }
-
-    }
-
     @Autowired
     private final MongoTemplate mongoTemplate;
     private final @NonNull StudyRepository studyRepository;
     private final @NonNull MetadataCrudService metadataCrudService;
     private final @NonNull MetadataUpdateService metadataUpdateService;
     private final @NonNull StudyEventHandler studyEventHandler;
-
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected Logger getLog() {
+    protected final Logger getLog() {
         return log;
     }
 
     private final ObjectMapper objectMapper = new ObjectMapper(); // For JSON string to Map conversion if necessary
 
+    //Helper class for capturing copies of a Study and all Submission Envelopes related to them.
+    private static class StudyBag {
+        private final Set<SubmissionEnvelope> submissionEnvelopes;
+
+        public StudyBag(Set<SubmissionEnvelope> submissionEnvelopes) {
+            this.submissionEnvelopes = submissionEnvelopes;
+        }
+    }
+
     public Study register(final Study study) {
-        Study persistentStudy = studyRepository.save(study);
+        final Study persistentStudy = studyRepository.save(study);
         studyEventHandler.registeredStudy(persistentStudy);
         return persistentStudy;
     }
 
-    public Study update(String studyId, ObjectNode patch) {
-        Optional<Study> existingStudyOptional = studyRepository.findById(studyId);
+    public Study update(final String studyId, final ObjectNode patch) {
+        final Optional<Study> existingStudyOptional = studyRepository.findById(studyId);
 
         if (existingStudyOptional.isEmpty()) {
             log.warn("Attempted to update study with ID: {} but not found.", studyId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
-        Study existingStudy = existingStudyOptional.get();
-        Study updatedStudy = metadataUpdateService.update(existingStudy, patch);
+        final Study existingStudy = existingStudyOptional.get();
+        final Study updatedStudy = metadataUpdateService.update(existingStudy, patch);
         studyEventHandler.updatedStudy(updatedStudy);
         return updatedStudy;
     }
 
-    public Study replace(String studyId, Study updatedStudy) {
-        Optional<Study> existingStudyOptional = studyRepository.findById(studyId);
+    public Study replace(final String studyId, final Study updatedStudy) {
+        final Optional<Study> existingStudyOptional = studyRepository.findById(studyId);
 
         if (existingStudyOptional.isEmpty()) {
             log.warn("Study not found with ID: {}", studyId);
@@ -85,30 +79,27 @@ public class StudyService {
         }
 
         // Replace the entire entity with the updatedStudy
-        Study existingStudy = existingStudyOptional.get();
-        existingStudy = updatedStudy; // This line replaces the entire entity
+        studyRepository.save(updatedStudy);
+        studyEventHandler.updatedStudy(updatedStudy);
 
-        studyRepository.save(existingStudy);
-        studyEventHandler.updatedStudy(existingStudy);
-
-        return existingStudy;
+        return updatedStudy;
     }
 
-    public void delete(String studyId) {
-        Optional<Study> deleteStudyOptional = studyRepository.findById(studyId);
+    public void delete(final String studyId) {
+        final Optional<Study> deleteStudyOptional = studyRepository.findById(studyId);
 
         if (deleteStudyOptional.isEmpty()) {
             log.warn("Attempted to delete study with ID: {} but not found.", studyId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
-        Study deleteStudy = deleteStudyOptional.get();
+        final Study deleteStudy = deleteStudyOptional.get();
         metadataCrudService.deleteDocument(deleteStudy);
         studyEventHandler.deletedStudy(studyId);
     }
 
-    public Study addStudyToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Study study) {
-        Map<String, Object> contentMap = convertAndMergeStudyContent(study.getContent());
+    public Study addStudyToSubmissionEnvelope(final SubmissionEnvelope submissionEnvelope, final Study study) {
+        final Map<String, Object> contentMap = convertAndMergeStudyContent(study.getContent());
         study.setContent(contentMap);
 
         if (!study.getIsUpdate()) {
@@ -118,13 +109,13 @@ public class StudyService {
         }
     }
 
-    private Map<String, Object> convertAndMergeStudyContent(Object contentObject) {
-        Map<String, Object> contentMap = convertContentToObjectMap(contentObject);
+    private Map<String, Object> convertAndMergeStudyContent(final Object contentObject) {
+        final Map<String, Object> contentMap = convertContentToObjectMap(contentObject);
         contentMap.putAll(createBaseContentForStudy());
         return contentMap;
     }
 
-    private Map<String, Object> convertContentToObjectMap(Object contentObject) {
+    private Map<String, Object> convertContentToObjectMap(final Object contentObject) {
         try {
             if (contentObject instanceof Map) {
                 return (Map<String, Object>) contentObject;
@@ -139,13 +130,13 @@ public class StudyService {
     }
 
     private Map<String, String> createBaseContentForStudy() {
-        Map<String, String> content = new HashMap<>();
+        final Map<String, String> content = new HashMap<>();
         content.put("describedBy", "https://schema.morphic.bio/type/project/0.0.1/study");
         content.put("schema_type", "study");
         return content;
     }
 
-    public Study linkStudySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Study study) {
+    public Study linkStudySubmissionEnvelope(final SubmissionEnvelope submissionEnvelope, final Study study) {
         final String studyId = study.getId();
         study.addToSubmissionEnvelopes(submissionEnvelope);
         studyRepository.save(study);
@@ -159,19 +150,18 @@ public class StudyService {
         return study;
     }
 
-    public Study linkDatasetToStudy(Study study, Dataset dataset) {
+    public Study linkDatasetToStudy(final Study study, final Dataset dataset) {
         study.addDataset(dataset);
-
         return studyRepository.save(study);
     }
 
-    public Set<SubmissionEnvelope> getSubmissionEnvelopes(Study study) {
+    public Set<SubmissionEnvelope> getSubmissionEnvelopes(final Study study) {
         return gather(study).submissionEnvelopes;
     }
 
-    private StudyService.StudyBag gather(Study study) {
-        Set<SubmissionEnvelope> envelopes = new HashSet<>();
-        Set<Study> studies = this.studyRepository.findByUuid(study.getUuid()).collect(toSet());
+    private StudyService.StudyBag gather(final Study study) {
+        final Set<SubmissionEnvelope> envelopes = new HashSet<>();
+        final Set<Study> studies = this.studyRepository.findByUuid(study.getUuid()).collect(toSet());
         studies.forEach(copy -> {
             envelopes.addAll(copy.getSubmissionEnvelopes());
             envelopes.add(copy.getSubmissionEnvelope());
@@ -179,6 +169,6 @@ public class StudyService {
 
         //ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
         envelopes.removeIf(env -> env == null || env.getSubmissionState() == null);
-        return new StudyService.StudyBag(studies, envelopes);
+        return new StudyService.StudyBag(envelopes);
     }
 }

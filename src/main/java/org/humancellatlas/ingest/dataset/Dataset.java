@@ -1,13 +1,14 @@
 package org.humancellatlas.ingest.dataset;
 
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.Setter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
@@ -22,18 +23,27 @@ import java.util.stream.Collectors;
 @JsonIgnoreProperties({"firstDcpVersion", "dcpVersion", "validationState",
         "validationErrors", "graphValidationErrors", "isUpdate"})
 public class Dataset extends MetadataDocument {
-    // A dataset may have 1 or more submissions related to it.
+
     @JsonCreator
-    public Dataset(@JsonProperty("content") Object content) {
+    public Dataset(@JsonProperty("content") final Object content) {
         super(EntityType.DATASET, content);
     }
 
     @JsonIgnore
-    private @DBRef(lazy = true)
-    Set<SubmissionEnvelope> submissionEnvelopes = new HashSet<>();
+    @DBRef(lazy = true)
+    private Set<SubmissionEnvelope> submissionEnvelopes = new HashSet<>();
+    private Set<File> dataFiles = new HashSet<>();
 
-    public void addToSubmissionEnvelopes(@NotNull SubmissionEnvelope submissionEnvelope) {
+    @Setter
+    @Getter
+    private String comment;
+
+    public void addToSubmissionEnvelopes(@NotNull final SubmissionEnvelope submissionEnvelope) {
         this.submissionEnvelopes.add(submissionEnvelope);
+    }
+
+    public void addFileToDataset(@NotNull final File dataFile) {
+        this.dataFiles.add(dataFile);
     }
 
     @JsonIgnore

@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.dataset.DatasetEventHandler;
 import org.humancellatlas.ingest.dataset.DatasetRepository;
+import org.humancellatlas.ingest.dataset.util.UploadAreaUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -32,6 +34,8 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -39,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
+@WithMockUser
 class DatasetControllerTest {
 
     @Autowired
@@ -57,6 +62,9 @@ class DatasetControllerTest {
     private DatasetEventHandler eventHandler;
 
     @MockBean
+    private UploadAreaUtil uploadAreaUtil;
+
+    @MockBean
     private MigrationConfiguration migrationConfiguration;
 
     @AfterEach
@@ -68,6 +76,7 @@ class DatasetControllerTest {
     class Registration {
         @Test
         @DisplayName("Register Dataset - Success")
+        @WithMockUser
         void registerSuccess() throws Exception {
             doTestRegister("/datasets", dataset -> {
                 var datasetArgumentCaptor = ArgumentCaptor.forClass(Dataset.class);
@@ -82,6 +91,8 @@ class DatasetControllerTest {
             // given:
             var content = new HashMap<String, Object>();
             content.put("name", "Test Dataset");
+
+            doAnswer(invocation -> null).when(uploadAreaUtil).createDataFilesUploadArea(any());
 
             // when:
             MvcResult result = webApp

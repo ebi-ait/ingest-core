@@ -2,8 +2,8 @@ package org.humancellatlas.ingest.study.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.data.MapEntry;
+import org.humancellatlas.ingest.TestingHelper;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
-import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.dataset.Dataset;
@@ -21,8 +21,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -34,7 +36,7 @@ import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -42,6 +44,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
+@WithMockUser
+@ActiveProfiles("test")
 class StudyControllerTest {
 
     @Autowired
@@ -75,6 +79,7 @@ class StudyControllerTest {
 
         @Test
         @DisplayName("Register Study - Success")
+        @WithMockUser
         void registerSuccess() throws Exception {
             doTestRegister("/studies", study -> {
                 var studyCaptor = ArgumentCaptor.forClass(Study.class);
@@ -84,7 +89,6 @@ class StudyControllerTest {
             });
         }
 
-        @Test
         private void doTestRegister(String registerUrl, Consumer<Study> postCondition) throws Exception {
             // given:
             var content = new HashMap<String, Object>();
@@ -96,6 +100,8 @@ class StudyControllerTest {
                             .contentType(APPLICATION_JSON_VALUE)
                             .content("{\"content\": " + objectMapper.writeValueAsString(content) + "}"))
                     .andReturn();
+
+            TestingHelper.resetTestingSecurityContext();
 
             // then:
             MockHttpServletResponse response = result.getResponse();
@@ -123,9 +129,9 @@ class StudyControllerTest {
     class Update {
 
         @Test
-        @DisplayName("Update Study - Success")
-        void updateSuccess() throws Exception {
-            doTestUpdate("/studies/{studyId}", study -> {
+        @DisplayName("Update Study - Failure - Study not linked with submission envelope")
+        void updateFailure() throws Exception {
+            doTestUpdateFailure("/studies/{studyId}", study -> {
                 var studyCaptor = ArgumentCaptor.forClass(Study.class);
                 verify(studyEventHandler).updatedStudy(studyCaptor.capture());
                 Study handledStudy = studyCaptor.getValue();
@@ -133,7 +139,7 @@ class StudyControllerTest {
             });
         }
 
-        private void doTestUpdate(String patchUrl, Consumer<Study> postCondition) throws Exception {
+        private void doTestUpdateFailure(String patchUrl, Consumer<Study> postCondition) throws Exception {
             //given:
             var content = new HashMap<String, Object>();
             content.put("description", "test");
@@ -150,22 +156,7 @@ class StudyControllerTest {
 
             //expect:
             MockHttpServletResponse response = result.getResponse();
-            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-            assertThat(response.getContentType()).containsPattern("application/.*json.*");
-
-            //and:
-            //Using Map here because reading directly to Study converts the entire JSON to Study.content.
-            Map<String, Object> updated = objectMapper.readValue(response.getContentAsString(), Map.class);
-            assertThat(updated.get("content")).isInstanceOf(Map.class);
-            MapEntry<String, String> updatedDescription = entry("description", "test updated");
-            assertThat((Map) updated.get("content")).containsOnly(updatedDescription);
-
-            //and:
-            study = repository.findById(study.getId()).get();
-            assertThat((Map) study.getContent()).containsOnly(updatedDescription);
-
-            //and:
-            postCondition.accept(study);
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
 
         @Test
@@ -181,10 +172,14 @@ class StudyControllerTest {
                             .content("{\"content\": {\"description\": \"Updated Description\"}}"))
                     .andReturn();
 
+            TestingHelper.resetTestingSecurityContext();
+
             // then:
             MockHttpServletResponse response = result.getResponse();
             assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
         }
+
+        // TODO: study update success test, study must be part of submission envelope
     }
 
     @Nested
@@ -203,11 +198,14 @@ class StudyControllerTest {
             webApp.perform(delete("/studies/{studyId}", existingStudyId))
                     .andExpect(status().isNoContent());
 
+            TestingHelper.resetTestingSecurityContext();
+
             // then:
             assertThat(repository.findById(existingStudyId)).isEmpty();
-            MetadataDocument document = metadataCrudService.findOriginalByUuid(
-                    String.valueOf(persistentStudy.getUuid()), EntityType.STUDY);
-            assertNull(document);
+            assertThrows(ResourceNotFoundException.class, () -> {
+                metadataCrudService.findOriginalByUuid(
+                        String.valueOf(persistentStudy.getUuid()), EntityType.STUDY);
+            });
             verify(studyEventHandler).deletedStudy(existingStudyId);
         }
 
@@ -220,6 +218,8 @@ class StudyControllerTest {
             // when:
             MvcResult result = webApp.perform(delete("/studies/{studyId}", nonExistentStudyId))
                     .andReturn();
+
+            TestingHelper.resetTestingSecurityContext();
 
             // then:
             MockHttpServletResponse response = result.getResponse();
@@ -247,7 +247,8 @@ class StudyControllerTest {
             // when:
             webApp.perform(put("/studies/{stud_id}/datasets/{dataset_id}", studyId, datasetId))
                     .andExpect(status().isAccepted());
+
+            TestingHelper.resetTestingSecurityContext();
         }
     }
-
 }

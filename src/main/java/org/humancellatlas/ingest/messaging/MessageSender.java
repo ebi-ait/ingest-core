@@ -75,6 +75,11 @@ public class MessageSender {
         MessageBuffer.UPLOAD_MANAGER.queueAmqpMessage(exchange, routingKey, payload ,intendedSendTime);
     }
 
+    public void queueUploadManagerMessage(String exchange, String routingKey,
+                                          MetadataDocumentMessage payload, long intendedSendTime) {
+        MessageBuffer.UPLOAD_MANAGER.queueAmqpMessage(exchange, routingKey, payload ,intendedSendTime);
+    }
+
     public void queueSpreadsheetGenerationMessage(String exchange, String routingKey, SpreadsheetGenerationMessage payload, long intendedSendTime) {
         MessageBuffer.SPREADSHEET_GENERATION.queueAmqpMessage(exchange, routingKey, payload ,intendedSendTime);
     }
