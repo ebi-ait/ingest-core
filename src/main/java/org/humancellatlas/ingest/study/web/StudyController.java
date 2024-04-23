@@ -45,8 +45,7 @@ public class StudyController {
     public ResponseEntity<Resource<?>> updateStudy(@PathVariable final String studyId,
                                                    @RequestBody final ObjectNode patch,
                                                    final PersistentEntityResourceAssembler assembler) {
-        //return ResponseEntity.ok().body(assembler.toFullResource(studyService.update(studyId, patch)));
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+        return ResponseEntity.ok().body(assembler.toFullResource(studyService.update(studyId, patch)));
     }
 
     @PutMapping("/studies/{studyId}")

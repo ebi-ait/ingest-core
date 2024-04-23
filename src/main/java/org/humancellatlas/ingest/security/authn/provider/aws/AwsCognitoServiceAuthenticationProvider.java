@@ -20,6 +20,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Date;
+
 @Component
 @Qualifier("COGNITO")
 @Slf4j
@@ -64,6 +66,12 @@ public class AwsCognitoServiceAuthenticationProvider implements AuthenticationPr
     private Authentication authenticateWithNonOpenIdScope(final DecodedJWT decodedJWT) {
         final String userName = decodedJWT.getClaim("username").asString();
         final String sub = decodedJWT.getClaim("sub").asString();
+        final Date expiresAt = decodedJWT.getExpiresAt();
+
+        // Check if the token is expired
+        if (expiresAt != null && expiresAt.before(new Date())) {
+            throw new AuthenticationServiceException("Token is expired");
+        }
 
         if (userName == null || sub == null) {
             throw new AuthenticationServiceException("Invalid user information");

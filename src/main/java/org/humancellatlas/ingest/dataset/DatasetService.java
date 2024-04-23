@@ -84,9 +84,11 @@ public class DatasetService {
 
     public Dataset addDatasetToSubmissionEnvelope(final SubmissionEnvelope submissionEnvelope, final Dataset dataset) {
         if (!dataset.getIsUpdate()) {
-            uploadAreaUtil.createDataFilesUploadArea(dataset);
+            final Dataset savedDataset = metadataCrudService.addToSubmissionEnvelopeAndSave(dataset, submissionEnvelope);
 
-            return metadataCrudService.addToSubmissionEnvelopeAndSave(dataset, submissionEnvelope);
+            uploadAreaUtil.createDataFilesUploadArea(savedDataset);
+
+            return savedDataset;
         } else {
             return metadataUpdateService.acceptUpdate(dataset, submissionEnvelope);
         }
