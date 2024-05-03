@@ -3,18 +3,19 @@ package org.humancellatlas.ingest.study.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.data.MapEntry;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
-import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.dataset.DatasetRepository;
+import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.study.Study;
 import org.humancellatlas.ingest.study.StudyEventHandler;
 import org.humancellatlas.ingest.study.StudyRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.humancellatlas.ingest.study.StudyService;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
+import org.junit.jupiter.api.*;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,7 +25,6 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -35,7 +35,6 @@ import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -53,6 +52,9 @@ class StudyControllerTest {
     private StudyRepository repository;
 
     @Autowired
+    private StudyService studyService;
+
+    @Autowired
     private DatasetRepository datasetRepository;
 
     @Autowired
@@ -61,11 +63,16 @@ class StudyControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private SubmissionEnvelopeRepository submissionEnvelopeRepository;
+
     @SpyBean
     private StudyEventHandler studyEventHandler;
 
     @MockBean
     private MigrationConfiguration migrationConfiguration;
+
+    SubmissionEnvelope submissionEnvelope;
 
     @AfterEach
     private void tearDown() {
@@ -123,7 +130,15 @@ class StudyControllerTest {
 
     @Nested
     class Update {
-
+        /**
+         * Tests updating a Study entity. It should be noted that unlike Project entities,
+         * Study entities currently require linkage to a SubmissionEnvelope for certain operations.
+         * This test ensures that the Study is appropriately linked before performing the update.
+         * The logic differs from Project, where no such linkage is required, but it may be
+         * considered in future revisions to standardize the behavior across different entity types.
+         *
+         * @throws Exception if the test fails
+         */
         @Test
         @DisplayName("Update Study - Success")
         void updateSuccess() throws Exception {
@@ -137,11 +152,19 @@ class StudyControllerTest {
 
         private void doTestUpdate(String patchUrl, Consumer<Study> postCondition) throws Exception {
             //given:
+            submissionEnvelope = new SubmissionEnvelope();
+            submissionEnvelope.setUuid(Uuid.newUuid());
+            submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
+            submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
+
             var content = new HashMap<String, Object>();
             content.put("description", "test");
             Study study = new Study("https://dev.schema.morphic.bio/type/0.0.1/project/study",
                     "0.0.1", "study", content);
+            study.getSubmissionEnvelopes().add(submissionEnvelope);
             study = repository.save(study);
+
+            studyService.addStudyToSubmissionEnvelope(submissionEnvelope, study);
 
             //when:
             content.put("description", "test updated");
@@ -215,10 +238,6 @@ class StudyControllerTest {
 
             // then:
             assertThat(repository.findById(existingStudyId)).isEmpty();
-//            System.out.println("persistentStudy.getUuid() = " + persistentStudy.getUuid());
-//            MetadataDocument document = metadataCrudService.findOriginalByUuid(
-//                    String.valueOf(persistentStudy.getUuid()), EntityType.STUDY);
-//            assertNull(document);
             // Expect the ResourceNotFoundException when attempting to find the study after deletion
             assertThrows(ResourceNotFoundException.class, () -> {
                 metadataCrudService.findOriginalByUuid(String.valueOf(persistentStudy.getUuid()), EntityType.STUDY);
