@@ -108,41 +108,11 @@ public class StudyService {
     }
 
     public Study addStudyToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Study study) {
-        Map<String, Object> contentMap = convertAndMergeStudyContent(study.getContent());
-        study.setContent(contentMap);
-
         if (!study.getIsUpdate()) {
             return metadataCrudService.addToSubmissionEnvelopeAndSave(study, submissionEnvelope);
         } else {
             return metadataUpdateService.acceptUpdate(study, submissionEnvelope);
         }
-    }
-
-    private Map<String, Object> convertAndMergeStudyContent(Object contentObject) {
-        Map<String, Object> contentMap = convertContentToObjectMap(contentObject);
-        contentMap.putAll(createBaseContentForStudy());
-        return contentMap;
-    }
-
-    private Map<String, Object> convertContentToObjectMap(Object contentObject) {
-        try {
-            if (contentObject instanceof Map) {
-                return (Map<String, Object>) contentObject;
-            } else if (contentObject instanceof String) {
-                return objectMapper.readValue((String) contentObject, new TypeReference<Map<String, Object>>() {
-                });
-            }
-            return new HashMap<>();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to parse content JSON string", e);
-        }
-    }
-
-    private Map<String, String> createBaseContentForStudy() {
-        Map<String, String> content = new HashMap<>();
-        content.put("describedBy", "https://schema.morphic.bio/type/project/0.0.1/study");
-        content.put("schema_type", "study");
-        return content;
     }
 
     public Study linkStudySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Study study) {

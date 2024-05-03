@@ -28,6 +28,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -75,7 +76,7 @@ public class StudyServiceTest {
         @BeforeEach
         void setup(){
             // given
-            study1 = spy(new Study(null));
+            study1 = spy(new Study("Schema URL", "1.0", "Generic", null));
             doReturn("study1").when(study1).getId();
             study1.setUuid(Uuid.newUuid());
 
@@ -88,7 +89,7 @@ public class StudyServiceTest {
             submissionSet1.forEach(study1::addToSubmissionEnvelopes);
 
             //and:
-            study2 = spy(new Study(null));
+            study2 = spy(new Study("Schema URL-2", "2.0", "Generic", null));
             doReturn("study2").when(study2).getId();
             study2.setUuid(study1.getUuid());
 
@@ -120,7 +121,7 @@ public class StudyServiceTest {
         @DisplayName("no duplicate submissions")
         void getFromAllCopiesOfStudiesNoDuplicates() {
             // given
-            var study3 = spy(new Study(null));
+            var study3 = spy(new Study("Schema URL", "1.0", "Generic", null));
             doReturn("study3").when(study3).getId();
             study3.setUuid(study1.getUuid());
 
@@ -152,10 +153,10 @@ public class StudyServiceTest {
         void registerSuccess() {
             //given:
             String content = "{\"name\": \"study\"}";
-            Study study = new Study(content);
+            Study study = new Study("Schema URL", "1.0", "Generic", "{\"name\": \"study\"}");
 
             //and:
-            Study persistentStudy = new Study(content);
+            Study persistentStudy = new Study("Schema URL", "1.0", "Generic", "{\"name\": \"study\"}");
             doReturn(persistentStudy).when(studyRepository).save(study);
 
             //when:
@@ -167,6 +168,26 @@ public class StudyServiceTest {
             verify(studyEventHandler).registeredStudy(persistentStudy);
         }
 
+        @Test
+        @DisplayName("Register Study - Ensure Descriptive Fields Are Managed Correctly")
+        void shouldHandleDescriptiveFieldsCorrectly() {
+            // Initialize studies with descriptive fields
+            Study study = new Study("Schema URL", "1.0", "Study", "{\"type\": \"study\", \"content\": \"Details\"}");
+
+            // Test retrieval of descriptive fields
+            assertEquals("Schema URL", study.getDescribedBy());
+            assertEquals("1.0", study.getSchemaVersion());
+            assertEquals("Study", study.getSchemaType());
+
+            // Test setting and getting new values
+            study.setDescribedBy("Updated Schema URL");
+            study.setSchemaVersion("1.1");
+            study.setSchemaType("Protocol");
+
+            assertEquals("Updated Schema URL", study.getDescribedBy());
+            assertEquals("1.1", study.getSchemaVersion());
+            assertEquals("Protocol", study.getSchemaType());
+        }
     }
 
     @Nested
@@ -177,7 +198,7 @@ public class StudyServiceTest {
             // given:
             String studyId = "studyId";
             ObjectNode patch = createUpdatePatch("Updated Study Name");
-            Study existingStudy = new Study("{\"name\": \"study\"}");
+            Study existingStudy = new Study("Schema URL", "1.0", "Generic", "{\"name\": \"study\"}");
 
             // and:
             when(studyRepository.findById(studyId)).thenReturn(Optional.of(existingStudy));
@@ -231,8 +252,10 @@ public class StudyServiceTest {
         void replaceSuccess() {
             // given:
             String studyId = "studyId";
-            Study existingStudy = new Study("{\"name\": \"Existing Study Name\"}");
-            Study updatedStudy = new Study("{\"name\": \"Updated Study Name\"}");
+            Study existingStudy = new Study("ExistingSchema URL", "1.0", "Generic", "{\"name\": \"Existing Study Name\"}");
+            Study updatedStudy = new Study("UpdatedSchema URL", "1.1", "Specific", "{\"name\": \"Updated Study Name\"}");
+//            Study existingStudy = new Study("{\"name\": \"Existing Study Name\"}");
+//            Study updatedStudy = new Study("{\"name\": \"Updated Study Name\"}");
 
             // and:
             when(studyRepository.findById(studyId)).thenReturn(Optional.of(existingStudy));
@@ -252,7 +275,7 @@ public class StudyServiceTest {
         void replaceStudyNotFound() {
             // given:
             String nonExistentStudyId = "nonExistentId";
-            Study updatedStudy = new Study("{\"name\": \"Updated Study Name\"}");
+            Study updatedStudy = new Study("Schema URL", "1.1", "Specific", "{\"name\": \"Updated Study Name\"}");
 
             // and:
             when(studyRepository.findById(nonExistentStudyId)).thenReturn(Optional.empty());
@@ -278,8 +301,8 @@ public class StudyServiceTest {
         void deleteSuccess() {
             // given:
             String studyId = "testDeleteId";
-            String content = "{\"name\": \"delete study\"}";
-            Study persistentStudy = new Study(content);
+            //String content = "{\"name\": \"delete study\"}";
+            Study persistentStudy = new Study("Schema URL", "1.1", "Specific", "{\"name\": \"Updated Study Name\"}");
 
             // and:
             when(studyRepository.findById(studyId)).thenReturn(Optional.of(persistentStudy));

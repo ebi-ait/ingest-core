@@ -21,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
@@ -35,6 +36,7 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -137,7 +139,8 @@ class StudyControllerTest {
             //given:
             var content = new HashMap<String, Object>();
             content.put("description", "test");
-            Study study = new Study(content);
+            Study study = new Study("https://dev.schema.morphic.bio/type/0.0.1/project/study",
+                    "0.0.1", "study", content);
             study = repository.save(study);
 
             //when:
@@ -156,13 +159,19 @@ class StudyControllerTest {
             //and:
             //Using Map here because reading directly to Study converts the entire JSON to Study.content.
             Map<String, Object> updated = objectMapper.readValue(response.getContentAsString(), Map.class);
-            assertThat(updated.get("content")).isInstanceOf(Map.class);
-            MapEntry<String, String> updatedDescription = entry("description", "test updated");
-            assertThat((Map) updated.get("content")).containsOnly(updatedDescription);
+            assertThat(updated.get("described_by")).isEqualTo("https://dev.schema.morphic.bio/type/0.0.1/project/study");
+            assertThat(updated.get("schema_version")).isEqualTo("0.0.1");
+            assertThat(updated.get("schema_type")).isEqualTo("study");
+            assertThat(updated.containsKey("content")).isTrue();
+            assertThat(((Map<String, Object>) updated.get("content")).get("description")).isEqualTo("test updated");
 
             //and:
             study = repository.findById(study.getId()).get();
-            assertThat((Map) study.getContent()).containsOnly(updatedDescription);
+
+            assertThat(study.getDescribedBy()).isEqualTo("https://dev.schema.morphic.bio/type/0.0.1/project/study");
+            assertThat(study.getSchemaVersion()).isEqualTo("0.0.1");
+            assertThat(study.getSchemaType()).isEqualTo("study");
+            assertThat(((Map<String, Object>) study.getContent()).get("description")).isEqualTo("test updated");
 
             //and:
             postCondition.accept(study);
@@ -195,7 +204,8 @@ class StudyControllerTest {
         void deleteSuccess() throws Exception {
             // given:
             String content = "{\"name\": \"delete study\"}";
-            Study persistentStudy = new Study(content);
+            Study persistentStudy = new Study("https://dev.schema.morphic.bio/type/0.0.1/project/study",
+                    "0.0.1", "study", content);
             repository.save(persistentStudy);
             String existingStudyId = persistentStudy.getId();
 
@@ -205,9 +215,14 @@ class StudyControllerTest {
 
             // then:
             assertThat(repository.findById(existingStudyId)).isEmpty();
-            MetadataDocument document = metadataCrudService.findOriginalByUuid(
-                    String.valueOf(persistentStudy.getUuid()), EntityType.STUDY);
-            assertNull(document);
+//            System.out.println("persistentStudy.getUuid() = " + persistentStudy.getUuid());
+//            MetadataDocument document = metadataCrudService.findOriginalByUuid(
+//                    String.valueOf(persistentStudy.getUuid()), EntityType.STUDY);
+//            assertNull(document);
+            // Expect the ResourceNotFoundException when attempting to find the study after deletion
+            assertThrows(ResourceNotFoundException.class, () -> {
+                metadataCrudService.findOriginalByUuid(String.valueOf(persistentStudy.getUuid()), EntityType.STUDY);
+            });
             verify(studyEventHandler).deletedStudy(existingStudyId);
         }
 
@@ -235,7 +250,8 @@ class StudyControllerTest {
         void listDatasetToStudySuccess() throws Exception {
             // given:
             String studyContent = "{\"name\": \"study\"}";
-            Study persistentStudy = new Study(studyContent);
+            Study persistentStudy = new Study("https://dev.schema.morphic.bio/type/0.0.1/project/study",
+                    "0.0.1", "study", studyContent);
             repository.save(persistentStudy);
             String studyId = persistentStudy.getId();
 
