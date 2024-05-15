@@ -40,25 +40,27 @@ public class MessageSender {
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(5);
 
-    private @Autowired @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
-    private @Autowired @NonNull ConfigurationService configurationService;
+    private @Autowired
+    @NonNull RabbitMessagingTemplate rabbitMessagingTemplate;
+    private @Autowired
+    @NonNull ConfigurationService configurationService;
 
 
     public void queueValidationMessage(String exchange, String routingKey,
-            MetadataDocumentMessage payload, long intendedSendTime){
+                                       MetadataDocumentMessage payload, long intendedSendTime) {
         MessageBuffer.VALIDATION.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
 
     public void queueGraphValidationMessage(String exchange, String routingKey, Object payload,
-                                               long intendedSendTime) {
+                                            long intendedSendTime) {
         MessageBuffer.GRAPH_VALIDATION.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
 
-    public void queueNewExportMessage(String exchange, String routingKey, Object payload, long intendedSendTime){
+    public void queueNewExportMessage(String exchange, String routingKey, Object payload, long intendedSendTime) {
         MessageBuffer.EXPORT.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
 
-    public void queueStateTrackingMessage(String exchange, String routingKey, Object payload, long intendedSendTime){
+    public void queueStateTrackingMessage(String exchange, String routingKey, Object payload, long intendedSendTime) {
         MessageBuffer.STATE_TRACKING.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
 
@@ -71,21 +73,16 @@ public class MessageSender {
     }
 
     public void queueUploadManagerMessage(String exchange, String routingKey,
-            SubmissionEnvelopeMessage payload, long intendedSendTime) {
-        MessageBuffer.UPLOAD_MANAGER.queueAmqpMessage(exchange, routingKey, payload ,intendedSendTime);
-    }
-
-    public void queueUploadManagerMessage(String exchange, String routingKey,
-                                          MetadataDocumentMessage payload, long intendedSendTime) {
-        MessageBuffer.UPLOAD_MANAGER.queueAmqpMessage(exchange, routingKey, payload ,intendedSendTime);
+                                          SubmissionEnvelopeMessage payload, long intendedSendTime) {
+        MessageBuffer.UPLOAD_MANAGER.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
 
     public void queueSpreadsheetGenerationMessage(String exchange, String routingKey, SpreadsheetGenerationMessage payload, long intendedSendTime) {
-        MessageBuffer.SPREADSHEET_GENERATION.queueAmqpMessage(exchange, routingKey, payload ,intendedSendTime);
+        MessageBuffer.SPREADSHEET_GENERATION.queueAmqpMessage(exchange, routingKey, payload, intendedSendTime);
     }
 
     @PostConstruct
-    private void initiateSending(){
+    private void initiateSending() {
         List<MessageBuffer> amqpMessageBuffers = Arrays.asList(
                 MessageBuffer.ACCESSIONER,
                 MessageBuffer.EXPORT,
@@ -140,7 +137,7 @@ public class MessageSender {
         public int compareTo(Delayed other) {
             long otherDelay = other.getDelay(MILLISECONDS);
             return Math.toIntExact(getDelay(TimeUnit.MILLISECONDS) - otherDelay);
-      }
+        }
     }
 
     private enum MessageBuffer {
@@ -194,7 +191,7 @@ public class MessageSender {
             Queue<QueuedMessage> drainedQueue = new PriorityQueue<>(Comparator.comparing(QueuedMessage::getIntendedStartTime));
             this.messageQueue.drainTo(drainedQueue);
             return Stream.generate(drainedQueue::remove)
-                         .limit(drainedQueue.size());
+                    .limit(drainedQueue.size());
         }
 
         private String convertToString(Object object) {
@@ -223,7 +220,7 @@ public class MessageSender {
         public void run() {
             HttpHeaders headers = uriListHeaders();
             buffer.takeAll().forEach(message -> {
-                if(message.getMessageProtocol().equals(MessageProtocol.AMQP)) {
+                if (message.getMessageProtocol().equals(MessageProtocol.AMQP)) {
                     messagingTemplate.convertAndSend(message.exchange, message.routingKey, message.payload);
                 } else {
                     try {
