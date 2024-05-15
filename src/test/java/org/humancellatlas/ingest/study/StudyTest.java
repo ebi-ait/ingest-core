@@ -21,7 +21,7 @@ public class StudyTest {
         openSubmissionEnvelope2.enactStateTransition(SubmissionState.SUBMITTED);
 
 
-        Study study = new Study(null);
+        Study study = new Study("Schema URL", "1.1", "Specific", "{\"name\": \"Updated Study Name\"}");
         study.addToSubmissionEnvelopes(openSubmissionEnvelope);
         study.addToSubmissionEnvelopes(openSubmissionEnvelope2);
 
@@ -47,7 +47,7 @@ public class StudyTest {
         submittedSubmission.enactStateTransition(SubmissionState.METADATA_VALID);
         submittedSubmission.enactStateTransition(SubmissionState.SUBMITTED);
 
-        Study study = new Study(null);
+        Study study = new Study("Schema URL", "1.1", "Specific", "{\"name\": \"Updated Study Name\"}");
         study.addToSubmissionEnvelopes(submittedSubmission);
         study.addToSubmissionEnvelopes(completeSubmission);
 
@@ -60,7 +60,7 @@ public class StudyTest {
 
     @Test
     public void testIsEditable() {
-        Study study = new Study(null);
+        Study study = new Study("Schema URL", "1.1", "Specific", "{\"name\": \"Updated Study Name\"}");
         assertThat(study.isEditable()).isTrue();
 
         SubmissionEnvelope submissionOne = new SubmissionEnvelope();

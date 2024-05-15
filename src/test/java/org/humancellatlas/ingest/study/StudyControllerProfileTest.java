@@ -3,11 +3,7 @@ package org.humancellatlas.ingest.study;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.humancellatlas.ingest.study.web.StudyController;
-import org.junit.Ignore;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +14,6 @@ import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +24,7 @@ import static org.mockito.Mockito.*;
         StudyController.class,
         StudyRepository.class
 })
-@Ignore
+@Disabled("Disabled until the morphic profile is active")
 public class StudyControllerProfileTest {
 
     @MockBean
@@ -60,7 +55,7 @@ public class StudyControllerProfileTest {
         public void testRegisterStudyMorphicProfile() {
             //given:
             String content = "{\"name\": \"study\"}";
-            Study inputStudy = new Study(content);
+            Study inputStudy = new Study("Schema URL", "1.1", "Specific", "{\"name\": \"Updated Study Name\"}");
 
             //and: mock the environment to simulate the "morphic" profile being active
             when(environment.getActiveProfiles()).thenReturn(new String[]{"morphic"});
@@ -79,7 +74,7 @@ public class StudyControllerProfileTest {
         public void testRegisterStudyNonMorphicProfile() {
             //given:
             String content = "{\"name\": \"study\"}";
-            Study inputStudy = new Study(content);
+            Study inputStudy = new Study("Schema URL", "1.1", "Specific", "{\"name\": \"study\"}");
 
             //and: mock the environment to simulate the "morphic" profile not being active
             when(environment.getActiveProfiles()).thenReturn(new String[]{"non-morphic"});
@@ -102,7 +97,8 @@ public class StudyControllerProfileTest {
             //given:
             String studyId = "studyId";
             ObjectNode patch = createUpdatePatch("Updated Study Name");
-            Study updatedStudy = new Study("{\"name\": \"study\"}");
+            //Study updatedStudy = new Study("{\"name\": \"study\"}");
+            Study updatedStudy = new Study("Schema URL", "1.0", "Generic", "{\"name\": \"study\"}");
 
             //and: mock the environment to simulate the "morphic" profile being active
             when(environment.getActiveProfiles()).thenReturn(new String[]{"morphic"});

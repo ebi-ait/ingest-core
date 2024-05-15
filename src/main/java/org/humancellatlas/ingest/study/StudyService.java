@@ -1,6 +1,5 @@
 package org.humancellatlas.ingest.study;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
@@ -12,14 +11,15 @@ import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -27,7 +27,16 @@ import static java.util.stream.Collectors.toSet;
 @RequiredArgsConstructor
 @Getter
 public class StudyService {
-    @Autowired
+    private static class StudyBag {
+        private final Set<Study> studies;
+        private final Set<SubmissionEnvelope> submissionEnvelopes;
+
+        public StudyBag(final Set<Study> studies, final Set<SubmissionEnvelope> submissionEnvelopes) {
+            this.studies = Collections.unmodifiableSet(new HashSet<>(studies));
+            this.submissionEnvelopes = Collections.unmodifiableSet(new HashSet<>(submissionEnvelopes));
+        }
+    }
+
     private final MongoTemplate mongoTemplate;
     private final @NonNull StudyRepository studyRepository;
     private final @NonNull MetadataCrudService metadataCrudService;
@@ -39,24 +48,15 @@ public class StudyService {
         return log;
     }
 
-    private final ObjectMapper objectMapper = new ObjectMapper(); // For JSON string to Map conversion if necessary
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    //Helper class for capturing copies of a Study and all Submission Envelopes related to them.
-    private static class StudyBag {
-        private final Set<SubmissionEnvelope> submissionEnvelopes;
-
-        public StudyBag(Set<SubmissionEnvelope> submissionEnvelopes) {
-            this.submissionEnvelopes = submissionEnvelopes;
-        }
-    }
-
-    public Study register(final Study study) {
+    public final Study register(final Study study) {
         final Study persistentStudy = studyRepository.save(study);
         studyEventHandler.registeredStudy(persistentStudy);
         return persistentStudy;
     }
 
-    public Study update(final String studyId, final ObjectNode patch) {
+    public final Study update(final String studyId, final ObjectNode patch) {
         final Optional<Study> existingStudyOptional = studyRepository.findById(studyId);
 
         if (existingStudyOptional.isEmpty()) {
@@ -70,7 +70,7 @@ public class StudyService {
         return updatedStudy;
     }
 
-    public Study replace(final String studyId, final Study updatedStudy) {
+    public final Study replace(final String studyId, final Study updatedStudy) {
         final Optional<Study> existingStudyOptional = studyRepository.findById(studyId);
 
         if (existingStudyOptional.isEmpty()) {
@@ -78,14 +78,13 @@ public class StudyService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
-        // Replace the entire entity with the updatedStudy
         studyRepository.save(updatedStudy);
         studyEventHandler.updatedStudy(updatedStudy);
 
         return updatedStudy;
     }
 
-    public void delete(final String studyId) {
+    public final void delete(final String studyId) {
         final Optional<Study> deleteStudyOptional = studyRepository.findById(studyId);
 
         if (deleteStudyOptional.isEmpty()) {
@@ -98,10 +97,7 @@ public class StudyService {
         studyEventHandler.deletedStudy(studyId);
     }
 
-    public Study addStudyToSubmissionEnvelope(final SubmissionEnvelope submissionEnvelope, final Study study) {
-        final Map<String, Object> contentMap = convertAndMergeStudyContent(study.getContent());
-        study.setContent(contentMap);
-
+    public final Study addStudyToSubmissionEnvelope(final SubmissionEnvelope submissionEnvelope, final Study study) {
         if (!study.getIsUpdate()) {
             return metadataCrudService.addToSubmissionEnvelopeAndSave(study, submissionEnvelope);
         } else {
@@ -109,34 +105,7 @@ public class StudyService {
         }
     }
 
-    private Map<String, Object> convertAndMergeStudyContent(final Object contentObject) {
-        final Map<String, Object> contentMap = convertContentToObjectMap(contentObject);
-        contentMap.putAll(createBaseContentForStudy());
-        return contentMap;
-    }
-
-    private Map<String, Object> convertContentToObjectMap(final Object contentObject) {
-        try {
-            if (contentObject instanceof Map) {
-                return (Map<String, Object>) contentObject;
-            } else if (contentObject instanceof String) {
-                return objectMapper.readValue((String) contentObject, new TypeReference<Map<String, Object>>() {
-                });
-            }
-            return new HashMap<>();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to parse content JSON string", e);
-        }
-    }
-
-    private Map<String, String> createBaseContentForStudy() {
-        final Map<String, String> content = new HashMap<>();
-        content.put("describedBy", "https://schema.morphic.bio/type/project/0.0.1/study");
-        content.put("schema_type", "study");
-        return content;
-    }
-
-    public Study linkStudySubmissionEnvelope(final SubmissionEnvelope submissionEnvelope, final Study study) {
+    public final Study linkStudySubmissionEnvelope(final SubmissionEnvelope submissionEnvelope, final Study study) {
         final String studyId = study.getId();
         study.addToSubmissionEnvelopes(submissionEnvelope);
         studyRepository.save(study);
@@ -150,12 +119,12 @@ public class StudyService {
         return study;
     }
 
-    public Study linkDatasetToStudy(final Study study, final Dataset dataset) {
+    public final Study linkDatasetToStudy(final Study study, final Dataset dataset) {
         study.addDataset(dataset);
         return studyRepository.save(study);
     }
 
-    public Set<SubmissionEnvelope> getSubmissionEnvelopes(final Study study) {
+    public final Set<SubmissionEnvelope> getSubmissionEnvelopes(final Study study) {
         return gather(study).submissionEnvelopes;
     }
 
@@ -167,8 +136,8 @@ public class StudyService {
             envelopes.add(copy.getSubmissionEnvelope());
         });
 
-        //ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
+        // ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
         envelopes.removeIf(env -> env == null || env.getSubmissionState() == null);
-        return new StudyService.StudyBag(envelopes);
+        return new StudyService.StudyBag(studies, envelopes);
     }
 }
