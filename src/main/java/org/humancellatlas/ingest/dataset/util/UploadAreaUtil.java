@@ -21,7 +21,7 @@ public class UploadAreaUtil {
 
         try {
             final AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-                    .withRegion(Regions.EU_WEST_2)  // Specify the AWS region
+                    .withRegion(Regions.EU_WEST_2)
                     .build();
 
             if (!s3Client.doesBucketExistV2(datasetId)) {

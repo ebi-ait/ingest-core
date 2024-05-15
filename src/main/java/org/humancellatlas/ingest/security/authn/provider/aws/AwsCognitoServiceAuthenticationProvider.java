@@ -10,7 +10,8 @@ import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
 import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -24,16 +25,19 @@ import java.util.Date;
 
 @Component
 @Qualifier("COGNITO")
+@Lazy
 @Slf4j
 public class AwsCognitoServiceAuthenticationProvider implements AuthenticationProvider {
+    private final Environment environment;
     private static final String AWS_COGNITO_NON_OPENID_SCOPE = "aws.cognito.signin.user.admin";
     private final WebClient webClient;
-    @Value("${AWS_COGNITO_DOMAIN}")
-    public String awsCognitoDomainUrl;
+    public final String awsCognitoDomainUrl;
 
     @Autowired
-    public AwsCognitoServiceAuthenticationProvider(final WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl(awsCognitoDomainUrl)
+    public AwsCognitoServiceAuthenticationProvider(final Environment environment, final WebClient.Builder webClientBuilder) {
+        this.environment = environment;
+        this.awsCognitoDomainUrl = this.environment.getProperty("AWS_COGNITO_DOMAIN");
+        this.webClient = webClientBuilder.baseUrl(this.awsCognitoDomainUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }

@@ -2,7 +2,6 @@ package org.humancellatlas.ingest.dataset.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.data.MapEntry;
-import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
@@ -64,9 +63,6 @@ class DatasetControllerTest {
     @MockBean
     private UploadAreaUtil uploadAreaUtil;
 
-    @MockBean
-    private MigrationConfiguration migrationConfiguration;
-
     @AfterEach
     private void tearDown() {
         repository.deleteAll();
@@ -86,7 +82,6 @@ class DatasetControllerTest {
             });
         }
 
-        @Test
         private void doTestRegister(String registerUrl, Consumer<Dataset> postCondition) throws Exception {
             // given:
             var content = new HashMap<String, Object>();
@@ -228,5 +223,4 @@ class DatasetControllerTest {
             assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
         }
     }
-
 }
