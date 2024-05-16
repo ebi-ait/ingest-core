@@ -32,7 +32,9 @@ test:
 docker-build:
   stage: package
   script:
-    - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
-    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - docker build -t ingest-core-morphic:$CI_COMMIT_SHA .
+    - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/ingest-core-morphic:$CI_COMMIT_SHA
+    - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/ingest-core-morphic:$CI_COMMIT_SHA
 
 
