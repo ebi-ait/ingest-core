@@ -4,11 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.humancellatlas.ingest.security.Account;
 import org.humancellatlas.ingest.security.AccountService;
 import org.humancellatlas.ingest.security.Role;
-import org.humancellatlas.ingest.security.SecurityConfig;
 import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
 import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
 import org.humancellatlas.ingest.security.exception.DuplicateAccount;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,9 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
@@ -56,6 +52,9 @@ public class AuthenticationControllerTest {
 
     @MockBean(name = ELIXIR)
     private AuthenticationProvider elixir;
+
+    @MockBean(name = "COGNITO")
+    private AuthenticationProvider cognito;
 
     @MockBean
     private AccountService accountService;
@@ -185,7 +184,7 @@ public class AuthenticationControllerTest {
         }
 
         private void assertCorrectAccountDetails(MockHttpServletResponse response, String accountId,
-                String subjectId) throws Exception {
+                                                 String subjectId) throws Exception {
             ObjectMapper objectMapper = new ObjectMapper();
             Account retrievedAccount = objectMapper.readValue(response.getContentAsString(), Account.class);
             assertThat(retrievedAccount)

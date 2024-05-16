@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.security.authn.provider.aws;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
 import lombok.extern.slf4j.Slf4j;
 import org.humancellatlas.ingest.security.Account;
@@ -9,7 +10,8 @@ import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
 import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -19,17 +21,23 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Date;
+
 @Component
 @Qualifier("COGNITO")
+@Lazy
 @Slf4j
 public class AwsCognitoServiceAuthenticationProvider implements AuthenticationProvider {
+    private final Environment environment;
+    private static final String AWS_COGNITO_NON_OPENID_SCOPE = "aws.cognito.signin.user.admin";
     private final WebClient webClient;
-    @Value("${AWS_COGNITO_DOMAIN}")
-    public String awsCognitoDomainUrl;
+    public final String awsCognitoDomainUrl;
 
     @Autowired
-    public AwsCognitoServiceAuthenticationProvider(final WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl(awsCognitoDomainUrl)
+    public AwsCognitoServiceAuthenticationProvider(final Environment environment, final WebClient.Builder webClientBuilder) {
+        this.environment = environment;
+        this.awsCognitoDomainUrl = this.environment.getProperty("AWS_COGNITO_DOMAIN");
+        this.webClient = webClientBuilder.baseUrl(this.awsCognitoDomainUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
@@ -42,12 +50,50 @@ public class AwsCognitoServiceAuthenticationProvider implements AuthenticationPr
 
         final JwtAuthentication jwt = (JwtAuthentication) authentication;
         final String accessToken = jwt.getToken();
-        final String issuer = JWT.decode(accessToken).getIssuer();
+        final DecodedJWT decodedJWT = JWT.decode(accessToken);
+        final String issuer = decodedJWT.getIssuer();
+        final String scope = decodedJWT.getClaim("scope").asString();
 
         verifyIssuer(issuer);
 
+        if (scope == null) {
+            throw new AuthenticationServiceException("Invalid user information");
+        }
+
+        if (scope.equalsIgnoreCase(AWS_COGNITO_NON_OPENID_SCOPE)) {
+            return authenticateWithNonOpenIdScope(decodedJWT);
+        }
+
+        return authenticateWithUserInfoEndpoint(accessToken);
+    }
+
+    private Authentication authenticateWithNonOpenIdScope(final DecodedJWT decodedJWT) {
+        final String userName = decodedJWT.getClaim("username").asString();
+        final String sub = decodedJWT.getClaim("sub").asString();
+        final Date expiresAt = decodedJWT.getExpiresAt();
+
+        // Check if the token is expired
+        if (expiresAt != null && expiresAt.before(new Date())) {
+            throw new AuthenticationServiceException("Token is expired");
+        }
+
+        if (userName == null || sub == null) {
+            throw new AuthenticationServiceException("Invalid user information");
+        }
+
+        final UserInfo userInfo = new UserInfo(sub, userName);
+        final Account account = userInfo.toAccount();
+
+        account.setName(userInfo.getName());
+
+        final OpenIdAuthentication openIdAuth = new OpenIdAuthentication(account);
+        openIdAuth.authenticateWith(userInfo);
+
+        return openIdAuth;
+    }
+
+    private Authentication authenticateWithUserInfoEndpoint(final String accessToken) {
         try {
-            // Make a request to Cognito's user info endpoint to retrieve user information
             final String userInfoUrl = awsCognitoDomainUrl + "/userinfo";
             final UserInfo userInfo = webClient.get()
                     .uri(userInfoUrl)
@@ -56,7 +102,6 @@ public class AwsCognitoServiceAuthenticationProvider implements AuthenticationPr
                     .bodyToMono(UserInfo.class)
                     .block();
 
-            // Validate user information as needed
             if (userInfo != null && userInfo.getEmail() != null) {
                 final Account account = userInfo.toAccount();
                 account.setName(userInfo.getEmail());

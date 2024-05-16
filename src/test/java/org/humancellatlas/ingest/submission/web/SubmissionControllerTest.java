@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.submission.web;
 
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.bundle.BundleManifestRepository;
+import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.exporter.Exporter;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.messaging.MessageRouter;
@@ -10,6 +11,7 @@ import org.humancellatlas.ingest.process.ProcessService;
 import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.protocol.ProtocolService;
+import org.humancellatlas.ingest.study.StudyRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeService;
@@ -32,7 +34,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes={ SubmissionController.class })
+@SpringBootTest(classes = {SubmissionController.class})
 public class SubmissionControllerTest {
 
     @Autowired
@@ -60,6 +62,10 @@ public class SubmissionControllerTest {
     private BiomaterialRepository biomaterialRepository;
     @MockBean
     private ProcessRepository processRepository;
+    @MockBean
+    private StudyRepository studyRepository;
+    @MockBean
+    private DatasetRepository datasetRepository;
     @MockBean
     private BundleManifestRepository bundleManifestRepository;
     @MockBean
@@ -193,6 +199,7 @@ public class SubmissionControllerTest {
     }
 
     @Configuration
-    static class TestConfiguration {}
+    static class TestConfiguration {
+    }
 
 }

@@ -25,11 +25,7 @@ import java.net.URI;
 import java.util.Map;
 
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.EXPORTER_EXCHANGE;
-import static org.humancellatlas.ingest.messaging.Constants.Exchanges.SPREADSHEET_EXCHANGE;
-import static org.humancellatlas.ingest.messaging.Constants.Routing.EXPERIMENT_SUBMITTED;
-import static org.humancellatlas.ingest.messaging.Constants.Routing.MANIFEST_SUBMITTED;
-import static org.humancellatlas.ingest.messaging.Constants.Routing.SPREADSHEET_GENERATION;
-import static org.humancellatlas.ingest.messaging.Constants.Routing.SUBMISSION_SUBMITTED;
+import static org.humancellatlas.ingest.messaging.Constants.Routing.*;
 
 
 @Component

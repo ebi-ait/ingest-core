@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.dataset.util.UploadAreaUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {DatasetService.class, DatasetRepository.class})
+@SpringBootTest(classes = {DatasetService.class, DatasetRepository.class, UploadAreaUtil.class})
 public class DatasetServiceTest {
     @Autowired
     private ApplicationContext applicationContext;
@@ -48,6 +49,9 @@ public class DatasetServiceTest {
 
     @MockBean
     private MetadataUpdateService metadataUpdateService;
+
+    @MockBean
+    private UploadAreaUtil uploadAreaUtil;
 
     @BeforeEach
     void setUp() {
