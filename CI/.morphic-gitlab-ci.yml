@@ -1,0 +1,31 @@
+cache:
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+
+before_script:
+  - echo "Performing build..."
+
+stages:
+  - build
+  - test
+
+build:
+  image: quay.io/ebi-ait/ingest-base-images:openjdk_11
+  stage: build
+  script:
+    - ./gradlew build -x test --info --stacktrace
+  artifacts:
+    paths:
+      - build/libs/*.jar
+
+test:
+  image: quay.io/ebi-ait/ingest-base-images:openjdk_11
+  stage: test
+  script:
+    - ./gradlew verify
+  artifacts:
+    reports:
+      junit:
+        - build/test-results/**/TEST-*.xml
+
