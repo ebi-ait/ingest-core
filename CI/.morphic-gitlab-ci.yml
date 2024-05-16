@@ -9,6 +9,7 @@ before_script:
 stages:
   - build
   - test
+  - package
 
 build:
   image: quay.io/ebi-ait/ingest-base-images:openjdk_11
