@@ -5,16 +5,11 @@ import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
-import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,8 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -119,7 +112,7 @@ public class SecurityTest {
 
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
-        public void proxySearch_IsBlocked(String metadataTypePlural) throws Exception {
+        public void proxySearchList_IsBlocked(String metadataTypePlural) throws Exception {
             HttpHeaders headers = new HttpHeaders();
             headers.add(FORWARDED_HOST, "test.com");
             checkGetUrl_IsUnauthorized("/" + metadataTypePlural+"/search", headers);
@@ -143,8 +136,14 @@ public class SecurityTest {
                 checkGetUrl_IsOk("/submissionEnvelopes" );
             }
             @Test
-            public void internalSearch_IsOk() throws Exception {
+            public void internalSearchList_IsOk() throws Exception {
                 checkGetUrl_IsOk("/submissionEnvelopes/search" );
+            }
+            @Test
+            public void internalSearchByUuid_IsPermitted() throws Exception {
+                // "not found" means we passed security
+                webApp.perform(get("/submissionEnvelopes/search/findByUuidUuid") )
+                        .andExpect(status().isNotFound());
             }
         }
 
@@ -175,6 +174,20 @@ public class SecurityTest {
         @WithMockUser
         public void apiAccessNoTrailingSlash_IsPermitted(String metadataTypePlural) throws Exception {
             checkGetUrl_IsOk("/" + metadataTypePlural);
+        }
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmissionEnvelope")
+        @WithMockUser
+        public void apiSearch_IsPermitted(String metadataTypePlural) throws Exception {
+            checkGetUrl_IsOk("/" + metadataTypePlural+"/search");
+        }
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmissionEnvelope")
+        @WithMockUser
+        public void apiSearchByUuid_IsPermitted(String metadataTypePlural) throws Exception {
+            // "not found" means we passed security
+            webApp.perform(get("/" + metadataTypePlural+"/search/findByUuid") )
+                    .andExpect(status().isNotFound());
         }
     }
     @Nested
