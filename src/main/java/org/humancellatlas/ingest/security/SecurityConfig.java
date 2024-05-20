@@ -37,6 +37,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         List<AntPathRequestMatcher> antPathMatchers = new ArrayList<>();
         antPathMatchers.addAll(defineAntPathMatchers(POST, "/**"));
         antPathMatchers.addAll(defineAntPathMatchers(PATCH, "/projects/*"));
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionEnvelopes"));
         return Collections.unmodifiableList(antPathMatchers);
     }
 
@@ -103,6 +104,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers(SecurityConfig::isSecuredEndpointFromOutside).authenticated()
                 .requestMatchers(SecurityConfig::isSecuredWranglerEndpointFromOutside)
                     .hasAnyAuthority(WRANGLER.name(), SERVICE.name())
+                .antMatchers(GET, "/submissionEnvelopes").permitAll()
                 .antMatchers(GET, "/**").authenticated();
     }
 
