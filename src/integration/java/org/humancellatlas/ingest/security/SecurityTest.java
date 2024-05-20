@@ -98,7 +98,11 @@ public class SecurityTest {
         public void apiAccessWithTrailingSlash_IsBlocked(String metadataTypePlural) throws Exception {
             checkGetUrl_IsUnauthorized("/" + metadataTypePlural + "/");
         }
-
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
+        public void search_IsBlocked(String metadataTypePlural) throws Exception {
+            checkGetUrl_IsUnauthorized("/" + metadataTypePlural + "/search");
+        }
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
         public void apiAccessNoTrailingSlash_IsBlocked(String metadataTypePlural) throws Exception {
@@ -111,6 +115,14 @@ public class SecurityTest {
             HttpHeaders headers = new HttpHeaders();
             headers.add(FORWARDED_HOST, "test.com");
             checkGetUrl_IsUnauthorized("/" + metadataTypePlural, headers);
+        }
+
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
+        public void proxySearch_IsBlocked(String metadataTypePlural) throws Exception {
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(FORWARDED_HOST, "test.com");
+            checkGetUrl_IsUnauthorized("/" + metadataTypePlural+"/search", headers);
         }
         @Nested
         class SubmissionEnvelopesResource {
@@ -168,7 +180,7 @@ public class SecurityTest {
     @Nested
     class RootResource {
         @Test
-        public void checkUnauthenticatedJson_IsAllowed() throws Exception {
+        public void unauthenticatedJson_IsAllowed() throws Exception {
             webApp.perform(get("/")
                             .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
@@ -176,7 +188,7 @@ public class SecurityTest {
         }
 
         @Test
-        public void checkUnauthenticatedHtml_IsAllowed() throws Exception {
+        public void unauthenticatedHtml_IsAllowed() throws Exception {
             webApp.perform(get("/browser/index.html")
                             .accept(MediaType.TEXT_HTML))
                     .andExpect(status().isOk())
@@ -200,12 +212,12 @@ public class SecurityTest {
 
         @Test
 
-        public void checkUnauthenticate_IsAllowed() throws Exception {
+        public void unauthenticate_IsAllowed() throws Exception {
             webApp.perform(get("/schemas"))
                     .andExpect(status().isOk());
         }
         @Test
-        public void checkUnauthenticatedSubResource_IsAllowed() throws Exception {
+        public void unauthenticatedSubResource_IsAllowed() throws Exception {
             webApp.perform(get("/schemas/search"))
                     .andExpect(status().isOk());
         }
@@ -215,6 +227,7 @@ public class SecurityTest {
         webApp.perform(get(url))
                 .andExpect(status().isUnauthorized());
     }
+
     private void checkGetUrl_IsUnauthorized(String url, HttpHeaders headers) throws Exception {
         webApp.perform(get(url).headers(headers))
                 .andExpect(status().isUnauthorized());
