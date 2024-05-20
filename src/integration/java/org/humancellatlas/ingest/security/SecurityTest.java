@@ -121,10 +121,19 @@ public class SecurityTest {
                 checkGetUrl_IsUnauthorized("/submissionEnvelopes" , headers);
             }
             @Test
+            public void proxySearch_IsUnauthorized() throws Exception {
+                HttpHeaders headers = new HttpHeaders();
+                headers.add(FORWARDED_HOST, "test.com");
+                checkGetUrl_IsUnauthorized("/submissionEnvelopes/search" , headers);
+            }
+            @Test
             public void internalAccessNoTrailingSlash_IsOk() throws Exception {
                 checkGetUrl_IsOk("/submissionEnvelopes" );
             }
-
+            @Test
+            public void internalSearch_IsOk() throws Exception {
+                checkGetUrl_IsOk("/submissionEnvelopes/search" );
+            }
         }
 
 
