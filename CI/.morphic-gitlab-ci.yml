@@ -11,6 +11,12 @@ stages:
   - test
   - package
 
+variables:
+  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+  EKS_CLUSTER_NAME: $EKS_CLUSTER_NAME
+
 build:
   image: quay.io/ebi-ait/ingest-base-images:openjdk_11
   stage: build
@@ -44,4 +50,14 @@ docker-build:
     - docker tag ingest-core-morphic:$CI_COMMIT_SHA $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/ingest-core-morphic:$CI_COMMIT_SHA
     - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/ingest-core-morphic:$CI_COMMIT_SHA
 
-
+deploy:
+  stage: deploy
+  image: amazon/aws-cli:latest
+  before_script:
+    - apk add --no-cache curl jq
+    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION
+  script:
+    - kubectl apply -f ingest-core-morphic-deployment-dev.yaml
+    - kubectl apply -f ingest-core-morphic-service.yaml -n=morphic-dev
