@@ -55,11 +55,10 @@ deploy:
   stage: deploy
   image: amazon/aws-cli:latest
   before_script:
-    before_script:
-      - yum install -y curl jq
-      - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-      - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION
+    - yum install -y curl jq
+    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION
   script:
     - kubectl apply -f ingest-core-morphic-deployment-dev.yaml
     - kubectl apply -f ingest-core-morphic-service.yaml -n=morphic-dev
