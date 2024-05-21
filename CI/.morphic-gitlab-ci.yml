@@ -66,5 +66,5 @@ deploy:
     - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
     - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION
   script:
-    - kubectl apply -f ingest-core-morphic-deployment-dev.yaml
-    - kubectl apply -f ingest-core-morphic-service.yaml -n morphic-dev
+    - kubectl apply -f CI/ingest-core-morphic-deployment-dev.yaml
+    - kubectl apply -f CI/ingest-core-morphic-service.yaml -n morphic-dev
