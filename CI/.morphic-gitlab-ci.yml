@@ -10,6 +10,7 @@ stages:
   - build
   - test
   - package
+  - deploy
 
 variables:
   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
