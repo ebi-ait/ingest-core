@@ -37,16 +37,21 @@ public class SecurityTest {
                 Arguments.of("processes")
         );
     }
-    public static Stream<Arguments> metadataTypesWithProject() {
+    public static Stream<Arguments> metadataTypesWithProjectAndSubmission() {
         return Stream.concat(
                 metadataTypes(),
-                Stream.of(Arguments.of("projects" ))
+                Stream.of(
+                        Arguments.of("projects" ),
+                        Arguments.of("submissionEnvelopes" )
+                )
         );
     }
-    public static Stream<Arguments> metadataTypesWithSubmissionEnvelope() {
+    public static Stream<Arguments> metadataTypesWithSubmission() {
         return Stream.concat(
                 metadataTypes(),
-                Stream.of(Arguments.of("submissionEnvelopes" ))
+                Stream.of(
+                        Arguments.of("submissionEnvelopes" )
+                )
         );
     }
 
@@ -59,21 +64,21 @@ public class SecurityTest {
     @Ignore()
     class Authorised {
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmissionEnvelope")
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
         @WithMockUser
         public void apiAccessWithTrailingSlashIsPermitted(String metadataTypePlural) throws Exception {
             checkGetUrl_IsOk("/" + metadataTypePlural + "/");
         }
 
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmissionEnvelope")
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
         @WithMockUser
         public void apiAccessNoTrailingSlashIsPermitted(String metadataTypePlural) throws Exception {
             checkGetUrl_IsOk("/" + metadataTypePlural);
         }
 
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmissionEnvelope")
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
         public void singleMetadataDocumentAccessible(String metadataTypePlural) throws Exception {
             // Getting "not found" means that the request passed the security configuration
             webApp.perform(
@@ -87,23 +92,45 @@ public class SecurityTest {
         private static final String FORWARDED_HOST = "x-forwarded-host";
 
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
-        public void apiAccessWithTrailingSlash_IsBlocked(String metadataTypePlural) throws Exception {
-            checkGetUrl_IsUnauthorized("/" + metadataTypePlural + "/");
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
+        public void apiAccessWithTrailingSlash_IsAllowed(String metadataTypePlural) throws Exception {
+            checkGetUrl_IsOk("/" + metadataTypePlural + "/");
         }
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
-        public void search_IsBlocked(String metadataTypePlural) throws Exception {
-            checkGetUrl_IsUnauthorized("/" + metadataTypePlural + "/search");
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmission")
+        public void proxyAccessWithTrailingSlash_IsBlocked(String metadataTypePlural) throws Exception {
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(FORWARDED_HOST, "test.com");
+            checkGetUrl_IsUnauthorized("/" + metadataTypePlural + "/", headers);
         }
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
-        public void apiAccessNoTrailingSlash_IsBlocked(String metadataTypePlural) throws Exception {
-            checkGetUrl_IsUnauthorized("/" + metadataTypePlural);
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
+        public void search_IsAllowed(String metadataTypePlural) throws Exception {
+            checkGetUrl_IsOk("/" + metadataTypePlural + "/search");
+        }
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmission")
+        public void proxySearch_IsBlocked(String metadataTypePlural) throws Exception {
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(FORWARDED_HOST, "test.com");
+            checkGetUrl_IsUnauthorized("/" + metadataTypePlural + "/search", headers);
         }
 
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmission")
+        public void internalSearchByUuid_IsPermitted(String metadataTypePlural) throws Exception {
+            // "not found" means we passed security
+            webApp.perform(get("/"+metadataTypePlural+"/search/findByUuidUuid") )
+                    .andExpect(status().isNotFound());
+        }
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
+        public void apiAccessNoTrailingSlash_IsAllowed(String metadataTypePlural) throws Exception {
+            checkGetUrl_IsOk("/" + metadataTypePlural);
+        }
+
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
         public void proxyApiAccessNoTrailingSlash_IsBlocked(String metadataTypePlural) throws Exception {
             HttpHeaders headers = new HttpHeaders();
             headers.add(FORWARDED_HOST, "test.com");
@@ -111,55 +138,27 @@ public class SecurityTest {
         }
 
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
-        public void proxySearchList_IsBlocked(String metadataTypePlural) throws Exception {
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
+        public void internalSingleResource_IsPermitted(String metadataTypePlural) throws Exception {
+            // "not found" means we passed security
+            webApp.perform(get("/"+metadataTypePlural+"/abc123") )
+                    .andExpect(status().isNotFound());
+        }
+
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmission")
+        public void proxySingleResource_IsBlocked(String metadataTypePlural) throws Exception {
             HttpHeaders headers = new HttpHeaders();
             headers.add(FORWARDED_HOST, "test.com");
-            checkGetUrl_IsUnauthorized("/" + metadataTypePlural+"/search", headers);
+            checkGetUrl_IsUnauthorized("/" + metadataTypePlural + "/abc123", headers);
         }
-        @Nested
-        class SubmissionEnvelopesResource {
-            @Test
-            public void proxyApiAccessNoTrailingSlash_IsUnauthorized() throws Exception {
-                HttpHeaders headers = new HttpHeaders();
-                headers.add(FORWARDED_HOST, "test.com");
-                checkGetUrl_IsUnauthorized("/submissionEnvelopes" , headers);
-            }
-            @Test
-            public void proxySearch_IsUnauthorized() throws Exception {
-                HttpHeaders headers = new HttpHeaders();
-                headers.add(FORWARDED_HOST, "test.com");
-                checkGetUrl_IsUnauthorized("/submissionEnvelopes/search" , headers);
-            }
-            @Test
-            public void internalAccessNoTrailingSlash_IsOk() throws Exception {
-                checkGetUrl_IsOk("/submissionEnvelopes" );
-            }
-            @Test
-            public void internalSearchList_IsOk() throws Exception {
-                checkGetUrl_IsOk("/submissionEnvelopes/search" );
-            }
-            @Test
-            public void internalSingleResource_IsOk() throws Exception {
-                webApp.perform(get("/submissionEnvelopes/abc123") )
-                        .andExpect(status().isNotFound());
-            }
-            @Test
-            public void internalSearchByUuid_IsPermitted() throws Exception {
-                // "not found" means we passed security
-                webApp.perform(get("/submissionEnvelopes/search/findByUuidUuid") )
-                        .andExpect(status().isNotFound());
-            }
-        }
-
-
     }
 
     @Nested
     @WithMockUser(roles = "WRANGLER")
     class WranglerAccess {
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmissionEnvelope")
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
         public void singleMetadataDocument_Accessible(String metadataTypePlural) throws Exception {
             // Getting "not found" means that the request passed the security configuration
             webApp.perform(
@@ -168,26 +167,26 @@ public class SecurityTest {
         }
 
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmissionEnvelope")
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
         @WithMockUser
         public void apiAccessWithTrailingSlash_IsPermitted(String metadataTypePlural) throws Exception {
             checkGetUrl_IsOk("/" + metadataTypePlural + "/");
         }
 
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmissionEnvelope")
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
         @WithMockUser
         public void apiAccessNoTrailingSlash_IsPermitted(String metadataTypePlural) throws Exception {
             checkGetUrl_IsOk("/" + metadataTypePlural);
         }
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmissionEnvelope")
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
         @WithMockUser
         public void apiSearch_IsPermitted(String metadataTypePlural) throws Exception {
             checkGetUrl_IsOk("/" + metadataTypePlural+"/search");
         }
         @ParameterizedTest
-        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmissionEnvelope")
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
         @WithMockUser
         public void apiSearchByUuid_IsPermitted(String metadataTypePlural) throws Exception {
             // "not found" means we passed security
