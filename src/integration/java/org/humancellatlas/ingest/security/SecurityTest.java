@@ -140,6 +140,11 @@ public class SecurityTest {
                 checkGetUrl_IsOk("/submissionEnvelopes/search" );
             }
             @Test
+            public void internalSingleResource_IsOk() throws Exception {
+                webApp.perform(get("/submissionEnvelopes/abc123") )
+                        .andExpect(status().isNotFound());
+            }
+            @Test
             public void internalSearchByUuid_IsPermitted() throws Exception {
                 // "not found" means we passed security
                 webApp.perform(get("/submissionEnvelopes/search/findByUuidUuid") )

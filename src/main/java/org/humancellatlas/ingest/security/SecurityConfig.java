@@ -37,11 +37,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         List<AntPathRequestMatcher> antPathMatchers = new ArrayList<>();
         antPathMatchers.addAll(defineAntPathMatchers(POST, "/**"));
         antPathMatchers.addAll(defineAntPathMatchers(PATCH, "/projects/*"));
-        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionEnvelopes/"));
-        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionEnvelopes/search"));
-        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionEnvelopes/search/*"));
-        antPathMatchers.addAll(defineAntPathMatchers(GET, "/biomaterials/search"));
-        antPathMatchers.addAll(defineAntPathMatchers(GET, "/biomaterials/search/*"));
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionEnvelopes/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/biomaterials/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/files/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/protocols/**"));
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/processes/**"));
         return Collections.unmodifiableList(antPathMatchers);
     }
 
@@ -50,9 +50,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/bundleManifests"));
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionManifests"));
 
-        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionEnvelopes"));
-        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionEnvelopes/search"));
-        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionEnvelopes/search/*"));        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionEnvelopes/search"));
+        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionEnvelopes/**"));
+//        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionEnvelopes/search"));
+//        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionEnvelopes/search/*"));        antPathMatchers.addAll(defineAntPathMatchers(GET, "/submissionEnvelopes/search"));
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/biomaterials"));
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/files"));
         antPathMatchers.addAll(defineAntPathMatchers(GET, "/processes"));
@@ -110,9 +110,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers(SecurityConfig::isSecuredEndpointFromOutside).authenticated()
                 .requestMatchers(SecurityConfig::isSecuredWranglerEndpointFromOutside)
                     .hasAnyAuthority(WRANGLER.name(), SERVICE.name())
-                .antMatchers(GET, "/submissionEnvelopes").permitAll()
-                .antMatchers(GET, "/submissionEnvelopes/search").permitAll()
-                .antMatchers(GET, "/submissionEnvelopes/search/*").permitAll()
+                .antMatchers(GET, "/submissionEnvelopes/**").permitAll()
                 .antMatchers(GET, "/**").authenticated();
     }
 
