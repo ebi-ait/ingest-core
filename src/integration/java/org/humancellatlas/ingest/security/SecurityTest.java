@@ -37,20 +37,26 @@ public class SecurityTest {
                 Arguments.of("processes")
         );
     }
+
+    public static Stream<Arguments> projectsAndSubmissions() {
+        return Stream.of(
+                Arguments.of("projects"),
+                Arguments.of("submissionEnvelopes")
+        );
+    }
+
     public static Stream<Arguments> metadataTypesWithProjectAndSubmission() {
         return Stream.concat(
                 metadataTypes(),
-                Stream.of(
-                        Arguments.of("projects" ),
-                        Arguments.of("submissionEnvelopes" )
-                )
+                projectsAndSubmissions()
         );
     }
+
     public static Stream<Arguments> metadataTypesWithSubmission() {
         return Stream.concat(
                 metadataTypes(),
                 Stream.of(
-                        Arguments.of("submissionEnvelopes" )
+                        Arguments.of("submissionEnvelopes")
                 )
         );
     }
@@ -60,7 +66,7 @@ public class SecurityTest {
     // as otherwise MigrationConfiguration won't be initialised.
     private MigrationConfiguration migrationConfiguration;
 
-//    @Nested
+    //    @Nested
     @Ignore()
     class Authorised {
         @ParameterizedTest
@@ -82,7 +88,7 @@ public class SecurityTest {
         public void singleMetadataDocumentAccessible(String metadataTypePlural) throws Exception {
             // Getting "not found" means that the request passed the security configuration
             webApp.perform(
-                    get("/" + metadataTypePlural + "/"+"abc123")
+                    get("/" + metadataTypePlural + "/" + "abc123")
             ).andExpect(status().isNotFound());
         }
     }
@@ -96,6 +102,7 @@ public class SecurityTest {
         public void apiAccessWithTrailingSlash_IsAllowed(String metadataTypePlural) throws Exception {
             checkGetUrl_IsOk("/" + metadataTypePlural + "/");
         }
+
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmission")
         public void proxyAccessWithTrailingSlash_IsBlocked(String metadataTypePlural) throws Exception {
@@ -103,11 +110,13 @@ public class SecurityTest {
             headers.add(FORWARDED_HOST, "test.com");
             checkGetUrl_IsUnauthorized("/" + metadataTypePlural + "/", headers);
         }
+
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
         public void search_IsAllowed(String metadataTypePlural) throws Exception {
             checkGetUrl_IsOk("/" + metadataTypePlural + "/search");
         }
+
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmission")
         public void proxySearch_IsBlocked(String metadataTypePlural) throws Exception {
@@ -120,9 +129,10 @@ public class SecurityTest {
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithSubmission")
         public void internalSearchByUuid_IsPermitted(String metadataTypePlural) throws Exception {
             // "not found" means we passed security
-            webApp.perform(get("/"+metadataTypePlural+"/search/findByUuidUuid") )
+            webApp.perform(get("/" + metadataTypePlural + "/search/findByUuidUuid"))
                     .andExpect(status().isNotFound());
         }
+
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
         public void apiAccessNoTrailingSlash_IsAllowed(String metadataTypePlural) throws Exception {
@@ -141,8 +151,22 @@ public class SecurityTest {
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
         public void internalSingleResource_IsPermitted(String metadataTypePlural) throws Exception {
             // "not found" means we passed security
-            webApp.perform(get("/"+metadataTypePlural+"/abc123") )
+            webApp.perform(get("/" + metadataTypePlural + "/abc123"))
                     .andExpect(status().isNotFound());
+        }
+
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypes")
+        public void internalSubResource_IsPermitted(String metadataTypePlural) throws Exception {
+            // "not found" means we passed security
+            webApp.perform(get("/" + metadataTypePlural + "/abc123/files"))
+                    .andExpect(status().isNotFound());
+        }
+
+        @ParameterizedTest
+        @MethodSource("org.humancellatlas.ingest.security.SecurityTest#projectsAndSubmissions")
+        public void internalProjectAndSubmission_IsPermitted(String metadataTypePlural) throws Exception {
+            checkGetUrl_IsOk("/" + metadataTypePlural + "/abc123/files");
         }
 
         @ParameterizedTest
@@ -162,7 +186,7 @@ public class SecurityTest {
         public void singleMetadataDocument_Accessible(String metadataTypePlural) throws Exception {
             // Getting "not found" means that the request passed the security configuration
             webApp.perform(
-                    get("/" + metadataTypePlural + "/"+"abc123")
+                    get("/" + metadataTypePlural + "/" + "abc123")
             ).andExpect(status().isNotFound());
         }
 
@@ -179,21 +203,24 @@ public class SecurityTest {
         public void apiAccessNoTrailingSlash_IsPermitted(String metadataTypePlural) throws Exception {
             checkGetUrl_IsOk("/" + metadataTypePlural);
         }
+
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
         @WithMockUser
         public void apiSearch_IsPermitted(String metadataTypePlural) throws Exception {
-            checkGetUrl_IsOk("/" + metadataTypePlural+"/search");
+            checkGetUrl_IsOk("/" + metadataTypePlural + "/search");
         }
+
         @ParameterizedTest
         @MethodSource("org.humancellatlas.ingest.security.SecurityTest#metadataTypesWithProjectAndSubmission")
         @WithMockUser
         public void apiSearchByUuid_IsPermitted(String metadataTypePlural) throws Exception {
             // "not found" means we passed security
-            webApp.perform(get("/" + metadataTypePlural+"/search/findByUuid") )
+            webApp.perform(get("/" + metadataTypePlural + "/search/findByUuid"))
                     .andExpect(status().isNotFound());
         }
     }
+
     @Nested
     class RootResource {
         @Test
@@ -215,11 +242,11 @@ public class SecurityTest {
 
     @Nested
     class ManagementResources {
-//        @ParameterizedTest
+        //        @ParameterizedTest
         @Ignore("passes locally, fails in gitlab")
-        @ValueSource(strings = {"health","info","prometheus"})
+        @ValueSource(strings = {"health", "info", "prometheus"})
         public void checkUnauthenticatedJson_IsAllowed(String endpoint) throws Exception {
-            webApp.perform(get("/"+endpoint))
+            webApp.perform(get("/" + endpoint))
                     .andExpect(status().isOk());
         }
     }
@@ -233,6 +260,7 @@ public class SecurityTest {
             webApp.perform(get("/schemas"))
                     .andExpect(status().isOk());
         }
+
         @Test
         public void unauthenticatedSubResource_IsAllowed() throws Exception {
             webApp.perform(get("/schemas/search"))
@@ -251,9 +279,10 @@ public class SecurityTest {
     }
 
     private void checkGetUrl_IsOk(String url) throws Exception {
-        webApp.perform(get(url) )
+        webApp.perform(get(url))
                 .andExpect(status().isOk());
     }
+
     private void checkGetUrl_IsOk(String url, HttpHeaders headers) throws Exception {
         webApp.perform(get(url).headers(headers))
                 .andExpect(status().isOk());
