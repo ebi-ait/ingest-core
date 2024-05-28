@@ -42,13 +42,12 @@ public class StudyService {
     private final @NonNull MetadataCrudService metadataCrudService;
     private final @NonNull MetadataUpdateService metadataUpdateService;
     private final @NonNull StudyEventHandler studyEventHandler;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     protected final Logger getLog() {
         return log;
     }
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public final Study register(final Study study) {
         final Study persistentStudy = studyRepository.save(study);

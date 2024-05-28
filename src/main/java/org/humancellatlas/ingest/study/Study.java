@@ -31,7 +31,7 @@ public class Study extends MetadataDocument implements MorphicDescriptiveSchema 
     Set<SubmissionEnvelope> submissionEnvelopes = new HashSet<>();
 
     // A study can have multiple datasets
-    Set<Dataset> datasets = new HashSet<>();
+    private Set<Dataset> datasets = new HashSet<>();
 
     @Field("described_by")
     private String describedBy;
