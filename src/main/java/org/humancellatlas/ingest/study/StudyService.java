@@ -8,14 +8,17 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.dataset.Dataset;
+import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
@@ -39,6 +42,7 @@ public class StudyService {
 
     private final MongoTemplate mongoTemplate;
     private final @NonNull StudyRepository studyRepository;
+    private final @NotNull DatasetRepository datasetRepository;
     private final @NonNull MetadataCrudService metadataCrudService;
     private final @NonNull MetadataUpdateService metadataUpdateService;
     private final @NonNull StudyEventHandler studyEventHandler;
@@ -119,7 +123,16 @@ public class StudyService {
     }
 
     public final Study linkDatasetToStudy(final Study study, final Dataset dataset) {
+        final String studyId = study.getId();
+        final String datasetId = dataset.getId();
+
+        studyRepository.findById(studyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Study: " + studyId));
+        datasetRepository.findById(datasetId)
+                .orElseThrow(() -> new ResourceNotFoundException("Dataset: " + datasetId));
+
         study.addDataset(dataset);
+
         return studyRepository.save(study);
     }
 

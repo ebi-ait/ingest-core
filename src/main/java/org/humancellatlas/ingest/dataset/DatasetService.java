@@ -53,12 +53,12 @@ public class DatasetService {
         return persistentDataset;
     }
 
-    public Dataset update(final String datasetId, final ObjectNode patch) {
-        final Optional<Dataset> existingDatasetOptional = datasetRepository.findById(datasetId);
+    public Dataset update(final Dataset dataset, final ObjectNode patch) {
+        final Optional<Dataset> existingDatasetOptional = datasetRepository.findById(dataset.getId());
 
         if (existingDatasetOptional.isEmpty()) {
-            log.warn("Dataset not found with ID: {}", datasetId);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Dataset not found with ID: " + datasetId);
+            log.warn("Dataset not found with ID: {}", dataset);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Dataset not found with ID: " + dataset);
         }
 
         final Dataset updatedDataset = metadataUpdateService.update(existingDatasetOptional.get(), patch);
