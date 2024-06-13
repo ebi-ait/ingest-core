@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,6 +27,11 @@ import java.util.List;
 public abstract class AbstractEntity implements Identifiable<String> {
     protected  @Id @JsonIgnore String id;
 
+    // This alias is used to ensure the 'id' field is included in JSON responses
+    // for compatibility with morphic API clients.
+    @JsonProperty("id")
+    private String jsonIdAlias;
+
     private @Version Long version;
 
     private @CreatedDate Instant submissionDate;
@@ -47,5 +53,9 @@ public abstract class AbstractEntity implements Identifiable<String> {
     }
 
     protected AbstractEntity() {}
+
+    public String getJsonIdAlias() {
+        return id;
+    }
 
 }

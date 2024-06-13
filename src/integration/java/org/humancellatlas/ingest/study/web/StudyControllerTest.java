@@ -82,6 +82,12 @@ class StudyControllerTest {
     @Nested
     class Registration {
 
+        @BeforeEach
+        void setUp() {
+            // Reset mocks before each test to ensure a clean state
+            reset(studyEventHandler);
+        }
+
         @Test
         @DisplayName("Register Study - Success")
         void registerSuccess() throws Exception {
@@ -125,6 +131,35 @@ class StudyControllerTest {
 
             // and:
             postCondition.accept(storedStudy);
+        }
+
+        @Test
+        @DisplayName("Register Study - Verify ID Field in Response - Success")
+        void registerAndVerifyIdFieldSuccess() throws Exception {
+            doTestRegister("/studies", study -> {
+                var studyCaptor = ArgumentCaptor.forClass(Study.class);
+                verify(studyEventHandler, times(1)).registeredStudy(studyCaptor.capture());
+                Study handledStudy = studyCaptor.getValue();
+                assertThat(handledStudy.getId()).isNotNull();
+
+                // Verify the response contains the id field
+                MockHttpServletResponse response = null;
+                try {
+                    response = webApp
+                            .perform(get("/studies/" + handledStudy.getId())
+                                    .contentType(APPLICATION_JSON_VALUE))
+                            .andExpect(status().isOk())
+                            .andExpect(content().contentTypeCompatibleWith("application/hal+json"))
+                            .andReturn()
+                            .getResponse();
+
+                    Map<String, Object> responseBody = objectMapper.readValue(response.getContentAsString(), Map.class);
+                    assertThat(responseBody).containsKey("id");
+                    assertThat(responseBody.get("id")).isEqualTo(handledStudy.getId());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
     }
 
