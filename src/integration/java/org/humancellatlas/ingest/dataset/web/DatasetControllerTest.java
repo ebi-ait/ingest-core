@@ -5,10 +5,15 @@ import org.assertj.core.data.MapEntry;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.dataset.DatasetEventHandler;
 import org.humancellatlas.ingest.dataset.DatasetRepository;
+import org.humancellatlas.ingest.dataset.DatasetService;
+import org.humancellatlas.ingest.state.SubmissionState;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
+import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -48,16 +53,24 @@ class DatasetControllerTest {
     private DatasetRepository repository;
 
     @Autowired
+    private DatasetService datasetService;
+
+    @Autowired
     private MetadataCrudService metadataCrudService;
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
     @SpyBean
     private DatasetEventHandler eventHandler;
 
     @MockBean
     private MigrationConfiguration migrationConfiguration;
+
+    SubmissionEnvelope submissionEnvelope;
 
     @AfterEach
     private void tearDown() {
@@ -127,10 +140,18 @@ class DatasetControllerTest {
 
         private void doTestUpdate(String patchUrl, Consumer<Dataset> postCondition) throws Exception {
             //given:
+            submissionEnvelope = new SubmissionEnvelope();
+            submissionEnvelope.setUuid(Uuid.newUuid());
+            submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
+            submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
+
             var content = new HashMap<String, Object>();
             content.put("description", "test");
             Dataset dataset = new Dataset(content);
+            dataset.getSubmissionEnvelopes().add(submissionEnvelope);
             dataset = repository.save(dataset);
+
+            datasetService.addDatasetToSubmissionEnvelope(submissionEnvelope, dataset);
 
             //when:
             content.put("description", "test updated");
