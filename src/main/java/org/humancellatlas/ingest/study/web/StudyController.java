@@ -19,7 +19,6 @@ import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,6 +57,7 @@ public class StudyController {
     @DeleteMapping("/studies/{studyId}")
     public ResponseEntity<Void> deleteStudy(@PathVariable final String studyId) {
         studyService.delete(studyId);
+
         return ResponseEntity.noContent().build();
     }
 
@@ -65,7 +65,7 @@ public class StudyController {
     // @PreAuthorize("hasAnyRole('ROLE_CONTRIBUTOR', 'ROLE_WRANGLER', 'ROLE_SERVICE')")
     @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @PostMapping(path = "submissionEnvelopes/{sub_id}/studies")
-    public ResponseEntity<Resource<?>> addStudyToEnvelope(
+    public ResponseEntity<Resource<?>> addStudyToEnvelopeAndLink(
             @PathVariable("sub_id") final SubmissionEnvelope submissionEnvelope,
             @RequestBody final Study study,
             @RequestParam("updatingUuid") final Optional<UUID> updatingUuid,
@@ -74,19 +74,23 @@ public class StudyController {
             study.setUuid(new Uuid(uuid.toString()));
             study.setIsUpdate(true);
         });
-        final Study entity = getStudyService().addStudyToSubmissionEnvelope(submissionEnvelope, study);
-        final PersistentEntityResource resource = assembler.toFullResource(entity);
+
+        final Study savedStudy = getStudyService().addStudyToSubmissionEnvelope(submissionEnvelope, study);
+        final PersistentEntityResource resource = assembler.toFullResource
+                (getStudyService().linkStudySubmissionEnvelope(submissionEnvelope, savedStudy));
+
         return ResponseEntity.accepted().body(resource);
     }
 
     @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
-    @PutMapping(path = "studies/{stud_id}/submissionEnvelopes/{sub_id}")
+    @PutMapping(path = "submissionEnvelopes/{sub_id}/studies/{stud_id}/")
     public ResponseEntity<Resource<?>> linkSubmissionToStudy(
-            @PathVariable("stud_id") final Study study,
             @PathVariable("sub_id") final SubmissionEnvelope submissionEnvelope,
+            @PathVariable("stud_id") final Study study,
             final PersistentEntityResourceAssembler assembler) {
         final Study savedStudy = getStudyService().linkStudySubmissionEnvelope(submissionEnvelope, study);
         final PersistentEntityResource studyResource = assembler.toFullResource(savedStudy);
+
         return ResponseEntity.accepted().body(studyResource);
     }
 

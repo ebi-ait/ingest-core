@@ -100,15 +100,16 @@ public class DatasetController {
      * @return The added dataset as a resource.
      */
     @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
-    @PostMapping(path = "submissionEnvelopes/{sub_id}/datasets")
-    public ResponseEntity<Resource<?>> addDatasetToEnvelope(@PathVariable("sub_id") final SubmissionEnvelope submissionEnvelope, @RequestBody final Dataset dataset, @RequestParam("updatingUuid") final Optional<UUID> updatingUuid, final PersistentEntityResourceAssembler assembler) {
+    @PostMapping(path = "/submissionEnvelopes/{sub_id}/datasets")
+    public ResponseEntity<Resource<?>> addDatasetToEnvelopeAndLink(@PathVariable("sub_id") final SubmissionEnvelope submissionEnvelope, @RequestBody final Dataset dataset, @RequestParam("updatingUuid") final Optional<UUID> updatingUuid, final PersistentEntityResourceAssembler assembler) {
         updatingUuid.ifPresent(uuid -> {
             dataset.setUuid(new Uuid(uuid.toString()));
             dataset.setIsUpdate(true);
         });
 
-        final Dataset entity = datasetService.addDatasetToSubmissionEnvelope(submissionEnvelope, dataset);
-        final PersistentEntityResource resource = assembler.toFullResource(entity);
+        final Dataset savedDataset = datasetService.addDatasetToSubmissionEnvelope(submissionEnvelope, dataset);
+        final PersistentEntityResource resource = assembler.toFullResource
+                (datasetService.linkDatasetSubmissionEnvelope(submissionEnvelope, savedDataset));
 
         return ResponseEntity.accepted().body(resource);
     }
@@ -122,7 +123,7 @@ public class DatasetController {
      * @return The linked dataset as a resource.
      */
     @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
-    @PutMapping(path = "submissionEnvelopes/{sub_id}/datasets/{dataset_id}")
+    @PutMapping(path = "/submissionEnvelopes/{sub_id}/datasets/{dataset_id}")
     public ResponseEntity<Resource<?>> linkSubmissionToDataset(@PathVariable("sub_id") final SubmissionEnvelope submissionEnvelope,
                                                                @PathVariable("dataset_id") final Dataset dataset,
                                                                final PersistentEntityResourceAssembler assembler) {
@@ -140,7 +141,7 @@ public class DatasetController {
      * @param assembler   The resource assembler.
      * @return The updated dataset as a resource.
      */
-    @PutMapping("datasets/{dataset_id}/biomaterial/{biomaterial_id}")
+    @PutMapping("/datasets/{dataset_id}/biomaterials/{biomaterial_id}")
     public ResponseEntity<Resource<?>> linkBiomaterialToDataset(@PathVariable("dataset_id") final Dataset dataset, @PathVariable("biomaterial_id") final Biomaterial biomaterial, final PersistentEntityResourceAssembler assembler) {
         return ResponseEntity.accepted().body(assembler.toFullResource(datasetService.linkBiomaterialToDataset(dataset, biomaterial)));
     }
@@ -153,7 +154,7 @@ public class DatasetController {
      * @param assembler The resource assembler.
      * @return The updated dataset as a resource.
      */
-    @PutMapping("datasets/{dataset_id}/file/{file_id}")
+    @PutMapping("/datasets/{dataset_id}/files/{file_id}")
     public ResponseEntity<Resource<?>> linkFileToDataset(@PathVariable("dataset_id") final Dataset dataset, @PathVariable("file_id") final File file, final PersistentEntityResourceAssembler assembler) {
         return ResponseEntity.accepted().body(assembler.toFullResource(datasetService.linkFileToDataset(dataset, file)));
     }
@@ -166,7 +167,7 @@ public class DatasetController {
      * @param assembler The resource assembler.
      * @return The updated dataset as a resource.
      */
-    @PutMapping("/{dataset_id}/protocol/{protocol_id}")
+    @PutMapping("/datasets/{dataset_id}/protocol/{protocol_id}")
     public ResponseEntity<Resource<?>> linkProtocolToDataset(@PathVariable("dataset_id") final Dataset dataset, @PathVariable("protocol_id") final Protocol protocol, final PersistentEntityResourceAssembler assembler) {
         return ResponseEntity.accepted().body(assembler.toFullResource(datasetService.linkProtocolToDataset(dataset, protocol)));
     }
@@ -179,7 +180,7 @@ public class DatasetController {
      * @param assembler The resource assembler.
      * @return The updated dataset as a resource.
      */
-    @PutMapping("/{dataset_id}/process/{process_id}")
+    @PutMapping("/datasets/{dataset_id}/process/{process_id}")
     public ResponseEntity<Resource<?>> linkProcessToDataset(@PathVariable("dataset_id") final Dataset dataset, @PathVariable("process_id") final Process process, final PersistentEntityResourceAssembler assembler) {
         return ResponseEntity.accepted().body(assembler.toFullResource(datasetService.linkProcessToDataset(dataset, process)));
     }

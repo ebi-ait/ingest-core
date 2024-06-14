@@ -56,6 +56,7 @@ public class StudyService {
     public final Study register(final Study study) {
         final Study persistentStudy = studyRepository.save(study);
         studyEventHandler.registeredStudy(persistentStudy);
+
         return persistentStudy;
     }
 
@@ -70,6 +71,7 @@ public class StudyService {
         final Study existingStudy = existingStudyOptional.get();
         final Study updatedStudy = metadataUpdateService.update(existingStudy, patch);
         studyEventHandler.updatedStudy(updatedStudy);
+
         return updatedStudy;
     }
 
@@ -96,6 +98,7 @@ public class StudyService {
         }
 
         final Study deleteStudy = deleteStudyOptional.get();
+
         metadataCrudService.deleteDocument(deleteStudy);
         studyEventHandler.deletedStudy(studyId);
     }
@@ -119,6 +122,7 @@ public class StudyService {
                 studyRepository.save(studyByUuid);
             }
         });
+
         return study;
     }
 
@@ -150,6 +154,7 @@ public class StudyService {
 
         // ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
         envelopes.removeIf(env -> env == null || env.getSubmissionState() == null);
+
         return new StudyService.StudyBag(studies, envelopes);
     }
 }

@@ -14,7 +14,6 @@ import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.ProcessRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
-import org.humancellatlas.ingest.study.Study;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
