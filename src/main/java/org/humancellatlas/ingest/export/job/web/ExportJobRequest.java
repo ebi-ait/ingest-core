@@ -1,16 +1,15 @@
 package org.humancellatlas.ingest.export.job.web;
 
-import lombok.Data;
-import lombok.NonNull;
+import java.util.Map;
+
 import org.humancellatlas.ingest.export.destination.ExportDestination;
 
-import java.util.Map;
+import lombok.Data;
+import lombok.NonNull;
 
 @Data
 public class ExportJobRequest {
-    @NonNull
-    ExportDestination destination;
+  @NonNull ExportDestination destination;
 
-    @NonNull
-    Map<String, Object> context;
+  @NonNull Map<String, Object> context;
 }

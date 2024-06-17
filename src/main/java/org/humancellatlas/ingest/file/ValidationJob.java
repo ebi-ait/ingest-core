@@ -1,17 +1,17 @@
 package org.humancellatlas.ingest.file;
 
-import lombok.Data;
+import java.util.UUID;
 
 import org.humancellatlas.ingest.core.Checksums;
-import java.util.UUID;
+
+import lombok.Data;
 
 @Data
 public class ValidationJob {
-    private UUID validationId;
-    private Checksums checksums;
-    private boolean jobCompleted;
-    private ValidationReport validationReport;
-    
-    protected ValidationJob() {}
+  private UUID validationId;
+  private Checksums checksums;
+  private boolean jobCompleted;
+  private ValidationReport validationReport;
 
+  protected ValidationJob() {}
 }

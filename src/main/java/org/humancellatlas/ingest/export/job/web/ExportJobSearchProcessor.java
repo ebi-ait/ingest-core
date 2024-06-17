@@ -12,13 +12,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExportJobSearchProcessor implements ResourceProcessor<RepositorySearchesResource> {
 
-    @Override
-    public RepositorySearchesResource process(RepositorySearchesResource searchesResource) {
-        if(searchesResource.getDomainType().equals(ExportJob.class)) {
-            searchesResource.add(linkTo(methodOn(ExportJobController.class).findExportJobs(null, null, null, null, null, null))
-                                     .withRel(Links.EXPORT_JOB_FIND_REL));
-        }
-
-        return searchesResource;
+  @Override
+  public RepositorySearchesResource process(RepositorySearchesResource searchesResource) {
+    if (searchesResource.getDomainType().equals(ExportJob.class)) {
+      searchesResource.add(
+          linkTo(
+                  methodOn(ExportJobController.class)
+                      .findExportJobs(null, null, null, null, null, null))
+              .withRel(Links.EXPORT_JOB_FIND_REL));
     }
+
+    return searchesResource;
+  }
 }

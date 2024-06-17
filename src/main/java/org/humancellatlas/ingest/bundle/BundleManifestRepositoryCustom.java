@@ -5,5 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface BundleManifestRepositoryCustom {
-    Page<BundleManifest> findBundleManifestsByProjectAndBundleType(Project project, BundleType bundleType, Pageable pageable);
+  Page<BundleManifest> findBundleManifestsByProjectAndBundleType(
+      Project project, BundleType bundleType, Pageable pageable);
 }

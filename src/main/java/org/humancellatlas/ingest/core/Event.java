@@ -12,5 +12,5 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public abstract class Event {
-    private final SubmissionDate submissionDate;
+  private final SubmissionDate submissionDate;
 }

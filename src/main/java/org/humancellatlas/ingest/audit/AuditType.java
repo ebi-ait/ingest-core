@@ -3,17 +3,16 @@ package org.humancellatlas.ingest.audit;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum AuditType {
-    STATUS_UPDATED("Status updated");
+  STATUS_UPDATED("Status updated");
 
-    protected String value;
+  protected String value;
 
-    AuditType(String value) {
-        this.value = value;
-    }
+  AuditType(String value) {
+    this.value = value;
+  }
 
-    @JsonValue
-    public String getValue() {
-        return this.value;
-    }
-
-    }
+  @JsonValue
+  public String getValue() {
+    return this.value;
+  }
+}

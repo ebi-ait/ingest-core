@@ -1,7 +1,12 @@
 package org.humancellatlas.ingest.notifications;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.Mockito.*;
+
 import java.util.HashMap;
 import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.humancellatlas.ingest.notifications.exception.DuplicateNotification;
 import org.humancellatlas.ingest.notifications.model.Checksum;
@@ -9,12 +14,8 @@ import org.humancellatlas.ingest.notifications.model.Notification;
 import org.humancellatlas.ingest.notifications.model.NotificationRequest;
 import org.humancellatlas.ingest.notifications.model.NotificationState;
 import org.junit.jupiter.api.Test;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import org.mockito.Mockito;
 import org.springframework.dao.DuplicateKeyException;
-
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
 
 public class NotificationServicesTest {
   private NotificationRepository notificationRepository = mock(NotificationRepository.class);
@@ -23,16 +24,17 @@ public class NotificationServicesTest {
   @Test
   public void testCreateNotification() {
     Checksum testChecksum = new Checksum("testtype", "testvalue");
-    NotificationRequest notificationRequest = new NotificationRequest("testcontent",
-                                                                      new HashMap<>(),
-                                                                      testChecksum);
+    NotificationRequest notificationRequest =
+        new NotificationRequest("testcontent", new HashMap<>(), testChecksum);
 
-    Mockito.doReturn(Notification.buildNew()
-                                 .metadata(new HashMap<>())
-                                 .content("testcontent")
-                                 .checksum(testChecksum)
-                                 .build())
-           .when(notificationRepository).save(any(Notification.class));
+    Mockito.doReturn(
+            Notification.buildNew()
+                .metadata(new HashMap<>())
+                .content("testcontent")
+                .checksum(testChecksum)
+                .build())
+        .when(notificationRepository)
+        .save(any(Notification.class));
 
     Notification createdNotification = notificationService.createNotification(notificationRequest);
 
@@ -45,74 +47,78 @@ public class NotificationServicesTest {
   @Test
   public void testCreateDuplicateNotification() {
     Checksum testChecksum = new Checksum("testtype", "testvalue");
-    NotificationRequest notificationRequest = new NotificationRequest("testcontent",
-                                                                      new HashMap<>(),
-                                                                      testChecksum);
+    NotificationRequest notificationRequest =
+        new NotificationRequest("testcontent", new HashMap<>(), testChecksum);
 
-    Notification testExistingNotification = Notification.buildNew()
-                                                        .metadata(new HashMap<>())
-                                                        .content("testcontent")
-                                                        .checksum(testChecksum)
-                                                        .build();
-
+    Notification testExistingNotification =
+        Notification.buildNew()
+            .metadata(new HashMap<>())
+            .content("testcontent")
+            .checksum(testChecksum)
+            .build();
 
     Mockito.doThrow(new DuplicateKeyException(""))
-           .when(notificationRepository).save(any(Notification.class));
+        .when(notificationRepository)
+        .save(any(Notification.class));
 
     Mockito.doReturn(Optional.of(testExistingNotification))
-           .when(notificationRepository).findByChecksum_Value("testvalue");
-
+        .when(notificationRepository)
+        .findByChecksum_Value("testvalue");
 
     Assertions.assertThatExceptionOfType(DuplicateNotification.class)
-              .isThrownBy(() -> notificationService.createNotification(notificationRequest));
+        .isThrownBy(() -> notificationService.createNotification(notificationRequest));
   }
 
   @Test
   public void testRetrieveByChecksum() {
     Checksum testChecksum = new Checksum("testtype", "testvalue");
 
-    Mockito.doReturn(Optional.of(Notification.buildNew()
-                                             .metadata(new HashMap<>())
-                                             .content("testcontent")
-                                             .checksum(testChecksum)
-                                             .build()))
-           .when(notificationRepository).findByChecksum(testChecksum);
+    Mockito.doReturn(
+            Optional.of(
+                Notification.buildNew()
+                    .metadata(new HashMap<>())
+                    .content("testcontent")
+                    .checksum(testChecksum)
+                    .build()))
+        .when(notificationRepository)
+        .findByChecksum(testChecksum);
 
-    Assertions.assertThat(notificationService.retrieveForChecksum(testChecksum).orElseThrow().getChecksum())
-              .isEqualTo(testChecksum);
+    Assertions.assertThat(
+            notificationService.retrieveForChecksum(testChecksum).orElseThrow().getChecksum())
+        .isEqualTo(testChecksum);
   }
 
   @Test
   public void testChangeState() {
     Checksum testChecksum = new Checksum("testtype", "testvalue");
-    Notification testNotification = Notification.buildNew()
-                                                .metadata(new HashMap<>())
-                                                .content("testcontent")
-                                                .checksum(testChecksum)
-                                                .build();
+    Notification testNotification =
+        Notification.buildNew()
+            .metadata(new HashMap<>())
+            .content("testcontent")
+            .checksum(testChecksum)
+            .build();
 
+    Mockito.doAnswer(returnsFirstArg()).when(notificationRepository).save(any(Notification.class));
 
-    Mockito.doAnswer(returnsFirstArg())
-           .when(notificationRepository).save(any(Notification.class));
-
-
-    Notification changedState = notificationService.changeState(testNotification, NotificationState.QUEUED);
+    Notification changedState =
+        notificationService.changeState(testNotification, NotificationState.QUEUED);
     assertThat(changedState.getState()).isEqualTo(NotificationState.QUEUED);
   }
 
   @Test
   public void testIllegalStateChange() {
     Checksum testChecksum = new Checksum("testtype", "testvalue");
-    Notification testNotification = Notification.buildNew()
-                                                .metadata(new HashMap<>())
-                                                .content("testcontent")
-                                                .checksum(testChecksum)
-                                                .build();
+    Notification testNotification =
+        Notification.buildNew()
+            .metadata(new HashMap<>())
+            .content("testcontent")
+            .checksum(testChecksum)
+            .build();
 
-    Mockito.doAnswer(returnsFirstArg())
-           .when(notificationRepository).save(any(Notification.class));
+    Mockito.doAnswer(returnsFirstArg()).when(notificationRepository).save(any(Notification.class));
 
     Assertions.assertThatExceptionOfType(IllegalStateException.class)
-              .isThrownBy(() -> notificationService.changeState(testNotification, NotificationState.PROCESSED));
+        .isThrownBy(
+            () -> notificationService.changeState(testNotification, NotificationState.PROCESSED));
   }
 }

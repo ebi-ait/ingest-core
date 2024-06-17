@@ -1,8 +1,8 @@
 package org.humancellatlas.ingest.process;
 
-import lombok.*;
-
 import java.util.List;
+
+import lombok.*;
 
 /**
  * Javadocs go here!
@@ -12,5 +12,5 @@ import java.util.List;
  */
 @Data
 public class BundleReference {
-    private List<String> bundleUuids;
+  private List<String> bundleUuids;
 }

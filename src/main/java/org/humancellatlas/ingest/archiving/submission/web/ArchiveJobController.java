@@ -1,6 +1,9 @@
 package org.humancellatlas.ingest.archiving.submission.web;
 
-import lombok.RequiredArgsConstructor;
+import java.net.URI;
+import java.time.Instant;
+import java.util.Optional;
+
 import org.humancellatlas.ingest.archiving.entity.ArchiveJob;
 import org.humancellatlas.ingest.archiving.entity.ArchiveJobRepository;
 import org.slf4j.Logger;
@@ -17,9 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.net.URI;
-import java.time.Instant;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 
 @RepositoryRestController
 @ExposesResourceFor(ArchiveJob.class)
@@ -27,37 +28,37 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ArchiveJobController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveJobController.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveJobController.class);
 
-    private final ArchiveJobRepository archiveJobRepository;
+  private final ArchiveJobRepository archiveJobRepository;
 
-    @PostMapping("/archiveJobs")
-    ResponseEntity<?> createArchiveJob(@RequestBody ArchiveJob archiveJob,
-                                       PersistentEntityResourceAssembler resourceAssembler) {
-        initResource(archiveJob);
+  @PostMapping("/archiveJobs")
+  ResponseEntity<?> createArchiveJob(
+      @RequestBody ArchiveJob archiveJob, PersistentEntityResourceAssembler resourceAssembler) {
+    initResource(archiveJob);
 
-        final ArchiveJob persistedArchiveJob = archiveJobRepository.save(archiveJob);
-        final PersistentEntityResource entityResource = resourceAssembler.toFullResource(persistedArchiveJob);
-        return ResponseEntity.created(URI.create(entityResource.getId().getHref()))
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(entityResource);
+    final ArchiveJob persistedArchiveJob = archiveJobRepository.save(archiveJob);
+    final PersistentEntityResource entityResource =
+        resourceAssembler.toFullResource(persistedArchiveJob);
+    return ResponseEntity.created(URI.create(entityResource.getId().getHref()))
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(entityResource);
+  }
+
+  private void initResource(ArchiveJob archiveJob) {
+    archiveJob.setCreatedDate(Instant.now());
+    archiveJob.setOverallStatus(ArchiveJob.ArchiveJobStatus.PENDING);
+  }
+
+  @GetMapping("/archiveJobs/{id}")
+  ResponseEntity<?> getArchiveJob(
+      @PathVariable String id, PersistentEntityResourceAssembler resourceAssembler) {
+    Optional<ArchiveJob> archiveJob = archiveJobRepository.findById(id);
+
+    if (archiveJob.isEmpty()) {
+      return ResponseEntity.notFound().build();
     }
 
-    private void initResource(ArchiveJob archiveJob) {
-        archiveJob.setCreatedDate(Instant.now());
-        archiveJob.setOverallStatus(ArchiveJob.ArchiveJobStatus.PENDING);
-    }
-
-    @GetMapping("/archiveJobs/{id}")
-    ResponseEntity<?> getArchiveJob(@PathVariable String id,
-                                    PersistentEntityResourceAssembler resourceAssembler) {
-        Optional<ArchiveJob> archiveJob = archiveJobRepository.findById(id);
-
-        if (archiveJob.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok().body(resourceAssembler.toFullResource(archiveJob.get()));
-    }
-
+    return ResponseEntity.ok().body(resourceAssembler.toFullResource(archiveJob.get()));
+  }
 }

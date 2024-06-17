@@ -1,10 +1,10 @@
 package org.humancellatlas.ingest.process;
 
-import lombok.Data;
-
 import java.util.UUID;
+
+import lombok.Data;
 
 @Data
 public class InputFileReference {
-    private UUID inputFileUuid;
+  private UUID inputFileUuid;
 }

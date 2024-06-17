@@ -7,12 +7,12 @@ package org.humancellatlas.ingest.core;
  * @date 30/08/17
  */
 public enum EntityType {
-    SUBMISSION,
-    PROJECT,
-    BIOMATERIAL,
-    PROCESS,
-    PROTOCOL,
-    FILE,
-    STUDY,
-    DATASET
+  SUBMISSION,
+  PROJECT,
+  BIOMATERIAL,
+  PROCESS,
+  PROTOCOL,
+  FILE,
+  STUDY,
+  DATASET
 }

@@ -4,8 +4,7 @@ import org.springframework.security.core.AuthenticationException;
 
 public class InvalidUserGroup extends AuthenticationException {
 
-    public InvalidUserGroup(String group) {
-        super(String.format("Invalid user group, %s", group));
-    }
-
+  public InvalidUserGroup(String group) {
+    super(String.format("Invalid user group, %s", group));
+  }
 }

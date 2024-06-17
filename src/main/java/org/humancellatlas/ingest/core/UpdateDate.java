@@ -1,8 +1,8 @@
 package org.humancellatlas.ingest.core;
 
-import lombok.Data;
-
 import java.util.Date;
+
+import lombok.Data;
 
 /**
  * Javadocs go here!
@@ -12,20 +12,20 @@ import java.util.Date;
  */
 @Data
 public class UpdateDate {
-    private Date date;
+  private Date date;
 
-    protected UpdateDate() {
-        this.date = null;
-    }
+  protected UpdateDate() {
+    this.date = null;
+  }
 
-    public UpdateDate(Date date) {
-        if (!isValid(date)) {
-            throw new IllegalArgumentException(String.format("Update date '%s' is in the future!", date));
-        }
-        this.date = date;
+  public UpdateDate(Date date) {
+    if (!isValid(date)) {
+      throw new IllegalArgumentException(String.format("Update date '%s' is in the future!", date));
     }
+    this.date = date;
+  }
 
-    public static boolean isValid(Date date) {
-        return !date.after(new Date());
-    }
+  public static boolean isValid(Date date) {
+    return !date.after(new Date());
+  }
 }

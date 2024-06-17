@@ -1,7 +1,7 @@
 package org.humancellatlas.ingest.stagingjob.web;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import java.util.UUID;
+
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.stagingjob.StagingJob;
 import org.humancellatlas.ingest.stagingjob.StagingJobService;
@@ -9,11 +9,11 @@ import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 @RepositoryRestController
 @ExposesResourceFor(StagingJob.class)
@@ -21,30 +21,30 @@ import java.util.UUID;
 @RequestMapping("/stagingJobs")
 public class StagingJobController {
 
-    private final @NonNull StagingJobService stagingJobService;
+  private final @NonNull StagingJobService stagingJobService;
 
-    @PostMapping
-    public ResponseEntity<?> createStagingJob(@RequestBody StagingJob stagingJob,
-            PersistentEntityResourceAssembler resourceAssembler) {
-        StagingJob persistentJob = stagingJobService.register(stagingJob);
-        return ResponseEntity.ok(resourceAssembler.toFullResource(persistentJob));
-    }
+  @PostMapping
+  public ResponseEntity<?> createStagingJob(
+      @RequestBody StagingJob stagingJob, PersistentEntityResourceAssembler resourceAssembler) {
+    StagingJob persistentJob = stagingJobService.register(stagingJob);
+    return ResponseEntity.ok(resourceAssembler.toFullResource(persistentJob));
+  }
 
-    @PatchMapping(path = "/{stagingJob}" + Links.COMPLETE_STAGING_JOB_URL)
-    ResponseEntity<?> completeStagingJob(@PathVariable("stagingJob") StagingJob stagingJob,
-                                         @RequestBody StagingJobCompleteRequest stagingJobCompleteRequest,
-                                         final PersistentEntityResourceAssembler resourceAssembler) {
-        StagingJob completedStagingJob = stagingJobService.completeJob(
-                stagingJob,
-                stagingJobCompleteRequest.getStagingAreaFileUri()
-        );
+  @PatchMapping(path = "/{stagingJob}" + Links.COMPLETE_STAGING_JOB_URL)
+  ResponseEntity<?> completeStagingJob(
+      @PathVariable("stagingJob") StagingJob stagingJob,
+      @RequestBody StagingJobCompleteRequest stagingJobCompleteRequest,
+      final PersistentEntityResourceAssembler resourceAssembler) {
+    StagingJob completedStagingJob =
+        stagingJobService.completeJob(
+            stagingJob, stagingJobCompleteRequest.getStagingAreaFileUri());
 
-        return ResponseEntity.ok(resourceAssembler.toFullResource(completedStagingJob));
-    }
+    return ResponseEntity.ok(resourceAssembler.toFullResource(completedStagingJob));
+  }
 
-    @DeleteMapping
-    ResponseEntity<?> deleteStagingJobs(@RequestParam("stagingAreaUuid") UUID stagingAreaUuid) {
-        stagingJobService.deleteJobsForStagingArea(stagingAreaUuid);
-        return new ResponseEntity<StagingJob>(HttpStatus.NO_CONTENT);
-    }
+  @DeleteMapping
+  ResponseEntity<?> deleteStagingJobs(@RequestParam("stagingAreaUuid") UUID stagingAreaUuid) {
+    stagingJobService.deleteJobsForStagingArea(stagingAreaUuid);
+    return new ResponseEntity<StagingJob>(HttpStatus.NO_CONTENT);
+  }
 }

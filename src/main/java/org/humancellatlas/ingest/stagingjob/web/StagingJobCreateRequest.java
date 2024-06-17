@@ -1,11 +1,11 @@
 package org.humancellatlas.ingest.stagingjob.web;
 
-import lombok.Data;
-
 import java.util.UUID;
+
+import lombok.Data;
 
 @Data
 public class StagingJobCreateRequest {
-    private UUID stagingAreaUuid;
-    private String stagingAreaFileName;
+  private UUID stagingAreaUuid;
+  private String stagingAreaFileName;
 }

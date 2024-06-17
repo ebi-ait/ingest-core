@@ -10,8 +10,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class SubmissionEnvelopeMessage {
-    private final String documentType;
-    private final String documentId;
-    private final String documentUuid;
-    private final String callbackLink;
+  private final String documentType;
+  private final String documentId;
+  private final String documentUuid;
+  private final String callbackLink;
 }

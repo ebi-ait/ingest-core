@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 public class Message {
-    private String exchange;
-    private String routingKey;
-    private Object payload;
+  private String exchange;
+  private String routingKey;
+  private Object payload;
 }

@@ -1,6 +1,17 @@
 package org.humancellatlas.ingest.process;
 
-import lombok.NonNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.humancellatlas.ingest.TestingHelper;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -28,246 +39,263 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @SpringBootTest
 @AutoConfigureDataMongo()
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-@WithMockUser(username = "alice", roles = {"WRANGLER"})
-
+@WithMockUser(
+    username = "alice",
+    roles = {"WRANGLER"})
 class ProcessControllerTest {
-    @MockBean
-    ValidationStateChangeService validationStateChangeService;
+  @MockBean ValidationStateChangeService validationStateChangeService;
 
-    @MockBean
-    private MessageRouter messageRouter;
+  @MockBean private MessageRouter messageRouter;
 
-    @MockBean
-    private MigrationConfiguration migrationConfiguration;
+  @MockBean private MigrationConfiguration migrationConfiguration;
 
-    @Autowired
-    private MockMvc webApp;
+  @Autowired private MockMvc webApp;
 
-    @Autowired
-    private ProcessRepository processRepository;
+  @Autowired private ProcessRepository processRepository;
 
-    @Autowired
-    private ProtocolRepository protocolRepository;
+  @Autowired private ProtocolRepository protocolRepository;
 
-    @Autowired
-    private ProjectRepository projectRepository;
+  @Autowired private ProjectRepository projectRepository;
 
-    @Autowired
-    private SubmissionEnvelopeRepository submissionEnvelopeRepository;
+  @Autowired private SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
-    @Autowired
-    private ProjectService projectService;
-    Protocol protocol1;
+  @Autowired private ProjectService projectService;
+  Protocol protocol1;
 
-    Protocol protocol2;
+  Protocol protocol2;
 
-    Protocol protocol3;
+  Protocol protocol3;
 
-    Project project;
+  Project project;
 
-    Process process;
+  Process process;
 
-    UriComponentsBuilder uriBuilder;
+  UriComponentsBuilder uriBuilder;
 
-    SubmissionEnvelope submissionEnvelope;
+  SubmissionEnvelope submissionEnvelope;
 
-    @BeforeEach
-    void setUp() {
-        submissionEnvelope = new SubmissionEnvelope();
-        submissionEnvelope.setUuid(Uuid.newUuid());
-        submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
-        submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
+  @BeforeEach
+  void setUp() {
+    submissionEnvelope = new SubmissionEnvelope();
+    submissionEnvelope.setUuid(Uuid.newUuid());
+    submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
+    submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
 
-        protocol1 = protocolRepository.save(new Protocol(null));
-        protocol2 = protocolRepository.save(new Protocol(null));
-        protocol3 = protocolRepository.save(new Protocol(null));
+    protocol1 = protocolRepository.save(new Protocol(null));
+    protocol2 = protocolRepository.save(new Protocol(null));
+    protocol3 = protocolRepository.save(new Protocol(null));
 
-        project = new Project(new HashMap<>());
-        ((Map<String, Object>)project.getContent()).put("dataAccess", new ObjectToMapConverter().asMap(new DataAccess(DataAccessTypes.OPEN)));
-        projectService.addProjectToSubmissionEnvelope(submissionEnvelope, project);
+    project = new Project(new HashMap<>());
+    ((Map<String, Object>) project.getContent())
+        .put("dataAccess", new ObjectToMapConverter().asMap(new DataAccess(DataAccessTypes.OPEN)));
+    projectService.addProjectToSubmissionEnvelope(submissionEnvelope, project);
 
-        project.setSubmissionEnvelope(submissionEnvelope);
-        project.getSubmissionEnvelopes().add(submissionEnvelope);
-        project = projectRepository.save(project);
+    project.setSubmissionEnvelope(submissionEnvelope);
+    project.getSubmissionEnvelopes().add(submissionEnvelope);
+    project = projectRepository.save(project);
 
-        process = new Process(null);
-        process.setSubmissionEnvelope(submissionEnvelope);
-        process.setProject(project);
+    process = new Process(null);
+    process.setSubmissionEnvelope(submissionEnvelope);
+    process.setProject(project);
 
-        process = processRepository.save(process);
+    process = processRepository.save(process);
 
-        uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
-    }
+    uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
+  }
 
-    @AfterEach
-    void tearDown() {
-        submissionEnvelopeRepository.deleteAll();
-        processRepository.deleteAll();
-        protocolRepository.deleteAll();
-        projectRepository.deleteAll();
-    }
+  @AfterEach
+  void tearDown() {
+    submissionEnvelopeRepository.deleteAll();
+    processRepository.deleteAll();
+    protocolRepository.deleteAll();
+    projectRepository.deleteAll();
+  }
 
-    @Test
-    public void newProcessInSubmissionLinksToSubmissionAndProject() throws Exception {
-        //given
-        processRepository.deleteAll();
+  @Test
+  public void newProcessInSubmissionLinksToSubmissionAndProject() throws Exception {
+    // given
+    processRepository.deleteAll();
 
-        // when
-        webApp.perform(
+    // when
+    webApp
+        .perform(
             post("/submissionEnvelopes/{id}/processes", submissionEnvelope.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"content\": {}}")
-        ).andExpect(status().isAccepted());
-        TestingHelper.resetTestingSecurityContext();
+                .content("{\"content\": {}}"))
+        .andExpect(status().isAccepted());
+    TestingHelper.resetTestingSecurityContext();
 
-        //then
-        assertThat(processRepository.findAll()).hasSize(1);
-        assertThat(processRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
-        assertThat(processRepository.findByProject(project)).hasSize(1);
+    // then
+    assertThat(processRepository.findAll()).hasSize(1);
+    assertThat(processRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
+    assertThat(processRepository.findByProject(project)).hasSize(1);
 
-        var newProcess = processRepository.findAll().get(0);
-        assertThat(newProcess.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
-        assertThat(newProcess.getProject().getId()).isEqualTo(project.getId());
-        assertThat(newProcess.getProjects()).hasSize(1);
-        assertThat(newProcess.getProjects().stream().findFirst().get().getId()).isEqualTo(project.getId());
-    }
+    var newProcess = processRepository.findAll().get(0);
+    assertThat(newProcess.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
+    assertThat(newProcess.getProject().getId()).isEqualTo(project.getId());
+    assertThat(newProcess.getProjects()).hasSize(1);
+    assertThat(newProcess.getProjects().stream().findFirst().get().getId())
+        .isEqualTo(project.getId());
+  }
 
-    @Test
-    public void newProcessInSubmissionDoesNotFailIfSubmissionHasNoProject() throws Exception {
-        //given
-        processRepository.deleteAll();
-        projectRepository.deleteAll();
+  @Test
+  public void newProcessInSubmissionDoesNotFailIfSubmissionHasNoProject() throws Exception {
+    // given
+    processRepository.deleteAll();
+    projectRepository.deleteAll();
 
-        // when
-        webApp.perform(
+    // when
+    webApp
+        .perform(
             post("/submissionEnvelopes/{id}/processes", submissionEnvelope.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"content\": {}}")
-        ).andExpect(status().isAccepted());
-        TestingHelper.resetTestingSecurityContext();
+                .content("{\"content\": {}}"))
+        .andExpect(status().isAccepted());
+    TestingHelper.resetTestingSecurityContext();
 
-        //then
-        assertThat(processRepository.findAll()).hasSize(1);
-        assertThat(processRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
+    // then
+    assertThat(processRepository.findAll()).hasSize(1);
+    assertThat(processRepository.findAllBySubmissionEnvelope(submissionEnvelope)).hasSize(1);
 
-        var newProcess = processRepository.findAll().get(0);
-        assertThat(newProcess.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
-        assertThat(newProcess.getProject()).isNull();
-        assertThat(newProcess.getProjects()).isEmpty();
-    }
+    var newProcess = processRepository.findAll().get(0);
+    assertThat(newProcess.getSubmissionEnvelope().getId()).isEqualTo(submissionEnvelope.getId());
+    assertThat(newProcess.getProject()).isNull();
+    assertThat(newProcess.getProjects()).isEmpty();
+  }
 
-    @Test
-    public void testLinkProtocolsToProcessUsingPutMethodWithManyProtocolsInPayload() throws Exception {
-        // given
-        process.addProtocol(protocol1);
-        processRepository.save(process);
+  @Test
+  public void testLinkProtocolsToProcessUsingPutMethodWithManyProtocolsInPayload()
+      throws Exception {
+    // given
+    process.addProtocol(protocol1);
+    processRepository.save(process);
 
-        // when
-        webApp.perform(put("/processes/{id}/protocols/", process.getId())
+    // when
+    webApp
+        .perform(
+            put("/processes/{id}/protocols/", process.getId())
                 .contentType("text/uri-list")
-                .content(uriBuilder.build().toUriString() + "/protocols/" + protocol2.getId()
-                    + '\n' + uriBuilder.build().toUriString() + "/protocols/" + protocol3.getId()))
-            .andExpect(status().isOk());
-        TestingHelper.resetTestingSecurityContext();
+                .content(
+                    uriBuilder.build().toUriString()
+                        + "/protocols/"
+                        + protocol2.getId()
+                        + '\n'
+                        + uriBuilder.build().toUriString()
+                        + "/protocols/"
+                        + protocol3.getId()))
+        .andExpect(status().isOk());
+    TestingHelper.resetTestingSecurityContext();
 
-        // then
-        verifyThatValidationStateChangedToDraftWhenGraphValid(process);
-        Process updatedProcess = processRepository.findById(process.getId()).get();
-        assertThat(updatedProcess.getProtocols())
-            .usingElementComparatorOnFields("id")
-            .containsExactly(protocol2, protocol3);
-    }
+    // then
+    verifyThatValidationStateChangedToDraftWhenGraphValid(process);
+    Process updatedProcess = processRepository.findById(process.getId()).get();
+    assertThat(updatedProcess.getProtocols())
+        .usingElementComparatorOnFields("id")
+        .containsExactly(protocol2, protocol3);
+  }
 
-    @Test
-    public void testLinkProtocolsToProcessUsingPostMethodWithManyProtocolsInPayload() throws Exception {
-        // when
-        webApp.perform(post("/processes/{id}/protocols/", process.getId())
+  @Test
+  public void testLinkProtocolsToProcessUsingPostMethodWithManyProtocolsInPayload()
+      throws Exception {
+    // when
+    webApp
+        .perform(
+            post("/processes/{id}/protocols/", process.getId())
                 .contentType("text/uri-list")
-                .content(uriBuilder.build().toUriString() + "/protocols/" + protocol1.getId()
-                    + '\n' + uriBuilder.build().toUriString() + "/protocols/" + protocol2.getId()))
-            .andExpect(status().isOk());
-        TestingHelper.resetTestingSecurityContext();
+                .content(
+                    uriBuilder.build().toUriString()
+                        + "/protocols/"
+                        + protocol1.getId()
+                        + '\n'
+                        + uriBuilder.build().toUriString()
+                        + "/protocols/"
+                        + protocol2.getId()))
+        .andExpect(status().isOk());
+    TestingHelper.resetTestingSecurityContext();
 
-        // then
-        verifyThatValidationStateChangedToDraftWhenGraphValid(process);
-        Process updatedProcess = processRepository.findById(process.getId()).get();
-        assertThat(updatedProcess.getProtocols())
-            .usingElementComparatorOnFields("id")
-            .containsExactly(protocol1, protocol2);
-    }
+    // then
+    verifyThatValidationStateChangedToDraftWhenGraphValid(process);
+    Process updatedProcess = processRepository.findById(process.getId()).get();
+    assertThat(updatedProcess.getProtocols())
+        .usingElementComparatorOnFields("id")
+        .containsExactly(protocol1, protocol2);
+  }
 
-    @Test
-    public void testLinkProtocolsToProcessUsingPostMethodWithOneProtocolInPayload() throws Exception {
-        // when
-        webApp.perform(post("/processes/{processId}/protocols/", process.getId())
+  @Test
+  public void testLinkProtocolsToProcessUsingPostMethodWithOneProtocolInPayload() throws Exception {
+    // when
+    webApp
+        .perform(
+            post("/processes/{processId}/protocols/", process.getId())
                 .contentType("text/uri-list")
                 .content(uriBuilder.build().toUriString() + "/protocols/" + protocol1.getId()))
-            .andExpect(status().isOk());
-        TestingHelper.resetTestingSecurityContext();
+        .andExpect(status().isOk());
+    TestingHelper.resetTestingSecurityContext();
 
-        // then
-        verifyThatValidationStateChangedToDraftWhenGraphValid(process);
-        Process updatedProcess = processRepository.findById(process.getId()).get();
-        assertThat(updatedProcess.getProtocols())
-            .usingElementComparatorOnFields("id")
-            .containsExactly(protocol1);
-    }
+    // then
+    verifyThatValidationStateChangedToDraftWhenGraphValid(process);
+    Process updatedProcess = processRepository.findById(process.getId()).get();
+    assertThat(updatedProcess.getProtocols())
+        .usingElementComparatorOnFields("id")
+        .containsExactly(protocol1);
+  }
 
-    @Test
-    public void testUnlinkProtocolFromProcess() throws Exception {
-        // given
-        process.addProtocol(protocol1);
-        processRepository.save(process);
+  @Test
+  public void testUnlinkProtocolFromProcess() throws Exception {
+    // given
+    process.addProtocol(protocol1);
+    processRepository.save(process);
 
-        // when
-        webApp.perform(delete("/processes/{processId}/protocols/{protocolId}", process.getId(), protocol1.getId()))
-            .andExpect(status().isNoContent());
-        TestingHelper.resetTestingSecurityContext();
+    // when
+    webApp
+        .perform(
+            delete(
+                "/processes/{processId}/protocols/{protocolId}",
+                process.getId(),
+                protocol1.getId()))
+        .andExpect(status().isNoContent());
+    TestingHelper.resetTestingSecurityContext();
 
-        // then
-        verifyThatValidationStateChangedToDraftWhenGraphValid(process);
+    // then
+    verifyThatValidationStateChangedToDraftWhenGraphValid(process);
 
-        Process updatedProcess = processRepository.findById(process.getId()).get();
-        assertThat(updatedProcess.getProtocols()).doesNotContain(protocol1);
-    }
+    Process updatedProcess = processRepository.findById(process.getId()).get();
+    assertThat(updatedProcess.getProtocols()).doesNotContain(protocol1);
+  }
 
-    @Test
-    public void testLinkProjectToProcessDoesNotChangeTheirValidationStatesToDraft() throws Exception {
-        webApp.perform(put("/processes/{processId}/project", process.getId())
+  @Test
+  public void testLinkProjectToProcessDoesNotChangeTheirValidationStatesToDraft() throws Exception {
+    webApp
+        .perform(
+            put("/processes/{processId}/project", process.getId())
                 .contentType("text/uri-list")
                 .content(uriBuilder.build().toUriString() + "/projects/" + project.getId()))
-            .andExpect(status().isNoContent());
+        .andExpect(status().isNoContent());
 
-        verify(validationStateChangeService, times(0)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
-    }
+    verify(validationStateChangeService, times(0))
+        .changeValidationState(any(), any(), eq(ValidationState.DRAFT));
+  }
 
-    @Test
-    public void testUnlinkProjectFromProcessDoesNotChangeTheirValidationStatesToDraft() throws Exception {
-        webApp.perform(delete("/processes/{processId}/project/{projectId}", process.getId(), project.getId()))
-            .andExpect(status().isNoContent());
+  @Test
+  public void testUnlinkProjectFromProcessDoesNotChangeTheirValidationStatesToDraft()
+      throws Exception {
+    webApp
+        .perform(
+            delete("/processes/{processId}/project/{projectId}", process.getId(), project.getId()))
+        .andExpect(status().isNoContent());
 
-        verify(validationStateChangeService, times(0)).changeValidationState(any(), any(), eq(ValidationState.DRAFT));
-    }
+    verify(validationStateChangeService, times(0))
+        .changeValidationState(any(), any(), eq(ValidationState.DRAFT));
+  }
 
-    private void verifyThatValidationStateChangedToDraftWhenGraphValid(MetadataDocument... values) {
-        Arrays.stream(values).forEach(
-            value -> verify(validationStateChangeService, times(1))
-                .changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT)
-        );
-    }
+  private void verifyThatValidationStateChangedToDraftWhenGraphValid(MetadataDocument... values) {
+    Arrays.stream(values)
+        .forEach(
+            value ->
+                verify(validationStateChangeService, times(1))
+                    .changeValidationState(value.getType(), value.getId(), ValidationState.DRAFT));
+  }
 }

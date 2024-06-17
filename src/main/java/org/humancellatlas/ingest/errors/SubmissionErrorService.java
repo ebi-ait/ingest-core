@@ -9,20 +9,21 @@ import org.zalando.problem.Problem;
 
 @Service
 public class SubmissionErrorService {
-    @Autowired
-    private SubmissionErrorRepository submissionErrorRepository;
+  @Autowired private SubmissionErrorRepository submissionErrorRepository;
 
-    public Page<SubmissionError> getErrorsFromEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable) {
-        return submissionErrorRepository.findBySubmissionEnvelope(submissionEnvelope, pageable);
-    }
+  public Page<SubmissionError> getErrorsFromEnvelope(
+      SubmissionEnvelope submissionEnvelope, Pageable pageable) {
+    return submissionErrorRepository.findBySubmissionEnvelope(submissionEnvelope, pageable);
+  }
 
-    public SubmissionError addErrorToEnvelope(SubmissionEnvelope submissionEnvelope, Problem submissionProblem) {
-        SubmissionError submissionError = new SubmissionError(submissionEnvelope, submissionProblem);
-        submissionErrorRepository.insert(submissionError);
-        return submissionError;
-    }
+  public SubmissionError addErrorToEnvelope(
+      SubmissionEnvelope submissionEnvelope, Problem submissionProblem) {
+    SubmissionError submissionError = new SubmissionError(submissionEnvelope, submissionProblem);
+    submissionErrorRepository.insert(submissionError);
+    return submissionError;
+  }
 
-    public void deleteSubmissionEnvelopeErrors(SubmissionEnvelope submissionEnvelope) {
-        submissionErrorRepository.deleteBySubmissionEnvelope(submissionEnvelope);
-    }
+  public void deleteSubmissionEnvelopeErrors(SubmissionEnvelope submissionEnvelope) {
+    submissionErrorRepository.deleteBySubmissionEnvelope(submissionEnvelope);
+  }
 }

@@ -13,6 +13,6 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Getter
 public class ExceptionInfo {
-    private final @NonNull String url;
-    private final @NonNull String exceptionMessage;
+  private final @NonNull String url;
+  private final @NonNull String exceptionMessage;
 }

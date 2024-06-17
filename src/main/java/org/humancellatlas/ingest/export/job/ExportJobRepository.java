@@ -8,5 +8,5 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 @CrossOrigin
 public interface ExportJobRepository extends MongoRepository<ExportJob, String> {
-    Page<ExportJob> findBySubmission(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+  Page<ExportJob> findBySubmission(SubmissionEnvelope submissionEnvelope, Pageable pageable);
 }

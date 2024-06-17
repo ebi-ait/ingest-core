@@ -1,6 +1,12 @@
 package org.humancellatlas.ingest.submission.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
@@ -37,176 +43,161 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureDataMongo()
 @AutoConfigureMockMvc()
 @WithMockUser
 public class SubmissionControllerTest {
-    @Autowired
-    private MockMvc webApp;
+  @Autowired private MockMvc webApp;
 
-    @Autowired
-    private SubmissionEnvelopeRepository submissionEnvelopeRepository;
+  @Autowired private SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
-    @Autowired
-    private ProjectRepository projectRepository;
+  @Autowired private ProjectRepository projectRepository;
 
-    @Autowired
-    private BiomaterialRepository biomaterialRepository;
+  @Autowired private BiomaterialRepository biomaterialRepository;
 
-    @Autowired
-    private ProcessRepository processRepository;
+  @Autowired private ProcessRepository processRepository;
 
-    @Autowired
-    private ProtocolRepository protocolRepository;
+  @Autowired private ProtocolRepository protocolRepository;
 
-    @Autowired
-    private FileRepository fileRepository;
+  @Autowired private FileRepository fileRepository;
 
-    @Autowired
-    private StudyRepository studyRepository;
+  @Autowired private StudyRepository studyRepository;
 
-    @Autowired
-    private DatasetRepository datasetRepository;
+  @Autowired private DatasetRepository datasetRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-    @MockBean
-    private MigrationConfiguration migrationConfiguration;
+  @MockBean private MigrationConfiguration migrationConfiguration;
 
-    @MockBean
-    private MessageRouter messageRouter;
+  @MockBean private MessageRouter messageRouter;
 
-    SubmissionEnvelope submissionEnvelope;
+  SubmissionEnvelope submissionEnvelope;
 
-    Project project;
+  Project project;
 
-    Biomaterial biomaterial;
+  Biomaterial biomaterial;
 
-    Process process;
+  Process process;
 
-    Protocol protocol;
+  Protocol protocol;
 
-    File file;
+  File file;
 
-    Study study;
+  Study study;
 
-    Dataset dataset;
+  Dataset dataset;
 
-    UriComponentsBuilder uriBuilder;
+  UriComponentsBuilder uriBuilder;
 
-    @BeforeEach
-    void setUp() {
-        submissionEnvelope = new SubmissionEnvelope();
-        submissionEnvelope.setUuid(Uuid.newUuid());
-        submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
-        submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
+  @BeforeEach
+  void setUp() {
+    submissionEnvelope = new SubmissionEnvelope();
+    submissionEnvelope.setUuid(Uuid.newUuid());
+    submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
+    submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
 
-        project = new Project(null);
-        project.getSubmissionEnvelopes().add(submissionEnvelope);
-        project = projectRepository.save(project);
+    project = new Project(null);
+    project.getSubmissionEnvelopes().add(submissionEnvelope);
+    project = projectRepository.save(project);
 
-        biomaterial = new Biomaterial(null);
-        biomaterial.setSubmissionEnvelope(submissionEnvelope);
-        biomaterial = biomaterialRepository.save(biomaterial);
+    biomaterial = new Biomaterial(null);
+    biomaterial.setSubmissionEnvelope(submissionEnvelope);
+    biomaterial = biomaterialRepository.save(biomaterial);
 
-        process = new Process(null);
-        process.setSubmissionEnvelope(submissionEnvelope);
-        process = processRepository.save(process);
+    process = new Process(null);
+    process.setSubmissionEnvelope(submissionEnvelope);
+    process = processRepository.save(process);
 
-        protocol = new Protocol(null);
-        protocol.setSubmissionEnvelope(submissionEnvelope);
-        protocol = protocolRepository.save(protocol);
+    protocol = new Protocol(null);
+    protocol.setSubmissionEnvelope(submissionEnvelope);
+    protocol = protocolRepository.save(protocol);
 
-        file = new File(null, "fileName");
-        file.setSubmissionEnvelope(submissionEnvelope);
-        file = fileRepository.save(file);
+    file = new File(null, "fileName");
+    file.setSubmissionEnvelope(submissionEnvelope);
+    file = fileRepository.save(file);
 
-        study = new Study(null, null, null, null);
-        study.getSubmissionEnvelopes().add(submissionEnvelope);
-        study = studyRepository.save(study);
+    study = new Study(null, null, null, null);
+    study.getSubmissionEnvelopes().add(submissionEnvelope);
+    study = studyRepository.save(study);
 
-        dataset = new Dataset(null);
-        dataset.getSubmissionEnvelopes().add(submissionEnvelope);
-        dataset = datasetRepository.save(dataset);
+    dataset = new Dataset(null);
+    dataset.getSubmissionEnvelopes().add(submissionEnvelope);
+    dataset = datasetRepository.save(dataset);
 
-        uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
-    }
+    uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
+  }
 
-    @AfterEach
-    void tearDown() {
-        submissionEnvelopeRepository.deleteAll();
-        projectRepository.deleteAll();
-        biomaterialRepository.deleteAll();
-        processRepository.deleteAll();
-        protocolRepository.deleteAll();
-        fileRepository.deleteAll();
-    }
+  @AfterEach
+  void tearDown() {
+    submissionEnvelopeRepository.deleteAll();
+    projectRepository.deleteAll();
+    biomaterialRepository.deleteAll();
+    processRepository.deleteAll();
+    protocolRepository.deleteAll();
+    fileRepository.deleteAll();
+  }
 
-    @ParameterizedTest
-    @ValueSource(strings = {
-            "biomaterials",
-            "processes",
-            "protocols",
-            "files"
-    })
-    public void testAdditionToNonEditableSubmissionThrowsErrorForAllEntityTypes(String endpoint) throws Exception {
-        // given
-        submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALIDATION_REQUESTED);
-        submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
+  @ParameterizedTest
+  @ValueSource(strings = {"biomaterials", "processes", "protocols", "files"})
+  public void testAdditionToNonEditableSubmissionThrowsErrorForAllEntityTypes(String endpoint)
+      throws Exception {
+    // given
+    submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALIDATION_REQUESTED);
+    submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
 
-        // when
-        webApp.perform(
-                post("/submissionEnvelopes/{id}/" + endpoint, submissionEnvelope.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"content\": {}}")
-        ).andExpect(status().isForbidden());
-    }
+    // when
+    webApp
+        .perform(
+            post("/submissionEnvelopes/{id}/" + endpoint, submissionEnvelope.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"content\": {}}"))
+        .andExpect(status().isForbidden());
+  }
 
-    @ParameterizedTest
-    @EnumSource(value = SubmissionState.class, names = {
-            "GRAPH_VALIDATION_REQUESTED",
-            "GRAPH_VALIDATING",
-            "EXPORTING",
-            "PROCESSING",
-            "ARCHIVED",
-            "SUBMITTED"
-    })
-    public void testAdditionToNonEditableSubmissionThrowsErrorInAllStates(SubmissionState state) throws Exception {
-        // given
-        submissionEnvelope.enactStateTransition(state);
-        submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
+  @ParameterizedTest
+  @EnumSource(
+      value = SubmissionState.class,
+      names = {
+        "GRAPH_VALIDATION_REQUESTED",
+        "GRAPH_VALIDATING",
+        "EXPORTING",
+        "PROCESSING",
+        "ARCHIVED",
+        "SUBMITTED"
+      })
+  public void testAdditionToNonEditableSubmissionThrowsErrorInAllStates(SubmissionState state)
+      throws Exception {
+    // given
+    submissionEnvelope.enactStateTransition(state);
+    submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
 
-        // when
-        webApp.perform(
-                post("/submissionEnvelopes/{id}/biomaterials", submissionEnvelope.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"content\": {}}")
-        ).andExpect(status().isForbidden());
-    }
+    // when
+    webApp
+        .perform(
+            post("/submissionEnvelopes/{id}/biomaterials", submissionEnvelope.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"content\": {}}"))
+        .andExpect(status().isForbidden());
+  }
 
-    @ParameterizedTest
-    @ValueSource(strings = {
-            "/submissionEnvelopes/{id}/projects",
-            "/submissionEnvelopes/{id}/relatedProjects"
-    })
-    @WithMockUser
-    public void testProjectsAreReturnedWhenTheyIncludeTheSubmissionInTheirEnvelopes(String endpoint) throws Exception {
-        webApp.perform(
-                        // when
-                        get(endpoint, submissionEnvelope.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                )   // then
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.projects", hasSize(1)))
-                .andExpect(jsonPath("$._embedded.projects[0].uuid.uuid", is(project.getUuid().getUuid().toString())));
-    }
+  @ParameterizedTest
+  @ValueSource(
+      strings = {"/submissionEnvelopes/{id}/projects", "/submissionEnvelopes/{id}/relatedProjects"})
+  @WithMockUser
+  public void testProjectsAreReturnedWhenTheyIncludeTheSubmissionInTheirEnvelopes(String endpoint)
+      throws Exception {
+    webApp
+        .perform(
+            // when
+            get(endpoint, submissionEnvelope.getId())
+                .contentType(MediaType.APPLICATION_JSON)) // then
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$._embedded.projects", hasSize(1)))
+        .andExpect(
+            jsonPath(
+                "$._embedded.projects[0].uuid.uuid", is(project.getUuid().getUuid().toString())));
+  }
 }
