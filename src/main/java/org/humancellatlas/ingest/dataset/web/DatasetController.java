@@ -197,7 +197,7 @@ public class DatasetController {
    * @param assembler The resource assembler.
    * @return The updated dataset as a resource.
    */
-  @PutMapping("/datasets/{dataset_id}/protocol/{protocol_id}")
+  @PutMapping("/datasets/{dataset_id}/protocols/{protocol_id}")
   public ResponseEntity<Resource<?>> linkProtocolToDataset(
       @PathVariable("dataset_id") final Dataset dataset,
       @PathVariable("protocol_id") final Protocol protocol,
@@ -214,7 +214,7 @@ public class DatasetController {
    * @param assembler The resource assembler.
    * @return The updated dataset as a resource.
    */
-  @PutMapping("/datasets/{dataset_id}/process/{process_id}")
+  @PutMapping("/datasets/{dataset_id}/processes/{process_id}")
   public ResponseEntity<Resource<?>> linkProcessToDataset(
       @PathVariable("dataset_id") final Dataset dataset,
       @PathVariable("process_id") final Process process,

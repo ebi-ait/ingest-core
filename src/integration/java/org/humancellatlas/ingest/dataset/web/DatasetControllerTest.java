@@ -271,7 +271,7 @@ class DatasetControllerTest {
 
       // when:
       webApp
-          .perform(put("/datasets/{dataset_id}/file/{file_id}", datasetId, fileId))
+          .perform(put("/datasets/{dataset_id}/files/{file_id}", datasetId, fileId))
           .andExpect(status().isAccepted());
     }
 
@@ -293,7 +293,7 @@ class DatasetControllerTest {
       // when:
       webApp
           .perform(
-              put("/datasets/{dataset_id}/biomaterial/{biomaterial_id}", datasetId, biomaterialId))
+              put("/datasets/{dataset_id}/biomaterials/{biomaterial_id}", datasetId, biomaterialId))
           .andExpect(status().isAccepted());
     }
   }
