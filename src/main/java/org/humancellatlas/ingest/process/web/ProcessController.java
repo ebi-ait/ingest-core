@@ -9,8 +9,8 @@ import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.*;
 import org.humancellatlas.ingest.core.web.Links;
 import org.humancellatlas.ingest.file.File;
-import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.process.*;
+import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.security.CheckAllowed;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -41,9 +41,6 @@ import static org.springframework.data.rest.webmvc.RestMediaTypes.TEXT_URI_LIST_
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
-/**
- * Created by rolando on 16/02/2018.
- */
 @RepositoryRestController
 @RequiredArgsConstructor
 @ExposesResourceFor(Process.class)
@@ -56,174 +53,180 @@ public class ProcessController {
     private final @NonNull MetadataUpdateService metadataUpdateService;
 
     private @Autowired
-    ValidationStateChangeService validationStateChangeService;
-
+    final ValidationStateChangeService validationStateChangeService;
     private @Autowired
-    UriToEntityConversionService uriToEntityConversionService;
-
+    final UriToEntityConversionService uriToEntityConversionService;
     private @Autowired
-    MetadataLinkingService metadataLinkingService;
+    final MetadataLinkingService metadataLinkingService;
 
-    @RequestMapping(path = "processes/{proc_id}/inputBiomaterials", method = RequestMethod.GET)
-    ResponseEntity<?> getProcessInputBiomaterials(@PathVariable("proc_id") Process process,
-                                                  Pageable pageable,
-                                                  PersistentEntityResourceAssembler assembler) {
-        Page<Biomaterial> inputBiomaterials = getProcessService().findInputBiomaterialsForProcess(process, pageable);
-        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(inputBiomaterials, assembler));
+    // Input and Output Resources
+    @GetMapping("processes/{proc_id}/inputBiomaterials")
+    ResponseEntity<?> getProcessInputBiomaterials(@PathVariable("proc_id") final Process process,
+                                                  final Pageable pageable,
+                                                  final PersistentEntityResourceAssembler assembler) {
+        final Page<Biomaterial> inputBiomaterials = processService.findInputBiomaterialsForProcess(process, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(inputBiomaterials, assembler));
     }
 
-    @RequestMapping(path = "processes/{proc_id}/inputFiles", method = RequestMethod.GET)
-    ResponseEntity<?> getProcessInputFiles(@PathVariable("proc_id") Process process,
-                                           Pageable pageable,
-                                           PersistentEntityResourceAssembler assembler) {
-        Page<File> inputFiles = getProcessService().findInputFilesForProcess(process, pageable);
-        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(inputFiles, assembler));
+    @GetMapping("processes/{proc_id}/inputFiles")
+    ResponseEntity<?> getProcessInputFiles(@PathVariable("proc_id") final Process process,
+                                           final Pageable pageable,
+                                           final PersistentEntityResourceAssembler assembler) {
+        final Page<File> inputFiles = processService.findInputFilesForProcess(process, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(inputFiles, assembler));
     }
 
-    @RequestMapping(path = "processes/{proc_id}/derivedBiomaterials", method = RequestMethod.GET)
-    ResponseEntity<?> getProcessOutputBiomaterials(@PathVariable("proc_id") Process process,
-                                                   Pageable pageable,
-                                                   PersistentEntityResourceAssembler assembler) {
-        Page<Biomaterial> outputBiomaterials = getProcessService().findOutputBiomaterialsForProcess(process, pageable);
-        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(outputBiomaterials, assembler));
+    @GetMapping("processes/{proc_id}/derivedBiomaterials")
+    ResponseEntity<?> getProcessOutputBiomaterials(@PathVariable("proc_id") final Process process,
+                                                   final Pageable pageable,
+                                                   final PersistentEntityResourceAssembler assembler) {
+        final Page<Biomaterial> outputBiomaterials = processService.findOutputBiomaterialsForProcess(process, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(outputBiomaterials, assembler));
     }
 
-    @RequestMapping(path = "processes/{proc_id}/derivedFiles", method = RequestMethod.GET)
-    ResponseEntity<?> getProcessOutputFiles(@PathVariable("proc_id") Process process,
-                                            Pageable pageable,
-                                            PersistentEntityResourceAssembler assembler) {
-        Page<File> outputFiles = getProcessService().findOutputFilesForProcess(process, pageable);
-        return ResponseEntity.ok(getPagedResourcesAssembler().toResource(outputFiles, assembler));
+    @GetMapping("processes/{proc_id}/derivedFiles")
+    ResponseEntity<?> getProcessOutputFiles(@PathVariable("proc_id") final Process process,
+                                            final Pageable pageable,
+                                            final PersistentEntityResourceAssembler assembler) {
+        final Page<File> outputFiles = processService.findOutputFilesForProcess(process, pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(outputFiles, assembler));
     }
 
-
+    // Process Management
     @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
-    @PostMapping(path = "submissionEnvelopes/{sub_id}/processes")
-    ResponseEntity<Resource<?>> addProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                     @RequestBody Process process,
-                                                     @RequestParam("updatingUuid") Optional<UUID> updatingUuid,
-                                                     PersistentEntityResourceAssembler assembler) {
+    @PostMapping("submissionEnvelopes/{sub_id}/processes")
+    ResponseEntity<Resource<?>> addProcessToEnvelope(@PathVariable("sub_id") final SubmissionEnvelope submissionEnvelope,
+                                                     @RequestBody final Process process,
+                                                     @RequestParam("updatingUuid") final Optional<UUID> updatingUuid,
+                                                     final PersistentEntityResourceAssembler assembler) {
         updatingUuid.ifPresent(uuid -> {
             process.setUuid(new Uuid(uuid.toString()));
             process.setIsUpdate(true);
         });
-        Process entity = getProcessService().addProcessToSubmissionEnvelope(submissionEnvelope, process);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
+        final Process entity = processService.addProcessToSubmissionEnvelope(submissionEnvelope, process);
+        final PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }
 
     @CheckAllowed(value = "#submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
-    @RequestMapping(path = "submissionEnvelopes/{sub_id}/processes/{id}", method = RequestMethod.PUT)
-    ResponseEntity<Resource<?>> linkProcessToEnvelope(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                                      @PathVariable("id") Process process,
-                                                      PersistentEntityResourceAssembler assembler) {
-        Process entity = getProcessService().addProcessToSubmissionEnvelope(submissionEnvelope, process);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
+    @PutMapping("submissionEnvelopes/{sub_id}/processes/{id}")
+    ResponseEntity<Resource<?>> linkProcessToEnvelope(@PathVariable("sub_id") final SubmissionEnvelope submissionEnvelope,
+                                                      @PathVariable("id") final Process process,
+                                                      final PersistentEntityResourceAssembler assembler) {
+        final Process entity = processService.addProcessToSubmissionEnvelope(submissionEnvelope, process);
+        final PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }
 
+    @DeleteMapping("processes/{id}")
+    @CheckAllowed(value = "#process.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    ResponseEntity<?> deleteProcess(@PathVariable("id") final Process process) {
+        metadataCrudService.deleteDocument(process);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Bundle References
     @Deprecated
-    @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL)
+    @GetMapping("/processes/{analysis_id}/" + Links.BUNDLE_REF_URL)
     ResponseEntity<Resource<?>> addBundleReference() {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
+    @PutMapping("/processes/{analysis_id}/" + Links.BUNDLE_REF_URL)
     @CheckAllowed(value = "#analysis.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
-    @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL,
-            method = RequestMethod.PUT)
-    ResponseEntity<Resource<?>> oldAddBundleReference(@PathVariable("analysis_id") Process analysis,
-                                                      @RequestBody BundleReference bundleReference,
+    ResponseEntity<Resource<?>> oldAddBundleReference(@PathVariable("analysis_id") final Process analysis,
+                                                      @RequestBody final BundleReference bundleReference,
                                                       final PersistentEntityResourceAssembler assembler) {
-        Process entity = getProcessService().resolveBundleReferencesForProcess(analysis, bundleReference);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
+        final Process entity = processService.resolveBundleReferencesForProcess(analysis, bundleReference);
+        final PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }
 
+    @PostMapping("/processes/{analysis_id}/" + Links.BUNDLE_REF_URL)
     @CheckAllowed(value = "#analysis.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
-    @RequestMapping(path = "/processes/{analysis_id}/" + Links.BUNDLE_REF_URL,
-            method = RequestMethod.POST)
-    ResponseEntity<Resource<?>> addBundleReference(@PathVariable("analysis_id") Process analysis,
-                                                   @RequestBody BundleReference bundleReference,
+    ResponseEntity<Resource<?>> addBundleReference(@PathVariable("analysis_id") final Process analysis,
+                                                   @RequestBody final BundleReference bundleReference,
                                                    final PersistentEntityResourceAssembler assembler) {
-        Process entity = getProcessService().addInputBundleManifest(analysis, bundleReference);
-        PersistentEntityResource resource = assembler.toFullResource(entity);
+        final Process entity = processService.addInputBundleManifest(analysis, bundleReference);
+        final PersistentEntityResource resource = assembler.toFullResource(entity);
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL)
+    // File References
+    @GetMapping("/processes/{analysis_id}/" + Links.FILE_REF_URL)
     ResponseEntity<Resource<?>> addOutputFileReference() {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
+    @PutMapping("/processes/{analysis_id}/" + Links.FILE_REF_URL)
     @CheckAllowed(value = "#analysis.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
-    @RequestMapping(path = "/processes/{analysis_id}/" + Links.FILE_REF_URL,
-            method = RequestMethod.PUT)
-    ResponseEntity<Resource<?>> addOutputFileReference(@PathVariable("analysis_id") Process analysis,
-                                                       @RequestBody File file,
+    ResponseEntity<Resource<?>> addOutputFileReference(@PathVariable("analysis_id") final Process analysis,
+                                                       @RequestBody final File file,
                                                        final PersistentEntityResourceAssembler assembler) {
-        Process result = processService.addOutputFileToAnalysisProcess(analysis, file);
-        PersistentEntityResource resource = assembler.toFullResource(result);
+        final Process result = processService.addOutputFileToAnalysisProcess(analysis, file);
+        final PersistentEntityResource resource = assembler.toFullResource(result);
         return ResponseEntity.accepted().body(resource);
     }
 
+    @PostMapping("/processes/{analysis_id}/" + Links.INPUT_FILES_URL)
     @CheckAllowed(value = "#analysis.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
-    @RequestMapping(path = "/processes/{analysis_id}/" + Links.INPUT_FILES_URL,
-            method = RequestMethod.POST)
-    ResponseEntity<Resource<?>> addInputFileReference(@PathVariable("analysis_id") Process analysis,
-                                                      @RequestBody InputFileReference inputFileReference,
+    ResponseEntity<Resource<?>> addInputFileReference(@PathVariable("analysis_id") final Process analysis,
+                                                      @RequestBody final InputFileReference inputFileReference,
                                                       final PersistentEntityResourceAssembler assembler) {
-        Process result = processService.addInputFileUuidToProcess(analysis, inputFileReference.getInputFileUuid());
-        PersistentEntityResource resource = assembler.toFullResource(result);
+        final Process result = processService.addInputFileUuidToProcess(analysis, inputFileReference.getInputFileUuid());
+        final PersistentEntityResource resource = assembler.toFullResource(result);
         return ResponseEntity.accepted().body(resource);
     }
 
-    @RequestMapping(path = "/processes/search/findByInputBundleUuid", method = RequestMethod.GET)
-    ResponseEntity<?> findProcesessByInputBundleUuid(@RequestParam String bundleUuid,
-                                                     Pageable pageable,
-                                                     final PersistentEntityResourceAssembler resourceAssembler) {
-        Page<Process> processes = processService.findProcessesByInputBundleUuid(UUID.fromString(bundleUuid), pageable);
-        return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
-    }
-
-    @CheckAllowed(value = "#process.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
-    @PatchMapping(path = "/processes/{id}")
-    HttpEntity<?> patchProcess(@PathVariable("id") Process process,
-                               @RequestBody final ObjectNode patch,
-                               PersistentEntityResourceAssembler assembler) {
-        List<String> allowedFields = List.of("content", "validationErrors", "graphValidationErrors");
-        ObjectNode validPatch = patch.retain(allowedFields);
-        Process updatedProcess = metadataUpdateService.update(process, validPatch);
-        PersistentEntityResource resource = assembler.toFullResource(updatedProcess);
+    // Biomaterial References
+    @PostMapping("/processes/{analysis_id}/" + Links.INPUT_BIOMATERIALS_URL)
+    @CheckAllowed(value = "#analysis.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    ResponseEntity<Resource<?>> addInputBiomaterialReference(@PathVariable("analysis_id") final Process analysis,
+                                                             @RequestBody final Biomaterial biomaterial,
+                                                             final PersistentEntityResourceAssembler assembler) {
+        final Process result = processService.addInputBiomaterialToProcess(analysis, biomaterial);
+        final PersistentEntityResource resource = assembler.toFullResource(result);
         return ResponseEntity.accepted().body(resource);
     }
 
+    // Protocol Management
     @CheckAllowed(value = "#process.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @RequestMapping(path = "/processes/{id}/protocols", method = {PUT, POST}, consumes = {TEXT_URI_LIST_VALUE})
     HttpEntity<?> linkProtocolsToProcess(@PathVariable("id") Process process,
                                          @RequestBody Resources<Object> incoming,
-                                         HttpMethod requestMethod,
-                                         PersistentEntityResourceAssembler assembler) throws URISyntaxException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-
+                                         HttpMethod requestMethod) throws URISyntaxException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         List<Protocol> protocols = uriToEntityConversionService.convertLinks(incoming.getLinks(), Protocol.class);
         metadataLinkingService.updateLinks(process, protocols, "protocols", requestMethod.equals(HttpMethod.PUT));
         return ResponseEntity.ok().build();
     }
 
-    @CheckAllowed(value = "#process.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
     @DeleteMapping(path = "/processes/{id}/protocols/{protocolId}")
-    HttpEntity<?> unlinkProtocolFromProcess(@PathVariable("id") Process process,
-                                            @PathVariable("protocolId") Protocol protocol,
-                                            PersistentEntityResourceAssembler assembler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-
+    @CheckAllowed(value = "#process.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    HttpEntity<?> unlinkProtocolFromProcess(@PathVariable("id") final Process process,
+                                            @PathVariable("protocolId") final Protocol protocol) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         metadataLinkingService.removeLink(process, protocol, "protocols");
         return ResponseEntity.noContent().build();
     }
 
-    @CheckAllowed(value = "#process.submissionEnvelope.isEditable()", exception = NotAllowedDuringSubmissionStateException.class)
-    @DeleteMapping(path = "/processes/{id}")
-    ResponseEntity<?> deleteProcess(@PathVariable("id") Process process) {
-        metadataCrudService.deleteDocument(process);
-        return ResponseEntity.noContent().build();
+    // Patch Process
+    @PatchMapping("/processes/{id}")
+    @CheckAllowed(value = "#process.submissionEnvelope.isSystemEditable()", exception = NotAllowedDuringSubmissionStateException.class)
+    HttpEntity<?> patchProcess(@PathVariable("id") final Process process,
+                               @RequestBody final ObjectNode patch,
+                               final PersistentEntityResourceAssembler assembler) {
+        final List<String> allowedFields = List.of("content", "validationErrors", "graphValidationErrors");
+        final ObjectNode validPatch = patch.retain(allowedFields);
+        final Process updatedProcess = metadataUpdateService.update(process, validPatch);
+        final PersistentEntityResource resource = assembler.toFullResource(updatedProcess);
+        return ResponseEntity.accepted().body(resource);
+    }
+
+    // Find Processes by Input Bundle UUID
+    @GetMapping("/processes/search/findByInputBundleUuid")
+    ResponseEntity<?> findProcesessByInputBundleUuid(@RequestParam final String bundleUuid,
+                                                     final Pageable pageable,
+                                                     final PersistentEntityResourceAssembler resourceAssembler) {
+        final Page<Process> processes = processService.findProcessesByInputBundleUuid(UUID.fromString(bundleUuid), pageable);
+        return ResponseEntity.ok(pagedResourcesAssembler.toResource(processes, resourceAssembler));
     }
 }
-

@@ -8,14 +8,17 @@ import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.dataset.Dataset;
+import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
@@ -39,20 +42,21 @@ public class StudyService {
 
     private final MongoTemplate mongoTemplate;
     private final @NonNull StudyRepository studyRepository;
+    private final @NotNull DatasetRepository datasetRepository;
     private final @NonNull MetadataCrudService metadataCrudService;
     private final @NonNull MetadataUpdateService metadataUpdateService;
     private final @NonNull StudyEventHandler studyEventHandler;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     protected final Logger getLog() {
         return log;
     }
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     public final Study register(final Study study) {
         final Study persistentStudy = studyRepository.save(study);
         studyEventHandler.registeredStudy(persistentStudy);
+
         return persistentStudy;
     }
 
@@ -67,6 +71,7 @@ public class StudyService {
         final Study existingStudy = existingStudyOptional.get();
         final Study updatedStudy = metadataUpdateService.update(existingStudy, patch);
         studyEventHandler.updatedStudy(updatedStudy);
+
         return updatedStudy;
     }
 
@@ -93,6 +98,7 @@ public class StudyService {
         }
 
         final Study deleteStudy = deleteStudyOptional.get();
+
         metadataCrudService.deleteDocument(deleteStudy);
         studyEventHandler.deletedStudy(studyId);
     }
@@ -116,11 +122,21 @@ public class StudyService {
                 studyRepository.save(studyByUuid);
             }
         });
+
         return study;
     }
 
     public final Study linkDatasetToStudy(final Study study, final Dataset dataset) {
+        final String studyId = study.getId();
+        final String datasetId = dataset.getId();
+
+        studyRepository.findById(studyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Study: " + studyId));
+        datasetRepository.findById(datasetId)
+                .orElseThrow(() -> new ResourceNotFoundException("Dataset: " + datasetId));
+
         study.addDataset(dataset);
+
         return studyRepository.save(study);
     }
 
@@ -138,6 +154,7 @@ public class StudyService {
 
         // ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
         envelopes.removeIf(env -> env == null || env.getSubmissionState() == null);
+
         return new StudyService.StudyBag(studies, envelopes);
     }
 }

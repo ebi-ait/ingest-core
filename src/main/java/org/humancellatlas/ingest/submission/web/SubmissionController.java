@@ -211,10 +211,10 @@ public class SubmissionController {
     HttpEntity<?> submitEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                         @RequestBody(required = false) List<String> submitActionParam,
                                         final PersistentEntityResourceAssembler resourceAssembler) {
-        List<SubmitAction> submitActions = Optional.ofNullable(
-                submitActionParam.stream().map(submitAction -> {
-                    return SubmitAction.valueOf(submitAction.toUpperCase());
-                }).collect(Collectors.toList())
+        List<SubmitAction> submitActions = Optional.of(
+                submitActionParam.stream()
+                        .map(submitAction -> SubmitAction.valueOf(submitAction.toUpperCase()))
+                        .collect(Collectors.toList())
         ).orElse(List.of(SubmitAction.ARCHIVE, SubmitAction.EXPORT, SubmitAction.CLEANUP));
 
         submissionEnvelopeService.handleSubmitRequest(submissionEnvelope, submitActions);

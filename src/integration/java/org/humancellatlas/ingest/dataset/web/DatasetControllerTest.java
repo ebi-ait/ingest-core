@@ -2,6 +2,8 @@ package org.humancellatlas.ingest.dataset.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.data.MapEntry;
+import org.humancellatlas.ingest.biomaterial.Biomaterial;
+import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
@@ -9,6 +11,11 @@ import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.dataset.DatasetEventHandler;
 import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.dataset.util.UploadAreaUtil;
+import org.humancellatlas.ingest.file.File;
+import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.protocol.ProtocolRepository;
+import org.humancellatlas.ingest.study.Study;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -50,6 +57,18 @@ class DatasetControllerTest {
 
     @Autowired
     private DatasetRepository repository;
+
+    @Autowired
+    private FileRepository fileRepository;
+
+    @Autowired
+    private BiomaterialRepository biomaterialRepository;
+
+    @Autowired
+    private ProcessRepository processRepository;
+
+    @Autowired
+    private ProtocolRepository protocolRepository;
 
     @Autowired
     private MetadataCrudService metadataCrudService;
@@ -170,11 +189,14 @@ class DatasetControllerTest {
         @DisplayName("Update Dataset - Not Found")
         void updateDatasetNotFound() throws Exception {
             // given:
-            String nonExistentDatasetId = "nonExistentId";
+            var content = new HashMap<String, Object>();
+            content.put("description", "nonExistentDataset");
+
+            Dataset nonExistentDataset = new Dataset(content);
 
             // when:
             MvcResult result = webApp
-                    .perform(patch("/datasets/{datasetId}", nonExistentDatasetId)
+                    .perform(patch("/datasets/{datasetId}", nonExistentDataset.getId())
                             .contentType(APPLICATION_JSON_VALUE)
                             .content("{\"content\": {\"description\": \"Updated Description\"}}"))
                     .andReturn();
@@ -221,6 +243,50 @@ class DatasetControllerTest {
             // then:
             MockHttpServletResponse response = result.getResponse();
             assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        }
+    }
+
+    @Nested
+    class Link {
+        @Test
+        @WithMockUser
+        @DisplayName("Link file to dataset - Success")
+        void lintFileToDatasetSuccess() throws Exception {
+            // given:
+            String datasetContent = "{\"name\": \"dataset\"}";
+            Dataset persistentDataset = new Dataset(datasetContent);
+            repository.save(persistentDataset);
+            String datasetId = persistentDataset.getId();
+
+            String fileContent = "{\"name\": \"path\", \"file_type\"}";
+            File persistentFile = new File(fileContent, "test.fasta");
+            fileRepository.save(persistentFile);
+            String fileId = persistentFile.getId();
+
+            // when:
+            webApp.perform(put("/datasets/{dataset_id}/file/{file_id}", datasetId, fileId))
+                    .andExpect(status().isAccepted());
+        }
+
+        @Test
+        @WithMockUser
+        @DisplayName("Link biomaterial to dataset - Success")
+        void lintBiomaterialToDatasetSuccess() throws Exception {
+            // given:
+            String datasetContent = "{\"name\": \"dataset\"}";
+            Dataset persistentDataset = new Dataset(datasetContent);
+            repository.save(persistentDataset);
+            String datasetId = persistentDataset.getId();
+
+            String biomaterialContent = "{\"name\": \"test\"}";
+            Biomaterial persistentBiomaterial = new Biomaterial(biomaterialContent);
+            biomaterialRepository.save(persistentBiomaterial);
+            String biomaterialId = persistentBiomaterial.getId();
+
+            // when:
+            webApp.perform(put("/datasets/{dataset_id}/biomaterial/{biomaterial_id}", datasetId,
+                            biomaterialId))
+                    .andExpect(status().isAccepted());
         }
     }
 }

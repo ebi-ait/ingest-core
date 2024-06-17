@@ -10,14 +10,11 @@ import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.protocol.Protocol;
-import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.rest.core.annotation.RestResource;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -26,7 +23,6 @@ import java.util.Set;
 @Getter
 @EqualsAndHashCode(callSuper = true, exclude = {"project", "projects", "protocols", "inputBundleManifests", "chainedProcesses"})
 public class Process extends MetadataDocument {
-
     @Indexed
     private @Setter
     @DBRef(lazy = true)
@@ -67,5 +63,4 @@ public class Process extends MetadataDocument {
         protocols.remove(protocol);
         return this;
     }
-
 }

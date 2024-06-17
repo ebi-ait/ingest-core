@@ -2,9 +2,13 @@ package org.humancellatlas.ingest.dataset;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.dataset.util.UploadAreaUtil;
+import org.humancellatlas.ingest.file.FileRepository;
+import org.humancellatlas.ingest.process.ProcessRepository;
+import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,7 +31,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {DatasetService.class, DatasetRepository.class, UploadAreaUtil.class})
+@SpringBootTest(classes = {DatasetService.class, DatasetRepository.class, UploadAreaUtil.class,
+        BiomaterialRepository.class, ProtocolRepository.class, ProcessRepository.class,
+        FileRepository.class})
 public class DatasetServiceTest {
     @Autowired
     private ApplicationContext applicationContext;
@@ -40,6 +46,18 @@ public class DatasetServiceTest {
 
     @MockBean
     private DatasetRepository datasetRepository;
+
+    @MockBean
+    private ProtocolRepository protocolRepository;
+
+    @MockBean
+    private ProcessRepository processRepository;
+
+    @MockBean
+    private FileRepository fileRepository;
+
+    @MockBean
+    private BiomaterialRepository biomaterialRepository;
 
     @MockBean
     private DatasetEventHandler datasetEventHandler;
@@ -95,14 +113,14 @@ public class DatasetServiceTest {
             Dataset existingDataset = new Dataset("{\"name\": \"dataset\"}");
 
             // and:
-            when(datasetRepository.findById(datasetId)).thenReturn(Optional.of(existingDataset));
+            when(datasetRepository.findById(existingDataset.getId())).thenReturn(Optional.of(existingDataset));
             when(metadataUpdateService.update(existingDataset, patch)).thenReturn(existingDataset);
 
             // when:
-            Dataset result = datasetService.update(datasetId, patch);
+            Dataset result = datasetService.update(existingDataset, patch);
 
             // then:
-            verify(datasetRepository).findById(datasetId);
+            verify(datasetRepository).findById(existingDataset.getId());
             verify(metadataUpdateService).update(existingDataset, patch);
             verify(datasetEventHandler).updatedDataset(existingDataset);
             assertThat(result).isEqualTo(existingDataset);
@@ -119,14 +137,15 @@ public class DatasetServiceTest {
         @DisplayName("Update Dataset - Not Found")
         void updateDatasetNotFound() {
             // given:
-            String nonExistentDatasetId = "nonExistentId";
+            Dataset nonExistentDataset = new Dataset("{\"name\": \"non existant dataset\"}");
             ObjectNode patch = createUpdatePatch("Updated Dataset Name");
 
             // and:
-            when(datasetRepository.findById(nonExistentDatasetId)).thenReturn(Optional.empty());
+            when(datasetRepository.findById(nonExistentDataset.getId())).thenReturn(Optional.empty());
 
             // when, then:
-            ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> datasetService.update(nonExistentDatasetId, patch));
+            ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                    () -> datasetService.update(nonExistentDataset, patch));
             assertThat(Objects.requireNonNull(exception.getMessage()).contains("404 NOT_FOUND"));
 
             // verify that other methods are not called

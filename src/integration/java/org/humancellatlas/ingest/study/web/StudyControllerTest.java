@@ -48,7 +48,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
 class StudyControllerTest {
-
     @Autowired
     private MockMvc webApp;
 
@@ -85,7 +84,6 @@ class StudyControllerTest {
 
     @Nested
     class Registration {
-
         @Test
         @DisplayName("Register Study - Success")
         @WithMockUser
@@ -134,7 +132,6 @@ class StudyControllerTest {
 
     @Nested
     class Update {
-
         @Test
         @DisplayName("Update Study - Success")
         void updateSuccess() throws Exception {
@@ -216,7 +213,6 @@ class StudyControllerTest {
 
     @Nested
     class Delete {
-
         @Test
         @DisplayName("Delete Study - Success")
         void deleteSuccess() throws Exception {
@@ -258,7 +254,6 @@ class StudyControllerTest {
 
     @Nested
     class Link {
-
         @Test
         @DisplayName("Link dataset to study - Success")
         void listDatasetToStudySuccess() throws Exception {
@@ -279,5 +274,4 @@ class StudyControllerTest {
                     .andExpect(status().isAccepted());
         }
     }
-
 }
