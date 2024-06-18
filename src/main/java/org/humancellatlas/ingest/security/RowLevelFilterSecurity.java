@@ -6,6 +6,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface RowLevelFilterSecurity {
-    String expression();
-    Class<?>[] ignoreClasses() default {};
+  String expression();
+
+  Class<?>[] ignoreClasses() default {};
 }

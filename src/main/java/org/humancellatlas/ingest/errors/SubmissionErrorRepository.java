@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 @CrossOrigin
 public interface SubmissionErrorRepository extends MongoRepository<SubmissionError, String> {
-    Page<SubmissionError> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope,
-                                                             Pageable pageable);
+  Page<SubmissionError> findBySubmissionEnvelope(
+      SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
-    @RestResource(exported = false)
-    Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+  @RestResource(exported = false)
+  Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 }

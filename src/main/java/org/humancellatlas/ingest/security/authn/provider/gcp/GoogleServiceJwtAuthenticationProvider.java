@@ -1,10 +1,5 @@
 package org.humancellatlas.ingest.security.authn.provider.gcp;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.auth0.jwt.interfaces.JWTVerifier;
-import com.auth0.spring.security.api.authentication.JwtAuthentication;
 import org.humancellatlas.ingest.security.Account;
 import org.humancellatlas.ingest.security.authn.oidc.OpenIdAuthentication;
 import org.humancellatlas.ingest.security.authn.oidc.UserInfo;
@@ -18,56 +13,62 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.JWTVerifier;
+import com.auth0.spring.security.api.authentication.JwtAuthentication;
+
 public class GoogleServiceJwtAuthenticationProvider implements AuthenticationProvider {
 
-    private static Logger logger = LoggerFactory.getLogger(GoogleServiceJwtAuthenticationProvider.class);
+  private static Logger logger =
+      LoggerFactory.getLogger(GoogleServiceJwtAuthenticationProvider.class);
 
-    private final JwtVerifierResolver jwtVerifierResolver;
+  private final JwtVerifierResolver jwtVerifierResolver;
 
-    private final GcpDomainWhiteList projectWhitelist;
+  private final GcpDomainWhiteList projectWhitelist;
 
-    public GoogleServiceJwtAuthenticationProvider(GcpDomainWhiteList projectWhitelist,
-                                                  JwtVerifierResolver jwtVerifierResolver) {
-        this.jwtVerifierResolver = jwtVerifierResolver;
-        this.projectWhitelist = projectWhitelist;
+  public GoogleServiceJwtAuthenticationProvider(
+      GcpDomainWhiteList projectWhitelist, JwtVerifierResolver jwtVerifierResolver) {
+    this.jwtVerifierResolver = jwtVerifierResolver;
+    this.projectWhitelist = projectWhitelist;
+  }
+
+  @Override
+  public boolean supports(Class<?> authentication) {
+    return JwtAuthentication.class.isAssignableFrom(authentication);
+  }
+
+  @Override
+  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    if (!supports(authentication.getClass())) {
+      return null;
     }
+    try {
+      JwtAuthentication jwt = (JwtAuthentication) authentication;
+      verifyIssuer(jwt);
 
-    @Override
-    public boolean supports(Class<?> authentication) {
-        return JwtAuthentication.class.isAssignableFrom(authentication);
+      JWTVerifier jwtVerifier = jwtVerifierResolver.resolve(jwt.getToken());
+      Authentication jwtAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
+
+      logger.info("Authenticated with jwt with scopes {}", jwtAuth.getAuthorities());
+
+      Account account = Account.SERVICE;
+      UserInfo serviceUser = new UserInfo(JWT.decode(jwt.getToken()).getSubject(), "password");
+      OpenIdAuthentication openIdAuth = new OpenIdAuthentication(account, serviceUser);
+      return openIdAuth;
+    } catch (JWTVerificationException e) {
+      logger.error("JWT verification failed: {}", e.getMessage());
+      throw new JwtVerificationFailed(e);
     }
+  }
 
-    @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        if (!supports(authentication.getClass())) {
-            return null;
-        }
-        try {
-            JwtAuthentication jwt = (JwtAuthentication) authentication;
-            verifyIssuer(jwt);
+  private void verifyIssuer(JwtAuthentication jwt) {
+    DecodedJWT token = JWT.decode(jwt.getToken());
+    String issuer = token.getIssuer();
 
-            JWTVerifier jwtVerifier = jwtVerifierResolver.resolve(jwt.getToken());
-            Authentication jwtAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
-
-            logger.info("Authenticated with jwt with scopes {}", jwtAuth.getAuthorities());
-
-            Account account = Account.SERVICE;
-            UserInfo serviceUser = new UserInfo(JWT.decode(jwt.getToken()).getSubject(), "password");
-            OpenIdAuthentication openIdAuth = new OpenIdAuthentication(account, serviceUser);
-            return openIdAuth;
-        } catch (JWTVerificationException e) {
-            logger.error("JWT verification failed: {}", e.getMessage());
-            throw new JwtVerificationFailed(e);
-        }
+    if (!projectWhitelist.lists(issuer)) {
+      throw UnlistedJwtIssuer.notWhitelisted(issuer);
     }
-
-    private void verifyIssuer(JwtAuthentication jwt) {
-        DecodedJWT token = JWT.decode(jwt.getToken());
-        String issuer = token.getIssuer();
-
-        if (!projectWhitelist.lists(issuer)) {
-            throw UnlistedJwtIssuer.notWhitelisted(issuer);
-        }
-    }
-
+  }
 }

@@ -1,61 +1,59 @@
 package org.humancellatlas.ingest.project;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.humancellatlas.ingest.core.Uuid;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.humancellatlas.ingest.core.Uuid;
+
 /**
- * generic builder that uses reflection.
- * Might not be suitable for production due to slower performance.
- * Currently used only for testing.
+ * generic builder that uses reflection. Might not be suitable for production due to slower
+ * performance. Currently used only for testing.
  */
 public class ProjectBuilder {
-    public final BuilderHelper builderHelper = new BuilderHelper<Project, ProjectBuilder>(this);
-    Map<String, Object> content = new HashMap<>();
+  public final BuilderHelper builderHelper = new BuilderHelper<Project, ProjectBuilder>(this);
+  Map<String, Object> content = new HashMap<>();
 
-    Uuid uuid = Uuid.newUuid();
+  Uuid uuid = Uuid.newUuid();
 
-    public ProjectBuilder emptyProject() {
-        return this;
-    }
+  public ProjectBuilder emptyProject() {
+    return this;
+  }
 
-    public ProjectBuilder withManagedAccess() {
-        return withDataAccess(new DataAccess(DataAccessTypes.MANAGED));
-    }
+  public ProjectBuilder withManagedAccess() {
+    return withDataAccess(new DataAccess(DataAccessTypes.MANAGED));
+  }
 
-    public ProjectBuilder withOpenAccess() {
-        return withDataAccess(new DataAccess(DataAccessTypes.OPEN));
-    }
+  public ProjectBuilder withOpenAccess() {
+    return withDataAccess(new DataAccess(DataAccessTypes.OPEN));
+  }
 
-    public ProjectBuilder withDataAccess(DataAccess dataAccess) {
-        content.put("dataAccess", new ObjectToMapConverter().asMap(dataAccess));
-        return this;
-    }
+  public ProjectBuilder withDataAccess(DataAccess dataAccess) {
+    content.put("dataAccess", new ObjectToMapConverter().asMap(dataAccess));
+    return this;
+  }
 
-    public ProjectBuilder withUuid(String uuid) {
-        this.uuid = new Uuid(uuid);
-        return this;
-    }
+  public ProjectBuilder withUuid(String uuid) {
+    this.uuid = new Uuid(uuid);
+    return this;
+  }
 
-    public ProjectBuilder withShortName(String shortName) {
-        Map<String, Object> projectCore =
-                (Map<String, Object>) content.computeIfAbsent("project_core", k -> new HashMap<String, Object>());
-        projectCore.put("project_short_name", shortName);
-        return this;
-    }
+  public ProjectBuilder withShortName(String shortName) {
+    Map<String, Object> projectCore =
+        (Map<String, Object>)
+            content.computeIfAbsent("project_core", k -> new HashMap<String, Object>());
+    projectCore.put("project_short_name", shortName);
+    return this;
+  }
 
-    public Project build() {
-        Project project = new Project(content);
-        List<String> constructorFields = List.of("content");
-        builderHelper.copyFieldsFromBuilder(project, constructorFields);
-        return project;
-    }
+  public Project build() {
+    Project project = new Project(content);
+    List<String> constructorFields = List.of("content");
+    builderHelper.copyFieldsFromBuilder(project, constructorFields);
+    return project;
+  }
 
-    public Map<String, Object> asMap() {
-        return builderHelper.asMap(List.of("contentLastModified"));
-    }
-
+  public Map<String, Object> asMap() {
+    return builderHelper.asMap(List.of("contentLastModified"));
+  }
 }

@@ -1,8 +1,5 @@
 package org.humancellatlas.ingest.protocol;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.process.ProcessRepository;
@@ -15,6 +12,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
 /**
  * Javadocs go here!
  *
@@ -26,36 +27,41 @@ import org.springframework.stereotype.Service;
 @Getter
 public class ProtocolService {
 
-    private final @NonNull MetadataCrudService metadataCrudService;
-    private final @NonNull MetadataUpdateService metadataUpdateService;
+  private final @NonNull MetadataCrudService metadataCrudService;
+  private final @NonNull MetadataUpdateService metadataUpdateService;
 
-    private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
-    private final @NonNull ProjectRepository projectRepository;
-    private final @NonNull ProtocolRepository protocolRepository;
-    private final @NonNull ProcessRepository processRepository;
+  private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
+  private final @NonNull ProjectRepository projectRepository;
+  private final @NonNull ProtocolRepository protocolRepository;
+  private final @NonNull ProcessRepository processRepository;
 
+  private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+  protected Logger getLog() {
+    return log;
+  }
 
-    protected Logger getLog() {
-        return log;
+  public Protocol addProtocolToSubmissionEnvelope(
+      SubmissionEnvelope submissionEnvelope, Protocol protocol) {
+    if (!protocol.getIsUpdate()) {
+      projectRepository
+          .findBySubmissionEnvelopesContains(submissionEnvelope)
+          .findFirst()
+          .ifPresent(protocol::setProject);
+      return metadataCrudService.addToSubmissionEnvelopeAndSave(protocol, submissionEnvelope);
+    } else {
+      return metadataUpdateService.acceptUpdate(protocol, submissionEnvelope);
     }
+  }
 
-    public Protocol addProtocolToSubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Protocol protocol) {
-        if (!protocol.getIsUpdate()) {
-            projectRepository.findBySubmissionEnvelopesContains(submissionEnvelope).findFirst().ifPresent(protocol::setProject);
-            return metadataCrudService.addToSubmissionEnvelopeAndSave(protocol, submissionEnvelope);
-        } else {
-            return metadataUpdateService.acceptUpdate(protocol, submissionEnvelope);
-        }
-    }
-
-    public Page<Protocol> retrieve(SubmissionEnvelope submission, Pageable pageable) {
-        Page<Protocol> protocols = protocolRepository.findBySubmissionEnvelope(submission, pageable);
-        protocols.forEach(protocol -> {
-            processRepository.findFirstByProtocolsContains(protocol).ifPresent(it -> protocol.markAsLinked());
+  public Page<Protocol> retrieve(SubmissionEnvelope submission, Pageable pageable) {
+    Page<Protocol> protocols = protocolRepository.findBySubmissionEnvelope(submission, pageable);
+    protocols.forEach(
+        protocol -> {
+          processRepository
+              .findFirstByProtocolsContains(protocol)
+              .ifPresent(it -> protocol.markAsLinked());
         });
-        return protocols;
-    }
-
+    return protocols;
+  }
 }

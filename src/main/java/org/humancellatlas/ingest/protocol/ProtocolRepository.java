@@ -1,5 +1,10 @@
 package org.humancellatlas.ingest.protocol;
 
+import java.util.Collection;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
+
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.security.RowLevelFilterSecurity;
@@ -13,11 +18,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Stream;
-
 /**
  * Javadocs go here!
  *
@@ -26,62 +26,66 @@ import java.util.stream.Stream;
  */
 @CrossOrigin
 @RowLevelFilterSecurity(
-        expression =
-                "(#filterObject.project != null)" +
-                        "? "+
-                        "   (" +
-                        "      #authentication.authorities.![authority].contains(" +
-                        "          'ROLE_access_' +#filterObject.project.uuid?.toString()) " +
-                        "     or " +
-                        "      #authentication.authorities.![authority].contains('ROLE_SERVICE') " +
-                        "     or " +
-                        "      #filterObject.project.content['dataAccess']['type'] " +
-                        "         eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label" +
-                        "   )" +
-                        ":true",
-        ignoreClasses = {Project.class})
+    expression =
+        "(#filterObject.project != null)"
+            + "? "
+            + "   ("
+            + "      #authentication.authorities.![authority].contains("
+            + "          'ROLE_access_' +#filterObject.project.uuid?.toString()) "
+            + "     or "
+            + "      #authentication.authorities.![authority].contains('ROLE_SERVICE') "
+            + "     or "
+            + "      #filterObject.project.content['dataAccess']['type'] "
+            + "         eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label"
+            + "   )"
+            + ":true",
+    ignoreClasses = {Project.class})
 public interface ProtocolRepository extends MongoRepository<Protocol, String> {
 
-    public Page<Protocol> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+  public Page<Protocol> findBySubmissionEnvelope(
+      SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
-    public Page<Protocol> findByProject(Project project, Pageable pageable);
+  public Page<Protocol> findByProject(Project project, Pageable pageable);
 
-    @RestResource(exported = false)
-    Stream<Protocol> findByProject(Project project);
+  @RestResource(exported = false)
+  Stream<Protocol> findByProject(Project project);
 
-    @RestResource(exported = false)
-    public Stream<Protocol> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+  @RestResource(exported = false)
+  public Stream<Protocol> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
-    @RestResource(exported = false)
-    Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+  @RestResource(exported = false)
+  Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
-    @RestResource(rel = "findBySubmissionAndValidationState")
-    public Page<Protocol> findBySubmissionEnvelopeAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
-                                                                     @Param("state") ValidationState state,
-                                                                     Pageable pageable);
+  @RestResource(rel = "findBySubmissionAndValidationState")
+  public Page<Protocol> findBySubmissionEnvelopeAndValidationState(
+      @Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
+      @Param("state") ValidationState state,
+      Pageable pageable);
 
-    @Query(value = "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }")
-    @RestResource(rel = "findBySubmissionIdWithGraphValidationErrors")
-    public Page<Protocol> findBySubmissionIdWithGraphValidationErrors(
-            @Param("envelopeId") String envelopeId,
-            Pageable pageable
-    );
+  @Query(
+      value =
+          "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }")
+  @RestResource(rel = "findBySubmissionIdWithGraphValidationErrors")
+  public Page<Protocol> findBySubmissionIdWithGraphValidationErrors(
+      @Param("envelopeId") String envelopeId, Pageable pageable);
 
-    @RestResource(exported = false)
-    Collection<Protocol> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+  @RestResource(exported = false)
+  Collection<Protocol> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
-    @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
-    Page<Protocol> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
+  @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
+  Page<Protocol> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
 
-    @RestResource(rel = "findByUuid", path = "findByUuid")
-    Optional<Protocol> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
+  @RestResource(rel = "findByUuid", path = "findByUuid")
+  Optional<Protocol> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
-    long countBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+  long countBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
-    long countBySubmissionEnvelopeAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState validationState);
+  long countBySubmissionEnvelopeAndValidationState(
+      SubmissionEnvelope submissionEnvelope, ValidationState validationState);
 
-    @Query(value = "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }", count = true)
-    long countBySubmissionEnvelopeAndCountWithGraphValidationErrors(String submissionEnvelopeId);
-
-
+  @Query(
+      value =
+          "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }",
+      count = true)
+  long countBySubmissionEnvelopeAndCountWithGraphValidationErrors(String submissionEnvelopeId);
 }

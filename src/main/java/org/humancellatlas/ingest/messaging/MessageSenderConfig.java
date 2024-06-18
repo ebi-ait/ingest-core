@@ -10,11 +10,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @EnableScheduling
 public class MessageSenderConfig {
 
-    @Bean
-    public TaskScheduler executor() {
-        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(7);
-        return scheduler;
-    }
-
+  @Bean
+  public TaskScheduler executor() {
+    ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+    scheduler.setPoolSize(7);
+    return scheduler;
+  }
 }

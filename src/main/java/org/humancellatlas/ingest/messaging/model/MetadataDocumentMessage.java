@@ -1,9 +1,9 @@
 package org.humancellatlas.ingest.messaging.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.humancellatlas.ingest.state.ValidationState;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * Javadocs go here!
@@ -14,10 +14,10 @@ import org.humancellatlas.ingest.state.ValidationState;
 @Getter
 @AllArgsConstructor
 public class MetadataDocumentMessage {
-    private final String documentType;
-    private final String documentId;
-    private final String documentUuid;
-    private final ValidationState validationState;
-    private final String callbackLink;
-    private final String envelopeId;
+  private final String documentType;
+  private final String documentId;
+  private final String documentUuid;
+  private final ValidationState validationState;
+  private final String callbackLink;
+  private final String envelopeId;
 }

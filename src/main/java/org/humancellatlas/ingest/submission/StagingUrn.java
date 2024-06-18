@@ -1,9 +1,10 @@
 package org.humancellatlas.ingest.submission;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import lombok.Data;
-
 import java.net.URI;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import lombok.Data;
 
 /**
  * Javadocs go here!
@@ -13,19 +14,18 @@ import java.net.URI;
  */
 @Data
 class StagingUrn {
-    private URI value;
+  private URI value;
 
-    @JsonCreator
-    public StagingUrn(String name) {
-        this.value = URI.create(name);
+  @JsonCreator
+  public StagingUrn(String name) {
+    this.value = URI.create(name);
 
-        // test this uri is a URN
-        if (!value.isOpaque()) {
-            throw new IllegalArgumentException(String.format("Staging URN is malformed: %s", value.toString()));
-        }
+    // test this uri is a URN
+    if (!value.isOpaque()) {
+      throw new IllegalArgumentException(
+          String.format("Staging URN is malformed: %s", value.toString()));
     }
+  }
 
-    StagingUrn() {
-
-    }
+  StagingUrn() {}
 }

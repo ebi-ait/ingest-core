@@ -1,8 +1,10 @@
 package org.humancellatlas.ingest.export.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Builder;
-import lombok.Data;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.humancellatlas.ingest.export.ExportError;
 import org.humancellatlas.ingest.export.ExportState;
 import org.humancellatlas.ingest.export.job.ExportJob;
@@ -14,34 +16,28 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.hateoas.Identifiable;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.Builder;
+import lombok.Data;
 
 @Data
 @Builder
 @Document
 public class ExportEntity implements Identifiable<String> {
-    @Id
-    @JsonIgnore
-    private String id;
+  @Id @JsonIgnore private String id;
 
-    @Indexed
-    @DBRef(lazy = true)
-    @RestResource(exported = false)
-    @JsonIgnore
-    private ExportJob exportJob;
+  @Indexed
+  @DBRef(lazy = true)
+  @RestResource(exported = false)
+  @JsonIgnore
+  private ExportJob exportJob;
 
-    @Indexed
-    private ExportState status;
+  @Indexed private ExportState status;
 
-    @CreatedDate
-    private Instant createdDate;
+  @CreatedDate private Instant createdDate;
 
-    private Map<String, Object> context;
+  private Map<String, Object> context;
 
-    @Builder.Default
-    private List<ExportError> errors = new ArrayList<>();
-
+  @Builder.Default private List<ExportError> errors = new ArrayList<>();
 }

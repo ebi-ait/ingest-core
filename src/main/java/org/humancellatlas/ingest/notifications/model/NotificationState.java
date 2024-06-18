@@ -1,4 +1,5 @@
 package org.humancellatlas.ingest.notifications.model;
+
 import java.util.List;
 
 public enum NotificationState {

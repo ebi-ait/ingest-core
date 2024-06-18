@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @RestResource(exported = false)
 public interface ExportEntityRepository extends MongoRepository<ExportEntity, String> {
 
-    Page<ExportEntity> findByExportJob(ExportJob exportJob, Pageable pageable);
+  Page<ExportEntity> findByExportJob(ExportJob exportJob, Pageable pageable);
 
-    Page<ExportEntity> findByExportJobAndStatus(ExportJob exportJob, ExportState exportState, Pageable pageable);
+  Page<ExportEntity> findByExportJobAndStatus(
+      ExportJob exportJob, ExportState exportState, Pageable pageable);
 }

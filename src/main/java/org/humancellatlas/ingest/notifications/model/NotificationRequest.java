@@ -1,6 +1,7 @@
 package org.humancellatlas.ingest.notifications.model;
 
 import java.util.Map;
+
 import lombok.Value;
 
 @Value

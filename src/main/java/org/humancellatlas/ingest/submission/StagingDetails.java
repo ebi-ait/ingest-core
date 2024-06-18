@@ -1,7 +1,8 @@
 package org.humancellatlas.ingest.submission;
 
-import lombok.Data;
 import org.humancellatlas.ingest.core.Uuid;
+
+import lombok.Data;
 
 /**
  * Javadocs go here!
@@ -11,6 +12,6 @@ import org.humancellatlas.ingest.core.Uuid;
  */
 @Data
 class StagingDetails {
-    private Uuid stagingAreaUuid;
-    private StagingUrn stagingAreaLocation;
+  private Uuid stagingAreaUuid;
+  private StagingUrn stagingAreaLocation;
 }

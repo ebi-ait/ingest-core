@@ -1,5 +1,10 @@
 package org.humancellatlas.ingest.biomaterial;
 
+import java.util.Collection;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
+
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.project.Project;
@@ -14,82 +19,81 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-
 @CrossOrigin
 @RowLevelFilterSecurity(
-        expression =
-                "(#filterObject.project != null)" +
-                        "? "+
-                        "   (" +
-                        "      #authentication.authorities.![authority].contains(" +
-                        "          'ROLE_access_' +#filterObject.project.uuid?.toString()) " +
-                        "     or " +
-                        "      #authentication.authorities.![authority].contains('ROLE_SERVICE') " +
-                        "     or " +
-                        "      #filterObject.project.content['dataAccess']['type'] " +
-                        "         eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label" +
-                        "   )" +
-                        ":true",
-        ignoreClasses = {Project.class})
+    expression =
+        "(#filterObject.project != null)"
+            + "? "
+            + "   ("
+            + "      #authentication.authorities.![authority].contains("
+            + "          'ROLE_access_' +#filterObject.project.uuid?.toString()) "
+            + "     or "
+            + "      #authentication.authorities.![authority].contains('ROLE_SERVICE') "
+            + "     or "
+            + "      #filterObject.project.content['dataAccess']['type'] "
+            + "         eq T(org.humancellatlas.ingest.project.DataAccessTypes).OPEN.label"
+            + "   )"
+            + ":true",
+    ignoreClasses = {Project.class})
 public interface BiomaterialRepository extends MongoRepository<Biomaterial, String> {
 
-    @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
-    Page<Biomaterial> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
+  @RestResource(rel = "findAllByUuid", path = "findAllByUuid")
+  Page<Biomaterial> findByUuid(@Param("uuid") Uuid uuid, Pageable pageable);
 
-    @RestResource(rel = "findByUuid", path = "findByUuid")
-    Optional<Biomaterial> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
+  @RestResource(rel = "findByUuid", path = "findByUuid")
+  Optional<Biomaterial> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
-    Page<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+  Page<Biomaterial> findBySubmissionEnvelope(
+      SubmissionEnvelope submissionEnvelope, Pageable pageable);
 
-    Page<Biomaterial> findByProject(Project project, Pageable pageable);
+  Page<Biomaterial> findByProject(Project project, Pageable pageable);
 
-    @RestResource(exported = false)
-    Stream<Biomaterial> findByProject(Project project);
+  @RestResource(exported = false)
+  Stream<Biomaterial> findByProject(Project project);
 
-    @RestResource(exported = false)
-    Stream<Biomaterial> findByProjectsContaining(Project project);
+  @RestResource(exported = false)
+  Stream<Biomaterial> findByProjectsContaining(Project project);
 
-    @RestResource(exported = false)
-    Stream<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+  @RestResource(exported = false)
+  Stream<Biomaterial> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
-    @RestResource(exported = false)
-    Collection<Biomaterial> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+  @RestResource(exported = false)
+  Collection<Biomaterial> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
-    @RestResource(exported = false)
-    Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+  @RestResource(exported = false)
+  Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
-    @RestResource(rel = "findBySubmissionAndValidationState")
-    public Page<Biomaterial> findBySubmissionEnvelopeAndValidationState(@Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
-                                                                        @Param("state") ValidationState state,
-                                                                        Pageable pageable);
+  @RestResource(rel = "findBySubmissionAndValidationState")
+  public Page<Biomaterial> findBySubmissionEnvelopeAndValidationState(
+      @Param("envelopeUri") SubmissionEnvelope submissionEnvelope,
+      @Param("state") ValidationState state,
+      Pageable pageable);
 
-    @Query(value = "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }")
-    @RestResource(rel = "findBySubmissionIdWithGraphValidationErrors")
-    public Page<Biomaterial> findBySubmissionIdWithGraphValidationErrors(
-            @Param("envelopeId") String envelopeId,
-            Pageable pageable
-    );
+  @Query(
+      value =
+          "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }")
+  @RestResource(rel = "findBySubmissionIdWithGraphValidationErrors")
+  public Page<Biomaterial> findBySubmissionIdWithGraphValidationErrors(
+      @Param("envelopeId") String envelopeId, Pageable pageable);
 
-    @RestResource(exported = false)
-    Stream<Biomaterial> findByInputToProcessesContains(Process process);
+  @RestResource(exported = false)
+  Stream<Biomaterial> findByInputToProcessesContains(Process process);
 
-    Page<Biomaterial> findByInputToProcessesContaining(Process process, Pageable pageable);
+  Page<Biomaterial> findByInputToProcessesContaining(Process process, Pageable pageable);
 
-    @RestResource(exported = false)
-    Stream<Biomaterial> findByDerivedByProcessesContains(Process process);
+  @RestResource(exported = false)
+  Stream<Biomaterial> findByDerivedByProcessesContains(Process process);
 
-    Page<Biomaterial> findByDerivedByProcessesContaining(Process process, Pageable pageable);
+  Page<Biomaterial> findByDerivedByProcessesContaining(Process process, Pageable pageable);
 
-    long countBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+  long countBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
-    long countBySubmissionEnvelopeAndValidationState(SubmissionEnvelope submissionEnvelope, ValidationState validationState);
+  long countBySubmissionEnvelopeAndValidationState(
+      SubmissionEnvelope submissionEnvelope, ValidationState validationState);
 
-    @Query(value = "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }", count = true)
-    long countBySubmissionEnvelopeAndCountWithGraphValidationErrors(String submissionEnvelopeId);
-
+  @Query(
+      value =
+          "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }",
+      count = true)
+  long countBySubmissionEnvelopeAndCountWithGraphValidationErrors(String submissionEnvelopeId);
 }

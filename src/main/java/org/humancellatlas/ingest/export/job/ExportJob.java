@@ -1,8 +1,10 @@
 package org.humancellatlas.ingest.export.job;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Builder;
-import lombok.Data;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.humancellatlas.ingest.core.web.LinkGenerator;
 import org.humancellatlas.ingest.export.ExportError;
 import org.humancellatlas.ingest.export.ExportState;
@@ -21,65 +23,59 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.hateoas.Identifiable;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.Builder;
+import lombok.Data;
 
 @Data
 @Builder
 @Document
 @CompoundIndexes({
-    @CompoundIndex(name = "exportDestinationName", def = "{ 'destination.name': 1 }"),
-    @CompoundIndex(name = "exportDestinationVersion", def = "{ 'destination.version': 1 }")
+  @CompoundIndex(name = "exportDestinationName", def = "{ 'destination.name': 1 }"),
+  @CompoundIndex(name = "exportDestinationVersion", def = "{ 'destination.version': 1 }")
 })
 public class ExportJob implements Identifiable<String> {
-    @Id
-    @JsonIgnore
-    private String id;
+  @Id @JsonIgnore private String id;
 
-    @CreatedDate
-    @Builder.Default
-    private Instant createdDate = Instant.now();
+  @CreatedDate @Builder.Default private Instant createdDate = Instant.now();
 
-    @Indexed
-    @DBRef(lazy = true)
-    @RestResource(exported = false)
-    @JsonIgnore
-    private final SubmissionEnvelope submission;
+  @Indexed
+  @DBRef(lazy = true)
+  @RestResource(exported = false)
+  @JsonIgnore
+  private final SubmissionEnvelope submission;
 
-    private final ExportDestination destination;
+  private final ExportDestination destination;
 
-    @Indexed
-    @Builder.Default
-    private ExportState status = ExportState.EXPORTING;
+  @Indexed @Builder.Default private ExportState status = ExportState.EXPORTING;
 
-    @LastModifiedDate
-    private Instant updatedDate;
+  @LastModifiedDate private Instant updatedDate;
 
-    private Map<String, Object> context;
+  private Map<String, Object> context;
 
-    @Builder.Default
-    private List<ExportError> errors = new ArrayList<>();
+  @Builder.Default private List<ExportError> errors = new ArrayList<>();
 
-    public ExportSubmissionMessage toExportSubmissionMessage(LinkGenerator linkGenerator, Map<String, Object> context) {
-        String callbackLink = linkGenerator.createCallback(getClass(), getId());
-        return new ExportSubmissionMessage(
-            getId(),
-            submission.getUuid().getUuid().toString(),
-            destination.getContext().get("projectUuid").toString(),
-            callbackLink,
-            context
-        );
-    }
+  public ExportSubmissionMessage toExportSubmissionMessage(
+      LinkGenerator linkGenerator, Map<String, Object> context) {
+    String callbackLink = linkGenerator.createCallback(getClass(), getId());
+    return new ExportSubmissionMessage(
+        getId(),
+        submission.getUuid().getUuid().toString(),
+        destination.getContext().get("projectUuid").toString(),
+        callbackLink,
+        context);
+  }
 
-    public SpreadsheetGenerationMessage toGenerateSubmissionMessage(LinkGenerator linkGenerator, Map<String, Object> context) {
-        // TODO: unify with toExportSubmissionMessage
-        String callbackLink = linkGenerator.createCallback(getClass(), getId());
-        return new SpreadsheetGenerationMessage(getId(),
-                submission.getUuid().getUuid().toString(),
-                destination.getContext().get("projectUuid").toString(),
-                callbackLink,
-                context);
-    }
+  public SpreadsheetGenerationMessage toGenerateSubmissionMessage(
+      LinkGenerator linkGenerator, Map<String, Object> context) {
+    // TODO: unify with toExportSubmissionMessage
+    String callbackLink = linkGenerator.createCallback(getClass(), getId());
+    return new SpreadsheetGenerationMessage(
+        getId(),
+        submission.getUuid().getUuid().toString(),
+        destination.getContext().get("projectUuid").toString(),
+        callbackLink,
+        context);
+  }
 }

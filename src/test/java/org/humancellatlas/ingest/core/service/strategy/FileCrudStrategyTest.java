@@ -1,5 +1,10 @@
 package org.humancellatlas.ingest.core.service.strategy;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+import java.util.stream.Stream;
+
 import org.humancellatlas.ingest.core.service.strategy.impl.FileCrudStrategy;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
@@ -14,47 +19,43 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {FileCrudStrategy.class})
 public class FileCrudStrategyTest {
-    @Autowired private FileCrudStrategy fileCrudStrategy;
+  @Autowired private FileCrudStrategy fileCrudStrategy;
 
-    @MockBean private FileRepository fileRepository;
-    @MockBean private ProjectRepository projectRepository;
-    @MockBean private MessageRouter messageRouter;
+  @MockBean private FileRepository fileRepository;
+  @MockBean private ProjectRepository projectRepository;
+  @MockBean private MessageRouter messageRouter;
 
-    private File testFile;
+  private File testFile;
 
-    @BeforeEach
-    void setUp() {
-        testFile = new File(null, "fileName");
-    }
+  @BeforeEach
+  void setUp() {
+    testFile = new File(null, "fileName");
+  }
 
-    @Test
-    public void testRemoveLinksFile() {
-        //given
-        Project projectWithFile = new Project(null);
-        projectWithFile.getSupplementaryFiles().add(testFile);
-        when(projectRepository.findBySupplementaryFilesContains(testFile)).thenReturn(Stream.of(projectWithFile));
+  @Test
+  public void testRemoveLinksFile() {
+    // given
+    Project projectWithFile = new Project(null);
+    projectWithFile.getSupplementaryFiles().add(testFile);
+    when(projectRepository.findBySupplementaryFilesContains(testFile))
+        .thenReturn(Stream.of(projectWithFile));
 
-        // when
-        fileCrudStrategy.removeLinksToDocument(testFile);
+    // when
+    fileCrudStrategy.removeLinksToDocument(testFile);
 
-        // then
-        assertThat(projectWithFile.getSupplementaryFiles()).isEmpty();
-        verify(projectRepository).save(projectWithFile);
-    }
+    // then
+    assertThat(projectWithFile.getSupplementaryFiles()).isEmpty();
+    verify(projectRepository).save(projectWithFile);
+  }
 
-    @Test
-    public void testDeleteFile() {
-        //when
-        fileCrudStrategy.deleteDocument(testFile);
-        //then
-        verify(fileRepository).delete(testFile);
-    }
+  @Test
+  public void testDeleteFile() {
+    // when
+    fileCrudStrategy.deleteDocument(testFile);
+    // then
+    verify(fileRepository).delete(testFile);
+  }
 }

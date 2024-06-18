@@ -5,8 +5,7 @@ import lombok.NonNull;
 
 @Data
 public class ExportError {
-    private final String errorCode;
-    @NonNull
-    private final String message;
-    private final Object details;
+  private final String errorCode;
+  @NonNull private final String message;
+  private final Object details;
 }

@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin
 public interface PatchRepository extends MongoRepository<Patch, String> {
 
-    @RestResource(path="updatedocument", rel="WithUpdateDocument")
-    @Query("{ 'updateDocument.$id': ?0 }")
-    Patch<? extends MetadataDocument> findByUpdateDocumentId(ObjectId id);
+  @RestResource(path = "updatedocument", rel = "WithUpdateDocument")
+  @Query("{ 'updateDocument.$id': ?0 }")
+  Patch<? extends MetadataDocument> findByUpdateDocumentId(ObjectId id);
 
-    @RestResource(path="submissionEnvelope", rel="WithSubmissionEnvelope")
-    @Query("{ 'submissionEnvelope.id': ?0 }")
-    Page<Patch<? extends MetadataDocument>> findBySubmissionEnvelopeId(String id, Pageable pageable);
+  @RestResource(path = "submissionEnvelope", rel = "WithSubmissionEnvelope")
+  @Query("{ 'submissionEnvelope.id': ?0 }")
+  Page<Patch<? extends MetadataDocument>> findBySubmissionEnvelopeId(String id, Pageable pageable);
 
-    @RestResource(exported = false)
-    Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
+  @RestResource(exported = false)
+  Long deleteBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 }

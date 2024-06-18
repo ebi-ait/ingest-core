@@ -5,60 +5,61 @@ import org.humancellatlas.ingest.messaging.model.SubmissionEnvelopeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class SubmissionEnvelopeMessageBuilder {
-    public static SubmissionEnvelopeMessageBuilder using(LinkGenerator linkGenerator) {
-        return new SubmissionEnvelopeMessageBuilder(linkGenerator);
-    }
-    private LinkGenerator linkGenerator;
+  public static SubmissionEnvelopeMessageBuilder using(LinkGenerator linkGenerator) {
+    return new SubmissionEnvelopeMessageBuilder(linkGenerator);
+  }
 
-    private Class<?> documentType;
-    private String submissionEnvelopeId;
-    private String submissionEnvelopeUuid;
+  private LinkGenerator linkGenerator;
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+  private Class<?> documentType;
+  private String submissionEnvelopeId;
+  private String submissionEnvelopeUuid;
 
-    protected Logger getLog() {
-        return log;
-    }
+  private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private SubmissionEnvelopeMessageBuilder(LinkGenerator linkGenerator) {
-        this.linkGenerator = linkGenerator;
-    }
+  protected Logger getLog() {
+    return log;
+  }
 
-    public SubmissionEnvelopeMessageBuilder messageFor(SubmissionEnvelope submissionEnvelope) {
-        withDocumentType(submissionEnvelope.getClass())
-                .withId(submissionEnvelope.getId())
-                .withUuid(submissionEnvelope.getUuid().getUuid().toString());
+  private SubmissionEnvelopeMessageBuilder(LinkGenerator linkGenerator) {
+    this.linkGenerator = linkGenerator;
+  }
 
-        return this;
-    }
+  public SubmissionEnvelopeMessageBuilder messageFor(SubmissionEnvelope submissionEnvelope) {
+    withDocumentType(submissionEnvelope.getClass())
+        .withId(submissionEnvelope.getId())
+        .withUuid(submissionEnvelope.getUuid().getUuid().toString());
 
-    private <T extends SubmissionEnvelope> SubmissionEnvelopeMessageBuilder withDocumentType(Class<T> documentClass) {
-        this.documentType = documentClass;
+    return this;
+  }
 
-        return this;
-    }
+  private <T extends SubmissionEnvelope> SubmissionEnvelopeMessageBuilder withDocumentType(
+      Class<T> documentClass) {
+    this.documentType = documentClass;
 
-    private SubmissionEnvelopeMessageBuilder withId(String metadataDocId) {
-        this.submissionEnvelopeId = metadataDocId;
+    return this;
+  }
 
-        return this;
-    }
+  private SubmissionEnvelopeMessageBuilder withId(String metadataDocId) {
+    this.submissionEnvelopeId = metadataDocId;
 
-    private SubmissionEnvelopeMessageBuilder withUuid(String uuid) {
-        this.submissionEnvelopeUuid = uuid;
+    return this;
+  }
 
-        return this;
-    }
+  private SubmissionEnvelopeMessageBuilder withUuid(String uuid) {
+    this.submissionEnvelopeUuid = uuid;
 
-    public SubmissionEnvelopeMessage build() {
+    return this;
+  }
 
-        String callbackLink = linkGenerator.createCallback(documentType, submissionEnvelopeId);
-        return new SubmissionEnvelopeMessage(
-                documentType.getSimpleName().toLowerCase(),
-                submissionEnvelopeId,
-                submissionEnvelopeUuid,
-                callbackLink);
-    }
+  public SubmissionEnvelopeMessage build() {
+
+    String callbackLink = linkGenerator.createCallback(documentType, submissionEnvelopeId);
+    return new SubmissionEnvelopeMessage(
+        documentType.getSimpleName().toLowerCase(),
+        submissionEnvelopeId,
+        submissionEnvelopeUuid,
+        callbackLink);
+  }
 }

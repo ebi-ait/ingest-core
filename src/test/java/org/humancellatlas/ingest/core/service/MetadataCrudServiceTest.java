@@ -1,5 +1,10 @@
 package org.humancellatlas.ingest.core.service;
 
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.stream.Stream;
+
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.core.MetadataDocument;
@@ -24,82 +29,61 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.stream.Stream;
-
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {
-        MetadataCrudService.class,
-        BiomaterialCrudStrategy.class,
-        FileCrudStrategy.class,
-        ProcessCrudStrategy.class,
-        ProjectCrudStrategy.class,
-        ProtocolCrudStrategy.class,
-        StudyCrudStrategy.class,
-        DatasetCrudStrategy.class
-})
+@SpringBootTest(
+    classes = {
+      MetadataCrudService.class,
+      BiomaterialCrudStrategy.class,
+      FileCrudStrategy.class,
+      ProcessCrudStrategy.class,
+      ProjectCrudStrategy.class,
+      ProtocolCrudStrategy.class,
+      StudyCrudStrategy.class,
+      DatasetCrudStrategy.class
+    })
 public class MetadataCrudServiceTest {
-    @Autowired
-    private MetadataCrudService crudService;
-    @Autowired
-    private BiomaterialCrudStrategy biomaterialCrudStrategy;
-    @Autowired
-    private FileCrudStrategy fileCrudStrategy;
-    @Autowired
-    private ProcessCrudStrategy processCrudStrategy;
-    @Autowired
-    private ProjectCrudStrategy projectCrudStrategy;
-    @Autowired
-    private ProtocolCrudStrategy protocolCrudStrategy;
-    @Autowired
-    private StudyCrudStrategy studyCrudStrategy;
-    @Autowired
-    private DatasetCrudStrategy datasetCrudStrategy;
+  @Autowired private MetadataCrudService crudService;
+  @Autowired private BiomaterialCrudStrategy biomaterialCrudStrategy;
+  @Autowired private FileCrudStrategy fileCrudStrategy;
+  @Autowired private ProcessCrudStrategy processCrudStrategy;
+  @Autowired private ProjectCrudStrategy projectCrudStrategy;
+  @Autowired private ProtocolCrudStrategy protocolCrudStrategy;
+  @Autowired private StudyCrudStrategy studyCrudStrategy;
+  @Autowired private DatasetCrudStrategy datasetCrudStrategy;
 
-    @MockBean
-    private MessageRouter messageRouter;
-    @MockBean
-    private BiomaterialRepository biomaterialRepository;
-    @MockBean
-    private FileRepository fileRepository;
-    @MockBean
-    private ProcessRepository processRepository;
-    @MockBean
-    private ProjectRepository projectRepository;
-    @MockBean
-    private ProtocolRepository protocolRepository;
-    @MockBean
-    private StudyRepository studyRepository;
-    @MockBean
-    private DatasetRepository datasetRepository;
+  @MockBean private MessageRouter messageRouter;
+  @MockBean private BiomaterialRepository biomaterialRepository;
+  @MockBean private FileRepository fileRepository;
+  @MockBean private ProcessRepository processRepository;
+  @MockBean private ProjectRepository projectRepository;
+  @MockBean private ProtocolRepository protocolRepository;
+  @MockBean private StudyRepository studyRepository;
+  @MockBean private DatasetRepository datasetRepository;
 
-    private static Stream<Arguments> providedTestDocuments() {
-        return Stream.of(
-                Arguments.of(new Biomaterial(null)),
-                Arguments.of(new File(null, "fileName")),
-                Arguments.of(new Process(null)),
-                Arguments.of(new Project(null)),
-                Arguments.of(new Protocol(null))
-        );
-    }
+  private static Stream<Arguments> providedTestDocuments() {
+    return Stream.of(
+        Arguments.of(new Biomaterial(null)),
+        Arguments.of(new File(null, "fileName")),
+        Arguments.of(new Process(null)),
+        Arguments.of(new Project(null)),
+        Arguments.of(new Protocol(null)));
+  }
 
-    @ParameterizedTest
-    @MethodSource("providedTestDocuments")
-    public void removeLinksSendsMessageToStateTracker(MetadataDocument document) {
-        // when
-        crudService.removeLinksToDocument(document);
-        // then
-        verify(messageRouter, times(1)).routeStateTrackingDeleteMessageFor(document);
-    }
+  @ParameterizedTest
+  @MethodSource("providedTestDocuments")
+  public void removeLinksSendsMessageToStateTracker(MetadataDocument document) {
+    // when
+    crudService.removeLinksToDocument(document);
+    // then
+    verify(messageRouter, times(1)).routeStateTrackingDeleteMessageFor(document);
+  }
 
-    @ParameterizedTest
-    @MethodSource("providedTestDocuments")
-    public void deleteSendsMessageToStateTracker(MetadataDocument document) {
-        // when
-        crudService.deleteDocument(document);
-        // then
-        verify(messageRouter, times(1)).routeStateTrackingDeleteMessageFor(document);
-    }
+  @ParameterizedTest
+  @MethodSource("providedTestDocuments")
+  public void deleteSendsMessageToStateTracker(MetadataDocument document) {
+    // when
+    crudService.deleteDocument(document);
+    // then
+    verify(messageRouter, times(1)).routeStateTrackingDeleteMessageFor(document);
+  }
 }

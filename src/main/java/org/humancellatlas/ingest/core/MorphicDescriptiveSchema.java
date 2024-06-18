@@ -1,12 +1,15 @@
 package org.humancellatlas.ingest.core;
 
 public interface MorphicDescriptiveSchema {
-    String getDescribedBy();
-    void setDescribedBy(String describedBy);
+  String getDescribedBy();
 
-    String getSchemaVersion();
-    void setSchemaVersion(String schemaVersion);
+  void setDescribedBy(String describedBy);
 
-    String getSchemaType();
-    void setSchemaType(String schemaType);
+  String getSchemaVersion();
+
+  void setSchemaVersion(String schemaVersion);
+
+  String getSchemaType();
+
+  void setSchemaType(String schemaType);
 }
