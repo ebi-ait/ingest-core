@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +36,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {
         StudyService.class,
-        StudyRepository.class
+        StudyRepository.class,
+        DatasetRepository.class
 })
 public class StudyServiceTest {
 
@@ -52,6 +54,9 @@ public class StudyServiceTest {
     private StudyRepository studyRepository;
 
     @MockBean
+    private DatasetRepository datasetRepository;
+
+    @MockBean
     private StudyEventHandler studyEventHandler;
 
     @MockBean
@@ -63,7 +68,7 @@ public class StudyServiceTest {
     @BeforeEach
     void setUp() {
         applicationContext.getBeansWithAnnotation(MockBean.class).forEach(Mockito::reset);
-        Mockito.reset(metadataCrudService, studyRepository,studyEventHandler);
+        Mockito.reset(metadataCrudService, studyRepository, studyEventHandler);
     }
 
     @Nested
@@ -74,7 +79,7 @@ public class StudyServiceTest {
         Set<SubmissionEnvelope> submissionSet2;
 
         @BeforeEach
-        void setup(){
+        void setup() {
             // given
             study1 = spy(new Study("Schema URL", "1.0", "Generic", null));
             doReturn("study1").when(study1).getId();

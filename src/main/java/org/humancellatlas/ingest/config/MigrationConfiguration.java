@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MigrationConfiguration {
-    @Value("${spring.data.mongodb.uri}")
+    /*@Value("${spring.data.mongodb.uri}")
     private String mongoURI;
 
     @Bean
@@ -15,5 +15,5 @@ public class MigrationConfiguration {
         Mongobee runner = new Mongobee(mongoURI);
         runner.setChangeLogsScanPackage("org.humancellatlas.ingest.migrations");
         return runner;
-    }
+    }*/
 }

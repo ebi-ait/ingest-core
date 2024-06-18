@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingest-core-deployment
+  namespace: morphic-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingest-core
+  template:
+    metadata:
+      labels:
+        app: ingest-core
+    spec:
+      containers:
+        - name: ingest-core-container
+          image: 489384528211.dkr.ecr.eu-west-2.amazonaws.com/ingest-core-morphic:test-ds-s3-6
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: local
+            - name: MONGO_URI
+              value: mongodb+srv://morphic-dev:mDev12345@morphicdevcluster.jduoa8p.mongodb.net/MorphicDev?retryWrites=true&w=majority
+            - name: RABBIT_HOST
+              value: rabbitmq-service
+            - name: RABBIT_PORT
+              value: "5672"
+            - name: AWS_COGNITO_DOMAIN
+              value: "https://morphic-dev.auth.eu-west-2.amazoncognito.com/oauth2"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_REGION
+              value: eu-west-2  # Optionally specify AWS region as an environment variable
+          imagePullPolicy: Always

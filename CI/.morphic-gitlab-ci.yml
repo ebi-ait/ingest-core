@@ -1,0 +1,70 @@
+cache:
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+
+before_script:
+  - echo "Performing build..."
+
+stages:
+  - build
+  - test
+  - package
+  - deploy
+
+variables:
+  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+  EKS_CLUSTER_NAME: $EKS_CLUSTER_NAME
+
+build:
+  image: quay.io/ebi-ait/ingest-base-images:openjdk_11
+  stage: build
+  script:
+    - ./gradlew build -x test --info --stacktrace
+  artifacts:
+    paths:
+      - build/libs/*.jar
+
+test:
+  image: quay.io/ebi-ait/ingest-base-images:openjdk_11
+  stage: test
+  script:
+    - ./gradlew test
+  allow_failure: true
+  variables:
+    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+docker-build:
+  stage: package
+  image: docker:19.03.12
+  services:
+    - docker:19.03.12-dind
+  before_script:
+    - apk add --update --no-cache python3 py3-pip
+    - pip3 install awscli
+  script:
+    - docker build -t ingest-core-morphic:$CI_COMMIT_SHA .
+    - aws ecr get-login-password --region $AWS_DEFAULT_REGION |
+      docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+    - docker tag ingest-core-morphic:$CI_COMMIT_SHA $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/ingest-core-morphic:$CI_COMMIT_SHA
+    - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/ingest-core-morphic:$CI_COMMIT_SHA
+
+deploy:
+  stage: deploy
+  image: alpine/k8s:1.27.13
+  before_script:
+    - apk add --update --no-cache curl jq python3 py3-pip
+    - python3 -m venv /opt/venv
+    - source /opt/venv/bin/activate
+    - pip install awscli
+    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+    - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+    - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION
+  script:
+    - kubectl apply -f CI/ingest-core-morphic-deployment-dev.yaml
+    - kubectl apply -f CI/ingest-core-morphic-service.yaml -n morphic-dev

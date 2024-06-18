@@ -6,21 +6,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.MorphicDescriptiveSchema;
 import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import javax.validation.constraints.NotNull;
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -37,7 +31,7 @@ public class Study extends MetadataDocument implements MorphicDescriptiveSchema 
     Set<SubmissionEnvelope> submissionEnvelopes = new HashSet<>();
 
     // A study can have multiple datasets
-    Set<Dataset> datasets = new HashSet<>();
+    private Set<Dataset> datasets = new HashSet<>();
 
     @Field("described_by")
     private String describedBy;
@@ -95,6 +89,7 @@ public class Study extends MetadataDocument implements MorphicDescriptiveSchema 
     public void addDataset(final Dataset dataset) {
         datasets.add(dataset);
     }
+
     //ToDo: Find a better way of ensuring that DBRefs to deleted objects aren't returned.
     @JsonIgnore
     public List<SubmissionEnvelope> getOpenSubmissionEnvelopes() {

@@ -63,14 +63,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Getter
 public class SubmissionController {
-
     private final @NonNull Exporter exporter;
-
     private final @NonNull SubmissionEnvelopeService submissionEnvelopeService;
     private final @NonNull SubmissionStateMachineService submissionStateMachineService;
     private final @NonNull ProcessService processService;
     private final @NonNull ProtocolService protocolService;
-
     private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
     private final @NonNull FileRepository fileRepository;
     private final @NonNull ProjectRepository projectRepository;
@@ -96,8 +93,8 @@ public class SubmissionController {
     }
 
     @GetMapping({
-        "/submissionEnvelopes/{sub_id}" + Links.PROJECTS_URL,
-        "/submissionEnvelopes/{sub_id}" + Links.SUBMISSION_RELATED_PROJECTS_URL
+            "/submissionEnvelopes/{sub_id}" + Links.PROJECTS_URL,
+            "/submissionEnvelopes/{sub_id}" + Links.SUBMISSION_RELATED_PROJECTS_URL
     })
     ResponseEntity<?> getProjects(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
                                   Pageable pageable,
@@ -122,8 +119,8 @@ public class SubmissionController {
             "/submissionEnvelopes/{sub_id}" + Links.SUBMISSION_RELATED_DATASETS_URL
     })
     ResponseEntity<?> getDatasets(@PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-                                 Pageable pageable,
-                                 final PersistentEntityResourceAssembler resourceAssembler) {
+                                  Pageable pageable,
+                                  final PersistentEntityResourceAssembler resourceAssembler) {
         Page<Dataset> datasets = getDatasetRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
         return ResponseEntity.ok(getPagedResourcesAssembler().toResource(datasets, resourceAssembler));
     }
@@ -214,10 +211,10 @@ public class SubmissionController {
     HttpEntity<?> submitEnvelopeRequest(@PathVariable("id") SubmissionEnvelope submissionEnvelope,
                                         @RequestBody(required = false) List<String> submitActionParam,
                                         final PersistentEntityResourceAssembler resourceAssembler) {
-        List<SubmitAction> submitActions = Optional.ofNullable(
-                submitActionParam.stream().map(submitAction -> {
-                    return SubmitAction.valueOf(submitAction.toUpperCase());
-                }).collect(Collectors.toList())
+        List<SubmitAction> submitActions = Optional.of(
+                submitActionParam.stream()
+                        .map(submitAction -> SubmitAction.valueOf(submitAction.toUpperCase()))
+                        .collect(Collectors.toList())
         ).orElse(List.of(SubmitAction.ARCHIVE, SubmitAction.EXPORT, SubmitAction.CLEANUP));
 
         submissionEnvelopeService.handleSubmitRequest(submissionEnvelope, submitActions);

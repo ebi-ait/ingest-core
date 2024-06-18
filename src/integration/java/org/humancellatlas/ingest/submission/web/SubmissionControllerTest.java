@@ -5,6 +5,8 @@ import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.core.Uuid;
+import org.humancellatlas.ingest.dataset.Dataset;
+import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.messaging.MessageRouter;
@@ -15,6 +17,8 @@ import org.humancellatlas.ingest.project.ProjectRepository;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
+import org.humancellatlas.ingest.study.Study;
+import org.humancellatlas.ingest.study.StudyRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -67,6 +71,12 @@ public class SubmissionControllerTest {
     private FileRepository fileRepository;
 
     @Autowired
+    private StudyRepository studyRepository;
+
+    @Autowired
+    private DatasetRepository datasetRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @MockBean
@@ -86,6 +96,10 @@ public class SubmissionControllerTest {
     Protocol protocol;
 
     File file;
+
+    Study study;
+
+    Dataset dataset;
 
     UriComponentsBuilder uriBuilder;
 
@@ -116,6 +130,14 @@ public class SubmissionControllerTest {
         file.setSubmissionEnvelope(submissionEnvelope);
         file = fileRepository.save(file);
 
+        study = new Study(null, null, null, null);
+        study.getSubmissionEnvelopes().add(submissionEnvelope);
+        study = studyRepository.save(study);
+
+        dataset = new Dataset(null);
+        dataset.getSubmissionEnvelopes().add(submissionEnvelope);
+        dataset = datasetRepository.save(dataset);
+
         uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
     }
 
@@ -131,10 +153,10 @@ public class SubmissionControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "biomaterials",
-        "processes",
-        "protocols",
-        "files"
+            "biomaterials",
+            "processes",
+            "protocols",
+            "files"
     })
     public void testAdditionToNonEditableSubmissionThrowsErrorForAllEntityTypes(String endpoint) throws Exception {
         // given
@@ -143,20 +165,20 @@ public class SubmissionControllerTest {
 
         // when
         webApp.perform(
-            post("/submissionEnvelopes/{id}/" + endpoint, submissionEnvelope.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"content\": {}}")
+                post("/submissionEnvelopes/{id}/" + endpoint, submissionEnvelope.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"content\": {}}")
         ).andExpect(status().isForbidden());
     }
 
     @ParameterizedTest
     @EnumSource(value = SubmissionState.class, names = {
-        "GRAPH_VALIDATION_REQUESTED",
-        "GRAPH_VALIDATING",
-        "EXPORTING",
-        "PROCESSING",
-        "ARCHIVED",
-        "SUBMITTED"
+            "GRAPH_VALIDATION_REQUESTED",
+            "GRAPH_VALIDATING",
+            "EXPORTING",
+            "PROCESSING",
+            "ARCHIVED",
+            "SUBMITTED"
     })
     public void testAdditionToNonEditableSubmissionThrowsErrorInAllStates(SubmissionState state) throws Exception {
         // given
@@ -165,26 +187,26 @@ public class SubmissionControllerTest {
 
         // when
         webApp.perform(
-            post("/submissionEnvelopes/{id}/biomaterials", submissionEnvelope.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"content\": {}}")
+                post("/submissionEnvelopes/{id}/biomaterials", submissionEnvelope.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"content\": {}}")
         ).andExpect(status().isForbidden());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "/submissionEnvelopes/{id}/projects",
-        "/submissionEnvelopes/{id}/relatedProjects"
+            "/submissionEnvelopes/{id}/projects",
+            "/submissionEnvelopes/{id}/relatedProjects"
     })
     @WithMockUser
     public void testProjectsAreReturnedWhenTheyIncludeTheSubmissionInTheirEnvelopes(String endpoint) throws Exception {
         webApp.perform(
-            // when
-            get(endpoint, submissionEnvelope.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-        )   // then
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$._embedded.projects", hasSize(1)))
-            .andExpect(jsonPath("$._embedded.projects[0].uuid.uuid", is(project.getUuid().getUuid().toString())));
+                        // when
+                        get(endpoint, submissionEnvelope.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                )   // then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.projects", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.projects[0].uuid.uuid", is(project.getUuid().getUuid().toString())));
     }
 }

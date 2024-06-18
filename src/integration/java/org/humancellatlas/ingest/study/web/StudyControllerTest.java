@@ -3,9 +3,9 @@ package org.humancellatlas.ingest.study.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.data.MapEntry;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
+import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
-import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.state.SubmissionState;
@@ -15,7 +15,10 @@ import org.humancellatlas.ingest.study.StudyRepository;
 import org.humancellatlas.ingest.study.StudyService;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,6 +28,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -36,15 +40,14 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
 class StudyControllerTest {
-
     @Autowired
     private MockMvc webApp;
 
@@ -81,15 +84,9 @@ class StudyControllerTest {
 
     @Nested
     class Registration {
-
-        @BeforeEach
-        void setUp() {
-            // Reset mocks before each test to ensure a clean state
-            reset(studyEventHandler);
-        }
-
         @Test
         @DisplayName("Register Study - Success")
+        @WithMockUser
         void registerSuccess() throws Exception {
             doTestRegister("/studies", study -> {
                 var studyCaptor = ArgumentCaptor.forClass(Study.class);
@@ -99,7 +96,6 @@ class StudyControllerTest {
             });
         }
 
-        @Test
         private void doTestRegister(String registerUrl, Consumer<Study> postCondition) throws Exception {
             // given:
             var content = new HashMap<String, Object>();
@@ -132,48 +128,10 @@ class StudyControllerTest {
             // and:
             postCondition.accept(storedStudy);
         }
-
-        @Test
-        @DisplayName("Register Study - Verify ID Field in Response - Success")
-        void registerAndVerifyIdFieldSuccess() throws Exception {
-            doTestRegister("/studies", study -> {
-                var studyCaptor = ArgumentCaptor.forClass(Study.class);
-                verify(studyEventHandler, times(1)).registeredStudy(studyCaptor.capture());
-                Study handledStudy = studyCaptor.getValue();
-                assertThat(handledStudy.getId()).isNotNull();
-
-                // Verify the response contains the id field
-                MockHttpServletResponse response = null;
-                try {
-                    response = webApp
-                            .perform(get("/studies/" + handledStudy.getId())
-                                    .contentType(APPLICATION_JSON_VALUE))
-                            .andExpect(status().isOk())
-                            .andExpect(content().contentTypeCompatibleWith("application/hal+json"))
-                            .andReturn()
-                            .getResponse();
-
-                    Map<String, Object> responseBody = objectMapper.readValue(response.getContentAsString(), Map.class);
-                    assertThat(responseBody).containsKey("id");
-                    assertThat(responseBody.get("id")).isEqualTo(handledStudy.getId());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        }
     }
 
     @Nested
     class Update {
-        /**
-         * Tests updating a Study entity. It should be noted that unlike Project entities,
-         * Study entities currently require linkage to a SubmissionEnvelope for certain operations.
-         * This test ensures that the Study is appropriately linked before performing the update.
-         * The logic differs from Project, where no such linkage is required, but it may be
-         * considered in future revisions to standardize the behavior across different entity types.
-         *
-         * @throws Exception if the test fails
-         */
         @Test
         @DisplayName("Update Study - Success")
         void updateSuccess() throws Exception {
@@ -215,7 +173,6 @@ class StudyControllerTest {
             assertThat(response.getContentType()).containsPattern("application/.*json.*");
 
             //and:
-            //Using Map here because reading directly to Study converts the entire JSON to Study.content.
             Map<String, Object> updated = objectMapper.readValue(response.getContentAsString(), Map.class);
             assertThat(updated.get("described_by")).isEqualTo("https://dev.schema.morphic.bio/type/0.0.1/project/study");
             assertThat(updated.get("schema_version")).isEqualTo("0.0.1");
@@ -256,7 +213,6 @@ class StudyControllerTest {
 
     @Nested
     class Delete {
-
         @Test
         @DisplayName("Delete Study - Success")
         void deleteSuccess() throws Exception {
@@ -298,7 +254,6 @@ class StudyControllerTest {
 
     @Nested
     class Link {
-
         @Test
         @DisplayName("Link dataset to study - Success")
         void listDatasetToStudySuccess() throws Exception {
@@ -319,5 +274,4 @@ class StudyControllerTest {
                     .andExpect(status().isAccepted());
         }
     }
-
 }

@@ -3,7 +3,6 @@ package org.humancellatlas.ingest.core.service.strategy.impl;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.humancellatlas.ingest.core.service.strategy.MetadataCrudStrategy;
-import org.humancellatlas.ingest.messaging.MessageRouter;
 import org.humancellatlas.ingest.study.Study;
 import org.humancellatlas.ingest.study.StudyRepository;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -19,8 +18,6 @@ import java.util.stream.Stream;
 public class StudyCrudStrategy implements MetadataCrudStrategy<Study> {
     private final @NonNull StudyRepository studyRepository;
 
-    private final @NonNull MessageRouter messageRouter;
-
     @Override
     public Study saveMetadataDocument(Study document) {
         return studyRepository.save(document);
@@ -29,17 +26,13 @@ public class StudyCrudStrategy implements MetadataCrudStrategy<Study> {
     @Override
     public Study findMetadataDocument(String id) {
         return studyRepository.findById(id)
-                .orElseThrow(() -> {
-                    throw new ResourceNotFoundException();
-                });
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     @Override
     public Study findOriginalByUuid(String uuid) {
         return studyRepository.findByUuidUuidAndIsUpdateFalse(UUID.fromString(uuid))
-                .orElseThrow(() -> {
-                    throw new ResourceNotFoundException();
-                });
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     @Override
