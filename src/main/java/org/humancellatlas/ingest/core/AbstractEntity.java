@@ -1,19 +1,18 @@
 package org.humancellatlas.ingest.core;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.data.annotation.*;
-import org.springframework.hateoas.Identifiable;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.data.annotation.*;
+import org.springframework.hateoas.Identifiable;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Javadocs go here!
@@ -23,32 +22,40 @@ import lombok.ToString;
  */
 @Getter
 @ToString
-@JsonIgnoreProperties(
-    value = {"type"},
-    allowGetters = true)
+@JsonIgnoreProperties(value = {"type"}, allowGetters = true)
 @EqualsAndHashCode
 public abstract class AbstractEntity implements Identifiable<String> {
-  protected @Id @JsonIgnore String id;
+    protected  @Id @JsonIgnore String id;
 
-  private @Version Long version;
+    // This alias is used to ensure the 'id' field is included in JSON responses
+    // for compatibility with morphic API clients.
+    @JsonProperty("id")
+    private String jsonIdAlias;
 
-  private @CreatedDate Instant submissionDate;
+    private @Version Long version;
 
-  private @LastModifiedDate Instant updateDate;
+    private @CreatedDate Instant submissionDate;
 
-  private @CreatedBy String user;
+    private @LastModifiedDate Instant updateDate;
 
-  private @LastModifiedBy String lastModifiedUser;
+    private @CreatedBy String user;
 
-  private EntityType type;
+    private @LastModifiedBy String lastModifiedUser;
 
-  private @Setter Uuid uuid;
+    private EntityType type;
 
-  private @Setter List<Event> events = new ArrayList<>();
+    private @Setter Uuid uuid;
 
-  protected AbstractEntity(EntityType type) {
-    this.type = type;
-  }
+    private @Setter List<Event> events = new ArrayList<>();
 
-  protected AbstractEntity() {}
+    protected AbstractEntity(EntityType type) {
+        this.type = type;
+    }
+
+    protected AbstractEntity() {}
+
+    public String getJsonIdAlias() {
+        return id;
+    }
+
 }
