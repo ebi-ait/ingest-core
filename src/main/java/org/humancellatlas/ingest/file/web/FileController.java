@@ -215,9 +215,7 @@ public class FileController {
       exception = NotAllowedDuringSubmissionStateException.class)
   @DeleteMapping(path = "/files/{id}/derivedByProcesses/{processId}")
   HttpEntity<?> unlinkFileAsDerivedByProcesses(
-      @PathVariable("id") File file,
-      @PathVariable("processId") Process process,
-      PersistentEntityResourceAssembler assembler)
+      @PathVariable("id") File file, @PathVariable("processId") Process process)
       throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
     metadataLinkingService.removeLink(file, process, "derivedByProcesses");
     return ResponseEntity.noContent().build();
