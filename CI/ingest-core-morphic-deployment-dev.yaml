@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: ingest-core-container
-          image: 489384528211.dkr.ecr.eu-west-2.amazonaws.com/ingest-core-morphic:test-ds-s3-6
+          image: {{IMAGE}}
           ports:
             - containerPort: 8080
           env:
