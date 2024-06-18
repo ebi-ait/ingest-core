@@ -66,6 +66,6 @@ deploy-dev:
     - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
     - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION
   script:
-    - sed -i "s|{{IMAGE}}|$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/ingest-core-morphic:$CI_COMMIT_SHA|g" ingest-core-morphic-deployment-dev.yaml
+    - sed -i "s|{{IMAGE}}|$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/ingest-core-morphic:$CI_COMMIT_SHA|g" CI/ingest-core-morphic-deployment-dev.yaml
     - kubectl apply -f CI/ingest-core-morphic-deployment-dev.yaml
     - kubectl apply -f CI/ingest-core-morphic-service.yaml -n morphic-dev
