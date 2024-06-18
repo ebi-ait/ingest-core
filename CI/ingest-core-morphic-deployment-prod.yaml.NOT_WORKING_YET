@@ -2,9 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ingest-core-deployment
-  namespace: morphic-dev
+  namespace: morphic-prod
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: ingest-core
@@ -15,20 +15,18 @@ spec:
     spec:
       containers:
         - name: ingest-core-container
-          image: {{IMAGE}}
+          image: 596988661787.dkr.ecr.eu-west-2.amazonaws.com/ingest-core-morphic:latest
           ports:
             - containerPort: 8080
           env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: local
             - name: MONGO_URI
-              value: mongodb+srv://morphic-dev:mDev12345@morphicdevcluster.jduoa8p.mongodb.net/MorphicDev?retryWrites=true&w=majority
+              value: mongodb+srv://morphic-prod:morphicProd#12345@morphicprodcluster.gvr5bkw.mongodb.net/MorphicProd?retryWrites=true&w=majority
             - name: RABBIT_HOST
               value: rabbitmq-service
             - name: RABBIT_PORT
               value: "5672"
             - name: AWS_COGNITO_DOMAIN
-              value: "https://morphic-dev-2.auth.eu-west-2.amazoncognito.com/oauth2"
+              value: "https://morphic.auth.eu-west-2.amazoncognito.com/oauth2"
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
