@@ -213,7 +213,7 @@ public class DatasetServiceTest {
       when(datasetRepository.findById(datasteId)).thenReturn(Optional.of(persistentDataset));
 
       // when:
-      datasetService.delete(datasteId);
+      datasetService.delete(datasteId, false);
 
       // then:
       verify(metadataCrudService).deleteDocument(persistentDataset);
@@ -232,7 +232,8 @@ public class DatasetServiceTest {
       // when, then:
       ResponseStatusException exception =
           assertThrows(
-              ResponseStatusException.class, () -> datasetService.delete(nonExistentDatasetId));
+              ResponseStatusException.class,
+              () -> datasetService.delete(nonExistentDatasetId, false));
       assertThat(Objects.requireNonNull(exception.getMessage()).contains("404 NOT_FOUND"));
 
       verify(metadataCrudService, never()).deleteDocument(any());
