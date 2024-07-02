@@ -5,11 +5,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
-import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.file.File;
-import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -37,10 +34,13 @@ public class Dataset extends MetadataDocument {
   @DBRef(lazy = true)
   private Set<SubmissionEnvelope> submissionEnvelopes = new HashSet<>();
 
-  private List<File> dataFiles = new ArrayList<>();
-  private List<Biomaterial> biomaterials = new ArrayList<>();
-  private List<Protocol> protocols = new ArrayList<>();
-  private List<Process> processes = new ArrayList<>();
+  private Set<String> dataFiles = new HashSet<>();
+
+  private Set<String> biomaterials = new HashSet<>();
+
+  private Set<Protocol> protocols = new HashSet<>();
+
+  private Set<String> processes = new HashSet<>();
 
   @Setter private String comment;
 
@@ -53,20 +53,20 @@ public class Dataset extends MetadataDocument {
     this.submissionEnvelopes.add(submissionEnvelope);
   }
 
-  public void addBiomaterial(@NotNull final Biomaterial biomaterial) {
-    this.biomaterials.add(biomaterial);
+  public void addBiomaterial(@NotNull final String biomaterialId) {
+    this.biomaterials.add(biomaterialId);
   }
 
   public void addProtocol(@NotNull final Protocol protocol) {
     this.protocols.add(protocol);
   }
 
-  public void addProcess(@NotNull final Process process) {
-    this.processes.add(process);
+  public void addProcess(@NotNull final String processId) {
+    this.processes.add(processId);
   }
 
-  public void addFile(@NotNull final File dataFile) {
-    this.dataFiles.add(dataFile);
+  public void addFile(@NotNull final String dataFileId) {
+    this.dataFiles.add(dataFileId);
   }
 
   @JsonIgnore

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.project.Project;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -56,6 +57,11 @@ public class Biomaterial extends MetadataDocument {
   @RestResource
   @DBRef(lazy = true)
   private Set<Biomaterial> childBiomaterials = new HashSet<>();
+
+  @Indexed
+  @RestResource
+  @DBRef(lazy = true)
+  private Set<Dataset> datasets = new HashSet<>();
 
   @JsonCreator
   public Biomaterial(@JsonProperty("content") Object content) {
@@ -154,6 +160,11 @@ public class Biomaterial extends MetadataDocument {
    */
   public Biomaterial removeParentBiomaterial(final Biomaterial parentBiomaterial) {
     this.parentBiomaterials.remove(parentBiomaterial);
+    return this;
+  }
+
+  public Biomaterial addDataset(final Dataset dataset) {
+    datasets.add(dataset);
     return this;
   }
 }

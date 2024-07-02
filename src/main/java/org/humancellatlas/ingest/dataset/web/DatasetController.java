@@ -3,12 +3,9 @@ package org.humancellatlas.ingest.dataset.web;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.dataset.DatasetService;
-import org.humancellatlas.ingest.file.File;
-import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.security.CheckAllowed;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -74,9 +71,13 @@ public class DatasetController {
    * @param datasetId The ID of the dataset to delete.
    * @return No content response.
    */
+  // TODO: check why not authenticated
   @DeleteMapping("/datasets/{datasetId}")
-  public ResponseEntity<Void> delete(@PathVariable final String datasetId) {
-    datasetService.delete(datasetId);
+  public ResponseEntity<Void> delete(
+      @PathVariable final String datasetId,
+      @RequestParam(name = "deleteLinkedEntities", required = false, defaultValue = "false")
+          boolean deleteLinkedEntities) {
+    datasetService.delete(datasetId, deleteLinkedEntities);
     return ResponseEntity.noContent().build();
   }
 
@@ -157,36 +158,34 @@ public class DatasetController {
    * Link a biomaterial to a dataset.
    *
    * @param dataset The dataset.
-   * @param biomaterial The biomaterial to link.
+   * @param id The id of the biomaterial to link.
    * @param assembler The resource assembler.
    * @return The updated dataset as a resource.
    */
   @PutMapping("/datasets/{dataset_id}/biomaterials/{biomaterial_id}")
   public ResponseEntity<Resource<?>> linkBiomaterialToDataset(
       @PathVariable("dataset_id") final Dataset dataset,
-      @PathVariable("biomaterial_id") final Biomaterial biomaterial,
+      @PathVariable("biomaterial_id") final String id,
       final PersistentEntityResourceAssembler assembler) {
     return ResponseEntity.accepted()
-        .body(
-            assembler.toFullResource(
-                datasetService.linkBiomaterialToDataset(dataset, biomaterial)));
+        .body(assembler.toFullResource(datasetService.linkBiomaterialToDataset(dataset, id)));
   }
 
   /**
    * Link a file to a dataset.
    *
    * @param dataset The dataset.
-   * @param file The file to link.
+   * @param id The id of the file to link.
    * @param assembler The resource assembler.
    * @return The updated dataset as a resource.
    */
   @PutMapping("/datasets/{dataset_id}/files/{file_id}")
   public ResponseEntity<Resource<?>> linkFileToDataset(
       @PathVariable("dataset_id") final Dataset dataset,
-      @PathVariable("file_id") final File file,
+      @PathVariable("file_id") final String id,
       final PersistentEntityResourceAssembler assembler) {
     return ResponseEntity.accepted()
-        .body(assembler.toFullResource(datasetService.linkFileToDataset(dataset, file)));
+        .body(assembler.toFullResource(datasetService.linkFileToDataset(dataset, id)));
   }
 
   /**
@@ -210,16 +209,16 @@ public class DatasetController {
    * Link a process to a dataset.
    *
    * @param dataset The dataset.
-   * @param process The process to link.
+   * @param id The id of the process to link.
    * @param assembler The resource assembler.
    * @return The updated dataset as a resource.
    */
   @PutMapping("/datasets/{dataset_id}/processes/{process_id}")
   public ResponseEntity<Resource<?>> linkProcessToDataset(
       @PathVariable("dataset_id") final Dataset dataset,
-      @PathVariable("process_id") final Process process,
+      @PathVariable("process_id") final String id,
       final PersistentEntityResourceAssembler assembler) {
     return ResponseEntity.accepted()
-        .body(assembler.toFullResource(datasetService.linkProcessToDataset(dataset, process)));
+        .body(assembler.toFullResource(datasetService.linkProcessToDataset(dataset, id)));
   }
 }

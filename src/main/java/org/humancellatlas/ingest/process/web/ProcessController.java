@@ -208,20 +208,6 @@ public class ProcessController {
     return ResponseEntity.accepted().body(resource);
   }
 
-  // Biomaterial References
-  @PostMapping("/processes/{analysis_id}/" + Links.INPUT_BIOMATERIALS_URL)
-  @CheckAllowed(
-      value = "#analysis.submissionEnvelope.isSystemEditable()",
-      exception = NotAllowedDuringSubmissionStateException.class)
-  ResponseEntity<Resource<?>> addInputBiomaterialReference(
-      @PathVariable("analysis_id") final Process analysis,
-      @RequestBody final Biomaterial biomaterial,
-      final PersistentEntityResourceAssembler assembler) {
-    final Process result = processService.addInputBiomaterialToProcess(analysis, biomaterial);
-    final PersistentEntityResource resource = assembler.toFullResource(result);
-    return ResponseEntity.accepted().body(resource);
-  }
-
   // Protocol Management
   @CheckAllowed(
       value = "#process.submissionEnvelope.isSystemEditable()",

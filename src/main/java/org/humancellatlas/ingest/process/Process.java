@@ -6,6 +6,7 @@ import java.util.Set;
 import org.humancellatlas.ingest.bundle.BundleManifest;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -38,6 +39,10 @@ public class Process extends MetadataDocument {
 
   @RestResource
   @DBRef(lazy = true)
+  private Set<Dataset> datasets = new HashSet<>();
+
+  @RestResource
+  @DBRef(lazy = true)
   @Indexed
   private Set<BundleManifest> inputBundleManifests = new HashSet<>();
 
@@ -60,6 +65,11 @@ public class Process extends MetadataDocument {
 
   public Process removeProtocol(Protocol protocol) {
     protocols.remove(protocol);
+    return this;
+  }
+
+  public Process addDataset(final Dataset dataset) {
+    datasets.add(dataset);
     return this;
   }
 }

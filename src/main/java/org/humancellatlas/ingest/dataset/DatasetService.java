@@ -71,16 +71,60 @@ public class DatasetService {
     return updatedDataset;
   }
 
-  public void delete(final String datasetId) {
+  public void delete(final String datasetId, final boolean deleteLinkedEntities) {
     final Optional<Dataset> deleteDatasetOptional = datasetRepository.findById(datasetId);
 
     if (deleteDatasetOptional.isEmpty()) {
       log.warn("Dataset not found with ID: {}", datasetId);
+
       throw new ResponseStatusException(
           HttpStatus.NOT_FOUND, "Dataset not found with ID: " + datasetId);
     }
 
     final Dataset deleteDataset = deleteDatasetOptional.get();
+
+    if (deleteLinkedEntities) {
+      deleteDataset
+          .getBiomaterials()
+          .forEach(
+              id -> {
+                try {
+                  final Optional<Biomaterial> biomaterial = biomaterialRepository.findById(id);
+
+                  biomaterial.ifPresent(metadataCrudService::deleteDocument);
+                } catch (final Exception e) {
+                  log.info("Biomaterial not found with ID " + id);
+                }
+              });
+
+      deleteDataset
+          .getProcesses()
+          .forEach(
+              id -> {
+                try {
+                  final Optional<Process> process = processRepository.findById(id);
+
+                  process.ifPresent(metadataCrudService::deleteDocument);
+                } catch (final Exception e) {
+                  log.info("Process not found with ID " + id);
+                }
+              });
+
+      deleteDataset
+          .getDataFiles()
+          .forEach(
+              id -> {
+                try {
+                  final Optional<File> file = fileRepository.findById(id);
+
+                  file.ifPresent(metadataCrudService::deleteDocument);
+                } catch (final Exception e) {
+                  log.info("File not found with ID " + id);
+                }
+              });
+
+      uploadAreaUtil.deleteDataFilesAndUploadArea(datasetId);
+    }
 
     metadataCrudService.deleteDocument(deleteDataset);
     datasetEventHandler.deletedDataset(datasetId);
@@ -134,37 +178,41 @@ public class DatasetService {
     return dataset;
   }
 
-  public final Dataset linkFileToDataset(final Dataset dataset, final File file) {
+  public final Dataset linkFileToDataset(final Dataset dataset, final String id) {
     final String datasetId = dataset.getId();
-    final String fileId = file.getId();
 
     datasetRepository
         .findById(datasetId)
         .orElseThrow(() -> new ResourceNotFoundException("Dataset: " + datasetId));
-    fileRepository
-        .findById(fileId)
-        .orElseThrow(() -> new ResourceNotFoundException("File: " + fileId));
+    fileRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("File: " + id));
 
-    dataset.addFile(file);
+    dataset.addFile(id);
+    // file.addDataset(dataset);
 
-    return datasetRepository.save(dataset);
+    // fileRepository.save(file);
+    final Dataset updatedDataset = datasetRepository.save(dataset);
+
+    return updatedDataset;
   }
 
-  public final Dataset linkBiomaterialToDataset(
-      final Dataset dataset, final Biomaterial biomaterial) {
+  public final Dataset linkBiomaterialToDataset(final Dataset dataset, final String id) {
     final String datasetId = dataset.getId();
-    final String biomaterialId = biomaterial.getId();
 
     datasetRepository
         .findById(datasetId)
         .orElseThrow(() -> new ResourceNotFoundException("Dataset: " + datasetId));
     biomaterialRepository
-        .findById(biomaterialId)
-        .orElseThrow(() -> new ResourceNotFoundException("Biomaterial: " + biomaterialId));
+        .findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Biomaterial: " + id));
 
-    dataset.addBiomaterial(biomaterial);
+    dataset.addBiomaterial(id);
+    // biomaterial.addDataset(dataset);
 
-    return datasetRepository.save(dataset);
+    // biomaterialRepository.save(biomaterial);
+
+    final Dataset updatedDataset = datasetRepository.save(dataset);
+
+    return updatedDataset;
   }
 
   public final Dataset linkProtocolToDataset(final Dataset dataset, final Protocol protocol) {
@@ -183,19 +231,22 @@ public class DatasetService {
     return datasetRepository.save(dataset);
   }
 
-  public final Dataset linkProcessToDataset(final Dataset dataset, final Process process) {
+  public final Dataset linkProcessToDataset(final Dataset dataset, final String id) {
     final String datasetId = dataset.getId();
-    final String processId = process.getId();
 
     datasetRepository
         .findById(datasetId)
         .orElseThrow(() -> new ResourceNotFoundException("Dataset: " + datasetId));
     processRepository
-        .findById(processId)
-        .orElseThrow(() -> new ResourceNotFoundException("Process: " + processId));
+        .findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Process: " + id));
 
-    dataset.addProcess(process);
+    dataset.addProcess(id);
+    // process.addDataset(dataset);
 
-    return datasetRepository.save(dataset);
+    // processRepository.save(process);
+    final Dataset updatedDataset = datasetRepository.save(dataset);
+
+    return updatedDataset;
   }
 }
