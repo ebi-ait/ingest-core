@@ -126,7 +126,7 @@ public class SubmissionEnvelope extends AbstractEntity {
 
   private List<SubmissionState> getNonEditableStates() {
     return Arrays.asList(
-        SubmissionState.PENDING,
+        /*SubmissionState.PENDING,*/
         SubmissionState.METADATA_VALIDATING,
         SubmissionState.GRAPH_VALIDATION_REQUESTED,
         SubmissionState.GRAPH_VALIDATING,
