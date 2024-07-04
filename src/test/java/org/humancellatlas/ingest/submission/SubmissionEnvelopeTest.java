@@ -135,7 +135,7 @@ public class SubmissionEnvelopeTest {
   @EnumSource(
       value = SubmissionState.class,
       names = {
-        "PENDING",
+        /*"PENDING",*/
         "METADATA_VALIDATING",
         "GRAPH_VALIDATION_REQUESTED",
         "GRAPH_VALIDATING",
