@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import org.humancellatlas.ingest.core.Checksums;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.process.Process;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
@@ -36,7 +37,6 @@ import lombok.Setter;
     callSuper = true,
     exclude = {"project", "inputToProcesses", "derivedByProcesses"})
 public class File extends MetadataDocument {
-
   @Indexed
   private @Setter @DBRef(lazy = true) Project project;
 
@@ -49,6 +49,11 @@ public class File extends MetadataDocument {
   @RestResource
   @DBRef(lazy = true)
   private Set<Process> derivedByProcesses = new HashSet<>();
+
+  @Indexed
+  @RestResource
+  @DBRef(lazy = true)
+  private Set<Dataset> datasets = new HashSet<>();
 
   @Indexed private String fileName;
   private String cloudUrl;
@@ -134,6 +139,11 @@ public class File extends MetadataDocument {
 
   public File removeAsInputToProcess(Process process) {
     this.inputToProcesses.remove(process);
+    return this;
+  }
+
+  public File addDataset(final Dataset dataset) {
+    datasets.add(dataset);
     return this;
   }
 }

@@ -201,14 +201,13 @@ public class BiomaterialController {
       @PathVariable final String parentId,
       @RequestBody final Biomaterial childBiomaterial,
       final PersistentEntityResourceAssembler assembler) {
-    final Biomaterial updatedParent =
-        biomaterialService.addChildBiomaterial(parentId, childBiomaterial);
-    final PersistentEntityResource resource = assembler.toFullResource(updatedParent);
+    biomaterialService.addChildBiomaterial(parentId, childBiomaterial);
+    final PersistentEntityResource resource = assembler.toFullResource(childBiomaterial);
 
     return ResponseEntity.accepted().body(resource);
   }
 
-  @DeleteMapping("/biomaterials/{parentId}/children/{childId}")
+  @DeleteMapping("/biomaterials/{parentId}/childBiomaterials/{childId}")
   public ResponseEntity<Resource<?>> removeChildBiomaterial(
       @PathVariable final String parentId,
       @PathVariable final String childId,
@@ -231,7 +230,7 @@ public class BiomaterialController {
     return ResponseEntity.accepted().body(resource);
   }
 
-  @DeleteMapping("/biomaterials/{childId}/parents/{parentId}")
+  @DeleteMapping("/biomaterials/{childId}/parentBiomaterials/{parentId}")
   public ResponseEntity<Resource<?>> removeParentBiomaterial(
       @PathVariable final String childId,
       @PathVariable final String parentId,

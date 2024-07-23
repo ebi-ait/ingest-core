@@ -105,12 +105,6 @@ public class ProcessService {
     return process;
   }
 
-  public Process addInputBiomaterialToProcess(
-      final Process process, final Biomaterial biomaterial) {
-    biomaterialRepository.save(biomaterial.addAsInputToProcess(process));
-    return process;
-  }
-
   private File determineTargetFile(final SubmissionEnvelope submissionEnvelope, final File file) {
     final List<File> persistentFiles =
         fileRepository.findBySubmissionEnvelopeAndFileName(submissionEnvelope, file.getFileName());
