@@ -36,19 +36,6 @@ public class DatasetController {
   private final @NonNull DatasetService datasetService;
 
   /**
-   * Register a new dataset.
-   *
-   * @param dataset The dataset to register.
-   * @param assembler The resource assembler.
-   * @return The registered dataset as a resource.
-   */
-  @PostMapping("/datasets")
-  public ResponseEntity<Resource<?>> register(
-      @RequestBody final Dataset dataset, final PersistentEntityResourceAssembler assembler) {
-    return ResponseEntity.ok().body(assembler.toFullResource(datasetService.register(dataset)));
-  }
-
-  /**
    * Update an existing dataset.
    *
    * @param dataset The dataset to update.
@@ -79,23 +66,6 @@ public class DatasetController {
           boolean deleteLinkedEntities) {
     datasetService.delete(datasetId, deleteLinkedEntities);
     return ResponseEntity.noContent().build();
-  }
-
-  /**
-   * Replace an existing dataset.
-   *
-   * @param datasetId The ID of the dataset to replace.
-   * @param updatedDataset The new dataset.
-   * @param assembler The resource assembler.
-   * @return The replaced dataset as a resource.
-   */
-  @PutMapping("/datasets/{datasetId}")
-  public ResponseEntity<Resource<?>> replace(
-      @PathVariable final String datasetId,
-      @RequestBody final Dataset updatedDataset,
-      final PersistentEntityResourceAssembler assembler) {
-    return ResponseEntity.ok()
-        .body(assembler.toFullResource(datasetService.replace(datasetId, updatedDataset)));
   }
 
   /**

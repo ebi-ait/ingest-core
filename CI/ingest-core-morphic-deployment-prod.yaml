@@ -15,10 +15,12 @@ spec:
     spec:
       containers:
         - name: ingest-core-container
-          image: 596988661787.dkr.ecr.eu-west-2.amazonaws.com/ingest-core-morphic:latest
+          image: {{IMAGE}}
           ports:
             - containerPort: 8080
           env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
             - name: MONGO_URI
               value: mongodb+srv://morphic-prod:morphicProd#12345@morphicprodcluster.gvr5bkw.mongodb.net/MorphicProd?retryWrites=true&w=majority
             - name: RABBIT_HOST

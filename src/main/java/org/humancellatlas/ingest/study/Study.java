@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
+import org.humancellatlas.ingest.core.DescriptiveSchema;
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
-import org.humancellatlas.ingest.core.MorphicDescriptiveSchema;
 import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -29,7 +29,7 @@ import lombok.Getter;
     callSuper = true,
     exclude = {"submissionEnvelopes"})
 @JsonIgnoreProperties({"firstDcpVersion", "dcpVersion"})
-public class Study extends MetadataDocument implements MorphicDescriptiveSchema {
+public class Study extends MetadataDocument implements DescriptiveSchema {
   // A study may have 1 or more submissions related to it.
   @JsonIgnore
   private @DBRef(lazy = true) Set<SubmissionEnvelope> submissionEnvelopes = new HashSet<>();

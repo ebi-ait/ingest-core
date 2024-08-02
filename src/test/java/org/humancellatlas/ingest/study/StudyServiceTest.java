@@ -199,6 +199,7 @@ public class StudyServiceTest {
       // given:
       String studyId = "studyId";
       ObjectNode patch = createUpdatePatch("Updated Study Name");
+      Study newStudy = new Study("Schema URL", "1.0", "Generic", "{\"name\": \"study\"}");
       Study existingStudy = new Study("Schema URL", "1.0", "Generic", "{\"name\": \"study\"}");
 
       // and:
@@ -206,10 +207,10 @@ public class StudyServiceTest {
       when(metadataUpdateService.update(existingStudy, patch)).thenReturn(existingStudy);
 
       // when:
-      Study result = studyService.update(studyId, patch);
+      Study result = studyService.update(newStudy, patch);
 
       // then:
-      verify(studyRepository).findById(studyId);
+      verify(studyRepository).findById(newStudy.getId());
       verify(metadataUpdateService).update(existingStudy, patch);
       verify(studyEventHandler).updatedStudy(existingStudy);
       assertThat(result).isEqualTo(existingStudy);
@@ -235,8 +236,12 @@ public class StudyServiceTest {
       // when, then:
       ResponseStatusException exception =
           assertThrows(
-              ResponseStatusException.class, () -> studyService.update(nonExistentStudyId, patch));
-      assertThat("404 NOT_FOUND").isEqualTo(exception.getMessage());
+              ResponseStatusException.class,
+              () ->
+                  studyService.update(
+                      new Study("Schema URL", "1.0", "Generic", "{\"name\": \"study\"}"), patch));
+      assertThat("404 NOT_FOUND \"Study not found with ID: null\"")
+          .isEqualTo(exception.getMessage());
 
       // verify that other methods are not called
       verify(metadataCrudService, never()).deleteDocument(any());
