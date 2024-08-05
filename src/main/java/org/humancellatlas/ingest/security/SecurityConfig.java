@@ -30,9 +30,7 @@ import com.auth0.spring.security.api.JwtAuthenticationEntryPoint;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
   private static final String FORWARDED_HOST = "x-forwarded-host";
-
   private static final List<AntPathRequestMatcher> SECURED_ANT_PATHS = setupSecuredAntPaths();
-
   private static final List<AntPathRequestMatcher> SECURED_WRANGLER_ANT_PATHS =
       setupWranglerAntPaths();
 
@@ -121,10 +119,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .antMatchers(POST, "/submissionEnvelopes/**")
         .authenticated()
         .antMatchers(POST, "/projects")
-        .authenticated()
-        .antMatchers(POST, "/datasets")
-        .authenticated()
-        .antMatchers(POST, "/studies")
         .authenticated()
         .antMatchers(POST, "/projects/suggestion")
         .permitAll()

@@ -163,7 +163,7 @@ public class Biomaterial extends MetadataDocument {
     return this;
   }
 
-  public Biomaterial addDataset(final Dataset dataset) {
+  public Biomaterial addBiomaterialToDataset(final Dataset dataset) {
     datasets.add(dataset);
     return this;
   }

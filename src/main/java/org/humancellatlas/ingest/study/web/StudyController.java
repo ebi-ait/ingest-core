@@ -36,27 +36,12 @@ public class StudyController {
   private final @NonNull StudyService studyService;
   private final @NonNull StudyRepository studyRepository;
 
-  @PostMapping("/studies")
-  public ResponseEntity<Resource<?>> registerStudy(
-      @RequestBody final Study study, final PersistentEntityResourceAssembler assembler) {
-    return ResponseEntity.ok().body(assembler.toFullResource(studyService.register(study)));
-  }
-
   @PatchMapping("/studies/{studyId}")
   public ResponseEntity<Resource<?>> updateStudy(
-      @PathVariable final String studyId,
+      @PathVariable final Study study,
       @RequestBody final ObjectNode patch,
       final PersistentEntityResourceAssembler assembler) {
-    return ResponseEntity.ok().body(assembler.toFullResource(studyService.update(studyId, patch)));
-  }
-
-  @PutMapping("/studies/{studyId}")
-  public ResponseEntity<Resource<?>> replaceStudy(
-      @PathVariable final String studyId,
-      @RequestBody final Study updatedStudy,
-      final PersistentEntityResourceAssembler assembler) {
-    return ResponseEntity.ok()
-        .body(assembler.toFullResource(studyService.replace(studyId, updatedStudy)));
+    return ResponseEntity.ok().body(assembler.toFullResource(studyService.update(study, patch)));
   }
 
   @DeleteMapping("/studies/{studyId}")

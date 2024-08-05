@@ -63,16 +63,19 @@ public class StudyService {
     return persistentStudy;
   }
 
-  public final Study update(final String studyId, final ObjectNode patch) {
+  public final Study update(final Study study, final ObjectNode patch) {
+    final String studyId = study.getId();
     final Optional<Study> existingStudyOptional = studyRepository.findById(studyId);
 
     if (existingStudyOptional.isEmpty()) {
       log.warn("Attempted to update study with ID: {} but not found.", studyId);
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND, "Study not found with ID: " + studyId);
     }
 
     final Study existingStudy = existingStudyOptional.get();
     final Study updatedStudy = metadataUpdateService.update(existingStudy, patch);
+
     studyEventHandler.updatedStudy(updatedStudy);
 
     return updatedStudy;

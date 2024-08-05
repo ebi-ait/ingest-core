@@ -41,49 +41,6 @@ public class StudyControllerProfileTest {
   }
 
   @Nested
-  class StudyRegistration {
-
-    @Test
-    @DisplayName("Register Study - True Morphic Profile")
-    public void testRegisterStudyMorphicProfile() {
-      // given:
-      String content = "{\"name\": \"study\"}";
-      Study inputStudy =
-          new Study("Schema URL", "1.1", "Specific", "{\"name\": \"Updated Study Name\"}");
-
-      // and: mock the environment to simulate the "morphic" profile being active
-      when(environment.getActiveProfiles()).thenReturn(new String[] {"morphic"});
-
-      // when:
-      when(studyService.register(inputStudy)).thenReturn(inputStudy);
-      ResponseEntity<Resource<?>> response = studyController.registerStudy(inputStudy, assembler);
-
-      // then:
-      assertEquals(HttpStatus.OK, response.getStatusCode());
-      verify(assembler).toFullResource(inputStudy);
-    }
-
-    @Test
-    @DisplayName("Register Study - False Morphic Profile")
-    public void testRegisterStudyNonMorphicProfile() {
-      // given:
-      String content = "{\"name\": \"study\"}";
-      Study inputStudy = new Study("Schema URL", "1.1", "Specific", "{\"name\": \"study\"}");
-
-      // and: mock the environment to simulate the "morphic" profile not being active
-      when(environment.getActiveProfiles()).thenReturn(new String[] {"non-morphic"});
-
-      // when:
-      ResponseEntity<Resource<?>> response = studyController.registerStudy(inputStudy, assembler);
-
-      // then:
-      assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-      verify(studyService, never()).register(any());
-      verify(assembler, never()).toFullResource(any());
-    }
-  }
-
-  @Nested
   class StudyUpdate {
     @Test
     @DisplayName("Update Study - True Morphic Profile")
@@ -92,14 +49,16 @@ public class StudyControllerProfileTest {
       String studyId = "studyId";
       ObjectNode patch = createUpdatePatch("Updated Study Name");
       // Study updatedStudy = new Study("{\"name\": \"study\"}");
+      Study newStudy = new Study("Schema URL", "1.0", "Generic", "{\"name\": \"study\"}");
       Study updatedStudy = new Study("Schema URL", "1.0", "Generic", "{\"name\": \"study\"}");
 
       // and: mock the environment to simulate the "morphic" profile being active
       when(environment.getActiveProfiles()).thenReturn(new String[] {"morphic"});
 
       // when:
-      when(studyService.update(studyId, patch)).thenReturn(updatedStudy);
-      ResponseEntity<Resource<?>> response = studyController.updateStudy(studyId, patch, assembler);
+      when(studyService.update(newStudy, patch)).thenReturn(updatedStudy);
+      ResponseEntity<Resource<?>> response =
+          studyController.updateStudy(newStudy, patch, assembler);
 
       // then:
       assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -110,14 +69,15 @@ public class StudyControllerProfileTest {
     @DisplayName("Update Study - False Morphic Profile")
     public void testUpdateStudyNonMorphicProfile() {
       // given:
-      String studyId = "updateStudyId";
+      Study newStudy = new Study("Schema URL", "1.0", "Generic", "{\"name\": \"study\"}");
       ObjectNode patch = createUpdatePatch("Updated Study Name");
 
       // and: mock the environment to simulate the "morphic" profile being active
       when(environment.getActiveProfiles()).thenReturn(new String[] {"non-morphic"});
 
       // when:
-      ResponseEntity<Resource<?>> response = studyController.updateStudy(studyId, patch, assembler);
+      ResponseEntity<Resource<?>> response =
+          studyController.updateStudy(newStudy, patch, assembler);
 
       // then:
       assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
