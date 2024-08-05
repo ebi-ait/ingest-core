@@ -61,15 +61,20 @@ docker-build-prod:
   image: docker:19.03.12
   services:
     - docker:19.03.12-dind
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_PROD
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_PROD
+    AWS_ACCOUNT_ID: $AWS_ACCOUNT_ID_PROD
+    EKS_CLUSTER_NAME: $EKS_CLUSTER_NAME_PROD
   before_script:
     - apk add --update --no-cache python3 py3-pip
     - pip3 install awscli
   script:
     - docker build -t ingest-core-morphic:$CI_COMMIT_SHA .
     - aws ecr get-login-password --region $AWS_DEFAULT_REGION |
-      docker login --username AWS --password-stdin $AWS_ACCOUNT_ID_PROD.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-    - docker tag ingest-core-morphic:$CI_COMMIT_SHA $AWS_ACCOUNT_ID_PROD.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/ingest-core-morphic:$CI_COMMIT_SHA
-    - docker push $AWS_ACCOUNT_ID_PROD.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/ingest-core-morphic:$CI_COMMIT_SHA
+      docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+    - docker tag ingest-core-morphic:$CI_COMMIT_SHA $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/ingest-core-morphic:$CI_COMMIT_SHA
+    - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/ingest-core-morphic:$CI_COMMIT_SHA
 
 deploy-dev:
   stage: deploy
