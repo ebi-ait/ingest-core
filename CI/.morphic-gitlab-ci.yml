@@ -67,6 +67,9 @@ docker-build-prod:
     AWS_ACCOUNT_ID: $AWS_ACCOUNT_ID_PROD
     EKS_CLUSTER_NAME: $EKS_CLUSTER_NAME_PROD
   before_script:
+    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_PROD
+    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_PROD
+    - export AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID_PROD
     - apk add --update --no-cache python3 py3-pip
     - pip3 install awscli
   script:
