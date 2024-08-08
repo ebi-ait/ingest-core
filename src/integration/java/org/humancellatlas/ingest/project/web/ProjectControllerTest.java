@@ -7,8 +7,10 @@ import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectEventHandler;
 import org.humancellatlas.ingest.project.ProjectRepository;
+import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.state.ValidationState;
+import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,11 +19,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -29,15 +35,13 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -66,6 +70,9 @@ class ProjectControllerTest {
 
     @MockBean
     private SchemaService schemaService;
+
+    @MockBean
+    private ProjectService projectService;
 
     @AfterEach
     private void tearDown() {
@@ -248,4 +255,57 @@ class ProjectControllerTest {
         }
     }
 
+    @Nested
+    class GetProjectSubmissionEnvelopesTests {
+
+        private Project project;
+
+        @BeforeEach
+        void setUp() {
+            project = makeProject();
+            repository.save(project);
+        }
+
+        @NotNull
+        private Project makeProject() {
+            var content = new HashMap<String, Object>();
+            content.put("description", "test kw1");
+            Project project = new Project(content);
+            return project;
+        }
+
+        @Test
+        @WithMockUser(roles = "WRANGLER")
+        void testGetProjectSubmissionEnvelopesAsWrangler() throws Exception {
+            MvcResult result = webApp
+                    .perform(get("/projects/{id}/submissionEnvelopes", project.getId())
+                            .contentType(APPLICATION_JSON_VALUE))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            MockHttpServletResponse response = result.getResponse();
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+        @Test
+        @WithMockUser(roles = "CONTRIBUTOR")
+        void testGetProjectSubmissionEnvelopesAsContributor() throws Exception {
+            MvcResult result = webApp
+                    .perform(get("/projects/{id}/submissionEnvelopes", project.getId())
+                            .contentType(APPLICATION_JSON_VALUE))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized())
+                    .andReturn();
+
+            MockHttpServletResponse response = result.getResponse();
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
+        }
+
+        @Test
+        public void testGetProjectSubmissionEnvelopesAsAnonymous() throws Exception {
+            webApp.perform(get("/projects/1/submissionEnvelopes"))
+                    .andExpect(status().isUnauthorized());
+        }
+    }
 }

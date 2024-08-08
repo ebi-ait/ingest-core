@@ -24,6 +24,7 @@ import org.humancellatlas.ingest.project.exception.NotAllowedWithSubmissionInSta
 import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.security.CheckAllowed;
+import org.humancellatlas.ingest.security.Role;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.exception.NotAllowedDuringSubmissionStateException;
 import org.slf4j.Logger;
@@ -41,6 +42,9 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -151,9 +155,32 @@ public class ProjectController {
     ResponseEntity<PagedResources<Resource<SubmissionEnvelope>>> getProjectSubmissionEnvelopes(
             @PathVariable("id") Project project, Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
-        var envelopes = projectService.getSubmissionEnvelopes(project);
-        var resultPage = new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
-        return ResponseEntity.ok(pagedResourcesAssembler.toResource(resultPage, resourceAssembler));
+
+        if (hasRoleWrangler()) {
+            var envelopes = projectService.getSubmissionEnvelopes(project);
+            var resultPage = new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
+            return ResponseEntity.ok(pagedResourcesAssembler.toResource(resultPage, resourceAssembler));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
+
+    private boolean hasRoleWrangler() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            LOGGER.error("Authentication is null");
+        } else {
+            LOGGER.info("Authenticated user: " + authentication.getName());
+            LOGGER.info("Authenticated user details: " + authentication.getDetails());
+            LOGGER.info("Authenticated user principal: " + authentication.getPrincipal());
+            LOGGER.info("Authenticated user authorities: " + authentication.getAuthorities());
+        }
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority ->
+                        (authority instanceof Role && authority.equals(Role.WRANGLER)) ||
+                                authority.getAuthority().equals("ROLE_WRANGLER")
+                );
     }
 
     @RequestMapping(path = "/projects/{project_id}/biomaterials", method = RequestMethod.GET)
