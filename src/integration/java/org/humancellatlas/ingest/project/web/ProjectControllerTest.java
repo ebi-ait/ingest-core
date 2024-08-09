@@ -7,10 +7,8 @@ import org.humancellatlas.ingest.config.MigrationConfiguration;
 import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.project.ProjectEventHandler;
 import org.humancellatlas.ingest.project.ProjectRepository;
-import org.humancellatlas.ingest.project.ProjectService;
 import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.state.ValidationState;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,15 +17,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -35,13 +29,15 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -71,9 +67,6 @@ class ProjectControllerTest {
     @MockBean
     private SchemaService schemaService;
 
-    @MockBean
-    private ProjectService projectService;
-
     @AfterEach
     private void tearDown() {
         repository.deleteAll();
@@ -102,8 +95,8 @@ class ProjectControllerTest {
         private void doTestUpdate(String patchUrl, Consumer<Project> postCondition) throws Exception {
             //given:
             var content = Map.of(
-                "description", "test",
-                "attr2", "should be deleted after patch");
+                    "description", "test",
+                    "attr2", "should be deleted after patch");
             Project originalProject = repository.save(new Project(content));
 
             //when:
@@ -128,10 +121,10 @@ class ProjectControllerTest {
 
             //and:
             repository.findById(originalProject.getId())
-                            .ifPresentOrElse(project -> {
-                                assertThat((Map) project.getContent()).containsOnly(updatedDescription);
-                                postCondition.accept(project);
-                            }, () -> Assertions.fail("project {} not found", originalProject.getId()));
+                    .ifPresentOrElse(project -> {
+                        assertThat((Map) project.getContent()).containsOnly(updatedDescription);
+                        postCondition.accept(project);
+                    }, () -> Assertions.fail("project {} not found", originalProject.getId()));
 
             //and:
         }
@@ -308,4 +301,5 @@ class ProjectControllerTest {
                     .andExpect(status().isUnauthorized());
         }
     }
+
 }
