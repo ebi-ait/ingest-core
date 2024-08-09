@@ -282,6 +282,20 @@ class ProjectControllerTest {
         }
 
         @Test
+        @WithMockUser(roles = "SERVICE")
+        void testGetProjectSubmissionEnvelopesAsService() throws Exception {
+            MvcResult result = webApp
+                    .perform(get("/projects/{id}/submissionEnvelopes", project.getId())
+                            .contentType(APPLICATION_JSON_VALUE))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            MockHttpServletResponse response = result.getResponse();
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+        @Test
         @WithMockUser(roles = "CONTRIBUTOR")
         void testGetProjectSubmissionEnvelopesAsContributor() throws Exception {
             MvcResult result = webApp

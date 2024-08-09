@@ -156,7 +156,7 @@ public class ProjectController {
             @PathVariable("id") Project project, Pageable pageable,
             final PersistentEntityResourceAssembler resourceAssembler) {
 
-        if (hasRoleWrangler()) {
+        if (hasRoleWranglerOrService()) {
             var envelopes = projectService.getSubmissionEnvelopes(project);
             var resultPage = new PageImpl<>(new ArrayList<>(envelopes), pageable, envelopes.size());
             return ResponseEntity.ok(pagedResourcesAssembler.toResource(resultPage, resourceAssembler));
@@ -165,7 +165,7 @@ public class ProjectController {
         }
     }
 
-    private boolean hasRoleWrangler() {
+    private boolean hasRoleWranglerOrService() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null) {
             LOGGER.error("Authentication is null");
@@ -178,8 +178,11 @@ public class ProjectController {
 
         return authentication.getAuthorities().stream()
                 .anyMatch(authority ->
-                        (authority instanceof Role && authority.equals(Role.WRANGLER)) ||
-                                authority.getAuthority().equals("ROLE_WRANGLER")
+                        (authority instanceof Role &&
+                                (authority.equals(Role.WRANGLER) || authority.equals(Role.SERVICE))) ||
+                                authority.getAuthority().equals("ROLE_WRANGLER") ||
+                                authority.getAuthority().equals("ROLE_SERVICE")
+
                 );
     }
 
