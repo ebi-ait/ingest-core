@@ -7,6 +7,8 @@ import static java.util.stream.Collectors.toSet;
 import java.time.Instant;
 import java.util.*;
 
+import javax.validation.constraints.NotNull;
+
 import org.humancellatlas.ingest.audit.AuditEntry;
 import org.humancellatlas.ingest.audit.AuditEntryService;
 import org.humancellatlas.ingest.audit.AuditType;
@@ -16,6 +18,8 @@ import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.dataset.Dataset;
+import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
 import org.humancellatlas.ingest.project.web.SearchFilter;
 import org.humancellatlas.ingest.schemas.SchemaService;
@@ -59,6 +63,7 @@ public class ProjectService {
 
   private final @NonNull SubmissionEnvelopeRepository submissionEnvelopeRepository;
   private final @NonNull ProjectRepository projectRepository;
+  private final @NotNull DatasetRepository datasetRepository;
   private final @NonNull MetadataCrudService metadataCrudService;
   private final @NonNull MetadataUpdateService metadataUpdateService;
   private final @NonNull SchemaService schemaService;
@@ -234,5 +239,21 @@ public class ProjectService {
 
   public List<AuditEntry> getProjectAuditEntries(Project project) {
     return auditEntryService.getAuditEntriesForAbstractEntity(project);
+  }
+
+  public final Project linkDatasetToProject(final Project project, final Dataset dataset) {
+    final String projectId = project.getId();
+    final String datasetId = dataset.getId();
+
+    projectRepository
+        .findById(projectId)
+        .orElseThrow(() -> new ResourceNotFoundException("Project: " + projectId));
+    datasetRepository
+        .findById(datasetId)
+        .orElseThrow(() -> new ResourceNotFoundException("Dataset: " + datasetId));
+
+    project.addDataset(dataset);
+
+    return projectRepository.save(project);
   }
 }

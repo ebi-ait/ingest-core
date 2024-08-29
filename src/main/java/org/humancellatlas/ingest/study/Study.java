@@ -15,6 +15,7 @@ import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.rest.core.annotation.RestResource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,7 +36,7 @@ public class Study extends MetadataDocument implements DescriptiveSchema {
   private @DBRef(lazy = true) Set<SubmissionEnvelope> submissionEnvelopes = new HashSet<>();
 
   // A study can have multiple datasets
-  private Set<Dataset> datasets = new HashSet<>();
+  @RestResource private Set<Dataset> datasets = new HashSet<>();
 
   @Field("described_by")
   private String describedBy;

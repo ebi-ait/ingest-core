@@ -6,8 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -19,14 +18,13 @@ import java.util.function.Consumer;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.data.MapEntry;
 import org.humancellatlas.ingest.config.MigrationConfiguration;
+import org.humancellatlas.ingest.dataset.Dataset;
+import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.project.*;
 import org.humancellatlas.ingest.schemas.SchemaService;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
@@ -49,7 +47,9 @@ class ProjectControllerTest {
 
   @Autowired private MockMvc webApp;
 
-  @Autowired private ProjectRepository repository;
+  @Autowired private ProjectRepository projectRepository;
+
+  @Autowired private DatasetRepository datasetRepository;
 
   @Autowired private ObjectMapper objectMapper;
 
@@ -61,7 +61,32 @@ class ProjectControllerTest {
 
   @AfterEach
   private void tearDown() {
-    repository.deleteAll();
+    projectRepository.deleteAll();
+  }
+
+  @Nested
+  class Link {
+    @Test
+    @DisplayName("Link dataset to project - Success")
+    void listDatasetToProjectSuccess() throws Exception {
+      // given:
+      String projectContent = "{\"name\": \"project\"}";
+      Project project = new Project(projectContent);
+
+      projectRepository.save(project);
+      String projectId = project.getId();
+
+      String datasetContent = "{\"name\": \"dataset\"}";
+      Dataset persistentDataset = new Dataset(datasetContent);
+
+      datasetRepository.save(persistentDataset);
+      String datasetId = persistentDataset.getId();
+
+      // when:
+      webApp
+          .perform(put("/projects/{project_id}/datasets/{dataset_id}", projectId, datasetId))
+          .andExpect(status().isAccepted());
+    }
   }
 
   @Nested
@@ -94,7 +119,7 @@ class ProjectControllerTest {
           Map.of(
               "description", "test",
               "attr2", "should be deleted after patch");
-      Project originalProject = repository.save(new Project(content));
+      Project originalProject = projectRepository.save(new Project(content));
 
       // when:
 
@@ -119,7 +144,7 @@ class ProjectControllerTest {
       assertThat((Map) updated.getContent()).containsOnly(updatedDescription);
 
       // and:
-      repository
+      projectRepository
           .findById(originalProject.getId())
           .ifPresentOrElse(
               project -> {
@@ -137,7 +162,7 @@ class ProjectControllerTest {
       var content = new HashMap<String, Object>();
       content.put("description", "test");
       Project project = new Project(content);
-      project = repository.save(project);
+      project = projectRepository.save(project);
 
       // when:
       content.put("description", "test updated");
@@ -168,7 +193,7 @@ class ProjectControllerTest {
       assertThat(updated.get("validationState")).isEqualTo("DRAFT");
 
       // and:
-      project = repository.findById(project.getId()).get();
+      project = projectRepository.findById(project.getId()).get();
       assertThat((Map) project.getContent()).containsOnly(updatedDescription);
       assertThat(project.getValidationState()).isEqualTo(ValidationState.DRAFT);
     }
@@ -180,7 +205,7 @@ class ProjectControllerTest {
     @BeforeEach
     public void setup() {
       Project project = makeProject();
-      repository.save(project);
+      projectRepository.save(project);
     }
 
     @NotNull

@@ -9,6 +9,7 @@ import org.humancellatlas.ingest.bundle.BundleType;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
 import org.humancellatlas.ingest.core.service.ValidationStateChangeService;
+import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.file.FileRepository;
 import org.humancellatlas.ingest.process.Process;
@@ -274,5 +275,14 @@ public class ProjectController {
     }
 
     return ResponseEntity.ok(projectService.getProjectAuditEntries(project));
+  }
+
+  @PutMapping(path = "projects/{project_id}/datasets/{dataset_id}")
+  public ResponseEntity<Resource<?>> linkDatasetToProject(
+      @PathVariable("project_id") final Project project,
+      @PathVariable("dataset_id") final Dataset dataset,
+      final PersistentEntityResourceAssembler assembler) {
+    return ResponseEntity.accepted()
+        .body(assembler.toFullResource(getProjectService().linkDatasetToProject(project, dataset)));
   }
 }
