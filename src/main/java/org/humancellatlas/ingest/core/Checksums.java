@@ -10,6 +10,7 @@ public class Checksums {
   private String sha1;
   private String sha256;
   private String crc32c;
+  private String md5;
 
   @JsonProperty("s3_etag")
   private String s3Etag;
@@ -19,6 +20,10 @@ public class Checksums {
     this.sha256 = sha256;
     this.crc32c = crc32c;
     this.s3Etag = s3Etag;
+  }
+
+  public Checksums(String md5) {
+    this.md5 = md5;
   }
 
   protected Checksums() {}

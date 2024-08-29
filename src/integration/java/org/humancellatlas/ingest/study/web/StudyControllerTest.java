@@ -51,7 +51,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class StudyControllerTest {
   @Autowired private MockMvc webApp;
 
-  @Autowired private StudyRepository repository;
+  @Autowired private StudyRepository studyRepository;
 
   @Autowired private StudyService studyService;
 
@@ -71,7 +71,7 @@ class StudyControllerTest {
 
   @AfterEach
   private void tearDown() {
-    repository.deleteAll();
+    studyRepository.deleteAll();
   }
 
   @Nested
@@ -118,7 +118,7 @@ class StudyControllerTest {
       assertThat((Map) registeredStudy.get("content")).containsOnly(nameEntry);
 
       // and: verify the study is stored in the repository
-      List<Study> studies = repository.findAll();
+      List<Study> studies = studyRepository.findAll();
       assertThat(studies).hasSize(1);
       Study storedStudy = studies.get(0);
       assertThat((Map) storedStudy.getContent()).containsOnly(nameEntry);
@@ -156,7 +156,7 @@ class StudyControllerTest {
           new Study(
               "https://dev.schema.morphic.bio/type/0.0.1/project/study", "0.0.1", "study", content);
       study.getSubmissionEnvelopes().add(submissionEnvelope);
-      study = repository.save(study);
+      study = studyRepository.save(study);
 
       studyService.addStudyToSubmissionEnvelope(submissionEnvelope, study);
 
@@ -187,7 +187,7 @@ class StudyControllerTest {
           .isEqualTo("test updated");
 
       // and:
-      study = repository.findById(study.getId()).get();
+      study = studyRepository.findById(study.getId()).get();
 
       assertThat(study.getDescribedBy())
           .isEqualTo("https://dev.schema.morphic.bio/type/0.0.1/project/study");
@@ -231,7 +231,7 @@ class StudyControllerTest {
       Study persistentStudy =
           new Study(
               "https://dev.schema.morphic.bio/type/0.0.1/project/study", "0.0.1", "study", content);
-      repository.save(persistentStudy);
+      studyRepository.save(persistentStudy);
       String existingStudyId = persistentStudy.getId();
 
       // when:
@@ -240,7 +240,7 @@ class StudyControllerTest {
           .andExpect(status().isNoContent());
 
       // then:
-      assertThat(repository.findById(existingStudyId)).isEmpty();
+      assertThat(studyRepository.findById(existingStudyId)).isEmpty();
       // Expect the ResourceNotFoundException when attempting to find the study after deletion
       assertThrows(
           ResourceNotFoundException.class,
@@ -280,10 +280,10 @@ class StudyControllerTest {
               "0.0.1",
               "study",
               studyContent);
-      repository.save(persistentStudy);
+      studyRepository.save(persistentStudy);
       String studyId = persistentStudy.getId();
 
-      String datasetContent = "{\"name\": \"study\"}";
+      String datasetContent = "{\"name\": \"dataset\"}";
       Dataset persistentDataset = new Dataset(datasetContent);
       datasetRepository.save(persistentDataset);
       String datasetId = persistentDataset.getId();

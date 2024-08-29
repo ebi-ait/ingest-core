@@ -162,9 +162,4 @@ public class Biomaterial extends MetadataDocument {
     this.parentBiomaterials.remove(parentBiomaterial);
     return this;
   }
-
-  public Biomaterial addDataset(final Dataset dataset) {
-    datasets.add(dataset);
-    return this;
-  }
 }

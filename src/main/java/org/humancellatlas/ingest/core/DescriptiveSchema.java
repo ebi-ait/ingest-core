@@ -1,6 +1,6 @@
 package org.humancellatlas.ingest.core;
 
-public interface MorphicDescriptiveSchema {
+public interface DescriptiveSchema {
   String getDescribedBy();
 
   void setDescribedBy(String describedBy);

@@ -15,6 +15,7 @@ import org.humancellatlas.ingest.config.ConvertersConfiguration;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.project.web.SearchFilter;
 import org.humancellatlas.ingest.project.web.SearchType;
 import org.humancellatlas.ingest.schemas.SchemaService;
@@ -51,6 +52,8 @@ class ProjectFilterTest {
   @MockBean private SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
   @MockBean private ProjectRepository projectRepository;
+
+  @MockBean private DatasetRepository datasetRepository;
 
   @MockBean private MetadataCrudService metadataCrudService;
 
@@ -518,6 +521,7 @@ class ProjectFilterTest {
             mongoTemplate,
             submissionEnvelopeRepository,
             projectRepository,
+            datasetRepository,
             metadataCrudService,
             metadataUpdateService,
             schemaService,

@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 
 import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
+import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.file.File;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -36,6 +37,9 @@ public class Project extends MetadataDocument {
   @JsonIgnore
   @DBRef(lazy = true)
   private Set<File> supplementaryFiles = new HashSet<>();
+
+  // A project can have multiple datasets
+  @RestResource private Set<Dataset> datasets = new HashSet<>();
 
   // A project may have 1 or more submissions related to it.
   @JsonIgnore
@@ -109,5 +113,9 @@ public class Project extends MetadataDocument {
 
   public static ProjectBuilder builder() {
     return new ProjectBuilder();
+  }
+
+  public void addDataset(final Dataset dataset) {
+    datasets.add(dataset);
   }
 }

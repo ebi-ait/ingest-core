@@ -103,9 +103,9 @@ public class File extends MetadataDocument {
    * @return a reference to this file
    */
   public File addAsDerivedByProcess(Process process) {
-
-    // XXX why we implementing this check here but not above??
+    // XXX why we're implementing this check here but not above??
     String processId = process.getId();
+
     boolean processInList =
         derivedByProcesses.stream().map(Process::getId).anyMatch(id -> id.equals(processId));
     if (!processInList) {
@@ -139,11 +139,6 @@ public class File extends MetadataDocument {
 
   public File removeAsInputToProcess(Process process) {
     this.inputToProcesses.remove(process);
-    return this;
-  }
-
-  public File addDataset(final Dataset dataset) {
-    datasets.add(dataset);
     return this;
   }
 }
