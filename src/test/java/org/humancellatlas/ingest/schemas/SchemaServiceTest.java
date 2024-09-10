@@ -150,4 +150,30 @@ public class SchemaServiceTest {
       return new SchemaService();
     }
   }
+
+  @Test
+  public void testGetLatestMorphicSchemasVersions() {
+    // given:
+    Schema version1_0_0 = createMorphicTestSchema("1.0.0", "biomaterial");
+    Schema version0_9_0 = createMorphicTestSchema("0.9.0", "biomaterial");
+    Schema version2_0_0 = createMorphicTestSchema("2.0.0", "biomaterial");
+
+    // and:
+    List<Schema> schemas = asList(version2_0_0, version0_9_0, version1_0_0);
+    doReturn(schemas).when(schemaRepository).findAll();
+
+    // when:
+    List<Schema> latestSchemas = schemaService.getLatestSchemas();
+
+    // then:
+    assertThat(latestSchemas).hasSize(1);
+    Schema latestSchema = latestSchemas.get(0);
+    assertThat(latestSchema.getSchemaVersion()).isEqualTo(version2_0_0.getSchemaVersion());
+  }
+
+  private Schema createMorphicTestSchema(String schemaVersion, String entityType) {
+    return new Schema("type", schemaVersion, entityType, "", entityType,
+            "https://dev.schema.morphic.bio");
+  }
+
 }

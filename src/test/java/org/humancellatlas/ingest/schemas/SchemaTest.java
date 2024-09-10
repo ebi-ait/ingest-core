@@ -67,4 +67,21 @@ public class SchemaTest {
     return new Schema(
         "core", schemaVersion, "process", "", "process_core", "http://schema.humancellatlas.org");
   }
+
+  @Test
+  public void testCompareMorphicSchemas() {
+    // given:
+    Schema morphicSchemaVersion1_0_0 = createMorphicTestSchema("1.0.0");
+    Schema morphicSchemaVersion2_0_0 = createMorphicTestSchema("2.0.0");
+
+    // expect:
+    assertThat(morphicSchemaVersion1_0_0.compareTo(morphicSchemaVersion2_0_0)).isLessThan(0);
+    assertThat(morphicSchemaVersion2_0_0.compareTo(morphicSchemaVersion1_0_0)).isGreaterThan(0);
+  }
+
+  private Schema createMorphicTestSchema(String schemaVersion) {
+    return new Schema("type", schemaVersion, "biomaterial", "", "biomaterial",
+            "https://dev.schema.morphic.bio");
+  }
+
 }
