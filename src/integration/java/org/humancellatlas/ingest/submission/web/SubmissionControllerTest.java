@@ -124,7 +124,6 @@ public class SubmissionControllerTest {
     study = studyRepository.save(study);
 
     dataset = new Dataset(null);
-    dataset.getSubmissionEnvelopes().add(submissionEnvelope);
     dataset = datasetRepository.save(dataset);
 
     uriBuilder = ServletUriComponentsBuilder.fromCurrentContextPath();
@@ -145,7 +144,7 @@ public class SubmissionControllerTest {
   public void testAdditionToNonEditableSubmissionThrowsErrorForAllEntityTypes(String endpoint)
       throws Exception {
     // given
-    submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALIDATION_REQUESTED);
+    submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
     submissionEnvelope = submissionEnvelopeRepository.save(submissionEnvelope);
 
     // when
@@ -160,14 +159,7 @@ public class SubmissionControllerTest {
   @ParameterizedTest
   @EnumSource(
       value = SubmissionState.class,
-      names = {
-        "GRAPH_VALIDATION_REQUESTED",
-        "GRAPH_VALIDATING",
-        "EXPORTING",
-        "PROCESSING",
-        "ARCHIVED",
-        "SUBMITTED"
-      })
+      names = {"EXPORTING", "PROCESSING", "ARCHIVED", "SUBMITTED"})
   public void testAdditionToNonEditableSubmissionThrowsErrorInAllStates(SubmissionState state)
       throws Exception {
     // given

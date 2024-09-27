@@ -21,18 +21,20 @@ public class SubmissionEnvelopeTest {
   public void testAllowedSubmissionStateTransitionsForDraft() {
     List<SubmissionState> states = getAllowedStates(SubmissionState.DRAFT);
     assertThat(states)
-        .containsExactlyInAnyOrderElementsOf(List.of(SubmissionState.METADATA_VALIDATING));
+        .containsExactlyInAnyOrderElementsOf(
+            List.of(SubmissionState.METADATA_VALID, SubmissionState.METADATA_INVALID));
   }
 
   @Test
   public void testAllowedSubmissionStateTransitionsForMetadataValidating() {
-    List<SubmissionState> states = getAllowedStates(SubmissionState.METADATA_VALIDATING);
+    List<SubmissionState> states = getAllowedStates(SubmissionState.METADATA_VALID);
     assertThat(states)
         .containsExactlyInAnyOrderElementsOf(
             List.of(
                 SubmissionState.DRAFT,
                 SubmissionState.METADATA_INVALID,
-                SubmissionState.METADATA_VALID));
+                SubmissionState.GRAPH_VALID,
+                SubmissionState.GRAPH_INVALID));
   }
 
   @Test
@@ -40,35 +42,33 @@ public class SubmissionEnvelopeTest {
     List<SubmissionState> states = getAllowedStates(SubmissionState.METADATA_VALID);
     assertThat(states)
         .containsExactlyInAnyOrderElementsOf(
-            List.of(SubmissionState.DRAFT, SubmissionState.GRAPH_VALIDATION_REQUESTED));
+            List.of(
+                SubmissionState.DRAFT,
+                SubmissionState.GRAPH_VALID,
+                SubmissionState.METADATA_INVALID,
+                SubmissionState.GRAPH_INVALID));
   }
 
   @Test
   public void testAllowedSubmissionStateTransitionsForMetadataInvalid() {
     List<SubmissionState> states = getAllowedStates(SubmissionState.METADATA_INVALID);
-    assertThat(states)
-        .containsExactlyInAnyOrderElementsOf(
-            List.of(
-                SubmissionState.DRAFT,
-                SubmissionState.METADATA_VALIDATING,
-                SubmissionState.GRAPH_VALIDATION_REQUESTED));
+    assertThat(states).containsExactlyInAnyOrderElementsOf(List.of(SubmissionState.DRAFT));
   }
 
   @Test
   public void testAllowedSubmissionStateTransitionsForGraphValidationRequested() {
-    List<SubmissionState> states = getAllowedStates(SubmissionState.GRAPH_VALIDATION_REQUESTED);
+    List<SubmissionState> states = getAllowedStates(SubmissionState.GRAPH_VALID);
     assertThat(states)
         .containsExactlyInAnyOrderElementsOf(
-            List.of(SubmissionState.GRAPH_VALIDATING, SubmissionState.DRAFT));
+            List.of(SubmissionState.SUBMITTED, SubmissionState.DRAFT));
   }
 
   @Test
   public void testAllowedSubmissionStateTransitionsForGraphValidating() {
-    List<SubmissionState> states = getAllowedStates(SubmissionState.GRAPH_VALIDATING);
+    List<SubmissionState> states = getAllowedStates(SubmissionState.GRAPH_VALID);
     assertThat(states)
         .containsExactlyInAnyOrderElementsOf(
-            List.of(
-                SubmissionState.GRAPH_INVALID, SubmissionState.GRAPH_VALID, SubmissionState.DRAFT));
+            List.of(SubmissionState.SUBMITTED, SubmissionState.DRAFT));
   }
 
   @Test
@@ -82,9 +82,7 @@ public class SubmissionEnvelopeTest {
   @Test
   public void testAllowedSubmissionStateTransitionsForGraphInvalid() {
     List<SubmissionState> states = getAllowedStates(SubmissionState.GRAPH_INVALID);
-    assertThat(states)
-        .containsExactlyInAnyOrderElementsOf(
-            List.of(SubmissionState.GRAPH_VALIDATION_REQUESTED, SubmissionState.DRAFT));
+    assertThat(states).containsExactlyInAnyOrderElementsOf(List.of(SubmissionState.DRAFT));
   }
 
   @Test
@@ -136,9 +134,6 @@ public class SubmissionEnvelopeTest {
       value = SubmissionState.class,
       names = {
         /*"PENDING",*/
-        "METADATA_VALIDATING",
-        "GRAPH_VALIDATION_REQUESTED",
-        "GRAPH_VALIDATING",
         "EXPORTING",
         "PROCESSING",
         "CLEANUP",
@@ -181,14 +176,7 @@ public class SubmissionEnvelopeTest {
   @ParameterizedTest
   @EnumSource(
       value = SubmissionState.class,
-      names = {
-        "GRAPH_VALIDATION_REQUESTED",
-        "GRAPH_VALIDATING",
-        "EXPORTING",
-        "PROCESSING",
-        "ARCHIVED",
-        "SUBMITTED"
-      })
+      names = {"EXPORTING", "PROCESSING", "ARCHIVED", "SUBMITTED"})
   public void testCannotAddTo(SubmissionState state) {
     // given:
     SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
@@ -203,7 +191,6 @@ public class SubmissionEnvelopeTest {
   @EnumSource(
       value = SubmissionState.class,
       names = {
-        "METADATA_VALIDATING",
         "PENDING",
         "METADATA_VALID",
         "METADATA_INVALID",

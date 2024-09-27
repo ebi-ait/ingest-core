@@ -66,7 +66,9 @@ public class ProjectCrudStrategy implements MetadataCrudStrategy<Project> {
 
   @Override
   public void removeLinksToDocument(Project document) {
-    messageRouter.routeStateTrackingDeleteMessageFor(document);
+    // TODO: handle locally
+    // messageRouter.routeStateTrackingDeleteMessageFor(document);
+
     biomaterialRepository
         .findByProject(document)
         .forEach(

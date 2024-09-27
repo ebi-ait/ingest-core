@@ -1,13 +1,9 @@
 package org.humancellatlas.ingest.core.service;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 import java.util.stream.Stream;
 
 import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.biomaterial.BiomaterialRepository;
-import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.service.strategy.impl.*;
 import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.file.File;
@@ -21,9 +17,7 @@ import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.protocol.ProtocolRepository;
 import org.humancellatlas.ingest.study.StudyRepository;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -67,23 +61,5 @@ public class MetadataCrudServiceTest {
         Arguments.of(new Process(null)),
         Arguments.of(new Project(null)),
         Arguments.of(new Protocol(null)));
-  }
-
-  @ParameterizedTest
-  @MethodSource("providedTestDocuments")
-  public void removeLinksSendsMessageToStateTracker(MetadataDocument document) {
-    // when
-    crudService.removeLinksToDocument(document);
-    // then
-    verify(messageRouter, times(1)).routeStateTrackingDeleteMessageFor(document);
-  }
-
-  @ParameterizedTest
-  @MethodSource("providedTestDocuments")
-  public void deleteSendsMessageToStateTracker(MetadataDocument document) {
-    // when
-    crudService.deleteDocument(document);
-    // then
-    verify(messageRouter, times(1)).routeStateTrackingDeleteMessageFor(document);
   }
 }

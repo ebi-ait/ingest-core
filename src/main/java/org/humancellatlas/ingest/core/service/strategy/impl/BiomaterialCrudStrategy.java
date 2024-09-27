@@ -59,7 +59,8 @@ public class BiomaterialCrudStrategy implements MetadataCrudStrategy<Biomaterial
 
   @Override
   public void removeLinksToDocument(Biomaterial document) {
-    messageRouter.routeStateTrackingDeleteMessageFor(document);
+    // TODO: handle locally
+    // messageRouter.routeStateTrackingDeleteMessageFor(document);
   }
 
   @Override

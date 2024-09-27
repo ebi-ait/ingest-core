@@ -47,39 +47,22 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class SubmissionEnvelopeService {
-
-  @NonNull private final MessageRouter messageRouter;
-
-  @NonNull private final Exporter exporter;
-
-  @NonNull private final ExecutorService executorService = Executors.newFixedThreadPool(5);
-
-  @NonNull private final SubmissionEnvelopeRepository submissionEnvelopeRepository;
-
-  @NonNull private final SubmissionEnvelopeCreateHandler submissionEnvelopeCreateHandler;
-
-  @NonNull private final SubmissionManifestRepository submissionManifestRepository;
-
   @NonNull private final Logger log = LoggerFactory.getLogger(getClass());
-
+  @NonNull private final MetadataCrudService metadataCrudService;
+  @NonNull private final MessageRouter messageRouter;
+  @NonNull private final Exporter exporter;
+  @NonNull private final ExecutorService executorService = Executors.newFixedThreadPool(5);
+  @NonNull private final SubmissionEnvelopeRepository submissionEnvelopeRepository;
+  @NonNull private final SubmissionEnvelopeCreateHandler submissionEnvelopeCreateHandler;
+  @NonNull private final SubmissionManifestRepository submissionManifestRepository;
   @NonNull private BundleManifestRepository bundleManifestRepository;
-
   @NonNull private ProjectRepository projectRepository;
-
   @NonNull private ProjectService projectService;
-
   @NonNull private ProcessRepository processRepository;
-
   @NonNull private ProtocolRepository protocolRepository;
-
   @NonNull private FileRepository fileRepository;
-
   @NonNull private BiomaterialRepository biomaterialRepository;
-
   @NonNull private PatchRepository patchRepository;
-
-  private final @NonNull MetadataCrudService metadataCrudService;
-
   @NonNull private SubmissionErrorRepository submissionErrorRepository;
 
   public void handleSubmitRequest(SubmissionEnvelope envelope, List<SubmitAction> submitActions) {
@@ -131,16 +114,20 @@ public class SubmissionEnvelopeService {
               "Envelope with id %s cannot be transitioned from state %s to state %s",
               envelope.getId(), envelope.getSubmissionState(), state));
     } else {
-      messageRouter.routeStateTrackingUpdateMessageForEnvelopeEvent(envelope, state);
+      /*messageRouter.routeStateTrackingUpdateMessageForEnvelopeEvent(envelope, state);
 
       if (state == SubmissionState.GRAPH_VALIDATION_REQUESTED) {
         removeGraphValidationErrors(envelope);
-      }
+      }*/
+
+      envelope.enactStateTransition(state);
+      submissionEnvelopeRepository.save(envelope);
     }
   }
 
   public void handleCommitSubmit(SubmissionEnvelope envelope) {
     Set<SubmitAction> submitActions = envelope.getSubmitActions();
+
     if (submitActions.isEmpty()) {
       log.info(
           String.format(
@@ -156,6 +143,7 @@ public class SubmissionEnvelopeService {
 
   public void handleCommitArchived(SubmissionEnvelope envelope) {
     Set<SubmitAction> submitActions = envelope.getSubmitActions();
+
     if (submitActions.contains(SubmitAction.EXPORT)) {
       handleEnvelopeStateUpdateRequest(envelope, SubmissionState.EXPORTING);
       exportData(envelope);
@@ -171,6 +159,7 @@ public class SubmissionEnvelopeService {
     getProject(envelope)
         .ifPresent(
             project -> projectService.updateWranglingState(project, WranglingState.SUBMITTED));
+
     if (envelope.getSubmitActions().contains(SubmitAction.CLEANUP)) {
       cleanupSubmission(envelope);
     }
@@ -202,16 +191,11 @@ public class SubmissionEnvelopeService {
 
   public SubmissionEnvelope createUpdateSubmissionEnvelope() {
     SubmissionEnvelope updateSubmissionEnvelope = new SubmissionEnvelope();
+
     submissionEnvelopeCreateHandler.setUuid(updateSubmissionEnvelope);
     updateSubmissionEnvelope.setIsUpdate(true);
-    return createSubmissionEnvelope(updateSubmissionEnvelope);
-  }
 
-  public SubmissionEnvelope createSubmissionEnvelope(SubmissionEnvelope submissionEnvelope) {
-    SubmissionEnvelope insertedSubmissionEnvelope =
-        submissionEnvelopeRepository.insert(submissionEnvelope);
-    submissionEnvelopeCreateHandler.handleSubmissionEnvelopeCreation(submissionEnvelope);
-    return insertedSubmissionEnvelope;
+    return submissionEnvelopeRepository.insert(updateSubmissionEnvelope);
   }
 
   public void deleteSubmission(SubmissionEnvelope submissionEnvelope, boolean forceDelete) {

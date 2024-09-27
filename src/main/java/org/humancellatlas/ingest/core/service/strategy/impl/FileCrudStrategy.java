@@ -60,7 +60,8 @@ public class FileCrudStrategy implements MetadataCrudStrategy<File> {
 
   @Override
   public void removeLinksToDocument(File document) {
-    messageRouter.routeStateTrackingDeleteMessageFor(document);
+    // TODO: handle locally
+    // messageRouter.routeStateTrackingDeleteMessageFor(document);
     projectRepository
         .findBySupplementaryFilesContains(document)
         .forEach(

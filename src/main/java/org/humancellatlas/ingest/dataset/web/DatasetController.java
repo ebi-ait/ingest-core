@@ -12,7 +12,6 @@ import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.exception.NotAllowedDuringSubmissionStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -94,11 +93,8 @@ public class DatasetController {
 
     final Dataset savedDataset =
         datasetService.addDatasetToSubmissionEnvelope(submissionEnvelope, dataset);
-    final PersistentEntityResource resource =
-        assembler.toFullResource(
-            datasetService.linkDatasetSubmissionEnvelope(submissionEnvelope, savedDataset));
 
-    return ResponseEntity.accepted().body(resource);
+    return ResponseEntity.accepted().body(assembler.toFullResource(savedDataset));
   }
 
   /**
@@ -118,10 +114,9 @@ public class DatasetController {
       @PathVariable("dataset_id") final Dataset dataset,
       final PersistentEntityResourceAssembler assembler) {
     final Dataset savedDataset =
-        datasetService.linkDatasetSubmissionEnvelope(submissionEnvelope, dataset);
-    final PersistentEntityResource datasetResource = assembler.toFullResource(savedDataset);
+        datasetService.addDatasetToSubmissionEnvelope(submissionEnvelope, dataset);
 
-    return ResponseEntity.accepted().body(datasetResource);
+    return ResponseEntity.accepted().body(assembler.toFullResource(savedDataset));
   }
 
   /**

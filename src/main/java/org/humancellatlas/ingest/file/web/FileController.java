@@ -54,30 +54,20 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @Validated
 public class FileController {
-
-  @NonNull private final FileService fileService;
-
-  @NonNull private final FileRepository fileRepository;
-
-  @NonNull private final ProcessRepository processRepository;
-
-  @NonNull private final PagedResourcesAssembler pagedResourcesAssembler;
-
-  @NonNull private final MetadataCrudService metadataCrudService;
-
-  @NonNull private final MetadataUpdateService metadataUpdateService;
-
-  private @Autowired ValidationStateChangeService validationStateChangeService;
-
-  private @Autowired UriToEntityConversionService uriToEntityConversionService;
-
-  private @Autowired MetadataLinkingService metadataLinkingService;
-
   private final Logger logger = LoggerFactory.getLogger(getClass());
+  @NonNull private final FileService fileService;
+  @NonNull private final FileRepository fileRepository;
+  @NonNull private final ProcessRepository processRepository;
+  @NonNull private final PagedResourcesAssembler pagedResourcesAssembler;
+  @NonNull private final MetadataCrudService metadataCrudService;
+  @NonNull private final MetadataUpdateService metadataUpdateService;
+  @Autowired private ValidationStateChangeService validationStateChangeService;
+  @Autowired private UriToEntityConversionService uriToEntityConversionService;
+  @Autowired private MetadataLinkingService metadataLinkingService;
 
   @ExceptionHandler(ConstraintViolationException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
+  ResponseEntity<String> handleConstraintViolationException(final ConstraintViolationException e) {
     return new ResponseEntity<>(
         "not valid due to validation error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
   }
@@ -90,19 +80,20 @@ public class FileController {
       method = RequestMethod.POST,
       produces = MediaTypes.HAL_JSON_VALUE)
   ResponseEntity<Resource<?>> createFile(
-      @PathVariable("sub_id") SubmissionEnvelope submissionEnvelope,
-      @RequestBody @Valid File file,
+      @PathVariable("sub_id") final SubmissionEnvelope submissionEnvelope,
+      @RequestBody @Valid final File file,
       final PersistentEntityResourceAssembler assembler) {
     try {
-      File createdFile = fileService.addFileToSubmissionEnvelope(submissionEnvelope, file);
+      final File createdFile = fileService.addFileToSubmissionEnvelope(submissionEnvelope, file);
       logFileDetails(submissionEnvelope, createdFile);
+
       return ResponseEntity.accepted().body(assembler.toFullResource(createdFile));
     } catch (FileAlreadyExistsException e) {
       throw new IllegalStateException(e);
     }
   }
 
-  private void logFileDetails(SubmissionEnvelope submissionEnvelope, File createdFile) {
+  private void logFileDetails(final SubmissionEnvelope submissionEnvelope, final File createdFile) {
     logger.info(
         "submission uuid {}: created File: id {} uuid {} name {} dataFileUuid {}",
         submissionEnvelope.getUuid(),
@@ -117,11 +108,12 @@ public class FileController {
       method = RequestMethod.PUT,
       produces = MediaTypes.HAL_JSON_VALUE)
   ResponseEntity<Resource<?>> addFileValidationJob(
-      @PathVariable("id") File file,
-      @RequestBody ValidationJob validationJob,
+      @PathVariable("id") final File file,
+      @RequestBody final ValidationJob validationJob,
       final PersistentEntityResourceAssembler assembler) {
-    File entity = getFileService().addFileValidationJob(file, validationJob);
-    PersistentEntityResource resource = assembler.toFullResource(entity);
+    final File entity = fileService.addFileValidationJob(file, validationJob);
+    final PersistentEntityResource resource = assembler.toFullResource(entity);
+
     return ResponseEntity.accepted().body(resource);
   }
 
@@ -130,10 +122,10 @@ public class FileController {
       exception = NotAllowedDuringSubmissionStateException.class)
   @PatchMapping(path = "/files/{id}")
   HttpEntity<?> patchFile(
-      @PathVariable("id") File file,
+      @PathVariable("id") final File file,
       @RequestBody final ObjectNode patch,
-      PersistentEntityResourceAssembler assembler) {
-    List<String> allowedFields =
+      final PersistentEntityResourceAssembler assembler) {
+    final List<String> allowedFields =
         List.of(
             "content",
             "fileName",
@@ -141,9 +133,10 @@ public class FileController {
             "validationErrors",
             "graphValidationErrors",
             "fileArchiveResult");
-    ObjectNode validPatch = patch.retain(allowedFields);
-    File updatedFile = metadataUpdateService.update(file, validPatch);
-    PersistentEntityResource resource = assembler.toFullResource(updatedFile);
+    final ObjectNode validPatch = patch.retain(allowedFields);
+    final File updatedFile = metadataUpdateService.update(file, validPatch);
+    final PersistentEntityResource resource = assembler.toFullResource(updatedFile);
+
     return ResponseEntity.accepted().body(resource);
   }
 
@@ -155,16 +148,15 @@ public class FileController {
       method = {PUT, POST},
       consumes = {TEXT_URI_LIST_VALUE})
   HttpEntity<?> linkFileAsInputToProcesses(
-      @PathVariable("id") File file,
-      @RequestBody Resources<Object> incoming,
-      HttpMethod requestMethod,
-      PersistentEntityResourceAssembler assembler)
+      @PathVariable("id") final File file,
+      @RequestBody final Resources<Object> incoming,
+      final HttpMethod requestMethod)
       throws URISyntaxException,
           InvocationTargetException,
           NoSuchMethodException,
           IllegalAccessException {
 
-    List<Process> processes =
+    final List<Process> processes =
         uriToEntityConversionService.convertLinks(incoming.getLinks(), Process.class);
     metadataLinkingService.updateLinks(
         file, processes, "inputToProcesses", requestMethod.equals(HttpMethod.PUT));
@@ -180,16 +172,15 @@ public class FileController {
       method = {PUT, POST},
       consumes = {TEXT_URI_LIST_VALUE})
   HttpEntity<?> linkFileAsDerivedByProcesses(
-      @PathVariable("id") File file,
-      @RequestBody Resources<Object> incoming,
-      HttpMethod requestMethod,
-      PersistentEntityResourceAssembler assembler)
+      @PathVariable("id") final File file,
+      @RequestBody final Resources<Object> incoming,
+      final HttpMethod requestMethod)
       throws URISyntaxException,
           InvocationTargetException,
           NoSuchMethodException,
           IllegalAccessException {
 
-    List<Process> processes =
+    final List<Process> processes =
         uriToEntityConversionService.convertLinks(incoming.getLinks(), Process.class);
     metadataLinkingService.updateLinks(
         file, processes, "derivedByProcesses", requestMethod.equals(HttpMethod.PUT));
@@ -202,11 +193,12 @@ public class FileController {
       exception = NotAllowedDuringSubmissionStateException.class)
   @DeleteMapping(path = "/files/{id}/inputToProcesses/{processId}")
   HttpEntity<?> unlinkFileAsInputToProcesses(
-      @PathVariable("id") File file,
-      @PathVariable("processId") Process process,
-      PersistentEntityResourceAssembler assembler)
+      @PathVariable("id") final File file,
+      @PathVariable("processId") final Process process,
+      final PersistentEntityResourceAssembler assembler)
       throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
     metadataLinkingService.removeLink(file, process, "inputToProcesses");
+
     return ResponseEntity.noContent().build();
   }
 
@@ -215,9 +207,10 @@ public class FileController {
       exception = NotAllowedDuringSubmissionStateException.class)
   @DeleteMapping(path = "/files/{id}/derivedByProcesses/{processId}")
   HttpEntity<?> unlinkFileAsDerivedByProcesses(
-      @PathVariable("id") File file, @PathVariable("processId") Process process)
+      @PathVariable("id") final File file, @PathVariable("processId") final Process process)
       throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
     metadataLinkingService.removeLink(file, process, "derivedByProcesses");
+
     return ResponseEntity.noContent().build();
   }
 
@@ -225,8 +218,9 @@ public class FileController {
       value = "#file.submissionEnvelope.isEditable()",
       exception = NotAllowedDuringSubmissionStateException.class)
   @DeleteMapping(path = "/files/{id}")
-  ResponseEntity<?> deleteFile(@PathVariable("id") File file) {
+  ResponseEntity<?> deleteFile(@PathVariable("id") final File file) {
     metadataCrudService.deleteDocument(file);
+
     return ResponseEntity.noContent().build();
   }
 }

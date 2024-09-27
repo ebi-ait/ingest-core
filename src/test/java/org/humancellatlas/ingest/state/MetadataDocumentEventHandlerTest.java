@@ -19,7 +19,7 @@ public class MetadataDocumentEventHandlerTest {
     Biomaterial biomaterial = new Biomaterial(null);
     handler.handleMetadataDocumentCreate(biomaterial);
     Mockito.verify(messageRouter, times(1)).routeValidationMessageFor(biomaterial);
-    Mockito.verify(messageRouter, times(1)).routeStateTrackingUpdateMessageFor(biomaterial);
+    // Mockito.verify(messageRouter, times(1)).routeStateTrackingUpdateMessageFor(biomaterial);
   }
 
   @Test
@@ -29,6 +29,6 @@ public class MetadataDocumentEventHandlerTest {
     project.getSubmissionEnvelopes().add(submissionEnvelope);
     handler.handleMetadataDocumentCreate(project);
     Mockito.verify(messageRouter, times(1)).routeValidationMessageFor(project);
-    Mockito.verify(messageRouter, times(1)).routeStateTrackingUpdateMessageFor(project);
+    // Mockito.verify(messageRouter, times(1)).routeStateTrackingUpdateMessageFor(project);
   }
 }

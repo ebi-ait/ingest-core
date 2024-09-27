@@ -343,12 +343,10 @@ public class SubmissionEnvelopeServiceTest {
       when(protocolRepository.findBySubmissionEnvelope(any())).thenReturn(Stream.of(testProtocol));
       when(fileRepository.findBySubmissionEnvelope(any())).thenReturn(Stream.of(testFile));
 
-      service.handleEnvelopeStateUpdateRequest(
-          submissionEnvelope, SubmissionState.GRAPH_VALIDATION_REQUESTED);
-      submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALIDATION_REQUESTED);
+      service.handleEnvelopeStateUpdateRequest(submissionEnvelope, SubmissionState.GRAPH_VALID);
+      submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_VALID);
       // then:
-      assertThat(submissionEnvelope.getSubmissionState())
-          .isEqualTo(SubmissionState.GRAPH_VALIDATION_REQUESTED);
+      assertThat(submissionEnvelope.getSubmissionState()).isEqualTo(SubmissionState.GRAPH_VALID);
       assertThat(testBiomaterial.getGraphValidationErrors()).isEqualTo(new ArrayList<>());
       assertThat(testProcess.getGraphValidationErrors()).isEqualTo(new ArrayList<>());
       assertThat(testProtocol.getGraphValidationErrors()).isEqualTo(new ArrayList<>());
@@ -414,63 +412,6 @@ public class SubmissionEnvelopeServiceTest {
       submissionEnvelope.enactStateTransition(SubmissionState.SUBMITTED);
       submitActions = new HashSet<>();
       submissionEnvelope.setSubmitActions(submitActions);
-    }
-
-    @Test
-    public void testHandleEnvelopeArchivingRequest() {
-      // given
-      submitActions.add(SubmitAction.ARCHIVE);
-
-      // when
-      service.handleCommitSubmit(submissionEnvelope);
-
-      // then
-      verify(messageRouter)
-          .routeStateTrackingUpdateMessageForEnvelopeEvent(
-              submissionEnvelope, SubmissionState.PROCESSING);
-    }
-
-    @Test
-    public void testHandleEnvelopeExportingDataRequest() {
-      // given
-      submitActions.add(SubmitAction.EXPORT);
-
-      // when
-      service.handleCommitSubmit(submissionEnvelope);
-
-      // then
-      verify(messageRouter)
-          .routeStateTrackingUpdateMessageForEnvelopeEvent(
-              submissionEnvelope, SubmissionState.EXPORTING);
-    }
-
-    @Test
-    public void testHandleEnvelopeExportingMetadataRequest() {
-      // given
-      submitActions.add(SubmitAction.EXPORT_METADATA);
-
-      // when
-      service.handleCommitSubmit(submissionEnvelope);
-
-      // then
-      verify(messageRouter)
-          .routeStateTrackingUpdateMessageForEnvelopeEvent(
-              submissionEnvelope, SubmissionState.EXPORTING);
-    }
-
-    @Test
-    public void testHandleEnvelopeCleanupRequest() {
-      // given
-      submissionEnvelope.enactStateTransition(SubmissionState.EXPORTED);
-      submitActions.add(SubmitAction.CLEANUP);
-
-      // when
-      service.handleCommitSubmit(submissionEnvelope);
-
-      // then
-      verify(messageRouter)
-          .routeStateTrackingUpdateMessageForEnvelopeEvent(
-              submissionEnvelope, SubmissionState.CLEANUP);
     }
   }
 }

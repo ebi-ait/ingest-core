@@ -128,7 +128,6 @@ public class BiomaterialController {
           InvocationTargetException,
           NoSuchMethodException,
           IllegalAccessException {
-
     final List<Process> processes =
         uriToEntityConversionService.convertLinks(incoming.getLinks(), Process.class);
     metadataLinkingService.updateLinks(

@@ -18,9 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -33,6 +31,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public class StudyService {
+  protected final Logger getLog() {
+    return log;
+  }
+
   private static class StudyBag {
     private final Set<Study> studies;
     private final Set<SubmissionEnvelope> submissionEnvelopes;
@@ -52,10 +54,6 @@ public class StudyService {
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final Logger log = LoggerFactory.getLogger(getClass());
 
-  protected final Logger getLog() {
-    return log;
-  }
-
   public final Study register(final Study study) {
     final Study persistentStudy = studyRepository.save(study);
     studyEventHandler.registeredStudy(persistentStudy);
@@ -69,8 +67,8 @@ public class StudyService {
 
     if (existingStudyOptional.isEmpty()) {
       log.warn("Attempted to update study with ID: {} but not found.", studyId);
-      throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "Study not found with ID: " + studyId);
+
+      throw new ResourceNotFoundException("Study: " + studyId);
     }
 
     final Study existingStudy = existingStudyOptional.get();
@@ -86,7 +84,7 @@ public class StudyService {
 
     if (existingStudyOptional.isEmpty()) {
       log.warn("Study not found with ID: {}", studyId);
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+      throw new ResourceNotFoundException("Study: " + studyId);
     }
 
     studyRepository.save(updatedStudy);
@@ -100,7 +98,7 @@ public class StudyService {
 
     if (deleteStudyOptional.isEmpty()) {
       log.warn("Attempted to delete study with ID: {} but not found.", studyId);
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+      throw new ResourceNotFoundException("Study: " + studyId);
     }
 
     final Study deleteStudy = deleteStudyOptional.get();
@@ -118,21 +116,15 @@ public class StudyService {
     }
   }
 
-  public final Study linkStudySubmissionEnvelope(
+  public final Study linkStudyToSubmissionEnvelope(
       final SubmissionEnvelope submissionEnvelope, final Study study) {
     final String studyId = study.getId();
-    study.addToSubmissionEnvelopes(submissionEnvelope);
-    studyRepository.save(study);
 
     studyRepository
-        .findByUuidUuidAndIsUpdateFalse(study.getUuid().getUuid())
-        .ifPresent(
-            studyByUuid -> {
-              if (!studyByUuid.getId().equals(studyId)) {
-                studyByUuid.addToSubmissionEnvelopes(submissionEnvelope);
-                studyRepository.save(studyByUuid);
-              }
-            });
+        .findById(studyId)
+        .orElseThrow(() -> new ResourceNotFoundException("Study: " + studyId));
+    study.addToSubmissionEnvelopes(submissionEnvelope);
+    studyRepository.save(study);
 
     return study;
   }
@@ -160,6 +152,7 @@ public class StudyService {
   private StudyService.StudyBag gather(final Study study) {
     final Set<SubmissionEnvelope> envelopes = new HashSet<>();
     final Set<Study> studies = this.studyRepository.findByUuid(study.getUuid()).collect(toSet());
+
     studies.forEach(
         copy -> {
           envelopes.addAll(copy.getSubmissionEnvelopes());

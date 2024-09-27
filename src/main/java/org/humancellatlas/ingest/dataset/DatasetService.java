@@ -161,25 +161,6 @@ public class DatasetService {
     }
   }
 
-  public Dataset linkDatasetSubmissionEnvelope(
-      final SubmissionEnvelope submissionEnvelope, final Dataset dataset) {
-    final String datasetId = dataset.getId();
-
-    dataset.addToSubmissionEnvelopes(submissionEnvelope);
-    datasetRepository.save(dataset);
-    datasetRepository
-        .findByUuidUuidAndIsUpdateFalse(dataset.getUuid().getUuid())
-        .ifPresent(
-            datasetByUuid -> {
-              if (!datasetByUuid.getId().equals(datasetId)) {
-                datasetByUuid.addToSubmissionEnvelopes(submissionEnvelope);
-                datasetRepository.save(datasetByUuid);
-              }
-            });
-
-    return dataset;
-  }
-
   public final Dataset linkFileToDataset(final Dataset dataset, final String id) {
     final String datasetId = dataset.getId();
 

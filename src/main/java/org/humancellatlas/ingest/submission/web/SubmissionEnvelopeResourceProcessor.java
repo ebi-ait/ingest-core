@@ -190,10 +190,6 @@ public class SubmissionEnvelopeResourceProcessor
 
   private Optional<String> getRelNameForRequestSubmissionState(SubmissionState submissionState) {
     switch (submissionState) {
-      case GRAPH_VALIDATION_REQUESTED:
-        return Optional.of(Links.GRAPH_VALIDATION_REQUESTED_REL);
-      case GRAPH_VALIDATING:
-        return Optional.of(Links.GRAPH_VALIDATING_REL);
       case GRAPH_VALID:
         return Optional.of(Links.GRAPH_VALID_REL);
       case GRAPH_INVALID:
@@ -250,16 +246,10 @@ public class SubmissionEnvelopeResourceProcessor
     switch (submissionState) {
       case DRAFT:
         return Optional.of(Links.COMMIT_DRAFT_REL);
-      case METADATA_VALIDATING:
-        return Optional.of(Links.COMMIT_METADATA_VALIDATING_REL);
       case METADATA_INVALID:
         return Optional.of(Links.COMMIT_METADATA_INVALID_REL);
       case METADATA_VALID:
         return Optional.of(Links.COMMIT_METADATA_VALID_REL);
-      case GRAPH_VALIDATION_REQUESTED:
-        return Optional.of(Links.COMMIT_GRAPH_VALIDATION_REQUESTED_REL);
-      case GRAPH_VALIDATING:
-        return Optional.of(Links.COMMIT_GRAPH_VALIDATING_REL);
       case GRAPH_VALID:
         return Optional.of(Links.COMMIT_GRAPH_VALID_REL);
       case GRAPH_INVALID:
@@ -291,16 +281,10 @@ public class SubmissionEnvelopeResourceProcessor
     switch (submissionState) {
       case DRAFT:
         return Optional.of(Links.COMMIT_DRAFT_URL);
-      case METADATA_VALIDATING:
-        return Optional.of(Links.COMMIT_METADATA_VALIDATING_URL);
       case METADATA_INVALID:
         return Optional.of(Links.COMMIT_METADATA_INVALID_URL);
       case METADATA_VALID:
         return Optional.of(Links.COMMIT_METADATA_VALID_URL);
-      case GRAPH_VALIDATION_REQUESTED:
-        return Optional.of(Links.COMMIT_GRAPH_VALIDATION_REQUESTED_URL);
-      case GRAPH_VALIDATING:
-        return Optional.of(Links.COMMIT_GRAPH_VALIDATING_URL);
       case GRAPH_VALID:
         return Optional.of(Links.COMMIT_GRAPH_VALID_URL);
       case GRAPH_INVALID:

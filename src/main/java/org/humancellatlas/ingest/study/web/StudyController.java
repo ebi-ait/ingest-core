@@ -72,7 +72,7 @@ public class StudyController {
         getStudyService().addStudyToSubmissionEnvelope(submissionEnvelope, study);
     final PersistentEntityResource resource =
         assembler.toFullResource(
-            getStudyService().linkStudySubmissionEnvelope(submissionEnvelope, savedStudy));
+            getStudyService().linkStudyToSubmissionEnvelope(submissionEnvelope, savedStudy));
 
     return ResponseEntity.accepted().body(resource);
   }
@@ -86,7 +86,7 @@ public class StudyController {
       @PathVariable("stud_id") final Study study,
       final PersistentEntityResourceAssembler assembler) {
     final Study savedStudy =
-        getStudyService().linkStudySubmissionEnvelope(submissionEnvelope, study);
+        getStudyService().linkStudyToSubmissionEnvelope(submissionEnvelope, study);
     final PersistentEntityResource studyResource = assembler.toFullResource(savedStudy);
 
     return ResponseEntity.accepted().body(studyResource);

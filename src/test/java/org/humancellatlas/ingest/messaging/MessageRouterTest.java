@@ -4,17 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.humancellatlas.ingest.export.destination.ExportDestinationName.DCP;
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.EXPORTER_EXCHANGE;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.MANIFEST_SUBMITTED;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
-import java.net.URI;
 import java.time.Instant;
 
-import org.humancellatlas.ingest.biomaterial.Biomaterial;
 import org.humancellatlas.ingest.config.ConfigurationService;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
@@ -98,64 +95,6 @@ public class MessageRouterTest {
         .destination(new ExportDestination(DCP, "v2", destinationContext))
         .context(exportJobContext)
         .build();
-  }
-
-  @Test
-  public void testRouteStateTrackingUpdateMessageFor() {
-    // given:
-    Project project = mock(Project.class);
-    SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-    doReturn(Instant.now()).when(project).getUpdateDate();
-    doReturn(submissionEnvelope).when(project).getSubmissionEnvelope();
-
-    // when:
-    messageRouter.routeStateTrackingUpdateMessageFor(project);
-
-    verify(messageSender, times(1))
-        .queueDocumentStateUpdateMessage(any(URI.class), any(), anyLong());
-  }
-
-  @Test
-  public void testRouteStateTrackingUpdateMessageForBiomaterial() {
-    // given:
-    Biomaterial project = mock(Biomaterial.class);
-    SubmissionEnvelope submissionEnvelope = new SubmissionEnvelope();
-    doReturn(Instant.now()).when(project).getUpdateDate();
-    doReturn(submissionEnvelope).when(project).getSubmissionEnvelope();
-
-    // when:
-    messageRouter.routeStateTrackingUpdateMessageFor(project);
-
-    verify(messageSender, times(1))
-        .queueDocumentStateUpdateMessage(any(URI.class), any(), anyLong());
-  }
-
-  @Test
-  public void testRouteStateTrackingUpdateMessageForProject() {
-    // given:
-    Project project = new Project(null);
-    // when:
-    messageRouter.routeStateTrackingUpdateMessageFor(project);
-
-    verify(messageSender, never())
-        .queueDocumentStateUpdateMessage(any(URI.class), any(), anyLong());
-  }
-
-  @Test
-  public void testRouteStateTrackingUpdateMessageForBiomaterialWithoutSubmission() {
-    // given:
-    Biomaterial project = mock(Biomaterial.class);
-
-    // when:
-    Exception exception =
-        assertThrows(
-            RuntimeException.class,
-            () -> {
-              messageRouter.routeStateTrackingUpdateMessageFor(project);
-            });
-
-    verify(messageSender, never())
-        .queueDocumentStateUpdateMessage(any(URI.class), any(), anyLong());
   }
 
   private void doTestSendForExport(String routingKey) {

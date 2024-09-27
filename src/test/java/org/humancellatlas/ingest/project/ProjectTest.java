@@ -71,13 +71,10 @@ public class ProjectTest {
 
     assertThat(project.isEditable()).isTrue();
 
-    submissionOne.enactStateTransition(SubmissionState.GRAPH_VALIDATION_REQUESTED);
-    assertThat(project.isEditable()).isFalse();
-
     submissionOne.enactStateTransition(SubmissionState.GRAPH_VALID);
     assertThat(project.isEditable()).isTrue();
 
-    submissionTwo.enactStateTransition(SubmissionState.GRAPH_VALIDATION_REQUESTED);
+    submissionTwo.enactStateTransition(SubmissionState.GRAPH_VALID);
     assertThat(project.isEditable()).isFalse();
   }
 }

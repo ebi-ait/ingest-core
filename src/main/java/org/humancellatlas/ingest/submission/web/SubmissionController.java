@@ -2,6 +2,7 @@ package org.humancellatlas.ingest.submission.web;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -64,6 +65,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public class SubmissionController {
+  private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
   private final @NonNull Exporter exporter;
   private final @NonNull SubmissionEnvelopeService submissionEnvelopeService;
   private final @NonNull SubmissionStateMachineService submissionStateMachineService;
@@ -79,17 +81,15 @@ public class SubmissionController {
   private final @NonNull ProcessRepository processRepository;
   private final @NonNull BundleManifestRepository bundleManifestRepository;
   private final @NonNull SubmissionManifestRepository submissionManifestRepository;
-
   private final MessageRouter messageRouter;
-
   private final @NonNull PagedResourcesAssembler pagedResourcesAssembler;
-  private final @NonNull Logger log = LoggerFactory.getLogger(getClass());
 
   @PostMapping("/submissionEnvelopes" + Links.UPDATE_SUBMISSION_URL)
   ResponseEntity<?> createUpdateSubmission(
       final PersistentEntityResourceAssembler resourceAssembler) {
     SubmissionEnvelope updateSubmission =
         getSubmissionEnvelopeService().createUpdateSubmissionEnvelope();
+
     return ResponseEntity.ok(resourceAssembler.toFullResource(updateSubmission));
   }
 
@@ -103,6 +103,7 @@ public class SubmissionController {
       final PersistentEntityResourceAssembler resourceAssembler) {
     Page<Project> projects =
         getProjectRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+
     return ResponseEntity.ok(getPagedResourcesAssembler().toResource(projects, resourceAssembler));
   }
 
@@ -116,6 +117,7 @@ public class SubmissionController {
       final PersistentEntityResourceAssembler resourceAssembler) {
     Page<Study> studies =
         getStudyRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+
     return ResponseEntity.ok(getPagedResourcesAssembler().toResource(studies, resourceAssembler));
   }
 
@@ -128,7 +130,8 @@ public class SubmissionController {
       Pageable pageable,
       final PersistentEntityResourceAssembler resourceAssembler) {
     Page<Dataset> datasets =
-        getDatasetRepository().findBySubmissionEnvelopesContaining(submissionEnvelope, pageable);
+        getDatasetRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
+
     return ResponseEntity.ok(getPagedResourcesAssembler().toResource(datasets, resourceAssembler));
   }
 
@@ -139,6 +142,7 @@ public class SubmissionController {
       final PersistentEntityResourceAssembler resourceAssembler) {
     Page<Biomaterial> biomaterials =
         getBiomaterialRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
+
     return ResponseEntity.ok(
         getPagedResourcesAssembler().toResource(biomaterials, resourceAssembler));
   }
@@ -150,6 +154,7 @@ public class SubmissionController {
       final PersistentEntityResourceAssembler resourceAssembler) {
     Page<Process> processes =
         getProcessRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
+
     return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
   }
 
@@ -159,6 +164,7 @@ public class SubmissionController {
       Pageable pageable,
       final PersistentEntityResourceAssembler resourceAssembler) {
     Page<Protocol> protocols = protocolService.retrieve(submissionEnvelope, pageable);
+
     return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
   }
 
@@ -168,6 +174,7 @@ public class SubmissionController {
       Pageable pageable,
       final PersistentEntityResourceAssembler resourceAssembler) {
     Page<File> files = getFileRepository().findBySubmissionEnvelope(submissionEnvelope, pageable);
+
     return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
   }
 
@@ -179,6 +186,7 @@ public class SubmissionController {
     Page<BundleManifest> bundleManifests =
         getBundleManifestRepository()
             .findByEnvelopeUuid(submissionEnvelope.getUuid().getUuid().toString(), pageable);
+
     return ResponseEntity.ok(
         getPagedResourcesAssembler().toResource(bundleManifests, resourceAssembler));
   }
@@ -208,6 +216,7 @@ public class SubmissionController {
         getBiomaterialRepository()
             .findBySubmissionEnvelopeAndValidationState(
                 submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
+
     return ResponseEntity.ok(
         getPagedResourcesAssembler().toResource(biomaterials, resourceAssembler));
   }
@@ -222,6 +231,7 @@ public class SubmissionController {
         getProcessRepository()
             .findBySubmissionEnvelopeAndValidationState(
                 submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
+
     return ResponseEntity.ok(getPagedResourcesAssembler().toResource(processes, resourceAssembler));
   }
 
@@ -235,6 +245,7 @@ public class SubmissionController {
         getProtocolRepository()
             .findBySubmissionEnvelopeAndValidationState(
                 submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
+
     return ResponseEntity.ok(getPagedResourcesAssembler().toResource(protocols, resourceAssembler));
   }
 
@@ -248,6 +259,7 @@ public class SubmissionController {
         getFileRepository()
             .findBySubmissionEnvelopeAndValidationState(
                 submissionEnvelope, ValidationState.valueOf(state.toUpperCase()), pageable);
+
     return ResponseEntity.ok(getPagedResourcesAssembler().toResource(files, resourceAssembler));
   }
 
@@ -267,6 +279,7 @@ public class SubmissionController {
             .orElse(List.of(SubmitAction.ARCHIVE, SubmitAction.EXPORT, SubmitAction.CLEANUP));
 
     submissionEnvelopeService.handleSubmitRequest(submissionEnvelope, submitActions);
+
     return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
   }
 
@@ -279,6 +292,7 @@ public class SubmissionController {
       final PersistentEntityResourceAssembler resourceAssembler) {
     submissionEnvelopeService.handleEnvelopeStateUpdateRequest(
         submissionEnvelope, SubmissionState.ARCHIVED);
+
     return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
   }
 
@@ -290,6 +304,7 @@ public class SubmissionController {
       @PathVariable("id") SubmissionEnvelope submissionEnvelope,
       final PersistentEntityResourceAssembler resourceAssembler) {
     submissionEnvelopeService.exportData(submissionEnvelope);
+
     return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
   }
 
@@ -302,6 +317,7 @@ public class SubmissionController {
       final PersistentEntityResourceAssembler resourceAssembler) {
     submissionEnvelopeService.handleEnvelopeStateUpdateRequest(
         submissionEnvelope, SubmissionState.CLEANUP);
+
     return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
   }
 
@@ -314,6 +330,7 @@ public class SubmissionController {
       final PersistentEntityResourceAssembler resourceAssembler) {
     submissionEnvelopeService.handleEnvelopeStateUpdateRequest(
         submissionEnvelope, SubmissionState.COMPLETE);
+
     return ResponseEntity.accepted().body(resourceAssembler.toFullResource(submissionEnvelope));
   }
 
@@ -323,6 +340,7 @@ public class SubmissionController {
       final PersistentEntityResourceAssembler resourceAssembler) {
     envelope.enactStateTransition(state);
     getSubmissionEnvelopeRepository().save(envelope);
+
     return ResponseEntity.accepted().body(resourceAssembler.toFullResource(envelope));
   }
 
@@ -331,14 +349,6 @@ public class SubmissionController {
       @PathVariable("id") SubmissionEnvelope submissionEnvelope,
       final PersistentEntityResourceAssembler resourceAssembler) {
     return this.enactStateTransition(SubmissionState.DRAFT, submissionEnvelope, resourceAssembler);
-  }
-
-  @PutMapping("/submissionEnvelopes/{id}" + Links.COMMIT_METADATA_VALIDATING_URL)
-  HttpEntity<?> enactValidatingEnvelope(
-      @PathVariable("id") SubmissionEnvelope submissionEnvelope,
-      final PersistentEntityResourceAssembler resourceAssembler) {
-    return this.enactStateTransition(
-        SubmissionState.METADATA_VALIDATING, submissionEnvelope, resourceAssembler);
   }
 
   @PutMapping("/submissionEnvelopes/{id}" + Links.COMMIT_METADATA_INVALID_URL)
@@ -366,6 +376,7 @@ public class SubmissionController {
     log.info(
         String.format("Submission envelope with ID %s was submitted.", submissionEnvelope.getId()));
     submissionEnvelopeService.handleCommitSubmit(submissionEnvelope);
+
     return response;
   }
 
@@ -394,6 +405,7 @@ public class SubmissionController {
     log.info(
         String.format("Submission envelope with ID %s was archived.", submissionEnvelope.getId()));
     submissionEnvelopeService.handleCommitArchived(submissionEnvelope);
+
     return response;
   }
 
@@ -414,6 +426,7 @@ public class SubmissionController {
     log.info(
         String.format("Submission envelope with ID %s was exported.", submissionEnvelope.getId()));
     submissionEnvelopeService.handleCommitExported(submissionEnvelope);
+
     return response;
   }
 
@@ -431,25 +444,6 @@ public class SubmissionController {
       final PersistentEntityResourceAssembler resourceAssembler) {
     return this.enactStateTransition(
         SubmissionState.COMPLETE, submissionEnvelope, resourceAssembler);
-  }
-
-  @PutMapping("/submissionEnvelopes/{id}" + Links.COMMIT_GRAPH_VALIDATION_REQUESTED_URL)
-  HttpEntity<?> enactGraphValidationRequested(
-      @PathVariable("id") SubmissionEnvelope submissionEnvelope,
-      final PersistentEntityResourceAssembler resourceAssembler) {
-    HttpEntity<?> response =
-        this.enactStateTransition(
-            SubmissionState.GRAPH_VALIDATION_REQUESTED, submissionEnvelope, resourceAssembler);
-    messageRouter.routeGraphValidationMessageFor(submissionEnvelope);
-    return response;
-  }
-
-  @PutMapping("/submissionEnvelopes/{id}" + Links.COMMIT_GRAPH_VALIDATING_URL)
-  HttpEntity<?> enactGraphValidating(
-      @PathVariable("id") SubmissionEnvelope submissionEnvelope,
-      final PersistentEntityResourceAssembler resourceAssembler) {
-    return this.enactStateTransition(
-        SubmissionState.GRAPH_VALIDATING, submissionEnvelope, resourceAssembler);
   }
 
   @PutMapping("/submissionEnvelopes/{id}" + Links.COMMIT_GRAPH_VALID_URL)
@@ -476,7 +470,7 @@ public class SubmissionController {
     return ResponseEntity.accepted().body(resourceAssembler.toFullResource(envelope));
   }
 
-  @CheckAllowed(
+  /*@CheckAllowed(
       value = "#submissionEnvelope.isEditable()",
       exception = NotAllowedDuringSubmissionStateException.class)
   @PutMapping("/submissionEnvelopes/{id}" + Links.GRAPH_VALIDATION_REQUESTED_URL)
@@ -486,16 +480,7 @@ public class SubmissionController {
     // Used by the user (UI) to start the validation process
     return this.performStateUpdateRequest(
         SubmissionState.GRAPH_VALIDATION_REQUESTED, submissionEnvelope, resourceAssembler);
-  }
-
-  @PutMapping("/submissionEnvelopes/{id}" + Links.GRAPH_VALIDATING_URL)
-  HttpEntity<?> requestGraphValidating(
-      @PathVariable("id") SubmissionEnvelope submissionEnvelope,
-      final PersistentEntityResourceAssembler resourceAssembler) {
-    // Used by ingest-graph-validator to notify that the graph is validating
-    return this.performStateUpdateRequest(
-        SubmissionState.GRAPH_VALIDATING, submissionEnvelope, resourceAssembler);
-  }
+  }*/
 
   @PutMapping("/submissionEnvelopes/{id}" + Links.GRAPH_VALID_URL)
   HttpEntity<?> requestGraphValid(
@@ -533,6 +518,7 @@ public class SubmissionController {
       @PathVariable("id") SubmissionEnvelope submissionEnvelope,
       @RequestParam(name = "force", required = false, defaultValue = "false") boolean forceDelete) {
     getSubmissionEnvelopeService().deleteSubmission(submissionEnvelope, forceDelete);
+
     return ResponseEntity.accepted().build();
   }
 
@@ -541,6 +527,8 @@ public class SubmissionController {
       @PathVariable("id") SubmissionEnvelope submissionEnvelope) {
     Optional<Instant> lastUpdateDate =
         submissionEnvelopeService.getSubmissionContentLastUpdated(submissionEnvelope);
-    return ResponseEntity.ok(lastUpdateDate.isPresent() ? lastUpdateDate.get().toString() : null);
+
+    return ResponseEntity.ok(
+        Objects.requireNonNull(lastUpdateDate.map(Instant::toString).orElse(null)));
   }
 }

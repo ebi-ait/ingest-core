@@ -3,11 +3,8 @@ package org.humancellatlas.ingest.messaging;
 import static org.humancellatlas.ingest.messaging.Constants.Exchanges.EXPORTER_EXCHANGE;
 import static org.humancellatlas.ingest.messaging.Constants.Routing.*;
 
-import java.net.URI;
 import java.util.Map;
 
-import org.humancellatlas.ingest.config.ConfigurationService;
-import org.humancellatlas.ingest.core.EntityType;
 import org.humancellatlas.ingest.core.MetadataDocument;
 import org.humancellatlas.ingest.core.MetadataDocumentMessageBuilder;
 import org.humancellatlas.ingest.core.web.LinkGenerator;
@@ -20,25 +17,16 @@ import org.humancellatlas.ingest.state.SubmissionState;
 import org.humancellatlas.ingest.state.ValidationState;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.SubmissionEnvelopeMessageBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import lombok.NoArgsConstructor;
 
 @Component
 @NoArgsConstructor
 public class MessageRouter {
-
   @Autowired private MessageSender messageSender;
-
-  @Autowired private ConfigurationService configurationService;
-
   @Autowired private LinkGenerator linkGenerator;
-
-  private final Logger log = LoggerFactory.getLogger(getClass());
 
   /* messages to validator */
   public boolean routeValidationMessageFor(MetadataDocument document) {
@@ -52,86 +40,6 @@ public class MessageRouter {
     } else {
       return false;
     }
-  }
-
-  /* messages to graph validator */
-  public boolean routeGraphValidationMessageFor(SubmissionEnvelope envelope) {
-    if (envelope.allowedSubmissionStateTransitions().contains(SubmissionState.GRAPH_VALIDATING)) {
-      this.messageSender.queueGraphValidationMessage(
-          Constants.Exchanges.VALIDATION_EXCHANGE,
-          Constants.Queues.GRAPH_VALIDATION_QUEUE,
-          messageFor(envelope),
-          System.currentTimeMillis());
-      return true;
-    }
-    return false;
-  }
-
-  /* messages to state tracker */
-  public boolean routeStateTrackingUpdateMessageFor(MetadataDocument document) {
-    // allow projects to be created first before submission envelope
-    if (document.getSubmissionEnvelope() != null || document.getType() != EntityType.PROJECT) {
-      URI documentUpdateUri =
-          UriComponentsBuilder.newInstance()
-              .scheme(configurationService.getStateTrackerScheme())
-              .host(configurationService.getStateTrackerHost())
-              .port(configurationService.getStateTrackerPort())
-              .pathSegment(configurationService.getDocumentStatesUpdatePath())
-              .build()
-              .toUri();
-
-      this.messageSender.queueDocumentStateUpdateMessage(
-          documentUpdateUri,
-          documentStateUpdateMessage(document),
-          document.getUpdateDate().toEpochMilli());
-    }
-    return true;
-  }
-
-  public boolean routeStateTrackingDeleteMessageFor(MetadataDocument document) {
-    if (document.getSubmissionEnvelope() != null) {
-      URI documentDeleteUri =
-          UriComponentsBuilder.newInstance()
-              .scheme(configurationService.getStateTrackerScheme())
-              .host(configurationService.getStateTrackerHost())
-              .port(configurationService.getStateTrackerPort())
-              .pathSegment(configurationService.getDocumentStatesUpdatePath())
-              .queryParam(configurationService.getDocumentIdParamName(), document.getId())
-              .queryParam(
-                  configurationService.getEnvelopeIdParamName(),
-                  document.getSubmissionEnvelope().getId())
-              .build()
-              .toUri();
-      this.messageSender.queueDocumentStateDeleteMessage(
-          documentDeleteUri, document.getUpdateDate().toEpochMilli());
-      return true;
-    } else {
-      log.warn(
-          String.format(
-              "The metadata document '%s' is not linked to a submission envelope",
-              document.getId()));
-      return false;
-    }
-  }
-
-  public boolean routeStateTrackingUpdateMessageForEnvelopeEvent(
-      SubmissionEnvelope envelope, SubmissionState state) {
-    // TODO: call this when a user requests a state change on an envelope
-    this.messageSender.queueStateTrackingMessage(
-        Constants.Exchanges.STATE_TRACKING_EXCHANGE,
-        Constants.Routing.ENVELOPE_STATE_UPDATE,
-        messageFor(envelope, state),
-        envelope.getUpdateDate().toEpochMilli());
-    return true;
-  }
-
-  public boolean routeStateTrackingNewSubmissionEnvelope(SubmissionEnvelope envelope) {
-    this.messageSender.queueStateTrackingMessage(
-        Constants.Exchanges.STATE_TRACKING_EXCHANGE,
-        Constants.Routing.ENVELOPE_CREATE,
-        messageFor(envelope),
-        envelope.getUpdateDate().toEpochMilli());
-    return true;
   }
 
   /* messages to the exporter */
