@@ -161,7 +161,7 @@ public class DatasetService {
     }
   }
 
-  public final Dataset linkFileToDataset(final Dataset dataset, final String id) {
+  public final Dataset addFileToDataset(final Dataset dataset, final String id) {
     final String datasetId = dataset.getId();
 
     datasetRepository
@@ -178,7 +178,7 @@ public class DatasetService {
     return updatedDataset;
   }
 
-  public final Dataset linkBiomaterialToDataset(final Dataset dataset, final String id) {
+  public final Dataset addBiomaterialToDataset(final Dataset dataset, final String id) {
     final String datasetId = dataset.getId();
 
     datasetRepository
@@ -214,7 +214,7 @@ public class DatasetService {
     return datasetRepository.save(dataset);
   }
 
-  public final Dataset linkProcessToDataset(final Dataset dataset, final String id) {
+  public final Dataset addProcessToDataset(final Dataset dataset, final String id) {
     final String datasetId = dataset.getId();
 
     datasetRepository

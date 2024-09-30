@@ -189,7 +189,10 @@ public class BiomaterialController {
   @CheckAllowed(
       value = "#biomaterial.submissionEnvelope.isEditable()",
       exception = NotAllowedDuringSubmissionStateException.class)
-  ResponseEntity<?> deleteBiomaterial(@PathVariable("id") final Biomaterial biomaterial) {
+  ResponseEntity<?> deleteBiomaterial(@PathVariable("id") final Biomaterial biomaterial)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    metadataLinkingService.removeLinks(biomaterial, "inputToProcesses");
+    metadataLinkingService.removeLinks(biomaterial, "derivedByProcesses");
     metadataCrudService.deleteDocument(biomaterial);
 
     return ResponseEntity.noContent().build();

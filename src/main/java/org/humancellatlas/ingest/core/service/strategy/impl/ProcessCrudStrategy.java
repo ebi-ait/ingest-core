@@ -62,9 +62,6 @@ public class ProcessCrudStrategy implements MetadataCrudStrategy<Process> {
 
   @Override
   public void removeLinksToDocument(Process document) {
-    // TODO: handle locally
-    // messageRouter.routeStateTrackingDeleteMessageFor(document);
-
     fileRepository
         .findByInputToProcessesContains(document)
         .forEach(

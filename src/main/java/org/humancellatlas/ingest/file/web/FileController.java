@@ -218,7 +218,10 @@ public class FileController {
       value = "#file.submissionEnvelope.isEditable()",
       exception = NotAllowedDuringSubmissionStateException.class)
   @DeleteMapping(path = "/files/{id}")
-  ResponseEntity<?> deleteFile(@PathVariable("id") final File file) {
+  ResponseEntity<?> deleteFile(@PathVariable("id") final File file)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    metadataLinkingService.removeLinks(file, "inputToProcesses");
+    metadataLinkingService.removeLinks(file, "derivedByProcesses");
     metadataCrudService.deleteDocument(file);
 
     return ResponseEntity.noContent().build();

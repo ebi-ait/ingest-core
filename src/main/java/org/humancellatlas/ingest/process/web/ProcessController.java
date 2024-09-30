@@ -136,7 +136,9 @@ public class ProcessController {
   @CheckAllowed(
       value = "#process.submissionEnvelope.isEditable()",
       exception = NotAllowedDuringSubmissionStateException.class)
-  ResponseEntity<?> deleteProcess(@PathVariable("id") final Process process) {
+  ResponseEntity<?> deleteProcess(@PathVariable("id") final Process process)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    metadataLinkingService.removeLinks(process, "protocols");
     metadataCrudService.deleteDocument(process);
     return ResponseEntity.noContent().build();
   }
@@ -173,12 +175,6 @@ public class ProcessController {
     final Process entity = processService.addInputBundleManifest(analysis, bundleReference);
     final PersistentEntityResource resource = assembler.toFullResource(entity);
     return ResponseEntity.accepted().body(resource);
-  }
-
-  // File References
-  @GetMapping("/processes/{analysis_id}/" + Links.FILE_REF_URL)
-  ResponseEntity<Resource<?>> addOutputFileReference() {
-    return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
   }
 
   @PutMapping("/processes/{analysis_id}/" + Links.FILE_REF_URL)

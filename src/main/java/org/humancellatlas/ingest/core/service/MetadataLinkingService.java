@@ -47,7 +47,7 @@ public class MetadataLinkingService {
   public <S extends MetadataDocument, T extends MetadataDocument> T addLinks(
       T targetEntity, List<S> entitiesToLink, String linkProperty)
       throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    Method method = getGetterMethod(targetEntity, entitiesToLink.get(0).getClass(), linkProperty);
+    Method method = getGetterMethod(targetEntity, linkProperty);
     Set<S> linkedEntities = (Set<S>) invoke(targetEntity, method);
     entitiesToLink.forEach(
         doc -> {
@@ -63,7 +63,7 @@ public class MetadataLinkingService {
   public <S extends MetadataDocument, T extends MetadataDocument> T replaceLinks(
       T targetEntity, List<S> entitiesToLink, String linkProperty)
       throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    Method method = getGetterMethod(targetEntity, entitiesToLink.get(0).getClass(), linkProperty);
+    Method method = getGetterMethod(targetEntity, linkProperty);
     Set<S> linkedEntities = (Set<S>) invoke(targetEntity, method);
     linkedEntities.clear();
     linkedEntities.addAll(entitiesToLink);
@@ -74,10 +74,23 @@ public class MetadataLinkingService {
     return targetEntity;
   }
 
+  public <S extends MetadataDocument, T extends MetadataDocument> T removeLinks(
+      T targetEntity, String linkProperty)
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    Method method = getGetterMethod(targetEntity, linkProperty);
+    Set<S> linkedEntities = (Set<S>) invoke(targetEntity, method);
+    linkedEntities.clear();
+    mongoTemplate.save(targetEntity);
+
+    setValidationStateToDraftIfGraphValid(targetEntity);
+
+    return targetEntity;
+  }
+
   public <S extends MetadataDocument, T extends MetadataDocument> T removeLink(
       T targetEntity, S entityToUnlink, String linkProperty)
       throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    Method method = getGetterMethod(targetEntity, entityToUnlink.getClass(), linkProperty);
+    Method method = getGetterMethod(targetEntity, linkProperty);
     Set<S> linkedEntities = (Set<S>) invoke(targetEntity, method);
     linkedEntities.remove(entityToUnlink);
     mongoTemplate.save(targetEntity);
@@ -88,8 +101,7 @@ public class MetadataLinkingService {
   }
 
   private <T extends MetadataDocument> Method getGetterMethod(
-      T metadataDocument, Class<?> parameterType, String linkProperty)
-      throws NoSuchMethodException {
+      T metadataDocument, String linkProperty) throws NoSuchMethodException {
     return metadataDocument.getClass().getMethod("get" + StringUtils.capitalize(linkProperty));
   }
 
@@ -118,9 +130,8 @@ public class MetadataLinkingService {
             .retryOn(OptimisticLockingFailureException.class)
             .build();
     retry.execute(
-        context -> {
-          return validationStateChangeService.changeValidationState(
-              entity.getType(), entity.getId(), ValidationState.DRAFT);
-        });
+        context ->
+            validationStateChangeService.changeValidationState(
+                entity.getType(), entity.getId(), ValidationState.DRAFT));
   }
 }

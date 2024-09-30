@@ -6,7 +6,6 @@ import java.util.UUID;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.dataset.Dataset;
 import org.humancellatlas.ingest.dataset.DatasetService;
-import org.humancellatlas.ingest.protocol.Protocol;
 import org.humancellatlas.ingest.security.CheckAllowed;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 import org.humancellatlas.ingest.submission.exception.NotAllowedDuringSubmissionStateException;
@@ -128,12 +127,12 @@ public class DatasetController {
    * @return The updated dataset as a resource.
    */
   @PutMapping("/datasets/{dataset_id}/biomaterials/{biomaterial_id}")
-  public ResponseEntity<Resource<?>> linkBiomaterialToDataset(
+  public ResponseEntity<Resource<?>> addBiomaterialToDataset(
       @PathVariable("dataset_id") final Dataset dataset,
       @PathVariable("biomaterial_id") final String id,
       final PersistentEntityResourceAssembler assembler) {
     return ResponseEntity.accepted()
-        .body(assembler.toFullResource(datasetService.linkBiomaterialToDataset(dataset, id)));
+        .body(assembler.toFullResource(datasetService.addBiomaterialToDataset(dataset, id)));
   }
 
   /**
@@ -145,29 +144,12 @@ public class DatasetController {
    * @return The updated dataset as a resource.
    */
   @PutMapping("/datasets/{dataset_id}/files/{file_id}")
-  public ResponseEntity<Resource<?>> linkFileToDataset(
+  public ResponseEntity<Resource<?>> addFileToDataset(
       @PathVariable("dataset_id") final Dataset dataset,
       @PathVariable("file_id") final String id,
       final PersistentEntityResourceAssembler assembler) {
     return ResponseEntity.accepted()
-        .body(assembler.toFullResource(datasetService.linkFileToDataset(dataset, id)));
-  }
-
-  /**
-   * Link a protocol to a dataset.
-   *
-   * @param dataset The dataset.
-   * @param protocol The protocol to link.
-   * @param assembler The resource assembler.
-   * @return The updated dataset as a resource.
-   */
-  @PutMapping("/datasets/{dataset_id}/protocols/{protocol_id}")
-  public ResponseEntity<Resource<?>> linkProtocolToDataset(
-      @PathVariable("dataset_id") final Dataset dataset,
-      @PathVariable("protocol_id") final Protocol protocol,
-      final PersistentEntityResourceAssembler assembler) {
-    return ResponseEntity.accepted()
-        .body(assembler.toFullResource(datasetService.linkProtocolToDataset(dataset, protocol)));
+        .body(assembler.toFullResource(datasetService.addFileToDataset(dataset, id)));
   }
 
   /**
@@ -179,11 +161,11 @@ public class DatasetController {
    * @return The updated dataset as a resource.
    */
   @PutMapping("/datasets/{dataset_id}/processes/{process_id}")
-  public ResponseEntity<Resource<?>> linkProcessToDataset(
+  public ResponseEntity<Resource<?>> addProcessToDataset(
       @PathVariable("dataset_id") final Dataset dataset,
       @PathVariable("process_id") final String id,
       final PersistentEntityResourceAssembler assembler) {
     return ResponseEntity.accepted()
-        .body(assembler.toFullResource(datasetService.linkProcessToDataset(dataset, id)));
+        .body(assembler.toFullResource(datasetService.addProcessToDataset(dataset, id)));
   }
 }

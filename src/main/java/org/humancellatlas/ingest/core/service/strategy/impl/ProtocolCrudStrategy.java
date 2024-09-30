@@ -60,8 +60,6 @@ public class ProtocolCrudStrategy implements MetadataCrudStrategy<Protocol> {
 
   @Override
   public void removeLinksToDocument(Protocol document) {
-    // TODO: handle locally
-    // messageRouter.routeStateTrackingDeleteMessageFor(document);
     processRepository
         .findByProtocolsContains(document)
         .forEach(
