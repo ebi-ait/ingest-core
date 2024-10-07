@@ -58,7 +58,7 @@ public class StudyControllerProfileTest {
       // when:
       when(studyService.update(newStudy, patch)).thenReturn(updatedStudy);
       ResponseEntity<Resource<?>> response =
-          studyController.updateStudy(newStudy, patch, assembler);
+          studyController.updateStudy(newStudy.getId(), patch, assembler);
 
       // then:
       assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -77,7 +77,7 @@ public class StudyControllerProfileTest {
 
       // when:
       ResponseEntity<Resource<?>> response =
-          studyController.updateStudy(newStudy, patch, assembler);
+          studyController.updateStudy(newStudy.getId(), patch, assembler);
 
       // then:
       assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());

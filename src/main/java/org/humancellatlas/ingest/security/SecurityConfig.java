@@ -135,7 +135,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .requestMatchers(SecurityConfig::isSecuredWranglerEndpointFromOutside)
         .hasAnyAuthority(WRANGLER.name(), SERVICE.name())
         .antMatchers(GET, "/**")
-        .authenticated();
+        .permitAll();
   }
 
   private static Boolean isSecuredEndpointFromOutside(HttpServletRequest request) {
