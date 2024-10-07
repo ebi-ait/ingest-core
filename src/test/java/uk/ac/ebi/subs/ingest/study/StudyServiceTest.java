@@ -200,18 +200,18 @@ public class StudyServiceTest {
       // given:
       String studyId = "studyId";
       ObjectNode patch = createUpdatePatch("Updated Study Name");
-      Study newStudy = new Study("Schema URL", "1.0", "Generic", "{\"name\": \"study\"}");
-      Study existingStudy = new Study("Schema URL", "1.0", "Generic", "{\"name\": \"study\"}");
+      Study existingStudy = mock(Study.class);
 
       // and:
+      when(existingStudy.getId()).thenReturn(studyId);
       when(studyRepository.findById(studyId)).thenReturn(Optional.of(existingStudy));
       when(metadataUpdateService.update(existingStudy, patch)).thenReturn(existingStudy);
 
       // when:
-      Study result = studyService.update(newStudy, patch);
+      Study result = studyService.update(existingStudy, patch);
 
       // then:
-      verify(studyRepository).findById(newStudy.getId());
+      verify(studyRepository).findById(studyId);
       verify(metadataUpdateService).update(existingStudy, patch);
       verify(studyEventHandler).updatedStudy(existingStudy);
       assertThat(result).isEqualTo(existingStudy);

@@ -79,6 +79,12 @@ public class StudyService {
     return updatedStudy;
   }
 
+  public Study findById(String studyId) {
+    Optional<Study> studyOptional = studyRepository.findById(studyId);
+    return studyOptional.orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Study not found with ID: " + studyId));
+  }
+
   public final Study replace(final String studyId, final Study updatedStudy) {
     final Optional<Study> existingStudyOptional = studyRepository.findById(studyId);
 
