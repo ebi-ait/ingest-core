@@ -31,6 +31,9 @@ import uk.ac.ebi.subs.ingest.submission.exception.NotAllowedDuringSubmissionStat
 @ExposesResourceFor(Study.class)
 @RequiredArgsConstructor
 @Getter
+/*
+Controller for studies
+ */
 public class StudyController {
   private static final Logger LOGGER = LoggerFactory.getLogger(StudyController.class);
   private final @NonNull StudyService studyService;
