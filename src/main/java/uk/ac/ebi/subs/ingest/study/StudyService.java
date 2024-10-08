@@ -13,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -81,8 +83,10 @@ public class StudyService {
 
   public Study findById(String studyId) {
     Optional<Study> studyOptional = studyRepository.findById(studyId);
-    return studyOptional.orElseThrow(() ->
-            new ResponseStatusException(HttpStatus.NOT_FOUND, "Study not found with ID: " + studyId));
+    return studyOptional.orElseThrow(
+        () ->
+            new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Study not found with ID: " + studyId));
   }
 
   public final Study replace(final String studyId, final Study updatedStudy) {

@@ -80,8 +80,7 @@ public class SchemaTest {
   }
 
   private Schema createMorphicTestSchema(String schemaVersion) {
-    return new Schema("type", schemaVersion, "biomaterial", "", "biomaterial",
-            "https://dev.schema.morphic.bio");
+    return new Schema(
+        "type", schemaVersion, "biomaterial", "", "biomaterial", "https://dev.schema.morphic.bio");
   }
-
 }
