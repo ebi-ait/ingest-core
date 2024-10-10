@@ -172,8 +172,7 @@ public class SchemaServiceTest {
   }
 
   private Schema createMorphicTestSchema(String schemaVersion, String entityType) {
-    return new Schema("type", schemaVersion, entityType, "", entityType,
-            "https://dev.schema.morphic.bio");
+    return new Schema(
+        "type", schemaVersion, entityType, "", entityType, "https://dev.schema.morphic.bio");
   }
-
 }

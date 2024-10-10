@@ -100,11 +100,9 @@ class StudyControllerTest {
       content.put("name", "Test Study");
       content.put("submissionEnvelope", submissionEnvelope.getId());
 
-      Study study = new Study(
-              "https://dev.schema.morphic.bio/type/0.0.1/project/study",
-              "0.0.1",
-              "study",
-              content);
+      Study study =
+          new Study(
+              "https://dev.schema.morphic.bio/type/0.0.1/project/study", "0.0.1", "study", content);
 
       // Link study to submission envelope
       study.getSubmissionEnvelopes().add(submissionEnvelope);

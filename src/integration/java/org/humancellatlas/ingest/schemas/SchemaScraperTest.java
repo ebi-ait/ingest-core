@@ -286,16 +286,15 @@ public class SchemaScraperTest {
   public void testSchemaParse_MorphicSchemas() {
     try {
       // when
-      schemaService.schemaDescriptionFromSchemaUris(Arrays.asList(
+      schemaService.schemaDescriptionFromSchemaUris(
+          Arrays.asList(
               URI.create("type/1.0.0/biomaterial/cell_line"),
               URI.create("type/0.9.0/file/sequence_file"),
-              URI.create("type/2.0.0/project/study")
-      ));
+              URI.create("type/2.0.0/project/study")));
     } catch (Exception e) {
       assert false;
     }
 
     assert true;
   }
-
 }

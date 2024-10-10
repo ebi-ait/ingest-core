@@ -38,12 +38,12 @@ public class StudyController {
 
   @PatchMapping("/studies/{studyId}")
   public ResponseEntity<Resource<?>> updateStudy(
-          @PathVariable("studyId") final String studyId,  // Change to String
-          @RequestBody final ObjectNode patch,
-          final PersistentEntityResourceAssembler assembler) {
+      @PathVariable("studyId") final String studyId, // Change to String
+      @RequestBody final ObjectNode patch,
+      final PersistentEntityResourceAssembler assembler) {
 
     // Fetch the Study object in the service layer based on studyId
-    Study study = studyService.findById(studyId);  // New service method to get Study
+    Study study = studyService.findById(studyId); // New service method to get Study
     return ResponseEntity.ok().body(assembler.toFullResource(studyService.update(study, patch)));
   }
 
