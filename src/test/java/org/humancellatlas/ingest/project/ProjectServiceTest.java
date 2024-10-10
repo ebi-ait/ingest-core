@@ -18,6 +18,7 @@ import org.humancellatlas.ingest.bundle.BundleManifestRepository;
 import org.humancellatlas.ingest.core.Uuid;
 import org.humancellatlas.ingest.core.service.MetadataCrudService;
 import org.humancellatlas.ingest.core.service.MetadataUpdateService;
+import org.humancellatlas.ingest.dataset.DatasetRepository;
 import org.humancellatlas.ingest.project.exception.NonEmptyProject;
 import org.humancellatlas.ingest.schemas.Schema;
 import org.humancellatlas.ingest.schemas.SchemaService;
@@ -46,6 +47,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
       ProjectService.class,
       ProjectRepository.class,
       SubmissionEnvelopeRepository.class,
+            DatasetRepository.class
     })
 public class ProjectServiceTest {
 
@@ -58,6 +60,8 @@ public class ProjectServiceTest {
   @MockBean private SubmissionEnvelopeRepository submissionEnvelopeRepository;
 
   @MockBean private ProjectRepository projectRepository;
+
+  @MockBean private DatasetRepository datasetRepository;
 
   @MockBean private MetadataCrudService metadataCrudService;
 
