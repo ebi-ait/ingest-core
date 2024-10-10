@@ -47,7 +47,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
       ProjectService.class,
       ProjectRepository.class,
       SubmissionEnvelopeRepository.class,
-            DatasetRepository.class
+      DatasetRepository.class
     })
 public class ProjectServiceTest {
 
