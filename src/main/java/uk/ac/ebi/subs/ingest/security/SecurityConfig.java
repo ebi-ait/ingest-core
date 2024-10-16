@@ -120,6 +120,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .authenticated()
         .antMatchers(POST, "/projects")
         .authenticated()
+        .antMatchers(POST, "/studies")
+        .authenticated()
         .antMatchers(POST, "/projects/suggestion")
         .permitAll()
         .antMatchers(POST, "/projects/catalogue")
