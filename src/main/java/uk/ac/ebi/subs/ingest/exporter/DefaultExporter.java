@@ -1,0 +1,148 @@
+package uk.ac.ebi.subs.ingest.exporter;
+
+import static uk.ac.ebi.subs.ingest.export.destination.ExportDestinationName.DCP;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.apache.commons.collections4.ListUtils;
+import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import uk.ac.ebi.subs.ingest.export.destination.ExportDestination;
+import uk.ac.ebi.subs.ingest.export.job.ExportJob;
+import uk.ac.ebi.subs.ingest.export.job.ExportJobRepository;
+import uk.ac.ebi.subs.ingest.export.job.web.ExportJobRequest;
+import uk.ac.ebi.subs.ingest.messaging.MessageRouter;
+import uk.ac.ebi.subs.ingest.process.Process;
+import uk.ac.ebi.subs.ingest.process.ProcessRepository;
+import uk.ac.ebi.subs.ingest.process.ProcessService;
+import uk.ac.ebi.subs.ingest.project.Project;
+import uk.ac.ebi.subs.ingest.project.ProjectRepository;
+import uk.ac.ebi.subs.ingest.submission.SubmissionEnvelope;
+
+@Component
+public class DefaultExporter implements Exporter {
+
+  private final Logger log = LoggerFactory.getLogger(getClass());
+
+  @Autowired private ProcessService processService;
+
+  @Autowired private ProcessRepository processRepository;
+
+  @Autowired private ExportJobRepository exportJobRepository;
+
+  @Autowired private ProjectRepository projectRepository;
+
+  @Autowired private MessageRouter messageRouter;
+
+  /**
+   * Divides a set of process IDs into lists of size partitionSize
+   *
+   * @param processIds
+   * @param partitionSize
+   * @return A collection of partitionSize sized lists of processes
+   */
+  private static List<List<String>> partitionProcessIds(
+      Collection<String> processIds, int partitionSize) {
+    return ListUtils.partition(new ArrayList<>(processIds), partitionSize);
+  }
+
+  @Override
+  public void exportManifests(SubmissionEnvelope envelope) {
+    Collection<String> assayingProcessIds = processService.findAssays(envelope);
+
+    log.info(
+        String.format(
+            "Found %s assays processes for envelope with ID %s",
+            assayingProcessIds.size(), envelope.getId()));
+
+    int totalCount = assayingProcessIds.size();
+    ExperimentProcess.IndexCounter counter = new ExperimentProcess.IndexCounter(totalCount);
+
+    int partitionSize = 500;
+    partitionProcessIds(assayingProcessIds, partitionSize).stream()
+        .flatMap(processIdBatch -> processService.getProcesses(processIdBatch))
+        .map(process -> ExperimentProcess.from(process, counter))
+        .forEach(messageRouter::sendManifestForExport);
+  }
+
+  @Override
+  public void exportData(SubmissionEnvelope envelope) {
+    Project project =
+        projectRepository.findBySubmissionEnvelopesContains(envelope).findFirst().orElseThrow();
+    var destinationContext = new JSONObject();
+    destinationContext.put("projectUuid", project.getUuid().getUuid().toString());
+
+    var exportJobContext = new JSONObject();
+    exportJobContext.put("dataFileTransfer", false);
+    ExportJob exportJob = createDcpExportJob(envelope, destinationContext, exportJobContext);
+
+    var messageContext = new JSONObject();
+    messageRouter.sendSubmissionForDataExport(exportJob, messageContext);
+  }
+
+  @Override
+  public void generateSpreadsheet(SubmissionEnvelope submissionEnvelope) {
+    Project project =
+        projectRepository
+            .findBySubmissionEnvelopesContains(submissionEnvelope)
+            .findFirst()
+            .orElseThrow();
+    var destinationContext = new JSONObject();
+    destinationContext.put("projectUuid", project.getUuid().getUuid().toString());
+
+    var exportJob = createDcpExportJob(submissionEnvelope, destinationContext, new JSONObject());
+    generateSpreadsheet(exportJob);
+  }
+
+  @Override
+  public void exportMetadata(ExportJob exportJob) {
+    var submission = exportJob.getSubmission();
+    Collection<String> assayingProcessIds = processService.findAssays(submission);
+    exportJob.getContext().put("totalAssayCount", assayingProcessIds.size());
+    exportJobRepository.save(exportJob);
+    updateDcpVersionAndSendMessageForEachProcess(assayingProcessIds, exportJob);
+  }
+
+  private ExportJob createDcpExportJob(
+      SubmissionEnvelope submissionEnvelope,
+      JSONObject destinationContext,
+      JSONObject exportJobContext) {
+    ExportDestination exportDestination = new ExportDestination(DCP, "v2", destinationContext);
+    ExportJobRequest exportJobRequest = new ExportJobRequest(exportDestination, exportJobContext);
+    ExportJob newExportJob =
+        ExportJob.builder()
+            .submission(submissionEnvelope)
+            .destination(exportJobRequest.getDestination())
+            .context(exportJobRequest.getContext())
+            .build();
+    return exportJobRepository.insert(newExportJob);
+  }
+
+  private void updateDcpVersionAndSendMessageForEachProcess(
+      Collection<String> assayingProcessIds, ExportJob exportJob) {
+    int totalCount = assayingProcessIds.size();
+    ExperimentProcess.IndexCounter counter = new ExperimentProcess.IndexCounter(totalCount);
+
+    int partitionSize = 500;
+    partitionProcessIds(assayingProcessIds, partitionSize).stream()
+        .flatMap(processIdBatch -> processService.getProcesses(processIdBatch))
+        .map(process -> (Process) process.setDcpVersion(exportJob.getCreatedDate()))
+        .map(process -> processRepository.save(process))
+        .map(process -> ExperimentProcess.from(process, counter))
+        .forEach(exportData -> messageRouter.sendExperimentForExport(exportData, exportJob, null));
+  }
+
+  @Override
+  public void generateSpreadsheet(ExportJob exportJob) {
+    exportJob.getContext().put("spreadsheetGeneration", false);
+    exportJobRepository.save(exportJob);
+    var messageContext = new JSONObject();
+    messageRouter.sendGenerateSpreadsheet(exportJob, messageContext);
+  }
+}
