@@ -1,29 +1,17 @@
-package org.humancellatlas.ingest.project;
+package uk.ac.ebi.subs.ingest.project;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.humancellatlas.ingest.audit.AuditType.STATUS_UPDATED;
-import static org.humancellatlas.ingest.project.WranglingState.ELIGIBLE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static uk.ac.ebi.subs.ingest.audit.AuditType.STATUS_UPDATED;
+import static uk.ac.ebi.subs.ingest.project.WranglingState.ELIGIBLE;
 
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
-import org.humancellatlas.ingest.audit.AuditEntry;
-import org.humancellatlas.ingest.audit.AuditEntryService;
-import org.humancellatlas.ingest.bundle.BundleManifestRepository;
-import org.humancellatlas.ingest.core.Uuid;
-import org.humancellatlas.ingest.core.service.MetadataCrudService;
-import org.humancellatlas.ingest.core.service.MetadataUpdateService;
-import org.humancellatlas.ingest.dataset.DatasetRepository;
-import org.humancellatlas.ingest.project.exception.NonEmptyProject;
-import org.humancellatlas.ingest.schemas.Schema;
-import org.humancellatlas.ingest.schemas.SchemaService;
-import org.humancellatlas.ingest.submission.SubmissionEnvelope;
-import org.humancellatlas.ingest.submission.SubmissionEnvelopeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -40,6 +28,19 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import uk.ac.ebi.subs.ingest.audit.AuditEntry;
+import uk.ac.ebi.subs.ingest.audit.AuditEntryService;
+import uk.ac.ebi.subs.ingest.bundle.BundleManifestRepository;
+import uk.ac.ebi.subs.ingest.core.Uuid;
+import uk.ac.ebi.subs.ingest.core.service.MetadataCrudService;
+import uk.ac.ebi.subs.ingest.core.service.MetadataUpdateService;
+import uk.ac.ebi.subs.ingest.dataset.DatasetRepository;
+import uk.ac.ebi.subs.ingest.project.exception.NonEmptyProject;
+import uk.ac.ebi.subs.ingest.schemas.Schema;
+import uk.ac.ebi.subs.ingest.schemas.SchemaService;
+import uk.ac.ebi.subs.ingest.submission.SubmissionEnvelope;
+import uk.ac.ebi.subs.ingest.submission.SubmissionEnvelopeRepository;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(
