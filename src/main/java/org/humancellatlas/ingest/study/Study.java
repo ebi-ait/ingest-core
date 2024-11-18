@@ -47,9 +47,6 @@ public class Study extends MetadataDocument implements DescriptiveSchema {
   @Field("schema_type")
   private String schemaType;
 
-  @Field("accessions")
-  private List<String> accessions;
-
   @JsonCreator
   public Study(
       @JsonProperty("described_by") String describedBy,
@@ -60,7 +57,6 @@ public class Study extends MetadataDocument implements DescriptiveSchema {
     this.describedBy = describedBy;
     this.schemaVersion = schemaVersion;
     this.schemaType = schemaType;
-    this.accessions = accessions != null ? accessions : List.of();
   }
 
   public void addToSubmissionEnvelopes(@NotNull SubmissionEnvelope submissionEnvelope) {
@@ -96,14 +92,6 @@ public class Study extends MetadataDocument implements DescriptiveSchema {
   @Override
   public void setSchemaType(String schemaType) {
     this.schemaType = schemaType;
-  }
-
-  public List<String> getAccessions() {
-    return accessions;
-  }
-
-  public void setAccessions(List<String> accessions) {
-    this.accessions = accessions;
   }
 
   public void addDataset(final Dataset dataset) {
