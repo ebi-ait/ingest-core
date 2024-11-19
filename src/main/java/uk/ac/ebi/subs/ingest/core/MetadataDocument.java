@@ -46,7 +46,7 @@ public abstract class MetadataDocument extends AbstractEntity {
   @Field("accessions")
   private List<String> accessions;
 
-//  private @Setter Accession accession;
+  //  private @Setter Accession accession;
 
   private @Setter ValidationState validationState;
 

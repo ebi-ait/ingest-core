@@ -22,10 +22,10 @@ public class UploadAreaUtil {
 
     try {
       final AmazonS3 s3Client =
-          AmazonS3ClientBuilder.standard().withRegion(Regions.EU_WEST_2).build();
+          AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
 
       if (!s3Client.doesBucketExistV2(datasetId)) {
-        s3Client.createBucket(new CreateBucketRequest(datasetId, Region.EU_London));
+        s3Client.createBucket(new CreateBucketRequest(datasetId));
         dataset.setComment(
             "Upload area created for this dataset with name "
                 + dataset.getId()
@@ -50,24 +50,27 @@ public class UploadAreaUtil {
   public void deleteDataFilesAndUploadArea(final String datasetId) {
     try {
       final AmazonS3 s3Client =
-          AmazonS3ClientBuilder.standard().withRegion(Regions.EU_WEST_2).build();
+          AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
 
       if (s3Client.doesBucketExistV2(datasetId)) {
         // List and delete all objects in the bucket
-        ListObjectsV2Request listObjectsV2Request =
+        final ListObjectsV2Request listObjectsV2Request =
             new ListObjectsV2Request().withBucketName(datasetId);
         ListObjectsV2Result result;
+
         do {
           result = s3Client.listObjectsV2(listObjectsV2Request);
 
           for (final S3ObjectSummary objectSummary : result.getObjectSummaries()) {
             s3Client.deleteObject(new DeleteObjectRequest(datasetId, objectSummary.getKey()));
           }
+
           listObjectsV2Request.setContinuationToken(result.getNextContinuationToken());
         } while (result.isTruncated());
 
         // Delete the bucket
         s3Client.deleteBucket(datasetId);
+
         log.info("Bucket and all contents deleted for dataset with ID " + datasetId);
       } else {
         log.info("Bucket does not exist for dataset with ID " + datasetId);
