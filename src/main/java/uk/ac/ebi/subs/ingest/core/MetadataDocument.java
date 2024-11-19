@@ -43,7 +43,10 @@ public abstract class MetadataDocument extends AbstractEntity {
   @DBRef(lazy = true)
   private SubmissionEnvelope submissionEnvelope;
 
-  private @Setter Accession accession;
+  @Field("accessions")
+  private List<String> accessions;
+
+//  private @Setter Accession accession;
 
   private @Setter ValidationState validationState;
 
@@ -125,5 +128,13 @@ public abstract class MetadataDocument extends AbstractEntity {
       this.dcpVersion = dcpVersion;
     }
     return this;
+  }
+
+  public List<String> getAccessions() {
+    return accessions;
+  }
+
+  public void setAccessions(List<String> accessions) {
+    this.accessions = accessions;
   }
 }

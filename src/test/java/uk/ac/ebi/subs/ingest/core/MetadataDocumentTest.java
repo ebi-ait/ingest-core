@@ -2,6 +2,7 @@ package uk.ac.ebi.subs.ingest.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
@@ -90,5 +91,21 @@ public class MetadataDocumentTest {
       super(type, content);
       this.id = id;
     }
+  }
+
+  @Test
+  @DisplayName("Is Equal with matching accessions")
+  public void testAccessionsEquality() {
+    // given
+    var accessions1 = List.of("ENA:12345", "ENA:67890");
+    var accessions2 = List.of("ENA:12345", "ENA:67890");
+
+    MetadataDocument doc1 = new DocumentTest(EntityType.PROJECT, "Identifier", Map.of());
+    doc1.setAccessions(accessions1);
+    MetadataDocument doc2 = new DocumentTest(EntityType.PROJECT, "Identifier", Map.of());
+    doc2.setAccessions(accessions2);
+
+    // then
+    assertThat(doc1).isEqualTo(doc2);
   }
 }
