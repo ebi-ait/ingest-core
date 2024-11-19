@@ -241,8 +241,7 @@ public class StudyServiceTest {
               () ->
                   studyService.update(
                       new Study("Schema URL", "1.0", "Generic", "{\"name\": \"study\"}"), patch));
-      assertThat("404 NOT_FOUND")
-          .isEqualTo(exception.getMessage());
+      assertThat("404 NOT_FOUND").isEqualTo(exception.getMessage());
 
       // verify that other methods are not called
       verify(metadataCrudService, never()).deleteDocument(any());

@@ -238,45 +238,45 @@ public class SubmissionEnvelopeServiceTest {
   }
 
   @ParameterizedTest
-//  @EnumSource(
-//      value = SubmissionState.class,
-//      names = {
-//        "PENDING",
-//        "DRAFT",
-//        "METADATA_VALIDATING",
-//        "METADATA_VALID",
-//        "METADATA_INVALID",
-//        "GRAPH_VALIDATION_REQUESTED",
-//        "GRAPH_VALIDATING",
-//        "GRAPH_VALID",
-//        "GRAPH_INVALID",
-//        "SUBMITTED",
-//        "PROCESSING",
-//        "ARCHIVING",
-//        "ARCHIVED",
-//        "EXPORTING",
-//        "EXPORTED",
-//        "CLEANUP",
-//        "COMPLETE"
-//      })
+  //  @EnumSource(
+  //      value = SubmissionState.class,
+  //      names = {
+  //        "PENDING",
+  //        "DRAFT",
+  //        "METADATA_VALIDATING",
+  //        "METADATA_VALID",
+  //        "METADATA_INVALID",
+  //        "GRAPH_VALIDATION_REQUESTED",
+  //        "GRAPH_VALIDATING",
+  //        "GRAPH_VALID",
+  //        "GRAPH_INVALID",
+  //        "SUBMITTED",
+  //        "PROCESSING",
+  //        "ARCHIVING",
+  //        "ARCHIVED",
+  //        "EXPORTING",
+  //        "EXPORTED",
+  //        "CLEANUP",
+  //        "COMPLETE"
+  //      })
   @EnumSource(
-          value = SubmissionState.class,
-          names = {
-                  "PENDING",
-                  "DRAFT",
-                  "METADATA_VALID",
-                  "METADATA_INVALID",
-                  "GRAPH_VALID",
-                  "GRAPH_INVALID",
-                  "SUBMITTED",
-                  "PROCESSING",
-                  "ARCHIVING",
-                  "ARCHIVED",
-                  "EXPORTING",
-                  "EXPORTED",
-                  "CLEANUP",
-                  "COMPLETE"
-          })
+      value = SubmissionState.class,
+      names = {
+        "PENDING",
+        "DRAFT",
+        "METADATA_VALID",
+        "METADATA_INVALID",
+        "GRAPH_VALID",
+        "GRAPH_INVALID",
+        "SUBMITTED",
+        "PROCESSING",
+        "ARCHIVING",
+        "ARCHIVED",
+        "EXPORTING",
+        "EXPORTED",
+        "CLEANUP",
+        "COMPLETE"
+      })
   public void testRedundantHandleEnvelopeStateUpdateRequest(SubmissionState state) {
     // Given
     var submissionEnvelope = new SubmissionEnvelope();
