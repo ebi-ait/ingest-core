@@ -72,10 +72,19 @@ public class StudyTest {
 
     assertThat(study.isEditable()).isTrue();
 
-    submissionOne.enactStateTransition(SubmissionState.GRAPH_VALID);
+    submissionOne.enactStateTransition(SubmissionState.PROCESSING);
+    assertThat(study.isEditable()).isFalse();
+
+    submissionOne.enactStateTransition(SubmissionState.DRAFT);
     assertThat(study.isEditable()).isTrue();
 
-    submissionTwo.enactStateTransition(SubmissionState.GRAPH_VALID);
+    submissionTwo.enactStateTransition(SubmissionState.SUBMITTED);
     assertThat(study.isEditable()).isFalse();
+
+//    submissionOne.enactStateTransition(SubmissionState.GRAPH_VALID);
+//    assertThat(study.isEditable()).isTrue();
+//
+//    submissionTwo.enactStateTransition(SubmissionState.GRAPH_VALID);
+//    assertThat(study.isEditable()).isFalse();
   }
 }

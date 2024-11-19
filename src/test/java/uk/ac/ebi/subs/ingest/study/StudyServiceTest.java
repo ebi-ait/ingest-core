@@ -241,7 +241,7 @@ public class StudyServiceTest {
               () ->
                   studyService.update(
                       new Study("Schema URL", "1.0", "Generic", "{\"name\": \"study\"}"), patch));
-      assertThat("404 NOT_FOUND \"Study not found with ID: null\"")
+      assertThat("404 NOT_FOUND")
           .isEqualTo(exception.getMessage());
 
       // verify that other methods are not called

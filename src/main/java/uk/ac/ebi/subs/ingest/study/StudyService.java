@@ -70,7 +70,7 @@ public class StudyService {
     if (existingStudyOptional.isEmpty()) {
       log.warn("Attempted to update study with ID: {} but not found.", studyId);
 
-      throw new ResourceNotFoundException("Study: " + studyId);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
     final Study existingStudy = existingStudyOptional.get();
@@ -94,7 +94,7 @@ public class StudyService {
 
     if (existingStudyOptional.isEmpty()) {
       log.warn("Study not found with ID: {}", studyId);
-      throw new ResourceNotFoundException("Study: " + studyId);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
     studyRepository.save(updatedStudy);
@@ -108,7 +108,7 @@ public class StudyService {
 
     if (deleteStudyOptional.isEmpty()) {
       log.warn("Attempted to delete study with ID: {} but not found.", studyId);
-      throw new ResourceNotFoundException("Study: " + studyId);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
     final Study deleteStudy = deleteStudyOptional.get();

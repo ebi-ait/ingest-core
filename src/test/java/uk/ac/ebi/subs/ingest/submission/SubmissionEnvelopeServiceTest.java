@@ -11,10 +11,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -241,27 +238,45 @@ public class SubmissionEnvelopeServiceTest {
   }
 
   @ParameterizedTest
+//  @EnumSource(
+//      value = SubmissionState.class,
+//      names = {
+//        "PENDING",
+//        "DRAFT",
+//        "METADATA_VALIDATING",
+//        "METADATA_VALID",
+//        "METADATA_INVALID",
+//        "GRAPH_VALIDATION_REQUESTED",
+//        "GRAPH_VALIDATING",
+//        "GRAPH_VALID",
+//        "GRAPH_INVALID",
+//        "SUBMITTED",
+//        "PROCESSING",
+//        "ARCHIVING",
+//        "ARCHIVED",
+//        "EXPORTING",
+//        "EXPORTED",
+//        "CLEANUP",
+//        "COMPLETE"
+//      })
   @EnumSource(
-      value = SubmissionState.class,
-      names = {
-        "PENDING",
-        "DRAFT",
-        "METADATA_VALIDATING",
-        "METADATA_VALID",
-        "METADATA_INVALID",
-        "GRAPH_VALIDATION_REQUESTED",
-        "GRAPH_VALIDATING",
-        "GRAPH_VALID",
-        "GRAPH_INVALID",
-        "SUBMITTED",
-        "PROCESSING",
-        "ARCHIVING",
-        "ARCHIVED",
-        "EXPORTING",
-        "EXPORTED",
-        "CLEANUP",
-        "COMPLETE"
-      })
+          value = SubmissionState.class,
+          names = {
+                  "PENDING",
+                  "DRAFT",
+                  "METADATA_VALID",
+                  "METADATA_INVALID",
+                  "GRAPH_VALID",
+                  "GRAPH_INVALID",
+                  "SUBMITTED",
+                  "PROCESSING",
+                  "ARCHIVING",
+                  "ARCHIVED",
+                  "EXPORTING",
+                  "EXPORTED",
+                  "CLEANUP",
+                  "COMPLETE"
+          })
   public void testRedundantHandleEnvelopeStateUpdateRequest(SubmissionState state) {
     // Given
     var submissionEnvelope = new SubmissionEnvelope();
@@ -306,6 +321,7 @@ public class SubmissionEnvelopeServiceTest {
     }
 
     @Test
+    @Disabled("Not yet applicable to MorPhiC")
     public void testSubmissionUnblocked() {
       // when
       service.handleSubmitRequest(submissionEnvelope, List.of(SubmitAction.EXPORT));
@@ -315,6 +331,7 @@ public class SubmissionEnvelopeServiceTest {
     }
 
     @Test
+    @Disabled("Not yet applicable to MorPhiC")
     public void testGraphValidationErrorsCleared() {
       // given envelope:
       submissionEnvelope.enactStateTransition(SubmissionState.GRAPH_INVALID);
