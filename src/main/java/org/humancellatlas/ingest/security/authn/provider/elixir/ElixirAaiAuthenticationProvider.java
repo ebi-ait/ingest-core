@@ -16,11 +16,13 @@ import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.humancellatlas.ingest.security.ElixirConfig.ELIXIR;
@@ -35,6 +37,11 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
     private final AccountRepository accountRepository;
 
     private final WebClient webClient;
+
+    // Counters for periodic logging
+    private static final AtomicInteger userInfoRequestCounter = new AtomicInteger(0);
+    private static final AtomicInteger successCount = new AtomicInteger(0);
+    private static final AtomicInteger failureCount = new AtomicInteger(0);
 
     public ElixirAaiAuthenticationProvider(@Qualifier(ELIXIR) JwtVerifierResolver jwtVerifierResolver,
             AccountRepository accountRepository, WebClient.Builder webCliBuilder) {
@@ -51,8 +58,12 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         try {
             JwtAuthentication jwt = (JwtAuthentication) authentication;
             String token = jwt.getToken();
+            LOGGER.info("Authentication attempt started for token: {}", truncateToken(token));
+
             String issuer = JWT.decode(token).getIssuer();
             verifyIssuer(issuer);
+
+            LOGGER.info("Issuer verified: {}", issuer);
 
             JWTVerifier jwtVerifier = jwtVerifierResolver.resolve(jwt.getToken());
             DelegatingJwtAuthentication verifiedAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
@@ -60,34 +71,70 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
             token = verifiedAuth.getToken();
             UserInfo userInfo = retrieveUserInfo(token);
 
+            LOGGER.info("UserInfo retrieved successfully for subject ID: {}", userInfo.getSubjectId());
+
             Account account = accountRepository.findByProviderReference(userInfo.getSubjectId());
             OpenIdAuthentication openIdAuth = new OpenIdAuthentication(account);
             openIdAuth.authenticateWith(userInfo);
+
+            LOGGER.info("Authentication succeeded for subject ID: {}", userInfo.getSubjectId());
+            successCount.incrementAndGet();
+
             return openIdAuth;
         } catch (TokenExpiredException e) {
+            LOGGER.error("Token expired: {}", e.getMessage());
+            failureCount.incrementAndGet();
             throw new JwtVerificationFailed(e);
         } catch (JWTVerificationException e) {
             LOGGER.error("JWT verification failed: {}", e.getMessage());
+            failureCount.incrementAndGet();
             throw new JwtVerificationFailed(e);
         }
     }
 
     private UserInfo retrieveUserInfo(String token) {
-        return webClient.get()
-                .uri(String.format("%s/userinfo", jwtVerifierResolver.getIssuer()))
-                .header(AUTHORIZATION, String.format("Bearer %s", token))
-                .retrieve()
-                .bodyToMono(UserInfo.class).block();
+        long startTime = System.currentTimeMillis();
+        userInfoRequestCounter.incrementAndGet();
+
+        try {
+            UserInfo userInfo = webClient.get()
+                    .uri(String.format("%s/userinfo", jwtVerifierResolver.getIssuer()))
+                    .header(AUTHORIZATION, String.format("Bearer %s", token))
+                    .retrieve()
+                    .bodyToMono(UserInfo.class)
+                    .block();
+
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            LOGGER.info("Successfully fetched UserInfo in {} ms for token: {}", elapsedTime, truncateToken(token));
+            return userInfo;
+        } catch (Exception e) {
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            LOGGER.error("Failed to fetch UserInfo in {} ms for token: {}", elapsedTime, truncateToken(token), e);
+            throw e;
+        }
     }
 
     private void verifyIssuer(String issuer) {
+        LOGGER.info("Verifying issuer: {}", issuer);
         if (!issuer.contains("elixir")) {
-            throw new UnlistedJwtIssuer(String.format("Not an Elxir AAI issued token: %s", issuer), issuer);
+            LOGGER.error("Unlisted issuer: {}", issuer);
+            throw new UnlistedJwtIssuer(String.format("Not an Elixir AAI issued token: %s", issuer), issuer);
         }
     }
 
     @Override
     public boolean supports(Class<?> authentication) {
         return JwtAuthentication.class.isAssignableFrom(authentication);
+    }
+
+    private String truncateToken(String token) {
+        return token.substring(0, Math.min(10, token.length()));
+    }
+
+    // Periodic summary logs
+    @Scheduled(fixedRate = 60000)
+    public void logPeriodicSummary() {
+        LOGGER.info("Summary in the past minute - UserInfo requests: {}, Successes: {}, Failures: {}",
+                userInfoRequestCounter.getAndSet(0), successCount.getAndSet(0), failureCount.getAndSet(0));
     }
 }
