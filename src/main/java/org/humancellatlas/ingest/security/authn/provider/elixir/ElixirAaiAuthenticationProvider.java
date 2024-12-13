@@ -45,10 +45,13 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
     private static final AtomicInteger userInfoRequestCounter = new AtomicInteger(0);
     private static final AtomicInteger successCount = new AtomicInteger(0);
     private static final AtomicInteger failureCount = new AtomicInteger(0);
+    private static final AtomicInteger cacheHits = new AtomicInteger(0);
+    private static final AtomicInteger cacheMisses = new AtomicInteger(0);
 
+    // Cache for UserInfo with timestamps
     private final Map<String, UserInfo> userInfoCache = new ConcurrentHashMap<>();
-    private final long cacheTTL = 60000; // Cache entries expire after 60 seconds
     private final Map<String, Long> cacheTimestamps = new ConcurrentHashMap<>();
+    private static final long DEFAULT_CACHE_TTL = 60000; // Default TTL: 60 seconds
 
     public ElixirAaiAuthenticationProvider(@Qualifier(ELIXIR) JwtVerifierResolver jwtVerifierResolver,
                                            AccountRepository accountRepository, WebClient.Builder webCliBuilder) {
@@ -106,18 +109,22 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         // Check if the UserInfo is in cache and still valid
         if (userInfoCache.containsKey(token)) {
             Long timestamp = cacheTimestamps.get(token);
-            if (timestamp != null && (System.currentTimeMillis() - timestamp) < cacheTTL) {
+            if (timestamp != null && isCacheValid(token, timestamp)) {
                 LOGGER.info("Fetched UserInfo from cache for token: {}", truncateToken(token));
+                cacheHits.incrementAndGet();
                 return userInfoCache.get(token);
             } else {
                 // Remove expired entry from cache
                 userInfoCache.remove(token);
                 cacheTimestamps.remove(token);
                 LOGGER.info("Cache expired for token: {}", truncateToken(token));
+                cacheMisses.incrementAndGet();
             }
+        } else {
+            cacheMisses.incrementAndGet();
         }
 
-        // If not in cache or expired, fetch from LS
+        // Fetch from LS if not in cache or expired
         try {
             UserInfo userInfo = webClient.get()
                     .uri(String.format("%s/userinfo", jwtVerifierResolver.getIssuer()))
@@ -129,15 +136,32 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
             long elapsedTime = System.currentTimeMillis() - startTime;
             LOGGER.info("Successfully fetched UserInfo in {} ms for token: {}", elapsedTime, truncateToken(token));
 
-            // Update cache
-            userInfoCache.put(token, userInfo);
+            // Update cache with dynamic TTL based on token expiry
+            long expiryTime = getTokenExpiry(token);
             cacheTimestamps.put(token, System.currentTimeMillis());
+            userInfoCache.put(token, userInfo);
+
+            LOGGER.info("Updated cache for token: {}, Cache expiry in {} ms", truncateToken(token), expiryTime - System.currentTimeMillis());
 
             return userInfo;
         } catch (Exception e) {
             long elapsedTime = System.currentTimeMillis() - startTime;
             LOGGER.error("Failed to fetch UserInfo in {} ms for token: {}", elapsedTime, truncateToken(token), e);
             throw e;
+        }
+    }
+
+    private boolean isCacheValid(String token, Long timestamp) {
+        long expiryTime = getTokenExpiry(token);
+        return (System.currentTimeMillis() - timestamp) < Math.min(expiryTime - System.currentTimeMillis(), DEFAULT_CACHE_TTL);
+    }
+
+    private long getTokenExpiry(String token) {
+        try {
+            return JWT.decode(token).getExpiresAt().getTime();
+        } catch (Exception e) {
+            LOGGER.warn("Failed to retrieve token expiry. Using default cache TTL.", e);
+            return System.currentTimeMillis() + DEFAULT_CACHE_TTL;
         }
     }
 
@@ -160,7 +184,28 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
 
     @Scheduled(fixedRate = 60000)
     public void logPeriodicSummary() {
-        LOGGER.info("Summary in the past minute - UserInfo requests: {}, Successes: {}, Failures: {}",
-                userInfoRequestCounter.getAndSet(0), successCount.getAndSet(0), failureCount.getAndSet(0));
+        int userInfoRequests = userInfoRequestCounter.getAndSet(0);
+        int successes = successCount.getAndSet(0);
+        int failures = failureCount.getAndSet(0);
+        int hits = cacheHits.getAndSet(0);
+        int misses = cacheMisses.getAndSet(0);
+        int totalCacheAccesses = hits + misses;
+
+        if (userInfoRequests > 0) {
+            LOGGER.info("Periodic Summary (Last Minute):");
+            LOGGER.info("- Total UserInfo Requests: {}", userInfoRequests);
+            LOGGER.info("- Successful Requests: {}", successes);
+            LOGGER.info("- Failed Requests: {}", failures);
+            LOGGER.info("- Success Rate: {:.2f}%", calculateRate(successes, userInfoRequests));
+            LOGGER.info("- Cache Hits: {}", hits);
+            LOGGER.info("- Cache Misses: {}", misses);
+            LOGGER.info("- Cache Hit Rate: {:.2f}%", calculateRate(hits, totalCacheAccesses));
+        } else {
+            LOGGER.info("No UserInfo requests made in the last minute.");
+        }
+    }
+
+    private double calculateRate(int part, int total) {
+        return (total > 0) ? (part * 100.0 / total) : 0.0;
     }
 }
