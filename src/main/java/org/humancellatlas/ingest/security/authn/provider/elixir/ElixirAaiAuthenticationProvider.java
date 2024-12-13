@@ -192,16 +192,19 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         int totalCacheAccesses = hits + misses;
 
         if (userInfoRequests > 0) {
+            double successRate = calculateRate(successes, userInfoRequests);
+            double cacheHitRate = calculateRate(hits, totalCacheAccesses);
+
             LOGGER.info("Periodic Summary (Last Minute):");
             LOGGER.info("- Total UserInfo Requests: {}", userInfoRequests);
             LOGGER.info("- Successful Requests: {}", successes);
             LOGGER.info("- Failed Requests: {}", failures);
-            LOGGER.info("- Success Rate: {:.2f}%", calculateRate(successes, userInfoRequests));
+            LOGGER.info("- Success Rate: {}%", String.format("%.2f", successRate));
             LOGGER.info("- Cache Hits: {}", hits);
             LOGGER.info("- Cache Misses: {}", misses);
-            LOGGER.info("- Cache Hit Rate: {:.2f}%", calculateRate(hits, totalCacheAccesses));
+            LOGGER.info("- Cache Hit Rate: {}%", String.format("%.2f", cacheHitRate));
         } else {
-            LOGGER.info("No UserInfo requests made in the last minute.");
+            LOGGER.info("No UserInfo requests were made in the last minute.");
         }
     }
 
