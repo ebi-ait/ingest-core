@@ -22,6 +22,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
@@ -43,8 +46,12 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
     private static final AtomicInteger successCount = new AtomicInteger(0);
     private static final AtomicInteger failureCount = new AtomicInteger(0);
 
+    private final Map<String, UserInfo> userInfoCache = new ConcurrentHashMap<>();
+    private final long cacheTTL = 60000; // Cache entries expire after 60 seconds
+    private final Map<String, Long> cacheTimestamps = new ConcurrentHashMap<>();
+
     public ElixirAaiAuthenticationProvider(@Qualifier(ELIXIR) JwtVerifierResolver jwtVerifierResolver,
-            AccountRepository accountRepository, WebClient.Builder webCliBuilder) {
+                                           AccountRepository accountRepository, WebClient.Builder webCliBuilder) {
         this.jwtVerifierResolver = jwtVerifierResolver;
         this.accountRepository = accountRepository;
         webClient = webCliBuilder.build();
@@ -96,6 +103,21 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         long startTime = System.currentTimeMillis();
         userInfoRequestCounter.incrementAndGet();
 
+        // Check if the UserInfo is in cache and still valid
+        if (userInfoCache.containsKey(token)) {
+            Long timestamp = cacheTimestamps.get(token);
+            if (timestamp != null && (System.currentTimeMillis() - timestamp) < cacheTTL) {
+                LOGGER.info("Fetched UserInfo from cache for token: {}", truncateToken(token));
+                return userInfoCache.get(token);
+            } else {
+                // Remove expired entry from cache
+                userInfoCache.remove(token);
+                cacheTimestamps.remove(token);
+                LOGGER.info("Cache expired for token: {}", truncateToken(token));
+            }
+        }
+
+        // If not in cache or expired, fetch from LS
         try {
             UserInfo userInfo = webClient.get()
                     .uri(String.format("%s/userinfo", jwtVerifierResolver.getIssuer()))
@@ -106,6 +128,11 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
 
             long elapsedTime = System.currentTimeMillis() - startTime;
             LOGGER.info("Successfully fetched UserInfo in {} ms for token: {}", elapsedTime, truncateToken(token));
+
+            // Update cache
+            userInfoCache.put(token, userInfo);
+            cacheTimestamps.put(token, System.currentTimeMillis());
+
             return userInfo;
         } catch (Exception e) {
             long elapsedTime = System.currentTimeMillis() - startTime;
@@ -128,10 +155,9 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
     }
 
     private String truncateToken(String token) {
-        return token.substring(0, Math.min(10, token.length()));
+        return token.substring(0, Math.min(20, token.length()));
     }
 
-    // Periodic summary logs
     @Scheduled(fixedRate = 60000)
     public void logPeriodicSummary() {
         LOGGER.info("Summary in the past minute - UserInfo requests: {}, Successes: {}, Failures: {}",
