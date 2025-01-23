@@ -17,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.Getter;
@@ -53,7 +52,6 @@ public class StudyService {
   private final @NonNull MetadataCrudService metadataCrudService;
   private final @NonNull MetadataUpdateService metadataUpdateService;
   private final @NonNull StudyEventHandler studyEventHandler;
-  private final ObjectMapper objectMapper = new ObjectMapper();
   private final Logger log = LoggerFactory.getLogger(getClass());
 
   public final Study register(final Study study) {
