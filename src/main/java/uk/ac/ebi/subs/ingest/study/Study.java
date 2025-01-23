@@ -10,7 +10,6 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.rest.core.annotation.RestResource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -36,7 +35,7 @@ public class Study extends MetadataDocument implements DescriptiveSchema {
   private @DBRef(lazy = true) Set<SubmissionEnvelope> submissionEnvelopes = new HashSet<>();
 
   // A study can have multiple datasets x
-//  @RestResource private Set<Dataset> datasets = new HashSet<>();
+  //  @RestResource private Set<Dataset> datasets = new HashSet<>();
   @JsonIgnore
   @DBRef(lazy = true)
   private Set<Dataset> datasets = new HashSet<>();
