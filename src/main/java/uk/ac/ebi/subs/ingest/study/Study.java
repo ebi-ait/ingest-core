@@ -35,7 +35,6 @@ public class Study extends MetadataDocument implements DescriptiveSchema {
   private @DBRef(lazy = true) Set<SubmissionEnvelope> submissionEnvelopes = new HashSet<>();
 
   // A study can have multiple datasets x
-  //  @RestResource private Set<Dataset> datasets = new HashSet<>();
   @JsonIgnore
   @DBRef(lazy = true)
   private Set<Dataset> datasets = new HashSet<>();
