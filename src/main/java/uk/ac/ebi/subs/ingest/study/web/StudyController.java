@@ -1,15 +1,17 @@
 package uk.ac.ebi.subs.ingest.study.web;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +22,10 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import uk.ac.ebi.subs.ingest.core.Uuid;
 import uk.ac.ebi.subs.ingest.dataset.Dataset;
+import uk.ac.ebi.subs.ingest.gene.Gene;
+import uk.ac.ebi.subs.ingest.gene.GeneService;
+import uk.ac.ebi.subs.ingest.gene.GeneStudiesResponse;
+import uk.ac.ebi.subs.ingest.gene.StudySummary;
 import uk.ac.ebi.subs.ingest.security.CheckAllowed;
 import uk.ac.ebi.subs.ingest.study.Study;
 import uk.ac.ebi.subs.ingest.study.StudyRepository;
@@ -38,6 +44,9 @@ public class StudyController {
   private static final Logger LOGGER = LoggerFactory.getLogger(StudyController.class);
   private final @NonNull StudyService studyService;
   private final @NonNull StudyRepository studyRepository;
+
+  @Autowired
+  GeneService geneService;
 
   @PatchMapping("/studies/{studyId}")
   public ResponseEntity<Resource<?>> updateStudy(
@@ -106,4 +115,39 @@ public class StudyController {
     return ResponseEntity.accepted()
         .body(assembler.toFullResource(getStudyService().linkDatasetToStudy(study, dataset)));
   }
+
+  @GetMapping("/genes/{symbol}/studies")
+  public ResponseEntity<?> getStudiesForGene(@PathVariable String symbol) {
+    Gene gene = geneService.findBySymbol(symbol);
+    if (gene == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+              .body("Gene with symbol '" + symbol + "' not found in GeneDB.");
+    }
+
+    List<Study> studies = studyRepository.findByTargetGeneSymbol(symbol);
+
+    List<StudySummary> studySummaries = studies.stream().map(study -> {
+      Map<String, Object> contentMap = (Map<String, Object>) study.getContent();
+      return new StudySummary(
+              study.getId(),
+              (String) contentMap.getOrDefault("study_title", ""),
+              (String) contentMap.getOrDefault("institute", ""),
+              (String) contentMap.getOrDefault("label", ""),
+              (String) contentMap.getOrDefault("readout_assay", ""),
+              (List<String>) contentMap.getOrDefault("perturbation_type", Collections.emptyList()),
+              (List<String>) contentMap.getOrDefault("model_organ_systems", Collections.emptyList()),
+              (String) contentMap.getOrDefault("dracc_data_sharing_date", ""),
+              (List<String>) contentMap.getOrDefault("accessions", Collections.emptyList())
+      );
+    }).collect(Collectors.toList());
+
+    GeneStudiesResponse response = new GeneStudiesResponse(
+            gene.getHgncId(),
+            gene.getName(),
+            studySummaries
+    );
+
+    return ResponseEntity.ok(response);
+  }
+
 }
