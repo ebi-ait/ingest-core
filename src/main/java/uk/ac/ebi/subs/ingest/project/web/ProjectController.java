@@ -268,14 +268,14 @@ public class ProjectController {
     return ResponseEntity.ok(pagedResourcesAssembler.toResource(projects, resourceAssembler));
   }
 
-  @GetMapping(path = "projects/{id}/auditLogs")
-  public ResponseEntity<?> getProjectAuditLogs(@PathVariable("id") Project project) {
-    if (project == null) {
-      return ResponseEntity.notFound().build();
-    }
-
-    return ResponseEntity.ok(projectService.getProjectAuditEntries(project));
-  }
+//  @GetMapping(path = "projects/{id}/auditLogs")
+//  public ResponseEntity<?> getProjectAuditLogs(@PathVariable("id") Project project) {
+//    if (project == null) {
+//      return ResponseEntity.notFound().build();
+//    }
+//
+//    return ResponseEntity.ok(projectService.getProjectAuditEntries(project));
+//  }
 
   @PutMapping(path = "projects/{project_id}/datasets/{dataset_id}")
   public ResponseEntity<Resource<?>> linkDatasetToProject(

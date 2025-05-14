@@ -27,7 +27,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import uk.ac.ebi.subs.ingest.audit.AuditEntry;
-import uk.ac.ebi.subs.ingest.audit.AuditEntryService;
+//import uk.ac.ebi.subs.ingest.audit.AuditEntryService;
 import uk.ac.ebi.subs.ingest.audit.AuditType;
 import uk.ac.ebi.subs.ingest.bundle.BundleManifest;
 import uk.ac.ebi.subs.ingest.bundle.BundleManifestRepository;
@@ -68,7 +68,7 @@ public class ProjectService {
   private final @NonNull MetadataUpdateService metadataUpdateService;
   private final @NonNull SchemaService schemaService;
   private final @NonNull BundleManifestRepository bundleManifestRepository;
-  private final @NonNull AuditEntryService auditEntryService;
+//  private final @NonNull AuditEntryService auditEntryService;
 
   private final @NonNull ProjectEventHandler projectEventHandler;
 
@@ -140,7 +140,7 @@ public class ProjectService {
       AuditEntry wranglingStateUpdate =
           new AuditEntry(
               AuditType.STATUS_UPDATED, currentWranglingState, newWranglingState, project);
-      auditEntryService.addAuditEntry(wranglingStateUpdate);
+//      auditEntryService.addAuditEntry(wranglingStateUpdate);
     }
   }
 
@@ -237,9 +237,9 @@ public class ProjectService {
     return new PageImpl<>(projects, pageable, count);
   }
 
-  public List<AuditEntry> getProjectAuditEntries(Project project) {
-    return auditEntryService.getAuditEntriesForAbstractEntity(project);
-  }
+//  public List<AuditEntry> getProjectAuditEntries(Project project) {
+//    return auditEntryService.getAuditEntriesForAbstractEntity(project);
+//  }
 
   public final Project linkDatasetToProject(final Project project, final Dataset dataset) {
     final String projectId = project.getId();
