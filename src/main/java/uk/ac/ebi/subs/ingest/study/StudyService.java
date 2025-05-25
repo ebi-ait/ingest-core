@@ -149,6 +149,8 @@ public class StudyService {
         .orElseThrow(() -> new ResourceNotFoundException("Dataset: " + datasetId));
 
     study.addDataset(dataset);
+    dataset.setStudy(study);
+    datasetRepository.save(dataset);
 
     return studyRepository.save(study);
   }
