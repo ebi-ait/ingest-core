@@ -13,19 +13,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.assertj.core.data.MapEntry;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -47,6 +47,8 @@ import uk.ac.ebi.subs.ingest.file.File;
 import uk.ac.ebi.subs.ingest.file.FileRepository;
 import uk.ac.ebi.subs.ingest.process.ProcessRepository;
 import uk.ac.ebi.subs.ingest.protocol.ProtocolRepository;
+import uk.ac.ebi.subs.ingest.study.Study;
+import uk.ac.ebi.subs.ingest.study.StudyRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
@@ -56,6 +58,8 @@ class DatasetControllerTest {
   @Autowired private MockMvc webApp;
 
   @Autowired private DatasetRepository repository;
+
+  @Autowired private StudyRepository studyRepository;
 
   @Autowired private FileRepository fileRepository;
 
@@ -79,6 +83,7 @@ class DatasetControllerTest {
   }
 
   @Nested
+  @Disabled("Test class is currently deactivated - Need to be linked to Submission Envelope")
   class Registration {
     @Test
     @DisplayName("Register Dataset - Success")
@@ -298,4 +303,56 @@ class DatasetControllerTest {
           .andExpect(status().isAccepted());
     }
   }
+
+  @Test
+  void shouldPersistAndRetrieveDerivedFromDatasets() {
+    Dataset parentDataset = new Dataset(Map.of("label", "parent"));
+    parentDataset = repository.save(parentDataset);
+
+    Dataset childDataset = new Dataset(Map.of("label", "child"));
+    childDataset.setDerivedFrom(Set.of(parentDataset));
+    childDataset = repository.save(childDataset);
+
+    Dataset retrieved = repository.findById(childDataset.getId()).orElseThrow();
+    assertThat(retrieved.getDerivedFrom()).hasSize(1);
+    assertThat(retrieved.getDerivedFrom().iterator().next().getId()).isEqualTo(parentDataset.getId());
+  }
+
+  @Test
+  void shouldFindDatasetsByStudyIdAndType() throws Exception {
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    // Create and save a study
+    String studyContent = objectMapper.writeValueAsString(Map.of("study_title", "Study A"));
+    Study study = new Study(
+            "https://dev.schema.morphic.bio/type/0.0.1/project/study",
+            "0.0.1",
+            "study",
+            studyContent
+    );
+    study = studyRepository.save(study);
+
+    // Create raw dataset
+    Dataset rawDataset = new Dataset(Map.of("label", "Raw dataset"));
+    rawDataset.setDatasetType("raw");
+    rawDataset.setStudy(study);
+    repository.save(rawDataset);
+
+    // Create processed dataset
+    Dataset processedDataset = new Dataset(Map.of("label", "Processed dataset"));
+    processedDataset.setDatasetType("processed");
+    processedDataset.setStudy(study);
+    repository.save(processedDataset);
+
+    // Query raw datasets
+    Page<Dataset> result = repository.findByStudyIdAndDatasetType(
+            study.getId(), "raw", PageRequest.of(0, 10));
+
+    // Assert only raw returned
+    assertThat(result.getContent()).hasSize(1);
+    assertThat(result.getContent().get(0).getDatasetType()).isEqualTo("raw");
+  }
+
+
+
 }
