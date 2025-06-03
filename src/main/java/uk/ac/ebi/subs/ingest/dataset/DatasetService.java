@@ -232,4 +232,21 @@ public class DatasetService {
 
     return updatedDataset;
   }
+
+  public Dataset addDerivedFromDataset(Dataset dataset, String sourceDatasetId) {
+    String datasetId = dataset.getId();
+
+    datasetRepository
+        .findById(datasetId)
+        .orElseThrow(() -> new ResourceNotFoundException("Dataset: " + datasetId));
+
+    Dataset sourceDataset =
+        datasetRepository
+            .findById(sourceDatasetId)
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Derived-from dataset: " + sourceDatasetId));
+
+    dataset.getDerivedFrom().add(sourceDataset);
+    return datasetRepository.save(dataset);
+  }
 }

@@ -4,6 +4,9 @@ import java.util.*;
 
 import javax.validation.constraints.NotNull;
 
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,6 +16,7 @@ import lombok.Setter;
 import uk.ac.ebi.subs.ingest.core.EntityType;
 import uk.ac.ebi.subs.ingest.core.MetadataDocument;
 import uk.ac.ebi.subs.ingest.protocol.Protocol;
+import uk.ac.ebi.subs.ingest.study.Study;
 
 @Getter
 @JsonIgnoreProperties({
@@ -33,6 +37,16 @@ public class Dataset extends MetadataDocument {
   private Set<String> processes = new HashSet<>();
 
   @Setter private String comment;
+
+  @Setter
+  @Field("dataset_type")
+  private String datasetType; // e.g. raw, processed, analysis
+
+  @DBRef(lazy = true)
+  @Setter
+  private Set<Dataset> derivedFrom = new HashSet<>();
+
+  @DBRef @Setter private Study study;
 
   @JsonCreator
   public Dataset(@JsonProperty("content") final Object content) {

@@ -26,4 +26,11 @@ public interface DatasetRepository extends MongoRepository<Dataset, String> {
   Optional<Dataset> findByUuidUuidAndIsUpdateFalse(@Param("uuid") UUID uuid);
 
   Page<Dataset> findBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope, Pageable pageable);
+
+  @RestResource(rel = "byType", path = "byType")
+  Page<Dataset> findByDatasetType(@Param("type") String datasetType, Pageable pageable);
+
+  @RestResource(rel = "byStudyAndType", path = "byStudyAndType")
+  Page<Dataset> findByStudyIdAndDatasetType(
+      @Param("id") String studyId, @Param("type") String datasetType, Pageable pageable);
 }

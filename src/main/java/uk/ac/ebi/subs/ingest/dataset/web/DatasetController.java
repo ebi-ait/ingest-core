@@ -168,4 +168,14 @@ public class DatasetController {
     return ResponseEntity.accepted()
         .body(assembler.toFullResource(datasetService.addProcessToDataset(dataset, id)));
   }
+
+  @PutMapping("/datasets/{dataset_id}/derivedFrom/{source_dataset_id}")
+  public ResponseEntity<Resource<?>> addDerivedFromDataset(
+      @PathVariable("dataset_id") final Dataset dataset,
+      @PathVariable("source_dataset_id") final String sourceDatasetId,
+      final PersistentEntityResourceAssembler assembler) {
+
+    Dataset updatedDataset = datasetService.addDerivedFromDataset(dataset, sourceDatasetId);
+    return ResponseEntity.accepted().body(assembler.toFullResource(updatedDataset));
+  }
 }
