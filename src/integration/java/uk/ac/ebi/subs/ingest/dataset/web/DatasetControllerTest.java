@@ -315,7 +315,8 @@ class DatasetControllerTest {
 
     Dataset retrieved = repository.findById(childDataset.getId()).orElseThrow();
     assertThat(retrieved.getDerivedFrom()).hasSize(1);
-    assertThat(retrieved.getDerivedFrom().iterator().next().getId()).isEqualTo(parentDataset.getId());
+    assertThat(retrieved.getDerivedFrom().iterator().next().getId())
+        .isEqualTo(parentDataset.getId());
   }
 
   @Test
@@ -324,12 +325,12 @@ class DatasetControllerTest {
 
     // Create and save a study
     String studyContent = objectMapper.writeValueAsString(Map.of("study_title", "Study A"));
-    Study study = new Study(
+    Study study =
+        new Study(
             "https://dev.schema.morphic.bio/type/0.0.1/project/study",
             "0.0.1",
             "study",
-            studyContent
-    );
+            studyContent);
     study = studyRepository.save(study);
 
     // Create raw dataset
@@ -345,14 +346,11 @@ class DatasetControllerTest {
     repository.save(processedDataset);
 
     // Query raw datasets
-    Page<Dataset> result = repository.findByStudyIdAndDatasetType(
-            study.getId(), "raw", PageRequest.of(0, 10));
+    Page<Dataset> result =
+        repository.findByStudyIdAndDatasetType(study.getId(), "raw", PageRequest.of(0, 10));
 
     // Assert only raw returned
     assertThat(result.getContent()).hasSize(1);
     assertThat(result.getContent().get(0).getDatasetType()).isEqualTo("raw");
   }
-
-
-
 }

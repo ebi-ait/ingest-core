@@ -31,7 +31,6 @@ public interface DatasetRepository extends MongoRepository<Dataset, String> {
   Page<Dataset> findByDatasetType(@Param("type") String datasetType, Pageable pageable);
 
   @RestResource(rel = "byStudyAndType", path = "byStudyAndType")
-  Page<Dataset> findByStudyIdAndDatasetType(@Param("id") String studyId,
-                                            @Param("type") String datasetType,
-                                            Pageable pageable);
+  Page<Dataset> findByStudyIdAndDatasetType(
+      @Param("id") String studyId, @Param("type") String datasetType, Pageable pageable);
 }
