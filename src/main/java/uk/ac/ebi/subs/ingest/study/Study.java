@@ -24,6 +24,9 @@ import uk.ac.ebi.subs.ingest.core.MetadataDocument;
 import uk.ac.ebi.subs.ingest.dataset.Dataset;
 import uk.ac.ebi.subs.ingest.submission.SubmissionEnvelope;
 
+import java.util.Collections;
+import java.util.Map;
+
 @Getter
 @EqualsAndHashCode(
     callSuper = true,
@@ -118,5 +121,30 @@ public class Study extends MetadataDocument implements DescriptiveSchema {
     return this.submissionEnvelopes.stream()
         .filter(Objects::nonNull)
         .allMatch(SubmissionEnvelope::isEditable);
+  }
+
+  @JsonIgnore
+  @SuppressWarnings("unchecked")
+  public Map<String, Object> getContentMap() {
+    // use the inherited getter – *not* the field
+    Object raw = getContent();          // <- this compiles
+
+    return (raw instanceof Map)
+            ? (Map<String, Object>) raw
+            : Collections.emptyMap();
+  }
+  @JsonIgnore
+  public List<String> getTargetGenes() {
+    Object raw = getContentMap().get("target_genes");
+
+    if (raw instanceof List<?>) {
+      return ((List<?>) raw).stream()
+              .map(Object::toString)
+              .collect(Collectors.toList());
+    }
+    if (raw instanceof String) {
+      return List.of(raw.toString());
+    }
+    return Collections.emptyList();
   }
 }

@@ -26,11 +26,22 @@ import uk.ac.ebi.subs.ingest.study.StudyRepository;
 import uk.ac.ebi.subs.ingest.study.StudyService;
 import uk.ac.ebi.subs.ingest.submission.SubmissionEnvelope;
 import uk.ac.ebi.subs.ingest.submission.exception.NotAllowedDuringSubmissionStateException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.hateoas.Link;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+import uk.ac.ebi.subs.ingest.gene.GeneSearchClient;
+import uk.ac.ebi.subs.ingest.study.api.StudyDto;
+import uk.ac.ebi.subs.ingest.study.api.GeneRef;
+import java.util.List;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+
 
 @RepositoryRestController
 @ExposesResourceFor(Study.class)
 @RequiredArgsConstructor
 @Getter
+@Slf4j
 /*
 Controller for studies
  */
@@ -38,6 +49,8 @@ public class StudyController {
   private static final Logger LOGGER = LoggerFactory.getLogger(StudyController.class);
   private final @NonNull StudyService studyService;
   private final @NonNull StudyRepository studyRepository;
+  private final GeneSearchClient geneClient;
+  @Value("${gene.api.base}") private String geneApiBase;
 
   @PatchMapping("/studies/{studyId}")
   public ResponseEntity<Resource<?>> updateStudy(
@@ -105,5 +118,26 @@ public class StudyController {
       final PersistentEntityResourceAssembler assembler) {
     return ResponseEntity.accepted()
         .body(assembler.toFullResource(getStudyService().linkDatasetToStudy(study, dataset)));
+  }
+
+  @GetMapping("/studies/{studyId}")
+  public ResponseEntity<StudyDto> getStudy(@PathVariable String studyId) {
+    return Optional.ofNullable(studyService.findById(studyId))
+            .map(study -> {
+
+              // ---------------- build the enriched list ----------------
+              log.debug("Loaded Study {}, targetGenes = {}", studyId, study.getTargetGenes());
+              List<GeneRef> enriched = study.getTargetGenes().stream()
+                      .map(symbol ->
+                              geneClient.symbolToHgncId(symbol)          // Optional<String>
+                                      .map(id -> new GeneRef(symbol, geneClient.buildGeneUrl(id)))
+                                      .orElse(new GeneRef(symbol, null))
+                      )
+                      .collect(Collectors.toList());
+              // --------------------------------------------------------
+              log.debug("After enrichment Study {}", new StudyDto(study, enriched));
+              return ResponseEntity.ok(new StudyDto(study, enriched));
+            })
+            .orElseGet(() -> ResponseEntity.notFound().build());
   }
 }
