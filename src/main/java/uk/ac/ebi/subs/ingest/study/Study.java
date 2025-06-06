@@ -1,7 +1,9 @@
 package uk.ac.ebi.subs.ingest.study;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,9 +25,6 @@ import uk.ac.ebi.subs.ingest.core.EntityType;
 import uk.ac.ebi.subs.ingest.core.MetadataDocument;
 import uk.ac.ebi.subs.ingest.dataset.Dataset;
 import uk.ac.ebi.subs.ingest.submission.SubmissionEnvelope;
-
-import java.util.Collections;
-import java.util.Map;
 
 @Getter
 @EqualsAndHashCode(
@@ -127,20 +126,17 @@ public class Study extends MetadataDocument implements DescriptiveSchema {
   @SuppressWarnings("unchecked")
   public Map<String, Object> getContentMap() {
     // use the inherited getter – *not* the field
-    Object raw = getContent();          // <- this compiles
+    Object raw = getContent(); // <- this compiles
 
-    return (raw instanceof Map)
-            ? (Map<String, Object>) raw
-            : Collections.emptyMap();
+    return (raw instanceof Map) ? (Map<String, Object>) raw : Collections.emptyMap();
   }
+
   @JsonIgnore
   public List<String> getTargetGenes() {
     Object raw = getContentMap().get("target_genes");
 
     if (raw instanceof List<?>) {
-      return ((List<?>) raw).stream()
-              .map(Object::toString)
-              .collect(Collectors.toList());
+      return ((List<?>) raw).stream().map(Object::toString).collect(Collectors.toList());
     }
     if (raw instanceof String) {
       return List.of(raw.toString());
