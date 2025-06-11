@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
+import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -47,6 +48,14 @@ public class Study extends MetadataDocument implements DescriptiveSchema {
 
   @Field("schema_type")
   private String schemaType;
+
+  public enum ReleaseStatus {
+    PUBLIC, PRIVATE
+  }
+
+  @Setter
+  @Field("release_status")
+  private ReleaseStatus releaseStatus = ReleaseStatus.PRIVATE;
 
   @JsonCreator
   public Study(
