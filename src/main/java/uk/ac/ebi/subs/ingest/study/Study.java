@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
-import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -19,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import uk.ac.ebi.subs.ingest.core.DescriptiveSchema;
 import uk.ac.ebi.subs.ingest.core.EntityType;
 import uk.ac.ebi.subs.ingest.core.MetadataDocument;
@@ -50,7 +50,8 @@ public class Study extends MetadataDocument implements DescriptiveSchema {
   private String schemaType;
 
   public enum ReleaseStatus {
-    PUBLIC, PRIVATE
+    PUBLIC,
+    PRIVATE
   }
 
   @Setter

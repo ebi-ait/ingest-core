@@ -37,5 +37,6 @@ public interface StudyRepository extends MongoRepository<Study, String> {
   Collection<Study> findAllBySubmissionEnvelope(SubmissionEnvelope submissionEnvelope);
 
   @RestResource(rel = "findByReleaseStatus", path = "findByReleaseStatus")
-  Page<Study> findByReleaseStatus(@Param("releaseStatus") Study.ReleaseStatus releaseStatus, Pageable pageable);
+  Page<Study> findByReleaseStatus(
+      @Param("releaseStatus") Study.ReleaseStatus releaseStatus, Pageable pageable);
 }
