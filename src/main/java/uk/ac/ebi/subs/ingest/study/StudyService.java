@@ -55,6 +55,10 @@ public class StudyService {
   private final Logger log = LoggerFactory.getLogger(getClass());
 
   public final Study register(final Study study) {
+    if (study.getReleaseStatus() == null) {
+      study.setReleaseStatus(Study.ReleaseStatus.PRIVATE);
+    }
+
     final Study persistentStudy = studyRepository.save(study);
     studyEventHandler.registeredStudy(persistentStudy);
 
@@ -117,6 +121,10 @@ public class StudyService {
 
   public final Study addStudyToSubmissionEnvelope(
       final SubmissionEnvelope submissionEnvelope, final Study study) {
+    if (study.getReleaseStatus() == null) {
+      study.setReleaseStatus(Study.ReleaseStatus.PRIVATE);
+    }
+
     if (!study.getIsUpdate()) {
       return metadataCrudService.addToSubmissionEnvelopeAndSave(study, submissionEnvelope);
     } else {

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import uk.ac.ebi.subs.ingest.core.DescriptiveSchema;
 import uk.ac.ebi.subs.ingest.core.EntityType;
 import uk.ac.ebi.subs.ingest.core.MetadataDocument;
@@ -47,6 +48,15 @@ public class Study extends MetadataDocument implements DescriptiveSchema {
 
   @Field("schema_type")
   private String schemaType;
+
+  public enum ReleaseStatus {
+    PUBLIC,
+    PRIVATE
+  }
+
+  @Setter
+  @Field("release_status")
+  private ReleaseStatus releaseStatus = ReleaseStatus.PRIVATE;
 
   @JsonCreator
   public Study(
