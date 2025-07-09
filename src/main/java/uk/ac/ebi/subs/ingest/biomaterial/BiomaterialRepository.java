@@ -1,6 +1,7 @@
 package uk.ac.ebi.subs.ingest.biomaterial;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -97,4 +98,9 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
           "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }",
       count = true)
   long countBySubmissionEnvelopeAndCountWithGraphValidationErrors(String submissionEnvelopeId);
+
+  @Query("{'content.label': ?0}")
+  @RestResource(rel = "findByContentLabel", path = "findByContentLabel")
+  List<Biomaterial> findByContentLabel(@Param("label") String label);
+
 }
