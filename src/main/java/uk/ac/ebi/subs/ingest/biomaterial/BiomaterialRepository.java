@@ -102,5 +102,4 @@ public interface BiomaterialRepository extends MongoRepository<Biomaterial, Stri
   @Query("{'content.label': ?0}")
   @RestResource(rel = "findByContentLabel", path = "findByContentLabel")
   List<Biomaterial> findByContentLabel(@Param("label") String label);
-
 }
