@@ -49,18 +49,22 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
             return null;
         }
         try {
+            LOGGER.debug("authentication started");
             JwtAuthentication jwt = (JwtAuthentication) authentication;
             String token = jwt.getToken();
             String issuer = JWT.decode(token).getIssuer();
             verifyIssuer(issuer);
+            LOGGER.debug("issuer verified: {}" , issuer);
 
             JWTVerifier jwtVerifier = jwtVerifierResolver.resolve(jwt.getToken());
+            LOGGER.debug("token resolved");
             DelegatingJwtAuthentication verifiedAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
 
             token = verifiedAuth.getToken();
             UserInfo userInfo = retrieveUserInfo(token);
-
+            LOGGER.debug("retrieved user info from token: {} for subject: {}", userInfo.getName(), userInfo.getSubjectId());
             Account account = accountRepository.findByProviderReference(userInfo.getSubjectId());
+            LOGGER.debug("account retrieved from db: {} " , account.getProviderReference());
             OpenIdAuthentication openIdAuth = new OpenIdAuthentication(account);
             openIdAuth.authenticateWith(userInfo);
             return openIdAuth;
@@ -69,6 +73,9 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         } catch (JWTVerificationException e) {
             LOGGER.error("JWT verification failed: {}", e.getMessage());
             throw new JwtVerificationFailed(e);
+        } catch (Exception e) {
+            LOGGER.error("JWT verification failed, unexpected exception: {}", e.getMessage());
+            throw e;
         }
     }
 
