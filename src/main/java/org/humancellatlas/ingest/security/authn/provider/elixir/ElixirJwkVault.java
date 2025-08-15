@@ -23,7 +23,7 @@ public class ElixirJwkVault implements JwkVault {
             var jwk = jwkProvider.get(jwt.getKeyId());
             return jwk.getPublicKey();
         } catch (JwkException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("problem getting public key of " + jwt.getSubject(), e);
         }
     }
 

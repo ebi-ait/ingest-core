@@ -101,11 +101,11 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
             failureCount.incrementAndGet();
             throw new JwtVerificationFailed(e);
         } catch (JWTVerificationException e) {
-            LOGGER.error("JWT verification failed: {}", e.getMessage());
+            LOGGER.error("JWT verification failed: {}", e.getMessage(), e);
             failureCount.incrementAndGet();
             throw new JwtVerificationFailed(e);
         } catch (Exception e) {
-            LOGGER.error("JWT verification failed, unexpected exception: {}", e.getMessage());
+             LOGGER.error("JWT verification failed, unexpected exception: {}", e.getMessage(), e);
             throw e;
         }
     }

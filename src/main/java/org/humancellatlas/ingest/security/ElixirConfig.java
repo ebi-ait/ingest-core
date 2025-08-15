@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Configuration
 public class ElixirConfig {
@@ -19,7 +20,8 @@ public class ElixirConfig {
     @Bean
     @Qualifier(ELIXIR)
     public JwtVerifierResolver elixirJwtVerifierResolver() {
-        var urlJwkProviderResolver = new UrlJwkProviderResolver(issuer + "/jwk");
+        String jwkUrl = UriComponentsBuilder.fromUriString(issuer).pathSegment("jwk").toUriString();
+        var urlJwkProviderResolver = new UrlJwkProviderResolver(jwkUrl);
         ElixirJwkVault jwkVault = new ElixirJwkVault(urlJwkProviderResolver);
         return new JwtVerifierResolver(jwkVault, null, issuer);
     }
