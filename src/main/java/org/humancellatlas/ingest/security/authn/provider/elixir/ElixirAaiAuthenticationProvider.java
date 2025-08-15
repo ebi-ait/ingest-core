@@ -41,6 +41,9 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
 
     private final WebClient webClient;
 
+    private final ElixirAaiAuthenticationProperties elixirAaiAuthenticationProperties;
+
+
     // Counters for periodic logging
     private static final AtomicInteger userInfoRequestCounter = new AtomicInteger(0);
     private static final AtomicInteger successCount = new AtomicInteger(0);
@@ -51,10 +54,13 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
     private final Map<String, Long> cacheTimestamps = new ConcurrentHashMap<>();
 
     public ElixirAaiAuthenticationProvider(@Qualifier(ELIXIR) JwtVerifierResolver jwtVerifierResolver,
-                                           AccountRepository accountRepository, WebClient.Builder webCliBuilder) {
+                                           AccountRepository accountRepository,
+                                           WebClient.Builder webCliBuilder,
+                                           ElixirAaiAuthenticationProperties elixirAaiAuthenticationProperties) {
         this.jwtVerifierResolver = jwtVerifierResolver;
         this.accountRepository = accountRepository;
         webClient = webCliBuilder.build();
+        this.elixirAaiAuthenticationProperties = elixirAaiAuthenticationProperties;
     }
 
     @Override
@@ -147,8 +153,9 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
     }
 
     private void verifyIssuer(String issuer) {
-        LOGGER.info("Verifying issuer: {}", issuer);
-        if (!issuer.contains("elixir")) {
+        String issuerWhitelist = elixirAaiAuthenticationProperties.getIssuerWhitelist();
+        LOGGER.info("Verifying issuer: {} against whitelist: {}", issuer, issuerWhitelist);
+        if (!issuer.contains(issuerWhitelist)) {
             LOGGER.error("Unlisted issuer: {}", issuer);
             throw new UnlistedJwtIssuer(String.format("Not an Elixir AAI issued token: %s", issuer), issuer);
         }
