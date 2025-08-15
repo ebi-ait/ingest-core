@@ -17,7 +17,7 @@ public class ElixirJwkVaultTest {
     @Test
     public void testGetPublicKey() throws Exception {
         //given: JWT
-        String issuer = "https://login.elixir-czech.org/oidc";
+        String issuer = "https://login.aai.lifescience-ri.eu/oidc";
         JwtGenerator generator = new JwtGenerator(issuer);
         var jwt = generator.generate();
 

@@ -88,7 +88,7 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
             LOGGER.info("UserInfo retrieved successfully for subject ID: {}", userInfo.getSubjectId());
 
             Account account = accountRepository.findByProviderReference(userInfo.getSubjectId());
-            LOGGER.debug("account retrieved from db: {} " , account.getProviderReference());
+
             OpenIdAuthentication openIdAuth = new OpenIdAuthentication(account);
             openIdAuth.authenticateWith(userInfo);
 
