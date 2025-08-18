@@ -57,13 +57,7 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
 
 
     // Counters for periodic logging
-    private static final AtomicInteger userInfoRequestCounter = new AtomicInteger(0);
-    private static final AtomicInteger successCount = new AtomicInteger(0);
-    private static final AtomicInteger failureCount = new AtomicInteger(0);
-
-    private final Map<String, UserInfo> userInfoCache = new ConcurrentHashMap<>();
     private final long cacheTTL = 60000; // Cache entries expire after 60 seconds
-    private final Map<String, Long> cacheTimestamps = new ConcurrentHashMap<>();
 
     public ElixirAaiAuthenticationProvider(@Qualifier(ELIXIR) JwtVerifierResolver jwtVerifierResolver,
                                            AccountRepository accountRepository,
@@ -231,4 +225,5 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
 
     private double calculateRate(int part, int total) {
         return (total > 0) ? (part * 100.0 / total) : 0.0;
+    }
 }
