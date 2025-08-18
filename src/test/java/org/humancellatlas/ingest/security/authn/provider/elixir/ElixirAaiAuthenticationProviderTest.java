@@ -18,6 +18,7 @@ import org.humancellatlas.ingest.security.exception.JwtVerificationFailed;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -35,6 +36,8 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes={ElixirAaiAuthenticationProviderTest.Config.class})
 @AutoConfigureWebClient
+@EnableConfigurationProperties(ElixirAaiAuthenticationProperties.class)
+
 public class ElixirAaiAuthenticationProviderTest {
 
     @Configuration
@@ -54,6 +57,7 @@ public class ElixirAaiAuthenticationProviderTest {
     private AccountRepository accountRepository;
 
     @Autowired
+    @Qualifier(ELIXIR)
     private AuthenticationProvider authenticationProvider;
 
     @Nested
@@ -83,7 +87,7 @@ public class ElixirAaiAuthenticationProviderTest {
             //given: JWT
             String subject = "johndoe@elixirdomain.tld";
             UserInfo userInfo = new UserInfo(subject, "name", "pref", "giv", "fam", "email@ebi.ac.uk");
-            JwtGenerator jwtGenerator = new JwtGenerator("elixir");
+            JwtGenerator jwtGenerator = new JwtGenerator("aai.lifescience-ri");
             String jwt = jwtGenerator.encode(userInfo);
 
             //and: given a JWT Authentication
@@ -118,9 +122,9 @@ public class ElixirAaiAuthenticationProviderTest {
         @DisplayName("no account")
         public void testForNoAccount() throws Exception {
             //given: JWT
-            String subject = "johndoe@elixirdomain.tld";
+            String subject = "johndoe@lifescience-ri.eu";
             UserInfo userInfo = new UserInfo(subject, "name", "pref", "giv", "fam", "email@ebi.ac.uk");
-            String jwt = new JwtGenerator("elixir").encode(userInfo);
+            String jwt = new JwtGenerator("aai.lifescience-ri").encode(userInfo);
 
             //and: given a JWT Authentication
             var jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
@@ -170,7 +174,7 @@ public class ElixirAaiAuthenticationProviderTest {
                     .addHeader("Content-Type", "application/json"));
 
             //and:
-            JwtGenerator jwtGenerator = new JwtGenerator("elixir");
+            JwtGenerator jwtGenerator = new JwtGenerator("aai.lifescience-ri");
             String jwt = jwtGenerator.generate();
             var jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
 
@@ -178,7 +182,7 @@ public class ElixirAaiAuthenticationProviderTest {
             doReturn(jwt).when(token).getToken();
             doReturn(token).when(jwtVerifier).verify(jwtAuthentication.getToken());
             Account account = mock(Account.class);
-            doReturn(account).when(accountRepository).findByProviderReference("sub");
+            doReturn(account).when(accountRepository).findByProviderReference(userInfo.getSubjectId());
 
             //when:
             Authentication auth = authenticationProvider.authenticate(jwtAuthentication);
@@ -197,7 +201,7 @@ public class ElixirAaiAuthenticationProviderTest {
                     .addHeader("Content-Type", "application/json"));
 
             //and: given a JWT Authentication
-            JwtGenerator jwtGenerator = new JwtGenerator("elixir");
+            JwtGenerator jwtGenerator = new JwtGenerator("aai.lifescience-ri");
             String jwt = jwtGenerator.generateWithSubject("sub");
             var jwtAuthentication = PreAuthenticatedAuthenticationJsonWebToken.usingToken(jwt);
 

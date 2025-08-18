@@ -95,8 +95,8 @@ class ProjectControllerTest {
         private void doTestUpdate(String patchUrl, Consumer<Project> postCondition) throws Exception {
             //given:
             var content = Map.of(
-                "description", "test",
-                "attr2", "should be deleted after patch");
+                    "description", "test",
+                    "attr2", "should be deleted after patch");
             Project originalProject = repository.save(new Project(content));
 
             //when:
@@ -121,10 +121,10 @@ class ProjectControllerTest {
 
             //and:
             repository.findById(originalProject.getId())
-                            .ifPresentOrElse(project -> {
-                                assertThat((Map) project.getContent()).containsOnly(updatedDescription);
-                                postCondition.accept(project);
-                            }, () -> Assertions.fail("project {} not found", originalProject.getId()));
+                    .ifPresentOrElse(project -> {
+                        assertThat((Map) project.getContent()).containsOnly(updatedDescription);
+                        postCondition.accept(project);
+                    }, () -> Assertions.fail("project {} not found", originalProject.getId()));
 
             //and:
         }
@@ -245,6 +245,74 @@ class ProjectControllerTest {
             if(!"null".equals(value)){
                 content.put(key, value);
             }
+        }
+    }
+
+    @Nested
+    class GetProjectSubmissionEnvelopesTests {
+
+        private Project project;
+
+        @BeforeEach
+        void setUp() {
+            project = makeProject();
+            repository.save(project);
+        }
+
+        @NotNull
+        private Project makeProject() {
+            var content = new HashMap<String, Object>();
+            content.put("description", "test kw1");
+            Project project = new Project(content);
+            return project;
+        }
+
+        @Test
+        @WithMockUser(roles = "WRANGLER")
+        void testGetProjectSubmissionEnvelopesAsWrangler() throws Exception {
+            MvcResult result = webApp
+                    .perform(get("/projects/{id}/submissionEnvelopes", project.getId())
+                            .contentType(APPLICATION_JSON_VALUE))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            MockHttpServletResponse response = result.getResponse();
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+        @Test
+        @WithMockUser(roles = "SERVICE")
+        void testGetProjectSubmissionEnvelopesAsService() throws Exception {
+            MvcResult result = webApp
+                    .perform(get("/projects/{id}/submissionEnvelopes", project.getId())
+                            .contentType(APPLICATION_JSON_VALUE))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            MockHttpServletResponse response = result.getResponse();
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        }
+
+        @Test
+        @WithMockUser(roles = "CONTRIBUTOR")
+        void testGetProjectSubmissionEnvelopesAsContributor() throws Exception {
+            MvcResult result = webApp
+                    .perform(get("/projects/{id}/submissionEnvelopes", project.getId())
+                            .contentType(APPLICATION_JSON_VALUE))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized())
+                    .andReturn();
+
+            MockHttpServletResponse response = result.getResponse();
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
+        }
+
+        @Test
+        public void testGetProjectSubmissionEnvelopesAsAnonymous() throws Exception {
+            webApp.perform(get("/projects/1/submissionEnvelopes"))
+                    .andExpect(status().isUnauthorized());
         }
     }
 

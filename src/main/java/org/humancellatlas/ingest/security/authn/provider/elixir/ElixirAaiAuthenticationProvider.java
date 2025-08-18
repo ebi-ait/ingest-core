@@ -53,11 +53,26 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
     private final Map<String, Long> cacheTimestamps = new ConcurrentHashMap<>();
     private static final long DEFAULT_CACHE_TTL = 60000; // Default TTL: 60 seconds
 
+    private final ElixirAaiAuthenticationProperties elixirAaiAuthenticationProperties;
+
+
+    // Counters for periodic logging
+    private static final AtomicInteger userInfoRequestCounter = new AtomicInteger(0);
+    private static final AtomicInteger successCount = new AtomicInteger(0);
+    private static final AtomicInteger failureCount = new AtomicInteger(0);
+
+    private final Map<String, UserInfo> userInfoCache = new ConcurrentHashMap<>();
+    private final long cacheTTL = 60000; // Cache entries expire after 60 seconds
+    private final Map<String, Long> cacheTimestamps = new ConcurrentHashMap<>();
+
     public ElixirAaiAuthenticationProvider(@Qualifier(ELIXIR) JwtVerifierResolver jwtVerifierResolver,
-                                           AccountRepository accountRepository, WebClient.Builder webCliBuilder) {
+                                           AccountRepository accountRepository,
+                                           WebClient.Builder webCliBuilder,
+                                           ElixirAaiAuthenticationProperties elixirAaiAuthenticationProperties) {
         this.jwtVerifierResolver = jwtVerifierResolver;
         this.accountRepository = accountRepository;
         webClient = webCliBuilder.build();
+        this.elixirAaiAuthenticationProperties = elixirAaiAuthenticationProperties;
     }
 
     @Override
@@ -68,26 +83,28 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         try {
             JwtAuthentication jwt = (JwtAuthentication) authentication;
             String token = jwt.getToken();
-            LOGGER.info("Authentication attempt started for token: {}", truncateToken(token));
+            LOGGER.debug("Authentication attempt started for token: {}", truncateToken(token));
 
             String issuer = JWT.decode(token).getIssuer();
             verifyIssuer(issuer);
+            LOGGER.debug("issuer verified: {}" , issuer);
 
-            LOGGER.info("Issuer verified: {}", issuer);
 
             JWTVerifier jwtVerifier = jwtVerifierResolver.resolve(jwt.getToken());
+            LOGGER.debug("token resolved");
             DelegatingJwtAuthentication verifiedAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
 
             token = verifiedAuth.getToken();
             UserInfo userInfo = retrieveUserInfo(token);
 
-            LOGGER.info("UserInfo retrieved successfully for subject ID: {}", userInfo.getSubjectId());
+            LOGGER.debug("UserInfo retrieved successfully for subject ID: {}", userInfo.getSubjectId());
 
             Account account = accountRepository.findByProviderReference(userInfo.getSubjectId());
+
             OpenIdAuthentication openIdAuth = new OpenIdAuthentication(account);
             openIdAuth.authenticateWith(userInfo);
 
-            LOGGER.info("Authentication succeeded for subject ID: {}", userInfo.getSubjectId());
+            LOGGER.debug("Authentication succeeded for subject ID: {}", userInfo.getSubjectId());
             successCount.incrementAndGet();
 
             return openIdAuth;
@@ -96,9 +113,12 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
             failureCount.incrementAndGet();
             throw new JwtVerificationFailed(e);
         } catch (JWTVerificationException e) {
-            LOGGER.error("JWT verification failed: {}", e.getMessage());
+            LOGGER.error("JWT verification failed: {}", e.getMessage(), e);
             failureCount.incrementAndGet();
             throw new JwtVerificationFailed(e);
+        } catch (Exception e) {
+             LOGGER.error("JWT verification failed, unexpected exception: {}", e.getMessage(), e);
+            throw e;
         }
     }
 
@@ -166,8 +186,9 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
     }
 
     private void verifyIssuer(String issuer) {
-        LOGGER.info("Verifying issuer: {}", issuer);
-        if (!issuer.contains("elixir")) {
+        String issuerWhitelist = elixirAaiAuthenticationProperties.getIssuerWhitelist();
+        LOGGER.info("Verifying issuer: {} against whitelist: {}", issuer, issuerWhitelist);
+        if (!issuer.contains(issuerWhitelist)) {
             LOGGER.error("Unlisted issuer: {}", issuer);
             throw new UnlistedJwtIssuer(String.format("Not an Elixir AAI issued token: %s", issuer), issuer);
         }
@@ -210,5 +231,4 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
 
     private double calculateRate(int part, int total) {
         return (total > 0) ? (part * 100.0 / total) : 0.0;
-    }
 }
