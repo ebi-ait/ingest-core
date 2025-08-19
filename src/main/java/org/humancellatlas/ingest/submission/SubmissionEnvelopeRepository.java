@@ -23,7 +23,7 @@ public interface SubmissionEnvelopeRepository extends MongoRepository<Submission
     @RestResource(exported = false)
     SubmissionEnvelope findByUuid(Uuid uuid);
 
-    @RestResource(rel = "findByUuid")
+    @RestResource(rel = "findByUuid", path = "findByUuid")
     SubmissionEnvelope findByUuidUuid(@Param("uuid") UUID uuid);
 
     @RestResource(path = "findByUser", rel = "findByUser")
