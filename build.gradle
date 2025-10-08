@@ -71,6 +71,7 @@ spotless {
         googleJavaFormat()
         removeUnusedImports()
         importOrder 'java', 'javax', 'org', 'com'
+        lineEndings 'UNIX'
     }
 }
 
