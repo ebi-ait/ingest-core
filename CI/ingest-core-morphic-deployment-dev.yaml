@@ -15,20 +15,23 @@ spec:
     spec:
       containers:
         - name: ingest-core-container
-          image: 489384528211.dkr.ecr.eu-west-2.amazonaws.com/ingest-core-morphic:test-ds-s3-6
+          image: {{IMAGE}}
           ports:
             - containerPort: 8080
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: local
-            - name: MONGO_URI
-              value: mongodb+srv://morphic-dev:mDev12345@morphicdevcluster.jduoa8p.mongodb.net/MorphicDev?retryWrites=true&w=majority
+            - name: SPRING_DATA_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: ingest-core-secrets
+                  key: SPRING_DATA_MONGODB_URI
             - name: RABBIT_HOST
               value: rabbitmq-service
             - name: RABBIT_PORT
               value: "5672"
             - name: AWS_COGNITO_DOMAIN
-              value: "https://morphic-dev.auth.eu-west-2.amazoncognito.com/oauth2"
+              value: "https://morphic-dev-2.auth.eu-west-2.amazoncognito.com/oauth2"
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
