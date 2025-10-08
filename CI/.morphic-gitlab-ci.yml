@@ -94,6 +94,14 @@ deploy-dev:
     - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
     - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION
   script:
+    # 1) Decode base64 and upsert Secret (no printing of value)
+    - |
+      DECODED_URI="$(echo "$SPRING_DATA_MONGODB_URI_DEV" | base64 -d)"
+      kubectl -n morphic-dev create secret generic ingest-core-secrets \
+        --from-literal=SPRING_DATA_MONGODB_URI="$DECODED_URI" \
+        --dry-run=client -o yaml | kubectl -n morphic-dev apply -f -
+      unset DECODED_URI
+    # 2) Inject image tag and apply manifests
     - sed -i "s|{{IMAGE}}|$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/ingest-core-morphic:$CI_COMMIT_SHA|g" CI/ingest-core-morphic-deployment-dev.yaml
     - kubectl apply -f CI/ingest-core-morphic-deployment-dev.yaml
     - kubectl apply -f CI/ingest-core-morphic-service.yaml -n morphic-dev
@@ -113,6 +121,12 @@ deploy-prod:
     - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
     - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME_PROD --region $AWS_DEFAULT_REGION
   script:
+    - |
+      DECODED_URI="$(echo "$SPRING_DATA_MONGODB_URI_PROD" | base64 -d)"
+      kubectl -n morphic-prod create secret generic ingest-core-secrets \
+        --from-literal=SPRING_DATA_MONGODB_URI="$DECODED_URI" \
+        --dry-run=client -o yaml | kubectl -n morphic-prod apply -f -
+      unset DECODED_URI
     - sed -i "s|{{IMAGE}}|$AWS_ACCOUNT_ID_PROD.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/ingest-core-morphic:$CI_COMMIT_SHA|g" CI/ingest-core-morphic-deployment-prod.yaml
     - kubectl apply -f CI/ingest-core-morphic-deployment-prod.yaml
     - kubectl apply -f CI/ingest-core-morphic-service.yaml -n morphic-prod
