@@ -21,8 +21,11 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
-            - name: MONGO_URI
-              value: mongodb+srv://morphic-prod:morphicProd#12345@morphicprodcluster.gvr5bkw.mongodb.net/MorphicProd?retryWrites=true&w=majority
+            - name: SPRING_DATA_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: ingest-core-secrets
+                  key: SPRING_DATA_MONGODB_URI
             - name: RABBIT_HOST
               value: rabbitmq-service
             - name: RABBIT_PORT
