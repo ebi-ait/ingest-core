@@ -10,6 +10,8 @@ import java.util.Collection;
 
 public class DelegatingJwtAuthentication implements Auth0JwtAuthentication {
 
+    private static JwtVerificationService jwtVerificationService;
+
     private Authentication authentication;
 
     private DecodedJWT token;
@@ -20,7 +22,29 @@ public class DelegatingJwtAuthentication implements Auth0JwtAuthentication {
         return new DelegatingJwtAuthentication(authentication, token);
     }
 
-    private DelegatingJwtAuthentication(Authentication authentication, DecodedJWT token) {
+    /**
+     * Creates a DelegatingJwtAuthentication with cached JWT verification.
+     * This method uses the JwtVerificationService to cache verification results.
+     * 
+     * @param source The JWT authentication source
+     * @param verifier The JWT verifier to use
+     * @return A DelegatingJwtAuthentication instance with verified token
+     */
+    public static DelegatingJwtAuthentication delegateWithCache(JwtAuthentication source, JWTVerifier verifier) {
+        if (jwtVerificationService == null) {
+            // Fallback to non-cached verification if service is not available
+            return delegate(source, verifier);
+        }
+        var authentication = source.verify(null);
+        DecodedJWT token = jwtVerificationService.verify(source.getToken(), verifier);
+        return new DelegatingJwtAuthentication(authentication, token);
+    }
+
+    public static void setJwtVerificationService(JwtVerificationService jwtVerificationService) {
+        DelegatingJwtAuthentication.jwtVerificationService = jwtVerificationService;
+    }
+
+    DelegatingJwtAuthentication(Authentication authentication, DecodedJWT token) {
         this.authentication = authentication;
         this.token = token;
     }

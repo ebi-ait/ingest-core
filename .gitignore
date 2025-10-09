@@ -30,5 +30,8 @@ nbdist/
 
 out
 bin/
-.vscode/
+# VS Code - exclude personal settings but keep shared project configs
+.vscode/settings.local.json
+# Note: launch.json and tasks.json are included for team consistency
+# If you have personal debug configs, add them to .vscode/launch.local.json
 .DS_Store

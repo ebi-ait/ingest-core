@@ -1,0 +1,22 @@
+{
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.import.gradle.enabled": true,
+    "java.import.gradle.wrapper.enabled": true,
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.project.sourcePaths": [
+        "src/main/java",
+        "src/test/java",
+        "src/integration/java"
+    ],
+    "java.project.outputPath": "build/classes",
+    "java.project.referencedLibraries": [
+        "build/libs/**/*.jar"
+    ],
+    "files.exclude": {
+        "**/build": true,
+        "**/.gradle": true
+    },
+    "java.import.gradle.java.home": "/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk/Contents/Home",
+    "java.home": "/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk/Contents/Home"
+
+}

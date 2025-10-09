@@ -16,16 +16,13 @@ import org.humancellatlas.ingest.security.exception.UnlistedJwtIssuer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.humancellatlas.ingest.security.ElixirConfig.ELIXIR;
@@ -43,15 +40,6 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
 
     private final ElixirAaiAuthenticationProperties elixirAaiAuthenticationProperties;
 
-
-    // Counters for periodic logging
-    private static final AtomicInteger userInfoRequestCounter = new AtomicInteger(0);
-    private static final AtomicInteger successCount = new AtomicInteger(0);
-    private static final AtomicInteger failureCount = new AtomicInteger(0);
-
-    private final Map<String, UserInfo> userInfoCache = new ConcurrentHashMap<>();
-    private final long cacheTTL = 60000; // Cache entries expire after 60 seconds
-    private final Map<String, Long> cacheTimestamps = new ConcurrentHashMap<>();
 
     public ElixirAaiAuthenticationProvider(@Qualifier(ELIXIR) JwtVerifierResolver jwtVerifierResolver,
                                            AccountRepository accountRepository,
@@ -80,7 +68,7 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
 
             JWTVerifier jwtVerifier = jwtVerifierResolver.resolve(jwt.getToken());
             LOGGER.debug("token resolved");
-            DelegatingJwtAuthentication verifiedAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
+            DelegatingJwtAuthentication verifiedAuth = DelegatingJwtAuthentication.delegateWithCache(jwt, jwtVerifier);
 
             token = verifiedAuth.getToken();
             UserInfo userInfo = retrieveUserInfo(token);
@@ -92,17 +80,14 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
             OpenIdAuthentication openIdAuth = new OpenIdAuthentication(account);
             openIdAuth.authenticateWith(userInfo);
 
-            LOGGER.info("Authentication succeeded for subject ID: {}", userInfo.getSubjectId());
-            successCount.incrementAndGet();
+            LOGGER.debug("Authentication succeeded for subject ID: {}", userInfo.getSubjectId());
 
             return openIdAuth;
         } catch (TokenExpiredException e) {
             LOGGER.error("Token expired: {}", e.getMessage());
-            failureCount.incrementAndGet();
             throw new JwtVerificationFailed(e);
         } catch (JWTVerificationException e) {
             LOGGER.error("JWT verification failed: {}", e.getMessage(), e);
-            failureCount.incrementAndGet();
             throw new JwtVerificationFailed(e);
         } catch (Exception e) {
              LOGGER.error("JWT verification failed, unexpected exception: {}", e.getMessage(), e);
@@ -110,51 +95,24 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         }
     }
 
+    @Cacheable(value = "userInfo")
     private UserInfo retrieveUserInfo(String token) {
-        long startTime = System.currentTimeMillis();
-        userInfoRequestCounter.incrementAndGet();
-
-        // Check if the UserInfo is in cache and still valid
-        if (userInfoCache.containsKey(token)) {
-            Long timestamp = cacheTimestamps.get(token);
-            if (timestamp != null && (System.currentTimeMillis() - timestamp) < cacheTTL) {
-                LOGGER.info("Fetched UserInfo from cache for token: {}", truncateToken(token));
-                return userInfoCache.get(token);
-            } else {
-                // Remove expired entry from cache
-                userInfoCache.remove(token);
-                cacheTimestamps.remove(token);
-                LOGGER.info("Cache expired for token: {}", truncateToken(token));
-            }
-        }
-
-        // If not in cache or expired, fetch from LS
         try {
-            UserInfo userInfo = webClient.get()
+            return webClient.get()
                     .uri(String.format("%s/userinfo", jwtVerifierResolver.getIssuer()))
                     .header(AUTHORIZATION, String.format("Bearer %s", token))
                     .retrieve()
                     .bodyToMono(UserInfo.class)
                     .block();
-
-            long elapsedTime = System.currentTimeMillis() - startTime;
-            LOGGER.info("Successfully fetched UserInfo in {} ms for token: {}", elapsedTime, truncateToken(token));
-
-            // Update cache
-            userInfoCache.put(token, userInfo);
-            cacheTimestamps.put(token, System.currentTimeMillis());
-
-            return userInfo;
         } catch (Exception e) {
-            long elapsedTime = System.currentTimeMillis() - startTime;
-            LOGGER.error("Failed to fetch UserInfo in {} ms for token: {}", elapsedTime, truncateToken(token), e);
+            LOGGER.warn("Failed to fetch UserInfo for token: {}", truncateToken(token), e);
             throw e;
         }
     }
 
     private void verifyIssuer(String issuer) {
         String issuerWhitelist = elixirAaiAuthenticationProperties.getIssuerWhitelist();
-        LOGGER.info("Verifying issuer: {} against whitelist: {}", issuer, issuerWhitelist);
+        LOGGER.debug("Verifying issuer: {} against whitelist: {}", issuer, issuerWhitelist);
         if (!issuer.contains(issuerWhitelist)) {
             LOGGER.error("Unlisted issuer: {}", issuer);
             throw new UnlistedJwtIssuer(String.format("Not an Elixir AAI issued token: %s", issuer), issuer);
@@ -170,10 +128,4 @@ public class ElixirAaiAuthenticationProvider implements AuthenticationProvider {
         return token.substring(0, Math.min(20, token.length()));
     }
 
-    // Periodic summary logs
-    @Scheduled(fixedRate = 60000)
-    public void logPeriodicSummary() {
-        LOGGER.info("Summary in the past minute - UserInfo requests: {}, Successes: {}, Failures: {}",
-                userInfoRequestCounter.getAndSet(0), successCount.getAndSet(0), failureCount.getAndSet(0));
-    }
 }

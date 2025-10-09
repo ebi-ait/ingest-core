@@ -18,7 +18,21 @@ See [this document](https://github.com/HumanCellAtlas/metadata-schema/blob/maste
 
 An example of the process of making a submission is in [docs/primary-submission-walkthrough.md](docs/primary-submission-walkthrough.md).
 
+## Local Setup
+
+### Java 11
+
+On Mac:
+
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 11)
+export PATH=$JAVA_HOME/bin:$PATH
+```
+
+
+
 ## Tests
+
 `./gradlew verify`
 
 You will need a mongo database running on localhost with default ports to run the tests

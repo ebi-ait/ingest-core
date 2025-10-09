@@ -46,7 +46,7 @@ public class GoogleServiceJwtAuthenticationProvider implements AuthenticationPro
             verifyIssuer(jwt);
 
             JWTVerifier jwtVerifier = jwtVerifierResolver.resolve(jwt.getToken());
-            Authentication jwtAuth = DelegatingJwtAuthentication.delegate(jwt, jwtVerifier);
+            Authentication jwtAuth = DelegatingJwtAuthentication.delegateWithCache(jwt, jwtVerifier);
             logger.info("Authenticated with jwt with scopes {}", jwtAuth.getAuthorities());
 
             Account account = Account.SERVICE;
