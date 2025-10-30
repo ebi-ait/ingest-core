@@ -103,8 +103,10 @@ public class DefaultExporterTest {
         return project.getUuid().getUuid().toString();
     }
 
+    
     @Test
     public void testExportManifests() {
+        
         //when:
         Set<ExperimentProcess> receivedData = mockSendingManifestThroughMessageRouter();
 

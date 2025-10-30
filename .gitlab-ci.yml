@@ -1,6 +1,8 @@
 include:
   remote: 'https://raw.githubusercontent.com/ebi-ait/gitlab-ci-templates/master/build-release-deploy.yml'
 
+privileged: true
+
 cache:
   paths:
     - .gradle/wrapper

@@ -1,7 +1,6 @@
 package org.humancellatlas.ingest.exporter;
 
 import org.humancellatlas.ingest.export.job.ExportJob;
-import org.humancellatlas.ingest.project.Project;
 import org.humancellatlas.ingest.submission.SubmissionEnvelope;
 
 public interface Exporter {

@@ -1,0 +1,25 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Run ExporterForSpreadsheetOnlyProjectTest",
+            "request": "launch",
+            "mainClass": "org.humancellatlas.ingest.exporter.ExporterForSpreadsheetOnlyProjectTest",
+            "projectName": "ingest-core",
+            "vmArgs": "-Dspring.test.context.profiles.active=test -Dlog4j.configuration=log4j.properties",
+            "console": "internalConsole",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "type": "java",
+            "name": "IngestCoreApplication",
+            "request": "launch",
+            "mainClass": "org.humancellatlas.ingest.IngestCoreApplication",
+            "projectName": "ingest-core"
+        }
+    ]
+}

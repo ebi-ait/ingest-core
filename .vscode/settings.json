@@ -17,6 +17,12 @@
         "**/.gradle": true
     },
     "java.import.gradle.java.home": "/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk/Contents/Home",
-    "java.home": "/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk/Contents/Home"
-
+    "java.home": "/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk/Contents/Home",
+    
+    // Test explorer settings for Java
+    "java.test.config": {
+        "workingDirectory": "${workspaceFolder}"
+    },
+    "java.test.defaultConfig": "",
+    "java.test.log": true
 }
