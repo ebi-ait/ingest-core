@@ -25,6 +25,8 @@ ADD src ./src
 
 COPY gradlew build.gradle ./
 
+ENV GRADLE_OPTS="-Dorg.gradle.jvmargs=-XX:+UseContainerSupport=false"
+
 RUN ./gradlew --no-daemon assemble
 
 CMD java \
