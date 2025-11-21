@@ -32,7 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   private static final String FORWARDED_HOST = "x-forwarded-host";
   private static final List<AntPathRequestMatcher> SECURED_ANT_PATHS = setupSecuredAntPaths();
   private static final List<AntPathRequestMatcher> SECURED_WRANGLER_ANT_PATHS =
-      setupWranglerAntPaths();
+          setupWranglerAntPaths();
 
   // The following endpoints are only secured when accessed from the outside the cluster
 
@@ -62,10 +62,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   }
 
   private static List<AntPathRequestMatcher> defineAntPathMatchers(
-      HttpMethod method, String... patterns) {
+          HttpMethod method, String... patterns) {
     return Stream.of(patterns)
-        .map(pattern -> new AntPathRequestMatcher(pattern, method.name()))
-        .collect(toList());
+            .map(pattern -> new AntPathRequestMatcher(pattern, method.name()))
+            .collect(toList());
   }
 
   private final AuthenticationProvider gcpAuthenticationProvider;
@@ -73,9 +73,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   private final AuthenticationProvider awsCognitoAuthenticationProvider;
 
   public SecurityConfig(
-      @Qualifier(GCP) AuthenticationProvider gcp,
-      @Qualifier(ELIXIR) AuthenticationProvider elixir,
-      @Qualifier("COGNITO") AuthenticationProvider awsCognito) {
+          @Qualifier(GCP) AuthenticationProvider gcp,
+          @Qualifier(ELIXIR) AuthenticationProvider elixir,
+          @Qualifier("COGNITO") AuthenticationProvider awsCognito) {
     this.gcpAuthenticationProvider = gcp;
     this.elixirAuthenticationProvider = elixir;
     this.awsCognitoAuthenticationProvider = awsCognito;
@@ -84,70 +84,72 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.authenticationProvider(elixirAuthenticationProvider)
-        .authenticationProvider(gcpAuthenticationProvider)
-        .authenticationProvider(awsCognitoAuthenticationProvider)
-        .securityContext()
-        .securityContextRepository(new BearerSecurityContextRepository())
-        .and()
-        .exceptionHandling()
-        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
-        .and()
-        .httpBasic()
-        .disable()
-        .csrf()
-        .disable()
-        .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-        .cors()
-        .and()
-        .authorizeRequests()
-        .antMatchers(GET, "/")
-        .permitAll()
-        .antMatchers(GET, "/schemas/**")
-        .permitAll()
-        .antMatchers(GET, "/health")
-        .permitAll()
-        .antMatchers(GET, "/info")
-        .permitAll()
-        .antMatchers(GET, "/prometheus")
-        .permitAll()
-        .antMatchers(GET, "/browser/**")
-        .permitAll()
-        .antMatchers(POST, "/submissionEnvelopes")
-        .authenticated()
-        .antMatchers(POST, "/submissionEnvelopes/**")
-        .authenticated()
-        .antMatchers(POST, "/projects")
-        .authenticated()
-        .antMatchers(POST, "/studies")
-        .authenticated()
-        .antMatchers(POST, "/projects/suggestion")
-        .permitAll()
-        .antMatchers(POST, "/projects/catalogue")
-        .permitAll()
-        .antMatchers(GET, "/user/**")
-        .authenticated()
-        .antMatchers(GET, "/auth/account")
-        .authenticated()
-        .antMatchers(POST, "/auth/registration")
-        .hasAuthority(GUEST.name())
-        .requestMatchers(SecurityConfig::isSecuredEndpointFromOutside)
-        .authenticated()
-        .requestMatchers(SecurityConfig::isSecuredWranglerEndpointFromOutside)
-        .hasAnyAuthority(WRANGLER.name(), SERVICE.name())
-        .antMatchers(GET, "/**")
-        .permitAll();
+            .authenticationProvider(gcpAuthenticationProvider)
+            .authenticationProvider(awsCognitoAuthenticationProvider)
+            .securityContext()
+            .securityContextRepository(new BearerSecurityContextRepository())
+            .and()
+            .exceptionHandling()
+            .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+            .and()
+            .httpBasic()
+            .disable()
+            .csrf()
+            .disable()
+            .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+            .cors()
+            .and()
+            .authorizeRequests()
+            .antMatchers(GET, "/")
+            .permitAll()
+            .antMatchers(GET, "/schemas/**")
+            .permitAll()
+            .antMatchers(GET, "/health")
+            .permitAll()
+            .antMatchers(GET, "/info")
+            .permitAll()
+            .antMatchers(GET, "/prometheus")
+            .permitAll()
+            .antMatchers(GET, "/browser/**")
+            .permitAll()
+            .antMatchers("/datasets/*/globus/**").authenticated()
+            .antMatchers("/datasets/*/delete").authenticated()
+            .antMatchers(POST, "/submissionEnvelopes")
+            .authenticated()
+            .antMatchers(POST, "/submissionEnvelopes/**")
+            .authenticated()
+            .antMatchers(POST, "/projects")
+            .authenticated()
+            .antMatchers(POST, "/studies")
+            .authenticated()
+            .antMatchers(POST, "/projects/suggestion")
+            .permitAll()
+            .antMatchers(POST, "/projects/catalogue")
+            .permitAll()
+            .antMatchers(GET, "/user/**")
+            .authenticated()
+            .antMatchers(GET, "/auth/account")
+            .authenticated()
+            .antMatchers(POST, "/auth/registration")
+            .hasAuthority(GUEST.name())
+            .requestMatchers(SecurityConfig::isSecuredEndpointFromOutside)
+            .authenticated()
+            .requestMatchers(SecurityConfig::isSecuredWranglerEndpointFromOutside)
+            .hasAnyAuthority(WRANGLER.name(), SERVICE.name())
+            .antMatchers(GET, "/**")
+            .permitAll();
   }
 
   private static Boolean isSecuredEndpointFromOutside(HttpServletRequest request) {
     return SECURED_ANT_PATHS.stream().anyMatch(matcher -> matcher.matches(request))
-        && SecurityConfig.isRequestOutsideProxy(request);
+            && SecurityConfig.isRequestOutsideProxy(request);
   }
 
   private static Boolean isSecuredWranglerEndpointFromOutside(HttpServletRequest request) {
     return SECURED_WRANGLER_ANT_PATHS.stream().anyMatch(matcher -> matcher.matches(request))
-        && SecurityConfig.isRequestOutsideProxy(request);
+            && SecurityConfig.isRequestOutsideProxy(request);
   }
 
   private static Boolean isRequestOutsideProxy(HttpServletRequest request) {
