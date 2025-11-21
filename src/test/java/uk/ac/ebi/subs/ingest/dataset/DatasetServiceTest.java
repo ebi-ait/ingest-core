@@ -28,10 +28,10 @@ import uk.ac.ebi.subs.ingest.biomaterial.BiomaterialRepository;
 import uk.ac.ebi.subs.ingest.core.service.MetadataCrudService;
 import uk.ac.ebi.subs.ingest.core.service.MetadataUpdateService;
 import uk.ac.ebi.subs.ingest.dataset.util.UploadAreaUtil;
+import uk.ac.ebi.subs.ingest.dataset.util.UploadAreaUtilGlobus;
 import uk.ac.ebi.subs.ingest.file.FileRepository;
 import uk.ac.ebi.subs.ingest.process.ProcessRepository;
 import uk.ac.ebi.subs.ingest.protocol.ProtocolRepository;
-import uk.ac.ebi.subs.ingest.dataset.util.UploadAreaUtilGlobus;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(
@@ -71,7 +71,6 @@ public class DatasetServiceTest {
   @MockBean private UploadAreaUtil uploadAreaUtil;
 
   @MockBean private UploadAreaUtilGlobus uploadAreaUtilGlobus;
-
 
   @BeforeEach
   void setUp() {
