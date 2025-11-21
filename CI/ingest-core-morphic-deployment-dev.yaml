@@ -44,4 +44,20 @@ spec:
                   key: AWS_SECRET_ACCESS_KEY
             - name: AWS_REGION
               value: eu-west-2  # Optionally specify AWS region as an environment variable
+            - name: MORPHIC_PROVIDER_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: morphic-globus-credentials
+                  key: MORPHIC_PROVIDER_CLIENT_ID
+            - name: MORPHIC_PROVIDER_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: morphic-globus-credentials
+                  key: MORPHIC_PROVIDER_CLIENT_SECRET
+            - name: MORPHIC_EBI_COLLECTION_UUID
+              value: "14a0be5f-226c-49fe-b65f-dba083d67fc3"
+            - name: MORPHIC_DEST_ROOT
+              value: "/ebi/ftp/private/morphic-transfer"
+            - name: MORPHIC_UPLOAD_SUBDIR
+              value: "submissions"
           imagePullPolicy: Always
