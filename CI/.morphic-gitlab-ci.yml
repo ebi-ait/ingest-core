@@ -94,6 +94,12 @@ deploy-dev:
     - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
     - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION
   script:
+    # 0) Create/update Globus credentials secret
+    - |
+      kubectl -n morphic-dev create secret generic morphic-globus-credentials \
+        --from-literal=MORPHIC_PROVIDER_CLIENT_ID="$MORPHIC_PROVIDER_CLIENT_ID" \
+        --from-literal=MORPHIC_PROVIDER_CLIENT_SECRET="$MORPHIC_PROVIDER_CLIENT_SECRET" \
+        --dry-run=client -o yaml | kubectl -n morphic-dev apply -f -
     # 1) Decode base64 and upsert Secret (no printing of value)
     - |
       DECODED_URI="$(echo "$SPRING_DATA_MONGODB_URI_DEV" | base64 -d)"
@@ -121,6 +127,11 @@ deploy-prod:
     - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
     - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME_PROD --region $AWS_DEFAULT_REGION
   script:
+    - |
+      kubectl -n morphic-prod create secret generic morphic-globus-credentials \
+        --from-literal=MORPHIC_PROVIDER_CLIENT_ID="$MORPHIC_PROVIDER_CLIENT_ID" \
+        --from-literal=MORPHIC_PROVIDER_CLIENT_SECRET="$MORPHIC_PROVIDER_CLIENT_SECRET" \
+        --dry-run=client -o yaml | kubectl -n morphic-dev apply -f -
     - |
       DECODED_URI="$(echo "$SPRING_DATA_MONGODB_URI_PROD" | base64 -d)"
       kubectl -n morphic-prod create secret generic ingest-core-secrets \
