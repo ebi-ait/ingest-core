@@ -22,6 +22,7 @@ import uk.ac.ebi.subs.ingest.biomaterial.BiomaterialRepository;
 import uk.ac.ebi.subs.ingest.core.service.MetadataCrudService;
 import uk.ac.ebi.subs.ingest.core.service.MetadataUpdateService;
 import uk.ac.ebi.subs.ingest.dataset.util.UploadAreaUtil;
+import uk.ac.ebi.subs.ingest.dataset.util.UploadAreaUtilGlobus;
 import uk.ac.ebi.subs.ingest.file.File;
 import uk.ac.ebi.subs.ingest.file.FileRepository;
 import uk.ac.ebi.subs.ingest.process.Process;
@@ -43,14 +44,20 @@ public class DatasetService {
   private final @NonNull MetadataUpdateService metadataUpdateService;
   private final @NonNull DatasetEventHandler datasetEventHandler;
   private final @NotNull UploadAreaUtil uploadAreaUtil;
+  private final @NotNull UploadAreaUtilGlobus uploadAreaUtilGlobus;
   private final Logger log = LoggerFactory.getLogger(getClass());
 
   public Dataset register(final Dataset dataset) {
     final Dataset persistentDataset = datasetRepository.save(dataset);
 
-    uploadAreaUtil.createDataFilesUploadArea(dataset);
-    datasetEventHandler.registeredDataset(persistentDataset);
+    try {
+      uploadAreaUtilGlobus.createDataFilesUploadArea(persistentDataset);
+    } catch (Exception e) {
+      log.error("Failed to create Globus upload area during register() for dataset {}: {}",
+              persistentDataset.getId(), e.getMessage(), e);
+    }
 
+    datasetEventHandler.registeredDataset(persistentDataset);
     return persistentDataset;
   }
 
@@ -125,7 +132,8 @@ public class DatasetService {
                 }
               });
 
-      uploadAreaUtil.deleteDataFilesAndUploadArea(datasetId);
+//      uploadAreaUtil.deleteDataFilesAndUploadArea(datasetId);
+      uploadAreaUtilGlobus.deleteDataFilesAndUploadArea(datasetId);
     }
 
     metadataCrudService.deleteDocument(deleteDataset);
@@ -148,12 +156,20 @@ public class DatasetService {
   }
 
   public Dataset addDatasetToSubmissionEnvelope(
-      final SubmissionEnvelope submissionEnvelope, final Dataset dataset) {
+          final SubmissionEnvelope submissionEnvelope, final Dataset dataset) {
+
     if (!dataset.getIsUpdate()) {
       final Dataset savedDataset =
-          metadataCrudService.addToSubmissionEnvelopeAndSave(dataset, submissionEnvelope);
+              metadataCrudService.addToSubmissionEnvelopeAndSave(dataset, submissionEnvelope);
 
-      uploadAreaUtil.createDataFilesUploadArea(savedDataset);
+      try {
+        System.out.println("Added dataset to envelope - uuid=" + savedDataset.getUuid() + " preparing upload are globus");
+        uploadAreaUtilGlobus.createDataFilesUploadArea(savedDataset);
+      } catch (Exception e) {
+        log.error("Failed to create Globus upload area for dataset {}: {}",
+                savedDataset.getId(), e.getMessage(), e);
+        // Do NOT rethrow – keep the dataset creation successful.
+      }
 
       return savedDataset;
     } else {
