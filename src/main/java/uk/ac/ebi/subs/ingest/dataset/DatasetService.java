@@ -53,8 +53,11 @@ public class DatasetService {
     try {
       uploadAreaUtilGlobus.createDataFilesUploadArea(persistentDataset);
     } catch (Exception e) {
-      log.error("Failed to create Globus upload area during register() for dataset {}: {}",
-              persistentDataset.getId(), e.getMessage(), e);
+      log.error(
+          "Failed to create Globus upload area during register() for dataset {}: {}",
+          persistentDataset.getId(),
+          e.getMessage(),
+          e);
     }
 
     datasetEventHandler.registeredDataset(persistentDataset);
@@ -132,7 +135,7 @@ public class DatasetService {
                 }
               });
 
-//      uploadAreaUtil.deleteDataFilesAndUploadArea(datasetId);
+      //      uploadAreaUtil.deleteDataFilesAndUploadArea(datasetId);
       uploadAreaUtilGlobus.deleteDataFilesAndUploadArea(datasetId);
     }
 
@@ -156,18 +159,24 @@ public class DatasetService {
   }
 
   public Dataset addDatasetToSubmissionEnvelope(
-          final SubmissionEnvelope submissionEnvelope, final Dataset dataset) {
+      final SubmissionEnvelope submissionEnvelope, final Dataset dataset) {
 
     if (!dataset.getIsUpdate()) {
       final Dataset savedDataset =
-              metadataCrudService.addToSubmissionEnvelopeAndSave(dataset, submissionEnvelope);
+          metadataCrudService.addToSubmissionEnvelopeAndSave(dataset, submissionEnvelope);
 
       try {
-        System.out.println("Added dataset to envelope - uuid=" + savedDataset.getUuid() + " preparing upload are globus");
+        System.out.println(
+            "Added dataset to envelope - uuid="
+                + savedDataset.getUuid()
+                + " preparing upload are globus");
         uploadAreaUtilGlobus.createDataFilesUploadArea(savedDataset);
       } catch (Exception e) {
-        log.error("Failed to create Globus upload area for dataset {}: {}",
-                savedDataset.getId(), e.getMessage(), e);
+        log.error(
+            "Failed to create Globus upload area for dataset {}: {}",
+            savedDataset.getId(),
+            e.getMessage(),
+            e);
         // Do NOT rethrow – keep the dataset creation successful.
       }
 

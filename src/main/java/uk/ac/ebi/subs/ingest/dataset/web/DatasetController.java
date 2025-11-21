@@ -1,11 +1,13 @@
 package uk.ac.ebi.subs.ingest.dataset.web;
 
-import java.io.InputStream;
+import java.nio.file.*;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -22,6 +24,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import uk.ac.ebi.subs.ingest.core.Uuid;
 import uk.ac.ebi.subs.ingest.dataset.Dataset;
 import uk.ac.ebi.subs.ingest.dataset.DatasetService;
@@ -31,18 +34,6 @@ import uk.ac.ebi.subs.ingest.dataset.util.UploadAreaUtilGlobus;
 import uk.ac.ebi.subs.ingest.security.CheckAllowed;
 import uk.ac.ebi.subs.ingest.submission.SubmissionEnvelope;
 import uk.ac.ebi.subs.ingest.submission.exception.NotAllowedDuringSubmissionStateException;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.InputStream;
-import java.nio.file.*;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import java.util.HashMap;
 
 /** Controller for managing Datasets. */
 @RepositoryRestController
@@ -167,9 +158,8 @@ public class DatasetController {
    * @return The updated dataset as a resource.
    */
   @PutMapping(
-          value = "/datasets/{dataset_id}/files/{file_id}",
-          consumes = MediaType.APPLICATION_JSON_VALUE
-  )
+      value = "/datasets/{dataset_id}/files/{file_id}",
+      consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<Resource<?>> addFileToDataset(
       @PathVariable("dataset_id") final Dataset dataset,
       @PathVariable("file_id") final String id,
@@ -206,26 +196,21 @@ public class DatasetController {
   }
 
   @GetMapping("/datasets/{datasetId}/globus/area-exists")
-  public ResponseEntity<Map<String, Object>> globusAreaExists(
-          @PathVariable String datasetId
-  ) {
+  public ResponseEntity<Map<String, Object>> globusAreaExists(@PathVariable String datasetId) {
     String root = globus.remoteDatasetRoot(datasetId);
     boolean exists = globus.directoryExists(root);
 
     return ResponseEntity.ok(
-            Map.of(
-                    "datasetId", datasetId,
-                    "path", root,
-                    "exists", exists
-            )
-    );
+        Map.of(
+            "datasetId", datasetId,
+            "path", root,
+            "exists", exists));
   }
 
   @GetMapping("/datasets/{datasetId}/globus/files")
   public ResponseEntity<List<FileListingEntry>> listGlobusFiles(
-          @PathVariable String datasetId,
-          @RequestParam(required = false, defaultValue = "") String prefix
-  ) {
+      @PathVariable String datasetId,
+      @RequestParam(required = false, defaultValue = "") String prefix) {
     String root = globus.remoteDatasetRoot(datasetId);
     System.out.println("[Globus] listGlobusFiles root=" + root);
 
@@ -236,19 +221,21 @@ public class DatasetController {
     try {
       List<GlobusService.GlobusEntry> entries = globus.listEntries(root);
 
-      List<FileListingEntry> fileEntries = entries.stream()
+      List<FileListingEntry> fileEntries =
+          entries.stream()
               .filter(e -> prefix.isBlank() || e.getName().startsWith(prefix))
               .sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName()))
-              .map(e -> {
-                String name = e.getName();
-                String type = e.getType();
+              .map(
+                  e -> {
+                    String name = e.getName();
+                    String type = e.getType();
 
-                if ("dir".equalsIgnoreCase(type)) {
-                  name += "/";
-                }
+                    if ("dir".equalsIgnoreCase(type)) {
+                      name += "/";
+                    }
 
-                return new FileListingEntry(name, type, e.getSize());
-              })
+                    return new FileListingEntry(name, type, e.getSize());
+                  })
               .collect(Collectors.toList());
 
       return ResponseEntity.ok(fileEntries);
@@ -261,15 +248,12 @@ public class DatasetController {
 
   @GetMapping("/datasets/{datasetId}/globus/files/exists")
   public ResponseEntity<Map<String, Object>> fileExists(
-          @PathVariable String datasetId,
-          @RequestParam("path") String relPath
-  ) {
+      @PathVariable String datasetId, @RequestParam("path") String relPath) {
     String root = globus.remoteDatasetRoot(datasetId);
 
     if (!globus.directoryExists(root)) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-              Map.of("exists", false, "reason", "dataset area does not exist")
-      );
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(Map.of("exists", false, "reason", "dataset area does not exist"));
     }
 
     try {
@@ -279,50 +263,43 @@ public class DatasetController {
       }
       return ResponseEntity.ok(Map.of("exists", true));
     } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-              Map.of("error", e.getMessage())
-      );
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(Map.of("error", e.getMessage()));
     }
   }
 
   @PostMapping("/datasets/{datasetId}/delete")
   public ResponseEntity<Map<String, Object>> deleteGlobusFiles(
-          @PathVariable String datasetId,
-          @RequestBody DeleteRequest request
-  ) {
+      @PathVariable String datasetId, @RequestBody DeleteRequest request) {
     String root = globus.remoteDatasetRoot(datasetId);
 
     if (!globus.directoryExists(root)) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(
               Map.of(
-                      "datasetId", datasetId,
-                      "path", root,
-                      "error", "dataset area does not exist"
-              )
-      );
+                  "datasetId", datasetId,
+                  "path", root,
+                  "error", "dataset area does not exist"));
     }
 
     List<String> targets;
     try {
       if (request.isAllContents()) {
         List<GlobusService.GlobusEntry> entries = globus.listEntries(root);
-        targets = entries.stream()
-                .map(GlobusService.GlobusEntry::getName)
-                .collect(Collectors.toList());
+        targets =
+            entries.stream().map(GlobusService.GlobusEntry::getName).collect(Collectors.toList());
       } else {
         targets = request.getPaths();
       }
     } catch (Exception e) {
-      log.error("Globus list failed for dataset {} root {}: {}", datasetId, root, e.getMessage(), e);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-              Map.of("error", "Failed to list dataset contents")
-      );
+      log.error(
+          "Globus list failed for dataset {} root {}: {}", datasetId, root, e.getMessage(), e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(Map.of("error", "Failed to list dataset contents"));
     }
 
     if (targets == null || targets.isEmpty()) {
-      return ResponseEntity.badRequest().body(
-              Map.of("error", "No targets specified for deletion")
-      );
+      return ResponseEntity.badRequest().body(Map.of("error", "No targets specified for deletion"));
     }
 
     try {
@@ -337,11 +314,10 @@ public class DatasetController {
 
       return ResponseEntity.accepted().body(body);
     } catch (Exception e) {
-      log.error("Globus delete failed for dataset {} root {}: {}", datasetId, root, e.getMessage(), e);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-              Map.of("error", "Globus delete failed: " + e.getMessage())
-      );
+      log.error(
+          "Globus delete failed for dataset {} root {}: {}", datasetId, root, e.getMessage(), e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(Map.of("error", "Globus delete failed: " + e.getMessage()));
     }
   }
-
 }
