@@ -43,7 +43,7 @@ spec:
                   name: aws-credentials
                   key: AWS_SECRET_ACCESS_KEY
             - name: AWS_REGION
-              value: eu-west-2  # Optionally specify AWS region as an environment variable
+              value: eu-west-2
             - name: MORPHIC_PROVIDER_CLIENT_ID
               valueFrom:
                 secretKeyRef:
@@ -60,4 +60,9 @@ spec:
               value: "/ebi/ftp/private/morphic-transfer"
             - name: MORPHIC_UPLOAD_SUBDIR
               value: "submissions"
+            - name: MORPHIC_GLOBUS_ACL_COLLECTION_ID
+              valueFrom:
+                secretKeyRef:
+                  name: morphic-globus-credentials
+                  key: MORPHIC_GLOBUS_ACL_COLLECTION_ID
           imagePullPolicy: Always

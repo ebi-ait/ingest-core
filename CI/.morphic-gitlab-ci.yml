@@ -99,6 +99,7 @@ deploy-dev:
       kubectl -n morphic-dev create secret generic morphic-globus-credentials \
         --from-literal=MORPHIC_PROVIDER_CLIENT_ID="$MORPHIC_PROVIDER_CLIENT_ID" \
         --from-literal=MORPHIC_PROVIDER_CLIENT_SECRET="$MORPHIC_PROVIDER_CLIENT_SECRET" \
+        --from-literal=MORPHIC_GLOBUS_ACL_COLLECTION_ID="$MORPHIC_GLOBUS_ACL_COLLECTION_ID" \
         --dry-run=client -o yaml | kubectl -n morphic-dev apply -f -
     # 1) Decode base64 and upsert Secret (no printing of value)
     - |
@@ -131,6 +132,7 @@ deploy-prod:
       kubectl -n morphic-prod create secret generic morphic-globus-credentials \
         --from-literal=MORPHIC_PROVIDER_CLIENT_ID="$MORPHIC_PROVIDER_CLIENT_ID" \
         --from-literal=MORPHIC_PROVIDER_CLIENT_SECRET="$MORPHIC_PROVIDER_CLIENT_SECRET" \
+        --from-literal=MORPHIC_GLOBUS_ACL_COLLECTION_ID="$MORPHIC_GLOBUS_ACL_COLLECTION_ID" \
         --dry-run=client -o yaml | kubectl -n morphic-dev apply -f -
     - |
       DECODED_URI="$(echo "$SPRING_DATA_MONGODB_URI_PROD" | base64 -d)"

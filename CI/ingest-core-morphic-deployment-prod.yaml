@@ -60,4 +60,9 @@ spec:
               value: "/ebi/ftp/private/morphic-transfer"
             - name: MORPHIC_UPLOAD_SUBDIR
               value: "submissions"
+            - name: MORPHIC_GLOBUS_ACL_COLLECTION_ID
+              valueFrom:
+                secretKeyRef:
+                  name: morphic-globus-credentials
+                  key: MORPHIC_GLOBUS_ACL_COLLECTION_ID
           imagePullPolicy: Always
