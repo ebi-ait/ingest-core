@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -105,7 +106,9 @@ class DatasetControllerTest {
       var content = new HashMap<String, Object>();
       content.put("name", "Test Dataset");
 
-      doAnswer(invocation -> null).when(uploadAreaUtil).createDataFilesUploadArea(any());
+      doAnswer(invocation -> null)
+          .when(uploadAreaUtil)
+          .createDataFilesUploadArea(any(Dataset.class), anyString());
 
       // when:
       MvcResult result =
@@ -121,20 +124,17 @@ class DatasetControllerTest {
       assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
       assertThat(response.getContentType()).containsPattern("application/.*json.*");
 
-      // and: verify the registered dataset content
       Map<String, Object> registeredDataset =
           objectMapper.readValue(response.getContentAsString(), Map.class);
       assertThat(registeredDataset.get("content")).isInstanceOf(Map.class);
       MapEntry<String, String> nameEntry = entry("name", "Test Dataset");
       assertThat((Map) registeredDataset.get("content")).containsOnly(nameEntry);
 
-      // and: verify the dataset is stored in the repository
       List<Dataset> datasets = repository.findAll();
       assertThat(datasets).hasSize(1);
       Dataset storedDataset = datasets.get(0);
       assertThat((Map) storedDataset.getContent()).containsOnly(nameEntry);
 
-      // and:
       postCondition.accept(storedDataset);
     }
   }

@@ -47,22 +47,24 @@ public class DatasetService {
   private final @NotNull UploadAreaUtilGlobus uploadAreaUtilGlobus;
   private final Logger log = LoggerFactory.getLogger(getClass());
 
-  //  public Dataset register(final Dataset dataset) {
-  //    final Dataset persistentDataset = datasetRepository.save(dataset);
-  //
-  //    try {
-  //      uploadAreaUtilGlobus.createDataFilesUploadArea(persistentDataset);
-  //    } catch (Exception e) {
-  //      log.error(
-  //          "Failed to create Globus upload area during register() for dataset {}: {}",
-  //          persistentDataset.getId(),
-  //          e.getMessage(),
-  //          e);
-  //    }
-  //
-  //    datasetEventHandler.registeredDataset(persistentDataset);
-  //    return persistentDataset;
-  //  }
+  public Dataset register(final Dataset dataset) {
+    final Dataset persistentDataset = datasetRepository.save(dataset);
+
+    try {
+      String principalId = persistentDataset.getGlobusOwnerIdentityId();
+
+      uploadAreaUtilGlobus.createDataFilesUploadArea(persistentDataset, principalId);
+    } catch (Exception e) {
+      log.error(
+          "Failed to create Globus upload area during register() for dataset {}: {}",
+          persistentDataset.getId(),
+          e.getMessage(),
+          e);
+    }
+
+    datasetEventHandler.registeredDataset(persistentDataset);
+    return persistentDataset;
+  }
 
   public Dataset update(final Dataset dataset, final ObjectNode patch) {
     final String datasetId = dataset.getId();
