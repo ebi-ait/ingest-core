@@ -21,6 +21,10 @@ public class GlobusProps {
   private String sourceEndpointId; // user / submission source endpoint
   private String remoteProcessingPathPrefix;
 
-  /** If true, use local 'globus' CLI for transfer submission instead of Transfer API. */
   private boolean useCli = false;
+  private String defaultPrincipalId;
+
+  // collection where ACLs should be applied (submissions guest collection)
+  private String aclCollectionId;
+  private boolean enableAcl = false;
 }
