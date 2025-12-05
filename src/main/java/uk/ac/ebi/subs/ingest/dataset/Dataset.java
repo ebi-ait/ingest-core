@@ -18,14 +18,16 @@ import uk.ac.ebi.subs.ingest.core.MetadataDocument;
 import uk.ac.ebi.subs.ingest.protocol.Protocol;
 import uk.ac.ebi.subs.ingest.study.Study;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Getter
 @JsonIgnoreProperties({
-  "firstDcpVersion",
-  "dcpVersion",
-  "validationState",
-  "validationErrors",
-  "graphValidationErrors",
-  "isUpdate"
+        "firstDcpVersion",
+        "dcpVersion",
+        "validationState",
+        "validationErrors",
+        "graphValidationErrors",
+        "isUpdate"
 })
 public class Dataset extends MetadataDocument {
   private Set<String> dataFiles = new HashSet<>();
@@ -47,6 +49,11 @@ public class Dataset extends MetadataDocument {
   private Set<Dataset> derivedFrom = new HashSet<>();
 
   @DBRef @Setter private Study study;
+
+  @Setter
+  @Field("globus_owner_identity_id")
+  @JsonIgnore
+  private String globusOwnerIdentityId;
 
   @JsonCreator
   public Dataset(@JsonProperty("content") final Object content) {

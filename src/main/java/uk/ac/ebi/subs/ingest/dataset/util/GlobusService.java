@@ -98,7 +98,7 @@ public class GlobusService {
   }
 
   public String remoteDatasetRoot(String datasetId) {
-    String base = props.getBasePath(); // e.g. /ebi/ftp/private/morphic-transfer
+    String base = props.getBasePath(); // /ebi/ftp/private/morphic-transfer
     if (base == null || base.isBlank()) {
       throw new IllegalStateException("morphic.globus.base-path is not configured");
     }
@@ -106,7 +106,7 @@ public class GlobusService {
       base = base.substring(0, base.length() - 1);
     }
 
-    String uploadSubdir = System.getenv("MORPHIC_UPLOAD_SUBDIR");
+    String uploadSubdir = System.getenv("MORPHIC_UPLOAD_SUBDIR"); // "submissions"
     if (uploadSubdir != null && !uploadSubdir.isBlank()) {
       uploadSubdir = uploadSubdir.replaceAll("^/+", "").replaceAll("/+$", "");
       base = base + "/" + uploadSubdir;
@@ -118,28 +118,34 @@ public class GlobusService {
   }
 
   public void mkdir(String absPath) {
-    String tok = tokenForTransfer(); // <-- use Transfer token
-    System.out.printf("[Globus] mkdir endpoint=%s path=%s%n", props.getCollectionId(), absPath);
+    String tok = tokenForTransfer();
+    System.out.printf("[Globus] mkdir endpoint=%s path=%s%n",
+            props.getCollectionId(), absPath);
 
     var body = Map.of("DATA_TYPE", "mkdir", "path", absPath);
+
     client(props.getTransferUrl())
-        .post()
-        .uri("/operation/endpoint/{id}/mkdir", props.getCollectionId())
-        .header("Authorization", "Bearer " + tok)
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(Mono.just(body), Map.class)
-        .exchange()
-        .flatMap(
-            resp -> {
-              if (resp.statusCode().is2xxSuccessful()) return Mono.empty();
-              return resp.bodyToMono(String.class)
-                  .flatMap(
-                      b ->
-                          Mono.error(
-                              new RuntimeException(
-                                  "Globus mkdir " + resp.statusCode() + " body=" + b)));
+            .post()
+            .uri("/operation/endpoint/{id}/mkdir", props.getCollectionId())
+            .header("Authorization", "Bearer " + tok)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(Mono.just(body), Map.class)
+            .exchange()
+            .flatMap(response -> {
+              if (response.statusCode().is2xxSuccessful()) {
+                return Mono.empty();
+              }
+              if (response.statusCode().equals(HttpStatus.CONFLICT)) {
+                System.out.printf(
+                        "[Globus] mkdir: directory %s already exists (409); treating as success%n",
+                        absPath);
+                return Mono.empty();
+              }
+              return response.bodyToMono(String.class)
+                      .flatMap(err -> Mono.error(new RuntimeException(
+                              "Globus mkdir " + response.statusCode() + " body=" + err)));
             })
-        .block();
+            .block();
   }
 
   public Map<String, Object> ls(String absPath) {
@@ -214,16 +220,67 @@ public class GlobusService {
     return transferToken;
   }
 
-  public String baseForDataset(String datasetId) {
-    String base = props.getBasePath();
-    if (base == null || base.isBlank()) {
-      throw new IllegalStateException("morphic.globus.base-path is not configured");
-    }
+  public void addAclRule(String path, String principalId, String permissions) {
+    String tok = tokenForTransfer();
 
-    if (base.endsWith("/")) {
-      base = base.substring(0, base.length() - 1);
+    // Use ACL collection if set, otherwise fall back to main collectionId
+    String collectionId = (props.getAclCollectionId() != null && !props.getAclCollectionId().isBlank())
+            ? props.getAclCollectionId()
+            : props.getCollectionId();
+
+    Map<String, Object> rule = new HashMap<>();
+    rule.put("DATA_TYPE", "access");
+    rule.put("principal_type", "identity");
+    rule.put("principal", principalId);
+    rule.put("path", path);
+    rule.put("permissions", permissions);
+
+    System.out.printf(
+            "[Globus] Adding ACL rule on endpoint=%s path=%s principal=%s perms=%s%n",
+            collectionId, path, principalId, permissions);
+
+    client(props.getTransferUrl())
+            .post()
+            .uri("/endpoint/{id}/access", collectionId)
+            .header("Authorization", "Bearer " + tok)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(Mono.just(rule), Map.class)
+            .exchange()
+            .flatMap(response -> {
+              if (response.statusCode().is2xxSuccessful()) {
+                return Mono.empty();
+              }
+              if (response.statusCode().equals(HttpStatus.CONFLICT)) {
+                System.out.printf(
+                        "[Globus] ACL rule already exists on %s for principal %s (409); treating as success%n",
+                        path, principalId);
+                return Mono.empty();
+              }
+              return response.bodyToMono(String.class)
+                      .flatMap(err -> Mono.error(new RuntimeException(
+                              "Globus ACL error " + response.statusCode() + " body=" + err)));
+            })
+            .block();
+  }
+
+
+  @SuppressWarnings("unchecked")
+  public List<Map<String, Object>> listAclRules() {
+    String tok = tokenForTransfer();
+    Map<String, Object> resp =
+            client(props.getTransferUrl())
+                    .get()
+                    .uri("/endpoint/{id}/access_list", props.getCollectionId())
+                    .header("Authorization", "Bearer " + tok)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+
+    Object data = resp.get("DATA");
+    if (data instanceof List<?>) {
+      return (List<Map<String, Object>>) data;
     }
-    return base + "/" + datasetId;
+    return List.of();
   }
 
   public String getSubmissionId() {
