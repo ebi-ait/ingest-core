@@ -47,22 +47,22 @@ public class DatasetService {
   private final @NotNull UploadAreaUtilGlobus uploadAreaUtilGlobus;
   private final Logger log = LoggerFactory.getLogger(getClass());
 
-//  public Dataset register(final Dataset dataset) {
-//    final Dataset persistentDataset = datasetRepository.save(dataset);
-//
-//    try {
-//      uploadAreaUtilGlobus.createDataFilesUploadArea(persistentDataset);
-//    } catch (Exception e) {
-//      log.error(
-//          "Failed to create Globus upload area during register() for dataset {}: {}",
-//          persistentDataset.getId(),
-//          e.getMessage(),
-//          e);
-//    }
-//
-//    datasetEventHandler.registeredDataset(persistentDataset);
-//    return persistentDataset;
-//  }
+  //  public Dataset register(final Dataset dataset) {
+  //    final Dataset persistentDataset = datasetRepository.save(dataset);
+  //
+  //    try {
+  //      uploadAreaUtilGlobus.createDataFilesUploadArea(persistentDataset);
+  //    } catch (Exception e) {
+  //      log.error(
+  //          "Failed to create Globus upload area during register() for dataset {}: {}",
+  //          persistentDataset.getId(),
+  //          e.getMessage(),
+  //          e);
+  //    }
+  //
+  //    datasetEventHandler.registeredDataset(persistentDataset);
+  //    return persistentDataset;
+  //  }
 
   public Dataset update(final Dataset dataset, final ObjectNode patch) {
     final String datasetId = dataset.getId();
@@ -159,32 +159,33 @@ public class DatasetService {
   }
 
   public Dataset addDatasetToSubmissionEnvelope(
-          final SubmissionEnvelope submissionEnvelope,
-          final Dataset dataset,
-          final String globusIdentityId) {
+      final SubmissionEnvelope submissionEnvelope,
+      final Dataset dataset,
+      final String globusIdentityId) {
 
     if (!dataset.getIsUpdate()) {
-      if (dataset.getGlobusOwnerIdentityId() == null || dataset.getGlobusOwnerIdentityId().isBlank()) {
+      if (dataset.getGlobusOwnerIdentityId() == null
+          || dataset.getGlobusOwnerIdentityId().isBlank()) {
         dataset.setGlobusOwnerIdentityId(globusIdentityId);
       }
 
       final Dataset savedDataset =
-              metadataCrudService.addToSubmissionEnvelopeAndSave(dataset, submissionEnvelope);
+          metadataCrudService.addToSubmissionEnvelopeAndSave(dataset, submissionEnvelope);
 
       try {
         System.out.println(
-                "Added dataset to envelope - uuid="
-                        + savedDataset.getUuid()
-                        + " preparing upload area globus for principal="
-                        + globusIdentityId);
+            "Added dataset to envelope - uuid="
+                + savedDataset.getUuid()
+                + " preparing upload area globus for principal="
+                + globusIdentityId);
 
         uploadAreaUtilGlobus.createDataFilesUploadArea(savedDataset, globusIdentityId);
       } catch (Exception e) {
         log.error(
-                "Failed to create Globus upload area for dataset {}: {}",
-                savedDataset.getId(),
-                e.getMessage(),
-                e);
+            "Failed to create Globus upload area for dataset {}: {}",
+            savedDataset.getId(),
+            e.getMessage(),
+            e);
       }
 
       return savedDataset;

@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -18,16 +19,14 @@ import uk.ac.ebi.subs.ingest.core.MetadataDocument;
 import uk.ac.ebi.subs.ingest.protocol.Protocol;
 import uk.ac.ebi.subs.ingest.study.Study;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 @Getter
 @JsonIgnoreProperties({
-        "firstDcpVersion",
-        "dcpVersion",
-        "validationState",
-        "validationErrors",
-        "graphValidationErrors",
-        "isUpdate"
+  "firstDcpVersion",
+  "dcpVersion",
+  "validationState",
+  "validationErrors",
+  "graphValidationErrors",
+  "isUpdate"
 })
 public class Dataset extends MetadataDocument {
   private Set<String> dataFiles = new HashSet<>();

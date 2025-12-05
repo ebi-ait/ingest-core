@@ -20,8 +20,10 @@ public class UploadAreaUtilGlobus {
 
   public void createDataFilesUploadArea(final Dataset dataset, final String principalId) {
     final String datasetId = dataset.getId();
-    log.info("[UploadAreaUtilGlobus] createDataFilesUploadArea datasetId={} principal={}",
-            datasetId, principalId);
+    log.info(
+        "[UploadAreaUtilGlobus] createDataFilesUploadArea datasetId={} principal={}",
+        datasetId,
+        principalId);
 
     String logicalPath;
     try {
@@ -33,49 +35,51 @@ public class UploadAreaUtilGlobus {
     }
 
     log.info(
-            "[Globus] Preparing upload area on collection={} at {} for datasetId={}",
-            props.getCollectionId(),
-            logicalPath,
-            datasetId);
+        "[Globus] Preparing upload area on collection={} at {} for datasetId={}",
+        props.getCollectionId(),
+        logicalPath,
+        datasetId);
 
     try {
       globus.mkdir(logicalPath);
 
       if (props.isEnableAcl()) {
         if (principalId == null || principalId.isBlank()) {
-          log.warn("[Globus] No principalId provided; skipping ACL creation for datasetId={}", datasetId);
+          log.warn(
+              "[Globus] No principalId provided; skipping ACL creation for datasetId={}",
+              datasetId);
         } else {
           String aclPath = "/" + datasetId + "/";
 
           globus.addAclRule(aclPath, principalId, "rw");
           log.info(
-                  "[Globus] Applied ACL for datasetId={} path={} principal={} perms=rw",
-                  datasetId, aclPath, principalId);
+              "[Globus] Applied ACL for datasetId={} path={} principal={} perms=rw",
+              datasetId,
+              aclPath,
+              principalId);
         }
       } else {
         log.info(
-                "[Globus] ACL creation disabled via config; skipping ACL rule for datasetId={}",
-                datasetId);
+            "[Globus] ACL creation disabled via config; skipping ACL rule for datasetId={}",
+            datasetId);
       }
 
       dataset.setComment(
-              "Upload area ready on Globus collection "
-                      + props.getCollectionId()
-                      + " at "
-                      + logicalPath
-                      + ".");
+          "Upload area ready on Globus collection "
+              + props.getCollectionId()
+              + " at "
+              + logicalPath
+              + ".");
 
     } catch (Exception e) {
       log.warn(
-              "[Globus] Failed to prepare upload area for datasetId={} at {} : {}",
-              datasetId,
-              logicalPath,
-              e.getMessage(),
-              e);
+          "[Globus] Failed to prepare upload area for datasetId={} at {} : {}",
+          datasetId,
+          logicalPath,
+          e.getMessage(),
+          e);
       dataset.setComment(
-              "Upload area preparation on Globus failed at "
-                      + logicalPath
-                      + " (see server logs).");
+          "Upload area preparation on Globus failed at " + logicalPath + " (see server logs).");
     }
   }
 

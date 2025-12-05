@@ -119,33 +119,37 @@ public class GlobusService {
 
   public void mkdir(String absPath) {
     String tok = tokenForTransfer();
-    System.out.printf("[Globus] mkdir endpoint=%s path=%s%n",
-            props.getCollectionId(), absPath);
+    System.out.printf("[Globus] mkdir endpoint=%s path=%s%n", props.getCollectionId(), absPath);
 
     var body = Map.of("DATA_TYPE", "mkdir", "path", absPath);
 
     client(props.getTransferUrl())
-            .post()
-            .uri("/operation/endpoint/{id}/mkdir", props.getCollectionId())
-            .header("Authorization", "Bearer " + tok)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(Mono.just(body), Map.class)
-            .exchange()
-            .flatMap(response -> {
+        .post()
+        .uri("/operation/endpoint/{id}/mkdir", props.getCollectionId())
+        .header("Authorization", "Bearer " + tok)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(Mono.just(body), Map.class)
+        .exchange()
+        .flatMap(
+            response -> {
               if (response.statusCode().is2xxSuccessful()) {
                 return Mono.empty();
               }
               if (response.statusCode().equals(HttpStatus.CONFLICT)) {
                 System.out.printf(
-                        "[Globus] mkdir: directory %s already exists (409); treating as success%n",
-                        absPath);
+                    "[Globus] mkdir: directory %s already exists (409); treating as success%n",
+                    absPath);
                 return Mono.empty();
               }
-              return response.bodyToMono(String.class)
-                      .flatMap(err -> Mono.error(new RuntimeException(
-                              "Globus mkdir " + response.statusCode() + " body=" + err)));
+              return response
+                  .bodyToMono(String.class)
+                  .flatMap(
+                      err ->
+                          Mono.error(
+                              new RuntimeException(
+                                  "Globus mkdir " + response.statusCode() + " body=" + err)));
             })
-            .block();
+        .block();
   }
 
   public Map<String, Object> ls(String absPath) {
@@ -224,7 +228,8 @@ public class GlobusService {
     String tok = tokenForTransfer();
 
     // Use ACL collection if set, otherwise fall back to main collectionId
-    String collectionId = (props.getAclCollectionId() != null && !props.getAclCollectionId().isBlank())
+    String collectionId =
+        (props.getAclCollectionId() != null && !props.getAclCollectionId().isBlank())
             ? props.getAclCollectionId()
             : props.getCollectionId();
 
@@ -236,45 +241,49 @@ public class GlobusService {
     rule.put("permissions", permissions);
 
     System.out.printf(
-            "[Globus] Adding ACL rule on endpoint=%s path=%s principal=%s perms=%s%n",
-            collectionId, path, principalId, permissions);
+        "[Globus] Adding ACL rule on endpoint=%s path=%s principal=%s perms=%s%n",
+        collectionId, path, principalId, permissions);
 
     client(props.getTransferUrl())
-            .post()
-            .uri("/endpoint/{id}/access", collectionId)
-            .header("Authorization", "Bearer " + tok)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(Mono.just(rule), Map.class)
-            .exchange()
-            .flatMap(response -> {
+        .post()
+        .uri("/endpoint/{id}/access", collectionId)
+        .header("Authorization", "Bearer " + tok)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(Mono.just(rule), Map.class)
+        .exchange()
+        .flatMap(
+            response -> {
               if (response.statusCode().is2xxSuccessful()) {
                 return Mono.empty();
               }
               if (response.statusCode().equals(HttpStatus.CONFLICT)) {
                 System.out.printf(
-                        "[Globus] ACL rule already exists on %s for principal %s (409); treating as success%n",
-                        path, principalId);
+                    "[Globus] ACL rule already exists on %s for principal %s (409); treating as success%n",
+                    path, principalId);
                 return Mono.empty();
               }
-              return response.bodyToMono(String.class)
-                      .flatMap(err -> Mono.error(new RuntimeException(
-                              "Globus ACL error " + response.statusCode() + " body=" + err)));
+              return response
+                  .bodyToMono(String.class)
+                  .flatMap(
+                      err ->
+                          Mono.error(
+                              new RuntimeException(
+                                  "Globus ACL error " + response.statusCode() + " body=" + err)));
             })
-            .block();
+        .block();
   }
-
 
   @SuppressWarnings("unchecked")
   public List<Map<String, Object>> listAclRules() {
     String tok = tokenForTransfer();
     Map<String, Object> resp =
-            client(props.getTransferUrl())
-                    .get()
-                    .uri("/endpoint/{id}/access_list", props.getCollectionId())
-                    .header("Authorization", "Bearer " + tok)
-                    .retrieve()
-                    .bodyToMono(Map.class)
-                    .block();
+        client(props.getTransferUrl())
+            .get()
+            .uri("/endpoint/{id}/access_list", props.getCollectionId())
+            .header("Authorization", "Bearer " + tok)
+            .retrieve()
+            .bodyToMono(Map.class)
+            .block();
 
     Object data = resp.get("DATA");
     if (data instanceof List<?>) {
