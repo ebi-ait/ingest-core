@@ -14,4 +14,4 @@ spec:
       protocol: TCP
       port: 443  # HTTPS port
       targetPort: 8080  # Should match the containerPort in the Deployment YAML
-  type: LoadBalancer
+  type: ClusterIP
