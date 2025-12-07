@@ -136,7 +136,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .antMatchers(GET, "/user/**")
         .authenticated()
         .antMatchers(GET, "/auth/account")
-        .hasAuthority(Role.WRANGLER.name())
+        .authenticated()
         .antMatchers(POST, "/auth/registration")
         .authenticated()
         .requestMatchers(SecurityConfig::isSecuredEndpointFromOutside)
