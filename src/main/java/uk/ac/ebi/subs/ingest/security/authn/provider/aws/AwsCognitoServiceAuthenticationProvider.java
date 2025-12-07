@@ -42,24 +42,24 @@ public class AwsCognitoServiceAuthenticationProvider implements AuthenticationPr
 
   @Autowired
   public AwsCognitoServiceAuthenticationProvider(
-          final Environment environment,
-          final WebClient.Builder webClientBuilder,
-          final AccountRepository accountRepository) {
+      final Environment environment,
+      final WebClient.Builder webClientBuilder,
+      final AccountRepository accountRepository) {
 
     this.environment = environment;
     this.awsCognitoDomainUrl = this.environment.getProperty("AWS_COGNITO_DOMAIN");
     this.webClient =
-            webClientBuilder
-                    .baseUrl(this.awsCognitoDomainUrl)
-                    .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .build();
+        webClientBuilder
+            .baseUrl(this.awsCognitoDomainUrl)
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .build();
 
     this.accountRepository = accountRepository;
   }
 
   @Override
   public Authentication authenticate(final Authentication authentication)
-          throws AuthenticationException {
+      throws AuthenticationException {
 
     if (!supports(authentication.getClass())) {
       return null;
@@ -85,8 +85,8 @@ public class AwsCognitoServiceAuthenticationProvider implements AuthenticationPr
   }
 
   /**
-   * Branch used when the token has the "aws.cognito.signin.user.admin" scope
-   * and we don't call the /userinfo endpoint.
+   * Branch used when the token has the "aws.cognito.signin.user.admin" scope and we don't call the
+   * /userinfo endpoint.
    */
   private Authentication authenticateWithNonOpenIdScope(final DecodedJWT decodedJWT) {
     final String userName = decodedJWT.getClaim("username").asString();
@@ -113,20 +113,20 @@ public class AwsCognitoServiceAuthenticationProvider implements AuthenticationPr
   }
 
   /**
-   * Branch used for normal OIDC tokens (no special admin scope),
-   * calling the Cognito /userinfo endpoint.
+   * Branch used for normal OIDC tokens (no special admin scope), calling the Cognito /userinfo
+   * endpoint.
    */
   private Authentication authenticateWithUserInfoEndpoint(final String accessToken) {
     try {
       final String userInfoUrl = awsCognitoDomainUrl + "/userinfo";
       final UserInfo userInfo =
-              webClient
-                      .get()
-                      .uri(userInfoUrl)
-                      .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-                      .retrieve()
-                      .bodyToMono(UserInfo.class)
-                      .block();
+          webClient
+              .get()
+              .uri(userInfoUrl)
+              .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+              .retrieve()
+              .bodyToMono(UserInfo.class)
+              .block();
 
       if (userInfo != null && userInfo.getEmail() != null) {
         final Account account = resolveOrCreateAccount(userInfo);
@@ -145,9 +145,8 @@ public class AwsCognitoServiceAuthenticationProvider implements AuthenticationPr
   }
 
   /**
-   * Central place that decides:
-   *  - If the user already exists in Mongo → reuse that Account (and its roles).
-   *  - If not → create a transient GUEST account so they can call /auth/registration.
+   * Central place that decides: - If the user already exists in Mongo → reuse that Account (and its
+   * roles). - If not → create a transient GUEST account so they can call /auth/registration.
    */
   private Account resolveOrCreateAccount(UserInfo userInfo) {
     // Adjust this depending on your UserInfo implementation:

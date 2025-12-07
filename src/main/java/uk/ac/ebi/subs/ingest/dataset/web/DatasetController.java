@@ -93,28 +93,29 @@ public class DatasetController {
    * @return The added dataset as a resource.
    */
   @CheckAllowed(
-          value = "#submissionEnvelope.isSystemEditable()",
-          exception = NotAllowedDuringSubmissionStateException.class)
+      value = "#submissionEnvelope.isSystemEditable()",
+      exception = NotAllowedDuringSubmissionStateException.class)
   @PostMapping(path = "/submissionEnvelopes/{sub_id}/datasets")
   public ResponseEntity<Resource<?>> addDatasetToEnvelopeAndLink(
-          @PathVariable("sub_id") final SubmissionEnvelope submissionEnvelope,
-          @RequestBody final Dataset dataset,
-          @RequestParam("updatingUuid") final Optional<UUID> updatingUuid,
-          final PersistentEntityResourceAssembler assembler) {
+      @PathVariable("sub_id") final SubmissionEnvelope submissionEnvelope,
+      @RequestBody final Dataset dataset,
+      @RequestParam("updatingUuid") final Optional<UUID> updatingUuid,
+      final PersistentEntityResourceAssembler assembler) {
 
     // derive principal from Spring Security instead of header
     String globusIdentityId = globusIdentityResolver.getCurrentGlobusPrincipalId();
 
     updatingUuid.ifPresent(
-            uuid -> {
-              dataset.setUuid(new Uuid(uuid.toString()));
-              dataset.setIsUpdate(true);
-            });
+        uuid -> {
+          dataset.setUuid(new Uuid(uuid.toString()));
+          dataset.setIsUpdate(true);
+        });
 
     dataset.setGlobusOwnerIdentityId(globusIdentityId);
 
     final Dataset savedDataset =
-            datasetService.addDatasetToSubmissionEnvelope(submissionEnvelope, dataset, globusIdentityId);
+        datasetService.addDatasetToSubmissionEnvelope(
+            submissionEnvelope, dataset, globusIdentityId);
 
     return ResponseEntity.accepted().body(assembler.toFullResource(savedDataset));
   }
@@ -205,8 +206,7 @@ public class DatasetController {
   }
 
   @GetMapping("/datasets/{datasetId}/globus/area-exists")
-  public ResponseEntity<Map<String, Object>> globusAreaExists(
-          @PathVariable String datasetId) {
+  public ResponseEntity<Map<String, Object>> globusAreaExists(@PathVariable String datasetId) {
 
     String callerGlobusId = globusIdentityResolver.getCurrentGlobusPrincipalId();
 
@@ -217,16 +217,16 @@ public class DatasetController {
     boolean exists = globus.directoryExists(root);
 
     return ResponseEntity.ok(
-            Map.of(
-                    "datasetId", datasetId,
-                    "path", root,
-                    "exists", exists));
+        Map.of(
+            "datasetId", datasetId,
+            "path", root,
+            "exists", exists));
   }
 
   @GetMapping("/datasets/{datasetId}/globus/files")
   public ResponseEntity<List<FileListingEntry>> listGlobusFiles(
-          @PathVariable String datasetId,
-          @RequestParam(required = false, defaultValue = "") String prefix) {
+      @PathVariable String datasetId,
+      @RequestParam(required = false, defaultValue = "") String prefix) {
 
     String callerGlobusId = globusIdentityResolver.getCurrentGlobusPrincipalId();
 
@@ -270,8 +270,7 @@ public class DatasetController {
 
   @GetMapping("/datasets/{datasetId}/globus/files/exists")
   public ResponseEntity<Map<String, Object>> fileExists(
-          @PathVariable String datasetId,
-          @RequestParam("path") String relPath) {
+      @PathVariable String datasetId, @RequestParam("path") String relPath) {
 
     String callerGlobusId = globusIdentityResolver.getCurrentGlobusPrincipalId();
 
@@ -327,8 +326,7 @@ public class DatasetController {
 
   @PostMapping("/datasets/{datasetId}/delete")
   public ResponseEntity<Map<String, Object>> deleteGlobusFiles(
-          @PathVariable String datasetId,
-          @RequestBody DeleteRequest request) {
+      @PathVariable String datasetId, @RequestBody DeleteRequest request) {
 
     String callerGlobusId = globusIdentityResolver.getCurrentGlobusPrincipalId();
 
@@ -387,19 +385,19 @@ public class DatasetController {
 
   private Dataset assertDatasetOwner(String datasetId, String callerGlobusId) {
     Dataset dataset =
-            datasetService
-                    .findById(datasetId)
-                    .orElseThrow(
-                            () ->
-                                    new ResponseStatusException(
-                                            HttpStatus.NOT_FOUND, "Dataset not found: " + datasetId));
+        datasetService
+            .findById(datasetId)
+            .orElseThrow(
+                () ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Dataset not found: " + datasetId));
 
     String ownerId = dataset.getGlobusOwnerIdentityId();
 
     if ((ownerId == null || ownerId.isBlank()) || (!ownerId.equals(callerGlobusId))) {
       throw new ResponseStatusException(
-              HttpStatus.FORBIDDEN,
-              String.format("Caller %s is not owner of dataset %s ", callerGlobusId, datasetId));
+          HttpStatus.FORBIDDEN,
+          String.format("Caller %s is not owner of dataset %s ", callerGlobusId, datasetId));
     }
 
     return dataset;

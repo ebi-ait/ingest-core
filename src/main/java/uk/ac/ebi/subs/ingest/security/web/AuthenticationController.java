@@ -2,7 +2,6 @@ package uk.ac.ebi.subs.ingest.security.web;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import uk.ac.ebi.subs.ingest.security.Account;
-import uk.ac.ebi.subs.ingest.security.Role;
 import uk.ac.ebi.subs.ingest.security.authn.oidc.OpenIdAuthentication;
 
 @Controller
@@ -25,11 +23,9 @@ public class AuthenticationController {
   }
 
   /**
-   * Registration endpoint:
-   * - No longer creates or updates accounts.
-   * - Just returns the currently authenticated account.
-   * - New users are already created as GUEST by the GlobusAuthenticationProvider.
-   * - This makes the call idempotent and avoids 409 conflicts.
+   * Registration endpoint: - No longer creates or updates accounts. - Just returns the currently
+   * authenticated account. - New users are already created as GUEST by the
+   * GlobusAuthenticationProvider. - This makes the call idempotent and avoids 409 conflicts.
    */
   @PostMapping(path = "/registration", produces = APPLICATION_JSON_UTF8_VALUE)
   public ResponseEntity<Account> register(Authentication authentication) {

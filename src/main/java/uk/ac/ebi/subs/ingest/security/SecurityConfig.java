@@ -22,7 +22,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import com.auth0.spring.security.api.BearerSecurityContextRepository;
 import com.auth0.spring.security.api.JwtAuthenticationEntryPoint;
 
 @EnableWebSecurity
@@ -78,19 +77,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
       @Qualifier(ELIXIR) AuthenticationProvider elixir,
       @Qualifier("COGNITO") AuthenticationProvider awsCognito,
       @Qualifier("GLOBUS") AuthenticationProvider globus) {
-        this.gcpAuthenticationProvider = gcp;
-        this.elixirAuthenticationProvider = elixir;
-        this.awsCognitoAuthenticationProvider = awsCognito;
-        this.globusAuthenticationProvider = globus;
-    }
+    this.gcpAuthenticationProvider = gcp;
+    this.elixirAuthenticationProvider = elixir;
+    this.awsCognitoAuthenticationProvider = awsCognito;
+    this.globusAuthenticationProvider = globus;
+  }
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.authenticationProvider(globusAuthenticationProvider)
-            .authenticationProvider(elixirAuthenticationProvider)
-            .authenticationProvider(gcpAuthenticationProvider)
-            .authenticationProvider(awsCognitoAuthenticationProvider)
-            .securityContext()
+        .authenticationProvider(elixirAuthenticationProvider)
+        .authenticationProvider(gcpAuthenticationProvider)
+        .authenticationProvider(awsCognitoAuthenticationProvider)
+        .securityContext()
         .securityContextRepository(new MixedBearerSecurityContextRepository())
         .and()
         .exceptionHandling()
@@ -119,27 +118,27 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .antMatchers(GET, "/browser/**")
         .permitAll()
         .antMatchers("/datasets/*/globus/**")
-            .hasAnyAuthority(CONTRIBUTOR.name(), Role.WRANGLER.name(), Role.SERVICE.name())
+        .hasAnyAuthority(CONTRIBUTOR.name(), Role.WRANGLER.name(), Role.SERVICE.name())
         .antMatchers("/datasets/*/delete")
-            .hasAnyAuthority(CONTRIBUTOR.name(), Role.WRANGLER.name(), Role.SERVICE.name())
+        .hasAnyAuthority(CONTRIBUTOR.name(), Role.WRANGLER.name(), Role.SERVICE.name())
         .antMatchers(POST, "/submissionEnvelopes")
         .authenticated()
         .antMatchers(POST, "/submissionEnvelopes/**")
-            .hasAnyAuthority(CONTRIBUTOR.name(), Role.WRANGLER.name(), Role.SERVICE.name())
-            .antMatchers(POST, "/projects")
+        .hasAnyAuthority(CONTRIBUTOR.name(), Role.WRANGLER.name(), Role.SERVICE.name())
+        .antMatchers(POST, "/projects")
         .authenticated()
         .antMatchers(POST, "/studies")
-            .hasAnyAuthority(CONTRIBUTOR.name(), Role.WRANGLER.name(), Role.SERVICE.name())
-            .antMatchers(POST, "/projects/suggestion")
+        .hasAnyAuthority(CONTRIBUTOR.name(), Role.WRANGLER.name(), Role.SERVICE.name())
+        .antMatchers(POST, "/projects/suggestion")
         .permitAll()
         .antMatchers(POST, "/projects/catalogue")
         .permitAll()
         .antMatchers(GET, "/user/**")
         .authenticated()
         .antMatchers(GET, "/auth/account")
-            .hasAuthority(Role.WRANGLER.name())
+        .hasAuthority(Role.WRANGLER.name())
         .antMatchers(POST, "/auth/registration")
-            .authenticated()
+        .authenticated()
         .requestMatchers(SecurityConfig::isSecuredEndpointFromOutside)
         .authenticated()
         .requestMatchers(SecurityConfig::isSecuredWranglerEndpointFromOutside)
