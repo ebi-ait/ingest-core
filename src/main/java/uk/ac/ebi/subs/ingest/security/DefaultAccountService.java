@@ -24,7 +24,7 @@ public class DefaultAccountService implements AccountService {
 
     // Only assign a default role if none is present
     if (account.getRoles() == null || account.getRoles().isEmpty()) {
-      account.addRole(Role.GUEST);
+      account.addRole(Role.CONTRIBUTOR);
     }
 
     Account persistentAccount =

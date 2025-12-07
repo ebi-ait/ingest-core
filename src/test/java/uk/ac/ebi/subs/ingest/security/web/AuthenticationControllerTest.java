@@ -14,7 +14,6 @@ import static uk.ac.ebi.subs.ingest.security.GcpConfig.GCP;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -35,7 +34,6 @@ import uk.ac.ebi.subs.ingest.security.AccountService;
 import uk.ac.ebi.subs.ingest.security.Role;
 import uk.ac.ebi.subs.ingest.security.authn.oidc.OpenIdAuthentication;
 import uk.ac.ebi.subs.ingest.security.authn.oidc.UserInfo;
-import uk.ac.ebi.subs.ingest.security.exception.DuplicateAccount;
 
 @WebMvcTest(AuthenticationController.class)
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
@@ -56,6 +54,9 @@ public class AuthenticationControllerTest {
   @MockBean(name = "COGNITO")
   private AuthenticationProvider cognito;
 
+  @MockBean(name = "GLOBUS")
+  private AuthenticationProvider globusAuthenticationProvider;
+
   @MockBean private AccountService accountService;
 
   @Nested
@@ -68,13 +69,16 @@ public class AuthenticationControllerTest {
     void byAuthenticatedGuest() throws Exception {
       // given:
       String subjectId = "cf12881b";
-      UserInfo userInfo = new UserInfo(subjectId, "Jane Doe");
-      Authentication authentication = new OpenIdAuthentication(null, userInfo);
-
-      // and:
       String accountId = "b4912b3";
-      Account persistentAccount = new Account(accountId, subjectId);
-      doReturn(persistentAccount).when(accountService).register(any(Account.class));
+
+      UserInfo userInfo = new UserInfo(subjectId, "Jane Doe");
+
+      // Mimic what the real provider would do:
+      Account account = new Account(accountId, subjectId);
+      account.setName(userInfo.getName());
+      account.addRole(Role.GUEST);
+
+      Authentication authentication = new OpenIdAuthentication(account, userInfo);
 
       // when:
       MvcResult result =
@@ -84,55 +88,67 @@ public class AuthenticationControllerTest {
       MockHttpServletResponse response = result.getResponse();
       assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 
-      // and:
       ObjectMapper objectMapper = new ObjectMapper();
       var resultingAccount = objectMapper.readValue(response.getContentAsString(), Account.class);
+
       assertThat(resultingAccount.getId()).isEqualTo(accountId);
-      assertCorrectRegisteredAccount(userInfo);
-    }
+      assertThat(resultingAccount.getProviderReference()).isEqualTo(subjectId);
+      assertThat(resultingAccount.getName()).isEqualTo("Jane Doe");
+      assertThat(resultingAccount.getRoles()).containsExactly(Role.GUEST);
 
-    private void assertCorrectRegisteredAccount(UserInfo userInfo) {
-      var accountCaptor = ArgumentCaptor.forClass(Account.class);
-      verify(accountService).register(accountCaptor.capture());
-
-      var registeredAccount = accountCaptor.getValue();
-      assertThat(registeredAccount)
-          .extracting("providerReference", "name")
-          .containsExactly(userInfo.getSubjectId(), userInfo.getName());
-      assertThat(registeredAccount.getRoles()).isEmpty();
+      // With the new controller, accountService should not be touched:
+      verify(accountService, never()).register(any());
     }
 
     @Test
     @WithMockUser(roles = {"CONTRIBUTOR"})
     void byRegisteredUser() throws Exception {
-      // expect:
-      webApp.perform(post(PATH)).andExpect(status().isForbidden());
+      // A non-Account principal (e.g. default @WithMockUser) should be rejected
+      webApp.perform(post(PATH).with(csrf())).andExpect(status().isForbidden());
     }
 
     /*
-    Similar scenario to byRegisteredUser but somehow the Account was either,
-    1) unrecognised and so was treated as an authenticated Guest, or
-    2) Account was erroneously assigned the Guest role.
-    Essentially, we want to handle duplicated subject id in our system.
-     */
+    Previously this scenario asserted a 409 when AccountService.register threw DuplicateAccount.
+    Now /auth/registration is idempotent and simply returns the current Account principal.
+    Any "duplicate subject id" handling belongs in the AuthenticationProvider, not this controller.
+    We just verify that the endpoint still returns the given Account and does not call AccountService.
+    */
     @Test
     void byUnrecognisedRegisteredUser() throws Exception {
-      // given:
-      UserInfo userInfo = new UserInfo("cc9a9a1", "");
-      Authentication authentication = new OpenIdAuthentication(userInfo);
+      // given: some existing-looking guest account
+      String subjectId = "cc9a9a1";
+      String accountId = "existing-id";
 
-      // and:
-      doThrow(new DuplicateAccount()).when(accountService).register(any(Account.class));
+      UserInfo userInfo = new UserInfo(subjectId, "");
+      Account account = new Account(accountId, subjectId);
+      account.addRole(Role.GUEST);
 
-      // expect:
-      webApp
-          .perform(post(PATH).with(authentication(authentication)).with(csrf()))
-          .andExpect(status().isConflict());
+      Authentication authentication = new OpenIdAuthentication(account, userInfo);
+
+      // when:
+      MvcResult result =
+          webApp
+              .perform(post(PATH).with(authentication(authentication)).with(csrf()))
+              .andExpect(status().isOk())
+              .andReturn();
+
+      // then:
+      MockHttpServletResponse response = result.getResponse();
+      ObjectMapper objectMapper = new ObjectMapper();
+      Account resultingAccount =
+          objectMapper.readValue(response.getContentAsString(), Account.class);
+
+      assertThat(resultingAccount.getId()).isEqualTo(accountId);
+      assertThat(resultingAccount.getProviderReference()).isEqualTo(subjectId);
+      assertThat(resultingAccount.getRoles()).containsExactly(Role.GUEST);
+
+      // No DuplicateAccount path anymore – controller doesn't call the service
+      verify(accountService, never()).register(any());
     }
 
     @Test
     void byAnonymousUser() throws Exception {
-      // expect:
+      // Security config still requires authentication, so this stays 401
       webApp.perform(post(PATH)).andExpect(status().isUnauthorized());
     }
   }
