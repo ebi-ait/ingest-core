@@ -11,40 +11,35 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import uk.ac.ebi.subs.ingest.security.Account;
-import uk.ac.ebi.subs.ingest.security.AccountService;
 import uk.ac.ebi.subs.ingest.security.Role;
 import uk.ac.ebi.subs.ingest.security.authn.oidc.OpenIdAuthentication;
-import uk.ac.ebi.subs.ingest.security.authn.oidc.UserInfo;
-import uk.ac.ebi.subs.ingest.security.exception.DuplicateAccount;
 
 @Controller
 @RequestMapping("/auth")
 public class AuthenticationController {
 
-  private final AccountService accountService;
+  private final uk.ac.ebi.subs.ingest.security.AccountService accountService;
 
-  public AuthenticationController(AccountService accountService) {
+  public AuthenticationController(uk.ac.ebi.subs.ingest.security.AccountService accountService) {
     this.accountService = accountService;
   }
 
+  /**
+   * Registration endpoint:
+   * - No longer creates or updates accounts.
+   * - Just returns the currently authenticated account.
+   * - New users are already created as GUEST by the GlobusAuthenticationProvider.
+   * - This makes the call idempotent and avoids 409 conflicts.
+   */
   @PostMapping(path = "/registration", produces = APPLICATION_JSON_UTF8_VALUE)
-  public ResponseEntity<?> register(Authentication authentication) {
+  public ResponseEntity<Account> register(Authentication authentication) {
     var openIdAuthentication = (OpenIdAuthentication) authentication;
-    var userInfo = (UserInfo) openIdAuthentication.getCredentials();
-    try {
-      Account account = userInfo.toAccount();
-      Account persistentAccount = accountService.register(account);
-      return ResponseEntity.ok().body(persistentAccount);
-    } catch (DuplicateAccount duplicateAccount) {
-      return ResponseEntity.status(HttpStatus.CONFLICT).build();
-    }
+    Account account = (Account) openIdAuthentication.getPrincipal();
+    return ResponseEntity.ok(account);
   }
 
   @GetMapping(path = "/account", produces = APPLICATION_JSON_UTF8_VALUE)
   public ResponseEntity<Account> getAccount(Authentication authentication) {
-    if (authentication.getAuthorities().contains(Role.GUEST)) {
-      return ResponseEntity.notFound().build();
-    }
     Account account = (Account) authentication.getPrincipal();
     return ResponseEntity.ok().body(account);
   }
