@@ -14,24 +14,34 @@ spec:
         app: ingest-core
     spec:
       containers:
-        - name: ingest-core-container
+        - name: ingest-core
           image: {{IMAGE}}
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
+            # Spring
             - name: SPRING_PROFILES_ACTIVE
-              value: local
+              value: "local"
             - name: SPRING_DATA_MONGODB_URI
               valueFrom:
                 secretKeyRef:
                   name: ingest-core-secrets
                   key: SPRING_DATA_MONGODB_URI
+
+            # Rabbit
             - name: RABBIT_HOST
-              value: rabbitmq-service
+              value: "rabbitmq-service"
             - name: RABBIT_PORT
               value: "5672"
+
+            # Cognito
             - name: AWS_COGNITO_DOMAIN
               value: "https://morphic-dev-2.auth.eu-west-2.amazoncognito.com/oauth2"
+
+            # AWS (current approach: static keys via secret; future: IRSA)
+            - name: AWS_REGION
+              value: "eu-west-2"
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -42,8 +52,8 @@ spec:
                 secretKeyRef:
                   name: aws-credentials
                   key: AWS_SECRET_ACCESS_KEY
-            - name: AWS_REGION
-              value: eu-west-2
+
+            # Globus app credentials (secret)
             - name: MORPHIC_PROVIDER_CLIENT_ID
               valueFrom:
                 secretKeyRef:
@@ -54,15 +64,41 @@ spec:
                 secretKeyRef:
                   name: morphic-globus-credentials
                   key: MORPHIC_PROVIDER_CLIENT_SECRET
+            - name: MORPHIC_GLOBUS_ACL_COLLECTION_ID
+              valueFrom:
+                secretKeyRef:
+                  name: morphic-globus-credentials
+                  key: MORPHIC_GLOBUS_ACL_COLLECTION_ID
+
+            # Upload/transfer config (non-secret)
             - name: MORPHIC_EBI_COLLECTION_UUID
               value: "14a0be5f-226c-49fe-b65f-dba083d67fc3"
             - name: MORPHIC_DEST_ROOT
               value: "/ebi/ftp/private/morphic-transfer"
             - name: MORPHIC_UPLOAD_SUBDIR
               value: "submissions"
-            - name: MORPHIC_GLOBUS_ACL_COLLECTION_ID
-              valueFrom:
-                secretKeyRef:
-                  name: morphic-globus-credentials
-                  key: MORPHIC_GLOBUS_ACL_COLLECTION_ID
-          imagePullPolicy: Always
+
+            # S3 staging + SSM runner + Globus promote (non-secret config)
+            - name: MORPHIC_STAGING_BUCKET
+              value: "morphic-dev-staging-metadata"
+            - name: MORPHIC_STAGING_REGION
+              value: "eu-west-2"
+            - name: MORPHIC_STAGING_PRESIGN_EXPIRY_SECONDS
+              value: "900"
+
+            - name: MORPHIC_STAGING_RUNNER_INSTANCE_ID
+              value: "i-07e76b39f36dec74d"
+            - name: MORPHIC_STAGING_SSM_DOCUMENT_NAME
+              value: "AWS-RunShellScript"
+            - name: MORPHIC_STAGING_BASE_DIR
+              value: "/home/ec2-user/staging"
+
+            - name: MORPHIC_GLOBUS_CLI
+              value: "/home/ec2-user/.local/bin/globus"
+            - name: MORPHIC_GLOBUS_RUN_AS_USER
+              value: "ec2-user"
+
+            - name: MORPHIC_STAGING_SRC_ENDPOINT_ID
+              value: "fcf5ea8a-dceb-11f0-b9e3-0213754b0ca1"
+            - name: MORPHIC_STAGING_DEST_ENDPOINT_ID
+              value: "56c5c4f0-601a-4555-9aca-70f8cacaac0f"
