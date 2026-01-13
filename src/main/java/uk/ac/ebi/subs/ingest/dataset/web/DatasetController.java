@@ -1,13 +1,11 @@
 package uk.ac.ebi.subs.ingest.dataset.web;
 
 import java.nio.file.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -30,8 +28,8 @@ import uk.ac.ebi.subs.ingest.core.Uuid;
 import uk.ac.ebi.subs.ingest.dataset.Dataset;
 import uk.ac.ebi.subs.ingest.dataset.DatasetService;
 import uk.ac.ebi.subs.ingest.dataset.FileListingEntry;
-import uk.ac.ebi.subs.ingest.dataset.util.GlobusService;
-import uk.ac.ebi.subs.ingest.dataset.util.UploadAreaUtilGlobus;
+import uk.ac.ebi.subs.ingest.dataset.MetadataUploadRecordService;
+import uk.ac.ebi.subs.ingest.dataset.util.*;
 import uk.ac.ebi.subs.ingest.security.CheckAllowed;
 import uk.ac.ebi.subs.ingest.security.authn.provider.globus.GlobusIdentityResolver;
 import uk.ac.ebi.subs.ingest.submission.SubmissionEnvelope;
@@ -49,6 +47,9 @@ public class DatasetController {
   private final GlobusService globus;
   private final UploadAreaUtilGlobus uploadAreaUtilGlobus;
   private final GlobusIdentityResolver globusIdentityResolver;
+  private final S3StagingService s3StagingService;
+  private final MetadataUploadRecordService metadataUploadRecordService;
+  private final StagingPromoteService stagingPromoteService;
 
   /**
    * Update an existing dataset.
@@ -401,5 +402,173 @@ public class DatasetController {
     }
 
     return dataset;
+  }
+
+  @GetMapping("/datasets/{datasetId}/__ops/metadata-upload-url")
+  public ResponseEntity<Map<String, Object>> getMetadataUploadUrl(@PathVariable String datasetId) {
+
+    log.warn("HIT __ops getMetadataUploadUrl datasetId={}", datasetId);
+
+    String callerGlobusId = globusIdentityResolver.getCurrentGlobusPrincipalId();
+    assertDatasetOwner(datasetId, callerGlobusId);
+
+    var presigned = s3StagingService.presignMetadataUpload(datasetId);
+
+    // Map.of is fine here because none of these should ever be null,
+    // but using a mutable map is also fine and consistent.
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("datasetId", datasetId);
+    body.put("bucket", presigned.getBucket());
+    body.put("key", presigned.getKey());
+    body.put("uploadUrl", presigned.getUploadUrl());
+    body.put("expiresInSeconds", presigned.getExpiresInSeconds());
+    body.put("signedHeaders", presigned.getSignedHeaders());
+
+    return ResponseEntity.ok(body);
+  }
+
+  @PostMapping("/datasets/{datasetId}/__ops/metadata-upload-complete")
+  public ResponseEntity<Map<String, Object>> metadataUploadComplete(
+          @PathVariable String datasetId,
+          @RequestParam("key") String key) {
+
+    log.warn("HIT __ops metadataUploadComplete datasetId={}", datasetId);
+
+    if (!key.startsWith(datasetId + "/metadata/")) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid key");
+    }
+
+    String callerGlobusId = globusIdentityResolver.getCurrentGlobusPrincipalId();
+    assertDatasetOwner(datasetId, callerGlobusId);
+
+    final ObjectMetadata meta;
+    final String bucket = s3StagingService.bucket();
+
+    try {
+      meta = s3StagingService.headObject(key);
+    } catch (AmazonServiceException e) {
+      if (e.getStatusCode() == 404) {
+        var record = metadataUploadRecordService.recordFailure(
+                datasetId,
+                bucket,
+                key,
+                "Staging object not found (HEAD returned 404)",
+                callerGlobusId // audit
+        );
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("datasetId", datasetId);
+        body.put("status", record.getStatus().name());
+        body.put("bucket", bucket);
+        body.put("key", record.getKey());
+        body.put("message", record.getMessage());
+        body.put("uploadedAt", record.getUploadedAt());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+      }
+      throw e;
+    }
+
+    var rules = MetadataUploadRecordService.UploadValidationRules.defaults();
+
+    var record = metadataUploadRecordService.confirmUpload(
+            datasetId,
+            bucket,
+            key,
+            meta,
+            rules,
+            callerGlobusId // audit
+    );
+
+    HttpStatus httpStatus =
+            (record.getStatus() == MetadataUploadRecordService.Status.UPLOADED_CONFIRMED)
+                    ? HttpStatus.OK
+                    : HttpStatus.UNPROCESSABLE_ENTITY;
+
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("datasetId", datasetId);
+    body.put("status", record.getStatus().name());
+    body.put("bucket", bucket);               // bucket from config
+    body.put("key", record.getKey());
+    body.put("etag", record.getETag());
+    body.put("sizeBytes", record.getSizeBytes());
+    body.put("contentType", record.getContentType());
+    body.put("uploadedAt", record.getUploadedAt());
+    body.put("message", record.getMessage());
+    body.put("confirmedBy", callerGlobusId); // audit
+
+    return ResponseEntity.status(httpStatus).body(body);
+  }
+
+  @GetMapping("/datasets/{datasetId}/__ops/metadata-upload-status")
+  public ResponseEntity<Map<String, Object>> metadataUploadStatus(@PathVariable String datasetId) {
+
+    String callerGlobusId = globusIdentityResolver.getCurrentGlobusPrincipalId();
+    assertDatasetOwner(datasetId, callerGlobusId);
+
+    var record = metadataUploadRecordService.latest(datasetId);
+
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("datasetId", datasetId);
+
+    if (record == null) {
+      body.put("status", "NONE");
+      body.put("bucket", s3StagingService.bucket());
+      return ResponseEntity.ok(body);
+    }
+
+    body.put("status", record.getStatus().name());
+    body.put("bucket", s3StagingService.bucket());
+    body.put("key", record.getKey());
+    body.put("etag", record.getETag());
+    body.put("sizeBytes", record.getSizeBytes());
+    body.put("contentType", record.getContentType());
+    body.put("uploadedAt", record.getUploadedAt());
+    body.put("message", record.getMessage());
+    body.put("attemptId", record.getAttemptId()); // helpful
+
+    return ResponseEntity.ok(body);
+  }
+
+  @PostMapping("/datasets/{datasetId}/__ops/metadata-promote")
+  public ResponseEntity<Map<String, Object>> promote(@PathVariable String datasetId) {
+
+    log.warn("HIT __ops promote datasetId={}", datasetId);
+
+    String callerGlobusId = globusIdentityResolver.getCurrentGlobusPrincipalId();
+    assertDatasetOwner(datasetId, callerGlobusId);
+
+    try {
+      PromoteResponse r = stagingPromoteService.promoteMetadata(datasetId, callerGlobusId);
+      Map<String, Object> body = new LinkedHashMap<>();
+      body.put("datasetId", datasetId);
+      body.put("ssmCommandId", r.getSsmCommandId());
+      return ResponseEntity.accepted().body(body);
+    } catch (IllegalStateException e) {
+      // promote gating -> clean 409
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+    }
+  }
+
+  @GetMapping("/datasets/{datasetId}/__ops/metadata-promote/status")
+  public ResponseEntity<Map<String, Object>> promoteStatus(
+          @PathVariable String datasetId,
+          @RequestParam("ssmCommandId") String ssmCommandId) {
+
+    log.warn("HIT __ops promoteStatus datasetId={} ssmCommandId={}", datasetId, ssmCommandId);
+
+    String callerGlobusId = globusIdentityResolver.getCurrentGlobusPrincipalId();
+    assertDatasetOwner(datasetId, callerGlobusId);
+
+    CommandStatusResponse s = stagingPromoteService.status(datasetId, ssmCommandId);
+
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("datasetId", datasetId);
+    body.put("ssmStatus", s.getStatus());
+    body.put("stdout", s.getStdout());
+    body.put("stderr", s.getStderr());
+    if (s.getGlobusTaskId() != null) body.put("globusTaskId", s.getGlobusTaskId());
+
+    return ResponseEntity.ok(body);
   }
 }
