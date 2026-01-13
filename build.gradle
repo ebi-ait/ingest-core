@@ -119,6 +119,11 @@ dependencies {
     implementation 'org.projectreactor:reactor-spring:1.0.1.RELEASE'
     compileOnly 'org.projectlombok:lombok'
 
+    implementation platform("software.amazon.awssdk:bom:2.25.45")
+
+    implementation "software.amazon.awssdk:ssm"
+    implementation "software.amazon.awssdk:auth"
+
     annotationProcessor 'org.projectlombok:lombok'
 
     testCompileOnly 'org.projectlombok:lombok'
