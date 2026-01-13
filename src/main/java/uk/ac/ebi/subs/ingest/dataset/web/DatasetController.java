@@ -4,8 +4,6 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -18,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.Getter;
@@ -429,8 +429,7 @@ public class DatasetController {
 
   @PostMapping("/datasets/{datasetId}/__ops/metadata-upload-complete")
   public ResponseEntity<Map<String, Object>> metadataUploadComplete(
-          @PathVariable String datasetId,
-          @RequestParam("key") String key) {
+      @PathVariable String datasetId, @RequestParam("key") String key) {
 
     log.warn("HIT __ops metadataUploadComplete datasetId={}", datasetId);
 
@@ -448,13 +447,14 @@ public class DatasetController {
       meta = s3StagingService.headObject(key);
     } catch (AmazonServiceException e) {
       if (e.getStatusCode() == 404) {
-        var record = metadataUploadRecordService.recordFailure(
+        var record =
+            metadataUploadRecordService.recordFailure(
                 datasetId,
                 bucket,
                 key,
                 "Staging object not found (HEAD returned 404)",
                 callerGlobusId // audit
-        );
+                );
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("datasetId", datasetId);
@@ -471,24 +471,20 @@ public class DatasetController {
 
     var rules = MetadataUploadRecordService.UploadValidationRules.defaults();
 
-    var record = metadataUploadRecordService.confirmUpload(
-            datasetId,
-            bucket,
-            key,
-            meta,
-            rules,
-            callerGlobusId // audit
-    );
+    var record =
+        metadataUploadRecordService.confirmUpload(
+            datasetId, bucket, key, meta, rules, callerGlobusId // audit
+            );
 
     HttpStatus httpStatus =
-            (record.getStatus() == MetadataUploadRecordService.Status.UPLOADED_CONFIRMED)
-                    ? HttpStatus.OK
-                    : HttpStatus.UNPROCESSABLE_ENTITY;
+        (record.getStatus() == MetadataUploadRecordService.Status.UPLOADED_CONFIRMED)
+            ? HttpStatus.OK
+            : HttpStatus.UNPROCESSABLE_ENTITY;
 
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("datasetId", datasetId);
     body.put("status", record.getStatus().name());
-    body.put("bucket", bucket);               // bucket from config
+    body.put("bucket", bucket); // bucket from config
     body.put("key", record.getKey());
     body.put("etag", record.getETag());
     body.put("sizeBytes", record.getSizeBytes());
@@ -552,8 +548,7 @@ public class DatasetController {
 
   @GetMapping("/datasets/{datasetId}/__ops/metadata-promote/status")
   public ResponseEntity<Map<String, Object>> promoteStatus(
-          @PathVariable String datasetId,
-          @RequestParam("ssmCommandId") String ssmCommandId) {
+      @PathVariable String datasetId, @RequestParam("ssmCommandId") String ssmCommandId) {
 
     log.warn("HIT __ops promoteStatus datasetId={} ssmCommandId={}", datasetId, ssmCommandId);
 

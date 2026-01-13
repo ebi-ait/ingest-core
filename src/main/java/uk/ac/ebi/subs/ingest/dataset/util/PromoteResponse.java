@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class PromoteResponse {
-    private String datasetId;
-    private String ssmCommandId;
+  private String datasetId;
+  private String ssmCommandId;
 }
