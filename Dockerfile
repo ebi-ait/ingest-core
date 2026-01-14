@@ -3,7 +3,6 @@ FROM quay.io/ebi-ait/ingest-base-images:openjdk_11
 WORKDIR /opt
 
 ENV LC_ALL=C
-ENV MONGO_URI=mongodb://localhost:27017/admin
 ENV RABBIT_HOST=localhost
 ENV RABBIT_PORT=5672
 ENV SCHEMA_BASE_URI=https://schema.humancellatlas.org
@@ -31,7 +30,7 @@ RUN ./gradlew --no-daemon assemble
 CMD java \
     -Djava.security.egd=file:/dev/./urandom \
     -jar build/libs/*.jar \
-    --spring.data.mongodb.uri=$MONGO_URI \
+    --spring.data.mongodb.uri=$SPRING_DATA_MONGODB_URI \
     --spring.rabbitmq.host=$RABBIT_HOST \
     --spring.rabbitmq.port=$RABBIT_PORT \
     --schema.base-uri=$SCHEMA_BASE_URI
