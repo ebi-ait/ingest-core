@@ -26,6 +26,11 @@ spec:
                 secretKeyRef:
                   name: ingest-core-secrets
                   key: SPRING_DATA_MONGODB_URI
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: ingest-core-secrets
+                  key: SPRING_DATA_MONGODB_URI
             - name: RABBIT_HOST
               value: rabbitmq-service
             - name: RABBIT_PORT
