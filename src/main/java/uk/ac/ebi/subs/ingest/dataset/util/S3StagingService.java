@@ -1,5 +1,7 @@
 package uk.ac.ebi.subs.ingest.dataset.util;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -14,7 +16,9 @@ import org.springframework.web.server.ResponseStatusException;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3Object;
 
 import lombok.Value;
 
@@ -91,6 +95,34 @@ public class S3StagingService {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "object not found in staging");
       }
       throw e;
+    }
+  }
+
+  public byte[] readFirstBytes(String key, int n) {
+    if (n <= 0) return new byte[0];
+
+    String bucket = bucket();
+    GetObjectRequest req = new GetObjectRequest(bucket, key).withRange(0, n - 1);
+
+    try (S3Object obj = s3.getObject(req);
+        InputStream in = obj.getObjectContent()) {
+
+      byte[] buf = new byte[n];
+      int off = 0;
+      while (off < n) {
+        int r = in.read(buf, off, n - off);
+        if (r < 0) break;
+        off += r;
+      }
+
+      if (off == n) return buf;
+
+      byte[] shortBuf = new byte[off];
+      System.arraycopy(buf, 0, shortBuf, 0, off);
+      return shortBuf;
+
+    } catch (IOException e) {
+      throw new RuntimeException("Failed reading first bytes from staging object: " + key, e);
     }
   }
 }

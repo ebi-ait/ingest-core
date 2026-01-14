@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.springframework.http.HttpStatus;
@@ -18,12 +19,14 @@ import org.springframework.web.server.ResponseStatusException;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 
 import lombok.RequiredArgsConstructor;
+import uk.ac.ebi.subs.ingest.dataset.util.S3StagingService;
 
 @Service
 @RequiredArgsConstructor
 public class MetadataUploadRecordService {
 
   private final DatasetRepository datasetRepository;
+  private final S3StagingService s3StagingService;
 
   private static final int MAX_HISTORY = 20;
 
@@ -46,7 +49,7 @@ public class MetadataUploadRecordService {
     String contentType = meta.getContentType();
     Instant now = Instant.now();
 
-    ValidationOutcome outcome = validate(meta, rules);
+    ValidationOutcome outcome = validate(datasetId, bucket, key, meta, rules);
 
     Map<String, Object> content = asMap(dataset.getContent());
     Map<String, Object> metadataUpload = getOrCreateMap(content, "metadataUpload");
@@ -63,6 +66,7 @@ public class MetadataUploadRecordService {
     attempt.put("uploadedAt", now.toString());
     attempt.put("status", outcome.status.name());
     attempt.put("message", outcome.message);
+    attempt.put("zipMagicOk", outcome.zipMagicOk);
     if (confirmedBy != null) attempt.put("confirmedBy", confirmedBy);
 
     history.add(0, attempt);
@@ -82,7 +86,8 @@ public class MetadataUploadRecordService {
         sizeBytes,
         contentType,
         now.toString(),
-        outcome.message);
+        outcome.message,
+        outcome.zipMagicOk);
   }
 
   public MetadataUploadRecord recordFailure(
@@ -125,7 +130,7 @@ public class MetadataUploadRecordService {
     datasetRepository.save(dataset);
 
     return new MetadataUploadRecord(
-        datasetId, attemptId, Status.FAILED, key, null, 0L, null, now.toString(), message);
+        datasetId, attemptId, Status.FAILED, key, null, 0L, null, now.toString(), message, null);
   }
 
   public MetadataUploadRecord latest(String datasetId) {
@@ -147,6 +152,17 @@ public class MetadataUploadRecordService {
 
     Status status = safeStatus(str(attempt.get("status")));
 
+    Boolean zipMagicOk = null;
+    if (attempt.containsKey("zipMagicOk")) {
+      Object v = attempt.get("zipMagicOk");
+      if (v instanceof Boolean) {
+        zipMagicOk = (Boolean) v;
+      } else if (v != null) {
+        // defensive: if stored as string somehow
+        zipMagicOk = Boolean.valueOf(String.valueOf(v));
+      }
+    }
+
     return new MetadataUploadRecord(
         datasetId,
         str(attempt.get("attemptId")),
@@ -156,62 +172,168 @@ public class MetadataUploadRecordService {
         longVal(attempt.get("sizeBytes")),
         str(attempt.get("contentType")),
         str(attempt.get("uploadedAt")),
-        str(attempt.get("message")));
+        str(attempt.get("message")),
+        zipMagicOk);
   }
 
   // -------------------------
   // Validation
   // -------------------------
 
-  private ValidationOutcome validate(ObjectMetadata meta, UploadValidationRules rules) {
+  private ValidationOutcome validate(
+      String datasetId,
+      String bucket,
+      String key,
+      ObjectMetadata meta,
+      UploadValidationRules rules) {
+
     if (rules == null) rules = UploadValidationRules.defaults();
 
-    long size = meta.getContentLength();
-    String ct = meta.getContentType();
+    // ---- bucket: do not trust caller-supplied bucket
+    String expectedBucket = s3StagingService.bucket();
+    if (bucket != null && !bucket.isBlank() && !expectedBucket.equals(bucket)) {
+      return new ValidationOutcome(
+          Status.FAILED, "Invalid bucket. Expected " + expectedBucket + ", got " + bucket, false);
+    }
 
-    if (rules.requiredContentType != null) {
-      if (ct == null || !ct.equalsIgnoreCase(rules.requiredContentType)) {
+    // ---- key ownership / tenancy
+    String prefix = datasetId + "/metadata/";
+    if (key == null || !key.startsWith(prefix)) {
+      return new ValidationOutcome(Status.FAILED, "Invalid key: not under " + prefix, false);
+    }
+
+    if (rules.requireXlsxSuffix && !key.endsWith(".xlsx")) {
+      return new ValidationOutcome(Status.FAILED, "Invalid key: must end with .xlsx", false);
+    }
+
+    if (rules.enforceTimestampPattern) {
+      // Expect: <datasetId>/metadata/yyyyMMdd-HHmmss-SSS.xlsx
+      String re = "^" + Pattern.quote(datasetId) + "/metadata/\\d{8}-\\d{6}-\\d{3}\\.xlsx$";
+      if (!key.matches(re)) {
         return new ValidationOutcome(
             Status.FAILED,
-            "Invalid contentType. Expected " + rules.requiredContentType + ", got " + ct);
+            "Invalid key: must match " + datasetId + "/metadata/yyyyMMdd-HHmmss-SSS.xlsx",
+            false);
       }
     }
 
+    // ---- content-type (normalized)
+    String ct = baseContentType(meta.getContentType());
+    if (rules.requiredContentType != null) {
+      String expectedCt = baseContentType(rules.requiredContentType);
+      if (ct == null || !ct.equalsIgnoreCase(expectedCt)) {
+        return new ValidationOutcome(
+            Status.FAILED,
+            "Invalid contentType. Expected "
+                + rules.requiredContentType
+                + ", got "
+                + meta.getContentType(),
+            false);
+      }
+    }
+
+    // ---- size checks
+    long size = meta.getContentLength();
     if (size <= 0) {
-      return new ValidationOutcome(Status.FAILED, "Empty object (sizeBytes=0)");
+      return new ValidationOutcome(Status.FAILED, "Empty object (sizeBytes=0)", false);
     }
 
     if (rules.minSizeBytes > 0 && size < rules.minSizeBytes) {
       return new ValidationOutcome(
           Status.FAILED,
-          "Object too small (" + size + " bytes). Minimum is " + rules.minSizeBytes + " bytes");
+          "File is too small ("
+              + humanBytes(size)
+              + "). Minimum allowed size is "
+              + humanBytes(rules.minSizeBytes)
+              + ".",
+          null);
     }
 
-    return new ValidationOutcome(Status.UPLOADED_CONFIRMED, "Staging object confirmed");
+    if (rules.maxSizeBytes > 0 && size > rules.maxSizeBytes) {
+      return new ValidationOutcome(
+          Status.FAILED,
+          "File is too large ("
+              + humanBytes(size)
+              + "). Maximum allowed size is "
+              + humanBytes(rules.maxSizeBytes)
+              + ".",
+          null);
+    }
+
+    // ---- ZIP magic bytes check (Range GET 0-3)
+    boolean zipMagicOk = false;
+    if (rules.requireZipMagic) {
+      byte[] b = s3StagingService.readFirstBytes(key, 4);
+      zipMagicOk =
+          b.length == 4
+              && (b[0] == 0x50) // 'P'
+              && (b[1] == 0x4B) // 'K'
+              && (b[2] == 0x03)
+              && (b[3] == 0x04);
+
+      if (!zipMagicOk) {
+        return new ValidationOutcome(
+            Status.FAILED, "File does not look like an XLSX (ZIP header missing)", false);
+      }
+    }
+
+    return new ValidationOutcome(
+        Status.UPLOADED_CONFIRMED,
+        "Staging object confirmed",
+        rules.requireZipMagic ? zipMagicOk : null);
+  }
+
+  private static String baseContentType(String ct) {
+    if (ct == null) return null;
+    int semi = ct.indexOf(';');
+    return (semi >= 0 ? ct.substring(0, semi) : ct).trim();
   }
 
   public static class UploadValidationRules {
     public final String requiredContentType;
     public final long minSizeBytes;
+    public final long maxSizeBytes;
 
-    public UploadValidationRules(String requiredContentType, long minSizeBytes) {
+    public final boolean requireXlsxSuffix;
+    public final boolean requireZipMagic;
+    public final boolean enforceTimestampPattern;
+
+    public UploadValidationRules(
+        String requiredContentType,
+        long minSizeBytes,
+        long maxSizeBytes,
+        boolean requireXlsxSuffix,
+        boolean requireZipMagic,
+        boolean enforceTimestampPattern) {
       this.requiredContentType = requiredContentType;
       this.minSizeBytes = minSizeBytes;
+      this.maxSizeBytes = maxSizeBytes;
+      this.requireXlsxSuffix = requireXlsxSuffix;
+      this.requireZipMagic = requireZipMagic;
+      this.enforceTimestampPattern = enforceTimestampPattern;
     }
 
     public static UploadValidationRules defaults() {
       return new UploadValidationRules(
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 1024L);
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          1024L,
+          50L * 1024L * 1024L, // 50MB
+          true,
+          true,
+          false // optional; enable if strict timestamp enforcement is needed
+          );
     }
   }
 
   private static class ValidationOutcome {
     final Status status;
     final String message;
+    final Boolean zipMagicOk;
 
-    ValidationOutcome(Status status, String message) {
+    ValidationOutcome(Status status, String message, Boolean zipMagicOk) {
       this.status = status;
       this.message = message;
+      this.zipMagicOk = zipMagicOk;
     }
   }
 
@@ -294,6 +416,7 @@ public class MetadataUploadRecordService {
     private final String contentType;
     private final String uploadedAt;
     private final String message;
+    private final Boolean zipMagicOk;
 
     public MetadataUploadRecord(
         String datasetId,
@@ -304,7 +427,8 @@ public class MetadataUploadRecordService {
         long sizeBytes,
         String contentType,
         String uploadedAt,
-        String message) {
+        String message,
+        Boolean zipMagicOk) {
       this.datasetId = datasetId;
       this.attemptId = attemptId;
       this.status = status;
@@ -314,6 +438,7 @@ public class MetadataUploadRecordService {
       this.contentType = contentType;
       this.uploadedAt = uploadedAt;
       this.message = message;
+      this.zipMagicOk = zipMagicOk;
     }
 
     public String getDatasetId() {
@@ -351,11 +476,22 @@ public class MetadataUploadRecordService {
     public String getMessage() {
       return message;
     }
+
+    public Boolean getZipMagicOk() {
+      return zipMagicOk;
+    }
   }
 
   public enum Status {
     UPLOADED_CONFIRMED,
     FAILED,
     UNKNOWN
+  }
+
+  private static String humanBytes(long bytes) {
+    if (bytes < 1024) return bytes + " B";
+    int exp = (int) (Math.log(bytes) / Math.log(1024));
+    String pre = "KMGTPE".charAt(exp - 1) + "B";
+    return String.format("%.0f %s", bytes / Math.pow(1024, exp), pre);
   }
 }

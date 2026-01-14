@@ -414,8 +414,6 @@ public class DatasetController {
 
     var presigned = s3StagingService.presignMetadataUpload(datasetId);
 
-    // Map.of is fine here because none of these should ever be null,
-    // but using a mutable map is also fine and consistent.
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("datasetId", datasetId);
     body.put("bucket", presigned.getBucket());
@@ -433,38 +431,54 @@ public class DatasetController {
 
     log.warn("HIT __ops metadataUploadComplete datasetId={}", datasetId);
 
-    if (!key.startsWith(datasetId + "/metadata/")) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid key");
-    }
-
     String callerGlobusId = globusIdentityResolver.getCurrentGlobusPrincipalId();
     assertDatasetOwner(datasetId, callerGlobusId);
 
-    final ObjectMetadata meta;
     final String bucket = s3StagingService.bucket();
 
+    String prefix = datasetId + "/metadata/";
+    if (key == null || !key.startsWith(prefix)) {
+      return failComplete(
+          datasetId,
+          bucket,
+          key,
+          callerGlobusId,
+          HttpStatus.BAD_REQUEST,
+          "Invalid key: not under " + prefix);
+    }
+    if (!key.endsWith(".xlsx")) {
+      return failComplete(
+          datasetId,
+          bucket,
+          key,
+          callerGlobusId,
+          HttpStatus.BAD_REQUEST,
+          "Invalid key: must end with .xlsx");
+    }
+
+    final ObjectMetadata meta;
     try {
       meta = s3StagingService.headObject(key);
+    } catch (ResponseStatusException e) {
+      if (e.getStatus() == HttpStatus.NOT_FOUND) {
+        return failComplete(
+            datasetId,
+            bucket,
+            key,
+            callerGlobusId,
+            HttpStatus.NOT_FOUND,
+            "Staging object not found (HEAD returned 404)");
+      }
+      throw e;
     } catch (AmazonServiceException e) {
       if (e.getStatusCode() == 404) {
-        var record =
-            metadataUploadRecordService.recordFailure(
-                datasetId,
-                bucket,
-                key,
-                "Staging object not found (HEAD returned 404)",
-                callerGlobusId // audit
-                );
-
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("datasetId", datasetId);
-        body.put("status", record.getStatus().name());
-        body.put("bucket", bucket);
-        body.put("key", record.getKey());
-        body.put("message", record.getMessage());
-        body.put("uploadedAt", record.getUploadedAt());
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+        return failComplete(
+            datasetId,
+            bucket,
+            key,
+            callerGlobusId,
+            HttpStatus.NOT_FOUND,
+            "Staging object not found (HEAD returned 404)");
       }
       throw e;
     }
@@ -473,8 +487,7 @@ public class DatasetController {
 
     var record =
         metadataUploadRecordService.confirmUpload(
-            datasetId, bucket, key, meta, rules, callerGlobusId // audit
-            );
+            datasetId, bucket, key, meta, rules, callerGlobusId);
 
     HttpStatus httpStatus =
         (record.getStatus() == MetadataUploadRecordService.Status.UPLOADED_CONFIRMED)
@@ -484,16 +497,41 @@ public class DatasetController {
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("datasetId", datasetId);
     body.put("status", record.getStatus().name());
-    body.put("bucket", bucket); // bucket from config
+    body.put("bucket", bucket);
     body.put("key", record.getKey());
     body.put("etag", record.getETag());
     body.put("sizeBytes", record.getSizeBytes());
     body.put("contentType", record.getContentType());
     body.put("uploadedAt", record.getUploadedAt());
     body.put("message", record.getMessage());
-    body.put("confirmedBy", callerGlobusId); // audit
+    body.put("zipMagicOk", record.getZipMagicOk());
+    body.put("confirmedBy", callerGlobusId);
 
     return ResponseEntity.status(httpStatus).body(body);
+  }
+
+  private ResponseEntity<Map<String, Object>> failComplete(
+      String datasetId,
+      String bucket,
+      String key,
+      String callerGlobusId,
+      HttpStatus status,
+      String message) {
+
+    var record =
+        metadataUploadRecordService.recordFailure(datasetId, bucket, key, message, callerGlobusId);
+
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("datasetId", datasetId);
+    body.put("status", record.getStatus().name());
+    body.put("bucket", bucket);
+    body.put("key", record.getKey());
+    body.put("message", record.getMessage());
+    body.put("uploadedAt", record.getUploadedAt());
+    body.put("confirmedBy", callerGlobusId);
+    body.put("attemptId", record.getAttemptId());
+
+    return ResponseEntity.status(status).body(body);
   }
 
   @GetMapping("/datasets/{datasetId}/__ops/metadata-upload-status")
@@ -521,16 +559,14 @@ public class DatasetController {
     body.put("contentType", record.getContentType());
     body.put("uploadedAt", record.getUploadedAt());
     body.put("message", record.getMessage());
-    body.put("attemptId", record.getAttemptId()); // helpful
+    body.put("zipMagicOk", record.getZipMagicOk());
+    body.put("attemptId", record.getAttemptId());
 
     return ResponseEntity.ok(body);
   }
 
   @PostMapping("/datasets/{datasetId}/__ops/metadata-promote")
   public ResponseEntity<Map<String, Object>> promote(@PathVariable String datasetId) {
-
-    log.warn("HIT __ops promote datasetId={}", datasetId);
-
     String callerGlobusId = globusIdentityResolver.getCurrentGlobusPrincipalId();
     assertDatasetOwner(datasetId, callerGlobusId);
 
@@ -541,7 +577,6 @@ public class DatasetController {
       body.put("ssmCommandId", r.getSsmCommandId());
       return ResponseEntity.accepted().body(body);
     } catch (IllegalStateException e) {
-      // promote gating -> clean 409
       throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
     }
   }
@@ -549,8 +584,6 @@ public class DatasetController {
   @GetMapping("/datasets/{datasetId}/__ops/metadata-promote/status")
   public ResponseEntity<Map<String, Object>> promoteStatus(
       @PathVariable String datasetId, @RequestParam("ssmCommandId") String ssmCommandId) {
-
-    log.warn("HIT __ops promoteStatus datasetId={} ssmCommandId={}", datasetId, ssmCommandId);
 
     String callerGlobusId = globusIdentityResolver.getCurrentGlobusPrincipalId();
     assertDatasetOwner(datasetId, callerGlobusId);
