@@ -129,5 +129,4 @@ public interface FileRepository extends MongoRepository<File, String> {
 
   @Query(value = "{ 'inputToProcesses._id': ?0 }")
   Page<File> findByInputToProcessObjectId(ObjectId processId, Pageable pageable);
-
 }
