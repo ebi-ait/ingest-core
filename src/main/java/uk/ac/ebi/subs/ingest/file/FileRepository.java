@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -122,4 +123,11 @@ public interface FileRepository extends MongoRepository<File, String> {
           "{'submissionEnvelope.id': ?0, graphValidationErrors: { $exists: true, $not: {$size: 0} } }",
       count = true)
   long countBySubmissionEnvelopeAndCountWithGraphValidationErrors(String submissionEnvelopeId);
+
+  @Query(value = "{ 'derivedByProcesses._id': ?0 }")
+  Page<File> findByDerivedByProcessObjectId(ObjectId processId, Pageable pageable);
+
+  @Query(value = "{ 'inputToProcesses._id': ?0 }")
+  Page<File> findByInputToProcessObjectId(ObjectId processId, Pageable pageable);
+
 }

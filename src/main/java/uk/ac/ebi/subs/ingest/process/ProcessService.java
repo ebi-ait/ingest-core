@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Stream;
 
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,17 +51,17 @@ public class ProcessService {
     return biomaterialRepository.findByInputToProcessesContaining(process, pageable);
   }
 
-  public Page<File> findInputFilesForProcess(final Process process, final Pageable pageable) {
-    return fileRepository.findByInputToProcessesContaining(process, pageable);
-  }
-
   public Page<Biomaterial> findOutputBiomaterialsForProcess(
       final Process process, final Pageable pageable) {
     return biomaterialRepository.findByDerivedByProcessesContaining(process, pageable);
   }
 
+  public Page<File> findInputFilesForProcess(final Process process, final Pageable pageable) {
+    return fileRepository.findByInputToProcessObjectId(new ObjectId(process.getId()), pageable);
+  }
+
   public Page<File> findOutputFilesForProcess(final Process process, final Pageable pageable) {
-    return fileRepository.findByDerivedByProcessesContaining(process, pageable);
+    return fileRepository.findByDerivedByProcessObjectId(new ObjectId(process.getId()), pageable);
   }
 
   public Process addProcessToSubmissionEnvelope(
